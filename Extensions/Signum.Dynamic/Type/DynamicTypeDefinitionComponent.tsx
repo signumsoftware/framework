@@ -1,37 +1,29 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Combobox } from 'react-widgets'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
 import { classes, Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
-import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
-import { getQueryNiceName, Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '@framework/Reflection'
+import { Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
-import { StyleContext, FormGroupStyle } from '@framework/TypeContext'
-import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, is, Lite, Entity, toLite } from '@framework/Signum.Entities'
-import { QueryEntity, TypeEntity } from '@framework/Signum.Basics'
-import { FilterOperation, PaginationMode } from '@framework/Signum.DynamicQuery'
+import { StyleContext } from '@framework/TypeContext'
+import { EntityControlMessage, toLite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal';
 import MessageModal from '@framework/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
 import * as DynamicClientOptions from '../DynamicClientOptions';
-import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
-import { DynamicTypeMessage, DynamicTypeEntity, DynamicMixinConnectionEntity } from '../Signum.Dynamic';
+import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror';
-import ContextMenu from '@framework/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror';
 import ValueLineModal from '@framework/ValueLineModal'
-
 import "./DynamicType.css"
 import { Tabs, Tab } from 'react-bootstrap';
-import CollapsableCard from '../../Basics/Templates/CollapsableCard';
+import CollapsableCard from '@framework/Components/CollapsableCard';
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { DynamicTypeEntity, DynamicTypeMessage } from '../Signum.Dynamic.Types'
+import { DynamicMixinConnectionEntity } from '../Signum.Dynamic.Mixins'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;

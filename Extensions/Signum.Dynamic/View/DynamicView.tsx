@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
-import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
@@ -12,6 +11,7 @@ import { DesignerNode, DesignerContext, RenderWithViewOverrides } from './NodeUt
 import ShowCodeModal from './ShowCodeModal'
 import { ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import "./DynamicView.css"
+import { DynamicViewEntity, DynamicViewMessage } from '../Signum.Dynamic.Views'
 
 interface DynamicViewEntityComponentProps {
   ctx: TypeContext<DynamicViewEntity>;

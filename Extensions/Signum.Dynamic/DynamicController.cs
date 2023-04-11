@@ -1,14 +1,9 @@
-using Signum.Dynamic;
 using Signum.Utilities.DataStructures;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
-using Signum.Dynamic;
 using Microsoft.Extensions.Hosting;
 using Signum.Dynamic.Controllers;
 using Signum.API.Filters;
-using Signum.API.Json;
-using Signum.API;
 using Signum.Eval;
 
 namespace Signum.Dynamic;
@@ -25,7 +20,7 @@ public class DynamicController : ControllerBase
     [HttpPost("api/dynamic/compile")]
     public List<CompilationErrorTS> Compile(bool inMemory)
     {
-        DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+        EvalPanelPermission.ViewDynamicPanel.AssertAuthorized();
 
         SystemEventLogLogic.Log("DynamicController.Compile");
         var compileResult = new List<DynamicLogic.CompilationResult>();
@@ -81,7 +76,7 @@ public class DynamicController : ControllerBase
     [HttpGet("api/dynamic/startErrors")]
     public List<HttpError> GetStartErrors()
     {
-        DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+        EvalPanelPermission.ViewDynamicPanel.AssertAuthorized();
 
 
         return new Sequence<Exception?>
@@ -95,31 +90,12 @@ public class DynamicController : ControllerBase
         .ToList();
     }
 
-    [HttpPost("api/dynamic/evalErrors")]
-    public async Task<List<EvalEntityError>> GetEvalErrors([Required, FromBody]QueryEntitiesRequestTS request)
-    {
-        DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
-
-        var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).Select(a => a.Entity).ToListAsync();
-
-        return allEntities.Select(entity =>
-        {
-            GraphExplorer.PreSaving(() => GraphExplorer.FromRoot(entity));
-
-            return new EvalEntityError
-            {
-                lite = entity.ToLite(),
-                error = entity.FullIntegrityCheck().EmptyIfNull().Select(a => a.Value).SelectMany(a => a.Errors.Values).ToString("\n")
-            };
-        })
-        .Where(ee => ee.error.HasText())
-        .ToList();
-    }
+  
 
     [HttpPost("api/dynamic/getPanelInformation")]
     public DynamicPanelInformation GetPanelInformation()
     {
-        DynamicPanelPermission.ViewDynamicPanel.AssertAuthorized();
+        EvalPanelPermission.ViewDynamicPanel.AssertAuthorized();
 
         return new DynamicPanelInformation
         {
@@ -131,12 +107,6 @@ public class DynamicController : ControllerBase
                     .Max(a => a.End),
         };
     } 
-}
-
-public class EvalEntityError
-{
-    public Lite<Entity> lite;
-    public string error;
 }
 
 public class DynamicPanelInformation

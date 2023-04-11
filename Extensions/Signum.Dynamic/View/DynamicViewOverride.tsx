@@ -1,24 +1,24 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DynamicViewOverrideEntity, DynamicViewMessage } from '../Signum.Dynamic'
 import { EntityLine, TypeContext, FormGroup } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
-import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
-import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
+import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
-import * as Nodes from '../../Dynamic/View/Nodes';
+import * as Nodes from './Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { ModulesHelp } from "./ModulesHelp";
 import { EntityFrame } from '@framework/TypeContext'
 import { ErrorBoundary } from '@framework/Components'
+import { DynamicViewMessage, DynamicViewOverrideEntity } from '../Signum.Dynamic.Views'
 
 interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;

@@ -4,7 +4,6 @@ import { RouteObject } from 'react-router'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, SearchValueLine } from '@framework/Search'
-import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -12,13 +11,15 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
-import { NormalControlMessage } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { DynamicTypeEntity, DynamicMixinConnectionEntity, DynamicTypeOperation, DynamicSqlMigrationEntity, DynamicRenameEntity, DynamicTypeMessage, DynamicPanelPermission, DynamicApiEntity } from './Signum.Dynamic'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import { Tab } from 'react-bootstrap';
+import { DynamicTypeEntity, DynamicTypeMessage, DynamicTypeOperation } from './Signum.Dynamic.Types';
+import { DynamicMixinConnectionEntity } from './Signum.Dynamic.Mixins';
+import { DynamicRenameEntity, DynamicSqlMigrationEntity } from './Signum.Dynamic.SqlMigrations';
+import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval';
+import * as EvalClient from '../Signum.Eval/EvalClient';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
@@ -36,7 +37,7 @@ export function start(options: { routes: RouteObject[] }) {
       return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
         .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
-          if (AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel)) {
+          if (AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel)) {
             return MessageModal.show({
               title: DynamicTypeMessage.TypeSaved.niceToString(),
               message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
@@ -56,15 +57,15 @@ export function start(options: { routes: RouteObject[] }) {
   }));
 
   QuickLinks.registerQuickLink(DynamicTypeEntity, ctx => new QuickLinks.QuickLinkLink("ViewDynamicPanel",
-    () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel), "/dynamic/panel", {
-      isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
+    () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), "/dynamic/panel", {
+      isVisible: AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
       iconColor: "purple",
     }));
 
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
-  DynamicClientOptions.Options.getDynaicMigrationsStep = () =>
+  EvalClient.Options.getDynaicMigrationsStep = () =>
     <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
       <SearchControl findOptions={{ queryName: DynamicSqlMigrationEntity }} />

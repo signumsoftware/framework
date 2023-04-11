@@ -5,13 +5,13 @@ import * as Finder from '@framework/Finder'
 import {PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
-import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic'
 import { Tabs, Tab } from 'react-bootstrap';
 import { TypeContext, EntityTable, ValueLine } from '@framework/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
 import { DynamicViewInspector, PropsHelp } from './Designer';
 import { ModulesHelp } from "./ModulesHelp";
-import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
+import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror';
+import { DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic.Views'
 
 export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {
 

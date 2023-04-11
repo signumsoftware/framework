@@ -13,7 +13,7 @@ public static class DynamicLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            PermissionLogic.RegisterPermissions(DynamicPanelPermission.ViewDynamicPanel);
+            PermissionLogic.RegisterPermissions(EvalPanelPermission.ViewDynamicPanel);
             if (withCodeGen)
             {
                 PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);

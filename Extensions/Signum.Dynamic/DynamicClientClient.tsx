@@ -9,7 +9,7 @@ import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
 import { globalModules } from './View/GlobalModules'
-import { DynamicClientEntity } from './Signum.Dynamic'
+import { DynamicClientEntity } from './Signum.Dynamic.Client';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicClientEntity, w => import('./Client/DynamicClientComponent')));
@@ -19,6 +19,11 @@ export function start(options: { routes: RouteObject[] }) {
     { token: t.append(p => p.entity.name), type: "Text" },
     { token: t.append(p => p.entity.code), type: "Code" },
   ]);
+}
+
+export namespace Options {
+  export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
+
 }
 
 //Run before reload

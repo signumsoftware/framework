@@ -7,7 +7,14 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.Codemirror" },
+    { "path": "../Signum.Eval" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.Tree" },
+    { "path": "../Signum.Isolation" },
+    { "path": "../Signum.DiffLog" }
   ],
   "exclude": [
     "../../Signum/ts_out",

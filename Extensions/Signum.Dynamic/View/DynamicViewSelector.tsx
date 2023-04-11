@@ -1,18 +1,18 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import { DynamicViewSelectorEntity, DynamicViewMessage } from '../Signum.Dynamic'
 import { EntityLine, TypeContext } from '@framework/Lines'
 import { Entity, JavascriptMessage, is, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute } from '@framework/Reflection'
-import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '@framework/Navigator'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { ModulesHelp } from "./ModulesHelp";
+import { DynamicViewMessage, DynamicViewSelectorEntity } from '../Signum.Dynamic.Views'
 
 
 export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }) {

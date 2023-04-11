@@ -3,7 +3,6 @@ import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { DynamicTypeEntity, DynamicTypeMessage, DynamicSqlMigrationMessage, DynamicPanelPermission } from '../Signum.Dynamic'
 import { IHasChanges } from '@framework/TypeContext'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
@@ -11,6 +10,7 @@ import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } fr
 import SelectorModal from '@framework/SelectorModal'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
+import { DynamicTypeEntity } from '../Signum.Dynamic.Types'
 
 interface DynamicTypeComponentProps {
   ctx: TypeContext<DynamicTypeEntity>;

@@ -3,13 +3,14 @@ import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { DynamicTypeEntity, DynamicTypeMessage, DynamicMixinConnectionEntity } from '../Signum.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, getQueryNiceName } from '@framework/Reflection'
 import * as DynamicTypeClient from '../DynamicTypeClient'
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
+import { DynamicMixinConnectionEntity } from '../Signum.Dynamic.Mixins'
+import { DynamicTypeEntity } from '../Signum.Dynamic.Types'
 
 interface DynamicMixinConnectionComponentProps {
   ctx: TypeContext<DynamicMixinConnectionEntity>;

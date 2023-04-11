@@ -8,6 +8,7 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 
+interface IDynamicTypeConditionEvaluator {}
 
 export const DynamicBaseType = new EnumType<DynamicBaseType>("DynamicBaseType");
 export type DynamicBaseType =

@@ -8,7 +8,7 @@ import { Entity } from '@framework/Signum.Entities'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
-import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Dynamic'
+import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Dynamic.Validations';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));

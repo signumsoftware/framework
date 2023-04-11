@@ -7,6 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 
+interface IDynamicApiEvaluator {}
 
 export const DynamicApiEntity = new Type<DynamicApiEntity>("DynamicApi");
 export interface DynamicApiEntity extends Entities.Entity {

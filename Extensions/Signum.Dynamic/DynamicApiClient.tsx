@@ -2,11 +2,11 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
-import { DynamicApiEntity, DynamicApiEval } from './Signum.Dynamic'
 import { SearchControl, SearchValueLine } from '@framework/Search'
 import * as Finder from '@framework/Finder'
 import * as Constructor from '@framework/Constructor'
 import * as DynamicClientOptions from './DynamicClientOptions'
+import { DynamicApiEntity, DynamicApiEval } from './Signum.Dynamic.Controllers'
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicApiEntity, w => import('./Api/DynamicApi')));

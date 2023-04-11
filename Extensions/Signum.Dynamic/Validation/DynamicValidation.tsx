@@ -1,23 +1,22 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
-import { MemberInfo, getTypeInfo, PropertyRoute, Binding, TypeInfo } from '@framework/Reflection'
-import { DynamicValidationEntity, DynamicValidationMessage, DynamicViewMessage } from '../Signum.Dynamic'
-import { ValueLine, EntityLine, RenderEntity, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityCheckboxList, EntityTabRepeater, TypeContext, ValueLineType, FormGroup } from '@framework/Lines'
+import { PropertyRoute, Binding } from '@framework/Reflection'
+import { ValueLine, EntityLine, TypeContext, FormGroup } from '@framework/Lines'
 import { Entity } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
+import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
-import PropertyRouteCombo from "../../Basics/Templates/PropertyRouteCombo";
+import PropertyRouteCombo from "@framework/Components/PropertyRouteCombo";
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
-import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { DynamicValidationEntity, DynamicValidationMessage } from '../Signum.Dynamic.Validations'
+import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 
 interface DynamicValidationProps {
   ctx: TypeContext<DynamicValidationEntity>;

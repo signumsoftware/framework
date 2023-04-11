@@ -3,11 +3,11 @@ import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { DynamicSqlMigrationEntity, DynamicSqlMigrationMessage } from '../Signum.Dynamic'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
-import SqlCodeMirror from '../../Codemirror/SqlCodeMirror'
+import SqlCodeMirror from '../../Signum.Codemirror/SqlCodeMirror'
+import { DynamicSqlMigrationEntity } from '../Signum.Dynamic.SqlMigrations'
 
 
 interface DynamicSqlMigrationComponentProps {

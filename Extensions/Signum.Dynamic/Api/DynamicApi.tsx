@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DynamicApiEntity } from '../Signum.Dynamic'
 import { ValueLine, TypeContext } from '@framework/Lines'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal';
 import { useForceUpdate } from '@framework/Hooks'
+import { DynamicApiEntity } from '../Signum.Dynamic.Controllers'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 
 interface DynamicApiProps {
   ctx: TypeContext<DynamicApiEntity>;

@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { DropdownButton, Dropdown } from 'react-bootstrap'
 import { Dic } from '@framework/Globals';
-import { DynamicViewMessage } from '../Signum.Dynamic';
 import ValueLineModal from '@framework/ValueLineModal';
-import { globalModules } from '../../Dynamic/View/GlobalModules';
+import { globalModules } from './GlobalModules';
+import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 
 export function ModulesHelp(p: { cleanName: string; clientCode?: boolean; }) {
 

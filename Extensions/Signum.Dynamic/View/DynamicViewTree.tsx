@@ -7,9 +7,9 @@ import * as NodeUtils from './NodeUtils'
 import NodeSelectorModal from './NodeSelectorModal'
 import { DesignerNode } from './NodeUtils'
 import { BaseNode, ContainerNode, LineBaseNode, NodeConstructor } from './Nodes'
-import { DynamicViewMessage } from '../Signum.Dynamic'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import "./DynamicViewTree.css"
+import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 
 export interface DynamicViewTreeProps {
   rootNode: DesignerNode<BaseNode>;

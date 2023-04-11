@@ -1,29 +1,24 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
-import { classes, Dic } from '@framework/Globals'
+import { classes } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
-import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding, getTypeInfos } from '@framework/Reflection'
+import { getQueryNiceName, isTypeEntity, Binding, getTypeInfos } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
 import { Typeahead } from '@framework/Components'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import { ModifiableEntity, JavascriptMessage, EntityControlMessage, getToString } from '@framework/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, getToString } from '@framework/Signum.Entities'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { FilterOperation, PaginationMode } from '@framework/Signum.DynamicQuery'
-import { ExpressionOrValueComponent, FieldComponent, DesignerModal } from './Designer'
-import * as Nodes from './Nodes'
-import * as NodeUtils from './NodeUtils'
+import { ExpressionOrValueComponent, DesignerModal } from './Designer'
 import { DesignerNode, Expression } from './NodeUtils'
-import { BaseNode, SearchControlNode } from './Nodes'
+import { BaseNode } from './Nodes'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
 import * as DynamicViewClient from '../DynamicViewClient'
-import { DynamicViewMessage, DynamicViewValidationMessage } from '../Signum.Dynamic'
 import SelectorModal from '@framework/SelectorModal';
-import { tryGetTypeInfos } from '@framework/Reflection';
 import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 
 interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;

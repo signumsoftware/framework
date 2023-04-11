@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Dic } from '@framework/Globals';
 import { openModal, IModalProps } from '@framework/Modals';
-import { DynamicViewMessage } from '../Signum.Dynamic'
 import * as NodeUtils from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
+import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 
 export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
 

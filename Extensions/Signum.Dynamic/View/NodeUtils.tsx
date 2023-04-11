@@ -1,13 +1,12 @@
 import * as React from 'react'
 import { globalModules } from './GlobalModules'
-import { ModifiableEntity, External } from '@framework/Signum.Entities'
+import { ModifiableEntity } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { classes, Dic } from '@framework/Globals'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor'
 import { Binding, EnumType, PropertyRoute, isTypeModifiableEntity } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import { EntityBaseProps } from '@framework/Lines/EntityBase'
-import { DynamicViewValidationMessage } from '../Signum.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { FindOptionsLine, ViewNameComponent } from './FindOptionsComponent'
 import { FindOptionsExpr, toFindOptions } from './FindOptionsExpression'
@@ -16,10 +15,11 @@ import { toHtmlAttributes, HtmlAttributesExpression } from './HtmlAttributesExpr
 import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsExpression'
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
 import { findMany } from '@framework/Finder';
 import * as Lines from '@framework/Lines'
+import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 
 export type ExpressionOrValue<T> = T | Expression<T>;
 

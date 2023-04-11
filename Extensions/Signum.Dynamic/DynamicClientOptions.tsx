@@ -6,7 +6,7 @@ import { Type, QueryTokenString } from '@framework/Reflection';
 import { Entity } from '@framework/Signum.Entities';
 import { SearchValueLine } from '@framework/Search';
 import { CellFormatter } from '@framework/Finder';
-import { expandNumbers, DiffDocument } from '../DiffLog/Templates/DiffDocument';
+import { expandNumbers, DiffDocument } from '../Signum.DiffLog/Templates/DiffDocument';
 
 export type FormatColumnType = "Text" | "Code" | "JSon";
 
@@ -43,7 +43,6 @@ export namespace Options {
   export let onGetDynamicLineForType: ((ctx: StyleContext, type: string) => React.ReactNode)[] = [];
   export let checkEvalFindOptions: FindOptions[] = [];
 
-  export let getDynaicMigrationsStep: (() => React.ReactElement<any>) | undefined = undefined;
 }
 
 

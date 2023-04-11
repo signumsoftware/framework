@@ -6,15 +6,15 @@ import {PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror'
-import { DynamicViewMessage, DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic'
+import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror'
 import { openModal, IModalProps } from '@framework/Modals';
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import { Typeahead } from '@framework/Components';
 import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
 import { ModalFooterButtons, ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { ModulesHelp } from './ModulesHelp';
+import { DynamicViewMessage } from '../Signum.Dynamic.Views'
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;

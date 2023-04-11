@@ -3,17 +3,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicExpressionEntity } from '../Signum.Dynamic'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
-import * as TypeHelpClient from '../../TypeHelp/TypeHelpClient';
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
+import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
+import { DynamicExpressionEntity } from '../Signum.Dynamic.Expression'
 
 interface DynamicExpressionComponentProps {
   ctx: TypeContext<DynamicExpressionEntity>;

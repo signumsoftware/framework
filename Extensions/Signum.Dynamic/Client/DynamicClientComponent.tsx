@@ -1,13 +1,10 @@
 import * as React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { DynamicClientEntity } from '../Signum.Dynamic'
 import { ValueLine, TypeContext } from '@framework/Lines'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal';
-import JavascriptCodeMirror from '../../Codemirror/JavascriptCodeMirror';
+import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
+import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror';
 import { useForceUpdate } from '@framework/Hooks';
 import { ModulesHelp } from '../View/ModulesHelp';
+import { DynamicClientEntity } from '../Signum.Dynamic.Client'
 
 
 export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClientEntity> }) {

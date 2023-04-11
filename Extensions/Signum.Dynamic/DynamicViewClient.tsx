@@ -15,8 +15,7 @@ import { Entity, getToString, ModifiableEntity } from '@framework/Signum.Entitie
 import SelectorModal from '@framework/SelectorModal'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as Lines from '@framework/Lines'
-import * as FileLineModule from '../Files/FileLine'
-import { DynamicViewEntity, DynamicViewSelectorEntity, DynamicViewOverrideEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewSelectorOperation, DynamicViewPropEmbedded } from './Signum.Dynamic'
+import * as FileLineModule from '../Signum.Files/Components/FileLine'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
 import * as DynamicClientOptions from './DynamicClientOptions'
 import * as Nodes from './View/Nodes' //Typings-only
@@ -26,6 +25,7 @@ import { Dic } from "@framework/Globals";
 import * as Components from "@framework/Components";
 import * as Constructor from "@framework/Constructor"
 import { QueryString } from '@framework/QueryString';
+import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewOverrideEntity, DynamicViewSelectorEntity, DynamicViewSelectorOperation } from './Signum.Dynamic.Views';
 
 export function start(options: { routes: RouteObject[] }) {
 

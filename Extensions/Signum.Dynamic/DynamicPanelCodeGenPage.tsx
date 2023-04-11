@@ -3,27 +3,22 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
-import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
-import { SearchValue, FindOptions, SearchValueLine } from '@framework/Search'
-import EntityLink from '@framework/SearchControl/EntityLink'
-import { QueryEntitiesRequest } from '@framework/FindOptions'
-import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
-import { API, CompilationError, EvalEntityError, DynamicPanelInformation } from './DynamicClient'
-import { Options } from './DynamicClientOptions'
-import CSharpCodeMirror from '../Codemirror/CSharpCodeMirror'
+import { API, CompilationError, DynamicPanelInformation } from './DynamicClient'
+import CSharpCodeMirror from '../Signum.Codemirror/CSharpCodeMirror'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Dynamic'
-import { useLocation, useParams } from "react-router";
+import { useLocation } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
-import { FormGroup } from '@framework/Lines';
-import { toFilterRequests } from '@framework/Finder';
 import "./DynamicPanelPage.css"
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import { CheckEvalsStep, SearchPanel } from './DynamicPanelSimplePage'
+import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval'
+import { CheckEvalsStep, SearchPanel } from '../Signum.Eval/EvalPanelPage'
+import { Options } from '../Signum.Eval/EvalClient'
+
 
 
 type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
@@ -47,7 +42,7 @@ export default function DynamicPanelPage() {
     handleSelect("restartServerApp");
   }
 
-  AuthClient.assertPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel);
+  AuthClient.assertPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel);
 
   let step = QueryString.parse(location.search).step as DynamicPanelTab | undefined;
 

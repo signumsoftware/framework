@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine, EntityTable } from '@framework/Lines'
+import { ValueLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
@@ -12,13 +12,12 @@ import { BaseNode } from './Nodes'
 import { DesignerContext, DesignerNode, RenderWithViewOverrides } from './NodeUtils'
 import * as DynamicViewClient from '../DynamicViewClient'
 import { DynamicViewTabs } from './DynamicViewTabs'
-import { DynamicViewInspector, CollapsableTypeHelp } from './Designer'
+import { CollapsableTypeHelp } from './Designer'
 import ShowCodeModal from './ShowCodeModal'
-import { DynamicViewEntity, DynamicViewOperation, DynamicViewMessage, DynamicViewPropEmbedded } from '../Signum.Dynamic'
-import { Dropdown, DropdownButton, Tabs, Tab } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import "./DynamicView.css"
-import { AutoFocus } from '@framework/Components/AutoFocus';
 import { useAPI, useUpdatedRef } from '@framework/Hooks'
+import { DynamicViewEntity, DynamicViewOperation } from '../Signum.Dynamic.Views'
 
 export interface DynamicViewComponentProps {
   ctx: TypeContext<ModifiableEntity>;

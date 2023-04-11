@@ -7,7 +7,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import * as DynamicClientOptions from './DynamicClientOptions'
-import { DynamicExpressionEntity } from './Signum.Dynamic'
+import { DynamicExpressionEntity } from './Signum.Dynamic.Expression';
 
 export function start(options: { routes: RouteObject[] }) {
 

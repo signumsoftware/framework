@@ -8,6 +8,7 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 
+interface IDynamicValidationEvaluator {}
 
 export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {

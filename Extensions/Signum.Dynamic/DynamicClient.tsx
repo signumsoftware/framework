@@ -2,29 +2,17 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, WebApiHttpError } from '@framework/Services'
-import { Entity, Lite } from '@framework/Signum.Entities'
-import { DynamicPanelPermission } from './Signum.Dynamic'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
 import { ImportComponent } from '@framework/ImportComponent'
-import { QueryEntitiesRequest } from '@framework/FindOptions'
 
 
 
 export function start(options: { routes: RouteObject[], withCodeGen: boolean }) {
 
-  if (options.withCodeGen)
-    options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelCodeGenPage")} /> });
-  else
-    options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelSimplePage")} /> });
+  options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelCodeGenPage")} /> });
+
 
   Options.withCodeGen = options.withCodeGen;
 
-  OmniboxClient.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
-    key: "DynamicPanel",
-    onClick: () => Promise.resolve("/dynamic/panel")
-  });
 }
 
 export namespace Options {
@@ -57,19 +45,12 @@ export namespace API {
     return ajaxGet({ url: `/api/dynamic/startErrors` });
   }
 
-  export function getEvalErrors(request: QueryEntitiesRequest): Promise<EvalEntityError[]> {
-    return ajaxPost({ url: `/api/dynamic/evalErrors` }, request);
-  }
-
   export function getPanelInformation(): Promise<DynamicPanelInformation> {
     return ajaxPost({ url: `/api/dynamic/getPanelInformation` }, null);
   }
 }
 
-export interface EvalEntityError {
-  lite: Lite<Entity>;
-  error: string;
-}
+
 
 export interface DynamicPanelInformation {
   lastDynamicCompilationDateTime?: string;

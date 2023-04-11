@@ -11,7 +11,6 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
-import { DynamicViewValidationMessage } from '../Signum.Dynamic'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
 import { ExpressionOrValue, Expression, bindExpr, toCodeEx, withClassNameEx, DesignerNode } from './NodeUtils'
 import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescription } from './FindOptionsComponent'
@@ -22,20 +21,21 @@ import { registeredCustomContexts, API } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
-import { FileLine } from "../../Files/FileLine";
-import { MultiFileLine } from "../../Files/MultiFileLine";
-import { DownloadBehaviour } from "../../Files/FileDownloader";
+import { FileLine } from "../../Signum.Files/Components/FileLine";
+import { MultiFileLine } from "../../Signum.Files/Components/MultiFileLine";
+import { DownloadBehaviour } from "../../Signum.Files/Components/FileDownloader";
 import { registerSymbol } from "@framework/Reflection";
 import { BsColor, BsSize } from '@framework/Components';
 import { Tab, Tabs, Button } from 'react-bootstrap';
-import { FileImageLine } from '../../Files/FileImageLine';
-import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded } from '../../Files/Signum.Entities.Files';
-import { IconTypeahead, parseIcon } from '../../Basics/Templates/IconTypeahead';
+import { FileImageLine } from '../../Signum.Files/Components/FileImageLine';
+import { IconTypeahead, parseIcon } from '@framework/Components/IconTypeahead';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
 import { ColorTextBox, ValueLineController } from '@framework/Lines/ValueLine'
+import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
+import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -1289,7 +1289,7 @@ NodeUtils.register<SearchControlNode>({
       showExcelMenu: NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showExcelMenu, NodeUtils.isBooleanOrNull),
       showUserQuery: NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showUserQuery, NodeUtils.isBooleanOrNull),
       showWordReport: NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.showWordReport, NodeUtils.isBooleanOrNull),
-    }}
+    } as any}
     hideFullScreenButton={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.hideFullScreenButton, NodeUtils.isBooleanOrNull)}
     allowSelection={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowSelection, NodeUtils.isBooleanOrNull)}
     allowChangeColumns={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, f => f.allowChangeColumns, NodeUtils.isBooleanOrNull)}
