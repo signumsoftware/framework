@@ -2,11 +2,11 @@ import * as React from 'react'
 import { PropertyRoute } from '@framework/Reflection'
 import { TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from '../../TypeHelp/TypeHelpComponent'
-import TypeHelpButtonBarComponent from '../../TypeHelp/TypeHelpButtonBarComponent'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
 import ValueLineModal from '@framework/ValueLineModal'
-import { TemplateApplicableEval } from "../Signum.Entities.Templating";
+import { TemplateApplicableEval } from "../Signum.Templating";
+import TypeHelpButtonBarComponent from "../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent";
+import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
 import { QueryEntity } from "@framework/Signum.Basics";
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 

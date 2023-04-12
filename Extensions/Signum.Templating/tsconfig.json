@@ -8,6 +8,10 @@
   },
   "references": [
     { "path": "../../Signum" },
+    { "path": "../Signum.UserAssets" },
+    { "path": "../Signum.UserQueries" },
+    { "path": "../Signum.Chart" },
+    { "path": "../Signum.Codemirror" },
     { "path": "../Signum.Eval" }
   ],
   "exclude": [

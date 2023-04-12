@@ -1,0 +1,12 @@
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '@framework/FindOptions'
+
+//Partial
+export interface QueryModel {
+    queryKey: string;
+
+    filters: FilterRequest[];
+    orders: OrderRequest[];
+    pagination: Pagination;
+}
+
+export interface ITemplateApplicable {}

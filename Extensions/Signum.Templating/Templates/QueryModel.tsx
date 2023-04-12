@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import { QueryModelMessage, QueryModel } from '../../Templating/Signum.Entities.Templating'
 import { SearchControlHandler } from '@framework/SearchControl/SearchControl';
+import { QueryModel, QueryModelMessage } from '../Signum.Templating';
 
 interface QueryModelComponentProps {
   ctx: TypeContext<QueryModel>

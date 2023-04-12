@@ -7,6 +7,18 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 
+import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest, Pagination } from '@framework/FindOptions'
+
+//Partial
+export interface QueryModel {
+    queryKey: string;
+
+    filters: FilterRequest[];
+    orders: OrderRequest[];
+    pagination: Pagination;
+}
+
+export interface ITemplateApplicable {}
 
 export interface IContainsQuery extends Entities.Entity {
   query: Basics.QueryEntity;

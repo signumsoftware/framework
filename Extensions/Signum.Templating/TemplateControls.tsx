@@ -3,15 +3,14 @@ import { SubTokensOptions, QueryToken, hasAnyOrAll, FindOptions } from '@framewo
 import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import ValueLineModal from '@framework/ValueLineModal'
-import { UserChartEntity } from '../Chart/Signum.Entities.Chart'
 import { useAPI } from '@framework/Hooks'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserQueryEntity } from '../Signum.UserQueries/Signum.Entities.UserQueries'
+import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries'
+import { UserChartEntity } from '../Signum.Chart/Signum.Chart.UserChart'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ajaxGet } from '@framework/Services'
-import { softCast } from '@framework/Globals'
 
 export interface TemplateControlsProps {
   queryKey: string;
