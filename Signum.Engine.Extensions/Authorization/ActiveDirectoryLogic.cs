@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Engine.Mailing;
+using Signum.Engine.Scheduler;
 using Signum.Entities.Authorization;
 using Signum.Entities.Basics;
 using Signum.Utilities.Reflection;
@@ -146,5 +147,80 @@ public static class ActiveDirectoryLogic
 
             return null;
         }
+    }
+
+
+    public static bool CheckUserActive(string username)
+    {
+        var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+        using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName))
+        {
+            using (var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, username))
+            {
+                if (foundUser.Enabled.HasValue)
+                {
+                    return (bool)foundUser.Enabled;
+                }
+                else
+                {
+                    return false; 
+                }
+            }
+        }
+    }
+
+    public static void Start(SchemaBuilder sb, bool deactivateUsersTask)
+    {
+        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        {
+            if (deactivateUsersTask)
+            {
+                SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
+                {
+                    var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+                    var list = Database.Query<UserEntity>().ToList();
+
+                    using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
+                    {
+                        stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
+                        {
+                            foreach (var u in gr)
+                            {
+                                if (u.State == UserState.Active)
+                                {
+                                    var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
+                                    
+                                    if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
+                                    {
+                                        stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                        u.Execute(UserOperation.Deactivate);
+                                    }
+                                    else
+                                    {
+
+                                    }
+
+                                    if (foundUser == null && u.PasswordHash == null)
+                                    {
+                                        stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                        u.Execute(UserOperation.Deactivate);
+                                    }
+
+                                }
+                            }
+                        });
+
+                        return null;
+                    }
+                });
+            }
+        }
+    }
+
+    public static void CheckAllUserActive()
+    {
+        
     }
 }
