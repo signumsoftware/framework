@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { TypeContext, ValueLine } from '../../../../Framewo@framework/Lines';
-import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead';
+import { TypeContext, ValueLine } from '@framework/Lines';
+import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead';
 import { PanelPartEmbedded } from '../Signum.Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

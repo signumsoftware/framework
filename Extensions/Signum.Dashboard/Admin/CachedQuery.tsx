@@ -1,16 +1,13 @@
 
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityRepeater, EntityTable, EntityStrip } from '@framework/Lines'
+import { ValueLine, EntityLine, EntityStrip } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ValueUserQueryListPartEntity, ValueUserQueryElementEmbedded, DashboardEntity, CachedQueryEntity } from '../Signum.Dashboard'
-import { IsQueryCachedLine } from './Dashboard';
-import * as FilesClient from '../../Files/FilesClient';
-import { downloadFile } from '../../Files/FileDownloader';
-import * as Services from '@framework/Services';
+import { downloadFile } from '../../Signum.Files/Components/FileDownloader';
 import { useAPI } from '@framework/Hooks';
 import { FormatJson } from '@framework/Exceptions/Exception';
-import { FileLine } from '../../Files/FileLine';
+import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { JavascriptMessage } from '@framework/Signum.Entities';
+import { CachedQueryEntity } from '../Signum.Dashboard';
 
 export default function CachedQueryView(p: { ctx: TypeContext<CachedQueryEntity> }) {
   

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TypeContext, ValueLine } from '../../../../Framewo@framework/Lines';
+import { TypeContext, ValueLine } from '@framework/Lines';
 import { SeparatorPartEntity } from '../Signum.Dashboard';
 
 export default function SeparatorPart(p: { ctx: TypeContext<SeparatorPartEntity> }) {

@@ -3,8 +3,6 @@ import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, Find
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 import { useFetchAll } from '@framework/Navigator';
 import { ignoreErrors } from '@framework/QuickLinks';
-import * as ChartClient from '../Chart/ChartClient'
-import { ChartRequestModel } from '../Chart/Signum.Entities.Chart';
 
 
 export interface CachedQueryJS {
@@ -68,19 +66,6 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
   return resultTable.rows.map(r => r.columns[0]).singleOrNull();
 }
 
-export function executeChartCached(request: ChartRequestModel, chartScript: ChartClient.ChartScript, cachedQuery: CachedQueryJS): Promise<ChartClient.API.ExecuteChartResult> {
-  const palettesPromise = ChartClient.API.getPalletes(request);
-
-  const tokens = [
-    ...request.columns.map(a => a.element.token?.token).notNull(),
-    ...getAllFilterTokens(request.filterOptions),
-  ].toObjectDistinct(a => a.fullKey);
-
-  const queryRequest = ChartClient.API.getRequest(request);
-  const resultTable = getCachedResultTable(cachedQuery, queryRequest, tokens);
-
-  return palettesPromise.then(palettes => ChartClient.API.toChartResult(request, resultTable, chartScript, palettes));
-}
 
 function getAllFilterTokens(fos: FilterOptionParsed[]): QueryToken[]{
   return fos.flatMap(f => isFilterGroupOptionParsed(f) ?

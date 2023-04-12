@@ -1,7 +1,6 @@
-using Signum.Chart.UserChart;
 using Signum.UserAssets;
 using Signum.Files;
-using Signum.UserQueries;
+
 
 namespace Signum.Dashboard;
 
@@ -11,7 +10,7 @@ public class CachedQueryEntity : Entity
     public Lite<DashboardEntity> Dashboard { get; set; }
 
     [PreserveOrder, NoRepeatValidator]
-    [ImplementedBy(typeof(UserQueryEntity), typeof(UserChartEntity))]
+    [ImplementedBy()]
     public MList<Lite<IUserAssetEntity>> UserAssets { get; set; } = new MList<Lite<IUserAssetEntity>>();
 
     [DefaultFileType(nameof(CachedQueryFileType.CachedQuery), nameof(CachedQueryFileType))]

@@ -8,29 +8,24 @@ import * as Navigator from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SelectorMessage, SearchMessage } from '@framework/Signum.Entities'
+import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as ChartClient from '../Chart/ChartClient'
-import * as UserChartClient from '../Chart/UserChart/UserChartClient'
-import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
-import { DashboardPermission, DashboardEntity, ValueUserQueryListPartEntity, LinkListPartEntity, UserChartPartEntity, UserQueryPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded, UserTreePartEntity, CombinedUserChartPartEntity, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, ImagePartEntity, SeparatorPartEntity } from './Signum.Dashboard'
-import * as UserAssetClient from '../UserAssets/UserAssetClient'
+import {
+  DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
+  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity
+} from './Signum.Dashboard'
+import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { useAPI } from '@framework/Hooks';
-import { ChartPermission } from '../Chart/Signum.Entities.Chart';
-import SelectorModal from '@framework/SelectorModal';
-import { translated } from '../Signum.Translation/TranslatedInstanceTools';
 import { DashboardController } from "./View/DashboardFilterController";
 import { EntityFrame } from '@framework/TypeContext';
 import { CachedQueryJS } from './CachedQueryExecutor';
 import { QueryEntity } from '@framework/Signum.Basics';
-import { downloadFile } from '../Files/FileDownloader';
+import { downloadFile } from '../Signum.Files/Components/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { UserChartPartHandler } from './View/UserChartPart';
-import type { UserQueryPartHandler } from './View/UserQueryPart';
 import { QueryDescription } from '@framework/FindOptions';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
@@ -75,14 +70,9 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(PanelPartEmbedded, e => import('./Admin/PanelPart'), { modalSize: "xs" }));
   Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
-  Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Admin/ValueUserQueryListPart')));
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
-  Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('./Admin/UserChartPart')));
-  Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('./Admin/CombinedUserChartPart')));
-  Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Admin/UserQueryPart')));
   Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
   Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
-  Navigator.addSettings(new EntitySettings(UserTreePartEntity, e => import('./Admin/UserTreePart')));
 
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
@@ -100,138 +90,11 @@ export function start(options: { routes: RouteObject[] }) {
 
   options.routes.push({ path: "/dashboard/:dashboardId", element: <ImportComponent onImport={() => import("./View/DashboardPage")} /> });
 
-  registerRenderer(ValueUserQueryListPartEntity, {
-    component: () => import('./View/ValueUserQueryListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
-    getQueryNames: p => p.userQueries.map(a => a.element.userQuery?.query).notNull(),
-  });
   registerRenderer(LinkListPartEntity, {
     component: () => import('./View/LinkListPart').then(a => a.default),
     defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#B9770E" })
   });
-  registerRenderer(UserChartPartEntity, {
-    component: () => import('./View/UserChartPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
-    defaultTitle: c => translated(c.userChart, uc => uc.displayName),
-    getQueryNames: c => [c.userChart?.query].notNull(),
-    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        return Navigator.view(c.userChart!).then(e => Boolean(e));
-      },
-    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
-      (p, e, cdRef, ev) => {
-        ev.preventDefault();
-        ev.persist();
-        const handler = cdRef.current as UserChartPartHandler;
-          ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
-          .then(path => AppContext.pushOrOpenInTab(path, ev));
-      },
-    customTitleButtons: (c, entity, customDataRef) => {
-      if (!c.createNew)
-        return null;
 
-      return <CreateNewButton queryKey={c.userChart.query.key} onClick={tis => {
-        const handler = customDataRef.current as UserChartPartHandler;
-        return SelectorModal.chooseType(tis)
-          .then(ti => ti && Finder.getPropsFromFilters(ti, handler.chartRequest!.filterOptions)
-            .then(props => Constructor.constructPack(ti.name, props)))
-          .then(pack => pack && Navigator.view(pack))
-          .then(() => handler.reloadQuery());
-      }} />
-    }
-  });
-  registerRenderer(CombinedUserChartPartEntity, {
-    component: () => import('./View/CombinedUserChartPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
-    getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
-    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        return SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
-          buttonDisplay: a => a.userChart.displayName ?? "",
-          buttonName: a => a.userChart.id!.toString(),
-          title: SelectorMessage.SelectAnElement.niceToString(),
-          message: SelectorMessage.PleaseSelectAnElement.niceToString()
-        })
-          .then(lite => lite && Navigator.view(lite!))
-          .then(entity => Boolean(entity));
-      },
-    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        ev.persist();
-        SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
-          buttonDisplay: a => a.userChart.displayName ?? "",
-          buttonName: a => a.userChart.id!.toString(),
-          title: SelectorMessage.SelectAnElement.niceToString(),
-          message: SelectorMessage.PleaseSelectAnElement.niceToString()
-        }).then(uc => {
-          if (uc) {
-            UserChartClient.Converter.toChartRequest(uc.userChart, e)
-              .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc.userChart)))
-              .then(path => AppContext.pushOrOpenInTab(path, ev));
-          }
-        });
-      },
-  });
-
-  registerRenderer(UserQueryPartEntity, {
-    component: () => import('./View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
-    defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
-    withPanel: c => c.renderMode != "BigValue",
-    getQueryNames: c => [c.userQuery?.query].notNull(),
-    handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
-      },
-    handleTitleClick:
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        ev.persist();
-        const handler = cdRef.current as UserQueryPartHandler;
-        AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)) }), ev);
-      },
-    customTitleButtons: (c, entity, cdRef) => {
-      if (!c.createNew)
-        return null;
-
-      return <CreateNewButton queryKey={c.userQuery.query.key} onClick={(tis, qd) => {
-        const handler = cdRef.current as UserQueryPartHandler;
-        return Finder.parseFilterOptions(handler.findOptions.filterOptions ?? [], handler.findOptions.groupResults ?? false, qd!)
-          .then(fop => SelectorModal.chooseType(tis!)
-            .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
-              .then(props => Constructor.constructPack(ti.name, props)))
-            .then(pack => pack && Navigator.view(pack))
-            .then(() => {
-              handler.refresh();
-            }));
-
-      }} />
-    }
-  });
-
-
-  registerRenderer(UserTreePartEntity, {
-    component: () => import('./View/UserTreePart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
-    withPanel: c => true,
-    getQueryNames: c => [c.userQuery?.query].notNull(),
-    handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
-      },
-    handleTitleClick:
-      (c, e, cdRef, ev) => {
-        ev.preventDefault();
-        ev.persist();
-        UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
-          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))
-      }
-  });
   registerRenderer(ImagePartEntity, {
     component: () => import('./View/ImagePartView').then(a => a.default),
     defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),

@@ -8,7 +8,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
 import * as DashboardClient from "../DashboardClient";
-import { iconToString, IconTypeaheadLine, parseIcon } from "../../Basics/Templates/IconTypeahead";
+import { iconToString, parseIcon } from "@framework/Components/IconTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
@@ -17,7 +17,7 @@ import * as Navigator from '@framework/Navigator';
 import { classes } from '@framework/Globals';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder';
+import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
 export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {

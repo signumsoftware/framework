@@ -1,13 +1,11 @@
-import { DashboardEntity, InteractionGroup, PanelPartEmbedded, UserChartPartEntity, UserQueryPartEntity } from '../Signum.Dashboard';
+import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Dashboard';
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.DynamicQuery';
-import { ChartRequestModel, UserChartEntity } from '../../Chart/Signum.Entities.Chart';
-import { ChartRow } from '../../Chart/ChartClient';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import * as Finder from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '@framework/Globals';
-import { UserQueryEntity } from '../../Signum.UserQueries/Signum.Entities.UserQueries';
+
 
 
 export class DashboardController {
@@ -35,7 +33,7 @@ export class DashboardController {
 
   setIsLoading() {
     this.isLoading = !this.dashboard.parts
-      .filter(p => UserQueryPartEntity.isInstance(p.element.content) || UserChartPartEntity.isInstance(p.element.content))
+      //.filter(p => UserQueryPartEntity.isInstance(p.element.content) || UserChartPartEntity.isInstance(p.element.content))
       .every(p => this.invalidationMap.has(p.element));
   }
 
@@ -256,26 +254,6 @@ export class DashboardFilter {
   constructor(partEmbedded: PanelPartEmbedded, queryKey: string) {
     this.partEmbedded = partEmbedded;
     this.queryKey = queryKey;
-  }
-
-
-  getActiveDetector(request: ChartRequestModel): ((row: ChartRow) => boolean) | undefined {
-
-    if (this.rows.length == 0)
-      return undefined;
-
-    var tokenToColumn = request.columns
-      .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
-      .filter(a => a.tokenString != null)
-      .groupBy(a => a.tokenString)
-      .toObject(gr => gr.key!, gr => gr.elements.first().colName);
-
-    return row => this.rows.some(r => {
-      return r.filters.every(f => {
-        var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
-        return f.value == rowVal || is(f.value, rowVal, false, false);
-      });
-    });
   }
 }
 

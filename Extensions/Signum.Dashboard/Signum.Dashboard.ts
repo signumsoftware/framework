@@ -7,18 +7,10 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
-import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
+import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
-import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
-import * as UserChart from '../Signum.Chart/Signum.Chart.UserChart'
 
-
-export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
-export type AutoUpdate =
-  "None" |
-  "InteractionGroup" |
-  "Dashboard";
 
 export const CachedQueryEntity = new Type<CachedQueryEntity>("CachedQuery");
 export interface CachedQueryEntity extends Entities.Entity {
@@ -43,25 +35,6 @@ export interface CacheQueryConfigurationEmbedded extends Entities.EmbeddedEntity
   timeoutForQueries: number;
   maxRows: number;
   autoRegenerateWhenOlderThan: number | null;
-}
-
-export const CombinedUserChartElementEmbedded = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
-export interface CombinedUserChartElementEmbedded extends Entities.EmbeddedEntity {
-  Type: "CombinedUserChartElementEmbedded";
-  userChart: UserChart.UserChartEntity;
-  isQueryCached: boolean;
-}
-
-export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
-export interface CombinedUserChartPartEntity extends Entities.Entity, IPartEntity {
-  Type: "CombinedUserChartPart";
-  userCharts: Entities.MList<CombinedUserChartElementEmbedded>;
-  showData: boolean;
-  allowChangeShowData: boolean;
-  combinePinnedFiltersWithSameLabel: boolean;
-  useSameScale: boolean;
-  minHeight: number | null;
-  requiresTitle: boolean;
 }
 
 export const DashboardEmbedededInEntity = new EnumType<DashboardEmbedededInEntity>("DashboardEmbedededInEntity");
@@ -179,7 +152,7 @@ export const TokenEquivalenceEmbedded = new Type<TokenEquivalenceEmbedded>("Toke
 export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
   Type: "TokenEquivalenceEmbedded";
   query: Basics.QueryEntity;
-  token: QueryTokens.QueryTokenEmbedded;
+  token: Queries.QueryTokenEmbedded;
 }
 
 export const TokenEquivalenceGroupEntity = new Type<TokenEquivalenceGroupEntity>("TokenEquivalenceGroup");
@@ -188,61 +161,5 @@ export interface TokenEquivalenceGroupEntity extends Entities.Entity {
   dashboard: Entities.Lite<DashboardEntity>;
   interactionGroup: InteractionGroup | null;
   tokenEquivalences: Entities.MList<TokenEquivalenceEmbedded>;
-}
-
-export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
-export interface UserChartPartEntity extends Entities.Entity, IPartEntity {
-  Type: "UserChartPart";
-  userChart: UserChart.UserChartEntity;
-  isQueryCached: boolean;
-  showData: boolean;
-  allowChangeShowData: boolean;
-  createNew: boolean;
-  autoRefresh: boolean;
-  minHeight: number | null;
-  requiresTitle: boolean;
-}
-
-export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
-export interface UserQueryPartEntity extends Entities.Entity, IPartEntity {
-  Type: "UserQueryPart";
-  userQuery: UserQueries.UserQueryEntity;
-  isQueryCached: boolean;
-  renderMode: UserQueryPartRenderMode;
-  aggregateFromSummaryHeader: boolean;
-  autoUpdate: AutoUpdate;
-  allowSelection: boolean;
-  showFooter: boolean;
-  createNew: boolean;
-  allowMaxHeight: boolean;
-  requiresTitle: boolean;
-}
-
-export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
-export type UserQueryPartRenderMode =
-  "SearchControl" |
-  "BigValue";
-
-export const UserTreePartEntity = new Type<UserTreePartEntity>("UserTreePart");
-export interface UserTreePartEntity extends Entities.Entity, IPartEntity {
-  Type: "UserTreePart";
-  userQuery: UserQueries.UserQueryEntity;
-  requiresTitle: boolean;
-}
-
-export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
-export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
-  Type: "ValueUserQueryElementEmbedded";
-  label: string | null;
-  userQuery: UserQueries.UserQueryEntity;
-  isQueryCached: boolean;
-  href: string | null;
-}
-
-export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
-export interface ValueUserQueryListPartEntity extends Entities.Entity, IPartEntity {
-  Type: "ValueUserQueryListPart";
-  userQueries: Entities.MList<ValueUserQueryElementEmbedded>;
-  requiresTitle: boolean;
 }
 

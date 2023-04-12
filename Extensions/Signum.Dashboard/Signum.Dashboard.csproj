@@ -21,11 +21,12 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
-		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.Omnibox\Signum.Omnibox.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
+		<ProjectReference Include="..\Signum.Toolbar\Signum.Toolbar.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
-		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
+		<ProjectReference Include="..\Signum.ViewLog\Signum.ViewLog.csproj" />
 	</ItemGroup>
 
     <ItemGroup>

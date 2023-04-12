@@ -1,18 +1,15 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
-import { Entity, getToString, is, Lite, MListElement, SearchMessage, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import * as DashboardClient from '../DashboardClient'
-import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage, CachedQueryEntity } from '../Signum.Dashboard'
+import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
-
+import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardController } from './DashboardFilterController'
-import { FilePathEmbedded } from '../../Files/Signum.Entities.Files'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 

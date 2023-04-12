@@ -1,10 +1,7 @@
-import * as React from 'react'
 import { Location } from 'react-router'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Dashboard'
-import * as AppContext from '@framework/AppContext'
-import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {
    

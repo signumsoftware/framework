@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
-import { Entity, parseLite, getToString, JavascriptMessage, EntityPack } from '@framework/Signum.Entities'
+import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, translated } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Dashboard'
 import DashboardView from './DashboardView'
@@ -10,7 +10,6 @@ import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import { translated } from '../../Signum.Translation/TranslatedInstanceTools'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 
