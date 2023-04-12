@@ -44,7 +44,7 @@ public static class FullTextSearch
         ));
     }
 
-    public static IQueryable<FullTextResultTable> ContainsTable<T>(Expression<Func<T, string?[]>>? fields, 
+    public static IQueryable<FullTextResultTable> ContainsTable<T>(Expression<Func<T, object>>? fields, 
         string searchCondition, int? top_n_by_rank) 
         where T : Entity
     {
@@ -56,7 +56,7 @@ public static class FullTextSearch
     }
 
     public static IQueryable<FullTextResultTable> ContainsTable<T, V>(Expression<Func<T, MList<V>>> mlistProperty,
-        Expression<Func<MListElement<T, V>, object>> fields, 
+        Expression<Func<MListElement<T, V>, object>>? fields, 
         string searchCondition, int? top_n_by_rank)
         where T : Entity
     {

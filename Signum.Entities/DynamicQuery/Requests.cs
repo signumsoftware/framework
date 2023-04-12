@@ -15,7 +15,7 @@ public abstract class BaseQueryRequest
 
     public string? QueryUrl { get; set; }
 
-    public abstract BaseQueryRequest FixFullTextSearch();
+    public abstract BaseQueryRequest CombineFullTextFilters();
 
     public override string ToString()
     {
@@ -43,6 +43,7 @@ public class QueryRequest : BaseQueryRequest
     }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
     public HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -61,7 +62,7 @@ public class QueryRequest : BaseQueryRequest
         SystemTime = SystemTime,
     };
 
-    public override QueryRequest FixFullTextSearch()
+    public override QueryRequest CombineFullTextFilters()
     {
         var result = new QueryRequest
         {
@@ -199,9 +200,10 @@ public class QueryValueRequest : BaseQueryRequest
               .NotNull()
               .ToHashSet();
 
-    public List<CollectionElementToken> Multiplications => CollectionElementToken.GetElements(this.AllTokens());
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-    public override QueryValueRequest FixFullTextSearch()
+    public override QueryValueRequest CombineFullTextFilters()
     {
         var result = new QueryValueRequest
         {
@@ -226,13 +228,14 @@ public class UniqueEntityRequest : BaseQueryRequest
 
     public required UniqueType UniqueType { get; set; }
 
-    public List<CollectionElementToken> Multiplications => CollectionElementToken.GetElements(this.AllTokens());
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
     public HashSet<QueryToken> AllTokens() =>
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
         .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
-    public override UniqueEntityRequest FixFullTextSearch()
+    public override UniqueEntityRequest CombineFullTextFilters()
     {
         var result = new UniqueEntityRequest
         {
@@ -253,7 +256,8 @@ public class QueryEntitiesRequest: BaseQueryRequest
 {
     public required List<Order> Orders { get; set; }
 
-    public List<CollectionElementToken> Multiplications => CollectionElementToken.GetElements(AllTokens());
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
     public HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -264,7 +268,7 @@ public class QueryEntitiesRequest: BaseQueryRequest
 
     public override string ToString() => QueryName.ToString()!;
 
-    public override QueryEntitiesRequest FixFullTextSearch()
+    public override QueryEntitiesRequest CombineFullTextFilters()
     {
         var result = new QueryEntitiesRequest
         {

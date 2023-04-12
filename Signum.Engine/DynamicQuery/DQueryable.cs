@@ -5,6 +5,11 @@ using Signum.Entities.Basics;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using Signum.Engine.Json;
+using Signum.Engine.Maps;
+using Azure;
+using Signum.Utilities;
+using System.Runtime.ConstrainedExecution;
+using Signum.Entities.DynamicQuery.Tokens;
 
 namespace Signum.Engine.DynamicQuery;
 
@@ -84,7 +89,7 @@ public static class DQueryable
     public static Task<DEnumerableCount<T>> AllQueryOperationsAsync<T>(this DQueryable<T> query, QueryRequest request, CancellationToken token)
     {
         return query
-            .SelectMany(request.Multiplications())
+            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders)
             .Select(request.Columns)
@@ -94,7 +99,7 @@ public static class DQueryable
     public static DEnumerableCount<T> AllQueryOperations<T>(this DQueryable<T> query, QueryRequest request)
     {
         return query
-            .SelectMany(request.Multiplications())
+            .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
             .OrderBy(request.Orders)
             .Select(request.Columns)
@@ -316,12 +321,99 @@ public static class DQueryable
     }
 
     #region SelectMany
-    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens)
+    public static DQueryable<T> SelectMany<T>(this DQueryable<T> query, List<CollectionElementToken> elementTokens, List<FilterFullText> fullTextTableFilters)
     {
         foreach (var cet in elementTokens)
         {
             query = query.SelectMany(cet);
         }
+
+        foreach (var fttf in fullTextTableFilters)
+        {
+            query = query.JoinWith(fttf);
+        }
+
+        return query;
+    }
+
+    public static DQueryable<T> JoinWith<T>(this DQueryable<T> query, FilterFullText fft)
+    {
+        if (!fft.IsTable)
+            throw new InvalidOperationException("IsTable should be true");
+
+        IQueryable<FullTextResultTable> innerQuery = GetFullTextTableQuery(fft, out ITable table);
+
+        QueryToken tableToken = fft.Tokens.Select(t =>
+        {
+            if (table is TableMList)
+                return t.Follow(a => a.Parent).OfType<CollectionElementToken>().FirstEx();
+
+            return t.Follow(a => a.Parent).FirstOrDefault(a => a.Type.IsLite()) ?? query.Context.Replacements.SingleEx(a => a.Key.FullKey() == "Entity").Key;
+        }).Distinct().SingleEx();
+
+        var replacement = query.Context.Replacements.ToDictionary(); //Necessary for SubQueries IEnumerable
+
+        var ftrt = Expression.Parameter(typeof(FullTextResultTable), "ftrt");
+
+        var idToken = tableToken is CollectionElementToken ? MListElementPropertyToken.RowId(tableToken, MListElementPropertyToken.AsMListEntityProperty(tableToken.Parent!)!) :
+             EntityPropertyToken.IdProperty(tableToken);
+
+        var idExpression = UndoUnwrapPrimaryKey(idToken.BuildExpression(query.Context));
+
+
+        var properties = replacement.Values.Select(box => box.RawExpression).And(Expression.Field(ftrt, nameof(FullTextResultTable.Rank))).ToList();
+        var ctor = TupleReflection.TupleChainConstructor(properties);
+
+        var join = Untyped.Join(query.Query, innerQuery,
+            outerKeySelector: Expression.Lambda(idExpression, query.Context.Parameter),
+            innerKeySelector: Expression.Lambda(Expression.Field(ftrt, nameof(FullTextResultTable.Key)), ftrt),
+            resultSelector: Expression.Lambda(ctor, query.Context.Parameter, ftrt));
+
+        var parameter = Expression.Parameter(ctor.Type);
+
+        var newReplacements = replacement.Select((kvp, i) => KeyValuePair.Create(kvp.Key,
+            new ExpressionBox(TupleReflection.TupleChainProperty(parameter, i),
+            mlistElementRoute: kvp.Value.MListElementRoute)
+        )).ToDictionary();
+
+
+        var rank = TupleReflection.TupleChainProperty(parameter, replacement.Count);
+
+        newReplacements.AddRange(fft.Tokens, keySelector: t => new FullTextRankToken(t), valueSelector: t => new ExpressionBox(rank, mlistElementRoute: null));
+
+        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements);
+
+        return new DQueryable<T>(join, newContext);
+    }
+
+    private static Expression UndoUnwrapPrimaryKey(Expression expression)
+    {
+
+        if (expression is UnaryExpression u && u.NodeType == ExpressionType.Convert && u.Operand.Type == typeof(IComparable))
+            expression = u.Operand;
+
+        if (expression is MemberExpression me && me.Member.Name == nameof(PrimaryKey.Object))
+            expression = me.Expression!;
+
+        return expression;
+    }
+
+    private static IQueryable<FullTextResultTable> GetFullTextTableQuery(FilterFullText fft, out ITable table)
+    {
+        var schema = Schema.Current;
+        table = fft.Tokens.Select(a => a.GetPropertyRoute()!).Select(pr =>
+        {
+            var mle = pr.GetMListItemsRoute();
+            return mle != null ? ((FieldMList)schema.Field(mle.Parent!)).TableMList : (ITable)schema.Table(pr.RootType);
+        }).Distinct().SingleEx();
+        var columns = fft.Tokens.Select(a => (IColumn)schema.Field(a.GetPropertyRoute()!)).Distinct().ToArray();
+
+        var query = fft.Operation == FullTextFilterOperation.ComplexCondition ?
+            FullTextSearch.ContainsTable(table, columns, fft.SearchCondition, null) :
+            FullTextSearch.FreeTextTable(table, columns, fft.SearchCondition, null);
+
+        if (fft.TableOuterJoin)
+            return query.DefaultIfEmpty() as IQueryable<FullTextResultTable>;
 
         return query;
     }

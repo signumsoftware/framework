@@ -45,12 +45,10 @@ public class CollectionToArrayToken : QueryToken
         var ept = MListElementPropertyToken.AsMListEntityProperty(this.parent);
         if (ept != null)
         {
-            var mleType = MListElementPropertyToken.MListElementType(ept);
-
-            st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 });
+            st.Add(MListElementPropertyToken.RowId(this, ept));
 
             if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
-                st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 });
+                st.Add(MListElementPropertyToken.RowOrder(this, ept));
         }
 
         return st;

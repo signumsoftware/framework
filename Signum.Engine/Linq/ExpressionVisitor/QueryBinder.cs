@@ -1455,9 +1455,12 @@ internal class QueryBinder : ExpressionVisitor
                 new SqlLiteralExpression(typeof(object),cols == null ?  "*" : ($"({cols.ToString(a=>a.Name, ", ")})")),
                 DbExpressionNominator.FullNominate(mce.GetArgument(
                     mce.Method.Name is nameof(FullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
-                DbExpressionNominator.FullNominate(mce.GetArgument("top_n_by_rank")),
             };
 
+            var rank = DbExpressionNominator.FullNominate(mce.GetArgument("top_n_by_rank"));
+
+            if (!rank.IsNull())
+                arguments.Add(rank);
 
             SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments);
 

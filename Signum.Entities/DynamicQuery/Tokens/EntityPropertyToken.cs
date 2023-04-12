@@ -1,3 +1,4 @@
+using Signum.Entities.DynamicQuery.Tokens;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 
@@ -126,6 +127,19 @@ public class EntityPropertyToken : QueryToken
                 if (format != null)
                     return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
             }
+        }
+
+        if (uType == typeof(string))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+            var result = StringTokens();
+
+            if (this.HasFullTextIndex)
+            {
+                result.Add(new FullTextRankToken(this));
+            }
+
+            return result.AndHasValue(this);
         }
 
         return SubTokensBase(this.Type, options, GetImplementations());

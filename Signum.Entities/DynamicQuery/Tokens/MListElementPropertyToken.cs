@@ -16,7 +16,20 @@ public class MListElementPropertyToken : QueryToken
     QueryToken parent;
     public override QueryToken? Parent => parent;
    
-   internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
+   
+    public static MListElementPropertyToken RowId(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 };
+    }
+
+    public static MListElementPropertyToken RowOrder(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 };
+    }
+
+    internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
         if (parent is not (CollectionAnyAllToken or CollectionElementToken or CollectionToArrayToken))

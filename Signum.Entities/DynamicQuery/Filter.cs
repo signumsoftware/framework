@@ -58,17 +58,21 @@ public abstract class Filter
         }
     }
 
-    public static void SetIsTable(List<Filter> filters, IEnumerable<QueryToken> ordersAndColumns)
+    public static void SetIsTable(List<Filter> filters, IEnumerable<QueryToken> allTokens)
     {
-        var fullTextOrders = ordersAndColumns.OfType<FullTextRankToken>().Select(a => a.Parent!);
+        var fullTextOrders = allTokens.OfType<FullTextRankToken>().Select(a => a.Parent!);
 
-        foreach (var fft in filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>())
+        foreach (var fft in filters.OfType<FilterFullText>())
         {
             fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
+            fft.TableOuterJoin = false;
+        }
+
+        foreach (var fg in filters.OfType<FilterGroup>())
+        {
+            fg.SetIsTable(fullTextOrders, false);
         }
     }
-
-
 }
 
 public class FilterGroup : Filter
@@ -159,6 +163,21 @@ public class FilterGroup : Filter
         return this.Filters.Any(f => f.IsAggregate());
     }
 
+    internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, bool isOuter)
+    {
+        isOuter |= this.GroupOperation == FilterGroupOperation.Or && this.Filters.Count > 1;
+
+        foreach (var fft in this.Filters.OfType<FilterFullText>())
+        {
+            fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
+            fft.TableOuterJoin = isOuter;
+        }
+
+        foreach (var fg in this.Filters.OfType<FilterGroup>())
+        {
+            fg.SetIsTable(fullTextOrders, isOuter);
+        }
+    }
 }
 
 
@@ -366,6 +385,7 @@ public class FilterFullText : Filter
 
     public FullTextFilterOperation Operation { get; }
     public bool IsTable { get; set; }
+    public bool TableOuterJoin { get; set; }
 
     public string SearchCondition { get; }
 
@@ -375,7 +395,7 @@ public class FilterFullText : Filter
         {
             var rnk = ctx.Replacements.GetOrThrow(new FullTextRankToken(Tokens.FirstEx()));
 
-            return Expression.NotEqual(rnk.RawExpression, Expression.Constant(null, typeof(int?)));
+            return Expression.NotEqual(rnk.RawExpression.Nullify(), Expression.Constant(null, typeof(int?)));
         }
         else
         {
@@ -412,6 +432,11 @@ public class FilterFullText : Filter
     public override Filter ToFullText()
     {
         throw new InvalidOperationException("Already FilterFullText!");
+    }
+
+    public static List<FilterFullText> TableFilters(List<Filter> filters)
+    {
+        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>().Where(a => a.IsTable).ToList();
     }
 }
 
