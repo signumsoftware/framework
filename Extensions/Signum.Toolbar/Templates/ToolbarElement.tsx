@@ -2,14 +2,12 @@ import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Toolbar'
-import { IconTypeaheadLine, parseIcon } from '../../Basics/Templates/IconTypeahead'
+import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as Dashboard from '../../Dashboard/Admin/Dashboard'
-import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { getToString } from '@framework/Signum.Entities'
 import { useForceUpdate } from '@framework/Hooks'
-import { classes } from '@framework/Globals'
 import { ToolbarCount } from '../QueryToolbarConfig'
+import { PermissionSymbol } from '@framework/Signum.Basics'
 
 export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {
   const forceUpdate = useForceUpdate();

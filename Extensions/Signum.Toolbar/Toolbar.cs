@@ -1,14 +1,8 @@
 using Signum.Authorization;
-using Signum.Basics;
-using Signum.Chart;
-using Signum.Dashboard;
 using Signum.UserAssets;
-using Signum.UserQueries;
 using System.Xml.Linq;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
-using Signum.UserAssets;
-using Signum.Chart.UserChart;
 
 namespace  Signum.Toolbar;
 
@@ -92,7 +86,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
     [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
-    [ImplementedBy(typeof(ToolbarMenuEntity), typeof(ToolbarEntity), typeof(QueryEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(DashboardEntity), typeof(PermissionSymbol))]
+    [ImplementedBy()]
     public Lite<Entity>? Content { get; set; }
 
     [StringLengthValidator(Min = 1, Max = int.MaxValue), URLValidator(absolute: true, aspNetSiteRelative: true)]

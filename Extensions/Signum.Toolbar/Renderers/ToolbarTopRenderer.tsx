@@ -1,19 +1,11 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import * as AppContext from '@framework/AppContext'
 import * as ToolbarClient from '../ToolbarClient'
-import { ToolbarConfig } from "../ToolbarClient";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
-import { Nav } from 'react-bootstrap';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useUpdatedRef } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { SidebarMode  } from '../SidebarContainer'
-import { isActive } from '@framework/FindOptions';
-import { classes, Dic } from '@framework/Globals';
-import { urlVariables } from '../../Dashboard/UrlVariables';
+import { classes } from '@framework/Globals';
 import { inferActive, isCompatibleWithUrl, renderNavItem } from './ToolbarRenderer';
 
 

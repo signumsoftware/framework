@@ -11,8 +11,8 @@ import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload } from '@framew
 import * as Navigator from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
-import { parseIcon } from '../../Basics/Templates/IconTypeahead'
-import { urlVariables } from '../../Dashboard/UrlVariables';
+import { parseIcon } from '@framework/Components/IconTypeahead'
+import { urlVariables } from '../UrlVariables';
 import { Dic } from '@framework/Globals';
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Toolbar';
 

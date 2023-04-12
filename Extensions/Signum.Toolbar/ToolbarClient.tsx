@@ -11,10 +11,8 @@ import { Lite, Entity } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Toolbar'
 import * as Constructor from '@framework/Constructor'
-import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { parseIcon } from '../Basics/Templates/IconTypeahead';
-import { Nav } from 'react-bootstrap';
-import { SidebarMode } from './SidebarContainer';
+import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
+import { parseIcon } from '@framework/Components/IconTypeahead';
 import { Dic } from '@framework/Globals';
 import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
 

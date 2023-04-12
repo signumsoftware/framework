@@ -1,15 +1,10 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.Chart;
-using Signum.Dashboard;
 using Signum.UserAssets;
-using Signum.UserQueries;
 using Signum.Utilities.DataStructures;
 using System.Text.Json.Serialization;
-using Signum.Chart.UserChart;
-using Signum.UserAssets;
 
-namespace  Signum.Toolbar;
+namespace Signum.Toolbar;
 
 public static class ToolbarLogic
 {
@@ -55,10 +50,7 @@ public static class ToolbarLogic
             UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
             UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
 
-            RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
-            RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
             RegisterDelete<QueryEntity>(sb);
-            RegisterDelete<DashboardEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
     
 
@@ -69,22 +61,10 @@ public static class ToolbarLogic
             RegisterContentConfig<ToolbarEntity>(
                 lite => Toolbars.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
                 lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
-
-            RegisterContentConfig<UserQueryEntity>(
-                lite => { var uq = UserQueryLogic.UserQueries.Value.GetOrCreate(lite); return InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
-                lite => PropertyRouteTranslationLogic.TranslatedField(UserQueryLogic.UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
-
-            RegisterContentConfig<UserChartEntity>(
-                lite => { var uc = UserChartLogic.UserCharts.Value.GetOrCreate(lite); return InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); },
-                lite => PropertyRouteTranslationLogic.TranslatedField(UserChartLogic.UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
-
+            
             RegisterContentConfig<QueryEntity>(
               lite => IsQueryAllowed(lite),
               lite => QueryUtils.GetNiceName(QueryLogic.QueryNames.GetOrThrow(lite.ToString()!)));
-
-            RegisterContentConfig<DashboardEntity>(
-              lite => InMemoryFilter(DashboardLogic.Dashboards.Value.GetOrCreate(lite)),
-              lite => PropertyRouteTranslationLogic.TranslatedField(DashboardLogic.Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
 
             RegisterContentConfig<PermissionSymbol>(
                 lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),

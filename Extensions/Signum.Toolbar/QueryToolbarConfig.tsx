@@ -1,16 +1,13 @@
 import * as React from 'react'
 import { Location } from 'react-router'
-import { getQueryKey, getQueryNiceName, getTypeInfos, IsByAll } from '@framework/Reflection'
+import { IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
 import * as Finder from '@framework/Finder'
-import * as AppContext from '@framework/AppContext'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { IconColor, ToolbarConfig, ToolbarResponse } from './ToolbarClient'
 import { SearchValue, FindOptions } from '@framework/Search';
 import * as Navigator from '@framework/Navigator';
-import { useAPI, useDocumentEvent, useInterval, useUpdatedRef } from '@framework/Hooks'
-import { parseIcon } from '../Basics/Templates/IconTypeahead'
-import a from 'bpmn-js/lib/features/search'
+import { useAPI, useInterval } from '@framework/Hooks'
 import { classes } from '@framework/Globals'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {

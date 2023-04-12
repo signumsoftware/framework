@@ -15,7 +15,7 @@ import * as Reflection from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import { JavascriptMessage, getToString, SearchMessage } from '@framework/Signum.Entities';
 import { IModalProps, openModal } from '@framework/Modals';
-import { parseIcon } from '../../Basics/Templates/IconTypeahead'
+import { parseIcon } from '@framework/Components/IconTypeahead'
 
 export interface ToolbarMainRendererProps {
 }

@@ -4,16 +4,15 @@ import { TypeContext } from '@framework/TypeContext'
 import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MList } from '@framework/Signum.Entities';
-import { parseIcon } from '../../Basics/Templates/IconTypeahead';
+import { parseIcon } from '@framework/Components/IconTypeahead';
 import * as ToolbarClient from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
-import { PermissionSymbol } from '../../Signum.Authorization/Signum.Entities.Authorization';
-import { classes } from '@framework/Globals';
 import { ToolbarCount } from '../QueryToolbarConfig';
+import { PermissionSymbol } from '@framework/Signum.Basics';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
   const ctx = p.ctx;
