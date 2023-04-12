@@ -1,16 +1,15 @@
 import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage, QueryOrderEmbedded, QueryColumnEmbedded } from '../Signum.UserQueries'
+import { UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
 import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
 import { SearchMessage, getToString } from '@framework/Signum.Entities'
-import { formGroupStyle } from '../../Dynamic/View/StyleOptionsExpression'
+import { QueryColumnEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
 const CurrentEntityKey = "[CurrentEntity]";
 

@@ -22,7 +22,9 @@
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+		<ProjectReference Include="..\Signum.Dashboard\Signum.Dashboard.csproj" />
 		<ProjectReference Include="..\Signum.Omnibox\Signum.Omnibox.csproj" />
+		<ProjectReference Include="..\Signum.Toolbar\Signum.Toolbar.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
 		<ProjectReference Include="..\Signum.ViewLog\Signum.ViewLog.csproj" />
 	</ItemGroup>

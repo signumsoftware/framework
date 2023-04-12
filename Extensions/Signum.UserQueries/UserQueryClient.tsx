@@ -7,26 +7,26 @@ import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
-import { translated  } from '../Signum.Translation/TranslatedInstanceTools'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
-  UserQueryEntity, UserQueryPermission, UserQueryMessage,
+  UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity,
 } from './Signum.UserQueries'
-import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
+import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
+import { CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import ContextMenu from '@framework/SearchControl/ContextMenu';
 import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 import SelectorModal from '@framework/SelectorModal';
 import { Dic } from '@framework/Globals';
-import { ChartRequestModel, UserChartEntity } from '../Signum.Chart/Signum.Chart';
-import { ChartRow, hasAggregates } from '../Signum.Chart/ChartClient';
+import { QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
+import { UserQueryPartHandler } from './Dashboard/View/UserQueryPart';
 
 export function start(options: { routes: RouteObject[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -81,10 +81,55 @@ export function start(options: { routes: RouteObject[] }) {
   Constructor.registerConstructor<QueryColumnEmbedded>(QueryColumnEmbedded, () => QueryColumnEmbedded.New({ token: QueryTokenEmbedded.New() }));
 
   Navigator.addSettings(new EntitySettings(UserQueryEntity, e => import('./Templates/UserQuery'), { isCreable: "Never" }));
+  Navigator.addSettings(new EntitySettings(ValueUserQueryListPartEntity, e => import('./Dashboard/Admin/ValueUserQueryListPart')));
+  Navigator.addSettings(new EntitySettings(UserQueryPartEntity, e => import('./Dashboard/Admin/UserQueryPart')));
 
   SearchControlLoaded.onDrilldown = async (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => {
     return onDrilldownSearchControl(scl, row, options);
   }
+
+  DashboardClient.registerRenderer(ValueUserQueryListPartEntity, {
+    component: () => import('./Dashboard/View/ValueUserQueryListPart').then(a => a.default),
+    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#21618C" }),
+    getQueryNames: p => p.userQueries.map(a => a.element.userQuery?.query).notNull(),
+  });
+
+  DashboardClient.registerRenderer(UserQueryPartEntity, {
+    component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
+    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
+    defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
+    withPanel: c => c.renderMode != "BigValue",
+    getQueryNames: c => [c.userQuery?.query].notNull(),
+    handleEditClick: !Navigator.isViewable(UserQueryPartEntity) || Navigator.isReadOnly(UserQueryPartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
+      },
+    handleTitleClick:
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        const handler = cdRef.current as UserQueryPartHandler;
+        AppContext.pushOrOpenInTab(Finder.findOptionsPath(handler.findOptions, { userQuery: liteKey(toLite(c.userQuery!)) }), ev);
+      },
+    customTitleButtons: (c, entity, cdRef) => {
+      if (!c.createNew)
+        return null;
+
+      return <CreateNewButton queryKey={c.userQuery.query.key} onClick={(tis, qd) => {
+        const handler = cdRef.current as UserQueryPartHandler;
+        return Finder.parseFilterOptions(handler.findOptions.filterOptions ?? [], handler.findOptions.groupResults ?? false, qd!)
+          .then(fop => SelectorModal.chooseType(tis!)
+            .then(ti => ti && Finder.getPropsFromFilters(ti, fop)
+              .then(props => Constructor.constructPack(ti.name, props)))
+            .then(pack => pack && Navigator.view(pack))
+            .then(() => {
+              handler.refresh();
+            }));
+
+      }} />
+    }
+  });
 }
 
 export function userQueryUrl(uq: Lite<UserQueryEntity>): any {
@@ -165,30 +210,6 @@ export async function onDrilldownSearchControl(scl: SearchControlLoaded, row: Re
   return drilldownToUserQuery(val.fo, val.uq, options);
 }
 
-export async function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, uc?: Lite<UserChartEntity>, options?: OnDrilldownOptions): Promise<boolean | undefined> {
-  if (uc == null)
-    return false;
-
-  await Navigator.API.fetchAndRemember(uc);
-
-  if (uc.entity!.customDrilldowns.length == 0 || hasAggregates(uc.entity!) != hasAggregates(cr))
-    return false;
-
-  debugger;
-  const fo = extractFindOptions(cr, row);
-  const entity = row.entity ?? (hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
-  const filters = fo.filterOptions?.notNull();
-
-  const val = entity ?
-    await onDrilldownEntity(uc.entity!.customDrilldowns, entity) :
-    await onDrilldownGroup(uc.entity!.customDrilldowns, filters);
-
-  if (!val)
-    return undefined;
-
-  return drilldownToUserQuery(val.fo, val.uq, options);
-}
-
 export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
   const elements = items.map(a => a.element);
   return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
@@ -254,57 +275,6 @@ export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity,
       onReload?.();
       return true;
     });
-}
-
-export function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
-
-  const filters = cr.filterOptions.map(f => {
-    let f2 = withoutPinned(f);
-    if (f2 == null)
-      return null;
-    return withoutAggregate(f2);
-  }).notNull();
-
-  const columns: ColumnOption[] = [];
-
-  cr.columns.map((a, i) => {
-
-    const qte = a.element.token;
-
-    if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
-      filters.push({
-        token: qte!.token!,
-        operation: "EqualTo",
-        value: (r as any)["c" + i],
-        frozen: false
-      } as FilterOptionParsed);
-    }
-
-    if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
-    {
-      var t = qte.token;
-      if (t.queryTokenType == "Aggregate") {
-        columns.push({
-          token: t.parent!.fullKey,
-          summaryToken: t.fullKey
-        });
-      } else {
-        columns.push({
-          token: t.fullKey,
-        });
-      }
-    }
-  });
-
-  var fo: FindOptions = {
-    queryName: cr.queryKey,
-    filterOptions: Finder.toFilterOptions(filters),
-    includeDefaultFilters: false,
-    columnOptions: columns,
-    columnOptionsMode: "ReplaceOrAdd",
-  };
-
-  return fo;
 }
 
 export module Converter {

@@ -1,5 +1,4 @@
-using Signum.Authorization.Rules;
-using Signum.DynamicQuery.Tokens;
+using Signum.Dashboard;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
@@ -174,7 +173,163 @@ public static class UserQueryOperation
 
 
 
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class ValueUserQueryListPartEntity : Entity, IPartEntity
+{
+    public MList<ValueUserQueryElementEmbedded> UserQueries { get; set; } = new MList<ValueUserQueryElementEmbedded>();
 
+    public override string ToString()
+    {
+        return "{0} {1}".FormatWith(UserQueries.Count, typeof(UserQueryEntity).NicePluralName());
+    }
+
+    public bool RequiresTitle
+    {
+        get { return true; }
+    }
+
+    public IPartEntity Clone() => new ValueUserQueryListPartEntity
+    {
+        UserQueries = this.UserQueries.Select(e => e.Clone()).ToMList(),
+    };
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("ValueUserQueryListPart",
+            UserQueries.Select(cuqe => cuqe.ToXml(ctx)));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        UserQueries.Synchronize(element.Elements().ToList(), (cuqe, x) => cuqe.FromXml(x, ctx));
+    }
+}
+
+public class ValueUserQueryElementEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 200)]
+    public string? Label { get; set; }
+
+    public UserQueryEntity UserQuery { get; set; }
+
+    public bool IsQueryCached { get; set; }
+
+    [StringLengthValidator(Max = 200)]
+    public string? Href { get; set; }
+
+    public ValueUserQueryElementEmbedded Clone()
+    {
+        return new ValueUserQueryElementEmbedded
+        {
+            Href = this.Href,
+            Label = this.Label,
+            UserQuery = UserQuery,
+            IsQueryCached = this.IsQueryCached,
+        };
+    }
+
+    internal XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("ValueUserQueryElement",
+            Label == null ? null! : new XAttribute(nameof(Label), Label),
+            Href == null ? null! : new XAttribute(nameof(Href), Href),
+            IsQueryCached == false ? null! : new XAttribute(nameof(IsQueryCached), IsQueryCached),
+            new XAttribute("UserQuery", ctx.Include(UserQuery)));
+    }
+
+    internal void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        Label = element.Attribute(nameof(Label))?.Value;
+        Href = element.Attribute(nameof(Href))?.Value;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(UserQuery))!.Value));
+    }
+}
+
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class UserQueryPartEntity : Entity, IPartEntity
+{
+    public UserQueryEntity UserQuery { get; set; }
+
+    public bool IsQueryCached { get; set; }
+
+    public UserQueryPartRenderMode RenderMode { get; set; }
+
+    public bool AggregateFromSummaryHeader { get; set; }
+
+    public AutoUpdate AutoUpdate { get; set; }
+
+    public bool AllowSelection { get; set; }
+
+    public bool ShowFooter { get; set; }
+
+    public bool CreateNew { get; set; } = false;
+
+    public bool AllowMaxHeight { get; set; } = false;
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => UserQuery + "");
+
+    public bool RequiresTitle
+    {
+        get { return false; }
+    }
+
+    public IPartEntity Clone()
+    {
+        return new UserQueryPartEntity
+        {
+            UserQuery = this.UserQuery,
+            RenderMode = this.RenderMode,
+            AllowSelection = this.AllowSelection,
+            ShowFooter = this.ShowFooter,
+            CreateNew = this.CreateNew,
+            IsQueryCached = this.IsQueryCached,
+            AllowMaxHeight = this.AllowMaxHeight,
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("UserQueryPart",
+            new XAttribute(nameof(UserQuery), ctx.Include(UserQuery)),
+            new XAttribute(nameof(RenderMode), RenderMode),
+            new XAttribute(nameof(AllowSelection), AllowSelection),
+            AggregateFromSummaryHeader ? new XAttribute(nameof(AggregateFromSummaryHeader), AggregateFromSummaryHeader) : null,
+            ShowFooter ? new XAttribute(nameof(ShowFooter), ShowFooter) : null,
+            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
+            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
+            AllowMaxHeight ? new XAttribute(nameof(AllowMaxHeight), AllowMaxHeight) : null
+            );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        UserQuery = (UserQueryEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserQuery")!.Value));
+        RenderMode = element.Attribute(nameof(RenderMode))?.Value.ToEnum<UserQueryPartRenderMode>() ?? UserQueryPartRenderMode.SearchControl;
+        AllowSelection = element.Attribute(nameof(AllowSelection))?.Value.ToBool() ?? true;
+        ShowFooter = element.Attribute(nameof(ShowFooter))?.Value.ToBool() ?? false;
+        AggregateFromSummaryHeader = element.Attribute(nameof(AggregateFromSummaryHeader))?.Value.ToBool() ?? false;
+        CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        AllowMaxHeight = element.Attribute(nameof(AllowMaxHeight))?.Value.ToBool() ?? false;
+    }
+}
+
+public enum AutoUpdate
+{
+    None,
+    InteractionGroup,
+    Dashboard,
+}
+
+
+public enum UserQueryPartRenderMode
+{
+    SearchControl,
+    BigValue,
+}
 
 public enum UserQueryMessage
 {

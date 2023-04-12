@@ -410,6 +410,8 @@ export module EntityControlMessage {
   export const Expand = new MessageKey("EntityControlMessage", "Expand");
   export const Collapse = new MessageKey("EntityControlMessage", "Collapse");
   export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
+  export const Maximize = new MessageKey("EntityControlMessage", "Maximize");
+  export const Minimize = new MessageKey("EntityControlMessage", "Minimize");
 }
 
 export module FrameMessage {

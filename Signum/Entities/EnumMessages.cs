@@ -145,7 +145,9 @@ public enum EntityControlMessage
     Download,
     Expand,
     Collapse,
-    ToggleSideBar
+    ToggleSideBar,
+    Maximize,
+    Minimize,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

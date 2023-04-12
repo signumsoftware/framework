@@ -1,8 +1,9 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
+using Signum.Dashboard;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
-using Signum.UserAssets;
+using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
@@ -15,6 +16,10 @@ public static class UserQueryLogic
     public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
     public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks = null!;
     public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
+
+    [AutoExpressionField]
+    public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
+    As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uq.ToLite())));
 
     public static void Start(SchemaBuilder sb)
     {
@@ -33,6 +38,7 @@ public static class UserQueryLogic
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
+                .WithExpressionTo((UserQueryEntity d) => d.CachedQueries())
                 .WithSave(UserQueryOperation.Save)
                 .WithDelete(UserQueryOperation.Delete)
                 .WithQuery(() => uq => new
@@ -44,6 +50,65 @@ public static class UserQueryLogic
                     uq.EntityType,
                     uq.Owner,
                 });
+
+            ToolbarLogic.RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
+            ToolbarLogic.RegisterContentConfig<UserQueryEntity>(
+                lite => { var uq = UserQueries.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
+                lite => PropertyRouteTranslationLogic.TranslatedField(UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
+
+
+            if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserQueryPartEntity)))
+            {
+                sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
+                    Database.Query<UserQueryPartEntity>().Where(uqp => query.Contains(uqp.UserQuery)).UnsafeDelete();
+                    return null;
+                };
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                {
+                    var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Query.Is(q)));
+                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>().Where(uqp => uqp.UserQuery.Query.Is(q)));
+                    return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                };
+
+                sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var uq = (UserQueryEntity)arg;
+
+                    var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        .Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Is(uq)));
+
+                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>()
+                      .Where(mle => mle.UserQuery.Is(uq)));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                };
+
+                Validator.PropertyValidator((UserQueryPartEntity e) => e.AggregateFromSummaryHeader).StaticPropertyValidation += (UserQueryPartEntity uqp, PropertyInfo pi) =>
+                {
+                    if (uqp.AggregateFromSummaryHeader && uqp.RenderMode == UserQueryPartRenderMode.BigValue && uqp.UserQuery != null)
+                    {
+                        var first = uqp.UserQuery.Columns.FirstOrDefault(a => a.SummaryToken != null);
+
+                        if (first == null)
+                            return DashboardMessage.TheUserQuery0HasNoColumnWithSummaryHeader.NiceToString(uqp.UserQuery);
+                    }
+
+                    return null;
+                };
+            }
+
+
+            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
+            {
+                {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
+                {"UserQueryPart", typeof(UserQueryPartEntity)},
+            });
+
+            DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
+            DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
 
             AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserQueryEntity>().Any(a => a.Owner.Is(role));
 
@@ -226,6 +291,12 @@ public static class UserQueryLogic
 
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
             uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+
+        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
+             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
+
+        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
+            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 
 

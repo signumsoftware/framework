@@ -1,17 +1,14 @@
 import * as React from 'react'
 import { Location } from 'react-router'
 import * as Navigator from '@framework/Navigator'
-import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { FindOptions, SearchValue } from '@framework/Search'
 import { Lite, liteKey } from '@framework/Signum.Entities'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
 import { useAPI } from '@framework/Hooks';
-import { SearchToolbarCount, ToolbarCount } from '../Toolbar/QueryToolbarConfig';
+import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbarConfig';
 import { useFetchInState } from '@framework/Navigator'
-import { parseIcon } from '../Basics/Templates/IconTypeahead'
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {

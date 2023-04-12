@@ -4,13 +4,12 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic, softCast } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList } from '@framework/Signum.Entities'
+import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { UserQueryEntity, UserQueryMessage, QueryColumnEmbedded, QueryOrderEmbedded, UserQueryOperation, QueryFilterEmbedded, PinnedQueryFilterEmbedded } from './Signum.UserQueries'
+import { UserQueryEntity, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
-import * as UserAssetClient from '../UserAssets/UserAssetClient'
-import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets';
+import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
@@ -20,10 +19,10 @@ import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
 import type StringDistance from './StringDistance'
-import { translated } from '../Signum.Translation/TranslatedInstanceTools'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { TokenCompleter } from '@framework/Finder'
 import { useForceUpdate } from '@framework/Hooks'
+import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;

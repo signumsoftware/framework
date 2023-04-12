@@ -9,7 +9,14 @@ import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
+import * as Dashboard from '../Signum.Dashboard/Signum.Dashboard'
 
+
+export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
+export type AutoUpdate =
+  "None" |
+  "InteractionGroup" |
+  "Dashboard";
 
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
@@ -50,7 +57,43 @@ export module UserQueryOperation {
   export const Delete : Operations.DeleteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Delete");
 }
 
+export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
+export interface UserQueryPartEntity extends Entities.Entity, Dashboard.IPartEntity {
+  Type: "UserQueryPart";
+  userQuery: UserQueryEntity;
+  isQueryCached: boolean;
+  renderMode: UserQueryPartRenderMode;
+  aggregateFromSummaryHeader: boolean;
+  autoUpdate: AutoUpdate;
+  allowSelection: boolean;
+  showFooter: boolean;
+  createNew: boolean;
+  allowMaxHeight: boolean;
+  requiresTitle: boolean;
+}
+
+export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
+export type UserQueryPartRenderMode =
+  "SearchControl" |
+  "BigValue";
+
 export module UserQueryPermission {
   export const ViewUserQuery : Basics.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
+}
+
+export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
+export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
+  Type: "ValueUserQueryElementEmbedded";
+  label: string | null;
+  userQuery: UserQueryEntity;
+  isQueryCached: boolean;
+  href: string | null;
+}
+
+export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
+export interface ValueUserQueryListPartEntity extends Entities.Entity, Dashboard.IPartEntity {
+  Type: "ValueUserQueryListPart";
+  userQueries: Entities.MList<ValueUserQueryElementEmbedded>;
+  requiresTitle: boolean;
 }
 
