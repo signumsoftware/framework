@@ -1,17 +1,10 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import * as D3 from 'd3'
 import * as ChartClient from '../../ChartClient'
-import * as Navigator from '@framework/Navigator';
-import { ColumnOption, FilterOptionParsed } from '@framework/Search';
-import { hasAggregate } from '@framework/FindOptions';
-import { DomUtils, classes } from '@framework/Globals';
-import { parseLite, SearchMessage } from '@framework/Signum.Entities';
+import { classes } from '@framework/Globals';
 import { ChartRow } from '../../ChartClient';
-import { Rectangle } from '../../../Map/Utils';
-import { useThrottle, useSize, useAPI, areEqualDeps } from '@framework/Hooks';
+import { useThrottle, useSize, areEqualDeps } from '@framework/Hooks';
 import { ChartRequestModel } from '../../Signum.Chart';
-import { DashboardFilter } from '../../../Dashboard/View/DashboardFilterController';
+import { DashboardFilter } from '../../../Signum.Dashboard/View/DashboardFilterController';
 
 export interface ReactChartProps {
   chartRequest: ChartRequestModel,

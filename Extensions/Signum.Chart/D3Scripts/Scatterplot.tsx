@@ -9,7 +9,7 @@ import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { ChartRequestModel } from '../Signum.Chart';
-import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
+import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
 
 
 export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
@@ -159,7 +159,7 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
     onDrillDown: (row: ChartClient.ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
   }): JSX.Element {
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   if (horizontalColumn2 == null && verticalColumn2 == null)
     return (<>{

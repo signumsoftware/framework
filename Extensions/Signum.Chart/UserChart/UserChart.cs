@@ -1,3 +1,4 @@
+using Signum.Dashboard;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserQueries;
@@ -201,4 +202,146 @@ public static class UserChartOperation
 {
     public static ExecuteSymbol<UserChartEntity> Save;
     public static DeleteSymbol<UserChartEntity> Delete;
+}
+
+
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class UserChartPartEntity : Entity, IPartEntity
+{
+    public UserChartEntity UserChart { get; set; }
+
+    public bool IsQueryCached { get; set; }
+
+    public bool ShowData { get; set; } = false;
+
+    public bool AllowChangeShowData { get; set; } = false;
+
+    public bool CreateNew { get; set; } = false;
+
+    public bool AutoRefresh { get; set; } = false;
+
+    [Unit("px")]
+    public int? MinHeight { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => UserChart + "");
+
+    public bool RequiresTitle
+    {
+        get { return false; }
+    }
+
+    public IPartEntity Clone() => new UserChartPartEntity
+    {
+        UserChart = this.UserChart,
+        IsQueryCached = this.IsQueryCached,
+        ShowData = this.ShowData,
+        AllowChangeShowData = this.AllowChangeShowData,
+        CreateNew = this.CreateNew,
+        AutoRefresh = this.AutoRefresh,
+        MinHeight = this.MinHeight,
+    };
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("UserChartPart",
+            new XAttribute(nameof(UserChart), ctx.Include(UserChart)),
+            ShowData ? new XAttribute(nameof(ShowData), ShowData) : null,
+            AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
+            IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
+            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null!,
+            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null!,
+            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight.Value) : null!
+            );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(element.Attribute("UserChart")!.Value));
+        ShowData = element.Attribute(nameof(ShowData))?.Value.ToBool() ?? false;
+        AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
+        IsQueryCached = element.Attribute(nameof(IsQueryCached))?.Value.ToBool() ?? false;
+        CreateNew = element.Attribute(nameof(CreateNew))?.Value.ToBool() ?? false;
+        AutoRefresh = element.Attribute(nameof(AutoRefresh))?.Value.ToBool() ?? false;
+        MinHeight = element.Attribute(nameof(MinHeight))?.Value.ToInt();
+    }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class CombinedUserChartPartEntity : Entity, IPartEntity
+{
+    [PreserveOrder, NoRepeatValidator]
+    public MList<CombinedUserChartElementEmbedded> UserCharts { get; set; } = new MList<CombinedUserChartElementEmbedded>();
+
+    public bool ShowData { get; set; } = false;
+
+    public bool AllowChangeShowData { get; set; } = false;
+
+    public bool CombinePinnedFiltersWithSameLabel { get; set; } = true;
+
+    public bool UseSameScale { get; set; }
+
+    [Unit("px")]
+    public int? MinHeight { get; set; }
+
+    public override string ToString()
+    {
+        return UserCharts.ToString(", ");
+    }
+
+    public bool RequiresTitle
+    {
+        get { return true; }
+    }
+
+    public IPartEntity Clone() => new CombinedUserChartPartEntity
+    {
+        UserCharts = this.UserCharts.Select(a => a.Clone()).ToMList(),
+        ShowData = ShowData,
+        AllowChangeShowData = AllowChangeShowData,
+        CombinePinnedFiltersWithSameLabel = CombinePinnedFiltersWithSameLabel,
+        UseSameScale = UseSameScale
+    };
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("CombinedUserChartPart",
+            ShowData ? new XAttribute(nameof(ShowData), ShowData) : null,
+            AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
+            CombinePinnedFiltersWithSameLabel ? new XAttribute(nameof(CombinePinnedFiltersWithSameLabel), CombinePinnedFiltersWithSameLabel) : null,
+            UseSameScale ? new XAttribute(nameof(UseSameScale), UseSameScale) : null,
+            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight) : null,
+            UserCharts.Select(uc => new XElement("UserChart",
+                new XAttribute("Guid", ctx.Include(uc.UserChart)),
+                uc.IsQueryCached ? new XAttribute(nameof(uc.IsQueryCached), uc.IsQueryCached) : null))
+        );
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        ShowData = element.Attribute(nameof(ShowData))?.Value.ToBool() ?? false;
+        AllowChangeShowData = element.Attribute(nameof(AllowChangeShowData))?.Value.ToBool() ?? false;
+        CombinePinnedFiltersWithSameLabel = element.Attribute(nameof(CombinePinnedFiltersWithSameLabel))?.Value.ToBool() ?? false;
+        UseSameScale = element.Attribute(nameof(UseSameScale))?.Value.ToBool() ?? false;
+        MinHeight = element.Attribute(nameof(MinHeight))?.Value.ToInt();
+        UserCharts.Synchronize(element.Elements("UserChart").ToList(), (cuce, elem) =>
+        {
+            cuce.UserChart = (UserChartEntity)ctx.GetEntity(Guid.Parse(elem.Attribute("Guid")!.Value));
+            cuce.IsQueryCached = elem.Attribute(nameof(cuce.IsQueryCached))?.Value.ToBool() ?? false;
+        });
+    }
+}
+
+public class CombinedUserChartElementEmbedded : EmbeddedEntity
+{
+    public UserChartEntity UserChart { get; set; }
+
+    public bool IsQueryCached { get; set; }
+
+    internal CombinedUserChartElementEmbedded Clone() => new CombinedUserChartElementEmbedded
+    {
+        UserChart = UserChart,
+        IsQueryCached = IsQueryCached,
+    };
 }

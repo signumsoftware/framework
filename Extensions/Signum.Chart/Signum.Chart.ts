@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
 import * as Basics from '../../Signum/React/Signum.Basics'
-import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
+import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 
 import { FilterOptionParsed, OrderOptionParsed, FilterRequest, OrderRequest } from '@framework/FindOptions'
 
@@ -23,12 +23,12 @@ export interface ChartScriptParameterEmbedded {
   enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
-export type IChartBase = ChartRequestModel | UserChartEntity;
+
 
 export const ChartColumnEmbedded = new Type<ChartColumnEmbedded>("ChartColumnEmbedded");
 export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "ChartColumnEmbedded";
-  token: QueryTokens.QueryTokenEmbedded | null;
+  token: Queries.QueryTokenEmbedded | null;
   displayName: string | null;
   format: string | null;
   orderByIndex: number | null;

@@ -1,0 +1,3 @@
+import { ChartRequestModel } from './Signum.Chart'
+
+export type IChartBase = ChartRequestModel | UserChartEntity;

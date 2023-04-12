@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { Binding, EntityBaseController, EntityCombo, EntityLine, EntityTable, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from '../Signum.Chart';
 import { colorSchemes } from './ColorUtils';
 import { classes, Dic } from '@framework/Globals';
 import * as Navigator from '@framework/Navigator';
@@ -11,9 +10,9 @@ import * as Finder from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
-import { UserEntity } from '../../Signum.Authorization/Signum.Entities.Authorization';
 import { EntityLink } from '@framework/Search';
 import { calculateColor, ColorScheme } from './ColorPaletteClient';
+import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from '../Signum.Chart.ColorPalette';
 
 export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }) {
   const ctx = p.ctx;

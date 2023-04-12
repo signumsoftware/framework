@@ -3,16 +3,15 @@ import * as React from 'react'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { is } from '@framework/Signum.Entities'
 import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartParameterEmbedded, ChartRequestModel } from '../Signum.Chart'
+import { ChartColumnEmbedded, ChartMessage, ChartParameterEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
-import * as  ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { UserState } from '../../Signum.Authorization/Signum.Entities.Authorization'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
+import { IChartBase } from '../Signum.Chart.UserChart'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/

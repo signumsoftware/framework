@@ -170,7 +170,3 @@ text.sf-initial-message {
     flex-direction: column;
 }
 
-    .sf-chart-tab-container .tab-content .tab-pane.active .sf-fullscreen-component {
-        flex-grow: 1;
-        display: flex;
-    }

@@ -67,7 +67,7 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
 }
 
 
-function getAllFilterTokens(fos: FilterOptionParsed[]): QueryToken[]{
+export function getAllFilterTokens(fos: FilterOptionParsed[]): QueryToken[]{
   return fos.flatMap(f => isFilterGroupOptionParsed(f) ?
     [f.token, ...getAllFilterTokens(f.filters)] :
     [f.token])

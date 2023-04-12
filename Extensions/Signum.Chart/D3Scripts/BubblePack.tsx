@@ -62,7 +62,7 @@ export default function renderBubblePack({ data, width, height, parameters, load
 
   const nodes = circularRoot.descendants().filter(d => !isRoot(d.data)) as d3.HierarchyCircularNode<(ChartRow | Folder) & { active?: boolean }>[];
 
-  const activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
+  const activeDetector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const getNodeKey = (n: d3.HierarchyCircularNode<ChartRow | Folder>): string => {
     var last = isFolder(n.data) ? parentColumn!.getKey(n.data.folder) :

@@ -1,15 +1,11 @@
-import { DateTime, DurationUnit, Duration, DateTimeUnit } from "luxon"
+import { DateTime, DurationUnit, DateTimeUnit } from "luxon"
 import * as d3 from "d3"
-import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient"
-import { parseLite } from "@framework/Signum.Entities"
-import * as Navigator from '@framework/Navigator'
-import { coalesce, Dic } from "@framework/Globals";
+import { ChartColumn } from "../../ChartClient"
+import { Dic } from "@framework/Globals";
 import { tryGetTypeInfo } from "@framework/Reflection";
-import { ChartRequestModel } from "../../Signum.Entities.Chart";
-import { isFilterGroupOption, isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken, FilterConditionOption } from "@framework/FindOptions";
+import { isFilterGroupOptionParsed, FilterConditionOptionParsed, FilterOptionParsed, QueryToken } from "@framework/FindOptions";
 import { MemoRepository } from "./ReactChart";
 import * as ColorUtils from "../../ColorPalette/ColorUtils"
-import { colorInterpolators } from "../../ColorPalette/ColorUtils"
 
 
 

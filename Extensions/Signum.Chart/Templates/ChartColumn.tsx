@@ -5,14 +5,16 @@ import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { ValueLine, FormGroup } from '@framework/Lines'
-import { ChartColumnEmbedded, IChartBase, ChartMessage, ChartColumnType, ChartParameterEmbedded, ColorPaletteEntity } from '../Signum.Chart'
+import { ChartColumnEmbedded, ChartMessage, ChartColumnType, ChartParameterEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
 import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
-import QueryTokenEntityBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
+import { IChartBase } from '../Signum.Chart.UserChart'
+import { ColorPaletteEntity } from '../Signum.Chart.ColorPalette'
+import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;

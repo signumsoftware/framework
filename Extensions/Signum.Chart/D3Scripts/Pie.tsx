@@ -44,7 +44,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var legendRadius = 1.2;
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   var orderedPie = pie(data.rows).orderBy(s => keyColumn.getValueKey(s.data));
 

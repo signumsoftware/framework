@@ -103,7 +103,7 @@ export default function renderStackedBars({ data, width, height, parameters, loa
 
   var size = xRule.size('content');
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const bandMargin = y.bandwidth() > 20 ? 2 : y.bandwidth() > 10 ? 1 : 0;
 

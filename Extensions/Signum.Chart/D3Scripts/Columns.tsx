@@ -2,7 +2,7 @@ import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartTable, ChartColumn, ChartScriptProps, ChartRow } from '../ChartClient';
+import { ChartTable, ChartColumn, ChartScriptProps, ChartRow, getActiveDetector } from '../ChartClient';
 import TextEllipsis from './Components/TextEllipsis';
 import { XKeyTicks, YScaleTicks, XTitle } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
@@ -67,7 +67,7 @@ export default function renderColumns({ data, width, height, parameters, loading
 
   var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content') - (isInside ? labelsMargin + labelsPadding : 0), parameters["Scale"]);
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

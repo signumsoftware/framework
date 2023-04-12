@@ -1,29 +1,30 @@
 import * as React from 'react'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ifError, Dic, classes } from '@framework/Globals'
+import { ifError, classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
-import { QueryDescription, SubTokensOptions, QueryToken, FilterOptionParsed, FilterConditionOption, FindOptions } from '@framework/FindOptions'
+import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
-import { SearchMessage, JavascriptMessage } from '@framework/Signum.Entities'
+import { SearchMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import { ValidationErrors } from '@framework/Frames/ValidationErrors'
-import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Chart'
+import { ChartRequestModel, ChartMessage } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartBuilder from './ChartBuilder'
 import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
 import "@framework/SearchControl/Search.css"
 import "../Chart.css"
-import { ChartScript, cleanedChartRequest, getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient';
+import { ChartScript, cleanedChartRequest } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
+import { UserChartEntity } from '../Signum.Chart.UserChart';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;

@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
-import { ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
+import { ChartTable, ChartColumn, ChartScriptProps, getActiveDetector } from '../ChartClient';
 import Legend from './Components/Legend';
 import TextEllipsis from './Components/TextEllipsis';
 import { XScaleTicks, YKeyTicks } from './Components/Ticks';
@@ -78,7 +78,7 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
     .domain(pivot.columns.map(s => s.key))
     .range([interMagin, y.bandwidth() - interMagin]);
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

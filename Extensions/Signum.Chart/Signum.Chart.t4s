@@ -13,4 +13,4 @@ export interface ChartScriptParameterEmbedded {
   enumValues: { name: string, typeFilter : ChartColumnType }[];
 }
 
-export type IChartBase = ChartRequestModel | UserChartEntity;
+

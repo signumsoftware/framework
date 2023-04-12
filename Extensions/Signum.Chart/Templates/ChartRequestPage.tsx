@@ -2,13 +2,14 @@ import * as React from 'react'
 import { Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { parseLite } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
-import { ChartRequestModel, UserChartEntity } from '../Signum.Chart'
+import { ChartRequestModel } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import ChartRequestView from './ChartRequestView'
 import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { getQueryNiceName } from '@framework/Reflection'
+import { UserChartEntity } from '../Signum.Chart.UserChart'
 
 
 

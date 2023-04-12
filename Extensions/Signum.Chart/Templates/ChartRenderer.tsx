@@ -1,25 +1,21 @@
 import * as React from 'react'
-import { DomUtils, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Chart'
+import { ChartRequestModel} from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
-import { toFilterOptions } from '@framework/Finder';
 
 import "../Chart.css"
-import { ChartScript, ChartRow } from '../ChartClient';
+import { ChartRow, extractFindOptions, onDrilldownUserChart } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
-import { FullscreenComponent } from './FullscreenComponent'
-import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController'
+import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController'
 import { toAbsoluteUrl } from '@framework/AppContext'
 import * as UserQueryClient from '../../Signum.UserQueries/UserQueryClient'
-import { DynamicTypeConditionSymbolEntity } from '../../Dynamic/Signum.Entities.Dynamic'
-import { extractFindOptions } from '../../Signum.UserQueries/UserQueryClient'
 import { Lite } from '@framework/Signum.Entities'
+import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
 
 export interface ChartRendererProps {
   userChart?: Lite<UserChartEntity>;
@@ -76,7 +72,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
-  UserQueryClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
+  onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
     .then(done => {
       if (done == false) {
   if (r.entity) {

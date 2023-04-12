@@ -1,6 +1,8 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
+using Signum.Dashboard;
 using Signum.Engine.Sync;
+using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
@@ -14,6 +16,10 @@ public static class UserChartLogic
     public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks = null!;
     public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
 
+    [AutoExpressionField]
+    public static IQueryable<CachedQueryEntity> CachedQueries(this UserChartEntity uc) =>
+        As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uc.ToLite())));
+    
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
@@ -23,6 +29,7 @@ public static class UserChartLogic
             sb.Schema.Synchronizing += Schema_Synchronizing;
 
             sb.Include<UserChartEntity>()
+                .WithExpressionTo((UserChartEntity d) => d.CachedQueries())
                 .WithSave(UserChartOperation.Save)
                 .WithDelete(UserChartOperation.Delete)
                 .WithQuery(() => uq => new
@@ -35,6 +42,83 @@ public static class UserChartLogic
                     uq.ChartScript,
                     uq.Owner,
                 });
+
+            ToolbarLogic.RegisterDelete<UserChartEntity>(sb, uq => uq.Query);
+            ToolbarLogic.RegisterContentConfig<UserChartEntity>(
+                lite => { var uc = UserCharts.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uc) && QueryLogic.Queries.QueryAllowed(uc.Query.ToQueryName(), true); },
+                lite => PropertyRouteTranslationLogic.TranslatedField(UserCharts.Value.GetOrCreate(lite), a => a.DisplayName));
+
+
+            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
+            {
+                {"UserChartPart", typeof(UserChartPartEntity)},
+                {"CombinedUserChartPart", typeof(CombinedUserChartPartEntity)},
+            });
+
+            DashboardLogic.OnGetCachedQueryDefinition.Register((UserChartPartEntity ucp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(ucp.UserChart.ToChartRequest().ToQueryRequest(), ucp.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, ucp.UserChart, ucp.IsQueryCached, canWriteFilters: true) });
+            DashboardLogic.OnGetCachedQueryDefinition.Register((CombinedUserChartPartEntity cucp, PanelPartEmbedded pp) => cucp.UserCharts.Select(uc => new CachedQueryDefinition(uc.UserChart.ToChartRequest().ToQueryRequest(), uc.UserChart.Filters.GetDashboardPinnedFilterTokens(), pp, uc.UserChart, uc.IsQueryCached, canWriteFilters: false)));
+
+
+            if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserChartPartEntity)))
+            {
+                sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserChartPartEntity)mle.Element.Content).UserChart)).UnsafeDeleteMList();
+                    Database.Query<UserChartPartEntity>().Where(uqp => query.Contains(uqp.UserChart)).UnsafeDelete();
+
+                    return null;
+                };
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                {
+                    var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Query.Is(q)));
+                    var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>().Where(uqp => uqp.UserChart.Query.Is(q)));
+                    return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
+                };
+
+                sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var uc = (UserChartEntity)arg;
+
+                    var mlistElems = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts)
+                        .Where(mle => ((UserChartPartEntity)mle.Element.Content).UserChart.Is(uc)));
+
+                    var parts = Administrator.UnsafeDeletePreCommand(Database.Query<UserChartPartEntity>()
+                       .Where(ucp => ucp.UserChart.Is(uc)));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems, parts);
+                };
+            }
+
+            if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(CombinedUserChartPartEntity)))
+            {
+                sb.Schema.EntityEvents<UserChartEntity>().PreUnsafeDelete += query =>
+                {
+                    Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => query.Contains(mle.Element.UserChart)).UnsafeDeleteMList();
+
+                    return null;
+                };
+
+                sb.Schema.Table<UserChartEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var uc = (UserChartEntity)arg;
+
+                    var mlistElems2 = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                         Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Is(uc)));
+
+                    return SqlPreCommand.Combine(Spacing.Simple, mlistElems2);
+                };
+
+                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += arg =>
+                {
+                    var query = (QueryEntity)arg;
+
+                    var parts = Administrator.UnsafeDeletePreCommandMList((CombinedUserChartPartEntity e) => e.UserCharts,
+                         Database.MListQuery((CombinedUserChartPartEntity e) => e.UserCharts).Where(mle => mle.Element.UserChart.Query.Is(query)));
+                    return SqlPreCommand.Combine(Spacing.Simple, parts);
+                };
+            }
+
 
             AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserChartEntity>().Any(a => a.Owner.Is(role));
 
@@ -168,6 +252,12 @@ public static class UserChartLogic
 
         TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition,
             uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+
+        TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
+             ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+
+        TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
+            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
     }
 
     public static void RegisterTranslatableRoutes()

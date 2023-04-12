@@ -3,11 +3,11 @@ import { toLite } from '@framework/Signum.Entities'
 import { JavascriptMessage, parseLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { UserChartEntity } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import { useLocation, useParams } from "react-router";
 import { useForceUpdate } from '@framework/Hooks'
+import { UserChartEntity } from '../Signum.Chart.UserChart'
 
 
 

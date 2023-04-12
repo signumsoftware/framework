@@ -100,7 +100,7 @@ export default function renderStackedColumns({ data, width, height, parameters, 
 
   var size = yRule.size('content') + yRule.size("_labelTopMargin");
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const bandMargin = x.bandwidth() > 20 ? 2 : x.bandwidth() > 10 ? 1 : 0;
 

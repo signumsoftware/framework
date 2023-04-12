@@ -86,7 +86,7 @@ function ParallelCoordinatesImp({ data, width, height, parameters, loading, onDr
 
   var selectedColumn = cords.firstOrNull(a => a.column.name == selectedColumnName) || cords.first();
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

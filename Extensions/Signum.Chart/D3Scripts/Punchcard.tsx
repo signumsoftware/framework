@@ -212,7 +212,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
       })
     );
 
-  const detector = dashboardFilter?.getActiveDetector(chartRequest);
+  const detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

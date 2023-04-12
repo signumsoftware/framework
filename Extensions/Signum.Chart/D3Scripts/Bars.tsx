@@ -72,7 +72,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
 
   var rowsByKey = data.rows.toObject(r => keyColumn.getValueKey(r));
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const bandMargin = y.bandwidth() > 20 ? 2 : 0;
 

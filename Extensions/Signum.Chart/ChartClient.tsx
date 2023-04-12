@@ -5,19 +5,15 @@ import { ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey, MList, parseLite, toMList } from '@framework/Signum.Entities'
-import { getQueryKey, getEnumInfo, QueryTokenString, getTypeInfos, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
+import * as Constructor from '@framework/Constructor'
+import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
+import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, OrderOptionParsed, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions
+  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned
 } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import {
-  UserChartEntity, ChartPermission, ChartColumnEmbedded, ChartParameterEmbedded, ChartRequestModel,
-  IChartBase, ChartColumnType, ChartParameterType, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SvgMapsChartScript, SpecialParameterType
-} from './Signum.Chart'
-import { QueryTokenEmbedded } from '../UserAssets/Signum.Entities.UserAssets'
 import ChartButton from './ChartButton'
-import ChartRequestView, { ChartRequestViewHandle } from './Templates/ChartRequestView'
+import { ChartRequestViewHandle } from './Templates/ChartRequestView'
 import * as UserChartClient from './UserChart/UserChartClient'
 import * as ColorPaletteClient from './ColorPalette/ColorPaletteClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -27,12 +23,21 @@ import { toNumberFormat } from '@framework/Reflection';
 import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
-import { DashboardFilter } from '../Dashboard/View/DashboardFilterController';
+import { DashboardFilter } from '../Signum.Dashboard/View/DashboardFilterController';
+import * as DashboardClient from '../Signum.Dashboard/DashboardClient';
 import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
-import { UserQueryEntity } from '../Signum.UserQueries/Signum.Entities.UserQueries';
-import * as UserAssetClient from '../UserAssets/UserAssetClient'
+import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { CombinedUserChartPartEntity, IChartBase, UserChartEntity, UserChartPartEntity } from './Signum.Chart.UserChart';
+import { UserChartPartHandler } from './Dashboard/View/UserChartPart';
+import { CreateNewButton } from '../Signum.Dashboard/DashboardClient';
+import SelectorModal from '@framework/SelectorModal';
+import { CachedQueryJS, getAllFilterTokens, getCachedResultTable } from '../Signum.Dashboard/CachedQueryExecutor';
+import { drilldownToUserQuery, onDrilldownEntity, onDrilldownGroup } from '../Signum.UserQueries/UserQueryClient';
+import { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
+import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 
 export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
   
@@ -81,7 +86,136 @@ export function start(options: { routes: RouteObject[], googleMapsApiKey?: strin
   if (options.svgMap) {
     registerChartScriptComponent(SvgMapsChartScript.SvgMap, () => import("./SvgMap/SvgMap"));
   }
+
+  DashboardClient.registerRenderer(UserChartPartEntity, {
+    component: () => import('./Dashboard/View/UserChartPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
+    defaultTitle: c => translated(c.userChart, uc => uc.displayName),
+    getQueryNames: c => [c.userChart?.query].notNull(),
+    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return Navigator.view(c.userChart!).then(e => Boolean(e));
+      },
+    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+      (p, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        const handler = cdRef.current as UserChartPartHandler;
+        Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
+          .then(path => AppContext.pushOrOpenInTab(path, ev));
+      },
+    customTitleButtons: (c, entity, customDataRef) => {
+      if (!c.createNew)
+        return null;
+
+      return <CreateNewButton queryKey={c.userChart.query.key} onClick={tis => {
+        const handler = customDataRef.current as UserChartPartHandler;
+        return SelectorModal.chooseType(tis)
+          .then(ti => ti && Finder.getPropsFromFilters(ti, handler.chartRequest!.filterOptions)
+            .then(props => Constructor.constructPack(ti.name, props)))
+          .then(pack => pack && Navigator.view(pack))
+          .then(() => handler.reloadQuery());
+      }} />
+    }
+  });
+
+  DashboardClient.registerRenderer(CombinedUserChartPartEntity, {
+    component: () => import('./Dashboard/View/CombinedUserChartPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
+    getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
+    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
+          title: SelectorMessage.SelectAnElement.niceToString(),
+          message: SelectorMessage.PleaseSelectAnElement.niceToString()
+        })
+          .then(lite => lite && Navigator.view(lite!))
+          .then(entity => Boolean(entity));
+      },
+    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
+          title: SelectorMessage.SelectAnElement.niceToString(),
+          message: SelectorMessage.PleaseSelectAnElement.niceToString()
+        }).then(uc => {
+          if (uc) {
+            UserChartClient.Converter.toChartRequest(uc.userChart, e)
+              .then(cr => Encoder.chartPathPromise(cr, toLite(uc.userChart)))
+              .then(path => AppContext.pushOrOpenInTab(path, ev));
+          }
+        });
+      },
+  });
+
 }
+
+export function getActiveDetector(filter: DashboardFilter | undefined,  request: ChartRequestModel): ((row: ChartRow) => boolean) | undefined {
+
+  if (filter == null || filter.rows.length == 0)
+    return undefined;
+
+  var tokenToColumn = request.columns
+    .map((mle, i) => ({ colName: "c" + i, tokenString: mle.element.token?.tokenString }))
+    .filter(a => a.tokenString != null)
+    .groupBy(a => a.tokenString)
+    .toObject(gr => gr.key!, gr => gr.elements.first().colName);
+
+  return row => filter.rows.some(r => {
+    return r.filters.every(f => {
+      var rowVal = (row as any)[tokenToColumn[f.token.fullKey]];
+      return f.value == rowVal || is(f.value, rowVal, false, false);
+    });
+  });
+}
+
+
+export function executeChartCached(request: ChartRequestModel, chartScript: ChartScript, cachedQuery: CachedQueryJS): Promise<API.ExecuteChartResult> {
+  const palettesPromise = API.getPalletes(request);
+
+  const tokens = [
+    ...request.columns.map(a => a.element.token?.token).notNull(),
+    ...getAllFilterTokens(request.filterOptions),
+  ].toObjectDistinct(a => a.fullKey);
+
+  const queryRequest = API.getRequest(request);
+  const resultTable = getCachedResultTable(cachedQuery, queryRequest, tokens);
+
+  return palettesPromise.then(palettes => API.toChartResult(request, resultTable, chartScript, palettes));
+}
+
+export async function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow, uc?: Lite<UserChartEntity>, options?: OnDrilldownOptions): Promise<boolean | undefined> {
+  if (uc == null)
+    return false;
+
+  await Navigator.API.fetchAndRemember(uc);
+
+  if (uc.entity!.customDrilldowns.length == 0 || hasAggregates(uc.entity!) != hasAggregates(cr))
+    return false;
+
+  debugger;
+  const fo = extractFindOptions(cr, row);
+  const entity = row.entity ?? (hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
+  const filters = fo.filterOptions?.notNull();
+
+  const val = entity ?
+    await onDrilldownEntity(uc.entity!.customDrilldowns, entity) :
+    await onDrilldownGroup(uc.entity!.customDrilldowns, filters);
+
+  if (!val)
+    return undefined;
+
+  return drilldownToUserQuery(val.fo, val.uq, options);
+}
+
+
 
 export interface ChartScriptProps {
   data?: ChartTable;
@@ -134,6 +268,59 @@ export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescri
 
   return result;
 }
+
+
+export function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
+
+  const filters = cr.filterOptions.map(f => {
+    let f2 = withoutPinned(f);
+    if (f2 == null)
+      return null;
+    return withoutAggregate(f2);
+  }).notNull();
+
+  const columns: ColumnOption[] = [];
+
+  cr.columns.map((a, i) => {
+
+    const qte = a.element.token;
+
+    if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
+      filters.push({
+        token: qte!.token!,
+        operation: "EqualTo",
+        value: (r as any)["c" + i],
+        frozen: false
+      } as FilterOptionParsed);
+    }
+
+    if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
+    {
+      var t = qte.token;
+      if (t.queryTokenType == "Aggregate") {
+        columns.push({
+          token: t.parent!.fullKey,
+          summaryToken: t.fullKey
+        });
+      } else {
+        columns.push({
+          token: t.fullKey,
+        });
+      }
+    }
+  });
+
+  var fo: FindOptions = {
+    queryName: cr.queryKey,
+    filterOptions: Finder.toFilterOptions(filters),
+    includeDefaultFilters: false,
+    columnOptions: columns,
+    columnOptionsMode: "ReplaceOrAdd",
+  };
+
+  return fo;
+}
+
 
 export namespace ButtonBarChart {
 

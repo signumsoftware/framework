@@ -7,16 +7,13 @@ import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
-import { toNumberFormat } from '@framework/Reflection';
+import { Color } from '@framework/Basics/Color';
 import './PivotTable.css'
-import { Color } from '../../Basics/Color';
-import { isLite, Lite, Entity, BooleanEnum, EntityControlMessage } from '@framework/Signum.Entities';
+import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
-import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterOption, FindOptions } from '@framework/FindOptions';
-import { ChartColumnType } from '../Signum.Chart';
+import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
-import { isBooleanOrFunctionOrNull } from '../../Dynamic/View/NodeUtils';
-import { QueryTokenMessage } from '@framework/Signum.DynamicQuery';
+import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
 
 interface RowDictionary {
   [key: string]: { value: unknown, dicOrRows: RowDictionary | ChartRow[] };
@@ -446,7 +443,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   const isCreable = Navigator.isCreable(typeName, { isSearch: true });
 
-  const detector = dashboardFilter?.getActiveDetector(chartRequest);
+  const detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   function Cell(p:
     {

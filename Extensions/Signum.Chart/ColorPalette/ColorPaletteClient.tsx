@@ -1,18 +1,17 @@
-import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as React from 'react';
 import { RouteObject } from 'react-router'
 import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { ChartMessage, ColorPaletteEntity } from '../Signum.Chart'
 import * as ColorUtils from './ColorUtils'
-import { PseudoType, getTypeName, tryGetTypeInfo } from '@framework/Reflection';
+import { PseudoType, getTypeName } from '@framework/Reflection';
 import { Lite } from '@framework/Signum.Entities';
 import * as Constructor from '@framework/Constructor';
 import * as Finder from '@framework/Finder';
 import { Dic } from '@framework/Globals';
-import { TypeEntity } from '@framework/Signum.Basics';
 import { getColorInterpolation } from './ColorUtils';
+import { ColorPaletteEntity } from '../Signum.Chart.ColorPalette';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));

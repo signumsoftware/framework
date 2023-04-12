@@ -9,7 +9,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
 import { ChartRequestModel } from '../Signum.Chart';
-import { DashboardFilter } from '../../Dashboard/View/DashboardFilterController';
+import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
 
 
 export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
@@ -206,7 +206,7 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
     return (firstDay + lastDay) / 2.0;
   }
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <g key={year} className="year-group sf-transition"

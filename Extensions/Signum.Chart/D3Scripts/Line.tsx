@@ -1,16 +1,13 @@
 import * as React from 'react'
 import * as d3 from 'd3'
 import * as ChartUtils from './Components/ChartUtils';
-import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
-import { KeyCodes } from '@framework/Components';
-import TextEllipsis from './Components/TextEllipsis';
+import { translate, scale, scaleFor } from './Components/ChartUtils';
+import { ChartTable, ChartColumn, ChartRow, ChartScriptProps, getActiveDetector } from '../ChartClient';
 import { XKeyTicks, XScaleTicks, YScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
-import { ChartColumnType } from 'Chart/Signum.Entities.Chart';
 
 export default function renderLine({ data, width, height, parameters, loading, chartRequest, onDrillDown, initialLoad, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
@@ -63,7 +60,7 @@ export default function renderLine({ data, width, height, parameters, loading, c
 
   var y = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, yRule.size('content'), parameters["VerticalScale"]);
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

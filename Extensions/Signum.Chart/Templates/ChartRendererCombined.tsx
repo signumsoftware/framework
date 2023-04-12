@@ -1,23 +1,15 @@
 import * as React from 'react'
-import { DomUtils, Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
-import { FilterOptionParsed, ColumnOption, hasAggregate, withoutAggregate, FilterOption, FindOptions, withoutPinned } from '@framework/FindOptions'
-import { ChartRequestModel, ChartMessage, UserChartEntity } from '../Signum.Chart'
+import { ChartRequestModel} from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
-import { toFilterOptions } from '@framework/Finder';
-
 import "../Chart.css"
-import { ChartScript, ChartRow } from '../ChartClient';
+import { ChartScript } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
-
-import ReactChart, { MemoRepository } from '../D3Scripts/Components/ReactChart';
-import { useAPI } from '@framework/Hooks'
-import { TypeInfo } from '@framework/Reflection'
-import { FullscreenComponent } from './FullscreenComponent'
+import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 import { handleDrillDown } from './ChartRenderer'
 import { ReactChartCombined } from '../D3Scripts/Components/ReactChartCombined'
 import { Lite } from '@framework/Signum.Entities'
+import { UserChartEntity } from '../Signum.Chart.UserChart';
+import { FullscreenComponent } from '@framework/Components/FullscreenComponent';
 
 
 

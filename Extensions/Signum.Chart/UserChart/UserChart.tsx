@@ -1,17 +1,17 @@
 import * as React from 'react'
-import { UserQueryMessage, QueryOrderEmbedded, UserQueryEntity } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { UserChartEntity } from '../Signum.Chart'
-import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
+import { FormGroup, ValueLine, EntityLine, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
-import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
+import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
 import "../Chart.css"
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient'
 import { getToString } from '@framework/Signum.Entities'
+import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){

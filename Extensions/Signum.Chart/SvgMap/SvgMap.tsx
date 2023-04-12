@@ -116,7 +116,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
       }
 
 
-      var detector = dashboardFilter?.getActiveDetector(chartRequest);
+      var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
 
       var svg = divRef.current!.getElementsByTagName("svg")[0] as SVGElement;

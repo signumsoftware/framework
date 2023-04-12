@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -8,13 +8,13 @@ import * as Finder from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as AuthClient from '../../Signum.Authorization/AuthClient'
-import { UserChartEntity, ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Chart'
-import { QueryFilterEmbedded, QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
+import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Chart'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
-import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
+import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } from '../Signum.Chart.UserChart';
+import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries';
 
 export function start(options: { routes: RouteObject[] }) {
 
@@ -64,6 +64,8 @@ export function start(options: { routes: RouteObject[] }) {
 
 
   Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
+  Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('../Dashboard/Admin/UserChartPart')));
+  Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('../Dashboard/Admin/CombinedUserChartPart')));
 }
 
 

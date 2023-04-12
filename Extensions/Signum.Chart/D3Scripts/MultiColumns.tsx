@@ -78,7 +78,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
   var rowsInOrder = pivot.rows.orderBy(r => keyColumn.getKey(r.rowValue));
   var color = ChartUtils.colorCategory(parameters, columnsInOrder.map(s => s.key), memo);
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   return (
     <svg direction="ltr" width={width} height={height}>

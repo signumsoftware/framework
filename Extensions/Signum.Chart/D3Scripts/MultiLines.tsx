@@ -101,7 +101,7 @@ export default function renderMultiLines({ data, width, height, parameters, load
       numberOpacity = 0;
   }
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const getX: (row: PivotRow) => number =
     hasHorizontalScale ?

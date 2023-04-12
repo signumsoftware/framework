@@ -1,7 +1,5 @@
-import a from "bpmn-js/lib/features/search";
 import * as d3 from "d3"
 import * as d3sc from "d3-scale-chromatic";
-import { MemoRepository } from "../D3Scripts/Components/ReactChart";
 
 
 interface Interpolator {

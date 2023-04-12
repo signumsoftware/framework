@@ -65,7 +65,7 @@ export default function renderTreeMap({ data, width, height, parameters, loading
 
   var nodes = treeMapRoot.descendants().filter(d => !!d.data) as d3.HierarchyRectangularNode<(ChartRow | Folder)>[];
 
-  var activeDetector = dashboardFilter?.getActiveDetector(chartRequest);
+  var activeDetector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
   const nodeHeight = (n: d3.HierarchyRectangularNode<any>) => n.y1 - n.y0;
   const nodeWidth = (n: d3.HierarchyRectangularNode<any>) => n.x1 - n.x0;

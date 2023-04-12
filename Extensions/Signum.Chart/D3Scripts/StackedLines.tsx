@@ -113,7 +113,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
 
   var rectRadious = 2;
 
-  var detector = dashboardFilter?.getActiveDetector(chartRequest);
+  var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
   var bw = hasHorizontalScale ? 0 : (x as d3.ScaleBand<string>).bandwidth();
 
   return (

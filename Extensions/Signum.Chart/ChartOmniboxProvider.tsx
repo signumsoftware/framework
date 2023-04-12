@@ -1,9 +1,7 @@
 import * as React from 'react'
-import { getQueryKey } from '@framework/Reflection'
-import { OmniboxMessage } from '../Signum.Omnibox/Signum.Entities.Omnibox'
+import { OmniboxMessage } from '../Signum.Omnibox/Signum.Omnibox'
 import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
 import * as ChartClient from './ChartClient'
-import { ChartRequestModel } from './Signum.Chart'
 
 export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxResult>
 {
