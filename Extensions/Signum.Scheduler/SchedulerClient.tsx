@@ -10,7 +10,7 @@ import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
   ScheduleRuleWeekDaysEntity, HolidayCalendarEntity, SchedulerPermission, SchedulerTaskExceptionLineEntity, ITaskOperation, ITaskMessage
 } from './Signum.Scheduler'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
@@ -41,7 +41,7 @@ export function start(options: { routes: RouteObject[] }) {
     group: group
   }));
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
     key: "SchedulerPanel",
     onClick: () => Promise.resolve("/scheduler/view")

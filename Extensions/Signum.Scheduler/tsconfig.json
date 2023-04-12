@@ -7,7 +7,9 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.UserAssets" }
   ],
   "exclude": [
     "../../Signum/ts_out",
