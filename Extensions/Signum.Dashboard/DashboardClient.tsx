@@ -174,7 +174,7 @@ export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer:
   partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
 }
 
-function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }) {
+export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }) {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
 

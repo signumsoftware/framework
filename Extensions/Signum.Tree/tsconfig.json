@@ -8,7 +8,9 @@
   },
   "references": [
     { "path": "../../Signum" },
-    { "path": "../Signum.Omnibox" }
+    { "path": "../Signum.Omnibox" },
+    { "path": "../Signum.UserQueries" },
+    { "path": "../Signum.Dashboard" }
   ],
   "exclude": [
     "../../Signum/ts_out",

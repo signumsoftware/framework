@@ -5,6 +5,8 @@
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Dashboard from '../Signum.Dashboard/Signum.Dashboard'
+import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
 
 
 export module DisabledMessage {
@@ -78,5 +80,12 @@ export module TreeViewerMessage {
   export const AddSibling = new MessageKey("TreeViewerMessage", "AddSibling");
   export const Remove = new MessageKey("TreeViewerMessage", "Remove");
   export const None = new MessageKey("TreeViewerMessage", "None");
+}
+
+export const UserTreePartEntity = new Type<UserTreePartEntity>("UserTreePart");
+export interface UserTreePartEntity extends Entities.Entity, Dashboard.IPartEntity {
+  Type: "UserTreePart";
+  userQuery: UserQueries.UserQueryEntity;
+  requiresTitle: boolean;
 }
 

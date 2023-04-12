@@ -144,4 +144,3 @@ public enum InsertPlace
     Before,
     LastNode,
 }
-

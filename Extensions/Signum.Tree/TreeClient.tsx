@@ -8,8 +8,8 @@ import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Type, tryGetTypeInfo } from '@framework/Reflection'
-import { getToString, Lite } from '@framework/Signum.Entities'
-import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, DisabledMixin } from './Signum.Tree'
+import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
+import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, DisabledMixin, UserTreePartEntity } from './Signum.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
 import { ImportComponent } from '@framework/ImportComponent'
@@ -20,11 +20,14 @@ import { toLite } from "@framework/Signum.Entities";
 import { SearchControlLoaded } from "@framework/Search";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
+import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
+import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/tree/:typeName", element: <ImportComponent onImport={() => import("./TreePage")} /> });
 
   Navigator.addSettings(new EntitySettings(MoveTreeModel, e => import('./Templates/MoveTreeModel')));
+  Navigator.addSettings(new EntitySettings(UserTreePartEntity, e => import('./Dashboard/Admin/UserTreePart')));
 
   Operations.addSettings(
     new EntityOperationSettings(TreeOperation.CreateChild, { contextual: { isVisible: ctx => ctx.context.container instanceof SearchControlLoaded } }),
@@ -62,6 +65,27 @@ export function start(options: { routes: RouteObject[] }) {
 
     return { button: <TreeButton searchControl={ctx.searchControl} /> };
   });
+
+  DashboardClient.registerRenderer(UserTreePartEntity, {
+    component: () => import('./Dashboard/View/UserTreePart').then((a: any) => a.default),
+    defaultIcon: () => ({ icon: ["far", "network-wired"], iconColor: "#B7950B" }),
+    withPanel: c => true,
+    getQueryNames: c => [c.userQuery?.query].notNull(),
+    handleEditClick: !Navigator.isViewable(UserTreePartEntity) || Navigator.isReadOnly(UserTreePartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return Navigator.view(c.userQuery!).then(uq => Boolean(uq));
+      },
+    handleTitleClick:
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        UserQueryClient.Converter.toFindOptions(c.userQuery!, e)
+          .then(cr => AppContext.pushOrOpenInTab(Finder.findOptionsPath(cr, { userQuery: liteKey(toLite(c.userQuery!)) }), ev))
+      }
+  });
+
+
 }
 
 
