@@ -19,6 +19,8 @@ public static class QueryLogic
 
     static QueryLogic()
     {
+        FilterFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
+        FilterFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
         QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
         QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);
         EntityPropertyToken.DateTimeKindFunc = ept =>

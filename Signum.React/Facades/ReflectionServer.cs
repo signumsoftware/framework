@@ -251,8 +251,8 @@ public static class ReflectionServer
             })
             .Where(kvp => kvp.Value != null)
             .ToDictionaryEx("entities");
-        
-        return result;
+
+        return result!;
     }
 
     public static bool InTypeScript(PropertyRoute pr)

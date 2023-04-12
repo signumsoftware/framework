@@ -97,7 +97,7 @@ public static class QueryUtils
 
         if (token is EntityPropertyToken ept && ept.HasFullTextIndex)
         {
-            return result.PreAnd(FilterOperation.FullText_Condition).PreAnd(FilterOperation.FullText_FreeText).ToList();
+            return result.PreAnd(FilterOperation.FreeText).PreAnd(FilterOperation.ComplexCondition).ToList();
         }
 
         return result;

@@ -1,6 +1,7 @@
 using Signum.Entities.DynamicQuery;
 using Signum.Engine.Maps;
 using Signum.Engine.Basics;
+using Azure.Core;
 
 namespace Signum.Engine.DynamicQuery;
 
@@ -114,6 +115,8 @@ public class DynamicQueryContainer
 
     public ResultTable ExecuteQuery(QueryRequest request)
     {
+        request = request.FixFullTextSearch();
+
         if (!request.GroupResults)
             return Execute(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQuery(request));
         else
@@ -122,6 +125,8 @@ public class DynamicQueryContainer
 
     public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
     {
+        request = request.FixFullTextSearch();
+
         if (!request.GroupResults)
             return ExecuteAsync(ExecuteType.ExecuteQuery, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryAsync(request, token));
         else
@@ -130,21 +135,29 @@ public class DynamicQueryContainer
 
     public object? ExecuteQueryValue(QueryValueRequest request)
     {
+        request = request.FixFullTextSearch();
+     
         return Execute(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValue(request));
     }
 
     public Task<object?> ExecuteQueryValueAsync(QueryValueRequest request, CancellationToken token)
     {
+        request = request.FixFullTextSearch();
+
         return ExecuteAsync(ExecuteType.ExecuteQueryValue, request.QueryName, request, dqb => dqb.Core.Value.ExecuteQueryValueAsync(request, token));
     }
 
     public Lite<Entity>? ExecuteUniqueEntity(UniqueEntityRequest request)
     {
+        request = request.FixFullTextSearch();
+
         return Execute(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntity(request));
     }
 
     public Task<Lite<Entity>?> ExecuteUniqueEntityAsync(UniqueEntityRequest request, CancellationToken token)
     {
+        request = request.FixFullTextSearch();
+
         return ExecuteAsync(ExecuteType.ExecuteUniqueEntity, request.QueryName, request, dqb => dqb.Core.Value.ExecuteUniqueEntityAsync(request, token));
     }
 
@@ -155,11 +168,15 @@ public class DynamicQueryContainer
 
     public IQueryable<Lite<Entity>> GetEntitiesLite(QueryEntitiesRequest request)
     {
+        request = request.FixFullTextSearch();
+
         return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntitiesLite(request));
     }
 
     public IQueryable<Entity> GetEntitiesFull(QueryEntitiesRequest request)
     {
+        request = request.FixFullTextSearch();
+
         return Execute(ExecuteType.GetEntities, request.QueryName, null, dqb => dqb.Core.Value.GetEntitiesFull(request));
     }
 

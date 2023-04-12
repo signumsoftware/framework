@@ -20,6 +20,11 @@ public class Order: IEquatable<Order>
     public override int GetHashCode() => Token.GetHashCode();
     public override bool Equals(object? obj) => obj is Order order && Equals(order);
     public bool Equals(Order? other) => other is Order o && o.Token.Equals(Token) && o.OrderType.Equals(OrderType);
+
+    internal Order ToFullText()
+    {
+        return this;
+    }
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]

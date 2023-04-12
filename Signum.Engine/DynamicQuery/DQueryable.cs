@@ -4,6 +4,7 @@ using Signum.Engine.Linq;
 using Signum.Entities.Basics;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
+using Signum.Engine.Json;
 
 namespace Signum.Engine.DynamicQuery;
 
@@ -512,8 +513,9 @@ public static class DQueryable
             return null;
 
         string str = filters
-            .SelectMany(f => f.GetFilterConditions())
-            .Select(f => QueryUtils.CanFilter(f.Token))
+            .SelectMany(f => f.GetAllFilters())
+            .SelectMany(f => f.GetTokens())
+            .Select(t => QueryUtils.CanFilter(t))
             .NotNull()
             .ToString("\r\n");
 

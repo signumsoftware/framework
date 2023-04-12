@@ -835,7 +835,7 @@ public class Schema : IImplementationsFinder
 
         var mlItem = propertyRoute.GetMListItemsRoute();
 
-        var table = mlItem == null ? (ITable)Table(propertyRoute.RootType) : ((FieldMList)Field(mlItem)).TableMList;
+        var table = mlItem == null ? (ITable)Table(propertyRoute.RootType) : ((FieldMList)Field(mlItem.Parent!)).TableMList;
 
         var fullTextIndex = table.MultiColumnIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
 

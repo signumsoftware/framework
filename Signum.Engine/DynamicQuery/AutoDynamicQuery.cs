@@ -96,7 +96,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         if (!request.Columns.Where(c => c is _EntityColumn).Any())
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
-        if (request.MultiplicationsInSubQueries())
+        if (request.CanDoMultiplicationsInSubQueries())
         {
             var columnAndOrderTokens = request.Columns.Select(a => a.Token)
                  .Concat(request.Orders.Select(a => a.Token))

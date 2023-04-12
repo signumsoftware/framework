@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -524,6 +524,22 @@ export function getFilterType(tr: TypeReference): FilterType | null {
     return "Lite";
 
   return null;
+}
+
+export function getFilterOperations(qt: QueryToken): FilterOperation[] {
+
+  if (qt.filterType == null)
+    return [];
+
+  var fops = filterOperations[qt.filterType];
+
+  if (qt.queryTokenType == null && qt.propertyRoute != null) {
+    var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+
+    if (pr && pr.member?.hasFullTextIndex)
+      return ["ComplexCondition", "FreeText", ...fops];
+  }
+  return fops;
 }
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};

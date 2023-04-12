@@ -722,4 +722,11 @@ public enum QueryTokenMessage
     UtcDateTime,
     [Description("DateTime part")]
     DateTimePart,
+
+
+    [Description("Match Rank")]
+    MatchRank,
+
+    [Description("Match rank for {0}")]
+    MatchRankFor0
 }

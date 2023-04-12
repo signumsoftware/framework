@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import {
-  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
+  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
   isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox
 } from '../FindOptions'
 import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
@@ -55,7 +55,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       } as FilterGroupOptionParsed :
       {
         token: p.lastToken,
-        operation: (lastToken && (filterOperations[lastToken.filterType!] ?? []).firstOrNull()) ?? undefined,
+        operation: (lastToken && (getFilterOperations(lastToken) ?? []).firstOrNull()) ?? undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);
@@ -247,7 +247,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       } as FilterGroupOptionParsed :
       {
         token: lastToken,
-        operation: lastToken && (filterOperations[lastToken.filterType!] || []).firstOrNull() || undefined,
+        operation: lastToken && getFilterOperations(lastToken).firstOrNull() || undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);
@@ -486,7 +486,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       if (!areEqual(f.token, newToken, a => a.filterType) ||
         !areEqual(f.token, newToken, a => a.preferEquals) ||
         newToken.filterType == "Lite" && f.value != null && newToken.type.name != IsByAll && !getTypeInfos(newToken.type.name).some(t => t.name == (f.value as Lite<any>).EntityType)) {
-        f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
+        f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && getFilterOperations(newToken).first();
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
@@ -564,7 +564,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
             <select className="form-select form-select-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
-              {f.token.filterType && filterOperations[f.token.filterType!]
+              {f.token.filterType && getFilterOperations(f.token)
                 .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
             </select>}
         </td>
