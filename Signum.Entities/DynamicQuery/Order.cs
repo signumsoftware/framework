@@ -1,4 +1,6 @@
 
+using Signum.Entities.DynamicQuery.Tokens;
+
 namespace Signum.Entities.DynamicQuery;
 
 public class Order: IEquatable<Order>
@@ -23,6 +25,14 @@ public class Order: IEquatable<Order>
 
     internal Order ToFullText()
     {
+        if(this.Token is StringSnippetToken s)
+        {
+            if (s.Parent is EntityPropertyToken ep && ep.HasFullTextIndex)
+                return new Order(new FullTextRankToken(ep), this.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending);
+
+            return new Order(s.Parent!, this.OrderType);
+        }
+
         return this;
     }
 }

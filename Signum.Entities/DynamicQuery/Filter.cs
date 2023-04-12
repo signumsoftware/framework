@@ -24,9 +24,11 @@ public abstract class Filter
 
     public abstract IEnumerable<QueryToken> GetTokens();
 
-    public abstract Filter ToFullText();
+    public abstract Filter? ToFullText();
 
     public abstract bool IsAggregate();
+
+    public abstract IEnumerable<string> GetKeywords();
 
     protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll)
     {
@@ -73,6 +75,7 @@ public abstract class Filter
             fg.SetIsTable(fullTextOrders, false);
         }
     }
+
 }
 
 public class FilterGroup : Filter
@@ -116,7 +119,7 @@ public class FilterGroup : Filter
         return GetExpressionWithAnyAll(ctx, anyAll);
     }
 
-    public override Filter ToFullText()
+    public override Filter? ToFullText()
     {
         if (this.GroupOperation == FilterGroupOperation.Or)
         {
@@ -133,10 +136,14 @@ public class FilterGroup : Filter
                 Operation = a.Operation.ToFullTextFilterOperation(),
                 a.Value,
             })
+            .Where(a => a.Key.Value is string s && s.Length > 0)
             .Select(gr => new FilterFullText(gr.Key.Operation, gr.Select(a => a.Token).ToList(), (string)gr.Key.Value!))
             .ToList();
 
             filters.RemoveAll(aa => fullTextFilter.Contains(aa));
+
+            if (filters.Count == 0 && groups.Count == 0)
+                return null;
 
             if (filters.Count == 0 && groups.Count == 1)
                 return groups.SingleEx();
@@ -147,7 +154,15 @@ public class FilterGroup : Filter
         }
         else
         {
-            return new FilterGroup(FilterGroupOperation.And, this.Token, this.Filters.Select(a => a.ToFullText()).ToList());
+            var filters = this.Filters.Select(a => a.ToFullText()).NotNull().ToList();
+
+            if (filters.Count == 0)
+                return null;
+
+            if (filters.Count == 1)
+                return filters.SingleEx();
+
+            return  new FilterGroup(FilterGroupOperation.And, this.Token, filters);
         }
     }
 
@@ -178,6 +193,8 @@ public class FilterGroup : Filter
             fg.SetIsTable(fullTextOrders, isOuter);
         }
     }
+
+    public override IEnumerable<string> GetKeywords() => Enumerable.Empty<string>();
 }
 
 
@@ -204,10 +221,14 @@ public class FilterCondition : Filter
         yield return Token;
     }
 
-    public override Filter ToFullText()
+    public override Filter? ToFullText()
     {
         if (Operation.IsFullTextFilterOperation())
-            return new FilterFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, (string?)Value!);
+        {
+            if (Value is string s && s.Length > 0)
+                return new FilterFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, s);
+            return null;
+        }
 
         return this;
     }
@@ -323,6 +344,34 @@ public class FilterCondition : Filter
     {
         return "{0} {1} {2}".FormatWith(Token.FullKey(), Operation, Value);
     }
+
+    public override IEnumerable<string> GetKeywords()
+    {
+        switch (this.Operation)
+        {
+            case FilterOperation.EqualTo:
+            case FilterOperation.Contains:
+            case FilterOperation.StartsWith:
+            case FilterOperation.EndsWith:
+                {
+                    if(this.Value is string s)
+                        return new[] { s };
+
+                    break;
+                }
+            case FilterOperation.Like:
+                {
+                    if (this.Value is string s)
+                        return s.SplitNoEmpty("%");
+
+                    break;
+                }
+            case FilterOperation.IsIn:
+                return ((IEnumerable)this.Value!).OfType<string>();
+        }
+
+        return Enumerable.Empty<string>();
+    }
 }
 
 
@@ -371,9 +420,6 @@ public class FilterFullText : Filter
     public FilterFullText(FullTextFilterOperation operation, List<QueryToken> tokens, string value)
     {
         if (tokens.IsNullOrEmpty())
-            throw new ArgumentNullException(nameof(tokens));
-
-        if (value.IsNullOrEmpty())
             throw new ArgumentNullException(nameof(tokens));
 
         Tokens = tokens;
@@ -437,6 +483,16 @@ public class FilterFullText : Filter
     public static List<FilterFullText> TableFilters(List<Filter> filters)
     {
         return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>().Where(a => a.IsTable).ToList();
+    }
+
+    public override IEnumerable<string> GetKeywords()
+    {
+        if (this.Operation == FullTextFilterOperation.FreeText)
+            return this.SearchCondition.Split(" ");
+
+        return this.SearchCondition.Split(new string[] { "AND", "OR", "NOT", "NEAR", "(", ")", "*" }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim(' ').Trim('\'', '"'))
+            .Where(a => a.Length > 0);
     }
 }
 

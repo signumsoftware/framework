@@ -26,6 +26,15 @@ public static class QueryLogic
         EntityPropertyToken.DateTimeKindFunc = ept =>
         Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(ept.PropertyRoute)?.DateTimeKind ?? DateTimeKind.Unspecified;
         EntityPropertyToken.HasFullTextIndexFunc = ept => Schema.Current.HasFullTextIndex(ept.PropertyRoute);
+        EntityPropertyToken.HasSnippetFunc = ept =>
+        {
+            if (ept.Type != typeof(string))
+                return false;
+
+            var field = Schema.Current.TryField(ept.PropertyRoute);
+
+            return field is FieldValue fv && (fv.Size == null || fv.Size > 200);
+        };
 
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
         QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;

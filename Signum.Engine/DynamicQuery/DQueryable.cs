@@ -10,6 +10,7 @@ using Azure;
 using Signum.Utilities;
 using System.Runtime.ConstrainedExecution;
 using Signum.Entities.DynamicQuery.Tokens;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.DynamicQuery;
 
@@ -74,7 +75,7 @@ public static class DQueryable
 {
     #region ToDQueryable
 
-    public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description)
+    public static DQueryable<T> ToDQueryable<T>(this IQueryable<T> query, QueryDescription description, List<Filter>? filters = null)
     {
         ParameterExpression pe = Expression.Parameter(typeof(T));
 
@@ -82,7 +83,7 @@ public static class DQueryable
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
             cd => new ExpressionBox(Expression.PropertyOrField(pe, cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!)));
 
-        return new DQueryable<T>(query, new BuildExpressionContext(typeof(T), pe, dic));
+        return new DQueryable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, filters));
     }
 
 
@@ -166,7 +167,8 @@ public static class DQueryable
                 {
                     Token = t,
                     Expr = TupleReflection.TupleChainProperty(pe, i)
-                }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)));
+                }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)),
+                context.Filters);
 
         return Expression.Lambda(ctor, context.Parameter);
     }
@@ -233,7 +235,7 @@ public static class DQueryable
                         mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
                     )
                 }
-            });
+            }, context.Filters);
 
             var subQueryExp = SubQueryConstructor(subQueryCtx, child, out var newSubContext);
 
@@ -266,7 +268,7 @@ public static class DQueryable
             replacements.Add(collectionElementToken, new ExpressionBox(exp, subQueryContext: subContext[i]));
         }
 
-        newContext = new BuildExpressionContext(ctor.Type, pe, replacements);
+        newContext = new BuildExpressionContext(ctor.Type, pe, replacements, context.Filters);
 
         return Expression.Lambda(ctor, context.Parameter);
     }
@@ -298,7 +300,7 @@ public static class DQueryable
         return new DEnumerable<T>(Untyped.ToList(query.Query, query.Context.ElementType), query.Context);
     }
 
-    public static DEnumerable<T> ToDEnumerable<T>(this IEnumerable<T> query, QueryDescription description)
+    public static DEnumerable<T> ToDEnumerable<T>(this IEnumerable<T> query, QueryDescription description, List<Filter>? filters = null)
     {
         ParameterExpression pe = Expression.Parameter(typeof(T));
 
@@ -306,7 +308,7 @@ public static class DQueryable
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
             cd => new ExpressionBox(Expression.PropertyOrField(pe, cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!)));
 
-        return new DEnumerable<T>(query, new BuildExpressionContext(typeof(T), pe, dic));
+        return new DEnumerable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, filters));
     }
 
     public static DEnumerableCount<T> WithCount<T>(this DEnumerable<T> result, int? totalElements)
@@ -381,7 +383,7 @@ public static class DQueryable
 
         newReplacements.AddRange(fft.Tokens, keySelector: t => new FullTextRankToken(t), valueSelector: t => new ExpressionBox(rank, mlistElementRoute: null));
 
-        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements);
+        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, query.Context.Filters);
 
         return new DQueryable<T>(join, newContext);
     }
@@ -471,7 +473,7 @@ public static class DQueryable
             mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
         ));
 
-        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements);
+        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, context.Filters);
     }
 
     public static DEnumerableCount<T> SelectManySubQueries<T>(this DEnumerableCount<T> collection)
@@ -558,7 +560,7 @@ public static class DQueryable
             subQueryContext: kvp.Value.SubQueryContext)
         )));
 
-        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements);
+        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, context.Filters);
     }
 
 
@@ -577,7 +579,11 @@ public static class DQueryable
         if (predicate == null)
             return query;
 
-        return new DQueryable<T>(Untyped.Where(query.Query, predicate), query.Context);
+        var context = query.Context;
+
+        var newContext = new BuildExpressionContext(context.ElementType, context.Parameter, context.Replacements, context.Filters.EmptyIfNull().Concat(filters).ToList());
+
+        return new DQueryable<T>(Untyped.Where(query.Query, predicate), newContext);
     }
 
     public static DQueryable<T> Where<T>(this DQueryable<T> query, Expression<Func<object, bool>> filter)
@@ -958,7 +964,7 @@ public static class DQueryable
         {
             if (isQueryable)
             {
-                var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i)))).ToDictionary());
+                var tempContext = new BuildExpressionContext(keyTupleType, pk, rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i)))).ToDictionary(), context.Filters);
                 resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext, searchToArray: true))));
             }
             else
@@ -985,7 +991,8 @@ public static class DQueryable
 
         ParameterExpression pg = Expression.Parameter(resultConstructor.Type, "gr");
         newContext = new BuildExpressionContext(resultConstructor.Type, pg,
-            resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, new ExpressionBox(TupleReflection.TupleChainProperty(pg, i)))).ToDictionary());
+            resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, new ExpressionBox(TupleReflection.TupleChainProperty(pg, i)))).ToDictionary(),
+            context.Filters);
 
         return Expression.Lambda(resultConstructor, pk, pe);
     }
@@ -1174,7 +1181,7 @@ public static class DQueryable
                 ctor.Type, pe,
                 tokens
                 .Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(pe, i) })
-                .ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)));
+                .ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)), query.Context.Filters);
 
         var selector = Expression.Lambda(ctor, query.Context.Parameter);
 

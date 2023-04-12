@@ -122,7 +122,7 @@ public class MListElementPropertyToken : QueryToken
         var ctxTemp = new BuildExpressionContext(ctx.ElementType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
         {
             {  entityParent, new ExpressionBox(param)}
-        });
+        }, ctx.Filters);
 
         var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);
 

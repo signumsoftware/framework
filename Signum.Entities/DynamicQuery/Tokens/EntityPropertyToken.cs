@@ -35,6 +35,9 @@ public class EntityPropertyToken : QueryToken
     internal static Func<EntityPropertyToken, bool> HasFullTextIndexFunc = null!;
     public bool HasFullTextIndex => HasFullTextIndexFunc(this);
 
+    internal static Func<EntityPropertyToken, bool> HasSnippetFunc = null!;
+    public bool HasSnippet => HasSnippetFunc(this);
+
 
     public override Type Type
     {
@@ -137,6 +140,11 @@ public class EntityPropertyToken : QueryToken
             if (this.HasFullTextIndex)
             {
                 result.Add(new FullTextRankToken(this));
+            }
+
+            if (this.HasSnippet)
+            {
+                result.Add(new StringSnippetToken(this));
             }
 
             return result.AndHasValue(this);

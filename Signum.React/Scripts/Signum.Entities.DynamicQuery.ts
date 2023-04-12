@@ -145,6 +145,8 @@ export module QueryTokenMessage {
   export const DateTimePart = new MessageKey("QueryTokenMessage", "DateTimePart");
   export const MatchRank = new MessageKey("QueryTokenMessage", "MatchRank");
   export const MatchRankFor0 = new MessageKey("QueryTokenMessage", "MatchRankFor0");
+  export const MatchSnippet = new MessageKey("QueryTokenMessage", "MatchSnippet");
+  export const SnippetOf0 = new MessageKey("QueryTokenMessage", "SnippetOf0");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

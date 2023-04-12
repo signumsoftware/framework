@@ -87,8 +87,6 @@ public static class QueryUtils
         }
     }
 
-    static Func<PropertyRoute, bool> HasFullTextSearch = null!;
-
     public static IList<FilterOperation> GetFilterOperations(QueryToken token)
     {
         var filtertype = GetFilterType(token.Type);

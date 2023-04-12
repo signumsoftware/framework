@@ -70,7 +70,7 @@ public class QueryRequest : BaseQueryRequest
             QueryUrl = this.QueryUrl,
             Columns = this.Columns,
             GroupResults = this.GroupResults,
-            Filters = this.Filters.Select(f => f.ToFullText()).ToList(),
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
             Orders = this.Orders.Select(o => o.ToFullText()).ToList(),
             Pagination = this.Pagination,
             SystemTime = this.SystemTime,
@@ -209,7 +209,7 @@ public class QueryValueRequest : BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).ToList(),
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
             SystemTime = this.SystemTime,
             ValueToken = this.ValueToken,
             MultipleValues = this.MultipleValues
@@ -241,7 +241,7 @@ public class UniqueEntityRequest : BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).ToList(),
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
             Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
             UniqueType = this.UniqueType,
         };
@@ -274,7 +274,7 @@ public class QueryEntitiesRequest: BaseQueryRequest
         {
             QueryName = this.QueryName,
             QueryUrl = this.QueryUrl,
-            Filters = this.Filters.Select(f => f.ToFullText()).ToList(),
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
             Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
             Count = Count
         };
