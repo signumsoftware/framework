@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { BsColor } from '@framework/Components/Basic';
-import { classes } from '@framework/Globals'
-import { toNumberFormat } from '@framework/Reflection';
+import { classes } from '../Globals'
+import { BsColor } from './Basic';
+import { toNumberFormat } from '../Reflection';
 
 interface ProgressBarProps {
   value?: number | null; /*0...1*/

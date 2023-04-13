@@ -1,19 +1,14 @@
 import * as React from 'react'
-import { useLocation, useParams } from 'react-router-dom'
-import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { API, ProcessLogicState } from './ProcessClient'
+import { API } from './ProcessClient'
 import { ProcessEntity } from './Signum.Processes'
 import { SearchControl } from '@framework/Search';
 import * as AppContext from '@framework/AppContext'
-import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
+import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
-import { toNumberFormat } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { withClassName } from '../Dynamic/View/HtmlAttributesExpression'
 import { classes } from '@framework/Globals'
 import { ProcessProgressBar } from './Templates/Process'
-import { getToString } from '@framework/Signum.Entities'
 
 
 export default function ProcessPanelPage() {

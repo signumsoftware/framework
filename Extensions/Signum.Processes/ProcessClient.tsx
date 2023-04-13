@@ -8,16 +8,17 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { Lite, Entity, EntityPack, ExecuteSymbol, DeleteSymbol, ConstructSymbol_From, OperationMessage } from '@framework/Signum.Entities'
+import { Lite, Entity, EntityPack, OperationMessage } from '@framework/Signum.Entities'
 import { ContextualOperationContext, EntityOperationSettings } from '@framework/Operations'
 import { GraphExplorer, OperationType } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as ContextualOperations from '@framework/Operations/ContextualOperations'
 import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Processes'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
+import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
 
 export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
   Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable: "Never" }));
@@ -36,7 +37,7 @@ export function start(options: { routes: RouteObject[], packages: boolean, packa
 
   options.routes.push({ path: "/processes/view", element: <ImportComponent onImport={() => import("./ProcessPanelPage")} /> });
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
     key: "ProcessPanel",
     onClick: () => Promise.resolve("/processes/view")

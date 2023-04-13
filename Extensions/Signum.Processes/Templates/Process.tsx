@@ -5,8 +5,8 @@ import { toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext } from '@framework/TypeContext'
 import { ProcessEntity, ProcessExceptionLineEntity, ProcessState } from '../Signum.Processes'
-import ProgressBar from '../../MachineLearning/Templates/ProgressBar';
 import { BsColor } from '@framework/Components';
+import ProgressBar from '@framework/Components/ProgressBar';
 import { useInterval } from '@framework/Hooks'
 
 export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
