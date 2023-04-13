@@ -34,6 +34,8 @@ public static class EmailPackageLogic
                     e.Name,
                 });
 
+            MixinDeclarations.Register<EmailMessageEntity, EmailMessagePackageMixin>();
+
             Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
             QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
 

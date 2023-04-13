@@ -7,7 +7,9 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Mailing" },
+    { "path": "../Signum.Processes" }
   ],
   "exclude": [
     "../../Signum/ts_out",
