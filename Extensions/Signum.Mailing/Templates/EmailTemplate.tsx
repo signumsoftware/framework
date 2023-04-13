@@ -2,20 +2,20 @@ import * as React from 'react'
 import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage, EmailTemplateRecipientEmbedded, EmailTemplateFromEmbedded, EmailMessageFormat } from '../Signum.Mailing'
-import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import TemplateControls from '../../Templating/TemplateControls'
-import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
+import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import TemplateControls from '../../Signum.Templating/TemplateControls'
+import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
-import TemplateApplicable from '../../Templating/Templates/TemplateApplicable';
+import TemplateApplicable from '../../Signum.Templating/Templates/TemplateApplicable';
 import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
-import { QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
 import { QueryEntity } from '@framework/Signum.Basics'
-import HtmlEditor from '../../HtmlEditor/HtmlEditor'
+import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
+import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, EmailTemplateMessage, EmailTemplateMessageEmbedded, EmailTemplateRecipientEmbedded, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
+import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
 export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
   const forceUpdate = useForceUpdate();

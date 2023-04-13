@@ -9,6 +9,7 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Templates from './Signum.Mailing.Templates'
 import * as Files from '../Signum.Files/Signum.Files'
 
+import * as External from './Signum.Mailing.External'
 
 export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Basics.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");

@@ -5,6 +5,7 @@ using Signum.Engine.Sync;
 using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.QueryTokens;
+using Signum.UserAssets.Queries;
 
 namespace Signum.Mailing.Templates;
 

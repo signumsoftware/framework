@@ -1,41 +1,16 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailMessageEntity, EmailAttachmentEmbedded, EmailReceptionMixin, EmailFileType, EmailRecipientEmbedded } from '../Signum.Mailing'
-import { EmailTemplateMessage } from '../Signum.Mailing'
-import { FileLine } from '../../Files/FileLine'
-import IFrameRenderer from './IframeRenderer'
-import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
+import { EmailMessageEntity, EmailAttachmentEmbedded, EmailFileType, EmailRecipientEmbedded } from '../Signum.Mailing'
+import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Tabs, Tab } from 'react-bootstrap';
-import { LabelWithHelp } from '../../MachineLearning/Templates/NeuralNetworkSettings';
 import { useForceUpdate } from '@framework/Hooks'
+import { EmailTemplateMessage } from '../Signum.Mailing.Templates'
+import IFrameRenderer from './IframeRenderer'
 
 export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }) {
   const forceUpdate = useForceUpdate();
-
-  function renderEmailReceptionMixin() {
-    var erm = tryGetMixin(p.ctx.value, EmailReceptionMixin);
-    if (!erm || !erm.receptionInfo)
-      return null;
-
-    const ri = p.ctx.subCtx(EmailReceptionMixin).subCtx(a => a.receptionInfo!);
-
-    return (
-      <Tab title={ri.niceName()} eventKey="receptionMixin">
-        <fieldset>
-          <legend>Properties</legend>
-          <EntityLine ctx={ri.subCtx(f => f.reception)} />
-          <ValueLine ctx={ri.subCtx(f => f.uniqueId)} />
-          <ValueLine ctx={ri.subCtx(f => f.sentDate)} />
-          <ValueLine ctx={ri.subCtx(f => f.receivedDate)} />
-          <ValueLine ctx={ri.subCtx(f => f.deletionDate)} />
-        </fieldset>
-
-        <pre>{ri.value.rawContent?.text}</pre>
-      </Tab>
-    );
-  };
 
   let ctx = p.ctx.subCtx({ formGroupStyle: "Basic", readOnly: p.ctx.value.state == "Created" || p.ctx.value.state == "Draft" ? undefined  : true });
 
@@ -66,7 +41,6 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
             <div className="col-sm-4">
               <EntityLine ctx={ctx.subCtx(f => f.target, { labelColumns: 2 })} />
               <EntityLine ctx={ctx.subCtx(f => f.template)} />
-              <EntityLine ctx={ctx.subCtx(f => f.package)} hideIfNull />
             </div>
           </div>
         </fieldset>
@@ -97,7 +71,6 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
         }
         <EmailMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />
       </Tab>
-      {renderEmailReceptionMixin()}
     </Tabs>
   );
 }

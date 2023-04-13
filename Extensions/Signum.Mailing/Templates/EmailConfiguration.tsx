@@ -2,7 +2,8 @@ import * as React from 'react'
 import { ValueLine, EntityCombo } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailConfigurationEmbedded } from '../Signum.Mailing'
-import { CultureInfoEntity } from '../../Basics/Signum.Basics';
+import { CultureInfoEntity } from '@framework/Signum.Basics';
+
 
 export default function EmailConfiguration(p : { ctx: TypeContext<EmailConfigurationEmbedded> }){
   const sc = p.ctx;

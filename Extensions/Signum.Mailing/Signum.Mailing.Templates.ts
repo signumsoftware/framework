@@ -8,7 +8,6 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
-import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
 import * as Templating from '../Signum.Templating/Signum.Templating'
 import * as Mailing from './Signum.Mailing'
 import * as Files from '../Signum.Files/Signum.Files'
@@ -45,7 +44,7 @@ export type EmailMessageFormat =
 export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
   emailAddress: string | null;
   displayName: string | null;
-  token: QueryTokens.QueryTokenEmbedded | null;
+  token: Queries.QueryTokenEmbedded | null;
 }
 
 export const EmailTemplateEntity = new Type<EmailTemplateEntity>("EmailTemplate");

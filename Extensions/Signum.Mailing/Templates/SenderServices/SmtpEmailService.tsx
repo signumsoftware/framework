@@ -1,10 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailSenderConfigurationEntity, SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
-import { Binding } from '@framework/Reflection'
-import { DoublePassword } from '../../../Signum.Authorization/Templates/DoublePassword'
-
+import { SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
 export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }) {
   const sc = p.ctx;
 
@@ -19,8 +16,7 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
           <ValueLine ctx={net.subCtx(s => s.host)} />
           <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
           <ValueLine ctx={net.subCtx(s => s.username)} />
-          {!sc.readOnly && net.subCtx(a => a.password).propertyRoute?.canModify() &&
-            <DoublePassword ctx={new TypeContext<string>(net, undefined, undefined as any, Binding.create(net.value, v => v.newPassword))} initialOpen={Boolean(net.value.isNew)} mandatory={false} />}
+          <ValueLine ctx={net.subCtx(s => s.password)} valueLineType="Password" />
           <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
           <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
             <div>

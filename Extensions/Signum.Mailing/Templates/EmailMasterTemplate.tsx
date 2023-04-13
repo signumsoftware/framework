@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { ValueLine, EntityCombo, EntityTabRepeater, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateViewMessage, EmailTemplateMessage } from '../Signum.Mailing'
-import HtmlCodemirror from '../../Codemirror/HtmlCodemirror'
+import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
 import IFrameRenderer from './IframeRenderer'
 import { useForceUpdate } from '@framework/Hooks'
 import { Tabs, Tab } from 'react-bootstrap'
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateMessage, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 
 export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }){
   const forceUpdate = useForceUpdate();

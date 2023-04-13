@@ -10,12 +10,13 @@ import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, get
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import { EmailMessageEntity, EmailTemplateMessageEmbedded, EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailMessageOperation, EmailPackageEntity, EmailRecipientEmbedded, EmailConfigurationEmbedded, EmailTemplateEntity, AsyncEmailSenderPermission, EmailModelEntity, IEmailOwnerEntity, EmailFromEmbedded, ExchangeWebServiceEmailServiceEntity, MicrosoftGraphEmailServiceEntity, SmtpEmailServiceEntity } from './Signum.Mailing'
-import { EmailSenderConfigurationEntity, Pop3ConfigurationEntity, Pop3ReceptionEntity, EmailAddressEmbedded } from './Signum.Mailing'
-import { SendEmailTaskEntity, EmailTemplateVisibleOn } from './Signum.Mailing'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import { EmailMessageEntity, EmailMessageOperation, EmailRecipientEmbedded, EmailConfigurationEmbedded, AsyncEmailSenderPermission, EmailModelEntity, EmailFromEmbedded, SmtpEmailServiceEntity } from './Signum.Mailing'
+import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.Mailing'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import * as QuickLinks from '@framework/QuickLinks'
+import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
@@ -23,13 +24,11 @@ import { ModelEntity } from "@framework/Signum.Entities";
 import { QueryRequest } from "@framework/FindOptions";
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import MailingMenu from "./MailingMenu";
-import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
 import { Dropdown } from 'react-bootstrap';
-import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
 import "./Mailing.css";
-import { CultureInfoEntity } from '../Basics/Signum.Basics';
-import { currentCulture } from '../Signum.Translation/CultureClient';
 import { SearchControlLoaded } from '@framework/Search';
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn } from './Signum.Mailing.Templates';
+import { CultureInfoEntity } from '@framework/Signum.Basics';
 
 
 export var allTypes: string[] = [];
@@ -42,11 +41,12 @@ export function start(options: {
   queryButton: boolean,
   quickLinkInDefaultGroup?: boolean
 }) {
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
+
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
   options.routes.push({ path: "/asyncEmailSender/view", element: <ImportComponent onImport={() => import("./AsyncEmailSenderPage")} /> });
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
     key: "AsyncEmailSenderPanel",
     onClick: () => Promise.resolve("/asyncEmailSender/view")
@@ -58,13 +58,10 @@ export function start(options: {
   Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => import('./Templates/EmailMessage')));
   Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => import('./Templates/EmailTemplate')));
   Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => import('./Templates/EmailMasterTemplate')));
-  Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./Templates/EmailPackage')));
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));
   Navigator.addSettings(new EntitySettings(EmailConfigurationEmbedded, e => import('./Templates/EmailConfiguration')));
   Navigator.addSettings(new EntitySettings(SmtpEmailServiceEntity, e => import('./Templates/SenderServices/SmtpEmailService')));
-  Navigator.addSettings(new EntitySettings(ExchangeWebServiceEmailServiceEntity, e => import('./Templates/SenderServices/ExchangeWebServiceEmailService')));
-  Navigator.addSettings(new EntitySettings(MicrosoftGraphEmailServiceEntity, e => import('./Templates/SenderServices/MicrosoftGraphEmailService')));
 
   Constructor.registerConstructor(EmailTemplateEntity, props => API.getDefaultCulture()
     .then(culture => culture && EmailTemplateEntity.New({
@@ -98,13 +95,8 @@ export function start(options: {
 
   Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
 
-  if (options.sendEmailTask) {
-    Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./Templates/SendEmailTask')));
-  }
-
   if (options.pop3Config) {
-    Navigator.addSettings(new EntitySettings(Pop3ConfigurationEntity, e => import('./Pop3/Pop3Configuration')));
-    Navigator.addSettings(new EntitySettings(Pop3ReceptionEntity, e => import('./Pop3/Pop3Reception')));
+
   }
 
   if (options.contextual)
@@ -114,7 +106,7 @@ export function start(options: {
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
 
       if (!ctx.searchControl.props.showBarExtension ||
-        !(ctx.searchControl.props.showBarExtensionOption?.showChartButton ?? ctx.searchControl.props.largeToolbarButtons))
+        !(ctx.searchControl.props.showBarExtensionOption?.showMailButton ?? ctx.searchControl.props.largeToolbarButtons))
         return undefined;
 
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
@@ -136,12 +128,10 @@ export function start(options: {
       }));
   });
 
-  registerExportAssertLink(EmailTemplateEntity);
-  registerExportAssertLink(EmailMasterTemplateEntity);
+  UserAssetClient.registerExportAssertLink(EmailTemplateEntity);
+  UserAssetClient.registerExportAssertLink(EmailMasterTemplateEntity);
 
 }
-
-
 
 export interface EmailModelSettings<T extends ModelEntity> {
   createFromTemplate?: (et: EmailTemplateEntity) => Promise<ModelEntity | undefined>;
@@ -266,5 +256,12 @@ declare module '@framework/FindOptions' {
 
   export interface QueryDescription {
     emailTemplates?: Array<Lite<EmailTemplateEntity>>;
+  }
+}
+
+declare module '@framework/SearchControl/SearchControlLoaded' {
+
+  export interface ShowBarExtensionOption {
+    showMailButton?: boolean;
   }
 }
