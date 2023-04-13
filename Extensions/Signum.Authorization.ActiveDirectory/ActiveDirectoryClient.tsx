@@ -1,30 +1,31 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
+import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as Navigator from '@framework/Navigator'
 import { EntitySettings } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserEntity, UserADMessage, BasicPermission, ActiveDirectoryPermission, UserADQuery, ActiveDirectoryMessage, ADGroupEntity, UserADMixin, UserLiteModel, ActiveDirectoryConfigurationEmbedded } from './Signum.Authorization'
+import { UserEntity, UserLiteModel} from '../Signum.Authorization/Signum.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import ValueLineModal from '@framework/ValueLineModal';
-import { FindOptions, FindOptionsParsed, ResultRow } from '@framework/FindOptions';
+import { FindOptionsParsed, ResultRow } from '@framework/FindOptions';
 import MessageModal from '@framework/Modals/MessageModal';
-import { isLite, Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
+import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
 import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
-import ProfilePhoto, { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
+import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
-import { TypeaheadOptions } from '@framework/Components/Typeahead';
+import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin, UserADQuery } from './Signum.ActiveDirectory';
+import * as User from '../Signum.Authorization/Templates/User'
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
 
-  User.changePasswordVisible = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null;
-  User.userNameReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
-  User.emailReadonly = (user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null;
+  User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null);
+  User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
+  User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
 
 
   if (window.__azureApplicationId) {

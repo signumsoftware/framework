@@ -1,9 +1,8 @@
 import * as React from 'react'
-import { EntityLine, EntityTable, ValueLine } from '@framework/Lines'
+import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { useForceUpdate } from '@framework/Hooks';
-import { ADGroupEntity, UserADQuery } from '../Signum.Authorization';
 import { SearchValueLine } from '@framework/Search';
+import { ADGroupEntity, UserADQuery } from '../Signum.ActiveDirectory';
 
 export default function ADGroup(p: { ctx: TypeContext<ADGroupEntity> }) {
   const ctx = p.ctx;

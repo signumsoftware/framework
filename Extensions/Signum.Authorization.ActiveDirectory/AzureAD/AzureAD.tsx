@@ -1,10 +1,10 @@
 import * as React from "react";
 import * as msal from "@azure/msal-browser";
 import * as AppContext from "@framework/AppContext";
-import * as AuthClient from "../AuthClient";
-import { LoginContext } from "../Login/LoginPage";
+import * as AuthClient from "../../Signum.Authorization/AuthClient";
+import { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
 import { ExternalServiceError } from "@framework/Services";
-import { LoginAuthMessage } from "../Signum.Entities.Authorization";
+import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);

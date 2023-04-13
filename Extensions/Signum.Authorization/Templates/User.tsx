@@ -26,8 +26,8 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
         </div>
         <div className="col-sm-8">
           <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
-          <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={User.userNameReadonly(ctx.value) ? true : undefined} />
-          {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && User.changePasswordVisible(ctx.value) &&
+          <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
+          {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && changePasswordVisible(ctx.value) &&
             <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory />}
 
           <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>
@@ -41,7 +41,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
               return AuthAdminClient.API.trivialMergeRole(rs);
             })} />
 
-          <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={User.emailReadonly(ctx.value) ? true : undefined} />
+          <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={emailReadonly(ctx.value) ? true : undefined} />
           <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
         </div>
       </div>
@@ -49,6 +49,17 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
   );
 }
 
-User.changePasswordVisible = (user: UserEntity) => true;
-User.userNameReadonly = (user: UserEntity) => false;
-User.emailReadonly = (user: UserEntity) => false;
+export let changePasswordVisible = (user: UserEntity) => true;
+export function setChangePasswordVisibleFunction(newFunction: (user: UserEntity) => boolean) {
+  changePasswordVisible = newFunction;
+}
+
+export let userNameReadonly = (user: UserEntity) => false;
+export function setUserNameReadonlyFunction(newFunction: (user: UserEntity) => boolean) {
+  userNameReadonly = newFunction;
+}
+
+export let emailReadonly = (user: UserEntity) => false;
+export function setEmailReadonlyFunction(newFunction: (user: UserEntity) => boolean) {
+  emailReadonly = newFunction;
+}
