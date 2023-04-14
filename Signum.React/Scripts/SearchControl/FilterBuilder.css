@@ -38,7 +38,6 @@ select.form-control.sf-group-selector {
 
 
 .sf-remove-filter-icon {
-
-    width: 22px;
+    min-width: 22px;
     text-align: center;
 }
