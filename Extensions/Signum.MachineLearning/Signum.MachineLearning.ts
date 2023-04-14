@@ -10,7 +10,6 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Processes from '../Signum.Processes/Signum.Processes'
 import * as Files from '../Signum.Files/Signum.Files'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
-import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
 
 
 export const AutoconfigureNeuralNetworkEntity = new Type<AutoconfigureNeuralNetworkEntity>("AutoconfigureNeuralNetwork");
@@ -147,7 +146,7 @@ export const PredictorColumnEmbedded = new Type<PredictorColumnEmbedded>("Predic
 export interface PredictorColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorColumnEmbedded";
   usage: PredictorColumnUsage;
-  token: QueryTokens.QueryTokenEmbedded;
+  token: Queries.QueryTokenEmbedded;
   encoding: PredictorColumnEncodingSymbol;
   nullHandling: PredictorColumnNullHandling;
 }
@@ -318,7 +317,7 @@ export const PredictorSubQueryColumnEmbedded = new Type<PredictorSubQueryColumnE
 export interface PredictorSubQueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "PredictorSubQueryColumnEmbedded";
   usage: PredictorSubQueryColumnUsage;
-  token: QueryTokens.QueryTokenEmbedded;
+  token: Queries.QueryTokenEmbedded;
   encoding: PredictorColumnEncodingSymbol;
   nullHandling: PredictorColumnNullHandling | null;
 }

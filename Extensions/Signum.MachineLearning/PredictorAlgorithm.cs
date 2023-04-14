@@ -1,4 +1,4 @@
-using Signum.UserAssets.QueryTokens;
+using Signum.UserAssets.Queries;
 using System.Collections.Concurrent;
 
 namespace Signum.MachineLearning;

@@ -4,17 +4,16 @@ import { FindOptions, ColumnOption } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.MachineLearning'
 import * as Finder from '@framework/Finder'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets'
-import { QueryFilterEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
-import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
+import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { initializeColumn } from './Predictor';
 import { newMListElement } from '@framework/Signum.Entities';
 import { is } from '@framework/Signum.Entities';
 import { QueryTokenString } from '@framework/Reflection';
 import { useForceUpdate } from '@framework/Hooks'
+import { QueryFilterEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
 export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }){
   const forceUpdate = useForceUpdate();

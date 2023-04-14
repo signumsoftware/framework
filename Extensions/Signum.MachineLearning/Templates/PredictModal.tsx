@@ -1,4 +1,4 @@
-import { PredictorEntity } from "../Signum.Entities.MachineLearning";
+import { PredictorEntity } from "../Signum.MachineLearning";
 import { Modal } from "react-bootstrap";
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'

@@ -3,8 +3,8 @@ using System.IO;
 using static Tensorflow.Binding;
 using Tensorflow;
 using Tensorflow.NumPy;
-using Signum.UserAssets.QueryTokens;
 using Signum.Files;
+using Signum.UserAssets.Queries;
 
 namespace Signum.MachineLearning.TensorFlow;
 

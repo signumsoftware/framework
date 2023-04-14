@@ -4,20 +4,18 @@ import { Tab, Tabs } from 'react-bootstrap'
 import { ValueLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
 import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
-import { FileLine } from '../../Files/FileLine';
+import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.MachineLearning'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
-import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import { SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
-import { toLite, Lite } from "@framework/Signum.Entities";
+import { toLite } from "@framework/Signum.Entities";
 import { newMListElement } from '@framework/Signum.Entities';
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded';
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import PredictorSubQuery from './PredictorSubQuery';
-import { QueryTokenEmbedded } from '../../UserAssets/Signum.Entities.UserAssets';
-import { QueryEntity } from '@framework/Signum.Basics';
-import ProgressBar from './ProgressBar'
+import ProgressBar from '@framework/Components/ProgressBar'
 import LineChart, { LineChartSerie } from './LineChart'
 import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
@@ -25,6 +23,7 @@ import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
 import { toFilterOptions } from '@framework/Finder';
 import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
+import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
 export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<PredictorEntity> }, ref: React.Ref<IRenderButtons>) {
 

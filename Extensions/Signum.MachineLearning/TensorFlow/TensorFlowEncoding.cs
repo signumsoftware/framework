@@ -1,4 +1,4 @@
-using Signum.UserAssets.QueryTokens;
+using Signum.UserAssets.Queries;
 using Signum.Utilities.Reflection;
 
 namespace Signum.MachineLearning.TensorFlow;

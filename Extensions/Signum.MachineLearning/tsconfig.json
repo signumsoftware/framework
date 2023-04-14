@@ -7,7 +7,11 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.UserAssets" },
+    { "path": "../Signum.Chart" },
+    { "path": "../Signum.Processes" }
   ],
   "exclude": [
     "../../Signum/ts_out",
