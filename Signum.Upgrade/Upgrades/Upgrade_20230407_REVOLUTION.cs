@@ -14,8 +14,7 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
     {
         uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
         {
-            if(!a.FilePath.EndsWith("html-to-draftjs.d.ts"))
-                uctx.DeleteFile(a.FilePath);
+            uctx.DeleteFile(a.FilePath);
         });
 
         uctx.ForeachCodeFile("*.js", "Framework", a =>
