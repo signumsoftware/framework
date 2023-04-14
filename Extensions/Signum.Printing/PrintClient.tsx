@@ -6,9 +6,9 @@ import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { PrintLineEntity, PrintPackageEntity, PrintPermission, PrintLineOperation } from './Signum.Printing'
-import { ProcessEntity } from '../Processes/Signum.Entities.Processes'
-import { FileTypeSymbol } from '../Files/Signum.Entities.Files'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import { ProcessEntity } from '../Signum.Processes/Signum.Processes'
+import { FileTypeSymbol } from '../Signum.Files/Signum.Files'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
@@ -20,7 +20,7 @@ export function start(options: { routes: RouteObject[], }) {
 
   Operations.addSettings(new EntityOperationSettings(PrintLineOperation.SaveTest, { hideOnCanExecute: true }));
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(PrintPermission.ViewPrintPanel),
     key: "PrintPanel",
     onClick: () => Promise.resolve("/printing/view")
