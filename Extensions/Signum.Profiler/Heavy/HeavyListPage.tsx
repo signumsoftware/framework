@@ -1,16 +1,12 @@
 import * as React from 'react'
-import { useLocation, useParams } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as d3 from 'd3'
 import * as AppContext from '@framework/AppContext'
 import { API, HeavyProfilerEntry } from '../ProfilerClient'
 import "./Profiler.css"
-import { useAPI, useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
+import { useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
-import a from 'bpmn-js/lib/features/search'
-
-
 
 export default function HeavyList() {
 

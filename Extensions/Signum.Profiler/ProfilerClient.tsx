@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
 import { ProfilerPermission } from './Signum.Profiler'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
@@ -14,19 +14,19 @@ export function start(options: { routes: RouteObject[] }) {
   );
 
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
     key: "ProfilerHeavy",
     onClick: () => Promise.resolve("/profiler/heavy")
   });
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
     key: "ProfilerTimes",
     onClick: () => Promise.resolve("/profiler/times")
   });
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
     key: "OverrideSessionTimeout",
     onClick: () => Promise.resolve("/profiler/overrideSessionTimeout")
