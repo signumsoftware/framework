@@ -4,9 +4,9 @@ import { TypeContext } from '@framework/TypeContext'
 import { SMSTemplateEntity, SMSCharactersMessage, SMSTemplateMessageEmbedded, SMSTemplateMessage } from '../Signum.SMS'
 import { useForceUpdate, useAPI, useThrottle } from '@framework/Hooks';
 import ValueLineModal from '@framework/ValueLineModal';
-import TemplateControls from '../../Templating/TemplateControls';
+import TemplateControls from '../../Signum.Templating/TemplateControls';
 import * as SMSClient from '../SMSClient';
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions';
 
 export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) {

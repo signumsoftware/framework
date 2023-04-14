@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Processes from '../Signum.Processes/Signum.Processes'
-import * as QueryTokens from '../Signum.UserAssets/Signum.UserAssets.QueryTokens'
+import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
@@ -116,7 +116,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
   model: SMSModelEntity | null;
   messages: Entities.MList<SMSTemplateMessageEmbedded>;
   from: string | null;
-  to: QueryTokens.QueryTokenEmbedded | null;
+  to: Queries.QueryTokenEmbedded | null;
   messageLengthExceeded: MessageLengthExceeded;
   removeNoSMSCharacters: boolean;
   isActive: boolean;

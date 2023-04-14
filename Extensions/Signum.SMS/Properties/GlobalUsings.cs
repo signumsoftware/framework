@@ -7,7 +7,6 @@ global using System.Reflection;
 global using Signum.Utilities;
 global using Signum.Utilities.ExpressionTrees;
 global using Signum.Entities;
-global using Signum.Entities.Reflection;
 global using Signum.Entities.Validation;
 global using Signum.DynamicQuery;
 global using Signum.Operations;

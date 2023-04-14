@@ -1,5 +1,3 @@
-using Signum.Basics;
-
 namespace Signum.SMS;
 
 public class SMSConfigurationEmbedded : EmbeddedEntity

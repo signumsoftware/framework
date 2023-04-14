@@ -1,27 +1,11 @@
-import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { Lite, Entity, registerToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName, getAllTypes } from '@framework/Reflection'
-import * as Operations from '@framework/Operations'
-import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, SMSMessageOperation, ISMSOwnerEntity } from './Signum.SMS'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
+import { Lite, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
+import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, ISMSOwnerEntity } from './Signum.SMS'
 import * as QuickLinks from '@framework/QuickLinks'
-import { ImportComponent } from '@framework/ImportComponent'
-import { ModifiableEntity } from "@framework/Signum.Entities";
-import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
-import { ModelEntity } from "@framework/Signum.Entities";
-import { QueryRequest, ColumnOption } from "@framework/FindOptions";
-import * as ContexualItems from '@framework/SearchControl/ContextualItems'
-import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
-import { registerExportAssertLink } from '../UserAssets/UserAssetClient';
-import { TypeEntity } from '@framework/Signum.Basics';
 
 export var allTypes: string[] = [];
 

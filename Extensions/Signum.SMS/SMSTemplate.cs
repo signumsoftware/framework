@@ -1,5 +1,4 @@
-using Signum.Basics;
-using Signum.UserAssets.QueryTokens;
+using Signum.UserAssets.Queries;
 using System.ComponentModel;
 
 namespace Signum.SMS;
