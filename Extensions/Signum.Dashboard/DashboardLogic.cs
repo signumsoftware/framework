@@ -68,11 +68,15 @@ public static class DashboardLogic
 
             sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;
 
-            ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
-            ToolbarLogic.RegisterContentConfig<DashboardEntity>(
-              lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
-              lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
+            sb.Schema.WhenIncluded<ToolbarEntity>(() =>
+            {
+                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
 
+                ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
+                ToolbarLogic.RegisterContentConfig<DashboardEntity>(
+                  lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
+                  lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
+            });
 
             sb.Include<CachedQueryEntity>()
                 .WithExpressionFrom((DashboardEntity d) => d.CachedQueries())
@@ -89,7 +93,6 @@ public static class DashboardLogic
                       UserAssetsCount = e.UserAssets.Count,
                       e.Dashboard,
                   });
-
 
             sb.Schema.EntityEvents<DashboardEntity>().PreUnsafeDelete += query =>
             {

@@ -18,6 +18,7 @@ public static class ToolbarLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+            
             sb.Include<ToolbarEntity>()
                 .WithSave(ToolbarOperation.Save)
                 .WithDelete(ToolbarOperation.Delete)
@@ -42,6 +43,12 @@ public static class ToolbarLogic
                     e.Id,
                     e.Name
                 });
+
+             
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(QueryEntity));
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(PermissionSymbol));
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarEntity));
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(ToolbarMenuEntity));
 
             AuthLogic.HasRuleOverridesEvent += role =>
                 Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
@@ -70,7 +77,7 @@ public static class ToolbarLogic
                 lite => PermissionAuthLogic.IsAuthorized(SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!)),
                 lite => SymbolLogic<PermissionSymbol>.ToSymbol(lite.ToString()!).NiceToString());
 
-            ToolbarLogic.GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
+            GetContentConfig<PermissionSymbol>().CustomResponses = lite =>
             {
                 var action = CustomPermissionResponse.TryGetC(lite.Retrieve());
 

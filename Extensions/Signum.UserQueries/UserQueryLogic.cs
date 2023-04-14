@@ -51,14 +51,35 @@ public static class UserQueryLogic
                     uq.Owner,
                 });
 
-            ToolbarLogic.RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
-            ToolbarLogic.RegisterContentConfig<UserQueryEntity>(
-                lite => { var uq = UserQueries.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
-                lite => PropertyRouteTranslationLogic.TranslatedField(UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
-
-
-            if (sb.Settings.ImplementedBy((DashboardEntity cp) => cp.Parts.First().Content, typeof(UserQueryPartEntity)))
+            sb.Schema.WhenIncluded<ToolbarEntity>(() =>
             {
+                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(UserQueryEntity));
+
+                ToolbarLogic.RegisterDelete<UserQueryEntity>(sb, uq => uq.Query);
+                ToolbarLogic.RegisterContentConfig<UserQueryEntity>(
+                    lite => { var uq = UserQueries.Value.GetOrCreate(lite); return ToolbarLogic.InMemoryFilter(uq) && QueryLogic.Queries.QueryAllowed(uq.Query.ToQueryName(), true); },
+                    lite => PropertyRouteTranslationLogic.TranslatedField(UserQueries.Value.GetOrCreate(lite), a => a.DisplayName));
+            });
+
+            sb.Schema.WhenIncluded<CachedQueryEntity>(() =>
+            {
+                sb.Schema.Settings.AssertImplementedBy((CachedQueryEntity c) => c.UserAssets.First(), typeof(UserQueryEntity));
+            });
+
+            sb.Schema.WhenIncluded<DashboardEntity>(() =>
+            {
+                sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(UserQueryPartEntity));
+                sb.Schema.Settings.AssertImplementedBy((DashboardEntity d) => d.Parts.First().Content, typeof(ValueUserQueryListPartEntity));
+
+                DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
+                {
+                    {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
+                    {"UserQueryPart", typeof(UserQueryPartEntity)},
+                });
+
+                DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
+                DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
+
                 sb.Schema.EntityEvents<UserQueryEntity>().PreUnsafeDelete += query =>
                 {
                     Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => query.Contains(((UserQueryPartEntity)mle.Element.Content).UserQuery)).UnsafeDeleteMList();
@@ -98,17 +119,7 @@ public static class UserQueryLogic
 
                     return null;
                 };
-            }
-
-
-            DashboardLogic.PartNames.AddRange(new Dictionary<string, Type>
-            {
-                {"ValueUserQueryListPart", typeof(ValueUserQueryListPartEntity)},
-                {"UserQueryPart", typeof(UserQueryPartEntity)},
             });
-
-            DashboardLogic.OnGetCachedQueryDefinition.Register((ValueUserQueryListPartEntity vuql, PanelPartEmbedded pp) => vuql.UserQueries.Select(uqe => new CachedQueryDefinition(uqe.UserQuery.ToQueryRequestValue(), uqe.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqe.UserQuery, uqe.IsQueryCached, canWriteFilters: false)));
-            DashboardLogic.OnGetCachedQueryDefinition.Register((UserQueryPartEntity uqp, PanelPartEmbedded pp) => new[] { new CachedQueryDefinition(uqp.RenderMode == UserQueryPartRenderMode.BigValue ? uqp.UserQuery.ToQueryRequestValue() : uqp.UserQuery.ToQueryRequest(), uqp.UserQuery.Filters.GetDashboardPinnedFilterTokens(), pp, uqp.UserQuery, uqp.IsQueryCached, canWriteFilters: false) });
 
             AuthLogic.HasRuleOverridesEvent += role => Database.Query<UserQueryEntity>().Any(a => a.Owner.Is(role));
 

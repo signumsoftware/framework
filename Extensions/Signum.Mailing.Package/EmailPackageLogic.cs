@@ -20,12 +20,13 @@ public static class EmailPackageLogic
     public static IQueryable<EmailMessageEntity> ExceptionMessages(this EmailPackageEntity p) => 
         As.Expression(() => p.Messages().Where(a => a.State == EmailMessageState.SentException));
 
-
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Schema.Settings.AssertImplementedBy((ProcessEntity p) => p.Data, typeof(EmailPackageEntity));
+            MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailMessagePackageMixin));
+            
             sb.Include<EmailPackageEntity>()
                 .WithQuery(() => e => new
                 {
@@ -34,7 +35,6 @@ public static class EmailPackageLogic
                     e.Name,
                 });
 
-            MixinDeclarations.Register<EmailMessageEntity, EmailMessagePackageMixin>();
 
             Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
             QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
