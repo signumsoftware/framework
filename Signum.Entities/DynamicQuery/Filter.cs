@@ -379,24 +379,42 @@ public class FilterCondition : Filter
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum FilterOperation
 {
+    [Description("equal to")]
     EqualTo,
+    [Description("distinct to")]
     DistinctTo,
+    [Description("greater than")]
     GreaterThan,
+    [Description("greater than or equal")]
     GreaterThanOrEqual,
+    [Description("less than")]
     LessThan,
+    [Description("less than or equal")]
     LessThanOrEqual,
+    [Description("contains")]
     Contains,
+    [Description("starts with")]
     StartsWith,
+    [Description("ends with")]
     EndsWith,
+    [Description("like")]
     Like,
+    [Description("not contains")]
     NotContains,
+    [Description("not starts with")]
     NotStartsWith,
+    [Description("not ends with")]
     NotEndsWith,
+    [Description("not like")]
     NotLike,
+    [Description("is in")]
     IsIn,
+    [Description("is not in")]
     IsNotIn,
     
+    [Description("complex condition")]
     ComplexCondition, //Full Text Search
+    [Description("free text")]
     FreeText, //Full Text Search
 }
 
@@ -491,7 +509,7 @@ public class FilterFullText : Filter
             return this.SearchCondition.Split(" ");
 
         return this.SearchCondition.Split(new string[] { "AND", "OR", "NOT", "NEAR", "(", ")", "*" }, StringSplitOptions.RemoveEmptyEntries)
-            .Select(a => a.Trim(' ').Trim('\'', '"'))
+            .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
             .Where(a => a.Length > 0);
     }
 }
@@ -533,14 +551,14 @@ public enum PinnedFilterActive
 {
     Always,
     WhenHasValue,
-    [Description("Checkbox (start checked)")]
-    Checkbox_StartChecked,
-    [Description("Checkbox (start unchecked)")]
-    Checkbox_StartUnchecked,
-    [Description("Not Checkbox (start checked)")]
-    NotCheckbox_StartChecked,
-    [Description("Not Checkbox (start unchecked)")]
-    NotCheckbox_StartUnchecked,
+    [Description("Checkbox (checked)")]
+    Checkbox_Checked,
+    [Description("Checkbox (unchecked)")]
+    Checkbox_Unchecked,
+    [Description("Not Checkbox (checked)")]
+    NotCheckbox_Checked,
+    [Description("Not Checkbox (unchecked)")]
+    NotCheckbox_Unchecked,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]

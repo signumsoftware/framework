@@ -158,7 +158,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
   return (
     <div className="d-flex flex-column flex-grow-1">
-      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={() => reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
+      <PinnedFilterBuilder filterOptions={chartRequest.filterOptions} onFiltersChanged={(fops, avoidSearch) => !avoidSearch && reloadQuery()} pinnedFilterVisible={fop => fop.dashboardBehaviour == null} extraSmall={true} />
       {p.content.allowChangeShowData &&
         <label>
           <input type="checkbox" className="form-check-input" checked={showData} onChange={e => setShowData(e.currentTarget.checked)} />

@@ -454,10 +454,19 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
         Label = p.Attribute("Label")?.Value;
         Column = p.Attribute("Column")?.Value.ToInt();
         Row = p.Attribute("Row")?.Value.ToInt();
-        Active = p.Attribute("Active")?.Value.ToEnum<PinnedFilterActive>() ?? (p.Attribute("DisableOnNull")?.Value.ToBool() == true ? PinnedFilterActive.WhenHasValue : PinnedFilterActive.Always);
+        Active = ModernizeActive(p.Attribute("Active")?.Value)?.ToEnum<PinnedFilterActive>() ?? PinnedFilterActive.Always;
         SplitText = p.Attribute("SplitText")?.Value.ToBool() ?? false;
         return this;
     }
+
+    private string? ModernizeActive(string? str) => str switch
+    {
+        "Checkbox_StartChecked" => "Checkbox_Checked",
+        "Checkbox_StartUnchecked" => "Checkbox_Unchecked",
+        "NotCheckbox_StartChecked" => "NotCheckbox_Checked",
+        "NotCheckbox_StartUnchecked" => "NotCheckbox_Unchecked",
+        _ => str
+    };
 
     internal XElement ToXml(IToXmlContext ctx)
     {
@@ -488,10 +497,10 @@ public static class UserQueryUtils
 
             if (filter.Pinned != null)
             {
-                if (filter.Pinned.Active == PinnedFilterActive.Checkbox_StartUnchecked)
+                if (filter.Pinned.Active == PinnedFilterActive.Checkbox_Unchecked)
                     return null;
 
-                if (filter.Pinned.Active == PinnedFilterActive.NotCheckbox_StartChecked)
+                if (filter.Pinned.Active == PinnedFilterActive.NotCheckbox_Checked)
                     return null;
 
                 if (filter.Pinned.SplitText && !filter.ValueString.HasText())

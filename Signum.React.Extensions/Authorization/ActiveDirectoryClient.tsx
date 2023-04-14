@@ -97,7 +97,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
           ],
         },
         {
-          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
+          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_Checked", column: 2, row: 0 },
           token: "AccountEnabled", operation: "EqualTo", value: true
         },
         { token: "CreationType", operation: "DistinctTo", value: "Invitation" }

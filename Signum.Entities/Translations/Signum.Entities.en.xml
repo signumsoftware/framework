@@ -7,12 +7,6 @@
   <Type Name="CollectionAnyAllType" />
   <Type Name="CollectionElementType" />
   <Type Name="ColumnOptionsMode" />
-  <Type Name="ComparisonType">
-    <Member Name="DistinctTo" Description="distinct to" />
-    <Member Name="EqualTo" Description="equal to" />
-    <Member Name="GreaterThan" Description="greater than" />
-    <Member Name="LessThan" Description="less than" />
-  </Type>
   <Type Name="ConnectionMessage" />
   <Type Name="CorruptMixin" />
   <Type Name="DeleteLogParametersEmbedded" />
@@ -24,28 +18,8 @@
   <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" />
   <Type Name="FilterGroupOperation" />
-  <Type Name="FilterOperation">
-    <Member Name="Contains" Description="contains" />
-    <Member Name="DistinctTo" Description="distinct to" />
-    <Member Name="EndsWith" Description="ends with" />
-    <Member Name="EqualTo" Description="equal to" />
-    <Member Name="GreaterThan" Description="greater than" />
-    <Member Name="GreaterThanOrEqual" Description="greater than or equal" />
-    <Member Name="IsIn" Description="is in" />
-    <Member Name="IsNotIn" Description="is not in" />
-    <Member Name="LessThan" Description="less than" />
-    <Member Name="LessThanOrEqual" Description="less than or equal" />
-    <Member Name="Like" Description="like" />
-    <Member Name="NotContains" Description="not contains" />
-    <Member Name="NotEndsWith" Description="not ends with" />
-    <Member Name="NotLike" Description="not like" />
-    <Member Name="NotStartsWith" Description="not starts with" />
-    <Member Name="StartsWith" Description="starts with" />
-  </Type>
+ 
   <Type Name="IEntity" />
-  <Type Name="ImmutableEntity">
-    <Member Name="AllowChange" Description="Allow Change" />
-  </Type>
   <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage" />
   <Type Name="LiteMessage" />
@@ -67,14 +41,6 @@
   <Type Name="QueryTokenMessage" />
   <Type Name="QuickLinkMessage" />
   <Type Name="RoundingType" />
-  <Type Name="SearchMessage">
-    <Member Name="DeleteFilter" Description="Delete Filter" />
-    <Member Name="NewColumnSName" Description="New Column's Name" />
-  </Type>
-  <Type Name="SelectorMessage">
-    <Member Name="PleaseChooseAValueToContinue" Description="Please, choose a value to continue:" />
-    <Member Name="PleaseSelectAConstructor" Description="Please Select a Constructor" />
-  </Type>
   <Type Name="SemiSymbol" />
   <Type Name="StringCase" />
   <Type Name="Symbol" />

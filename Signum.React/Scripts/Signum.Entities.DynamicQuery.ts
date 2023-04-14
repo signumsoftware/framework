@@ -79,10 +79,10 @@ export const PinnedFilterActive = new EnumType<PinnedFilterActive>("PinnedFilter
 export type PinnedFilterActive =
   "Always" |
   "WhenHasValue" |
-  "Checkbox_StartChecked" |
-  "Checkbox_StartUnchecked" |
-  "NotCheckbox_StartChecked" |
-  "NotCheckbox_StartUnchecked";
+  "Checkbox_Checked" |
+  "Checkbox_Unchecked" |
+  "NotCheckbox_Checked" |
+  "NotCheckbox_Unchecked";
 
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");

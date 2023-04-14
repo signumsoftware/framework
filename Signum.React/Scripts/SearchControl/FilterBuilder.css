@@ -30,3 +30,15 @@ select.form-control.sf-group-selector {
     .sf-user-filter:hover {
         opacity: 1;
     }
+
+
+.sf-pinned-filter-cell {
+    background-color: rgb(255, 246, 230);
+}
+
+
+.sf-remove-filter-icon {
+
+    width: 22px;
+    text-align: center;
+}
