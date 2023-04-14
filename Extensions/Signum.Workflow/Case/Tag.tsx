@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { CaseTagTypeEntity } from '../Signum.Workflow'
-import { Color } from '../../Basics/Color'
+import { Color } from '@framework/Basics/Color'
 import "./Tag.css"
 
 export default function Tag(p : { tag: CaseTagTypeEntity }){

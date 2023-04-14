@@ -1,7 +1,7 @@
-/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import { Duration } from 'luxon'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Workflow'
-import { Color, Gradient } from '../../Basics/Color'
+import { Color, Gradient } from '@framework/Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
 import { WorkflowActivityStats, WorkflowActivityMonitor, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'

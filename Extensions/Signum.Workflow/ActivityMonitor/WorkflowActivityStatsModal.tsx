@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator';
 import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
-import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Entities.Workflow";
+import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Workflow";
 import { SearchControl, ColumnOption } from "@framework/Search";
 import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';

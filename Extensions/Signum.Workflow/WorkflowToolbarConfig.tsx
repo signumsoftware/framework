@@ -1,11 +1,8 @@
-import * as React from 'react'
 import { Location } from 'react-router'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import * as WorkflowClient from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
 import { is } from '@framework/Signum.Entities'
-import * as AppContext from '@framework/AppContext'
-import { parseIcon } from '../Basics/Templates/IconTypeahead'
 import SelectorModal from '@framework/SelectorModal'
 
 export default class WorkflowToolbarConfig extends ToolbarConfig<WorkflowEntity> {

@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import BpmnContextPadProvider from "bpmn-js/lib/features/context-pad/ContextPadProvider"
 
 export class CustomContextPadProvider extends BpmnContextPadProvider {

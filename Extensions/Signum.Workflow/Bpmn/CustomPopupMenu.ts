@@ -1,4 +1,4 @@
-﻿/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import BpmnReplaceMenuProvider from "bpmn-js/lib/features/popup-menu/ReplaceMenuProvider"
 import * as BpmnUtils from './BpmnUtils'
 

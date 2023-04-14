@@ -7,7 +7,18 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.Eval" },
+    { "path": "../Signum.Scheduler" },
+    { "path": "../Signum.Dynamic" },
+    { "path": "../Signum.Alerts" },
+    { "path": "../Signum.Map" },
+    { "path": "../Signum.SMS" },
+    { "path": "../Signum.Mailing" },
+    { "path": "../Signum.HtmlEditor" },
+    { "path": "../Signum.Processes" },
+    { "path": "../Signum.UserAssets" }
   ],
   "exclude": [
     "../../Signum/ts_out",

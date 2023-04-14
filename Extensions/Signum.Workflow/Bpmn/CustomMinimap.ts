@@ -1,4 +1,4 @@
-/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import MMPair from "diagram-js-minimap"
 
 const Minimap = MMPair.minimap[1];

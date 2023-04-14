@@ -7,7 +7,6 @@ import { ValueLine } from '@framework/Lines'
 import { EntityPack, getToString } from '@framework/Signum.Entities'
 import { ButtonBar } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, CaseActivityMessage, WorkflowActivityEntity } from '../Signum.Workflow'
-import { DynamicViewMessage } from '../../Dynamic/Signum.Entities.Dynamic'
 
 interface CaseButtonBarProps {
   frame: EntityFrame;

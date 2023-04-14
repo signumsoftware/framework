@@ -5,12 +5,11 @@ import * as Navigator from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
 import { getToString, is } from '@framework/Signum.Entities'
 import * as React from 'react'
-import { Nav } from 'react-bootstrap'
-import { PermissionSymbol } from '../Signum.Authorization/Signum.Entities.Authorization'
-import { ToolbarNavItem } from '../Toolbar/Renderers/ToolbarRenderer'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Toolbar/ToolbarClient'
-import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from '../Workflow/Signum.Entities.Workflow'
-import * as WorkflowClient from '../Workflow/WorkflowClient'
+import { ToolbarNavItem } from '../Signum.Toolbar/Renderers/ToolbarRenderer'
+import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
+import { CaseActivityQuery, WorkflowEntity, WorkflowMainEntityStrategy, WorkflowPermission } from './Signum.Workflow'
+import * as WorkflowClient from './WorkflowClient'
+import { PermissionSymbol } from '@framework/Signum.Basics'
 
 export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionSymbol> {
 

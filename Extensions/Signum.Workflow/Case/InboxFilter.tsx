@@ -5,7 +5,7 @@ import { InboxFilterModel, InboxMessage, CaseNotificationState, CaseActivityEnti
 import { TypeContext, ValueLine, EnumCheckboxList } from '@framework/Lines'
 import { ISimpleFilterBuilder, extractFilterValue, FilterOption } from '@framework/Search'
 import { FilterOptionParsed } from "@framework/FindOptions";
-import CollapsableCard from "../../Basics/Templates/CollapsableCard";
+import CollapsableCard from "@framework/Components/CollapsableCard";
 import { Button } from 'react-bootstrap';
 
 export default class InboxFilter extends React.Component<{ ctx: TypeContext<InboxFilterModel> }> implements ISimpleFilterBuilder {

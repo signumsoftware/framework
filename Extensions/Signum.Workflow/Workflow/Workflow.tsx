@@ -7,7 +7,7 @@ import { API } from '../WorkflowClient'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
 import MessageModal from "@framework/Modals/MessageModal";
-import CollapsableCard from '../../Basics/Templates/CollapsableCard';
+import CollapsableCard from '@framework/Components/CollapsableCard';
 import { BsColor } from '@framework/Components';
 
 interface WorkflowProps {

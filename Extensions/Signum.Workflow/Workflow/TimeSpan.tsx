@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { TimeSpanEmbedded } from '../Signum.Basics'
+import { TimeSpanEmbedded } from '../Signum.Workflow';
 
 export default function TimeSpan(p : { ctx: TypeContext<TimeSpanEmbedded> }){
   const e = p.ctx;

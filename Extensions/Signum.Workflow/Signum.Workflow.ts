@@ -14,6 +14,18 @@ import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 import * as Types from '../Signum.Dynamic/Signum.Dynamic.Types'
 import * as Processes from '../Signum.Processes/Signum.Processes'
 
+interface IWorkflowTimerConditionEvaluator {}
+interface IWorkflowConditionEvaluator {}
+interface IWorkflowActionExecutor {}
+interface IWorkflowLaneActorsEvaluator {}
+interface ISubEntitiesEvaluator{}
+interface IWorkflowScriptExecutor{}
+interface IWorkflowEventTaskConditionEvaluator{}
+interface IWorkflowEventTaskActionEval{}
+
+export interface WorkflowEntitiesDictionary {
+    [bpmnElementId: string]: Entities.ModelEntity
+}
 
 export const ActivityWithRemarks = new Type<ActivityWithRemarks>("ActivityWithRemarks");
 export interface ActivityWithRemarks extends Entities.ModelEntity {

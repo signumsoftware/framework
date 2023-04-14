@@ -1,13 +1,13 @@
-/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { DateTime, Duration } from 'luxon'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Workflow'
 import { CustomRenderer } from './CustomRenderer'
-import { Color, Gradient } from '../../Basics/Color'
 import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
-import { calculatePoint, Rectangle } from "../../Map/Utils"
+import { calculatePoint, Rectangle } from "../../Signum.Map/Utils"
 import { getToString } from "@framework/Signum.Entities"
+import { Color, Gradient } from "@framework/Basics/Color"
 
 export class CaseFlowRenderer extends CustomRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];

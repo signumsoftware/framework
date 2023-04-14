@@ -1,4 +1,4 @@
-/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Workflow'
 import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
 

@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
 import ValueLineModal from '@framework/ValueLineModal'
-import { AlertEntity } from '../../Alerts/Signum.Entities.Alerts'
+import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'
 import { useAPI } from '@framework/Hooks'
 

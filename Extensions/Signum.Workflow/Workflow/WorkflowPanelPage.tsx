@@ -4,7 +4,6 @@ import { useLocation, useParams } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
-import { OperationLogEntity } from '@framework/Signum.Basics'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Workflow'
 import * as AuthClient from '../../Signum.Authorization/AuthClient'
@@ -12,6 +11,7 @@ import { Tabs, Tab } from 'react-bootstrap';
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
+import { OperationLogEntity } from '@framework/Signum.Operations'
 
 export default function WorkflowPanelPage(){
 

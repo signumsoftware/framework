@@ -1,8 +1,8 @@
-/// <reference path="../bpmn-js.d.ts" />
+/// <reference path="../bpmn-js.ts" />
 import BpmnRenderer from "bpmn-js/lib/draw/BpmnRenderer"
-import { BootstrapStyle } from "../../Basics/Signum.Basics";
 import { ConnectionType } from '../Signum.Workflow'
 import * as BpmnUtils from './BpmnUtils'
+import { BootstrapStyle } from "@framework/Signum.Basics";
 
 const bootstrapStyleToColor: { [style: string /* BootstrapStyle*/]: string } = {
   "Light": "#f8f9fa",

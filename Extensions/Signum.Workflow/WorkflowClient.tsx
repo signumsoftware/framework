@@ -1,30 +1,28 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { DateTime, Duration, DurationUnit } from 'luxon';
+import { Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
-import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+import * as DynamicClientOptions from '../Signum.Dynamic/DynamicClientOptions';
 import {
-  EntityPack, Lite, toLite, newMListElement, Entity, ExecuteSymbol, isEntityPack, isEntity, liteKey, getToString
+  EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
 } from '@framework/Signum.Entities'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
-import { TypeEntity, IUserEntity } from '@framework/Signum.Basics'
+import { TypeEntity } from '@framework/Signum.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
-import * as AppContext from '@framework/AppContext'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
-import * as DynamicViewClient from '../Dynamic/DynamicViewClient'
-import { CodeContext } from '../Dynamic/View/NodeUtils'
-import { TimeSpanEmbedded } from '../Basics/Signum.Basics'
-import TypeHelpButtonBarComponent from '../TypeHelp/TypeHelpButtonBarComponent'
+import * as DynamicViewClient from '../Signum.Dynamic/DynamicViewClient'
+import { CodeContext } from '../Signum.Dynamic/View/NodeUtils'
+import TypeHelpButtonBarComponent from '../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
-  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, WorkflowLaneActorsEval, CaseNotificationEntity, CaseNotificationOperation, CaseActivityMessage, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType
+  ConnectionType, WorkflowTimerConditionEntity, WorkflowIssueType, CaseNotificationEntity, CaseNotificationOperation, CaseMessage, WorkflowScriptRetryStrategyEntity, WorkflowEventType, TimeSpanEmbedded
 } from './Signum.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
@@ -42,24 +40,24 @@ import {
 
 
 import InboxFilter from './Case/InboxFilter'
-import Workflow, { WorkflowHandle } from './Workflow/Workflow'
+import { WorkflowHandle } from './Workflow/Workflow'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
-import { FilterRequest, ColumnRequest, FindOptions } from '@framework/FindOptions';
+import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
 import { EntityLine } from '@framework/Lines';
-import { SMSMessageEntity } from '../SMS/Signum.Entities.SMS';
-import { EmailMessageEntity } from '../Mailing/Signum.Entities.Mailing';
+import { SMSMessageEntity } from '../Signum.SMS/Signum.SMS';
+import { EmailMessageEntity } from '../Signum.Mailing/Signum.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
-import * as UserAssetsClient from '../UserAssets/UserAssetClient'
+import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
 import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
-import { UserEntity } from '../Signum.Authorization/Signum.Entities.Authorization';
-import { SearchControl } from '@framework/Search';
-import SearchModal from '@framework/SearchControl/SearchModal';
+import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import MessageModal from '@framework/Modals/MessageModal';
+import { ExecuteSymbol } from '@framework/Signum.Operations';
+import { IUserEntity } from '@framework/Signum.Security';
 
 export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
 
@@ -80,7 +78,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
   DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
-  Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Templates/TimeSpan')));
+  Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Workflow/TimeSpan')));
   Constructor.registerConstructor(TimeSpanEmbedded, () => TimeSpanEmbedded.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
 
   DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowEntity, t => [
@@ -146,7 +144,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
       { icon: "list-check", iconColor: "blue" })
   ]);
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
     key: "WorkflowPanel",
     onClick: () => Promise.resolve("/workflow/panel")

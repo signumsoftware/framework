@@ -5,16 +5,15 @@ import {
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
-import CSharpCodeMirror from '../../Codemirror/CSharpCodeMirror'
-import TypeHelpComponent from "../../TypeHelp/TypeHelpComponent";
-import * as DynamicViewClient from '../../Dynamic/DynamicViewClient'
-import HtmlEditor from '../../HtmlEditor/HtmlEditor'
+import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
+import * as DynamicViewClient from '../../Signum.Dynamic/DynamicViewClient'
+import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { newMListElement, ModifiableEntity } from '@framework/Signum.Entities';
+import { newMListElement } from '@framework/Signum.Entities';
 import { Button } from 'react-bootstrap';
 import { Dic } from '@framework/Globals';
-import { isFunctionOrStringOrNull } from '../../Dynamic/View/NodeUtils';
 import { useForceUpdate } from '@framework/Hooks'
 
 

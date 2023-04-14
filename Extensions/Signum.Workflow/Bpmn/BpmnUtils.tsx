@@ -1,4 +1,4 @@
-import { WorkflowActivityModel, WorkflowConnectionModel, WorkflowEntitiesDictionary } from "../Signum.Entities.Workflow";
+import { WorkflowActivityModel, WorkflowConnectionModel, WorkflowEntitiesDictionary } from "../Signum.Workflow";
 
 export function isEvent(elementType: BPMN.ElementType): boolean {
   return elementType == "bpmn:StartEvent" ||
