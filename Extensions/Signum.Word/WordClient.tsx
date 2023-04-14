@@ -11,7 +11,7 @@ import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import * as Constructor from '@framework/Constructor'
 import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Word'
-import { QueryModel, MultiEntityModel } from '../Templating/Signum.Entities.Templating'
+import { QueryModel, MultiEntityModel } from '../Signum.Templating/Signum.Templating'
 import { ButtonBarManager } from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
 import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
@@ -21,7 +21,7 @@ import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { Dropdown } from 'react-bootstrap';
-import * as DynamicClientOptions from '../Dynamic/DynamicClientOptions';
+import * as DynamicClientOptions from '../Signum.Dynamic/DynamicClientOptions';
 import { SearchControlLoaded } from '@framework/Search';
 
 export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
@@ -48,7 +48,7 @@ export function start(options: { routes: RouteObject[], contextual: boolean, que
   });
 
   if (!Navigator.getSettings(QueryModel))
-    Navigator.addSettings(new EntitySettings(QueryModel, e => import('../Templating/Templates/QueryModel')));
+    Navigator.addSettings(new EntitySettings(QueryModel, e => import('../Signum.Templating/Templates/QueryModel')));
 
   register(MultiEntityModel, {
     createFromTemplate: wt => Finder.findMany({ queryName: wt.query!.key })

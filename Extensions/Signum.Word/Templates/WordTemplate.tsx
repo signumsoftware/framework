@@ -4,16 +4,15 @@ import { TypeContext } from '@framework/TypeContext'
 import ValueLineModal from '@framework/ValueLineModal'
 import { useForceUpdate } from '@framework/Hooks'
 import { WordTemplateEntity } from '../Signum.Word'
-import { TemplateApplicableEval } from '../../Templating/Signum.Entities.Templating'
-import { FileLine } from '../../Files/FileLine'
-import TemplateControls from '../../Templating/TemplateControls'
-import TemplateApplicable from '../../Templating/Templates/TemplateApplicable'
-import { QueryOrderEmbedded } from '../../Signum.UserQueries/Signum.Entities.UserQueries'
-import FilterBuilderEmbedded from '../../UserAssets/Templates/FilterBuilderEmbedded'
+import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
+import { FileLine } from '../../Signum.Files/Components/FileLine'
+import TemplateControls from '../../Signum.Templating/TemplateControls'
+import TemplateApplicable from '../../Signum.Templating/Templates/TemplateApplicable'
+import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 import { Tabs, Tab } from 'react-bootstrap';
-import CollapsableCard from '../../Basics/Templates/CollapsableCard'
 import { SubTokensOptions } from '@framework/FindOptions'
-import QueryTokenEmbeddedBuilder from '../../UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
+import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
 export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }) {
 

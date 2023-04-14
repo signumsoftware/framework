@@ -10,8 +10,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.Templating;
 using Signum.Files;
 using Signum.UserAssets;
-using Signum.Authorization.Rules;
-using Signum.Basics;
+using Signum.UserAssets.Queries;
 
 namespace Signum.Word;
 
