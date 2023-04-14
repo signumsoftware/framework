@@ -4,7 +4,7 @@ import { RestLogEntity } from '../Signum.Rest'
 import { TypeContext, ValueLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
 import { API } from '../RestClient'
-import { DiffDocument } from '../../DiffLog/Templates/DiffDocument';
+import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
 import { FormatJson } from '@framework/Exceptions/Exception';

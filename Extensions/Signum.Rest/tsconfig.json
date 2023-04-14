@@ -8,7 +8,8 @@
   },
   "references": [
     { "path": "../../Signum" },
-    { "path": "../Signum.Authorization" }
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.DiffLog" }
   ],
   "exclude": [
     "../../Signum/ts_out",
