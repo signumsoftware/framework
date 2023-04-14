@@ -21,7 +21,7 @@ public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
 {
     public readonly PrincipalContext PrincipalContext;
     public string UserName { get; private set; }
-    public string DomainName { get; private set; }
+    public string IdentityValue { get; private set; }
     public string? EmailAddress => this.GetUserPrincipal().EmailAddress != null ? this.GetUserPrincipal().EmailAddress : null;
 
     public string FirstName => this.GetUserPrincipal().GivenName;
@@ -34,17 +34,17 @@ public class DirectoryServiceAutoCreateUserContext : IAutoCreateUserContext
 
     UserPrincipal? userPrincipal;
 
-    public DirectoryServiceAutoCreateUserContext(PrincipalContext principalContext, string localName, string domainName, UserPrincipal? userPrincipal = null)
+    public DirectoryServiceAutoCreateUserContext(PrincipalContext principalContext, string localName, string identityValue, UserPrincipal? userPrincipal = null)
     {
         PrincipalContext = principalContext;
         UserName = localName;
-        DomainName = domainName;
+        IdentityValue = identityValue;
         this.userPrincipal = userPrincipal;
     }
 
     public UserPrincipal GetUserPrincipal() //https://stackoverflow.com/questions/14278274/how-i-get-active-directory-user-properties-with-system-directoryservices-account
     {
-        return userPrincipal ?? (userPrincipal = UserPrincipal.FindByIdentity(PrincipalContext, DomainName + @"\" + UserName));
+        return userPrincipal ?? (userPrincipal = UserPrincipal.FindByIdentity(PrincipalContext, IdentityValue));
     }
 }
 
@@ -127,20 +127,23 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         using (AuthLogic.Disable())
         {
             var config = this.GetConfig();
-            var domainName = userName.TryAfterLast('@') ?? userName.TryBefore('\\') ?? config.DomainName;
-            var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-            if (domainName != null && config.LoginWithActiveDirectoryRegistry)
+            if (config.LoginWithActiveDirectoryRegistry)
             {
                 try
                 {
-                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, domainName, localName + "@" + domainName, password))
+                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName, userName, password))
                     {
-                        if (pc.ValidateCredentials(localName + "@" + domainName, password, ContextOptions.Negotiate))
+                        if (pc.ValidateCredentials(userName, password, ContextOptions.Negotiate))
                         {
-                            UserEntity? user = AuthLogic.RetrieveUser(userName);
+                            var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
-                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!);
+                            var dsacuCtx = new DirectoryServiceAutoCreateUserContext(pc, localName, identityValue: userName);
+                            
+                            var sid = dsacuCtx.GetUserPrincipal().Sid;
+
+                            UserEntity? user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == sid.ToString()) ?? 
+                                AuthLogic.RetrieveUser(localName);
 
                             if (user != null)
                             {
@@ -152,7 +155,6 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                             }
                             else
                             {
-
                                 if (!GetConfig().AutoCreateUsers)
                                     throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
 

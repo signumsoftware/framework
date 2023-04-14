@@ -63,8 +63,12 @@ public static class ActiveDirectoryLogic
                 UPN = a.UserPrincipalName,
                 DisplayName = a.DisplayName,
                 JobTitle = a.Description,
-                ObjectID = (Guid)a.Guid!,
-            }).ToList();
+                SID = a.Sid.ToString(),
+                ObjectID = null,
+            })
+                .DistinctBy(a => a.SID)
+            .OrderBy(a => a.UPN)
+            .ToList();
 
             return Task.FromResult(result);
         }
@@ -87,7 +91,7 @@ public static class ActiveDirectoryLogic
 
             UserPrincipal userPrincipal = UserPrincipal.FindByIdentity(pc, userPc.SamAccountName);
 
-            var acuCtx = new DirectoryServiceAutoCreateUserContext(pc, userPc.SamAccountName, config.DomainName!);
+            var acuCtx = new DirectoryServiceAutoCreateUserContext(pc, userPc.SamAccountName, userPc.UserPrincipalName, userPrincipal);
 
             using (ExecutionMode.Global())
             using (var tr = new Transaction())
@@ -120,28 +124,26 @@ public static class ActiveDirectoryLogic
     public static byte[]? GetProfilePicture(string userName, int? size = null)
     {
         using (AuthLogic.Disable())
-        { 
+        {
             using (var pc = GetPrincipalContext())
             {
                 var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
-                var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
+                var up = UserPrincipal.FindByIdentity(pc, userName);
 
-                var ctx = new DirectoryServiceAutoCreateUserContext(pc, localName, config.DomainName!);
+                if (up == null)
+                    return null;
 
-                if (ctx is DirectoryServiceAutoCreateUserContext dsacCtx)
+                DirectoryEntry? directoryEntry = up.GetUnderlyingObject() as DirectoryEntry;
+
+                if (directoryEntry == null)
+                    return null;
+
+                if (directoryEntry!.Properties.Contains("thumbnailPhoto"))
                 {
-                    if (dsacCtx.GetUserPrincipal() == null || dsacCtx.GetUserPrincipal().GetUnderlyingObject() == null)
-                        return null;
+                    var byteFile = (directoryEntry!.Properties["thumbnailPhoto"][0] as byte[]);
 
-                    DirectoryEntry? directoryEntry = dsacCtx.GetUserPrincipal().GetUnderlyingObject() as DirectoryEntry;
-
-                    if (directoryEntry!.Properties.Contains("thumbnailPhoto"))
-                    {
-                        var byteFile = (directoryEntry!.Properties["thumbnailPhoto"][0] as byte[]);
-
-                        return byteFile;
-                    }
+                    return byteFile;
                 }
             }
 

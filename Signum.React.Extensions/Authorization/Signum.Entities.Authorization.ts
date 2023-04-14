@@ -21,7 +21,6 @@ export const ActiveDirectoryConfigurationEmbedded = new Type<ActiveDirectoryConf
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
   domainName: string | null;
-  domainServer: string | null;
   directoryRegistry_Username: string | null;
   directoryRegistry_Password: string | null;
   azure_ApplicationID: string /*Guid*/ | null;
