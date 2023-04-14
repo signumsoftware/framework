@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
@@ -6,7 +5,6 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
 import * as QuickLinks from '@framework/QuickLinks'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
 
 export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
