@@ -7,7 +7,11 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Omnibox" },
+    { "path": "../Signum.Disconnected" },
+    { "path": "../Signum.Caching" },
+    { "path": "../Signum.Authorization" }
   ],
   "exclude": [
     "../../Signum/ts_out",

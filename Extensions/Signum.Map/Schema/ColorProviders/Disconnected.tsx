@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
-import { Upload, Download } from '../../../Disconnected/Signum.Entities.Disconnected'
+import { Upload, Download } from '../../../Signum.Disconnected/Signum.Disconnected'
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
   return [

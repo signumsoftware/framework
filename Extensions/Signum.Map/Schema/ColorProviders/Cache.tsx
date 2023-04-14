@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
-import { CachePermission } from '../../../Cache/Signum.Entities.Cache'
+import { CachePermission } from '../../../Signum.Caching/Signum.Cache'
 import { isPermissionAuthorized } from '../../../Signum.Authorization/AuthClient'
 import { colorScale } from '../../Utils'
 
