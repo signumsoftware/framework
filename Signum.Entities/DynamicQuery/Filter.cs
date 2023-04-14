@@ -1,7 +1,11 @@
+using Signum.Entities.DynamicQuery.Tokens;
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
+using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery;
 
@@ -16,9 +20,15 @@ public abstract class Filter
 {
     public abstract Expression GetExpression(BuildExpressionContext ctx);
 
-    public abstract IEnumerable<FilterCondition> GetFilterConditions();
+    public abstract IEnumerable<Filter> GetAllFilters();
+
+    public abstract IEnumerable<QueryToken> GetTokens();
+
+    public abstract Filter? ToFullText();
 
     public abstract bool IsAggregate();
+
+    public abstract IEnumerable<string> GetKeywords();
 
     protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll)
     {
@@ -49,6 +59,23 @@ public abstract class Filter
             return anyAll.BuildAnyAll(collection, p, body);
         }
     }
+
+    public static void SetIsTable(List<Filter> filters, IEnumerable<QueryToken> allTokens)
+    {
+        var fullTextOrders = allTokens.OfType<FullTextRankToken>().Select(a => a.Parent!);
+
+        foreach (var fft in filters.OfType<FilterFullText>())
+        {
+            fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
+            fft.TableOuterJoin = false;
+        }
+
+        foreach (var fg in filters.OfType<FilterGroup>())
+        {
+            fg.SetIsTable(fullTextOrders, false);
+        }
+    }
+
 }
 
 public class FilterGroup : Filter
@@ -64,10 +91,18 @@ public class FilterGroup : Filter
         this.Filters = filters;
     }
 
-    public override IEnumerable<FilterCondition> GetFilterConditions()
+    public override IEnumerable<Filter> GetAllFilters()
     {
-        return Filters.SelectMany(a => a.GetFilterConditions());
+        return Filters.SelectMany(a => a.GetAllFilters()).PreAnd(this);
     }
+
+    public override IEnumerable<QueryToken> GetTokens()
+    {
+        if (Token != null)
+            yield return Token;
+    }
+
+
 
     public override Expression GetExpression(BuildExpressionContext ctx)
     {
@@ -84,6 +119,54 @@ public class FilterGroup : Filter
         return GetExpressionWithAnyAll(ctx, anyAll);
     }
 
+    public override Filter? ToFullText()
+    {
+        if (this.GroupOperation == FilterGroupOperation.Or)
+        {
+            var filters = Filters.ToList();
+
+            var fullTextFilter = filters
+            .OfType<FilterCondition>()
+            .Where(fc => fc.Operation.IsFullTextFilterOperation())
+            .ToList();
+
+            var groups = fullTextFilter.GroupBy(a => new
+            {
+                ParentToken = a.Token.Follow(a => a.Parent).FirstOrDefault(a => a is MListElementPropertyToken || a.Type.IsLite()),
+                Operation = a.Operation.ToFullTextFilterOperation(),
+                a.Value,
+            })
+            .Where(a => a.Key.Value is string s && s.Length > 0)
+            .Select(gr => new FilterFullText(gr.Key.Operation, gr.Select(a => a.Token).ToList(), (string)gr.Key.Value!))
+            .ToList();
+
+            filters.RemoveAll(aa => fullTextFilter.Contains(aa));
+
+            if (filters.Count == 0 && groups.Count == 0)
+                return null;
+
+            if (filters.Count == 0 && groups.Count == 1)
+                return groups.SingleEx();
+
+            filters.AddRange(groups);
+
+            return new FilterGroup(FilterGroupOperation.Or, this.Token, filters);
+        }
+        else
+        {
+            var filters = this.Filters.Select(a => a.ToFullText()).NotNull().ToList();
+
+            if (filters.Count == 0)
+                return null;
+
+            if (filters.Count == 1)
+                return filters.SingleEx();
+
+            return  new FilterGroup(FilterGroupOperation.And, this.Token, filters);
+        }
+    }
+
+
     public override string ToString()
     {
         return $@"{this.GroupOperation}{(this.Token != null ? $" ({this.Token})" : null)}
@@ -94,6 +177,24 @@ public class FilterGroup : Filter
     {
         return this.Filters.Any(f => f.IsAggregate());
     }
+
+    internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, bool isOuter)
+    {
+        isOuter |= this.GroupOperation == FilterGroupOperation.Or && this.Filters.Count > 1;
+
+        foreach (var fft in this.Filters.OfType<FilterFullText>())
+        {
+            fft.IsTable = fft.Tokens.Any(t => fullTextOrders.Contains(t));
+            fft.TableOuterJoin = isOuter;
+        }
+
+        foreach (var fg in this.Filters.OfType<FilterGroup>())
+        {
+            fg.SetIsTable(fullTextOrders, isOuter);
+        }
+    }
+
+    public override IEnumerable<string> GetKeywords() => Enumerable.Empty<string>();
 }
 
 
@@ -110,9 +211,26 @@ public class FilterCondition : Filter
         this.Value = ReflectionTools.ChangeType(value, operation.IsList() ? typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()) : Token.Type);
     }
 
-    public override IEnumerable<FilterCondition> GetFilterConditions()
+    public override IEnumerable<Filter> GetAllFilters()
     {
         yield return this;
+    }
+
+    public override IEnumerable<QueryToken> GetTokens()
+    {
+        yield return Token;
+    }
+
+    public override Filter? ToFullText()
+    {
+        if (Operation.IsFullTextFilterOperation())
+        {
+            if (Value is string s && s.Length > 0)
+                return new FilterFullText(Operation.ToFullTextFilterOperation(), new List<QueryToken> { Token }, s);
+            return null;
+        }
+
+        return this;
     }
 
     static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
@@ -226,27 +344,78 @@ public class FilterCondition : Filter
     {
         return "{0} {1} {2}".FormatWith(Token.FullKey(), Operation, Value);
     }
+
+    public override IEnumerable<string> GetKeywords()
+    {
+        switch (this.Operation)
+        {
+            case FilterOperation.EqualTo:
+            case FilterOperation.Contains:
+            case FilterOperation.StartsWith:
+            case FilterOperation.EndsWith:
+                {
+                    if(this.Value is string s)
+                        return new[] { s };
+
+                    break;
+                }
+            case FilterOperation.Like:
+                {
+                    if (this.Value is string s)
+                        return s.SplitNoEmpty("%");
+
+                    break;
+                }
+            case FilterOperation.IsIn:
+                return ((IEnumerable)this.Value!).OfType<string>();
+        }
+
+        return Enumerable.Empty<string>();
+    }
 }
+
+
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]
 public enum FilterOperation
 {
+    [Description("equal to")]
     EqualTo,
+    [Description("distinct to")]
     DistinctTo,
+    [Description("greater than")]
     GreaterThan,
+    [Description("greater than or equal")]
     GreaterThanOrEqual,
+    [Description("less than")]
     LessThan,
+    [Description("less than or equal")]
     LessThanOrEqual,
+    [Description("contains")]
     Contains,
+    [Description("starts with")]
     StartsWith,
+    [Description("ends with")]
     EndsWith,
+    [Description("like")]
     Like,
+    [Description("not contains")]
     NotContains,
+    [Description("not starts with")]
     NotStartsWith,
+    [Description("not ends with")]
     NotEndsWith,
+    [Description("not like")]
     NotLike,
+    [Description("is in")]
     IsIn,
+    [Description("is not in")]
     IsNotIn,
+    
+    [Description("complex condition")]
+    ComplexCondition, //Full Text Search
+    [Description("free text")]
+    FreeText, //Full Text Search
 }
 
 [InTypeScript(true)]
@@ -264,6 +433,109 @@ public enum FilterType
     Guid,
 }
 
+public class FilterFullText : Filter
+{
+    public FilterFullText(FullTextFilterOperation operation, List<QueryToken> tokens, string value)
+    {
+        if (tokens.IsNullOrEmpty())
+            throw new ArgumentNullException(nameof(tokens));
+
+        Tokens = tokens;
+        Operation = operation;
+        SearchCondition = value;
+    }
+
+    public List<QueryToken> Tokens { get; }
+
+    public FullTextFilterOperation Operation { get; }
+    public bool IsTable { get; set; }
+    public bool TableOuterJoin { get; set; }
+
+    public string SearchCondition { get; }
+
+    public override Expression GetExpression(BuildExpressionContext ctx)
+    {
+        if (this.IsTable)
+        {
+            var rnk = ctx.Replacements.GetOrThrow(new FullTextRankToken(Tokens.FirstEx()));
+
+            return Expression.NotEqual(rnk.RawExpression.Nullify(), Expression.Constant(null, typeof(int?)));
+        }
+        else
+        {
+            return Expression.Call(
+                Operation == FullTextFilterOperation.ComplexCondition ? miContains : miFreeText,
+                Expression.NewArrayInit(typeof(string),
+                    Tokens.Select(t => t.BuildExpression(ctx, false)).ToArray()
+                ),
+                Expression.Constant(SearchCondition)
+                );
+
+        }
+    }
+
+    public static MethodInfo miContains = null!;
+    public static MethodInfo miFreeText = null!;
+
+
+    public override IEnumerable<Filter> GetAllFilters()
+    {
+        yield return this;
+    }
+
+    public override IEnumerable<QueryToken> GetTokens()
+    {
+        return Tokens;
+    }
+
+    public override bool IsAggregate()
+    {
+        return false;
+    }
+
+    public override Filter ToFullText()
+    {
+        throw new InvalidOperationException("Already FilterFullText!");
+    }
+
+    public static List<FilterFullText> TableFilters(List<Filter> filters)
+    {
+        return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>().Where(a => a.IsTable).ToList();
+    }
+
+    public override IEnumerable<string> GetKeywords()
+    {
+        if (this.Operation == FullTextFilterOperation.FreeText)
+            return this.SearchCondition.Split(" ");
+
+        return this.SearchCondition.Split(new string[] { "AND", "OR", "NOT", "NEAR", "(", ")", "*" }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
+            .Where(a => a.Length > 0);
+    }
+}
+
+public static class FullTextFilterOperationExtensions
+{
+
+    public static FullTextFilterOperation ToFullTextFilterOperation(this FilterOperation fo)
+    {
+        return fo switch
+        {
+            FilterOperation.ComplexCondition => FullTextFilterOperation.ComplexCondition,
+            FilterOperation.FreeText => FullTextFilterOperation.FreeText,
+            _ => throw new UnexpectedValueException(fo)
+        };
+    }
+
+    public static bool IsFullTextFilterOperation(this FilterOperation fo) => fo is FilterOperation.ComplexCondition or FilterOperation.FreeText;
+}
+
+public enum FullTextFilterOperation
+{
+    ComplexCondition, //Full Text Search
+    FreeText, //Full Text Searc
+}
+
 [InTypeScript(true)]
 public enum UniqueType
 {
@@ -279,14 +551,14 @@ public enum PinnedFilterActive
 {
     Always,
     WhenHasValue,
-    [Description("Checkbox (start checked)")]
-    Checkbox_StartChecked,
-    [Description("Checkbox (start unchecked)")]
-    Checkbox_StartUnchecked,
-    [Description("Not Checkbox (start checked)")]
-    NotCheckbox_StartChecked,
-    [Description("Not Checkbox (start unchecked)")]
-    NotCheckbox_StartUnchecked,
+    [Description("Checkbox (checked)")]
+    Checkbox_Checked,
+    [Description("Checkbox (unchecked)")]
+    Checkbox_Unchecked,
+    [Description("Not Checkbox (checked)")]
+    NotCheckbox_Checked,
+    [Description("Not Checkbox (unchecked)")]
+    NotCheckbox_Unchecked,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]

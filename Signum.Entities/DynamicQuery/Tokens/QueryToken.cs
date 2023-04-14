@@ -563,16 +563,18 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters)
     {
         this.ElementType = elementType;
         this.Parameter = parameter;
         this.Replacements = replacements;
+        this.Filters = filters;
     }
 
     public readonly Type ElementType;
     public readonly ParameterExpression Parameter;
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
+    public readonly List<Filter>? Filters; //For Snippet keyword detection
 
     public LambdaExpression GetEntitySelector()
     {
@@ -722,4 +724,17 @@ public enum QueryTokenMessage
     UtcDateTime,
     [Description("DateTime part")]
     DateTimePart,
+
+
+    [Description("Match Rank")]
+    MatchRank,
+
+    [Description("Match Rank for {0}")]
+    MatchRankFor0,
+
+    [Description("Match Snippet")]
+    MatchSnippet,
+
+    [Description("Snippet for {0}")]
+    SnippetOf0
 }

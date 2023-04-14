@@ -63,6 +63,7 @@ export interface MemberInfo {
   id?: any; //symbols
   isPhone?: boolean;
   isMail?: boolean;
+  hasFullTextIndex?: boolean;
 }
 
 export interface OperationInfo {

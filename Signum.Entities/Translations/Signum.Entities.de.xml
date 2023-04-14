@@ -179,7 +179,7 @@
     <Member Name="GreaterThan" Description="größer als" />
     <Member Name="GreaterThanOrEqual" Description="größer als oder gleich" />
     <Member Name="IsIn" Description="ist in" />
-    <Member Name="IsNotIn" Description="Ist nicht in" />
+    <Member Name="IsNotIn" Description="ist nicht in" />
     <Member Name="LessThan" Description="kleiner als" />
     <Member Name="LessThanOrEqual" Description="kleiner als oder gleich" />
     <Member Name="Like" Description="wie" />

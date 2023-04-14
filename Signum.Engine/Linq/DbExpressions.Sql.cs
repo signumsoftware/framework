@@ -127,20 +127,20 @@ internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
     public readonly Table? ViewTable;
     public readonly Type? SingleColumnType; 
     public readonly ReadOnlyCollection<Expression> Arguments;
-    public readonly ObjectName SqlFunction;
+    public readonly string FunctionName; 
 
     public override Alias[] KnownAliases
     {
         get { return new[] { Alias }; }
     }
 
-    public SqlTableValuedFunctionExpression(ObjectName sqlFunction, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments)
+    public SqlTableValuedFunctionExpression(string functionName, Table? viewTable, Type? singleColumnType, Alias alias, IEnumerable<Expression> arguments)
         : base(DbExpressionType.SqlTableValuedFunction, alias)
     {
         if ((viewTable == null) == (singleColumnType == null))
             throw new ArgumentException("Either viewTable or singleColumn should be set");
 
-        this.SqlFunction = sqlFunction;
+        this.FunctionName = functionName;
         this.ViewTable = viewTable;
         this.SingleColumnType = singleColumnType;
         this.Arguments = arguments.ToReadOnly();
@@ -148,7 +148,7 @@ internal class SqlTableValuedFunctionExpression : SourceWithAliasExpression
 
     public override string ToString()
     {
-        string result = "{0}({1}) as {2}".FormatWith(SqlFunction, Arguments.ToString(a => a.ToString(), ","), Alias);
+        string result = "{0}({1}) as {2}".FormatWith(FunctionName, Arguments.ToString(a => a.ToString(), ","), Alias);
 
         return result;
     }
@@ -641,6 +641,11 @@ internal enum SqlFunction
     COLLATE,
     CONCAT,
     SwitchOffset,
+
+    CONTAINS,
+    CONTAINSTABLE,
+    FREETEXT,
+    FREETEXTTABLE,
 }
 
 internal enum PostgresFunction

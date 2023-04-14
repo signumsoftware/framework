@@ -7,14 +7,14 @@ import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
-import { createFilterValueControl, MultiValue } from './FilterBuilder';
+import { ComplexConditionSyntax, createFilterValueControl, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
-  onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
+  onFiltersChanged?: (filters: FilterOptionParsed[], avoidSearch?: boolean) => void;
   pinnedFilterVisible?: (fo: FilterOptionParsed) => boolean 
   onSearch?: () => void;
   showSearchButton?: boolean;
@@ -38,7 +38,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
             .groupBy(fo => (fo.pinned!.column ?? 0).toString())
             .orderBy(gr => parseInt(gr.key))
             .map(gr => <div key={gr.key} className={p.colClassName ?? (gr.elements.length > 4 ? "col-sm-2" : "col-sm-3")}>
-              {gr.elements.orderBy(a => a.pinned!.row).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+              {gr.elements.orderBy(a => a.pinned!.row ?? 0).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
             </div>)
         }
       </div>
@@ -60,12 +60,12 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       return (
         <div className="checkbox mt-4">
           <label>
-            <input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_StartChecked" || f.pinned.active == "NotCheckbox_StartChecked"} readOnly={readOnly} onChange={() => {
+            <input type="checkbox" className="form-check-input me-1" checked={f.pinned.active == "Checkbox_Checked" || f.pinned.active == "NotCheckbox_Checked"} readOnly={readOnly} onChange={() => {
               f.pinned!.active =
-                f.pinned!.active == "Checkbox_StartChecked" ? "Checkbox_StartUnchecked" :
-                  f.pinned!.active == "Checkbox_StartUnchecked" ? "Checkbox_StartChecked" :
-                    f.pinned!.active == "NotCheckbox_StartChecked" ? "NotCheckbox_StartUnchecked" :
-                      f.pinned!.active == "NotCheckbox_StartUnchecked" ? "NotCheckbox_StartChecked" : undefined!;
+                f.pinned!.active == "Checkbox_Checked" ? "Checkbox_Unchecked" :
+                  f.pinned!.active == "Checkbox_Unchecked" ? "Checkbox_Checked" :
+                    f.pinned!.active == "NotCheckbox_Checked" ? "NotCheckbox_Unchecked" :
+                      f.pinned!.active == "NotCheckbox_Unchecked" ? "NotCheckbox_Checked" : undefined!;
             p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
           }} />{label}</label>
         </div>
@@ -74,9 +74,19 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "xs" : "sm" }, undefined as any, Binding.create(f, a => a.value));
 
+    if (isFilterGroupOptionParsed(f) || f.operation == "ComplexCondition" || f.operation == "FreeText") {
 
-    if (isFilterGroupOptionParsed(f)) {
-      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
+      var isComplex = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition") : f.operation == "ComplexCondition";
+      var textArea = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText")) : f.operation == "ComplexCondition" || f.operation == "FreeText";
+      //  valueHtmlAttributes={{ className: isBig ? "big-value-line" : undefined }}
+
+      return <ValueLine ctx={ctx} type={{ name: "string" }}
+        valueLineType={textArea ? "TextArea" : "TextBox"}
+        onChange={(() => handleValueChange(f, isComplex))}
+        valueHtmlAttributes={isComplex ? { onKeyUp: e => e.stopPropagation() } : undefined}
+        extraButtons={isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
+        label={label || SearchMessage.Search.niceToString()
+  } />
     }
 
     if (isList(f.operation!))
@@ -91,7 +101,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   }
 
 
-  function handleValueChange(f: FilterOptionParsed) {
+  function handleValueChange(f: FilterOptionParsed, avoidSearch?: boolean) {
 
     if (isFilterGroupOptionParsed(f) || f.token && f.token.filterType == "String") {
 
@@ -99,12 +109,12 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         clearTimeout(timeoutWriteText.current);
 
       timeoutWriteText.current = setTimeout(() => {
-        p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+        p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
         timeoutWriteText.current = null;
       }, 200);
 
     } else {
-      p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+      p.onFiltersChanged && p.onFiltersChanged(p.filterOptions, avoidSearch);
     }
   }
 

@@ -286,7 +286,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
     {
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => Visit(a));
         if (args != sqlFunction.Arguments)
-            sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args); ;
+            sqlFunction = new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args); ;
 
         if (args.All(Has))
             return Add(sqlFunction);
@@ -1172,7 +1172,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                     (untu == typeof(double)))
                     return Add(new SqlCastExpression(u.Type, operand));
 
-                if (ReflectionTools.IsIntegerNumber(optu) && ReflectionTools.IsIntegerNumber(untu))
+                if (optu != untu && ReflectionTools.IsIntegerNumber(optu) && ReflectionTools.IsIntegerNumber(untu))
                     return Add(new SqlCastExpression(u.Type, operand));
 
                 if (isFullNominate || isGroupKey && optu == untu)
@@ -1592,7 +1592,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "StringExtensions.End":
                 return TrySqlFunction(null, SqlFunction.RIGHT, m.Type, m.GetArgument("str"), m.GetArgument("numChars"));
             case "StringExtensions.Replicate":
-                return TrySqlFunction(null, isPostgres ? PostgresFunction.repeat.ToString() : SqlFunction.REPLICATE.ToString(), m.Type, m.GetArgument("str"), m.GetArgument("times")); ;
+                return TrySqlFunction(null, isPostgres ? PostgresFunction.repeat.ToString() : SqlFunction.REPLICATE.ToString(), m.Type, m.GetArgument("str"), m.GetArgument("times"));
             case "StringExtensions.Reverse":
                 return TrySqlFunction(null, SqlFunction.REVERSE, m.Type, m.GetArgument("str"));
             case "StringExtensions.Like":
@@ -1601,6 +1601,13 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return TryEtc(m.GetArgument("str"), m.GetArgument("max"), m.TryGetArgument("etcString"));
             case "LinqHints.Collate":
                 return TryCollate(m.GetArgument("str"), m.GetArgument("collation"));
+
+            case "FullTextSearch.Contains":
+                return TrySqlFunction(null, SqlFunction.CONTAINS, typeof(bool), ToLiteralColumns(m), m.GetArgument("searchCondition"));
+
+            case "FullTextSearch.FreeText":
+                return TrySqlFunction(null, SqlFunction.FREETEXT, typeof(bool), ToLiteralColumns(m), m.GetArgument("freeTextString"));
+
 
             case "DateTime.Add":
             case "DateTimeOffset.Add":
@@ -1715,6 +1722,48 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
             default: return null;
         }
+    }
+
+    private SqlLiteralExpression ToLiteralColumns(MethodCallExpression mce)
+    {
+        var cols = mce.TryGetArgument("columns");
+        if (cols != null)
+        {
+            if (cols is ConstantExpression c && c.IsNull())
+                return new SqlLiteralExpression(typeof(object), "*");
+
+            if (cols is NewArrayExpression arr)
+            {
+                var columns = arr.Expressions.Select(a =>
+                {
+                    var col = Visit(a);
+
+                    if (col is ColumnExpression ce)
+                        return ce;
+
+                    throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: '{a}' is not a column");
+                }).ToList();
+
+                if (columns.Select(a => a.Alias).Distinct().Count() != 1)
+                    throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: Unable to use Columns of different table aliases {columns.Select(a => a.Alias).Distinct().ToString(", ")}");
+
+                var bla = columns.Distinct().ToString(", ");
+
+                return new SqlLiteralExpression(typeof(object), "(" + bla + ")");
+            }
+        }
+
+        var table = mce.TryGetArgument("table");
+        if(table != null)
+        {
+            var alias = table is EntityExpression ee ? ee.TableAlias! :
+                table is MListElementExpression mle ? mle.Alias :
+                throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: {table.GetType().Name} can not be used as 'table'");
+
+            return new SqlLiteralExpression(typeof(object), alias.ToString() + ".*");
+        }
+
+        throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: No 'columns' or 'table' argument found");
     }
 
     private Expression? TrySqlCast(Type type, Expression expression)

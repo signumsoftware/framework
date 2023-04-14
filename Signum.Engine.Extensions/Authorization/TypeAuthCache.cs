@@ -16,9 +16,8 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
         this.merger = merger;
 
         sb.Include<RuleTypeEntity>()
+            .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
             .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleType);
-
-        sb.AddUniqueIndex<RuleTypeEntity>(rt => new { rt.Resource, rt.Role });
 
         runtimeRules = sb.GlobalLazy(NewCache,
             new InvalidateWith(typeof(RuleTypeEntity), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);

@@ -1433,18 +1433,34 @@ internal class QueryBinder : ExpressionVisitor
         Type returnType = mce.Method.ReturnType;
         var type = returnType.GetGenericArguments()[0];
 
-        var functionName = ObjectName.Parse(mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name, Schema.Current.Settings.IsPostgres);
-
-        var arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
 
 
-        if (typeof(IView).IsAssignableFrom(type))
+        if (mce.Method.DeclaringType == typeof(FullTextSearch) &&
+              mce.Method.Name is nameof(FullTextSearch.ContainsTable) or nameof(FullTextSearch.FreeTextTable))
         {
-            Table table = schema.ViewBuilder.NewView(type);
+            var functionName = mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name;
+            var tab = (ITable)((ConstantExpression)mce.GetArgument("table")).Value!;
+
+            Table table = schema.ViewBuilder.NewFullTextResultTable(tab);
 
             Alias tableAlias = NextTableAlias(table.Name);
 
             Expression exp = table.GetProjectorExpression(tableAlias, this);
+
+            var cols = (IColumn[]?)((ConstantExpression)mce.GetArgument("columns")).Value!;
+
+            var arguments = new List<Expression>
+            {
+                new SqlLiteralExpression(typeof(object), tab.Name.ToString()),
+                new SqlLiteralExpression(typeof(object),cols == null ?  "*" : ($"({cols.ToString(a=>a.Name, ", ")})")),
+                DbExpressionNominator.FullNominate(mce.GetArgument(
+                    mce.Method.Name is nameof(FullTextSearch.ContainsTable) ? "searchCondition" : "freeTextString")),
+            };
+
+            var rank = DbExpressionNominator.FullNominate(mce.GetArgument("top_n_by_rank"));
+
+            if (!rank.IsNull())
+                arguments.Add(rank);
 
             SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, table, null, tableAlias, arguments);
 
@@ -1458,14 +1474,42 @@ internal class QueryBinder : ExpressionVisitor
 
             return projection;
         }
+        else if (typeof(IView).IsAssignableFrom(type))
+        {
+            var functionName = ObjectName.Parse(mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name, Schema.Current.Settings.IsPostgres);
+
+            Table table = schema.ViewBuilder.NewView(type);
+
+            Alias tableAlias = NextTableAlias(table.Name);
+
+            Expression exp = table.GetProjectorExpression(tableAlias, this);
+
+            List<Expression> arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), table, null, tableAlias, arguments);
+
+            Alias selectAlias = NextSelectAlias();
+
+            ProjectedColumns pc = ColumnProjector.ProjectColumns(exp, selectAlias);
+
+            ProjectionExpression projection = new ProjectionExpression(
+                new SelectExpression(selectAlias, false, null, pc.Columns, tableExpression, null, null, null, 0),
+            pc.Projector, null, returnType);
+
+            return projection;
+        }
         else
         {
+            var functionName = ObjectName.Parse(mce.Method.GetCustomAttribute<SqlMethodAttribute>()?.Name ?? mce.Method.Name, Schema.Current.Settings.IsPostgres);
+
             if (!isPostgres)
                 throw new InvalidOperationException("TableValuedFunctions should return an IQueryable<IView>");
 
             Alias tableAlias = NextTableAlias(functionName);
 
-            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName, null, type, tableAlias, arguments);
+            var arguments = mce.Arguments.Select(a => DbExpressionNominator.FullNominate(a)!).ToList();
+
+            SqlTableValuedFunctionExpression tableExpression = new SqlTableValuedFunctionExpression(functionName.ToString(), null, type, tableAlias, arguments);
 
             var columnExpression = new ColumnExpression(type, tableAlias, null);
 

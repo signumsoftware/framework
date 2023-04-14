@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.Entities.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -95,14 +95,14 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "NotCheckbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export function isCheckBox(active: PinnedFilterActive | undefined) {
-  return active == "Checkbox_StartChecked" ||
-    active == "Checkbox_StartUnchecked" ||
-    active == "NotCheckbox_StartChecked" ||
-    active == "NotCheckbox_StartUnchecked";
+  return active == "Checkbox_Checked" ||
+    active == "Checkbox_Unchecked" ||
+    active == "NotCheckbox_Checked" ||
+    active == "NotCheckbox_Unchecked";
 }
 
 export interface FilterConditionOptionParsed {
@@ -524,6 +524,22 @@ export function getFilterType(tr: TypeReference): FilterType | null {
     return "Lite";
 
   return null;
+}
+
+export function getFilterOperations(qt: QueryToken): FilterOperation[] {
+
+  if (qt.filterType == null)
+    return [];
+
+  var fops = filterOperations[qt.filterType];
+
+  if (qt.queryTokenType == null && qt.propertyRoute != null) {
+    var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+
+    if (pr && pr.member?.hasFullTextIndex)
+      return ["ComplexCondition", "FreeText", ...fops];
+  }
+  return fops;
 }
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};

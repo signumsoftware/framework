@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -35,7 +35,8 @@ import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints } from '../Hooks'
-import { IconProp } from '@fortawesome/fontawesome-svg-core'
+import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
+import { faFilter } from '@fortawesome/free-solid-svg-icons'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -256,7 +257,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   // MAIN
 
   isManualRefreshOrAllPagination() {
-    return this.state.refreshMode == "Manual" || this.state.refreshMode == undefined && this.props.findOptions.pagination.mode == "All";
+    return this.state.refreshMode == "Manual" ||
+      this.state.refreshMode == undefined && this.props.findOptions.pagination.mode == "All";
   }
 
   doSearchPage1(force: boolean = false) {
@@ -446,9 +448,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
 
-  handleFiltersChanged = () => {
+  handleFiltersChanged = (avoidSearch?: boolean) => {
 
-    if (this.isManualRefreshOrAllPagination())
+    if (this.isManualRefreshOrAllPagination() || avoidSearch)
       this.forceUpdate();
 
     if (this.props.onFiltersChanged)
@@ -456,10 +458,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
 
-  handlePinnedFilterChanged = () => {
+  handlePinnedFilterChanged = (fop: FilterOptionParsed[], avoidSearch?: boolean) => {
 
-    this.handleFiltersChanged();
+    this.handleFiltersChanged(avoidSearch);
 
+    if (!avoidSearch)
       this.doSearchPage1();
   }
 
@@ -517,15 +520,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
               this.state.showFilters ? <FilterBuilder
-              queryDescription={qd}
-              filterOptions={fo.filterOptions}
-              lastToken={this.state.lastToken}
-              subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
-              onTokenChanged={this.handleFilterTokenChanged}
-              onFiltersChanged={this.handleFiltersChanged}
-              onHeightChanged={this.handleHeightChanged}
-              showPinnedFiltersOptions={false}
-              showPinnedFiltersOptionsButton={true}
+                queryDescription={qd}
+                filterOptions={fo.filterOptions}
+                lastToken={this.state.lastToken}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                onTokenChanged={this.handleFilterTokenChanged}
+                onFiltersChanged={()=> this.handleFiltersChanged()}
+                onHeightChanged={this.handleHeightChanged}
+                showPinnedFiltersOptions={false}
+                showPinnedFiltersOptionsButton={true}
+                showDashboardBehaviour={false}
               /> :
               sfb && <div className="simple-filter-builder">{sfb}</div>}
           </div>
@@ -682,13 +686,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           style={!s.showFilters && p.findOptions.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid #6c757d" } : undefined}
           onClick={this.handleToggleFilters}
           title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
-          <FontAwesomeIcon icon="filter" />
+          <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={s.showFilters ? "60px" : "40px"} stroke="currentColor" fill="transparent" />
         </button>
       },
 
       p.showGroupButton && {
         order: -4,
-        button: < button
+        button: <button
           className={"sf-query-button btn " + (p.findOptions.groupResults ? "btn-info active" : "btn-light")}
           onClick={this.handleToggleGroupBy}
           title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
@@ -972,7 +976,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
     else {
       op = token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
-        token ? (filterOperations[token.filterType as any] || []).firstOrNull() as FilterOperation | undefined :
+        token ? (getFilterOperations(token) || []).firstOrNull() as FilterOperation | undefined :
           undefined as FilterOperation | undefined;
     }
 
@@ -2121,6 +2125,24 @@ function dominates(root: QueryToken, big: QueryToken) {
 
   return big.fullKey.startsWith(root.fullKey + ".")
 
+}
+
+
+function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
+
+  var [width, height, ligatures, unicode, data] = p.iconDefinition.icon;
+
+  return (
+    <svg
+      aria-hidden="true" focusable="false"
+      data-prefix={p.iconDefinition.prefix}
+      data-icon={p.iconDefinition.iconName}
+      className={"svg-inline--fa fa-" + p.iconDefinition.iconName}
+      role="img"
+      viewBox={`0 0 ${width} ${height}`}>
+      <path stroke-width={p.strokeWith} d={Array.isArray(data) ? data[0] : data} stroke={p.stroke} fill={p.fill}></path>
+    </svg>
+  );
 }
 
 export default SearchControlLoaded;
