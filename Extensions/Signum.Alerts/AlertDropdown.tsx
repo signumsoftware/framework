@@ -2,23 +2,22 @@ import * as React from 'react'
 import * as Operations from '@framework/Operations'
 import * as Finder from '@framework/Finder'
 import { Entity, getToString, is, JavascriptMessage, liteKey, parseLite, toLite } from '@framework/Signum.Entities'
-import { Toast, Button, ButtonGroup } from 'react-bootstrap'
+import { Toast } from 'react-bootstrap'
 import { DateTime } from 'luxon'
-import { useAPI, useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@framework/Hooks';
+import { useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@framework/Hooks';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AlertDropDownGroup, AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
+import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import { Lite } from '@framework/Signum.Entities'
 import MessageModal from '@framework/Modals/MessageModal'
-import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from './useSignalR'
+import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '@framework/useSignalR'
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
-import { UserEntity } from '../Signum.Authorization/Signum.Entities.Authorization'
-import { translate } from '../Chart/D3Scripts/Components/ChartUtils'
+import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
 import { useRootClose } from '@restart/ui'
 
 const MaxNumberOfAlerts = 3;
