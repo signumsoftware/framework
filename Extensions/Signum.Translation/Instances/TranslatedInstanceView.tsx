@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, softCast } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
-import * as CultureClient from '../CultureClient'
+import * as CultureClient from '@framework/Basics/CultureClient'
 import { API, TranslatedInstanceView, TranslatedInstanceViewType, TranslatedTypeSummary, TranslationRecord } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
 import { useLocation, useParams } from "react-router";
@@ -10,7 +10,7 @@ import { Link} from "react-router-dom";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
-import { DiffDocumentSimple } from '../../DiffLog/Templates/DiffDocument'
+import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
 import { KeyCodes } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'

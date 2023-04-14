@@ -1,11 +1,9 @@
 import * as React from 'react'
-import { useLocation, useParams } from 'react-router'
+import { useParams } from 'react-router'
 import { Dic } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
-import { getToString, Lite } from '@framework/Signum.Entities'
-import * as CultureClient from '../CultureClient'
+import { getToString } from '@framework/Signum.Entities'
 import { API, AssemblyResult } from '../TranslationClient'
-import { CultureInfoEntity } from '../../Basics/Signum.Basics'
 import { TranslationMessage } from '../Signum.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import { Link } from "react-router-dom";
@@ -13,6 +11,7 @@ import "../Translation.css"
 import { decodeDots, encodeDots } from './TranslationCodeStatus'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
+import * as CultureClient from '@framework/Basics/CultureClient'
 
 export default function TranslationCodeSync() {
   const params = useParams() as { culture: string; assembly: string; namespace?: string; };

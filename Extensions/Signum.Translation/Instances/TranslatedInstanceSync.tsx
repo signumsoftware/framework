@@ -3,21 +3,21 @@ import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, softCast } from '@framework/Globals'
 import { notifySuccess } from '@framework/Operations'
-import * as CultureClient from '../CultureClient'
-import { API, PropertyRouteConflic, TypeInstancesChanges, TranslationRecord, PropertyChange } from '../TranslatedInstanceClient'
+import * as CultureClient from '@framework/Basics/CultureClient'
+import { API, TypeInstancesChanges, TranslationRecord, PropertyChange } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
-import { useLocation, useParams } from "react-router";
+import { useParams } from "react-router";
 import "../Translation.css"
 import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Hooks'
 import { EntityLink } from '@framework/Search'
-import { DiffDocumentSimple } from '../../DiffLog/Templates/DiffDocument'
+import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
 import { KeyCodes } from '@framework/Components'
 import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
-import { CultureInfoEntity } from '../../Basics/Signum.Basics'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
 import { getToString, Lite } from '@framework/Signum.Entities'
+import { CultureInfoEntity } from '@framework/Signum.Basics'
 
 
 

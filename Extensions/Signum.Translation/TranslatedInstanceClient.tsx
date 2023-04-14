@@ -2,13 +2,13 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile } from '@framework/Services';
 import * as AppContext from '@framework/AppContext';
-import { TranslationPermission, TranslatedSummaryState, TranslateableRouteType, TranslationMessage } from './Signum.Translation'
+import { TranslationPermission, TranslationMessage } from './Signum.Translation'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
 import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
-import * as CultureClient from './CultureClient'
+import * as CultureClient from '@framework/Basics/CultureClient'
 import { AutomaticTranslation } from './TranslationClient';
 import { Binding, tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
@@ -16,10 +16,12 @@ import { ValueLineController, ValueLineProps } from '@framework/Lines/ValueLine'
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
+import { TranslatedSummaryState } from './Signum.Translation.Instances';
+import { TranslateableRouteType } from '@framework/Signum.Basics';
 
 export function start(options: { routes: RouteObject[] }) {
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances),
     key: "TranslateInstances",
     onClick: () => Promise.resolve("/translatedInstance/status")

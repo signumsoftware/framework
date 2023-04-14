@@ -1,14 +1,15 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { TranslationPermission, TranslatedSummaryState } from './Signum.Translation'
+import { TranslationPermission } from './Signum.Translation'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient'
+import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
+import { TranslatedSummaryState } from './Signum.Translation.Instances';
 
 export function start(options: { routes: RouteObject[] }) {
 
-  OmniboxClient.registerSpecialAction({
+  OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateCode),
     key: "TranslateCode",
     onClick: () => Promise.resolve("/translation/status")
