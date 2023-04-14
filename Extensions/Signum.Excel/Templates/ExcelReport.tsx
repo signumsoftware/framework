@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { FileLine } from '../../Files/FileLine'
+import { FileLine } from '../../Signum.Files/Components/FileLine'
 import { ExcelReportEntity } from '../Signum.Excel'
 
 export default function ExcelReport(p : { ctx: TypeContext<ExcelReportEntity> }){

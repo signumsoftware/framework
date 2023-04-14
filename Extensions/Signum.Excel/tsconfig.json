@@ -7,7 +7,12 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.Chart" },
+    { "path": "../Signum.Mailing" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.Dashboard" }
   ],
   "exclude": [
     "../../Signum/ts_out",

@@ -9,8 +9,8 @@ import { QueryRequest, QueryToken } from '@framework/FindOptions'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { ExcelReportEntity, ExcelMessage, ExcelPermission, ImportExcelModel } from './Signum.Excel'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as ChartClient from '../Chart/ChartClient'
-import { ChartPermission } from '../Chart/Signum.Entities.Chart'
+import * as ChartClient from '../Signum.Chart/ChartClient'
+import { ChartPermission } from '../Signum.Chart/Signum.Chart'
 import ExcelMenu from './ExcelMenu'
 import { ImportExcelProgressModal } from './ImportExcelProgressModal';
 import { TypeInfo } from '@framework/Reflection';

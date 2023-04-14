@@ -1,16 +1,13 @@
 import * as React from 'react'
 import { Modal, ProgressBar } from 'react-bootstrap';
-import { useState } from 'react';
 import { useForceUpdate, useThrottle } from '@framework/Hooks';
 import { IModalProps, openModal } from '@framework/Modals';
 import { jsonObjectStream } from '@framework/Operations/jsonObjectStream';
-import { JavascriptMessage, liteKey } from '@framework/Signum.Entities';
+import { JavascriptMessage } from '@framework/Signum.Entities';
 import { ImportFromExcelReport, ImportResult } from './ExcelClient';
 import { ImportFromExcelMessage } from './Signum.Excel';
 import { TypeInfo } from '@framework/Reflection';
-
-
-
+import '@framework/AppContext';
 
 interface ImportExcelProgressModalProps extends IModalProps<ImportFromExcelReport> {
   typeInfo: TypeInfo;

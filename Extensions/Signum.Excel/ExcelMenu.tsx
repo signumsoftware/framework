@@ -1,16 +1,15 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
-import { getToString, Lite, PaginationMessage, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
+import { getToString, Lite, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Excel'
 import * as ExcelClient from './ExcelClient'
-import { Dropdown, DropdownButton } from 'react-bootstrap';
+import { Dropdown } from 'react-bootstrap';
 import * as Operations from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
-import { getTypeInfos } from '@framework/Reflection'
 import { onImportFromExcel } from './Templates/ImportExcelModel'
 
 
@@ -134,8 +133,7 @@ export async function selectPagination(sc: SearchControlLoaded): Promise<QueryRe
 
     const pm = await SelectorModal.chooseElement<PaginationMode>([request.pagination.mode, "All"], {
       buttonDisplay: a => <span>{PaginationMode.niceToString(a)} {rt && SearchMessage._0Results_N.niceToString().forGenderAndNumber(rt.totalElements).formatHtml(
-        <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)
-      }</span>,
+        <span className="sf-pagination-strong" key={1}>{a == "All" ? rt?.totalElements : rt?.rows.length}</span>)}</span>,
       buttonName: a => a,
       title: SelectorMessage._0Selector.niceToString(PaginationMode.niceTypeName()),
       message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(PaginationMode.niceTypeName()),
