@@ -1,18 +1,18 @@
 import * as React from 'react'
 import * as draftjs from 'draft-js';
-import { IBinding, Binding, PropertyRoute, getSymbol } from '@framework/Reflection';
-import HtmlEditor, { HtmlEditorProps, HtmlEditorController } from '../../HtmlEditor/HtmlEditor';
-import BasicCommandsPlugin from '../../HtmlEditor/Plugins/BasicCommandsPlugin';
-import ImagePlugin, { ImageConverter } from '../../HtmlEditor/Plugins/ImagePlugin';
-import LinksPlugin from '../../HtmlEditor/Plugins/LinksPlugin';
-import { FileUploader, toFileEntity } from '../../Files/FileUploader';
-import { Lite, MList, ModifiableEntity, toLite } from '@framework/Signum.Entities';
-import { FilePathEmbedded, FileTypeSymbol, IFile } from '../../Files/Signum.Entities.Files';
-import { FileImage } from '../../Files/FileImage';
-import { TypeContext, ReadonlyBinding } from '@framework/Lines';
+import { Binding, PropertyRoute, getSymbol } from '@framework/Reflection';
+import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
+import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
+import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
+import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
+import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
+import { ModifiableEntity } from '@framework/Signum.Entities';
+import { FilePathEmbedded, FileTypeSymbol, IFile } from '../../Signum.Files/Signum.Files';
+import { FileImage } from '../../Signum.Files/Components/FileImage';
+import { ReadonlyBinding } from '@framework/Lines';
 import { ErrorBoundary } from '@framework/Components';
-import { ImageModal } from '../../../../Framework/Signum.React.Extensions/Files/ImageModal';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
+import { ImageModal } from '../../Signum.Files/Components/ImageModal';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;

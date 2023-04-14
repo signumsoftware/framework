@@ -1,25 +1,15 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { Link } from 'react-router-dom'
-import { DateTime } from 'luxon'
 import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
-import SelectorModal from '@framework/SelectorModal'
-import ValueLineModal from '@framework/ValueLineModal'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
-import { andClose } from '@framework/Operations/EntityOperations'
 import { ajaxGet, ajaxPost } from '@framework/Services'
-import * as Finder from '@framework/Finder'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { Entity, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
-import { EntityLink } from '@framework/Search'
-import { ISymbol, PropertyRoute, symbolNiceName, Type } from '@framework/Reflection'
-import { WhatsNewMessageEmbedded, WhatsNewEntity, WhatsNewOperation, WhatsNewMessage } from './Signum.WhatsNew'
+import { Entity, Lite } from '@framework/Signum.Entities'
+import { Type } from '@framework/Reflection'
+import { WhatsNewEntity, WhatsNewMessage } from './Signum.WhatsNew'
 import { ImportComponent } from '@framework/ImportComponent'
-import { FilePathEmbedded } from '../Files/Signum.Entities.Files'
 
 export function start(options: { routes: RouteObject[] }) {
 

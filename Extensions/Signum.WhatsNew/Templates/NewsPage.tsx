@@ -1,17 +1,13 @@
 import * as React from 'react'
-import { EntityControlMessage, getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities';
+import { EntityControlMessage, getToString, JavascriptMessage } from '@framework/Signum.Entities';
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.WhatsNew';
-import { useAPI } from '../../../../Framewo@framework/Hooks';
-import { API, WhatsNewFull } from "../WhatsNewClient";
+import { useAPI } from '@framework/Hooks';
+import { API } from "../WhatsNewClient";
 import "./NewsPage.css"
 import * as AppContext from "@framework/AppContext"
-import { FilePathEmbedded } from '../../../../Framework/Signum.React.Extensions/Files/Signum.Entities.Files';
-import { downloadFile } from '../../../../Framework/Signum.React.Extensions/Files/FileDownloader';
-import * as Services from '@framework/Services'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useLocation, useParams } from "react-router-dom";
-import WhatsNewHtmlEditor, { HtmlViewer } from './WhatsNewHtmlEditor';
-import { Binding } from '@framework/Lines';
+import { useParams } from "react-router-dom";
+import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
 import * as Navigator from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink';

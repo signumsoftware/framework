@@ -1,22 +1,13 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, TypeContext, RenderEntity, EntityTable } from '@framework/Lines'
-import { SearchValueLine } from '@framework/Search';
 import { JavascriptMessage } from '@framework/Signum.Entities';
-import { useInDB } from '@framework/Finder';
-import { useAPI, useAPIWithReload } from '../../../../Framewo@framework/Hooks';
+import { useAPI } from '@framework/Hooks';
 import { API, WhatsNewFull } from "../WhatsNewClient";
 import "./AllNewsPage.css"
 import * as AppContext from "@framework/AppContext"
-import { FilePathEmbedded } from '../../../../Framework/Signum.React.Extensions/Files/Signum.Entities.Files';
-import { downloadFile } from '../../../../Framework/Signum.React.Extensions/Files/FileDownloader';
-import * as Services from '@framework/Services'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.WhatsNew';
 import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
 import * as Navigator from '@framework/Navigator';
-import * as WhatsNewClient from '../WhatsNewClient';
-import MessageModal from '@framework/Modals/MessageModal';
 
 export default function AllNews() {
   const news: WhatsNewFull[] | undefined = useAPI(() => API.getAllNews().then(w => w), []);

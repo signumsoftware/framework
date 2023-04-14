@@ -7,7 +7,10 @@
     }
   },
   "references": [
-    { "path": "../../Signum" }
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.HtmlEditor" },
+    { "path": "../Signum.Files" }
   ],
   "exclude": [
     "../../Signum/ts_out",
