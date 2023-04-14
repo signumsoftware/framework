@@ -75,6 +75,10 @@ public class FilePathEntity : Entity, IFile, IFilePath
 
     public FileTypeSymbol FileType { get; internal set; }
 
+    //Old UnsafeMode
+    [Ignore]
+    public bool KeepSuffix;
+
     [Ignore]
     internal PrefixPair _prefixPair;
     public void SetPrefixPair(PrefixPair prefixPair)

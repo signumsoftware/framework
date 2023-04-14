@@ -17,8 +17,9 @@ public enum SqlServerVersion
     SqlServer2016,
     SqlServer2017,
     SqlServer2019,
+    SqlServer2022,
 
-    AzureSQL,
+    AzureSQL = 100,
 }
 
 public static class SqlServerVersionDetector
@@ -68,6 +69,7 @@ public static class SqlServerVersionDetector
                         "13" => SqlServerVersion.SqlServer2016,
                         "14" => SqlServerVersion.SqlServer2017,
                         "15" => SqlServerVersion.SqlServer2019,
+                        "16" => SqlServerVersion.SqlServer2022,
                         _ => (SqlServerVersion?)null,
                     };
                 }
@@ -251,6 +253,8 @@ public class SqlServerConnector : Connector
                 }
             });
         }
+
+
         catch (InvalidOperationException ioe)
         {
             if (ioe.Message.Contains("SqlDependency.Start()") && !reconected)

@@ -14,6 +14,7 @@ import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { KeyCodes } from '../Components'
 
 export interface EntityAccordionProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityAccordionController) => React.ReactElement<any>);
@@ -21,6 +22,7 @@ export interface EntityAccordionProps extends EntityListBaseProps {
   createMessage?: string;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
+  itemHtmlAttributes?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.HTMLAttributes<any>;
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
@@ -132,7 +134,7 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
           c.getMListItemContext(ctx).map((mlec, i) => (
-            <EntityAccordionElement key={i}
+            <EntityAccordionElement key={i}              
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
@@ -141,6 +143,7 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
               getComponent={p.getComponent}
               getViewPromise={p.getViewPromise}
               getTitle={p.getTitle}
+              htmlAttributes={p.itemHtmlAttributes?.(c, mlec.index!)}
               title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
         {
@@ -168,21 +171,24 @@ export interface EntityAccordionElementProps {
   drag?: DragConfig;
   title?: React.ReactElement<any>;
   itemExtraButtons?: () => React.ReactElement<any>;
+  htmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle }: EntityAccordionElementProps)
+export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes }: EntityAccordionElementProps)
 {
 
   const forceUpdate = useForceUpdate();
 
   if (ctx.binding == null && ctx.previousVersion) {
     return (
-      <Accordion.Item className={classes(drag?.dropClass, "sf-accordion-element")} eventKey="removed" title={EntityControlMessage.Removed0.niceToString()}>
-        <Accordion.Header>
-          <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "#ff000021" }}>
-            {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
-          </div>
-        </Accordion.Header>
+      <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey="removed" title={EntityControlMessage.Removed0.niceToString()}>
+        <h2 className="accordion-header bg-danger">
+          <Accordion.Button>
+            <div className="d-flex align-items-center flex-grow-1" style={{ backgroundColor: "#ff000021" }}>
+              {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
+            </div>
+          </Accordion.Button>
+        </h2>
         <Accordion.Body>
         </Accordion.Body>
       </Accordion.Item>
@@ -190,7 +196,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
   }
 
   return (
-    <Accordion.Item className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
+    <Accordion.Item {...htmlAttributes} className = { classes(drag?.dropClass, "sf-accordion-element") } eventKey = { ctx.index!.toString() }
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>

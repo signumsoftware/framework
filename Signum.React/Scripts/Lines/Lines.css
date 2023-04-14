@@ -95,9 +95,6 @@ li.sf-strip-element {
     padding: 2px 5px;
 }
 
-.sf-strip-element .sf-strip-link > span {
-    display: initial !important;
-}
 
 /* Buttons */
 /*.btn.btn-default.sf-line-button {

@@ -18,6 +18,7 @@ import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
+import { toAbsoluteUrl } from '../../Signum.React/Scripts/AppContext'
 
 export function start(options: { routes: RouteObject[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
@@ -151,8 +152,16 @@ export function format(text: string, alert: Partial<AlertEntity>, onNavigated?: 
     var lite = isEntity(prop) ? toLite(prop) :
       isLite(prop) ? prop : null;
 
-    if (groups.url)
-      nodes.push(<Link to={replacePlaceHolders(groups.url, alert)!}>{replacePlaceHolders(groups.text, alert) ?? getToString(lite)}</Link>);
+    if (groups.url) {
+      var url = replacePlaceHolders(groups.url, alert)!;
+      var text = replacePlaceHolders(groups.text, alert) ?? getToString(lite);
+      if (url.startsWith("http"))
+        nodes.push(<a href={url} target="_blank">{text}</a>);
+      else {
+        var routerUrl = url.startsWith("~") ? url.after("~") : url;
+        nodes.push(<Link to={routerUrl}>{text}</Link>);
+      }
+    }
     else if (lite != null) {
       if (groups.text)
         nodes.push(<EntityLink lite={lite} onNavigated={onNavigated}>{replacePlaceHolders(groups.text, alert)}</EntityLink>);
