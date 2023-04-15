@@ -12,9 +12,5 @@
     { "path": "../Signum.Disconnected" },
     { "path": "../Signum.Caching" },
     { "path": "../Signum.Authorization" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

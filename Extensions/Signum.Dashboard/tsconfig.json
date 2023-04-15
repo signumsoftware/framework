@@ -14,9 +14,5 @@
     { "path": "../Signum.Toolbar" },
     { "path": "../Signum.Scheduler" },
     { "path": "../Signum.UserAssets" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

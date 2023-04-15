@@ -19,9 +19,5 @@
     { "path": "../Signum.HtmlEditor" },
     { "path": "../Signum.Processes" },
     { "path": "../Signum.UserAssets" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

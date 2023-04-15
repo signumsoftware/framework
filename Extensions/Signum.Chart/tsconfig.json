@@ -12,9 +12,5 @@
     { "path": "../Signum.Omnibox" },
     { "path": "../Signum.UserQueries" },
     { "path": "../Signum.Dashboard" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

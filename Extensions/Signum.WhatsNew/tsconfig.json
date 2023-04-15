@@ -11,9 +11,5 @@
     { "path": "../Signum.Authorization" },
     { "path": "../Signum.HtmlEditor" },
     { "path": "../Signum.Files" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

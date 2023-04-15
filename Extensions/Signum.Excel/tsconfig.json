@@ -13,9 +13,5 @@
     { "path": "../Signum.Mailing" },
     { "path": "../Signum.Files" },
     { "path": "../Signum.Dashboard" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

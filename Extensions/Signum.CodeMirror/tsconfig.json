@@ -8,9 +8,5 @@
   },
   "references": [
     { "path": "../../Signum" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

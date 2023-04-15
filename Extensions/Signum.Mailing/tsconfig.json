@@ -15,9 +15,5 @@
     { "path": "../Signum.Eval" },
     { "path": "../Signum.HtmlEditor" },
     { "path": "../Signum.Codemirror" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

@@ -9,9 +9,5 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.Mailing" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

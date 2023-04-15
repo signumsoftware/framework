@@ -15,9 +15,5 @@
     { "path": "../Signum.Tree" },
     { "path": "../Signum.Isolation" },
     { "path": "../Signum.DiffLog" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

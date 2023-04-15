@@ -16,9 +16,5 @@
       "ES2020",
       "dom"
     ]
-  },
-  "exclude": [
-    "./node_modules",
-    "./ts_out"
-  ]
+  }
 }

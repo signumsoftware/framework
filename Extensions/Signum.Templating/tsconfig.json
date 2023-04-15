@@ -13,9 +13,5 @@
     { "path": "../Signum.Chart" },
     { "path": "../Signum.Codemirror" },
     { "path": "../Signum.Eval" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

@@ -11,9 +11,5 @@
     { "path": "../Signum.Mailing" },
     { "path": "../Signum.Templating" },
     { "path": "../Signum.Dynamic" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }

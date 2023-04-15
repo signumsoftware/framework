@@ -10,9 +10,5 @@
     { "path": "../../Signum" },
     { "path": "../Signum.Authorization" },
     { "path": "../Signum.Scheduler" }
-  ],
-  "exclude": [
-    "../../Signum/ts_out",
-    "./ts_out"
   ]
 }
