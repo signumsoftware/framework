@@ -104,7 +104,7 @@ public static class DynamicExpressionLogic
                     new List<DynamicExpressionEntity>() :
                     Database.Query<DynamicExpressionEntity>().ToList();
 
-                var dtcg = new DynamicExpressionCodeGenerator(EvalLogic.CodeGenEntitiesNamespace, expressions, EvalLogic.Namespaces);
+                var dtcg = new DynamicExpressionCodeGenerator(DynamicLogic.CodeGenNamespace, expressions, EvalLogic.Namespaces);
 
                 var content = dtcg.GetFileCode();
                 result.Add(new CodeFile("CodeGenExpressionStarter.cs", content));

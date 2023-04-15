@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations;
 using Signum.Utilities.Reflection;
 using System.IO;
 using Signum.Basics;
-using Signum.Translation;
 using Signum.API.Filters;
 
 namespace Signum.Translation.Instances;

@@ -42,7 +42,7 @@ public static class DynamicMixinConnectionLogic
         try
         {
             var mixins = !Administrator.ExistsTable<DynamicMixinConnectionEntity>() ? new List<DynamicMixinConnectionEntity>() : ExecutionMode.Global().Using(a => Database.Query<DynamicMixinConnectionEntity>().ToList());
-            var dlg = new DynamicMixinConnectionLogicGenerator(EvalLogic.CodeGenEntitiesNamespace, mixins, EvalLogic.Namespaces);
+            var dlg = new DynamicMixinConnectionLogicGenerator(DynamicLogic.CodeGenNamespace, mixins, EvalLogic.Namespaces);
             var content = dlg.GetFileCode();
             result.Add(new CodeFile("CodeGenMixinLogic.cs", content));
         }

@@ -7,14 +7,6 @@ namespace Signum.Eval;
 public static class EvalLogic
 {
     public static string AssemblyDirectory = Path.GetDirectoryName(typeof(Entity).Assembly.Location)!;
-    public static string CodeGenEntitiesNamespace = "Signum.Entities.CodeGen";
-    public static string CodeGenControllerNamespace = "Signum.React.CodeGen";
-    public static string CodeGenDirectory = "CodeGen";
-    public static string CodeGenAssembly = "CodeGenAssembly.dll";
-    public static string CodeGenControllerAssembly = "CodeGenControllerAssembly.dll";
-    public static string? CodeGenAssemblyPath;
-    public static string? CodeGenControllerAssemblyPath;
-    public static Action OnApplicationServerRestarted;
 
     public static HashSet<Type> RegisteredDynamicTypes = new HashSet<Type>();
     public static HashSet<string> Namespaces = new HashSet<string>
@@ -58,12 +50,14 @@ public static class EvalLogic
         typeof(System.Text.RegularExpressions.Regex),
     };
 
+    public static Func<string?> GetCodeGenAssemblyPath = () => null; 
+
     public static IEnumerable<MetadataReference> GetMetadataReferences(bool needsCodeGenAssembly = true)
     {
         var result = EvalLogic.AssemblyTypes
-            .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
-            .And(needsCodeGenAssembly ? EvalLogic.CodeGenAssemblyPath?.Let(s => MetadataReference.CreateFromFile(s)) : null)
-            .NotNull().ToList();
+                .Select(type => MetadataReference.CreateFromFile(type.Assembly.Location))
+                .And(needsCodeGenAssembly ? GetCodeGenAssemblyPath()?.Let(s => MetadataReference.CreateFromFile(s)) : null)
+                .NotNull().ToList();
 
         return result;
     }
@@ -93,9 +87,7 @@ public static class EvalLogic
 
     public static IEnumerable<string> GetNamespaces()
     {
-        return EvalLogic.Namespaces
-            .And(EvalLogic.CodeGenAssemblyPath == null ? null : EvalLogic.CodeGenEntitiesNamespace)
-            .NotNull();
+        return EvalLogic.Namespaces.NotNull();
     }
 
     public static string CreateUsings(IEnumerable<string> namespaces)
@@ -111,6 +103,14 @@ public static class EvalLogic
     {
         Namespaces.AddRange(type.Assembly.ExportedTypes.Select(a => a.Namespace!));
         AssemblyTypes.Add(type);
+    }
+
+    public static void Start(SchemaBuilder sb)
+    {
+        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        {
+            PermissionLogic.RegisterPermissions(EvalPanelPermission.ViewDynamicPanel);
+        }
     }
 }
 

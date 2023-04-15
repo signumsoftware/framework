@@ -85,7 +85,7 @@ public static class DynamicTypeConditionLogic
                 var typeConditions = !Administrator.ExistsTable<DynamicTypeConditionEntity>() ? new List<DynamicTypeConditionEntity>() : Database.Query<DynamicTypeConditionEntity>().ToList();
                 var typeConditionSymbols = !Administrator.ExistsTable<DynamicTypeConditionSymbolEntity>() ? new List<DynamicTypeConditionSymbolEntity>() : Database.Query<DynamicTypeConditionSymbolEntity>().ToList();
 
-                var dtcg = new DynamicTypeConditionCodeGenerator(EvalLogic.CodeGenEntitiesNamespace, typeConditions, typeConditionSymbols, EvalLogic.Namespaces);
+                var dtcg = new DynamicTypeConditionCodeGenerator(DynamicLogic.CodeGenNamespace, typeConditions, typeConditionSymbols, EvalLogic.Namespaces);
 
                 var content = dtcg.GetFileCode();
                 result.Add(new CodeFile("CodeGenTypeCondition.cs", content));

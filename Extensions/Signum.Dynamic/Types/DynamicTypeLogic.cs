@@ -128,7 +128,7 @@ public static class DynamicTypeLogic
 
     public static string GetPropertyType(DynamicProperty property)
     {
-        var generator = new DynamicTypeCodeGenerator(EvalLogic.CodeGenEntitiesNamespace, null!, DynamicBaseType.Entity, null!, new HashSet<string>());
+        var generator = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenNamespace, null!, DynamicBaseType.Entity, null!, new HashSet<string>());
 
         return generator.GetPropertyType(property);
     }
@@ -172,7 +172,7 @@ public static class DynamicTypeLogic
         {
             var def = dt.GetDefinition();
 
-            var dcg = new DynamicTypeCodeGenerator(EvalLogic.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, EvalLogic.Namespaces);
+            var dcg = new DynamicTypeCodeGenerator(DynamicLogic.CodeGenNamespace, dt.TypeName, dt.BaseType, def, EvalLogic.Namespaces);
 
             var content = dcg.GetFileCode();
             return new CodeFile(dt.TypeName + ".cs", content);
@@ -183,7 +183,7 @@ public static class DynamicTypeLogic
         {
             var def = dt.GetDefinition();
 
-            var dlg = new DynamicTypeLogicGenerator(EvalLogic.CodeGenEntitiesNamespace, dt.TypeName, dt.BaseType, def, EvalLogic.Namespaces)
+            var dlg = new DynamicTypeLogicGenerator(DynamicLogic.CodeGenNamespace, dt.TypeName, dt.BaseType, def, EvalLogic.Namespaces)
             {
                 AlreadyTranslated = alreadyTranslatedExpressions?.TryGetC(dt.TypeName + "Entity"),
                 Formatted = formattedExpressions?.TryGetC(dt.TypeName + "Entity"),
@@ -194,7 +194,7 @@ public static class DynamicTypeLogic
         }).ToList();
         result.AddRange(logics);
 
-        var bs = new DynamicBeforeSchemaGenerator(EvalLogic.CodeGenEntitiesNamespace, types.Select(a => a.GetDefinition().CustomBeforeSchema).NotNull().ToList(), EvalLogic.Namespaces);
+        var bs = new DynamicBeforeSchemaGenerator(DynamicLogic.CodeGenNamespace, types.Select(a => a.GetDefinition().CustomBeforeSchema).NotNull().ToList(), EvalLogic.Namespaces);
         result.Add(new CodeFile("CodeGenBeforeSchema.cs", bs.GetFileCode()));
 
         return result;

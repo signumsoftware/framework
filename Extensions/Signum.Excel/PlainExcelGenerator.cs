@@ -141,7 +141,6 @@ public static class PlainExcelGenerator
             }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
-            document.Close();
         }
     }
 
@@ -205,7 +204,6 @@ public static class PlainExcelGenerator
             }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
-            document.Close();
         }
     }
 

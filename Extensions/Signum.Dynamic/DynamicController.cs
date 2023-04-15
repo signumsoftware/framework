@@ -29,12 +29,12 @@ public class DynamicController : ControllerBase
             DynamicLogic.CleanCodeGenFolder();
 
         Dictionary<string, CodeFile> codeFiles = DynamicLogic.GetCodeFilesDictionary();
-        compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: EvalLogic.CodeGenAssembly, needsCodeGenAssembly: false));
+        compileResult.Add(DynamicLogic.Compile(codeFiles, inMemory: inMemory, assemblyName: DynamicLogic.CodeGenAssembly, needsCodeGenAssembly: false));
 
         if (DynamicApiLogic.IsStarted)
         {
             Dictionary<string, CodeFile> apiFiles = DynamicApiLogic.GetCodeFiles().ToDictionaryEx(a => a.FileName, "CodeGenController C# code file");
-            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: EvalLogic.CodeGenControllerAssembly, needsCodeGenAssembly: true));
+            compileResult.Add(DynamicLogic.Compile(apiFiles, inMemory: inMemory, assemblyName: DynamicLogic.CodeGenControllerAssembly, needsCodeGenAssembly: true));
             codeFiles.AddRange(apiFiles);
         }
 
@@ -69,7 +69,7 @@ public class DynamicController : ControllerBase
 
 
         SystemEventLogLogic.Log("DynamicController.RestartServer");
-        EvalLogic.OnApplicationServerRestarted?.Invoke();
+        DynamicLogic.OnApplicationServerRestarted?.Invoke();
         lifeTime.StopApplication();
     }
 

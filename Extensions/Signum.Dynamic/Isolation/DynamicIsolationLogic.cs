@@ -31,7 +31,7 @@ public static class DynamicIsolationLogic
         {
             var entities = !Administrator.ExistsTable<DynamicTypeEntity>() ? new List<DynamicTypeEntity>() :
                 ExecutionMode.Global().Using(a => Database.Query<DynamicTypeEntity>().Where(a => a.BaseType == DynamicBaseType.Entity).ToList());
-            var dlg = new DynamicIsolationLogicGenerator(EvalLogic.CodeGenEntitiesNamespace, entities, EvalLogic.Namespaces);
+            var dlg = new DynamicIsolationLogicGenerator(DynamicLogic.CodeGenNamespace, entities, EvalLogic.Namespaces);
             var content = dlg.GetFileCode();
             result.Add(new CodeFile("CodeGenIsolationLogic.cs", content));
         }

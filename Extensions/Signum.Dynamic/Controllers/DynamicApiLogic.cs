@@ -55,7 +55,7 @@ public static class DynamicApiLogic
                         .Where(a => a.Mixin<DisabledMixin>().IsDisabled == false)
                         .ToList();
 
-                var dtcg = new DynamicApiCodeGenerator(EvalLogic.CodeGenControllerNamespace, controllers, EvalLogic.GetNamespaces().ToHashSet());
+                var dtcg = new DynamicApiCodeGenerator(DynamicLogic.CodeGenNamespace, controllers, EvalLogic.GetNamespaces().ToHashSet());
 
                 var content = dtcg.GetFileCode();
                 result.Add(new CodeFile("CodeGenController.cs", content));

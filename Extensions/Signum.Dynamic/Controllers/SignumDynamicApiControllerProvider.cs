@@ -10,9 +10,9 @@ public class SignumDynamicApiControllerProvider : IApplicationFeatureProvider<Co
 {
     public void PopulateFeature(IEnumerable<ApplicationPart> parts, ControllerFeature feature)
     {
-        if (EvalLogic.CodeGenControllerAssemblyPath.HasText())
+        if (DynamicLogic.CodeGenControllerAssemblyPath.HasText())
         {
-            var assembly = Assembly.LoadFrom(EvalLogic.CodeGenControllerAssemblyPath);
+            var assembly = Assembly.LoadFrom(DynamicLogic.CodeGenControllerAssemblyPath);
             var candidates = assembly.GetExportedTypes();
 
             foreach (var candidate in candidates)

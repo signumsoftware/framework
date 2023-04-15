@@ -84,7 +84,6 @@ public static class ExcelGenerator
             }
 
             workbookPart.Workbook.Save();
-            document.Close();
         }
     }
 

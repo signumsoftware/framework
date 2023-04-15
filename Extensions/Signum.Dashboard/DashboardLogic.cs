@@ -4,7 +4,6 @@ using Signum.Authorization.Rules;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
 using Signum.UserAssets;
-using Signum.UserAssets;
 using Signum.Files;
 using Signum.Scheduler;
 using Signum.UserAssets.Queries;
