@@ -76,7 +76,7 @@ export class TypeaheadController {
       if (this.timeoutHandle != undefined)
         clearTimeout(this.timeoutHandle);
 
-      this.timeoutHandle = setTimeout(() => this.populate(), this.props.itemsDelay);
+      this.timeoutHandle = window.setTimeout(() => this.populate(), this.props.itemsDelay);
     }
   }
 

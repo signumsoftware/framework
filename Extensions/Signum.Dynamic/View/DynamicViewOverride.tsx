@@ -60,15 +60,15 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   }
 
   function handleRemoveClick(lambda: string) {
-    setTimeout(() => showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
+    window.setTimeout(() => showPropmt("Remove", `vr.removeLine(${lambda})`), 0);
   }
 
   function handleInsertBeforeClick(lambda: string) {
-    setTimeout(() => showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
+    window.setTimeout(() => showPropmt("InsertBefore", `vr.insertBeforeLine(${lambda}, ctx => [yourElement]);`), 0);
   }
 
   function handleInsertAfterClick(lambda: string) {
-    setTimeout(() => showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
+    window.setTimeout(() => showPropmt("InsertAfter", `vr.insertAfterLine(${lambda}, ctx => [yourElement]);`), 0);
   }
 
   function handleRenderContextualMenu(pr: PropertyRoute) {

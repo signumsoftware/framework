@@ -40,7 +40,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.keyCode == 13) {
       btnOkRef.current!.focus();
-      setTimeout(() => {
+      window.setTimeout(() => {
         handleOkClick();
       }, 100);
     }

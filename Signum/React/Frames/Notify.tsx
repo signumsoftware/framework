@@ -46,7 +46,7 @@ export default function Notify() {
   function notifyTimeout(options: NotifyOptions, timeout: number = 2000): NotifyOptions {
     notify(options);
 
-    options.timeoutHandler = setTimeout(() => remove(options), timeout);
+    options.timeoutHandler = window.setTimeout(() => remove(options), timeout);
     return options;
   }
 

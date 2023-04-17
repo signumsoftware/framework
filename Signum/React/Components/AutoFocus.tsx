@@ -6,7 +6,7 @@ export function AutoFocus(p: { disabled?: boolean, delay?: number, children: Rea
   React.useEffect(() => {
     if (!p.disabled) {
 
-      var timer = setTimeout(() => {
+      var timer = window.setTimeout(() => {
         
         var input = Array.from(ref.current!.querySelectorAll("input, select, textarea"))
           .firstOrNull(e => {

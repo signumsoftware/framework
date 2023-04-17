@@ -80,7 +80,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
 
   React.useEffect(() => {
     if (p.initiallyFocused)
-      setTimeout(() => {
+      window.setTimeout(() => {
         let select = comboRef.current && comboRef.current.getSelect(); 
         if (select) {
           select.focus();

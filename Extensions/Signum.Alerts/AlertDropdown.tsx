@@ -119,7 +119,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
 
   React.useEffect(() => {
     if (ringing) {
-      var handler = setTimeout(() => {
+      var handler = window.setTimeout(() => {
         setRinging(false);
       }, props.keepRingingFor);
 
@@ -158,7 +158,7 @@ function AlertDropdownImp(props: { keepRingingFor: number }) {
     const toRemove = fixToRemove(toRemoveRaw);
     toRemove.removing = true;
     forceUpdate();
-    setTimeout(() => {
+    window.setTimeout(() => {
       if (alertGroups) {
         if (isSingleAlert(toRemove)) {
           var group = alertGroups.single(ag => ag.alerts.some(a => is(a.alert, toRemove.alert)));

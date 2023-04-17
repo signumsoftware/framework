@@ -78,7 +78,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
 
   //Is conditionally but the condition is a constant
   React.useEffect(() => {
-    const handle = setTimeout(() => {
+    const handle = window.setTimeout(() => {
       if (ticksRef.current != null && ticksRef.current != entityRef.current.ticks) {
         MessageModal.show({
           title: ConcurrentUserMessage.DatabaseChangesDetected.niceToString(),

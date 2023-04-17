@@ -186,7 +186,7 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
 
           for (var i = 0; i < markers.length; i++) {
             const marker = markers[i];
-            window.setTimeout(function () {
+            window.window.setTimeout(function () {
               marker.setAnimation(google.maps.Animation.DROP);
               marker.setMap(map);
             }, i * 200);

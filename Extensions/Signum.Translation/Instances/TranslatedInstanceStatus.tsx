@@ -23,7 +23,7 @@ export default function TranslationCodeStatus() {
     function handleInputChange(e: React.FormEvent<any>) {
       let f = (e.currentTarget as HTMLInputElement).files![0];
       let fileReader = new FileReader();
-      fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
+      fileReader.onerror = e => { window.setTimeout(() => { throw (e as any).error; }, 0); };
       fileReader.onload = e => {
         let content = ((e.target as any).result as string).after("base64,");
         let fileName = f.name;

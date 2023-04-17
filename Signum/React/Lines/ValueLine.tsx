@@ -70,7 +70,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
     React.useEffect(() => {
       if (this.props.initiallyFocused) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           let element = this.inputElement.current;
           if (element) {
             if (element instanceof HTMLInputElement)

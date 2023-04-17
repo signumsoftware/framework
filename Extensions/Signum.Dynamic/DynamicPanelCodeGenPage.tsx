@@ -270,7 +270,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
 
   async function refreshScreen() {
     while (p.restarting) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => window.setTimeout(resolve, 1000));
       forceUpdate();
     }
   }
@@ -284,7 +284,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
         return;
       } catch (e) {
         if (e instanceof SyntaxError) {
-          await new Promise(resolve => setTimeout(resolve, 500));
+          await new Promise(resolve => window.setTimeout(resolve, 500));
         }
         else {
           throw e;

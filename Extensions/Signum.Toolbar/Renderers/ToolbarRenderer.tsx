@@ -49,7 +49,7 @@ export default function ToolbarRenderer(p: {
   }, [location, response]);
 
   function handleRefresh() {
-    return setTimeout(() => setRefresh(!refresh), 500)
+    return window.setTimeout(() => setRefresh(!refresh), 500)
   }
 
   return (

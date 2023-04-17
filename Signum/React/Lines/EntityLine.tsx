@@ -98,7 +98,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     super.setValue(val, event);
 
     if (val == null) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.writeInTypeahead("");
       }, 100);
     }

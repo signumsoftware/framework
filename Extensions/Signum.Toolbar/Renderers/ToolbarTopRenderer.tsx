@@ -35,7 +35,7 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   }, [response, location]);
 
   function handleRefresh() {
-    return setTimeout(() => setRefresh(!refresh), 500)
+    return window.setTimeout(() => setRefresh(!refresh), 500)
   }
 
   return (

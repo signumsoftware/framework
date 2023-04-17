@@ -235,7 +235,7 @@ export function autoLogin(): Promise<UserEntity | undefined> {
       return undefined;
     });
 
-  return new Promise<undefined>((resolve) => setTimeout(() => resolve(undefined), 500))
+  return new Promise<undefined>((resolve) => window.setTimeout(() => resolve(undefined), 500))
     .then(() => {
       if (getAuthToken()) {
         return API.fetchCurrentUser()

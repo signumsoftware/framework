@@ -71,7 +71,7 @@ export default function MessageModal(p: MessageModalProps) {
 
   function setFocus(e: HTMLButtonElement | null) {
     if (e) {
-      setTimeout(() => e.focus(), 200);
+      window.setTimeout(() => e.focus(), 200);
     }
   }
 

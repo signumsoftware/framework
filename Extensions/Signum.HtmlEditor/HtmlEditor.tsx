@@ -80,7 +80,7 @@ export class HtmlEditorController {
 
     React.useEffect(() => {
       if (p.initiallyFocused) {
-        setTimeout(() => {
+        window.setTimeout(() => {
           if (this.editor)
             this.editor.focus();          
         }, p.initiallyFocused == true ? 0 : p.initiallyFocused as number);

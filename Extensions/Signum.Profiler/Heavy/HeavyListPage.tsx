@@ -55,7 +55,7 @@ export default function HeavyList() {
 
   function handleUpload() {
     let fileReader = new FileReader();
-    fileReader.onerror = e => { setTimeout(() => { throw (e as any).error; }, 0); };
+    fileReader.onerror = e => { window.setTimeout(() => { throw (e as any).error; }, 0); };
     fileReader.onload = e => {
       let content = ((e.target as any).result as string).after("base64,");
       let fileName = fileToUpload!.name;

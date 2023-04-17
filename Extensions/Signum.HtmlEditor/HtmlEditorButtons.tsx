@@ -64,7 +64,7 @@ export function SubMenu(p: { controller: HtmlEditorController, children: React.R
     function onWindowClick() {
       p.controller.setOverrideToolbar(undefined);
     }
-    setTimeout(() => { window.addEventListener('click', onWindowClick); });
+    window.setTimeout(() => { window.addEventListener('click', onWindowClick); });
     return () => window.removeEventListener('click', onWindowClick);
   }, []);
 

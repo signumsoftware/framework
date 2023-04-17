@@ -97,7 +97,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
 
         if (visible) {
           if (initialTimeout)
-            initialHandle.current = setTimeout(setNewSize, initialTimeout);
+            initialHandle.current = window.setTimeout(setNewSize, initialTimeout);
           else
             setNewSize();
         }
@@ -115,7 +115,7 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
       if (resizeHandle.current != null)
         clearTimeout(resizeHandle.current);
 
-      resizeHandle.current = setTimeout(() => {
+      resizeHandle.current = window.setTimeout(() => {
         if (htmlElement.current) {
           setNewSize()
         }
@@ -258,7 +258,7 @@ export function useThrottle<T>(value: T, timeout: number, options?: { enabled?: 
           lastRequested.current.value = value;
         } else {
           lastRequested.current = { value };
-          handleRef.current = setTimeout(function () {
+          handleRef.current = window.setTimeout(function () {
             setThrottledValue(lastRequested.current!.value);
             stop();
           }, timeout);
@@ -314,7 +314,7 @@ export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: Reac
   return React.useCallback((event: React.MouseEvent) => {
     clearClickTimeout();
     if (click && event.detail === 1) {
-      handleRef.current = setTimeout(() => {
+      handleRef.current = window.setTimeout(() => {
         click(event);
       }, options!.timeout);
     }

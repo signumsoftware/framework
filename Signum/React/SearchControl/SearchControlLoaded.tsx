@@ -470,7 +470,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.keyCode == 13) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         var input = (document.activeElement as HTMLInputElement);
         input.blur();
         this.doSearchPage1(true);
@@ -487,7 +487,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         //this.thead!.style.transform = translate;
         this.containerDiv.scrollTop = 0;
         this.containerDiv.style.overflowY = "hidden";
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.containerDiv!.style.overflowY = "";
         }, 10);
 

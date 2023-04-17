@@ -98,7 +98,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       if (timeoutWriteText.current)
         clearTimeout(timeoutWriteText.current);
 
-      timeoutWriteText.current = setTimeout(() => {
+      timeoutWriteText.current = window.setTimeout(() => {
         p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
         timeoutWriteText.current = null;
       }, 200);
@@ -110,7 +110,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
     if (p.onSearch && e.keyCode == 13) {
-      setTimeout(() => {
+      window.setTimeout(() => {
         p.onSearch!();
       }, 200);
     }

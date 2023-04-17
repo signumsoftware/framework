@@ -263,7 +263,7 @@ export function saveFileBlob(blob: Blob, fileName: string) {
 
     a.click();
 
-    setTimeout(() => window.URL.revokeObjectURL(url), 500);
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 500);
   }
 }
 
