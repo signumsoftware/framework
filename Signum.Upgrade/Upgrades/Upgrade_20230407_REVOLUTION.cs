@@ -27,18 +27,24 @@ class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
             uctx.DeleteFile(a.FilePath);
         });
 
-
-        var regex = new Regex(@"(../)*Signum.React/Scripts");
-        uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
+        var regex = new Regex(@"Framework\\Extensions\\Signum.(?<name>[^\.\\]*)");
+        uctx.ForeachCodeFile("Attributes.cs", "Framework/Extensions", a =>
         {
-            a.Replace(regex, "@framework");
-            a.Replace("@framework/Signum.Entities.DynamicQuery", "@framework/Signum.DynamicQuery");
-            a.Replace("/Authorization/", "/Signum.Authorization/");
-            a.Replace("/Omnibox/", "/Signum.Omnibox/");
-            a.Replace("/Translation/", "/Signum.Translation/");
-            a.Replace("/UserQueries/", "/Signum.UserQueries/");
-            a.Replace("/UserQueries/", "/Signum.UserQueries/");
+            var m = regex.Match(a.FilePath);
+            a.InsertAfterLastLine(l => m.Length > 0,  $"[assembly: AssemblySchemaName(\"{m.Groups["name"].Value.FirstLower()}\")]");
         });
+
+        regex = new Regex(@"(../)*Signum.React/Scripts");
+        //uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
+        //{
+        //    a.Replace(regex, "@framework");
+        //    a.Replace("@framework/Signum.Entities.DynamicQuery", "@framework/Signum.DynamicQuery");
+        //    a.Replace("/Authorization/", "/Signum.Authorization/");
+        //    a.Replace("/Omnibox/", "/Signum.Omnibox/");
+        //    a.Replace("/Translation/", "/Signum.Translation/");
+        //    a.Replace("/UserQueries/", "/Signum.UserQueries/");
+        //    a.Replace("/UserQueries/", "/Signum.UserQueries/");
+        //});
 
 
         //var directory = Directory.EnumerateDirectories(Path.Combine(uctx.RootFolder, @"Framework\Extensions"))

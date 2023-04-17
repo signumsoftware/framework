@@ -108,7 +108,8 @@ public class ExpressionContainer
             {
                 var mi = ReflectionTools.GetMethodInfo(lambdaToMethodOrProperty);
 
-                AssertExtensionMethod(mi);
+                if(mi.GetCustomAttribute<ExpressionFieldAttribute>() == null)
+                    throw new InvalidOperationException("The parameter 'lambdaToMethodOrProperty' should be an expression calling a expression method or property");
 
                 return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
             }
@@ -116,20 +117,14 @@ public class ExpressionContainer
             {
                 var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
 
+                if (pi.GetCustomAttribute<ExpressionFieldAttribute>() == null)
+                    throw new InvalidOperationException("The parameter 'lambdaToMethodOrProperty' should be an expression calling a expression method or property");
+
+
                 return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
             }
             else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
-    }
-
-    private static void AssertExtensionMethod(MethodInfo mi)
-    {
-        var assembly = mi.DeclaringType!.Assembly;
-
-        if (assembly == typeof(Enumerable).Assembly ||
-            assembly == typeof(Csv).Assembly ||
-            assembly == typeof(Lite).Assembly)
-            throw new InvalidOperationException("The parameter 'lambdaToMethod' should be an expression calling a expression method");
     }
 
     public ExtensionInfo Register<E, S>(Expression<Func<E, S>> extensionLambda, Func<string> niceName, string key, bool replace = false)

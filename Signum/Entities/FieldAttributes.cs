@@ -16,6 +16,21 @@ public sealed class AttachToUniqueIndexesAttribute : Attribute
 {
 }
 
+[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
+public class AssemblySchemaNameAttribute : Attribute
+{
+    public static Dictionary<Type, Assembly> OverridenAssembly = new Dictionary<Type, Assembly>();
+
+    public string SchemaName { get; private set; }
+
+    public string? ForNamespace { get; set; }
+
+    public AssemblySchemaNameAttribute(string schemaName)
+    {
+        this.SchemaName = schemaName;
+    }
+}
+
 public struct Implementations : IEquatable<Implementations>
 {
     object? arrayOrType;

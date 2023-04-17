@@ -9,6 +9,9 @@ public class EmailSenderConfigurationEntity : Entity
     {
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryFormat), m => m.Name);
         DescriptionManager.ExternalEnums.Add(typeof(SmtpDeliveryMethod), m => m.Name);
+
+        AssemblySchemaNameAttribute.OverridenAssembly.Add(typeof(SmtpDeliveryFormat), typeof(EmailSenderConfigurationEntity).Assembly!);
+        AssemblySchemaNameAttribute.OverridenAssembly.Add(typeof(SmtpDeliveryMethod), typeof(EmailSenderConfigurationEntity).Assembly!);
     }
 
     [UniqueIndex]
