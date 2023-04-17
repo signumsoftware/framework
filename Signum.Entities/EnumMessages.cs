@@ -290,6 +290,12 @@ public enum SearchMessage
     CombineRowsWith,
 
     SwitchViewMode,
+
+    [Description("Splits the string value by space and searches each part independently in an AND group")]
+    SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup,
+
+    [Description("Splits the values and searches each one independently in an AND group")]
+    SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup,
 }
 
 public enum SelectorMessage

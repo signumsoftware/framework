@@ -7,7 +7,7 @@ import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
-import { ComplexConditionSyntax, createFilterValueControl, MultiValue } from './FilterBuilder';
+import { ComplexConditionSyntax, createFilterValueControl, MultiEntity, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -54,7 +54,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
-    var label = f.pinned!.label || f.token?.niceName;
+    var label = f.pinned!.label || (f.token?.queryTokenType == "AnyOrAll" || f.token?.queryTokenType == "Element" ? f.token.parent?.niceName :  f.token?.niceName);
 
     if (f.pinned && (isCheckBox(f.pinned.active))) {
       return (
@@ -92,14 +92,15 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     if (isList(f.operation!))
       return (
         <FormGroup ctx={ctx} label={label}>
-          {inputId => <MultiValue  values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
+          {inputId => f.token?.filterType == "Lite" ?
+            <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={() => handleValueChange(f)} /> :
+            <MultiValue values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
               onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f))} />}
         </FormGroup>
       );
 
     return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), label, f.pinned!.active == "WhenHasValue");
   }
-
 
   function handleValueChange(f: FilterOptionParsed, avoidSearch?: boolean) {
 

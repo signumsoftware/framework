@@ -77,7 +77,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           column: p.column,
           row: p.row,
           active: p.active,
-          splitText: p.splitText,
+          splitValue: p.splitValue,
         });
       }
     }
@@ -204,7 +204,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
         column: pinned.column ?? undefined,
         row: pinned.row ?? undefined,
         active: pinned.active || undefined,
-        splitText: pinned.splitText || undefined,
+        splitValue: pinned.splitValue || undefined,
       };
     }
   }

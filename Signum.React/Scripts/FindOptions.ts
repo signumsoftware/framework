@@ -85,7 +85,7 @@ export interface PinnedFilter {
   row?: number;
   column?: number;
   active?: PinnedFilterActive;
-  splitText?: boolean;
+  splitValue?: boolean;
 }
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
@@ -119,7 +119,7 @@ export interface PinnedFilterParsed {
   row?: number;
   column?: number;
   active?: PinnedFilterActive;
-  splitText?: boolean;
+  splitValue?: boolean;
 }
 
 export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
@@ -128,7 +128,7 @@ export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
     row: pf.row,
     column: pf.column,
     active: pf.active,
-    splitText: pf.splitText
+    splitValue: pf.splitValue
   };
 }
 
@@ -235,6 +235,16 @@ export function hasAnyOrAll(token: QueryToken | undefined): boolean {
   return hasAnyOrAll(token.parent);
 }
 
+export function hasAny(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "AnyOrAll" && token.key == "Any")
+    return true;
+
+  return hasAny(token.parent);
+}
+
 export function isPrefix(prefix: QueryToken, token: QueryToken): boolean {
   return prefix.fullKey == token.fullKey || token.fullKey.startsWith(prefix.fullKey + ".");
 }
@@ -321,6 +331,16 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     ...fop,
     pinned: undefined
   };
+}
+
+export function canSplitValue(fo: FilterOptionParsed) {
+  if (isFilterGroupOptionParsed(fo))
+    return fo.pinned != null;
+
+  else {
+    return fo.operation && isList(fo.operation) && hasAny(fo.token) ||
+      fo.token && fo.token.filterType == "String";
+  }
 }
 
 export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {

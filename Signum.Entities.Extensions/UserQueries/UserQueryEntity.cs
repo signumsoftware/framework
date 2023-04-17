@@ -438,7 +438,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
 
     public PinnedFilterActive Active { get; set; }
 
-    public bool SplitText { get; set; }
+    public bool SplitValue { get; set; }
 
     internal PinnedQueryFilterEmbedded Clone() => new PinnedQueryFilterEmbedded
     {
@@ -446,7 +446,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
         Column = Column,
         Row = Row,
         Active = Active,
-        SplitText = SplitText,
+        SplitValue = SplitValue,
     };
 
     internal PinnedQueryFilterEmbedded FromXml(XElement p, IFromXmlContext ctx)
@@ -455,7 +455,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
         Column = p.Attribute("Column")?.Value.ToInt();
         Row = p.Attribute("Row")?.Value.ToInt();
         Active = ModernizeActive(p.Attribute("Active")?.Value)?.ToEnum<PinnedFilterActive>() ?? PinnedFilterActive.Always;
-        SplitText = p.Attribute("SplitText")?.Value.ToBool() ?? false;
+        SplitValue = p.Attribute("SplitValue")?.Value.ToBool() ?? p.Attribute("SplitText")?.Value.ToBool() ?? false;
         return this;
     }
 
@@ -475,7 +475,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
             Column?.Let(l => new XAttribute("Column", l))!,
             Row?.Let(l => new XAttribute("Row", l))!,
             Active == PinnedFilterActive.Always ? null! : new XAttribute("Active", Active.ToString())!,
-            SplitText == false ? null! : new XAttribute("SplitText", SplitText)
+            SplitValue == false ? null! : new XAttribute("SplitValue", SplitValue)
         );
     }
 }
@@ -503,7 +503,7 @@ public static class UserQueryUtils
                 if (filter.Pinned.Active == PinnedFilterActive.NotCheckbox_Checked)
                     return null;
 
-                if (filter.Pinned.SplitText && !filter.ValueString.HasText())
+                if (filter.Pinned.SplitValue && !filter.ValueString.HasText())
                     return null;
             }
 

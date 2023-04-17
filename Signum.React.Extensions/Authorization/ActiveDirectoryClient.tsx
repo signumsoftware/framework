@@ -88,7 +88,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       defaultFilters: [
         {
           groupOperation: "Or",
-          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
           filters: [
             { token: "DisplayName", operation: "Contains" },
             { token: "GivenName", operation: "Contains" },
@@ -116,7 +116,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       defaultFilters: [
         {
           groupOperation: "Or",
-          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
           filters: [
             { token: "DisplayName", operation: "Contains" },
           ],
@@ -189,7 +189,7 @@ export function toADGroupRequest(row: ResultRow, scl: SearchControlLoaded): ADGr
 }
 
 function getSearch(fo: FindOptionsParsed): string | null {
-  var bla = fo.filterOptions.firstOrNull(a => a.pinned?.splitText == true)?.value;
+  var bla = fo.filterOptions.firstOrNull(a => a.pinned?.splitValue == true)?.value;
   return !bla ? null : bla as string;
 }
 

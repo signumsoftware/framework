@@ -3,12 +3,12 @@ import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox
+  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue
 } from '../FindOptions'
-import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
+import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
 import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
-import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat } from '../Reflection'
+import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly, EntityStrip } from '../Lines'
+import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat, PropertyRoute } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -365,7 +365,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
         {p.showPinnedFiltersOptions && p.showDashboardBehaviour && <td>
           <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
-        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
+        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly}  />}
       </tr >
 
       {
@@ -432,7 +432,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const readOnly = p.readOnly || f.frozen;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
     var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
     var textArea = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"));
@@ -458,7 +458,7 @@ function isFilterActive(fo: FilterOptionParsed) {
   if (fo.pinned == null)
     return true;
 
-  if (fo.pinned.splitText && (fo.value == null || fo.value == ""))
+  if (fo.pinned.splitValue && (fo.value == null || fo.value == ""))
     return false;
 
   return fo.pinned.active == null /*Always*/ ||
@@ -530,7 +530,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         }
       }
     }
+
     f.token = newToken ?? undefined;
+
+    if (p.filter.pinned?.splitValue && !canSplitValue(p.filter))
+      p.filter.pinned.splitValue = undefined;
 
     if (p.onTokenChanged)
       p.onTokenChanged(newToken ?? undefined);
@@ -543,9 +547,13 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
   function handleChangeOperation(event: React.FormEvent<HTMLSelectElement>) {
     const operation = (event.currentTarget as HTMLSelectElement).value as FilterOperation;
     if (isList(operation) != isList(p.filter.operation!))
-      p.filter.value = isList(operation) ? [p.filter.value] : p.filter.value[0];
+      p.filter.value = isList(operation) && p.filter.token?.filterType == "Lite" ? [p.filter.value].notNull() :
+        isList(operation) ? [p.filter.value] :
+        p.filter.value[0];
 
     p.filter.operation = operation;
+    if (p.filter.pinned?.splitValue && !canSplitValue(p.filter))
+      p.filter.pinned.splitValue = undefined;
 
     p.onFilterChanged();
 
@@ -610,7 +618,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
           <DashboardBehaviourComponent filter={f} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
 
-        {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
+        {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor fo={f} onChange={() => changeFilter()} readonly={readOnly} />}
 
       </tr>
     </>
@@ -630,10 +638,16 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     const readOnly = p.readOnly || f.frozen;
 
-    if (isList(f.operation!))
+    if (isList(f.operation!)) {
+      if (f.token?.filterType == "Lite")
+        return <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={handleValueChange} />;
+
       return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange)} readOnly={readOnly} onChange={handleValueChange} />;
 
-    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
+
+    }
+
+    const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
     if (f.operation == "ComplexCondition" || f.operation == "FreeText") {
       const isComplex = f.operation == "ComplexCondition";
@@ -656,39 +670,49 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
 
 interface PinnedFilterEditorProps {
-  pinned: PinnedFilterParsed;
+  fo: FilterOptionParsed;
   readonly: boolean;
   onChange: () => void;
 }
 
+
 export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
+
+  var pinned = p.fo.pinned!;
+
   return (
     <>
       <td className="sf-pinned-filter-cell">
         <div>
           <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={p.readonly}
-            value={p.pinned.label ?? ""}
-            onChange={e => { p.pinned.label = e.currentTarget.value; p.onChange(); }} />
+            value={pinned.label ?? ""}
+            onChange={e => { pinned.label = e.currentTarget.value; p.onChange(); }} />
         </div>
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(p.pinned, _ => _.column), SearchMessage.Column.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.column), SearchMessage.Column.niceToString())}
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(p.pinned, _ => _.row), SearchMessage.Row.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.row), SearchMessage.Row.niceToString())}
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {renderActiveDropdown(Binding.create(p.pinned, a => a.active), "Select when the filter will take effect")}
+        {renderActiveDropdown(Binding.create(pinned, a => a.active), "Select when the filter will take effect")}
       </td>
       <td className="sf-pinned-filter-cell">
-        <input type="checkbox" checked={p.pinned.splitText}
-          readOnly={p.readonly}
-          className="form-check-input"
-          onChange={e => { p.pinned.splitText = e.currentTarget.checked; p.onChange() }}
-          title="Splits the texts by spaces to search each part independently" />
+        {canSplitValue(p.fo) &&
+          <input type="checkbox" checked={pinned.splitValue ?? false}
+            readOnly={p.readonly}
+            className="form-check-input"
+            onChange={e => { pinned.splitValue = e.currentTarget.checked; p.onChange() }}
+            title={
+              !canSplitValue(p.fo) ? undefined :
+                !isFilterGroupOptionParsed(p.fo) && isList(p.fo.operation!) ? SearchMessage.SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup.niceToString() :
+                  SearchMessage.SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup.niceToString()
+            } />
+        }
       </td>
     </>
   );
@@ -840,7 +864,7 @@ export function MultiValue(p: MultiValueProps) {
                       formGroupStyle: "None",
                       formSize: "xs",
                       readOnly: p.readOnly
-                    }, undefined as any, new Binding<any>(p.values, i)))
+                    }, undefined, new Binding<any>(p.values, i)))
                 }
               </td>
             </tr>)
@@ -858,6 +882,23 @@ export function MultiValue(p: MultiValueProps) {
       </tbody>
     </table>
   );
+}
+
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }) {
+  const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
+
+
+  mListEntity.current.clear();
+  mListEntity.current.push(...p.values.map(lite => newMListElement(lite)));
+
+  var ctx = new TypeContext<MList<Lite<Entity>>>(undefined, { formGroupStyle: "None", readOnly: p.readOnly, formSize: "xs" }, undefined, Binding.create(mListEntity, a => a.current));
+
+
+  return <EntityStrip ctx={ctx} type={{ name: p.type, isLite: true, isCollection: true }} create={false} vertical={p.vertical} onChange={() => {
+    p.values.clear();
+    p.values.push(...mListEntity.current.map(a => a.element));
+    p.onChange();
+  }} />
 }
 
 
@@ -902,6 +943,7 @@ export function ComplexConditionSyntax() {
 
 }
 
+
 ComplexConditionSyntax.examples = [
   "banana AND strawberry",
   "banana OR strawberry",
@@ -911,6 +953,8 @@ ComplexConditionSyntax.examples = [
   "NEAR(\"apple\", \"orange\")",
   "NEAR((\"apple\", \"orange\"), 3)",
 ];
+
+
 
 function niceNameOrSymbol(fo: FilterOperation) {
   switch (fo) {
