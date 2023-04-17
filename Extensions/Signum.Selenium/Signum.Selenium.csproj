@@ -4,6 +4,7 @@
 		<TargetFramework>net7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
 	<ItemGroup>
