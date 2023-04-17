@@ -15,8 +15,7 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
           <fieldset>
             <legend>Active Directory (Windows)</legend>
             <ValueLine ctx={ctxb.subCtx(n => n.domainName)} />
-            <ValueLine ctx={ctxb.subCtx(n => n.domainServer)} />
-            <ValueLine ctx={ctxb.subCtx(ad => ad.directoryRegistry_Username)} helpText="Required if the IIS user is not in AD" />
+            <ValueLine ctx={ctxb.subCtx(ad => ad.directoryRegistry_Username)} helpText="Required for DirectoryServices if the IIS user is not in AD" />
             <ValueLine ctx={ctxb.subCtx(ad => ad.directoryRegistry_Password)} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithWindowsAuthenticator)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithActiveDirectoryRegistry)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
@@ -28,7 +27,7 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
             <ValueLine ctx={ctxb.subCtx(n => n.azure_ApplicationID)} />
             <ValueLine ctx={ctxb.subCtx(n => n.azure_DirectoryID)} />
             <ValueLine ctx={ctxb.subCtx(n => n.azure_ClientSecret)} helpText="Required for Microsoft Graph, not for Azure Log-in" />
-            <ValueLine ctx={ctxb.subCtx(n => n.loginWithAzureAD)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }}/>
+            <ValueLine ctx={ctxb.subCtx(n => n.loginWithAzureAD)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
           </fieldset>
         </div>
       </div>
@@ -36,11 +35,8 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
       <ValueLine ctx={ctx.subCtx(n => n.allowMatchUsersBySimpleUserName)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
       <ValueLine ctx={ctx.subCtx(n => n.autoUpdateUsers)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} onChange={forceUpdate} />
       <ValueLine ctx={ctx.subCtx(n => n.autoCreateUsers)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} onChange={forceUpdate} />
-      {ctx.value.autoCreateUsers && < div >
-        <EntityTable ctx={ctx.subCtx(n => n.roleMapping)} />
-        <EntityLine ctx={ctx.subCtx(n => n.defaultRole)} />
-      </div>
-      }
+      <EntityTable ctx={ctx.subCtx(n => n.roleMapping)} />
+      <EntityLine ctx={ctx.subCtx(n => n.defaultRole)} />
     </div>
   );
 }

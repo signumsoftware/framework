@@ -100,6 +100,15 @@ public class SqlServerConnector : Connector
     public override bool SupportsScalarSubquery { get { return true; } }
     public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
+    public override bool SupportsFullTextSearch
+    {
+        get
+        {
+            var result = (int)this.ExecuteScalar(new SqlPreCommandSimple("SELECT FULLTEXTSERVICEPROPERTY('IsFullTextInstalled')"), CommandType.Text)!;
+            return result == 1;
+        }
+    }
+
     T EnsureConnectionRetry<T>(Func<SqlConnection?, T> action)
     {
         if (Transaction.HasTransaction)
@@ -713,6 +722,25 @@ open cur
 close cur
 deallocate cur";
 
+    public static readonly string RemoveAllFullTextCatallogs =
+@"declare @catallogName nvarchar(128)
+DECLARE @sql nvarchar(255)
+
+declare cur cursor fast_forward for
+select name
+from sys.fulltext_catalogs
+open cur
+    fetch next from cur into @catallogName
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP FULLTEXT CATALOG [' + @catallogName + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @catallogName
+    end
+close cur
+deallocate cur";
+
+
     public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
@@ -725,7 +753,8 @@ deallocate cur";
             new SqlPreCommandSimple(Use(databaseName, RemoveAllConstraintsScript)),
             Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
-            new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas)))
+            new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas))),
+            Connector.Current.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
             )!;
     }
 

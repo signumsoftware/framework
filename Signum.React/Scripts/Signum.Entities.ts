@@ -583,6 +583,7 @@ export module SearchMessage {
   export const InvalidColumnExpression = new MessageKey("SearchMessage", "InvalidColumnExpression");
   export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
   export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
+  export const GroupPrefix = new MessageKey("SearchMessage", "GroupPrefix");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
   export const DeleteAllFilter = new MessageKey("SearchMessage", "DeleteAllFilter");
@@ -637,8 +638,11 @@ export module SearchMessage {
   export const PaginationFirst_01Elements = new MessageKey("SearchMessage", "PaginationFirst_01Elements");
   export const ReturnNewEntity = new MessageKey("SearchMessage", "ReturnNewEntity");
   export const DoYouWantToSelectTheNew01_G = new MessageKey("SearchMessage", "DoYouWantToSelectTheNew01_G");
-  export const ShowPinnedFiltersOptions = new MessageKey("SearchMessage", "ShowPinnedFiltersOptions");
-  export const HidePinnedFiltersOptions = new MessageKey("SearchMessage", "HidePinnedFiltersOptions");
+  export const EditPinnedFilters = new MessageKey("SearchMessage", "EditPinnedFilters");
+  export const PinFilter = new MessageKey("SearchMessage", "PinFilter");
+  export const UnpinFilter = new MessageKey("SearchMessage", "UnpinFilter");
+  export const IsActive = new MessageKey("SearchMessage", "IsActive");
+  export const Split = new MessageKey("SearchMessage", "Split");
   export const SummaryHeader = new MessageKey("SearchMessage", "SummaryHeader");
   export const SummaryHeaderMustBeAnAggregate = new MessageKey("SearchMessage", "SummaryHeaderMustBeAnAggregate");
   export const HiddenColumn = new MessageKey("SearchMessage", "HiddenColumn");
@@ -649,8 +653,6 @@ export module SearchMessage {
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
-  export const PinnFilter = new MessageKey("SearchMessage", "PinnFilter");
-  export const UnpinnFilter = new MessageKey("SearchMessage", "UnpinnFilter");
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
 }
 

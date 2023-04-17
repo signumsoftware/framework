@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FormGroup, FormControlReadonly, ValueLine, ValueLineType, EntityLine, EntityCombo, EntityList, EntityRepeater } from '@framework/Lines'
 import { classes, Dic } from '@framework/Globals'
 import * as Finder from '@framework/Finder'
-import { QueryDescription, SubTokensOptions, QueryToken, filterOperations, OrderType, ColumnOptionsMode } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, QueryToken, OrderType, ColumnOptionsMode, getFilterOperations } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfo, isTypeEntity, Binding, getTypeInfos } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import { TypeContext, FormGroupStyle } from '@framework/TypeContext'
@@ -493,21 +493,12 @@ class FilterOptionsComponent extends BaseOptionsComponent<FilterOptionExpr> {
         <td>{this.renderButtons(index)}</td>
         <td> <QueryTokenBuilderString label="columnName" token={item.token} parsedToken={item.parsedToken} onChange={newToken => this.handleColumnChange(item, newToken)}
           queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} hideLabel={true} /></td>
-        <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.operation)} type="string" defaultValue={null} options={this.getOperations(item.parsedToken)} />}</td>
+        <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.operation)} type="string" defaultValue={null} options={getFilterOperations(item.parsedToken)} />}</td>
         <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.value)} type={FilterOptionsComponent.getValueType(item.parsedToken)} defaultValue={null} />}</td>
         <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.frozen)} type="boolean" defaultValue={false} /></td>
         <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
       </tr>
     );
-  }
-
-  getOperations(token: QueryToken): FilterOperation[] {
-    var filterType = token.filterType;
-
-    if (!filterType)
-      return [];
-
-    return filterOperations[filterType]
   }
 
   static getValueType(token: QueryToken): "string" | "boolean" | "number" | null {

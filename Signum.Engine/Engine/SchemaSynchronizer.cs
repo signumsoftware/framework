@@ -33,6 +33,9 @@ public static class SchemaSynchronizer
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
+
+
+
         SimplifyDiffTables?.Invoke(databaseTables);
 
         replacements.AskForReplacements(databaseTables.Keys.ToHashSet(), modelTables.Keys.ToHashSet(), Replacements.KeyTables);
@@ -45,6 +48,17 @@ public static class SchemaSynchronizer
 
         Dictionary<ITable, Dictionary<string, TableIndex>> modelIndices = modelTables.Values
             .ToDictionary(t => t, t => t.GeneratAllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
+
+        var bla = modelIndices.OrderBy(a => a.Key.ToString()).ToList();
+
+        var modelFullTextCatallogs = (from kvp in modelIndices
+                                      from fti in kvp.Value.Values.OfType<FullTextTableIndex>()
+                                      select new FullTextCatallogName(fti.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
+
+        List<FullTextCatallogName> databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ?
+            PostgresCatalogSchema.GetFullTextSearchCatallogs(s.DatabaseNames()) :
+            SysTablesSchema.GetFullTextSearchCatallogs(s.DatabaseNames());
+
 
         //To --> From
         Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList = new Dictionary<ObjectName, Dictionary<string, string>>();
@@ -111,6 +125,14 @@ public static class SchemaSynchronizer
 
             if (preRenameColumns != null)
                 preRenameColumns.GoAfter = true;
+
+            SqlPreCommand? createFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs.ToDictionary(a => a),
+                databaseFullTextCatallogs.ToDictionary(a => a),
+                createNew: (_, newSN) => sqlBuilder.CreateFullTextCatallog(newSN),
+                removeOld: null,
+                mergeBoth: null
+                );
 
             SqlPreCommand? createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
@@ -440,7 +462,7 @@ public static class SchemaSynchronizer
                     var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                        createNew: (i, mix) => mix is UniqueTableIndex or FullTextTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
@@ -481,8 +503,17 @@ public static class SchemaSynchronizer
                 mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
              );
 
+            SqlPreCommand? dropFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs.ToDictionary(a => a),
+                databaseFullTextCatallogs.ToDictionary(a => a),
+                createNew: null,
+                removeOld: (_, newSN) => sqlBuilder.DropFullTextCatallog(newSN),
+                mergeBoth: null
+                );
+
             return SqlPreCommand.Combine(Spacing.Triple,
                 preRenameColumns,
+                createFullTextCatallogs,
                 createSchemas,
                 dropStatistics,
 
@@ -495,7 +526,9 @@ public static class SchemaSynchronizer
                 addForeingKeys,
                 addIndices, addIndicesHistory,
 
-                dropSchemas);
+                dropSchemas,
+                dropFullTextCatallogs
+            );
         }
     }
 
@@ -985,6 +1018,18 @@ public class DiffTable
         set { Indices.AddRange(value, a => a.IndexName, a => a); }
     }
 
+    public DiffIndex? FullTextIndex
+    {
+        get { return Indices.Values.SingleOrDefault(a => a.FullTextIndex != null); }
+        set
+        {
+            if (value != null)
+                Indices[FullTextTableIndex.FULL_TEXT] = value;
+            else
+                Indices.Remove(FullTextTableIndex.FULL_TEXT);
+        }
+    }
+
     public SysTableTemporalType TemporalType;
     public ObjectName? TemporalTableName;
     public DiffPeriod? Period;
@@ -1020,6 +1065,9 @@ public class DiffTable
     }
 }
 
+public record class FullTextCatallogName(string Name, DatabaseName? Database);
+
+
 
 public enum SysTableTemporalType
 {
@@ -1045,8 +1093,9 @@ public class DiffIndex
 {
     public bool IsUnique;
     public bool IsPrimary;
+    public FullTextIndex? FullTextIndex; 
     public string IndexName;
-    public string ViewName;
+    public string? ViewName;
     public string? FilterDefinition;
     public DiffIndexType? Type;
 
@@ -1078,6 +1127,9 @@ public class DiffIndex
     {
         if (mix is UniqueTableIndex && ((UniqueTableIndex)mix).ViewName != null)
             return null;
+
+        if (mix is FullTextTableIndex)
+            return DiffIndexType.FullTextIndex;
 
         if (mix is PrimaryKeyIndex)
             return Schema.Current.Settings.IsPostgres ? DiffIndexType.NonClustered : DiffIndexType.Clustered;
@@ -1116,6 +1168,13 @@ public class DiffIndex
     }
 }
 
+public class FullTextIndex
+{
+    public string CatallogName;
+    public string StopList;
+    public string PropertiesList;
+}
+
 public enum DiffIndexType
 {
     Heap = 0,
@@ -1126,6 +1185,9 @@ public enum DiffIndexType
     ClusteredColumnstore = 5,
     NonClusteredColumnstore = 6,
     NonClusteredHash = 7,
+
+
+    FullTextIndex = 100,
 }
 
 public enum GeneratedAlwaysType

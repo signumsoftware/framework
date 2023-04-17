@@ -8,9 +8,6 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     [StringLengthValidator(Max = 200)]
     public string? DomainName { get; set; }
 
-    [StringLengthValidator(Max = 250)]
-    public string? DomainServer { get; set; }
-
     public string? DirectoryRegistry_Username { get; set; }
 
     [Format(FormatAttribute.Password)]
@@ -49,13 +46,6 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
         {
             if (pi.Name == nameof(DomainName) && !DomainName.HasText())
                 return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
-            if (pi.Name == nameof(DomainServer) && !DomainServer.HasText())
-                return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
-
-            if (pi.Name == nameof(DirectoryRegistry_Username) && DirectoryRegistry_Username != null)
-                if (DirectoryRegistry_Username.Contains("@") || DirectoryRegistry_Username.Contains("\\") || DirectoryRegistry_Username.Contains("/"))
-                    return ValidationMessage._0DoesNotHaveAValid1Format.NiceToString(pi.NiceName(), "Simple Username");
         }
 
         if (LoginWithAzureAD)

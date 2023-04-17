@@ -110,22 +110,28 @@ internal class ConditionsRewriter: DbExpressionVisitor
                 return false;
         }
 
+        if(expression is SqlFunctionExpression sf)
+        {
+            return
+                sf.SqlFunction == SqlFunction.CONTAINS.ToString() ||
+                sf.SqlFunction == SqlFunction.FREETEXT.ToString();
+        }
+
         var exp = (DbExpression)expression;
         return exp.DbNodeType switch
         {
-            DbExpressionType.Exists or 
-            DbExpressionType.Like or 
-            DbExpressionType.In or 
-            DbExpressionType.IsNull or 
+            DbExpressionType.Exists or
+            DbExpressionType.Like or
+            DbExpressionType.In or
+            DbExpressionType.IsNull or
             DbExpressionType.IsNotNull => true,
 
-            DbExpressionType.SqlFunction or 
-            DbExpressionType.Column or 
-            DbExpressionType.Projection or 
-            DbExpressionType.Case or 
-            DbExpressionType.SqlConstant or 
+            DbExpressionType.Column or
+            DbExpressionType.Projection or
+            DbExpressionType.Case or
+            DbExpressionType.SqlConstant or
             DbExpressionType.SqlCast => false,
-            
+
             _ => throw new InvalidOperationException("Expected expression: {0}".FormatWith(expression.ToString())),
         };
     }
@@ -278,7 +284,7 @@ internal class ConditionsRewriter: DbExpressionVisitor
     {
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => MakeSqlValue(Visit(a)));
         if (args != sqlFunction.Arguments)
-            return new SqlTableValuedFunctionExpression(sqlFunction.SqlFunction, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
+            return new SqlTableValuedFunctionExpression(sqlFunction.FunctionName, sqlFunction.ViewTable, sqlFunction.SingleColumnType, sqlFunction.Alias, args);
         return sqlFunction;
     }
 

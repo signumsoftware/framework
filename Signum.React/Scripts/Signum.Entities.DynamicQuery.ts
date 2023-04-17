@@ -47,7 +47,9 @@ export type FilterOperation =
   "NotEndsWith" |
   "NotLike" |
   "IsIn" |
-  "IsNotIn";
+  "IsNotIn" |
+  "ComplexCondition" |
+  "FreeText";
 
 export const FilterType = new EnumType<FilterType>("FilterType");
 export type FilterType =
@@ -77,10 +79,10 @@ export const PinnedFilterActive = new EnumType<PinnedFilterActive>("PinnedFilter
 export type PinnedFilterActive =
   "Always" |
   "WhenHasValue" |
-  "Checkbox_StartChecked" |
-  "Checkbox_StartUnchecked" |
-  "NotCheckbox_StartChecked" |
-  "NotCheckbox_StartUnchecked";
+  "Checkbox_Checked" |
+  "Checkbox_Unchecked" |
+  "NotCheckbox_Checked" |
+  "NotCheckbox_Unchecked";
 
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
@@ -141,6 +143,10 @@ export module QueryTokenMessage {
   export const EntityType = new MessageKey("QueryTokenMessage", "EntityType");
   export const UtcDateTime = new MessageKey("QueryTokenMessage", "UtcDateTime");
   export const DateTimePart = new MessageKey("QueryTokenMessage", "DateTimePart");
+  export const MatchRank = new MessageKey("QueryTokenMessage", "MatchRank");
+  export const MatchRankFor0 = new MessageKey("QueryTokenMessage", "MatchRankFor0");
+  export const MatchSnippet = new MessageKey("QueryTokenMessage", "MatchSnippet");
+  export const SnippetOf0 = new MessageKey("QueryTokenMessage", "SnippetOf0");
 }
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");

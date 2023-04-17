@@ -169,6 +169,10 @@ public enum SearchMessage
     AddFilter,
     [Description("Add group")]
     AddGroup,
+
+    [Description("Group Prefix")]
+    GroupPrefix,
+
     [Description("Add value")]
     AddValue,
     [Description("Delete filter")]
@@ -253,10 +257,20 @@ public enum SearchMessage
     ReturnNewEntity,
     [Description("Do you want to return the new {0} ({1})?")]
     DoYouWantToSelectTheNew01_G,
-    [Description("Show pinned filter options")]
-    ShowPinnedFiltersOptions,
-    [Description("Hide pinned filter options")]
-    HidePinnedFiltersOptions,
+    [Description("Edit pinned filters")]
+    EditPinnedFilters,
+    
+    [Description("Pin filter")]
+    PinFilter,
+    [Description("Unpin filter")]
+    UnpinFilter,
+
+    [Description("Is Active")]
+    IsActive,
+
+    [Description("Split")]
+    Split,
+
     [Description("Summary header")]
     SummaryHeader,
     [Description("Summary header must be an aggregate (like Sum, Count, etc..)")]
@@ -275,8 +289,6 @@ public enum SearchMessage
     MoreThanOne0Selected,
     CombineRowsWith,
 
-    PinnFilter,
-    UnpinnFilter,
     SwitchViewMode,
 }
 

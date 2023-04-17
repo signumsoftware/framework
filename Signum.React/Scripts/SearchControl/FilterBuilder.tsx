@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import {
-  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, filterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
+  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
   isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox
 } from '../FindOptions'
 import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
@@ -16,8 +16,9 @@ import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '..
 import "./FilterBuilder.css"
 import { NumericTextBox } from '../Lines/ValueLine';
 import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
-import { Dropdown } from 'react-bootstrap'
+import { Button, Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import { TypeEntity } from '../Signum.Entities.Basics'
+import PinnedFilterBuilder from './PinnedFilterBuilder'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -55,7 +56,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
       } as FilterGroupOptionParsed :
       {
         token: p.lastToken,
-        operation: (lastToken && (filterOperations[lastToken.filterType!] ?? []).firstOrNull()) ?? undefined,
+        operation: (lastToken && (getFilterOperations(lastToken) ?? []).firstOrNull()) ?? undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);
@@ -89,6 +90,9 @@ export default function FilterBuilder(p: FilterBuilderProps) {
   function handleFilterChanged() {
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
+
+    if (showPinnedFiltersOptions)
+      forceUpdate();
   };
 
   function handleHeightChanged() {
@@ -98,24 +102,39 @@ export default function FilterBuilder(p: FilterBuilderProps) {
 
 
   var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
-
+  var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
   return (
     <fieldset className="form-xs">
+      {showPinnedFiltersOptions && <div className="mb-3 border-bottom">
+        <h4 className="lead">Preview</h4>
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} />
+      </div>
+      }
       {p.title && <legend>{p.title}</legend>}
       <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
         <table className="table-sm">
           <thead>
             <tr>
-              <th style={{ minWidth: "24px" }}>{!p.readOnly && p.filterOptions.length > 0 &&
-                <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
-                  className="sf-line-button sf-remove"
-                  onClick={handleDeleteAllFilters}>
-                  <FontAwesomeIcon icon="xmark" />
-                </a>}</th>
-              <th>{SearchMessage.Field.niceToString()}</th>
+              <th className="ps-0">
+                <div className="d-flex">
+                  {!p.readOnly && p.filterOptions.length > 0 &&
+                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
+                      className="sf-line-button sf-remove sf-remove-filter-icon"
+                      onClick={handleDeleteAllFilters}>
+                      <FontAwesomeIcon icon="xmark" />
+                    </a>}
+                  {SearchMessage.Field.niceToString()}
+                </div>
+              </th>
               <th>{SearchMessage.Operation.niceToString()}</th>
               <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
               {showPinnedFiltersOptions && <th></th>}
+              {showDashboardBehaviour && <th></th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.Label.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.Column.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.Row.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.IsActive.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.Split.niceToString()}</th>}
             </tr>
           </thead>
           <tbody>
@@ -126,15 +145,18 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
                 lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={(p.showDashboardBehaviour ?? true) && showPinnedFiltersOptions}
-                disableValue={false} /> :
+                showDashboardBehaviour={showDashboardBehaviour}
+                disableValue={false}
+                level={0}
+              /> :
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
                 showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={(p.showDashboardBehaviour ?? true) && showPinnedFiltersOptions}
-                disableValue={false} />
+                showDashboardBehaviour={showDashboardBehaviour}
+                disableValue={false}
+                level={0} />
             )}
             {!p.readOnly &&
               <tr className="sf-filter-create">
@@ -150,10 +172,10 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddGroup.niceToString()}
                   </a>
 
-                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? (showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString() : undefined}
+                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
                     className="sf-line-button ms-3"
                     onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "star"]} className="me-1" />{(showPinnedFiltersOptions ? SearchMessage.HidePinnedFiltersOptions : SearchMessage.ShowPinnedFiltersOptions).niceToString()}
+                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
                   </a>
                   }
                 </td>
@@ -188,6 +210,7 @@ export interface FilterGroupComponentsProps {
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   disableValue: boolean;
+  level: number;
 }
 
 export function FilterGroupComponent(p: FilterGroupComponentsProps) {
@@ -247,7 +270,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       } as FilterGroupOptionParsed :
       {
         token: lastToken,
-        operation: lastToken && (filterOperations[lastToken.filterType!] || []).firstOrNull() || undefined,
+        operation: lastToken && getFilterOperations(lastToken).firstOrNull() || undefined,
         value: undefined,
         frozen: false
       } as FilterConditionOptionParsed);
@@ -275,42 +298,31 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
   const readOnly = fg.frozen || p.readOnly;
 
+  var paddingLeft = (25 * p.level);
+  var paddingLeftNext = (25 * (p.level + 1)) + 5;
   return (
-    <tr className="sf-filter-group">
-      <td style={{ verticalAlign: "top" }}>
-        {!readOnly &&
-          <a href="#" 
-            className="sf-line-button sf-remove"
-            onClick={handleDeleteFilter}>
-            <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
-          </a>}
-      </td>
-      <td colSpan={3 + (p.showPinnedFiltersOptions ? 1 : 0) + (p.showDashboardBehaviour ? 1 : 0)} style={{ backgroundColor: fg.groupOperation == "Or" ? "#eee" : "#fff", border: "1px solid #ddd" }}>
-        <div className="justify-content-between d-flex" >
-          <div className="row gx-1">
-            <div className="col-auto">
+    <>
+      <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
+        <td style={{ paddingLeft: paddingLeft }}>
+          <div className="d-flex">
+            {!readOnly &&
               <a href="#"
-                onClick={handleExpandCollapse}                
-                className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "mx-2")} >
+                className="sf-line-button sf-remove sf-remove-filter-icon"
+                onClick={handleDeleteFilter}>
+                <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
+              </a>}
+
+
+            <div className="align-items-center d-flex">
+              <a href="#"
+                onClick={handleExpandCollapse}
+                className={classes(fg.expanded ? "sf-hide-group-button" : "sf-show-group-button", "ms-2")} >
                 <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2"
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
-            </div>
-            <div className="col-auto">
-              <label>Group:</label>
-            </div>
-            <div className="col-auto">
-              <select className="form-select form-select-xs sf-group-selector mx-2" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
-                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
-              </select>
-            </div>
-          </div>
-
-          <div className="row gx-1">
-            <div className="col-auto">
-              <label>Prefix:</label>
-            </div>
-            <div className="col-auto">
+              <small style={{ whiteSpace: "nowrap" }}>
+              Group Prefix:
+              </small>
               <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
                 <QueryTokenBuilder
                   prefixQueryToken={p.prefixToken}
@@ -322,91 +334,93 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
               </div>
             </div>
           </div>
+             
+        </td>
+        <td>
+          <select className="form-select form-select-xs sf-group-selector fw-bold" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+            {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
+          </select>
+        </td>
+        <td>
           {fg.pinned &&
             <div>
               {renderValue()}
             </div>
           }
-          <div>
-            {p.showPinnedFiltersOptions &&
-              <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")}
-                title={SearchMessage.ShowPinnedFiltersOptions.niceToString()}
-                onClick={e => {
+        </td>
+        <td>
+          {p.showPinnedFiltersOptions &&
+            <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", fg.pinned && "active")}
+              title={fg.pinned ? SearchMessage.UnpinFilter.niceToString() : SearchMessage.PinFilter.niceToString()}
+              onClick={e => {
                 fg.pinned = fg.pinned ? undefined : {};
                 fixDashboardBehaviour(fg);
                 changeFilter();
               }} disabled={p.readOnly}>
-                <FontAwesomeIcon color="orange" icon={[fg.pinned ? "fas" : "far", "star"]} />
-              </button>
-            }
-          </div>
-          {p.showDashboardBehaviour && <div>
-            <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
-          </div>}
-        </div>
-        <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-          <table className="table-sm" style={{ width: "100%" }}>
-            <thead>
-              {fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
-              {fg.expanded && <tr>
-                <th style={{ minWidth: "24px" }}></th>
-                <th>{SearchMessage.Field.niceToString()}</th>
-                <th>{SearchMessage.Operation.niceToString()}</th>
-                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
+              <FontAwesomeIcon color="orange" icon={"thumbtack"} rotation={fg.pinned ? undefined : 90} style={{ minWidth: 15 }} />
+            </button>
+          }
+        </td>
+
+        {p.showPinnedFiltersOptions && p.showDashboardBehaviour && <td>
+          <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
+        </td>}
+        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor pinned={fg.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
+      </tr >
+
+      {
+        fg.expanded ?
+          <>
+            {fg.filters.map((f) => isFilterGroupOptionParsed(f) ?
+
+              <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                prefixToken={fg.token}
+                subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
+                onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
+                lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
+                showPinnedFiltersOptions={p.showPinnedFiltersOptions}
+                showDashboardBehaviour={p.showDashboardBehaviour}
+                disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
+                level={p.level + 1}
+              /> :
+
+              <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                prefixToken={fg.token}
+                subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
+                onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
+                showPinnedFiltersOptions={p.showPinnedFiltersOptions}
+                showDashboardBehaviour={p.showDashboardBehaviour}
+                disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
+                level={p.level + 1}
+              />
+            )}
+            {!p.readOnly &&
+              <tr className="sf-filter-create">
+                <td colSpan={4} style={{ paddingLeft: paddingLeftNext }}>
+                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+                    className="sf-line-button sf-create"
+                    onClick={e => handlerNewFilter(e, false)}>
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
+                  </a>
+
+                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
+                    className="sf-line-button sf-create ms-3"
+                    onClick={e => handlerNewFilter(e, true)}>
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
+                  </a>
+                </td>
               </tr>
-              }
-            </thead>
-            {fg.expanded ?
-              <tbody>
-                {fg.filters.map((f) => isFilterGroupOptionParsed(f) ?
-
-                  <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
-                    prefixToken={fg.token}
-                    subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
-                    onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
-                    lastToken={p.lastToken} onHeightChanged={p.onHeightChanged} renderValue={p.renderValue}
-                    showPinnedFiltersOptions={p.showPinnedFiltersOptions}
-                    showDashboardBehaviour={p.showDashboardBehaviour}
-                    disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
-                  /> :
-
-                  <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
-                    prefixToken={fg.token}
-                    subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
-                    onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
-                    showPinnedFiltersOptions={p.showPinnedFiltersOptions}
-                    showDashboardBehaviour={p.showDashboardBehaviour}
-                    disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
-                  />
-                )}
-                {!p.readOnly &&
-                  <tr className="sf-filter-create">
-                    <td colSpan={4}>
-                      <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
-                        className="sf-line-button sf-create"
-                        onClick={e => handlerNewFilter(e, false)}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
-                      </a>
-
-                      <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
-                        className="sf-line-button sf-create ms-3"
-                        onClick={e => handlerNewFilter(e, true)}>
-                        <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
-                      </a>
-                    </td>
-                  </tr>
-                }
-              </tbody> :
-              <tbody>
-                <tr>
-                  <td colSpan={4} style={{ color: "#aaa", textAlign: "center", fontSize: "smaller" }}> {SearchMessage._0FiltersCollapsed.niceToString(fg.filters.length)}</td>
-                </tr>
-              </tbody>
             }
-          </table>
-        </div>
-      </td>
-    </tr>
+          </> :
+          <>
+            <tr>
+              <td colSpan={4} style={{ color: "#aaa", textAlign: "center", fontSize: "smaller", paddingLeft: paddingLeftNext }}>
+                {SearchMessage._0FiltersCollapsed.niceToString(fg.filters.length)}
+              </td>
+            </tr>
+          </>
+      }
+    </>
   );
 
   function renderValue() {
@@ -420,8 +434,13 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
-    return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
+    var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
+    var textArea = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"));
 
+    if (textArea)
+      return <FilterTextArea ctx={ctx} isComplex={isComplex} onChange={() => handleValueChange()} />;
+    else
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />;
   }
 
   function handleValueChange() {
@@ -444,8 +463,8 @@ function isFilterActive(fo: FilterOptionParsed) {
 
   return fo.pinned.active == null /*Always*/ ||
     fo.pinned.active == "Always" ||
-    fo.pinned.active == "Checkbox_StartChecked" ||
-    fo.pinned.active == "NotCheckbox_StartUnchecked" ||
+    fo.pinned.active == "Checkbox_Checked" ||
+    fo.pinned.active == "NotCheckbox_Unchecked" ||
     fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
 }
 
@@ -462,6 +481,7 @@ export interface FilterConditionComponentProps {
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   disableValue: boolean;
+  level: number;
 }
 
 export function FilterConditionComponent(p: FilterConditionComponentProps) {
@@ -486,7 +506,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       if (!areEqual(f.token, newToken, a => a.filterType) ||
         !areEqual(f.token, newToken, a => a.preferEquals) ||
         newToken.filterType == "Lite" && f.value != null && newToken.type.name != IsByAll && !getTypeInfos(newToken.type.name).some(t => t.name == (f.value as Lite<any>).EntityType)) {
-        f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && filterOperations[newToken.filterType].first();
+        f.operation = newToken.preferEquals ? "EqualTo" : newToken.filterType && getFilterOperations(newToken).first();
         f.value = f.operation && isList(f.operation) ? [undefined] : undefined;
       }
       else if (f.token && f.token.filterType == "DateTime" && newToken.filterType == "DateTime") {
@@ -542,30 +562,30 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
   return (
     <>
       <tr className="sf-filter-condition">
-        <td>
-          {!readOnly &&
-            <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-              className="sf-line-button sf-remove"
-              onClick={handleDeleteFilter}>
-              <FontAwesomeIcon icon="xmark" />
-            </a>}
-        </td>
-        <td>
-          <div className="rw-widget-xs">
-            <QueryTokenBuilder
-              prefixQueryToken={p.prefixToken}
-              queryToken={f.token}
-              onTokenChange={handleTokenChanged}
-              queryKey={p.queryDescription.queryKey}
-              subTokenOptions={p.subTokensOptions}
-              readOnly={readOnly} />
+        <td style={{ paddingLeft: (25 * p.level) }}>
+          <div className="d-flex">
+            {!readOnly &&
+              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+                className="sf-line-button sf-remove sf-remove-filter-icon"
+                onClick={handleDeleteFilter}>
+                <FontAwesomeIcon icon="xmark" />
+              </a>}
+            <div className="rw-widget-xs">
+              <QueryTokenBuilder
+                prefixQueryToken={p.prefixToken}
+                queryToken={f.token}
+                onTokenChange={handleTokenChanged}
+                queryKey={p.queryDescription.queryKey}
+                subTokenOptions={p.subTokensOptions}
+                readOnly={readOnly} />
+            </div>
           </div>
         </td>
         <td className="sf-filter-operation">
           {f.token && f.token.filterType && f.operation &&
             <select className="form-select form-select-xs" value={f.operation} disabled={readOnly} onChange={handleChangeOperation}>
-              {f.token.filterType && filterOperations[f.token.filterType!]
-                .map((ft, i) => <option key={i} value={ft as any}>{FilterOperation.niceToString(ft)}</option>)}
+              {f.token.filterType && getFilterOperations(f.token)
+                .map((ft, i) => <option key={i} value={ft as any} title={FilterOperation.niceToString(ft)}>{niceNameOrSymbol(ft)}</option>)}
             </select>}
         </td>
 
@@ -575,22 +595,24 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         </td>
         {p.showPinnedFiltersOptions &&
           <td>
-            {f.token && f.token.filterType && f.operation && <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => {
+            {f.token && f.token.filterType && f.operation && !p.disableValue && < button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => {
               f.pinned = f.pinned ? undefined : {};
               fixDashboardBehaviour(f);
               changeFilter();
-            }}              
+            }}
               disabled={p.readOnly}>
-              <FontAwesomeIcon color="orange" icon={[f.pinned ? "fas" : "far", "star"]} title={(f.pinned ? SearchMessage.PinnFilter : SearchMessage.UnpinnFilter).niceToString()} />
+              <FontAwesomeIcon color="orange" icon={"thumbtack"} rotation={f.pinned ? undefined : 90} title={(f.pinned ? SearchMessage.PinFilter : SearchMessage.UnpinFilter).niceToString()} style={{ minWidth: 15 }} />
             </button>
             }
           </td>
         }
         {p.showDashboardBehaviour && <td>
-          <DashboardBehaviourComponent filter={f} readonly={readOnly} onChange={()=> changeFilter()}/>
+          <DashboardBehaviourComponent filter={f} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
+
+        {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
+
       </tr>
-      {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor pinned={f.pinned} onChange={() => changeFilter()} readonly={readOnly} />}
     </>
   );
 
@@ -613,6 +635,16 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
+    if (f.operation == "ComplexCondition" || f.operation == "FreeText") {
+      const isComplex = f.operation == "ComplexCondition";
+      return <ValueLine ctx={ctx} type={{ name: "string" }}
+        valueLineType="TextArea"
+        valueHtmlAttributes={isComplex ? { onKeyUp: e => e.stopPropagation() } : undefined}
+        extraButtons={isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
+        onChange={handleValueChange}
+      />
+    }
+
     return createFilterValueControl(ctx, f.token!, handleValueChange);
   }
 
@@ -631,28 +663,34 @@ interface PinnedFilterEditorProps {
 
 export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
   return (
-    <tr className="sf-pinned-filter" style={{ backgroundColor: "#fff6e6", verticalAlign: "top" }}>
-      <td></td>
-      <td>
+    <>
+      <td className="sf-pinned-filter-cell">
         <div>
           <input type="text" className="form-control form-control-xs" placeholder={SearchMessage.Label.niceToString()} readOnly={p.readonly}
             value={p.pinned.label ?? ""}
             onChange={e => { p.pinned.label = e.currentTarget.value; p.onChange(); }} />
         </div>
       </td>
-      <td>
-        <div className="input-group input-group-xs">
-          {numericTextBox(Binding.create(p.pinned, _ => _.column), SearchMessage.Column.niceToString())}
-          {numericTextBox(Binding.create(p.pinned, _ => _.row), SearchMessage.Row.niceToString())}
-        </div>
+
+      <td className="sf-pinned-filter-cell">
+        {numericTextBox(Binding.create(p.pinned, _ => _.column), SearchMessage.Column.niceToString())}
       </td>
-      <td colSpan={2}>
-        <div className="btn-group btn-group-xs" role="group" aria-label="Basic example" style={{ verticalAlign: "unset" }}>
-          {renderActiveDropdown(Binding.create(p.pinned, a => a.active), "Select when the filter will take effect")}
-          {renderButton(Binding.create(p.pinned, a => a.splitText), "SplitText", "To enable google-like search")}
-        </div>
+
+      <td className="sf-pinned-filter-cell">
+        {numericTextBox(Binding.create(p.pinned, _ => _.row), SearchMessage.Row.niceToString())}
       </td>
-    </tr>
+
+      <td className="sf-pinned-filter-cell">
+        {renderActiveDropdown(Binding.create(p.pinned, a => a.active), "Select when the filter will take effect")}
+      </td>
+      <td className="sf-pinned-filter-cell">
+        <input type="checkbox" checked={p.pinned.splitText}
+          readOnly={p.readonly}
+          className="form-check-input"
+          onChange={e => { p.pinned.splitText = e.currentTarget.checked; p.onChange() }}
+          title="Splits the texts by spaces to search each part independently" />
+      </td>
+    </>
   );
 
   function numericTextBox(binding: Binding<number | undefined>, title: string) {
@@ -666,15 +704,15 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     );
   }
 
-  function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
-    return (
-      <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
-        onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
-        title={StyleContext.default.titleLabels ? title : undefined}>
-        {label}
-      </button>
-    );
-  }
+  //function renderButton(binding: Binding<boolean | undefined>, label: string, title: string) {
+  //  return (
+  //    <button type="button" className={classes("px-1 btn btn-light", binding.getValue() && "active")} disabled={p.readonly}
+  //      onClick={e => { binding.setValue(binding.getValue() ? undefined : true); p.onChange(); }}
+  //      title={StyleContext.default.titleLabels ? title : undefined}>
+  //      {label}
+  //    </button>
+  //  );
+  //}
 
   function renderActiveDropdown(binding: Binding<PinnedFilterActive | undefined>, title: string) {
     var value = binding.getValue() ?? "Always";
@@ -682,7 +720,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
       <Dropdown>
         <Dropdown.Toggle variant="light" id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className="px-1"
           title={StyleContext.default.titleLabels ? title : undefined}>
-          Active: {PinnedFilterActive.niceToString(value)}
+          {PinnedFilterActive.niceToString(value)}
         </Dropdown.Toggle>
 
         <Dropdown.Menu>
@@ -697,7 +735,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
   }
 }
 
-function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: boolean, onChange: ()=> void }) {
+function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: boolean, onChange: () => void }) {
   return (
     <Dropdown>
       <Dropdown.Toggle variant={p.filter.dashboardBehaviour ? "info" : "light"} id="dropdown-basic" disabled={p.readonly} size={"xs" as any} className={classes("px-1", p.filter.dashboardBehaviour ? "text-light" : "text-info")}
@@ -707,7 +745,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
 
       <Dropdown.Menu>
         {[undefined, ...DashboardBehaviour.values()].map(v =>
-          <Dropdown.Item key={v} active={v == p.filter.dashboardBehaviour} onClick={() => {
+          <Dropdown.Item key={v ?? "-"} active={v == p.filter.dashboardBehaviour} onClick={() => {
 
             p.filter.dashboardBehaviour = v;
             if (v == "PromoteToDasboardPinnedFilter" && p.filter.pinned == null)
@@ -717,7 +755,7 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
 
             p.onChange();
           }}>
-            {v == null? " - " :  DashboardBehaviour.niceToString(v)}
+            {v == null ? " - " : DashboardBehaviour.niceToString(v)}
           </Dropdown.Item>)
         }
       </Dropdown.Menu>
@@ -829,5 +867,59 @@ function fixDashboardBehaviour(fop: FilterOptionParsed) {
 
   if ((fop.dashboardBehaviour == "UseWhenNoFilters" || fop.dashboardBehaviour == "UseAsInitialSelection") && fop.pinned != null)
     fop.dashboardBehaviour = undefined;
+}
 
+
+export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void }) {
+  return <ValueLine ctx={p.ctx}
+    type={{ name: "string" }}
+    valueLineType="TextArea"
+    valueHtmlAttributes={p.isComplex ? { onKeyUp: e => { e.keyCode == 13 && e.shiftKey && e.stopPropagation(); } } : undefined }
+    extraButtons={p.isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
+    onChange={p.onChange}
+  />
+}
+
+export function ComplexConditionSyntax() {
+  const popover = (
+    <Popover id="popover-basic">
+      <Popover.Header as="h3">Full-Text Search Syntax</Popover.Header>
+      <Popover.Body>
+
+        <ul className="ps-3">
+          {ComplexConditionSyntax.examples.map(a => <li style={{ whiteSpace: "nowrap" }}>    <code>{a}</code></li>)}
+        </ul>
+        <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>
+      </Popover.Body>
+    </Popover>
+  );
+
+  return (
+    <OverlayTrigger trigger="click" placement="right" overlay={popover} >
+      <button className="sf-line-button sf-view btn input-group-text"><FontAwesomeIcon icon="asterisk" title="syntax" /></button>
+    </OverlayTrigger>
+  );
+
+}
+
+ComplexConditionSyntax.examples = [
+  "banana AND strawberry",
+  "banana OR strawberry",
+  "apple AND NOT (banana OR strawberry)",
+  "\"Dragon Fruit\" OR \"Passion Fruit\"",
+  "*berry",
+  "NEAR(\"apple\", \"orange\")",
+  "NEAR((\"apple\", \"orange\"), 3)",
+];
+
+function niceNameOrSymbol(fo: FilterOperation) {
+  switch (fo) {
+    case "EqualTo": return "=";
+    case "DistinctTo": return "≠";
+    case "GreaterThan": return ">";
+    case "GreaterThanOrEqual": return "≥";
+    case "LessThan": return "<";
+    case "LessThanOrEqual": return "≤";
+    default: return FilterOperation.niceToString(fo);
+  }
 }

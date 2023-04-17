@@ -937,7 +937,7 @@ interface OverridenValue {
 
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
-  if (fop.pinned && (fop.pinned.active == "Checkbox_StartUnchecked" || fop.pinned.active == "NotCheckbox_StartChecked"))
+  if (fop.pinned && (fop.pinned.active == "Checkbox_Unchecked" || fop.pinned.active == "NotCheckbox_Checked"))
     return undefined;
 
   if (fop.dashboardBehaviour == "UseAsInitialSelection")
@@ -966,7 +966,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
         return undefined;
       }
 
-      if (fop.pinned.active == "Checkbox_StartChecked") {
+      if (fop.pinned.active == "Checkbox_Checked") {
 
       } else {
         return toFilterRequest(fop, { value: fop.value });

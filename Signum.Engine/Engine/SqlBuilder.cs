@@ -303,6 +303,9 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         if (index.IsPrimary)
             return AlterTableDropConstraint(tableName, new ObjectName(tableName.Schema, index.IndexName, isPostgres));
 
+        if (index.FullTextIndex != null)
+            return new SqlPreCommandSimple($@"DROP FULLTEXT INDEX ON {tableName}");
+
         if (index.ViewName == null)
             return DropIndex(tableName, index.IndexName);
         else
@@ -357,11 +360,45 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
                     CreateIndexBasic(index, forHistoryTable: false))!;
             }
         }
+        else if(index is FullTextTableIndex ftindex)
+        {
+            var pk = ftindex.Table.GeneratAllIndexes().OfType<PrimaryKeyIndex>().SingleEx();
+
+            var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
+
+
+            var options = new[]
+            {
+                ftindex.ChangeTraking != null ? "CHANGE_TRACKING = " + GetSqlserverString(ftindex.ChangeTraking.Value) : null,
+                ftindex.StoplistName != null ? "STOPLIST =" + ftindex.StoplistName : null,
+                ftindex.PropertyListName != null ? "SEARCH PROPERTY LIST=" + ftindex.PropertyListName : null,
+            }.NotNull().ToList();
+
+            SqlPreCommandSimple indexSql = new SqlPreCommandSimple(
+                new string?[]
+                {
+                    $"CREATE FULLTEXT INDEX ON {ftindex.Table.Name}({columns})",
+                    $"KEY INDEX {pk.IndexName}",
+                    $"ON {ftindex.CatallogName}",
+                    options.Any() ? "WITH " + options.ToString(", ") : null
+                }.ToString("\n"));
+
+            return indexSql;
+        }
         else
         {
             return CreateIndexBasic(index, forHistoryTable: false);
         }
     }
+
+    private string GetSqlserverString(FullTextIndexChangeTracking changeTraking) => changeTraking switch
+    {
+        FullTextIndexChangeTracking.Manual => "MANUAL",
+        FullTextIndexChangeTracking.Auto => "AUTO",
+        FullTextIndexChangeTracking.Off => "OFF",
+        FullTextIndexChangeTracking.Off_NoPopulation => "OFF, NO POPULATION",
+        _ => throw new UnexpectedValueException(changeTraking)
+    };
 
     public int DuplicateCount(UniqueTableIndex uniqueIndex, Replacements rep)
     {
@@ -701,4 +738,40 @@ EXEC DB.dbo.sp_executesql @sql"
     }
 
     public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName};");
+
+    public SqlPreCommand CreateFullTextCatallog(string catallogName)
+    {
+        return new SqlPreCommandSimple("CREATE FULLTEXT CATALOG " + catallogName);
+    }
+
+    public SqlPreCommand? CreateFullTextCatallog(FullTextCatallogName newSN)
+    {
+        if (newSN.Database == null)
+            return CreateFullTextCatallog(newSN.Name);
+
+        return new[]
+        {
+            UseDatabase(newSN.Database!.Name),
+            CreateFullTextCatallog(newSN.Name),
+            UseDatabase(null),
+        }.Combine(Spacing.Simple);
+    }
+
+    public SqlPreCommand DropFullTextCatallog(string catallogName)
+    {
+        return new SqlPreCommandSimple("DROP FULLTEXT CATALOG " + catallogName);
+    }
+
+    public SqlPreCommand? DropFullTextCatallog(FullTextCatallogName newSN)
+    {
+        if (newSN.Database == null)
+            return DropFullTextCatallog(newSN.Name);
+
+        return new[]
+        {
+            UseDatabase(newSN.Database!.Name),
+            DropFullTextCatallog(newSN.Name),
+            UseDatabase(null),
+        }.Combine(Spacing.Simple);
+    }
 }

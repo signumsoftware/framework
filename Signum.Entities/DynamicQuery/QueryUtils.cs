@@ -1,5 +1,6 @@
 using Signum.Entities.Reflection;
 using Signum.Utilities.Reflection;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 
 namespace Signum.Entities.DynamicQuery;
@@ -86,12 +87,21 @@ public static class QueryUtils
         }
     }
 
-    public static List<FilterOperation> GetFilterOperations(FilterType filtertype)
+    public static IList<FilterOperation> GetFilterOperations(QueryToken token)
     {
-        return FilterOperations[filtertype];
+        var filtertype = GetFilterType(token.Type);
+
+        var result = FilterOperations[filtertype];
+
+        if (token is EntityPropertyToken ept && ept.HasFullTextIndex)
+        {
+            return result.PreAnd(FilterOperation.FreeText).PreAnd(FilterOperation.ComplexCondition).ToList();
+        }
+
+        return result;
     }
 
-    static readonly Dictionary<FilterType, List<FilterOperation>> FilterOperations = new Dictionary<FilterType, List<FilterOperation>>
+    static readonly Dictionary<FilterType, ReadOnlyCollection<FilterOperation>> FilterOperations = new Dictionary<FilterType, ReadOnlyCollection<FilterOperation>>
     {
         {
             FilterType.String, new List<FilterOperation>
@@ -108,7 +118,7 @@ public static class QueryUtils
                 FilterOperation.NotLike,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.DateTime, new List<FilterOperation>
@@ -121,7 +131,7 @@ public static class QueryUtils
                 FilterOperation.LessThanOrEqual,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Time, new List<FilterOperation>
@@ -134,7 +144,7 @@ public static class QueryUtils
                 FilterOperation.LessThanOrEqual,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Integer, new List<FilterOperation>
@@ -147,7 +157,7 @@ public static class QueryUtils
                 FilterOperation.LessThanOrEqual,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Decimal, new List<FilterOperation>
@@ -160,7 +170,7 @@ public static class QueryUtils
                 FilterOperation.LessThanOrEqual,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Enum, new List<FilterOperation>
@@ -173,7 +183,7 @@ public static class QueryUtils
                 FilterOperation.GreaterThanOrEqual,
                 FilterOperation.LessThan,
                 FilterOperation.LessThanOrEqual,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Guid, new List<FilterOperation>
@@ -182,7 +192,7 @@ public static class QueryUtils
                 FilterOperation.DistinctTo,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Lite, new List<FilterOperation>
@@ -191,21 +201,21 @@ public static class QueryUtils
                 FilterOperation.DistinctTo,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Embedded, new List<FilterOperation>
             {
                 FilterOperation.EqualTo,
                 FilterOperation.DistinctTo,
-            }
+            }.ToReadOnly()
         },
         {
             FilterType.Boolean, new List<FilterOperation>
             {
                 FilterOperation.EqualTo,
                 FilterOperation.DistinctTo,
-            }
+            }.ToReadOnly()
         },
     };
 

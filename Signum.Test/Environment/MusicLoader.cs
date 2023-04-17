@@ -49,8 +49,14 @@ public static class MusicLoader
 
         smashingPumpkins.Execute(BandOperation.Save);
 
-        new NoteWithDateEntity { ReleaseDate = DateTime.Now.AddHours(+8).ToDateOnly(), CreationTime = DateTime.Now.AddHours(+8), CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(), Text = "American alternative rock band", Target = smashingPumpkins }
-            .Execute(NoteWithDateOperation.Save);
+        new NoteWithDateEntity
+        {
+            ReleaseDate = DateTime.Now.AddHours(+8).ToDateOnly(),
+            CreationTime = DateTime.Now.AddHours(+8),
+            CreationDate = DateTime.Now.AddHours(+8).ToDateOnly(),
+            Text = "American alternative rock band",
+            Target = smashingPumpkins
+        }.Execute(NoteWithDateOperation.Save);
 
         LabelEntity virgin = new LabelEntity { Name = "Virgin", Country = usa, Node = SqlHierarchyId.GetRoot().FirstChild() }
             .Execute(LabelOperation.Save);
@@ -79,8 +85,14 @@ public static class MusicLoader
             Label = virgin
         }.Execute(AlbumOperation.Save);
 
-        new NoteWithDateEntity { ReleaseDate = DateTime.Now.AddDays(-100).ToDateOnly(), CreationTime = DateTime.Now.AddDays(-100).AddHours(-8), CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(), Text = "The blue one with the angel", Target = mellon }
-            .Execute(NoteWithDateOperation.Save);
+        new NoteWithDateEntity
+        {
+            ReleaseDate = DateTime.Now.AddDays(-100).ToDateOnly(),
+            CreationTime = DateTime.Now.AddDays(-100).AddHours(-8),
+            CreationDate = DateTime.Now.AddDays(-100).AddHours(-8).ToDateOnly(),
+            Text = "The blue one with the angel",
+            Target = mellon
+        }.Execute(NoteWithDateOperation.Save);
 
         LabelEntity wea = new LabelEntity { Name = "WEA International", Country = usa, Owner = virgin.ToLite(), Node = virgin.Node.FirstChild() }
             .Execute(LabelOperation.Save);
@@ -115,10 +127,29 @@ public static class MusicLoader
             Friends = { smashingPumpkins.Members.SingleEx(a=>a.Name.Contains("Billy Corgan")).ToLite() }
         }.Execute(ArtistOperation.Save); ;
 
-        new NoteWithDateEntity { CreationTime = new DateTime(2009, 6, 25, 0, 0, 0), CreationDate = new DateOnly(2009, 6, 25), Text = "Death on June, 25th", Target = michael }
-            .Execute(NoteWithDateOperation.Save);
+        new NoteWithDateEntity
+        {
+            CreationTime = new DateTime(2009, 6, 25, 0, 0, 0),
+            CreationDate = new DateOnly(2009, 6, 25),
+            Text = "Death on June, 25th",
+            Target = michael
+        }.Execute(NoteWithDateOperation.Save);
 
-        new NoteWithDateEntity { CreationTime = new DateTime(2000, 1, 1, 0, 0, 0), CreationDate = new DateOnly(2000, 1, 1), Text = null!, Target = michael }
+        new NoteWithDateEntity
+        {
+            CreationTime = new DateTime(2010, 6, 25, 0, 0, 0),
+            CreationDate = new DateOnly(2010, 6, 25),
+            Text = "Membedr of The Jackson 5 Pop band",
+            Target = michael
+        }.Execute(NoteWithDateOperation.Save);
+
+        new NoteWithDateEntity
+        {
+            CreationTime = new DateTime(2000, 1, 1, 0, 0, 0),
+            CreationDate = new DateOnly(2000, 1, 1),
+            Text = null!,
+            Target = michael
+        }
             .SetMixin((CorruptMixin c) => c.Corrupt, true)
             .Do(n => n.Mixin<ColaboratorsMixin>().Colaborators.Add(michael))
             .Execute(NoteWithDateOperation.Save);
