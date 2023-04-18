@@ -264,20 +264,23 @@ public class FilterCondition : Filter
 
             IList clone = (IList)Activator.CreateInstance(Value.GetType(), Value)!;
 
-            bool hasNull = false;
-            while (clone.Contains(null))
-            {
-                clone.Remove(null);
-                hasNull = true;
-            }
+            if (clone.Contains(null))
+                throw new InvalidOperationException("Filtering by null using IsIn / IsNotIn is no longer supported");
+
+            //bool hasNull = false;
+            //while (clone.Contains(null))
+            //{
+            //    clone.Remove(null);
+            //    hasNull = true;
+            //}
 
             if (Token.Type == typeof(string))
             {
-                while (clone.Contains(""))
-                {
-                    clone.Remove("");
-                    hasNull = true;
-                }
+                //while (clone.Contains(""))
+                //{
+                //    clone.Remove("");
+                //    hasNull = true;
+                //}
 
                 if (ToLowerString())
                 {
@@ -285,18 +288,18 @@ public class FilterCondition : Filter
                     left = Expression.Call(left, miToLower);
                 }
 
-                if (hasNull)
-                {
-                    clone.Add("");
-                    left = Expression.Coalesce(left, Expression.Constant(""));
-                }
+                //if (hasNull)
+                //{
+                //    clone.Add("");
+                //    left = Expression.Coalesce(left, Expression.Constant(""));
+                //}
             }
 
             Expression right = Expression.Constant(clone, typeof(IEnumerable<>).MakeGenericType(Token.Type.Nullify()));
-            var contains = Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
+            var result = Expression.Call(miContainsEnumerable.MakeGenericMethod(Token.Type.Nullify()), right, left.Nullify());
 
-            var result = !hasNull || Token.Type == typeof(string) ? (Expression)contains :
-                    Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
+            //var result = !hasNull || Token.Type == typeof(string) ? (Expression)contains :
+            //        Expression.Or(Expression.Equal(left, Expression.Constant(null, Token.Type.Nullify())), contains);
 
             if (Operation == FilterOperation.IsIn)
                 return result;

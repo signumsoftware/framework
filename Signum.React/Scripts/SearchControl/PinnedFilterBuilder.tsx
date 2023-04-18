@@ -95,11 +95,11 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
           {inputId => f.token?.filterType == "Lite" ?
             <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={() => handleValueChange(f)} /> :
             <MultiValue values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
-              onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f))} />}
+              onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f), {mandatory: true})} />}
         </FormGroup>
       );
 
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), label, f.pinned!.active == "WhenHasValue");
+    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), { label, forceNullable: f.pinned!.active == "WhenHasValue" });
   }
 
   function handleValueChange(f: FilterOptionParsed, avoidSearch?: boolean) {

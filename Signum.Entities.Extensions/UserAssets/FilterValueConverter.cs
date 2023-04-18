@@ -62,10 +62,10 @@ public static class FilterValueConverter
 
     public static Result<object?> TryParse(string? expression, Type type, bool isList)
     {
-        if (isList && expression != null && expression.Contains('|'))
+        if (isList)
         {
             IList list = (IList)Activator.CreateInstance(typeof(ObservableCollection<>).MakeGenericType(type))!;
-            foreach (var item in expression.Split('|'))
+            foreach (var item in (expression ?? "").SplitNoEmpty('|'))
             {
                 var result = TryParseInternal(item.Trim(), type);
                 if (result is Result<object?>.Error e)

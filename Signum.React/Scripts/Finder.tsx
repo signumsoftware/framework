@@ -1771,7 +1771,7 @@ export module Encoder {
       return "";
 
     if (Array.isArray(value))
-      return (value as any[]).map(a => stringValue(a)).join("~");
+      return value.notNull().map(a => stringValue(a)).join("~");
 
     if (isEntity(value))
       value = toLite(value, value.isNew);
@@ -1840,12 +1840,13 @@ export module Decoder {
         const parts = gr.key.value.split("~");
 
         if (FilterOperation.isDefined(parts[1])) {
+          var operation = FilterOperation.assertDefined(parts[1]);
           return ({
             token: parts[0],
-            operation: FilterOperation.assertDefined(parts[1]),
+            operation: operation,
             value: ignoreValues ? null :
-              parts.length == 3 ? unscapeTildes(parts[2]) :
-                parts.slice(2).map(a => unscapeTildes(a)),
+              !isList(operation) ? unscapeTildes(parts[2]) :
+                parts.slice(2).map(a => unscapeTildes(a)).notNull(),
             pinned: pinned,
           }) as FilterConditionOption
         } else {

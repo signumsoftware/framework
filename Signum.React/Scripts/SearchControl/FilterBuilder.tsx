@@ -34,6 +34,7 @@ interface FilterBuilderProps {
   showPinnedFiltersOptions?: boolean;
   showPinnedFiltersOptionsButton?: boolean;
   showDashboardBehaviour?: boolean;
+  avoidPreview?: boolean;
 }
 
 export default function FilterBuilder(p: FilterBuilderProps) {
@@ -105,7 +106,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
   var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
   return (
     <fieldset className="form-xs">
-      {showPinnedFiltersOptions && <div className="mb-3 border-bottom">
+      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3 border-bottom">
         <h4 className="lead">Preview</h4>
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} />
       </div>
@@ -639,12 +640,10 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     const readOnly = p.readOnly || f.frozen;
 
     if (isList(f.operation!)) {
-      if (f.token?.filterType == "Lite")
+      if (f.token?.filterType == "Lite" && !p.renderValue)
         return <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={handleValueChange} />;
 
-      return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange)} readOnly={readOnly} onChange={handleValueChange} />;
-
-
+      return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange, { mandatory: true })} readOnly={readOnly} onChange={handleValueChange} />;
     }
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
@@ -659,7 +658,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       />
     }
 
-    return createFilterValueControl(ctx, f.token!, handleValueChange);
+    return createFilterValueControl(ctx, f.token!, handleValueChange, { mandatory: true });
   }
 
   function handleValueChange() {
@@ -787,7 +786,9 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, label?: string, forceNullable?: boolean): React.ReactElement<any> {
+export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, options: { label?: string, forceNullable?: boolean, mandatory?: boolean }): React.ReactElement<any> {
+
+  var { label, forceNullable, mandatory } = options;
 
   var tokenType = token.type;
   if (forceNullable)
@@ -796,25 +797,25 @@ export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToke
   switch (token.filterType) {
     case "Lite":
       if (token.key == "[EntityType]" && token.parent!.type.name != IsByAll)
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} findOptions={{
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} findOptions={{
           queryName: TypeEntity,
           filterOptions: [{ token: TypeEntity.token(a => a.cleanName), operation: "IsIn", value: token.parent!.type.name.split(", ") }]
         }} />;
 
       if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />;
+        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} />;
       else
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} />
+        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} />
     case "Embedded":
-      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} />;
+      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} mandatory={mandatory} />;
     case "Enum":
       const ti = tryGetTypeInfos(tokenType).single();
       if (!ti)
         throw new Error(`EnumType ${tokenType.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} mandatory={mandatory} />;
     default:
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} />;
+      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} mandatory={mandatory} />;
   }
 }
 
