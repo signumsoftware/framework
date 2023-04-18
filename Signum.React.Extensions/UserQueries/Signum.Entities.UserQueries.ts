@@ -17,7 +17,7 @@ export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
   column: number | null;
   row: number | null;
   active: DynamicQuery.PinnedFilterActive;
-  splitText: boolean;
+  splitValue: boolean;
 }
 
 export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");

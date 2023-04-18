@@ -32,8 +32,10 @@ export default function renderCalendarStream({ data, width, height, parameters, 
   var colorInterpolation = ChartUtils.getColorInterpolation(colorInterpolate)!;
   var color = (r: ChartRow) => colorInterpolation(scaleFunc(valueColumn.getValue(r))!);
 
-  var minDate = d3.min(data.rows, r => new Date(dateColumn.getValue(r)))!;
-  var maxDate = d3.max(data.rows, r => new Date(dateColumn.getValue(r)))!;
+  var rowsWithValue = data.rows.filter(r => dateColumn.getValue(r) != null);
+
+  var minDate = d3.min(rowsWithValue, r => new Date(dateColumn.getValue(r)))!;
+  var maxDate = d3.max(rowsWithValue, r => new Date(dateColumn.getValue(r)))!;
   var years = d3.range(minDate.getFullYear(), maxDate.getFullYear() + 1);
 
   function getRules(weeksSize: number, daysSize: number): Rules {

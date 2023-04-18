@@ -22,8 +22,8 @@ interface FilterBuilderEmbeddedProps {
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
-  showPinnedFilterOptions?: boolean
-  showDashboardBehaviour?: boolean
+  showPinnedFilterOptions?: boolean;
+  showDashboardBehaviour?: boolean;
 }
 
 export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
@@ -77,7 +77,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           column: p.column,
           row: p.row,
           active: p.active,
-          splitText: p.splitText,
+          splitValue: p.splitValue,
         });
       }
     }
@@ -112,21 +112,21 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       if (isList(f.operation!))
-        return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange)} onChange={fc.handleValueChange} />;
+        return <MultiLineOrExpression ctx={ctx} onRenderItem={(ctx, onChange) => handleCreateAppropiateControl(ctx, fc, onChange, true)} onChange={fc.handleValueChange} />;
 
-      return handleCreateAppropiateControl(ctx, fc, () => { });
+      return handleCreateAppropiateControl(ctx, fc, fc.handleValueChange, false);
     }
   }
 
-  function handleCreateAppropiateControl(ctx: TypeContext<any>, fc: RenderValueContext, onChange: () => void) : React.ReactElement<any> {
+  function handleCreateAppropiateControl(ctx: TypeContext<any>, fc: RenderValueContext, onChange: () => void, mandatory: boolean): React.ReactElement<any> {
     const token = fc.filter.token!;
 
     switch (token.filterType) {
       case "Lite":
       case "Embedded":
-        return <EntityLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} />;
+        return <EntityLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
       default:
-        return <ValueLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} />
+        return <ValueLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
 
     }
   }
@@ -144,7 +144,8 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
           showPinnedFiltersOptions={p.showPinnedFilterOptions}
           showDashboardBehaviour={p.showDashboardBehaviour}
           showPinnedFiltersOptionsButton={false}
-          renderValue={handleRenderValue} />
+          renderValue={handleRenderValue}
+          avoidPreview />
       }
     </div>
   );
@@ -204,7 +205,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
         column: pinned.column ?? undefined,
         row: pinned.row ?? undefined,
         active: pinned.active || undefined,
-        splitText: pinned.splitText || undefined,
+        splitValue: pinned.splitValue || undefined,
       };
     }
   }
@@ -223,7 +224,7 @@ export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
   const [values, setValues] = React.useState<string[]>([]);
 
   React.useEffect(() => {
-    setValues((p.ctx.value ?? "").split("|"));
+    setValues((p.ctx.value ?? "").split("|").filter(a => Boolean(a)));
   }, [p.ctx.value]);
 
   const handleChangeValue = () => {
@@ -240,6 +241,7 @@ interface EntityLineOrExpressionProps {
   onChange: () => void;
   type: TypeReference;
   filterType: FilterType;
+  mandatory?: boolean;
 }
 
 export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
@@ -270,7 +272,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
   }
 
   if (liteRef.current === undefined)
-    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
+    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
@@ -284,12 +286,12 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
   if (p.filterType == "Lite") {
     if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
     else
-      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else if (p.filterType == "Embedded") {
-    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} />;
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else
     throw new Error("Unexpected Filter Type");
@@ -303,6 +305,7 @@ interface ValueLineOrExpressionProps {
   format?: string;
   unit?: string;
   filterType?: FilterType;
+  mandatory?: boolean;
 }
 
 export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
@@ -335,7 +338,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     );
   }
   if (valueRef.current === undefined)
-    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} />;
+    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(valueRef, a => a.current));
 
@@ -352,9 +355,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
   } else {
-    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} />;
+    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
 }
 

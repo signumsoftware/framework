@@ -655,6 +655,8 @@ export module SearchMessage {
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
+  export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
+  export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
 }
 
 export module SelectorMessage {

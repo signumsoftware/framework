@@ -11,7 +11,7 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue
 } from './FindOptions';
 
 import { FilterOperation, QueryTokenMessage, FilterGroupOperation, PinnedFilterActive } from './Signum.Entities.DynamicQuery';
@@ -63,7 +63,7 @@ export function addSettings(...settings: QuerySettings[]) {
 export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
   return {
     groupOperation: "Or",
-    pinned: { splitText: true },
+    pinned: { splitValue: true },
     filters: tokens.map(t => {
       var res = t(type.token());
 
@@ -688,7 +688,7 @@ export function getDefaultFilter(qd: QueryDescription | undefined, qs: QuerySett
     return [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },
@@ -936,6 +936,7 @@ interface OverridenValue {
   value: any;
 }
 
+
 export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: OverridenValue): FilterRequest | undefined {
 
   if (fop.pinned && (fop.pinned.active == "Checkbox_Unchecked" || fop.pinned.active == "NotCheckbox_Checked"))
@@ -944,22 +945,39 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
   if (fop.dashboardBehaviour == "UseAsInitialSelection")
     return undefined;
 
+  var operation = (fop as FilterConditionOptionParsed).operation;
+
   if (fop.pinned && overridenValue == null) {
-    if (fop.pinned.splitText) {
+    if (fop.pinned.splitValue) {
 
       if (!fop.value)
         return undefined;
 
-      if (typeof fop.value != "string")
+      if (!canSplitValue(fop))
         throw new Error("Split text only works with string");
 
-      var parts = fop.value.split(/\s+/);
 
-      return ({
-        groupOperation: "And",
-        token: fop.token && fop.token.fullKey,
-        filters: parts.filter(a => a.length > 0).map(part => toFilterRequest(fop, { value: part })),
-      }) as FilterGroupRequest;
+      if (typeof fop.value == "string") {
+        const parts = fop.value.split(/\s+/);
+
+        return ({
+          groupOperation: "And",
+          token: fop.token?.fullKey,
+          filters: parts.filter(a => a.length > 0).map(part => toFilterRequest(fop, { value: part })),
+        }) as FilterGroupRequest;
+      }
+      if (operation && isList(operation)) {
+
+        const parts = (fop.value as unknown[]);
+
+        var newOperation: FilterOperation = operation == "IsIn" ? "EqualTo" : "DistinctTo";
+
+        return ({
+          groupOperation: "And",
+          //token: fop.token?.fullKey,
+          filters: parts.map(part => toFilterRequest({ ...fop, operation: newOperation }, { value: part })),
+        }) as FilterGroupRequest;
+      }
     }
     else if (isFilterGroupOptionParsed(fop)) {
 
@@ -1705,7 +1723,7 @@ export module Encoder {
           "~" + (p.column == null ? "" : p.column) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
-          "~" + (p.splitText ? 1 : 0);
+          "~" + (p.splitValue ? 1 : 0);
       }
 
 
@@ -1752,7 +1770,7 @@ export module Encoder {
       return "";
 
     if (Array.isArray(value))
-      return (value as any[]).map(a => stringValue(a)).join("~");
+      return value.notNull().map(a => stringValue(a)).join("~");
 
     if (isEntity(value))
       value = toLite(value, value.isNew);
@@ -1803,7 +1821,7 @@ export module Decoder {
         column: parts[1].length ? parseInt(parts[1]) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
         active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
-        splitText: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
+        splitValue: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
       });
     }
 
@@ -1821,12 +1839,13 @@ export module Decoder {
         const parts = gr.key.value.split("~");
 
         if (FilterOperation.isDefined(parts[1])) {
+          var operation = FilterOperation.assertDefined(parts[1]);
           return ({
             token: parts[0],
-            operation: FilterOperation.assertDefined(parts[1]),
+            operation: operation,
             value: ignoreValues ? null :
-              parts.length == 3 ? unscapeTildes(parts[2]) :
-                parts.slice(2).map(a => unscapeTildes(a)),
+              !isList(operation) ? unscapeTildes(parts[2]) :
+                parts.slice(2).map(a => unscapeTildes(a)).notNull(),
             pinned: pinned,
           }) as FilterConditionOption
         } else {
@@ -2464,3 +2483,4 @@ function initEntityFormatRules(): EntityFormatRule[] {
     },
   ]
 }
+

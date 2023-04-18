@@ -254,12 +254,12 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       return filters;
     }
 
-    var searchBox = filters.firstOrNull(a => a.pinned != null && a.pinned.splitText == true);
+    var searchBox = filters.firstOrNull(a => a.pinned != null && a.pinned.splitValue == true);
 
     if (searchBox == null) {
       filters.insertAt(0, {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },

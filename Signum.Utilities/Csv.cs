@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Collections.Concurrent;
 using System.Collections;
+using System.IO.Pipes;
 
 namespace Signum.Utilities;
 
@@ -157,7 +158,7 @@ public static class Csv
         return p.Replace("__", "^").Replace("_", " ").Replace("^", "_");
     }
 
-    public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+    public static List<T> ReadFile<T>(string fileName, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class
     {
         encoding ??= DefaultEncoding;
         culture ??= DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -166,13 +167,13 @@ public static class Csv
             return ReadStream<T>(fs, encoding, culture, skipLines, options).ToList();
     }
 
-    public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+    public static List<T> ReadBytes<T>(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class
     {
         using (MemoryStream ms = new MemoryStream(data))
             return ReadStream<T>(ms, encoding, culture, skipLines, options).ToList();
     }
 
-    public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class, new()
+    public static IEnumerable<T> ReadStream<T>(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, int skipLines = 1, CsvReadOptions<T>? options = null) where T : class
     {
         encoding ??= DefaultEncoding;
         var defCulture = GetDefaultCulture(culture);
@@ -264,7 +265,7 @@ public static class Csv
     }
 
     public static T ReadLine<T>(string csvLine, CultureInfo? culture = null, CsvReadOptions<T>? options = null)
-        where T : class, new()
+        where T : class
     {
         var defOptions = options ?? new CsvReadOptions<T>();
 
@@ -296,14 +297,14 @@ public static class Csv
         return str => ConvertTo(str, type, culture, column.Format);
     }
 
-    static T ReadObject<T>(Match m, List<CsvMemberInfo<T>> members, List<Func<string, object?>> parsers) where T : new()
+    static T ReadObject<T>(Match m, List<CsvMemberInfo<T>> members, List<Func<string, object?>> parsers)
     {
         var vals = m.Groups["val"].Captures;
 
         if (vals.Count < members.Count)
             throw new FormatException("Only {0} columns found (instead of {1}) in line: {2}".FormatWith(vals.Count, members.Count, m.Value));
 
-        T t = new T();
+        T t = Activator.CreateInstance<T>();
 
         for (int i = 0; i < members.Count; i++)
         {
@@ -477,7 +478,7 @@ public static class Csv
             return name.Replace("-", "_").ToPascal();
         }
 
-        string InferType(int index)
+        string? InferType(int index)
         {
             var vals = values.Select(a => a[index]).ToList();
             var isNullable = values.Any(a => string.IsNullOrEmpty(a[index]));
@@ -486,16 +487,17 @@ public static class Csv
             if (isNullable)
             {
                 vals.RemoveAll(a => !a.HasText());
-                return InferTypeFromVals(vals) + "?";
+                var result = InferTypeFromVals(vals);
+                return result == null ? null : result + "?";
             }
 
             return InferTypeFromVals(vals);
         }
 
-        string InferTypeFromVals(List<string> vals)
+        string? InferTypeFromVals(List<string> vals)
         {
             if (vals.Count == 0)
-                return "Object";
+                return null;
 
             var longs = vals.Select(a => a.ToLong(NumberStyles.Integer, defCulture));
             if(longs.All(a=> a != null))
@@ -519,7 +521,11 @@ public static class Csv
         return $$"""
             public class MyFileCSV
             {
-            {{header.Select((name, i) => $"    public {InferType(i)} {ToName(name)};").ToString("\r\n")}}
+            {{header.Select((name, i) =>
+        {
+            var type = InferType(i);
+            return $"    public required {type ?? "string?"} {(type == null ? "_" : "") + ToName(name)};" + (type == null ? " //Empty" : null);
+        }).ToString("\r\n")}}
             }
             """;
     }

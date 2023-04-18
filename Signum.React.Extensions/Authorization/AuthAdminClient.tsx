@@ -65,7 +65,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     defaultFilters: [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },
@@ -95,7 +95,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     defaultFilters: [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.Id", operation: "EqualTo" },
           { token: "Entity.ToString", operation: "Contains" },
