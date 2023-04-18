@@ -27,6 +27,7 @@ export interface TypeInfo {
   entityKind?: EntityKind;
   entityData?: EntityData;
   toStringFunction?: string;
+  toStringFunctionTokens?: string[];
   customLiteModels?: { [modelType: string]: CustomLiteModel };
   isLowPopulation?: boolean;
   isSystemVersioned?: boolean;

@@ -23,7 +23,7 @@ import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
-import { TypeaheadOptions } from "./Components/Typeahead";
+import { TextHighlighter, TypeaheadOptions } from "./Components/Typeahead";
 import CopyLinkButton from "./Components/CopyLinkButton";
 import { object } from "prop-types";
 
@@ -189,31 +189,31 @@ export function renderLiteOrEntity(entity: Lite<Entity> | Entity | ModifiableEnt
     var es = entitySettings[entity.Type];
    
     if (es.renderEntity)
-      return es.renderEntity(entity);
+      return es.renderEntity(entity, new TextHighlighter(undefined));
 
     if (es.renderLite) {
       var lite = toLite(entity, entity.isNew);
-      return es.renderLite(lite);
+      return es.renderLite(lite, new TextHighlighter(undefined));
     }
 
     return getToString(entity);
   }
 }
 
-export function renderLite(lite: Lite<Entity>, subStr?: string): React.ReactChild {
+export function renderLite(lite: Lite<Entity>, hl?: TextHighlighter): React.ReactChild {
   var es = entitySettings[lite.EntityType];
   if (es != null && es.renderLite != null) {
-    return es.renderLite(lite, subStr);
+    return es.renderLite(lite, hl ?? new TextHighlighter(undefined));
   }
 
   var toStr = getToString(lite);
-  return TypeaheadOptions.highlightedTextAll(toStr, subStr);
+  return hl == null ? toStr : hl.highlight(toStr);
 }
 
-export function renderEntity(entity: ModifiableEntity): React.ReactNode {
+export function renderEntity(entity: ModifiableEntity): React.ReactChild {
   var es = entitySettings[entity.Type];
   if (es != null && es.renderEntity != null) {
-    return es.renderEntity(entity);
+    return es.renderEntity(entity, new TextHighlighter(undefined));
   }
 
   return getToString(entity);
@@ -625,7 +625,7 @@ export function getAutoComplete(type: TypeReference, findOptions: FindOptions | 
 }
 
 
-export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType: boolean) {
+export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | undefined, ctx: TypeContext<any>, create: boolean, showType: boolean): AutocompleteConfig<any> {
 
   var s = getSettings(type);
 
@@ -946,8 +946,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
   onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
-  renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild;
-  renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactChild;
+  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactChild; 
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
@@ -1028,8 +1028,8 @@ export class EntitySettings<T extends ModifiableEntity> {
     this.viewOverrides.push({ override, viewName });
   }
 
-  renderLite?: (lite: Lite<T & Entity>, subStr?: string) => React.ReactChild; 
-  renderEntity?: (entity: T, subStr?: string) => React.ReactChild; 
+  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactChild; 
+  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactChild; 
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 

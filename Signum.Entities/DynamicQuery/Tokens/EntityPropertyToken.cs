@@ -142,7 +142,7 @@ public class EntityPropertyToken : QueryToken
                 result.Add(new FullTextRankToken(this));
             }
 
-            if (this.HasSnippet)
+            if (this.HasSnippet && (options & SubTokensOptions.CanToArray) != 0)
             {
                 result.Add(new StringSnippetToken(this));
             }

@@ -76,3 +76,4 @@ export function similarToken(tokenA: string | undefined, tokenB: string | undefi
   return (tokenA?.startsWith("Entity.") ? tokenA.after("Entity.") : tokenA) ==
     (tokenB?.startsWith("Entity.") ? tokenB.after("Entity.") : tokenB);
 }
+

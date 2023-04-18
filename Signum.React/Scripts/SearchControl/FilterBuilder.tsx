@@ -885,9 +885,8 @@ export function ComplexConditionSyntax() {
     <Popover id="popover-basic">
       <Popover.Header as="h3">Full-Text Search Syntax</Popover.Header>
       <Popover.Body>
-
         <ul className="ps-3">
-          {ComplexConditionSyntax.examples.map(a => <li style={{ whiteSpace: "nowrap" }}>    <code>{a}</code></li>)}
+          {ComplexConditionSyntax.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
         </ul>
         <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>
       </Popover.Body>

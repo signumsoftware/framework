@@ -5,7 +5,7 @@ import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, Resul
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, TypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
 import { toFilterRequests } from '../Finder';
-import { TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
+import { TextHighlighter, TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor } from '../Navigator';
 import * as Navigator from '../Navigator';
 import { Dic } from '../Globals'
@@ -14,7 +14,7 @@ export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
   getItemsDelay(): number | undefined;
   getMinLength(): number | undefined;
-  renderItem(item: T, subStr?: string): React.ReactNode;
+  renderItem(item: T, highlighter?: TextHighlighter): React.ReactNode;
   renderList?(typeahead: TypeaheadController): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
@@ -73,18 +73,18 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     return this.abortableRequest.getData(subStr);
   }
 
-  renderItem(item: Lite<T> | AutocompleteConstructor<T>, subStr: string): React.ReactNode{
+  renderItem(item: Lite<T> | AutocompleteConstructor<T>, hl: TextHighlighter): React.ReactNode{
 
     if (isAutocompleteConstructor<T>(item)) {
       if (item.customElement)
         return item.customElement;
 
       var ti = getTypeInfo(item.type);
-      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;
+      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{hl.query}"</em>;
     }
 
     var toStr = getToString(item);
-    var html = Navigator.renderLite(item, subStr);
+    var html = Navigator.renderLite(item, hl);
     if (this.showType)
       return <span className="d-flex align-items-center flex-wrap" title={toStr}>{html}<TypeBadge entity={item} /></span>;
     else
@@ -182,7 +182,7 @@ interface FindOptionsAutocompleteConfigOptions extends AutocompleteConfigOptions
   count?: number,
   requiresInitialLoad?: boolean,
   showType?: boolean,
-  customRenderItem?: (row: ResultRow, table: ResultTable, subStr: string) => React.ReactNode;
+  customRenderItem?: (row: ResultRow, table: ResultTable, hl: TextHighlighter) => React.ReactNode;
 }
 
 export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultRow | AutocompleteConstructor<Entity>>{
@@ -191,7 +191,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   requiresInitialLoad?: boolean;
   showType?: boolean;
   count?: number;
-  customRenderItem?: (row: ResultRow, table: ResultTable, subStr: string) => React.ReactNode;
+  customRenderItem?: (row: ResultRow, table: ResultTable, hl: TextHighlighter) => React.ReactNode;
   itemsDelay?: number;
   minLength?: number;
 
@@ -300,17 +300,17 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
       });
   }
 
-  renderItem(item: ResultRow | AutocompleteConstructor<Entity>, subStr: string): React.ReactNode {
+  renderItem(item: ResultRow | AutocompleteConstructor<Entity>, hl: TextHighlighter): React.ReactNode {
     if (isAutocompleteConstructor<Entity>(item)) {
       var ti = getTypeInfo(item.type);
-      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{subStr}"</em>;
+      return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{hl.query}"</em>;
     }
 
     if (this.customRenderItem)
-      return this.customRenderItem(item, this.resultTable!, subStr);
+      return this.customRenderItem(item, this.resultTable!, hl);
 
     var toStr = getToString(item.entity!);
-    var html = Navigator.renderLite(item.entity!, subStr);
+    var html = Navigator.renderLite(item.entity!, hl);
     if (this.showType)
       return <span className="d-flex align-items-center flex-wrap"  title={toStr}>{html}<TypeBadge entity={item.entity!} /></span>;
     else
@@ -427,15 +427,15 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
     return Object.values(this.implementations).map(a => a.getMinLength()).notNull().max() ?? undefined;
   }
 
-  renderItem(item: unknown, subStr?: string): React.ReactNode {
+  renderItem(item: unknown, hl?: TextHighlighter): React.ReactNode {
     for (var type in this.implementations) {
       var acc = this.implementations[type];
       if (acc.isCompatible(item, type))
-        return acc.renderItem(item, subStr);
+        return acc.renderItem(item, hl);
     }
 
     if (isLite(item))
-      return Navigator.renderLite(item, subStr);
+      return Navigator.renderLite(item, hl);
 
     throw new Error("Unexpected " + JSON.stringify(item));
   }

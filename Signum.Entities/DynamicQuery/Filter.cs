@@ -503,6 +503,7 @@ public class FilterFullText : Filter
         return filters.SelectMany(a => a.GetAllFilters()).OfType<FilterFullText>().Where(a => a.IsTable).ToList();
     }
 
+    //Keep in sync with Finder.tsx extractComplexConditions
     public override IEnumerable<string> GetKeywords()
     {
         if (this.Operation == FullTextFilterOperation.FreeText)

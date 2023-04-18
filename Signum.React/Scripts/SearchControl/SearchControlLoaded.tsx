@@ -975,6 +975,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       op = "IsIn";
     }
     else {
+
+      if (newToken != null && newToken.key == "Snippet" && newToken.parent?.filterType == "String")
+        newToken = newToken.parent;
+
       op = token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
         token ? (getFilterOperations(token) || []).firstOrNull() as FilterOperation | undefined :
           undefined as FilterOperation | undefined;
@@ -1123,15 +1127,22 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     const menuItems: React.ReactElement<any>[] = [];
-    if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex))
+    if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
+      menuItems.push(<Dropdown.Header>{SearchMessage.Filters.niceToString()}</Dropdown.Header>);
       menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}>
-        <FontAwesomeIcon icon="filter" className="icon" />&nbsp;{JavascriptMessage.addFilter.niceToString()}
+        <span className="fa-layers fa-fw icon">
+          <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
+          <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
+        </span>&nbsp;{JavascriptMessage.addFilter.niceToString()}
       </Dropdown.Item>);
+    }
 
     if (cm.rowIndex == undefined && p.allowChangeColumns) {
 
       if (menuItems.length)
         menuItems.push(<Dropdown.Divider />);
+
+      menuItems.push(<Dropdown.Header>{SearchMessage.Columns.niceToString()}</Dropdown.Header>);
 
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
@@ -2140,7 +2151,7 @@ function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: stri
       className={"svg-inline--fa fa-" + p.iconDefinition.iconName}
       role="img"
       viewBox={`0 0 ${width} ${height}`}>
-      <path stroke-width={p.strokeWith} d={Array.isArray(data) ? data[0] : data} stroke={p.stroke} fill={p.fill}></path>
+      <path strokeWidth={p.strokeWith} d={Array.isArray(data) ? data[0] : data} stroke={p.stroke} fill={p.fill}></path>
     </svg>
   );
 }

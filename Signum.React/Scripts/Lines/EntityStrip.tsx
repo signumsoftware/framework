@@ -187,7 +187,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
         inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
         itemsDelay={ac.getItemsDelay()}
-        renderItem={(e, str) => ac!.renderItem(e, str)}
+        renderItem={(e, hl) => ac!.renderItem(e, hl)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
         renderInput={renderInput}

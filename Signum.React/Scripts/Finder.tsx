@@ -8,9 +8,9 @@ import { ajaxGet, ajaxPost } from './Services';
 
 import {
   QueryDescription, QueryValueRequest, QueryRequest, QueryEntitiesRequest, FindOptions,
-  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed, 
+  FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
-  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest, 
+  ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany
 } from './FindOptions';
 
@@ -21,8 +21,8 @@ import { TypeEntity, QueryEntity } from './Signum.Entities.Basics';
 
 import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
-  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType, 
-  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions, 
+  getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType,
+  TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions,
   Anonymous, toLuxonDurationFormat, toFormatWithFixes
 } from './Reflection';
 
@@ -37,6 +37,7 @@ import { QueryString } from "./QueryString";
 import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BsSize } from "./Components";
+import { TextHighlighter } from "./Components/Typeahead";
 
 
 export const querySettings: { [queryKey: string]: QuerySettings } = {};
@@ -367,7 +368,7 @@ export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescrip
     combineRows: c.combineRows,
     hiddenColumn: c.hiddenColumn,
   }) as ColumnOption;
- 
+
 
   ideal = ideal.filter(a => a.name != "Entity");
 
@@ -908,7 +909,7 @@ function getTypeIfNew(val: any): string[] {
 
 
 export function exploreOrView(findOptions: FindOptions): Promise<void> {
-  return fetchLites({ queryName: findOptions.queryName, filterOptions: findOptions.filterOptions ?? [], orderOptions: [], count: 2}).then(list => {
+  return fetchLites({ queryName: findOptions.queryName, filterOptions: findOptions.filterOptions ?? [], orderOptions: [], count: 2 }).then(list => {
     if (list.length == 1)
       return Navigator.view(list[0], { buttons: "close" }).then(() => undefined);
     else
@@ -1042,7 +1043,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
 }
 
 
-function isValidGuid(str : string) {
+function isValidGuid(str: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
 }
 
@@ -1073,7 +1074,7 @@ export async function fetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T
   const qd = await getQueryDescription(fo.queryName);
   const filters = await parseFilterOptions(fo.filterOptions ?? [], false, qd);
   const orders = await parseOrderOptions(fo.orderOptions ?? [], false, qd);
-  
+
   const entities = await API.fetchEntities({
 
     queryKey: qd.queryKey,
@@ -1102,7 +1103,7 @@ export function defaultNoColumnsAllRows(fo: FindOptions, count: number | undefin
   }
 
   if (newFO.pagination == undefined) {
-    newFO.pagination = count == undefined ? { mode: "All" } :  { mode: "Firsts", elementsPerPage: count };
+    newFO.pagination = count == undefined ? { mode: "All" } : { mode: "Firsts", elementsPerPage: count };
   }
 
   return newFO;
@@ -1159,8 +1160,7 @@ export class TokenCompleter {
       })
   } = {};
 
-  constructor(public queryDescription: QueryDescription)
-  {
+  constructor(public queryDescription: QueryDescription) {
     this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
   }
 
@@ -1262,8 +1262,7 @@ export class TokenCompleter {
         expanded: false,
       } as FilterGroupOptionParsed);
     }
-    else
-    {
+    else {
 
       const token = this.get(fo.token.toString());
 
@@ -1547,7 +1546,7 @@ export function useInDBMany<TO extends { [name: string]: QueryTokenString<any> |
     queryName: isEntity(entity) ? entity.Type : entity.EntityType,
     filterOptions: [{ token: "Entity", value: entity }],
     pagination: { mode: "Firsts", elementsPerPage: 1 },
-    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a  })),
+    columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
     columnOptionsMode: "ReplaceAll",
   }, additionalDeps, options);
 
@@ -1623,7 +1622,7 @@ export module API {
 
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
-  
+
     return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
       .then(rt => decompress(rt));
   }
@@ -1636,7 +1635,7 @@ export module API {
     return ajaxPost({ url: "/api/query/lites" }, request);
   }
 
-  export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]>{
+  export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]> {
     return ajaxPost({ url: "/api/query/entities" }, request);
   }
 
@@ -1737,12 +1736,12 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token  + (displayName ? ("~" + displayName) : "");
+        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
           query["summary" + i] = co.summaryToken.toString();
         if (co.combineRows)
           query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
-       
+
       });
     }
   }
@@ -1858,7 +1857,7 @@ export module Decoder {
     return Dic.getKeys(query).map(s => regex.exec(s))
       .filter(r => !!r)
       .map(r => ({ index: parseInt(r![1]), value: query[r![0]] }))
-      .orderBy(a => a.index);   
+      .orderBy(a => a.index);
   }
 
   export function decodeOrders(query: any): OrderOption[] {
@@ -1875,9 +1874,9 @@ export module Decoder {
 
     return valuesInOrder(query, "column").map(p => {
 
-      var displayName = unscapeTildes(p.value.tryAfter("~")); 
+      var displayName = unscapeTildes(p.value.tryAfter("~"));
 
-      var token = p.value.tryBefore("~") ?? p.value; 
+      var token = p.value.tryBefore("~") ?? p.value;
       var comb = combine.firstOrNull(a => a.index == p.index)?.value;
       return softCast<ColumnOption>({
         token: token,
@@ -2002,7 +2001,7 @@ function resetFormatRules() {
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ |undefined, formater: CellFormatter) {
+export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ | undefined, formater: CellFormatter) {
   if (pr == null)
     return;
   registeredPropertyFormatters[pr.toString()] = formater;
@@ -2022,10 +2021,15 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Object",
       isApplicable: qt => true,
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell?.toString()}</span> : undefined, true)
+      formatter: (qt, sc) => {
+
+        var hl = new TextHighlighter(getKeywordsSC(qt, sc));
+
+        return new CellFormatter(cell => cell ? <span className="try-no-wrap">{hl.highlight(cell.toString())}</span> : undefined, true);
+      }
     },
     {
-      name: "Object",
+      name: "Entity",
       isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite",
       formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined, true)
     },
@@ -2040,7 +2044,27 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="multi-line">{cell.toString()}</span> : undefined, true)
+      formatter: (qt, sc) => {
+        var hl = new TextHighlighter(getKeywordsSC(qt, sc));
+
+        return new CellFormatter(cell => cell ? <span className="multi-line">{hl.highlight(cell.toString())}</span> : undefined, true);
+      }
+    },
+    {
+      name: "Snippet",
+      isApplicable: qt => qt.key == "Snippet" && qt.parent?.type.name == "string",
+      formatter: (qt, sc) => {
+        var hl = new TextHighlighter(getKeywordsSC(qt, sc));
+
+        return new CellFormatter(cell => {
+          if (!cell)
+            return cell;
+
+          debugger;
+
+          return (cell as string).toString().split("(…)").map(str => hl.highlight(str)).joinHtml(<small className="text-muted">(…)</small>);
+        }, true);
+      }
     },
     {
       name: "SmallText",
@@ -2053,7 +2077,12 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{cell.toString()}</span> : undefined, false)
+      formatter: (qt, sc) => {
+      
+        var hl = new TextHighlighter(getKeywords(qt, sc?.state.resultFindOptions?.filterOptions));
+
+        return new CellFormatter(cell => cell ? <span className="try-no-wrap">{hl.highlight(cell.toString())}</span> : undefined, false);
+      }
     },
     {
       name: "Password",
@@ -2087,7 +2116,23 @@ function initFormatRules(): FormatRule[] {
     {
       name: "Guid",
       isApplicable: qt => qt.filterType == "Guid",
-      formatter: qt => new CellFormatter((cell: string | undefined) => cell && <span className="guid try-no-wrap">{cell.substr(0, 4) + "…" + cell.substring(cell.length - 4)}</span>, false)
+      formatter: (qt, sc) => {
+
+        var kw = getKeywordsSC(qt, sc)?.map(a => a.toLowerCase());
+
+        return new CellFormatter((cell: string | undefined) => {
+          if (!cell)
+            return cell;
+
+          var small = cell.substring(0, 4) + "…" + cell.substring(cell.length - 4)
+
+          if (kw?.contains(cell.toLowerCase()))
+            return <strong className="try-no-wrap">{small}</strong>;
+
+          return <span className="guid try-no-wrap">{small}</span>
+
+        }, false);
+      }
     },
     {
       name: "DateTime",
@@ -2149,9 +2194,29 @@ function initFormatRules(): FormatRule[] {
       }
     },
     {
-      name: "Number",
-      isApplicable: qt => qt.filterType == "Integer" || qt.filterType == "Decimal",
-      formatter: qt => {
+      name: "Integer",
+      isApplicable: qt => qt.filterType == "Integer",
+      formatter: (qt, sc) => {
+        var values = getKeywordsSC(qt, sc)?.map(a => a.toLowerCase());
+        const numberFormat = toNumberFormat(qt.format);
+        return new CellFormatter((cell: number | undefined) => {
+          if (!cell)
+            return cell;
+
+          var str = numberFormat.format(cell);
+
+          if (values?.contains(str))
+            return <strong className="try-no-wrap">{str}</strong>;
+          else
+            return <span className="try-no-wrap">{str}</span>;
+
+        }, false, "numeric-cell");
+      }
+    },
+    {
+      name: "Decimal",
+      isApplicable: qt => qt.filterType == "Decimal",
+      formatter: (qt, hl) => {
         const numberFormat = toNumberFormat(qt.format);
         return new CellFormatter((cell: number | undefined) => cell == undefined ? "" : <span className="try-no-wrap">{numberFormat.format(cell)}</span>, false, "numeric-cell");
       }
@@ -2180,18 +2245,24 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter((cell: string | undefined) => {
-        if (cell == undefined)
-          return undefined;
+      formatter: (qt, sc) => {
 
-        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
+        var hl = new TextHighlighter(getKeywords(qt, sc?.state.resultFindOptions?.filterOptions));
 
-        return (
-          <span className={multiLineClass}>
-            {cell.split(",").map((t, i) => <a key={i} href={`tel:${t.trim()}`}>{t.trim()}</a>).joinCommaHtml(",")}
-          </span>
-        );
-      }, false, "telephone-link-cell")
+        return new CellFormatter((cell: string | undefined) => {
+          if (!cell)
+            return cell;
+
+          const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
+
+          return (
+            <span className={multiLineClass}>
+              {cell.split(",").map((t, i) => <a key={i} href={`tel:${t.trim()}`}>{hl.highlight(t.trim())}</a>).joinCommaHtml(", ")}
+            </span>
+          );
+        }, false, "telephone-link-cell");
+
+      }
     },
     {
       name: "Email",
@@ -2204,20 +2275,146 @@ function initFormatRules(): FormatRule[] {
 
         return false;
       },
-      formatter: qt => new CellFormatter((cell: string | undefined) => {
-        if (cell == undefined)
-          return undefined;
+      formatter: (qt, sc) => {
 
-        const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
+        var hl = new TextHighlighter(getKeywords(qt, sc?.state.resultFindOptions?.filterOptions));
 
-        return (
-          <span className={multiLineClass}>
-            <a href={`mailto:${cell}`}>{cell}</a>
-          </span>
-        );
-      }, false, "email-link-cell")
+        return new CellFormatter((cell: string | undefined) => {
+          if (!cell)
+            return cell;
+
+          const multiLineClass = isMultiline(PropertyRoute.tryParseFull(qt.propertyRoute!)) ? "multi-line" : "try-no-wrap";
+
+          return (
+            <span className={multiLineClass}>
+              <a href={`mailto:${cell}`}>{hl.highlight(cell)}</a>
+            </span>
+          );
+        }, false, "email-link-cell");
+
+      }
     },
   ];
+}
+
+function getKeywordsSC(token: QueryToken, sc?: SearchControlLoaded): string[] | undefined {
+  return getKeywords(token, sc?.state.resultFindOptions?.filterOptions);
+}
+function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[] | undefined {
+  if (filters == null)
+    return undefined;
+
+  if (token.key == "Snippet" && token.parent?.filterType == "String")
+    token = token.parent;
+
+  //Keep in sync with FilterFullText.GetKeywords
+  function extractComplexConditions(value: string) {
+
+    var result = value.split(/AND|OR|NOT|NEAR|\(|\)|\*/).map(a => {
+      a = a.trim()
+      if (a.startsWith("\"") && a.endsWith("\""))
+        a = a.afterLast("\"").beforeLast("\"");
+
+      return a;
+    }).filter(a => a.length > 0);
+
+    return result;
+  }
+
+  function splitTokens(value: unknown, splitText: boolean | undefined, operation: FilterOperation): string[] {
+    if (typeof value == "string" && (splitText || operation == "FreeText"))
+      return (value as string).split(/\s+/);
+
+    if (operation == "ComplexCondition")
+      return extractComplexConditions(value as string);
+
+    if (operation == "IsIn" || operation == "IsNotIn") {
+      if (Array.isArray(value))
+        return value.map(a => typeof a == "string" ? a :
+          typeof a == "number" ? a.toString() : null)
+          .notNull();
+    }
+
+    if (typeof value == "string")
+      return [value];
+
+    if (typeof value == "number")
+      return [value.toString()];
+
+    return [];
+  }
+
+
+  function getFiltersKeywords(fo: FilterOptionParsed): string[] {
+    if (isFilterGroupOptionParsed(fo)) {
+      if (fo.value && fo.pinned && typeof fo.value == "string") {
+
+        var filterConditions = fo.filters.filter(sf => sf.token != null && !isFilterGroupOptionParsed(sf)) as FilterConditionOptionParsed[];
+
+        var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation != undefined)
+          .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitText, sf.operation!));
+
+        return filters;
+      } else {
+        return fo.filters.notNull().flatMap(f => getFiltersKeywords(f)).distinctBy(a => a);
+      }
+    }
+    else {
+      if (fo.token && fo.operation && similarTokenToStr(fo.token, token)) {
+        return splitTokens(fo.value, fo.pinned?.splitText, fo.operation);
+      } else {
+        return [];
+      }
+    }
+  }
+
+  return filters.notNull().flatMap(f => getFiltersKeywords(f)).distinctBy(a => a);
+}
+
+export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
+  if (similarToken(tokenA.fullKey, tokenB.fullKey))
+    return true;
+
+
+  if (tokenA && tokenA.key == "ToString") {
+    var steps = getToStringDependencies(tokenA.parent!.type);
+
+    if (steps && steps.some(a => similarToken(tokenA.parent?.fullKey + "." + a, tokenB.fullKey)))
+      return true;
+  }
+
+  if (tokenB && tokenB.key == "ToString") {
+    var steps = getToStringDependencies(tokenB.parent!.type);
+
+    if (steps && steps.some(a => similarToken(tokenB.parent?.fullKey + "." + a, tokenA.fullKey)))
+      return true;
+  }
+
+  return false;
+}
+
+const toStringFunctionTokensCache: { [typeName: string]: string[] | null } = {};
+
+export function getToStringDependencies(tr: TypeReference) {
+
+  var ti = tryGetTypeInfo(tr.name);
+  if (ti == null)
+    return null;
+
+  if (ti.toStringFunction == null)
+    return null;
+
+  var cachedResult = toStringFunctionTokensCache[tr.name];
+  if (cachedResult !== undefined)
+    return cachedResult
+
+  var parts = Array.from(ti.toStringFunction.matchAll(/e(\.(\w+))+/g));
+
+  var result = parts.map(a => a[0].split(".").slice(1).map(a => a.firstUpper()).join("."));
+
+  toStringFunctionTokensCache[tr.name] = result;
+
+  return result;
 }
 
 export interface EntityFormatRule {

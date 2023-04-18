@@ -180,6 +180,7 @@ public enum SearchMessage
     [Description("Delete all filter")]
     DeleteAllFilter,
     Filters,
+    Columns,
     Find,
     [Description("Finder of {0}")]
     FinderOf0,

@@ -203,7 +203,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
         getItems={query => ac!.getItems(query)}
         itemsDelay={ac.getItemsDelay()}
         minLength={ac.getMinLength()}
-        renderItem={(item, query) => ac!.renderItem(item, query)}
+        renderItem={(item, hl) => ac!.renderItem(item, hl)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}

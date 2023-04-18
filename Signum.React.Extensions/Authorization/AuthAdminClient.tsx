@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -41,14 +41,14 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   permissions = options.permissions;
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
-    renderLite: (lite, subStr) => {
+    renderLite: (lite, hl) => {
       if (UserLiteModel.isInstance(lite.model))
         return (
-          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
+          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{hl.highlight(getToString(lite))}</span></span>
         );
 
       if (typeof lite.model == "string")
-        return TypeaheadOptions.highlightedText(getToString(lite), subStr);
+        return hl.highlight(getToString(lite));
 
       return lite.EntityType;
     }
