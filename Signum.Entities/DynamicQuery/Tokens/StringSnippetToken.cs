@@ -75,7 +75,8 @@ public class Highlighter
         if (text == null)
             return null;
 
-        var sentences = text.Replace("\r", "").Split('\n', '.');
+        var sentences = text.Replace("\r", "").Split('\n', '.').Select(a => a.Trim()).Where(a => a.HasText());
+
         var i = 0;
         var packets = sentences.Select(sentence => new Packet
         {
@@ -89,7 +90,7 @@ public class Highlighter
 
         foreach (var packet in packets)
         {
-            if (length >= maxLength || packet.Density == 0)
+            if (length >= maxLength)
             {
                 break;
             }
