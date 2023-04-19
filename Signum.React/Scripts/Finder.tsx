@@ -2332,7 +2332,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
     var result = value.split(/AND|OR|NOT|NEAR|\(|\)|\*/).map(a => {
       a = a.trim()
       if (a.startsWith("\"") && a.endsWith("\""))
-        a = a.afterLast("\"").beforeLast("\"");
+        a = a.after("\"").beforeLast("\"");
 
       return a;
     }).filter(a => a.length > 0);
@@ -2345,7 +2345,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
       return (value as string).split(/\s+/);
 
     if (operation == "ComplexCondition")
-      return extractComplexConditions(value as string);
+      return extractComplexConditions(value as string ?? "");
 
     if (operation == "IsIn" || operation == "IsNotIn") {
       if (Array.isArray(value))
