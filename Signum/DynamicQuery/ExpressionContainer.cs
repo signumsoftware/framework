@@ -117,13 +117,10 @@ public class ExpressionContainer
             {
                 var pi = ReflectionTools.GetPropertyInfo(lambdaToMethodOrProperty);
 
-                if (pi.GetCustomAttribute<ExpressionFieldAttribute>() == null)
-                    throw new InvalidOperationException("The parameter 'lambdaToMethodOrProperty' should be an expression calling a expression method or property");
-
-
                 return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => pi.NiceName()), pi.Name);
             }
-            else throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
+            else 
+                throw new InvalidOperationException("argument 'lambdaToMethodOrProperty' should be a simple lambda calling a method or property: {0}".FormatWith(lambdaToMethodOrProperty.ToString()));
         }
     }
 

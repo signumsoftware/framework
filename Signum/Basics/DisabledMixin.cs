@@ -1,5 +1,5 @@
 
-namespace Signum.Tree;
+namespace Signum.Basics;
 
 
 public class DisabledMixin : MixinEntity
@@ -11,7 +11,7 @@ public class DisabledMixin : MixinEntity
 
     public bool IsDisabled { get; set; }
 
-    protected override void CopyFrom(MixinEntity mixin, object[] args)
+    protected internal override void CopyFrom(MixinEntity mixin, object[] args)
     {
         this.IsDisabled = ((DisabledMixin)mixin).IsDisabled;
     }

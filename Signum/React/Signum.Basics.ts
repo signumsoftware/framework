@@ -63,6 +63,21 @@ export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity
   deleteLogsWithExceptionsOlderThan: number | null;
 }
 
+export module DisabledMessage {
+  export const ParentIsDisabled = new MessageKey("DisabledMessage", "ParentIsDisabled");
+}
+
+export const DisabledMixin = new Type<DisabledMixin>("DisabledMixin");
+export interface DisabledMixin extends Entities.MixinEntity {
+  Type: "DisabledMixin";
+  isDisabled: boolean;
+}
+
+export module DisableOperation {
+  export const Disable : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Disable");
+  export const Enabled : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Enabled");
+}
+
 export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
 export interface ExceptionEntity extends Entities.Entity {
   Type: "Exception";

@@ -25,7 +25,6 @@
 		<ProjectReference Include="..\Signum.Eval\Signum.Eval.csproj" />
 		<ProjectReference Include="..\Signum.Isolation\Signum.Isolation.csproj" />
 		<ProjectReference Include="..\Signum.Migrations\Signum.Migrations.csproj" />
-		<ProjectReference Include="..\Signum.Tree\Signum.Tree.csproj" />
 	</ItemGroup>
 
     <ItemGroup>

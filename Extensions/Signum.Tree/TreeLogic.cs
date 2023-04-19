@@ -1,4 +1,5 @@
 using Microsoft.SqlServer.Types;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Tree;
 
@@ -313,6 +314,43 @@ public static class TreeLogic
 
                  };
             }).Register();
+        }
+
+        if(MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)))
+        {
+            new Graph<T>.Execute(DisableOperation.Disable)
+            {
+                CanExecute = e => e.Mixin<DisabledMixin>().IsDisabled ? ValidationMessage._0IsSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName()) : null,
+                Execute = (e, _) =>
+                {
+                    e.Mixin<DisabledMixin>().IsDisabled = true;
+                    e.Save();
+                    var children = e.Children().Where(a => a.Mixin<DisabledMixin>().IsDisabled == false).ToList();
+                    foreach (var item in children)
+                    {
+                        item.Execute(DisableOperation.Disable);
+                    }
+
+                },
+            }.Register();
+
+            new Graph<T>.Execute(DisableOperation.Enabled)
+            {
+                CanExecute = e =>
+                !e.Mixin<DisabledMixin>().IsDisabled ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo((DisabledMixin m) => m.IsDisabled).NiceName()) :
+                e.InDB(_ => (bool?)_.Parent()!.Mixin<DisabledMixin>().IsDisabled) == true ? DisabledMessage.ParentIsDisabled.NiceToString() :
+                null,
+                Execute = (e, _) =>
+                {
+                    e.Mixin<DisabledMixin>().IsDisabled = false;
+                    e.Save();
+                    var children = e.Children().Where(a => a.Mixin<DisabledMixin>().IsDisabled == true).ToList();
+                    foreach (var item in children)
+                    {
+                        item.Execute(DisableOperation.Enabled);
+                    }
+                },
+            }.Register();
         }
 
         new Graph<T>.Delete(TreeOperation.Delete)

@@ -14,7 +14,7 @@ public static class PlainExcelGenerator
 
     static PlainExcelGenerator()
     {
-        SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Engine.Excel.plainExcelTemplate.xlsx")!);
+        SetTemplate(typeof(PlainExcelGenerator).Assembly.GetManifestResourceStream("Signum.Excel.plainExcelTemplate.xlsx")!);
     }
 
     public static void SetTemplate(Stream templateStream)
