@@ -98,10 +98,10 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation));
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation));
 
         foreach (var o in Orders)
-            o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate);
     }
 
     public XElement ToXml(IToXmlContext ctx)
