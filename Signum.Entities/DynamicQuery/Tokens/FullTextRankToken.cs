@@ -1,3 +1,4 @@
+using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,7 +41,7 @@ internal class FullTextRankToken : QueryToken
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        return context.Replacements.GetOrThrow(this).RawExpression;
+        return context.Replacements.TryGetS(this)?.RawExpression ?? Expression.Constant(0);
     }
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options) => new List<QueryToken>();
