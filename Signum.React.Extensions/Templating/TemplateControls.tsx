@@ -144,11 +144,23 @@ export default function TemplateControls(p: TemplateControlsProps) {
         <div className="btn-group" style={{ marginLeft: "auto" }}>
           {UserChartEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
             queryName: UserChartEntity,
-            filterOptions: [{
-              token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-              operation: "IsIn",
-              value: [null, ...getTypeInfos(qd?.columns["Entity"].type!).map(a => a.name)]
-            }]
+            filterOptions: [
+              {
+                groupOperation: "Or",
+                filters: [
+                  {
+                    token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
+                    operation: "IsIn",
+                    value: [...getTypeInfos(qd?.columns["Entity"].type!).map(a => a.name)]
+                  },
+                  {
+                    token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
+                    operation: "EqualTo",
+                    value: null
+                  }
+                ]
+              }
+            ]
           }).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
             var text = "UserChart:" + uce.guid;
 

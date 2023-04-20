@@ -658,7 +658,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       />
     }
 
-    return createFilterValueControl(ctx, f.token!, handleValueChange, { mandatory: true });
+    return createFilterValueControl(ctx, f.token!, handleValueChange, { });
   }
 
   function handleValueChange() {
