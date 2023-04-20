@@ -14,7 +14,7 @@ import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInf
 import { FilterOperation } from '../Signum.Entities.DynamicQuery'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
-import { TypeaheadController } from '../Components/Typeahead'
+import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
@@ -253,7 +253,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item) :
+      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item, new TextHighlighter(undefined)) :
         getToStr();
 
   function getToStr() {

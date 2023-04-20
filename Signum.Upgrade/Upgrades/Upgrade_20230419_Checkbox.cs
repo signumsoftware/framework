@@ -15,6 +15,8 @@ class Upgrade_20230419_Checkbox : CodeUpgradeBase
             file.Replace("Checkbox_StartUnchecked", "Checkbox_Unchecked");
             file.Replace("NotCheckbox_StartChecked", "NotCheckbox_Checked");
             file.Replace("NotCheckbox_StartUnchecked", "NotCheckbox_Unchecked");
+
+            file.Replace("splitText:", "splitValues:");
         });
 
     }
