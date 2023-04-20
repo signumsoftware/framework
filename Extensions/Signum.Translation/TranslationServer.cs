@@ -19,8 +19,6 @@ public class TranslationServer
     {
         Translators = translators;
         
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>

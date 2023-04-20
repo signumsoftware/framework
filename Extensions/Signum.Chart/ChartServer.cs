@@ -16,8 +16,6 @@ public static class ChartServer
     {
         UserAssetServer.Start(app);
 
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         CustomizeChartRequest();
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((ChartRequestModel cr) =>

@@ -16,7 +16,6 @@ public static class ConcurrentUserServer
 
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(ConcurrentUserMessage), () => true);
 
         //No easy way to check if its a Server OS https://stackoverflow.com/questions/2819934/detect-windows-version-in-net

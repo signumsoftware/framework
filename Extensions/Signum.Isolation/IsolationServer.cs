@@ -9,8 +9,6 @@ public static class IsolationServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         MapColorProvider.GetColorProviders += GetMapColors;
 
         SignumExceptionFilterAttribute.ApplyMixins += (ctx, e) => 

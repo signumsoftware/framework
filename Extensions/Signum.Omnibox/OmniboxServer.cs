@@ -8,7 +8,6 @@ public static class OmniboxServer
 {
     public static void Start(IApplicationBuilder app, params IOmniboxResultGenerator[] generators)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         QueryTokenJsonConverter.GetQueryTokenTS = qt => new QueryTokenTS(qt, true);
         QueryNameJsonConverter.GetQueryKey = qn => QueryUtils.GetKey(qn);
 

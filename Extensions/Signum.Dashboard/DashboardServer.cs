@@ -10,8 +10,6 @@ public static class DashboardServer
     {
         UserAssetServer.Start(app);
 
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         EntityPackTS.AddExtension += ep =>
         {
             if (ep.entity.IsNew || !DashboardPermission.ViewDashboard.IsAuthorized())

@@ -12,8 +12,6 @@ public static class FilesServer
 
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         void RegisterFilePathEmbeddedProperty(string propertyName, Func<FilePathEmbedded, object?> getter)
         {
             SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(FilePathEmbedded)).Add(propertyName, new PropertyConverter()

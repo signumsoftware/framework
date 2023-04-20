@@ -18,8 +18,6 @@ public static class MailingServer
     public static void Start(IApplicationBuilder app)
     {
         TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(EmailTemplateEntity)).MaxUI() > TypeAllowedBasic.None;
-        TypeHelpServer.Start(app);
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(SmtpDeliveryMethod).Namespace!, () => TypeAuthLogic.GetAllowed(typeof(EmailSenderConfigurationEntity)).MaxUI() > TypeAllowedBasic.None);
 
 

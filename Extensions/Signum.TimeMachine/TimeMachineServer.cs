@@ -9,8 +9,6 @@ public static class TimeMachineServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         ReflectionServer.RegisterLike(typeof(TimeMachineMessage), () => TimeMachinePermission.ShowTimeMachine.IsAuthorized());
     }
 }

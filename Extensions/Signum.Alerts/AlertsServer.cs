@@ -13,11 +13,6 @@ public static class AlertsServer
 
     public static IHubContext<AlertsHub, IAlertsClient> AlertsHub { get; private set; }
 
-    public static void Start(IApplicationBuilder app)
-    {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-    }
-
     public static void MapAlertsHub(IEndpointRouteBuilder endpoints)
     {
         endpoints.MapHub<AlertsHub>("/api/alertshub");

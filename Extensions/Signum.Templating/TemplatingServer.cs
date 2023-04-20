@@ -9,8 +9,6 @@ public static class TemplatingServer
 
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         ReflectionServer.RegisterLike(typeof(TemplateTokenMessage), () => TemplateTokenMessageAllowed.GetInvocationListTyped().Any(f => f()));
     }
 }

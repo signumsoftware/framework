@@ -17,8 +17,6 @@ public static class WordServer
 
         TemplatingServer.TemplateTokenMessageAllowed += () => TypeAuthLogic.GetAllowed(typeof(WordTemplateEntity)).MaxUI() > TypeAllowedBasic.None;
 
-        TypeHelpServer.Start(app);
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
         TemplatingServer.Start(app);
 

@@ -12,7 +12,6 @@ public static class RestServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         SignumAuthenticationFilter.Authenticators.Insert(0, ApiKeyAuthenticator);
     }
 

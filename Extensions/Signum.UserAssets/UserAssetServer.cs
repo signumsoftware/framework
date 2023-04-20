@@ -25,7 +25,6 @@ public static class UserAssetServer
 
         started = true;
 
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded), () => RegisterLikeUserAssets.GetInvocationListTyped().Any(a => a()));
 
         var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(QueryTokenEmbedded));

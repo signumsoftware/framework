@@ -22,8 +22,6 @@ public static class AuthServer
     
     public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
         ReflectionServer.GetContext = () => new

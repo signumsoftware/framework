@@ -8,8 +8,6 @@ public static class SchedulerServer
 {
     public static void Start(IApplicationBuilder app, IHostApplicationLifetime lifetime)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         lifetime.ApplicationStopping.Register(() =>
         {
             if (ScheduleTaskRunner.Running)

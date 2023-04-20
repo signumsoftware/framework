@@ -7,8 +7,8 @@ public static class MapServer
 {
     public static void Start(IApplicationBuilder app)
     {
+
         ReflectionServer.RegisterLike(typeof(MapMessage), () => MapPermission.ViewMap.IsAuthorized());
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
 
         MapColorProvider.GetColorProviders += () => new[]
         {

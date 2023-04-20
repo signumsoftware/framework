@@ -10,8 +10,6 @@ public static class PredictorServer
     {
         UserAssetServer.Start(app);
 
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PredictorMainQueryEmbedded p) =>
         {
             if (p.Query != null)

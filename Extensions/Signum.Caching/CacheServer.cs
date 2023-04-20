@@ -7,7 +7,6 @@ public static class CacheServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(CachePermission), () => CachePermission.ViewCache.IsAuthorized());
 
         MapColorProvider.GetColorProviders += GetMapColors;

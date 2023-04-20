@@ -10,8 +10,6 @@ public static class UserQueryServer
     {
         UserAssetServer.Start(app);
 
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
-
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>
         {
             if (uq.Query != null)

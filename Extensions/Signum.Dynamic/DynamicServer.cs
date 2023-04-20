@@ -10,8 +10,6 @@ public static class DynamicServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        TypeHelpServer.Start(app);
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod());
         ReflectionServer.RegisterLike(typeof(DynamicViewMessage), () => UserEntity.Current != null);
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
