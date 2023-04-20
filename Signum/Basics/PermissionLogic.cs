@@ -80,7 +80,7 @@ public static class PermissionLogic
 
     public static bool IsAuthorized(this PermissionSymbol permissionSymbol)
     {
-        return permissionSymbol.IsAuthorizedString() != null;
+        return permissionSymbol.IsAuthorizedString() == null;
     }
 
 }
