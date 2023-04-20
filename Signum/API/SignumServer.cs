@@ -15,6 +15,7 @@ using Signum.API.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace Signum.API;
 
@@ -85,12 +86,9 @@ public static class SignumServer
         });
     }
 
-    public static void Start(IApplicationBuilder app, IWebHostEnvironment hostingEnvironment, Assembly mainAsembly)
+    public static void Start(WebServerBuilder wsb)
     {
-        Schema.Current.ApplicationName = hostingEnvironment.ContentRootPath;
-
-        SignumControllerFactory.RegisterArea(typeof(EntitiesController));
-        SignumControllerFactory.RegisterArea(MethodInfo.GetCurrentMethod()!);
+        Schema.Current.ApplicationName = wsb.MachineName ?? wsb.WebHostEnvironment.ContentRootPath;
 
         ReflectionServer.Start();
         ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
@@ -213,4 +211,13 @@ public class EmbeddedPropertyRouteAttribute<T> : EmbeddedPropertyRouteAttributeB
 public interface IEmbeddedPropertyRouteResolver
 {
     PropertyRoute GetPropertyRoute(EmbeddedEntity embedded, FilterContext filterContext);
+}
+
+public class WebServerBuilder
+{
+    public IApplicationBuilder ApplicationBuilder { get; set; }
+    public IWebHostEnvironment WebHostEnvironment { get; set; }
+    public IHostApplicationLifetime ApplicationLifetime { get; set; }
+    public string? MachineName { get; set; }
+    public string AuthTokenEncryptionKey { get; set; }
 }
