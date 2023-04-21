@@ -55,15 +55,6 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
 
     public static Lite<UserEntity> Current => (Lite<UserEntity>)UserHolder.Current?.User!;
 
-    public static CultureInfo? CurrentUserCulture
-    {
-        get
-        {
-            var culture = UserHolder.Current?.GetClaim("Culture") as string;
-            return culture == null ? null : System.Globalization.CultureInfo.GetCultureInfo(culture);
-        }
-    }
-
     [AutoExpressionField]
     public EmailOwnerData EmailOwnerData => As.Expression(() => new EmailOwnerData
     {

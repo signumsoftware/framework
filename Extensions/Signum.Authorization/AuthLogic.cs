@@ -1,3 +1,5 @@
+using Signum.API;
+using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
@@ -58,11 +60,14 @@ public static class AuthLogic
 
     public static void AssertStarted(SchemaBuilder sb)
     {
-        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null!, null, null)));
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null!, null, null, null, null)));
     }
 
-    public static void Start(SchemaBuilder sb, string? systemUserName, string? anonymousUserName)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, string? systemUserName, string? anonymousUserName, Func<AuthTokenConfigurationEmbedded>? tokenConfig)
     {
+        if(wsb != null && tokenConfig != null)
+            AuthServer.Start(wsb.ApplicationBuilder, tokenConfig, wsb.AuthTokenEncryptionKey);
+        
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             SystemUserName = systemUserName;

@@ -14,6 +14,7 @@ using System.Text.Json;
 using System.Xml.Linq;
 using Signum.ViewLog;
 using Signum.Toolbar;
+using Signum.API;
 
 namespace Signum.Dashboard;
 
@@ -29,8 +30,11 @@ public static class DashboardLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this DashboardEntity db) =>
         As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.Dashboard.Is(db)));
 
-    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm cachedQueryAlgorithm)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm cachedQueryAlgorithm)
     {
+        if (wsb != null)
+            DashboardServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterPermissions(DashboardPermission.ViewDashboard);

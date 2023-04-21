@@ -1,11 +1,15 @@
+using Signum.API;
 using System.Net.Http;
 
 namespace Signum.Rest;
 
 public class RestLogLogic
 {
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
+        if (wsb != null)
+            RestServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             sb.Include<RestLogEntity>()

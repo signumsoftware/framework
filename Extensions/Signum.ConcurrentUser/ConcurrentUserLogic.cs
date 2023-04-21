@@ -1,10 +1,15 @@
+using Signum.API;
+
 namespace Signum.ConcurrentUser;
 public static class ConcurrentUserLogic
 {
     public static Func<Type, bool> WatchSaveFor = null!; 
 
-    public static void Start(SchemaBuilder sb, Func<Type, bool>? activatedFor = null)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, Func<Type, bool>? activatedFor = null)
     {
+        if (wsb != null)
+            ConcurrentUserServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             //Should be in sync with ConcurrentUserCLlient onlyFor!!

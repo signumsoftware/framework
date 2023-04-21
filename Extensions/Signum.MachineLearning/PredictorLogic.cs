@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.DynamicQuery.Tokens;
 using Signum.Files;
 using Signum.Processes;
@@ -71,8 +72,11 @@ public static class PredictorLogic
         return Trainings.TryGetC(lite)?.Context;
     }
 
-    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm predictorFileAlgorithm)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm predictorFileAlgorithm)
     {
+        if (wsb != null)
+            PredictorServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Settings.AssertIgnored((PredictorEntity p) => p.MainQuery.Filters.Single().Pinned, "use PredictorLogic", "by calling PredictorLogic.IgnorePinned in Starter.OverrideAttributes");

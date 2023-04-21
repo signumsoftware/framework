@@ -4,6 +4,7 @@ using Signum.Dynamic.Controllers;
 using Signum.Dynamic;
 using Signum.Eval;
 using System.IO;
+using Signum.API;
 
 namespace Signum.Dynamic;
 
@@ -18,8 +19,11 @@ public static class DynamicLogic
     public static Action OnApplicationServerRestarted;
 
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
+        if (wsb != null)
+            DynamicServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);

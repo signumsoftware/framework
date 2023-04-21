@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using Signum.UserAssets;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
+using Signum.API;
 
 namespace Signum.Scheduler;
 
@@ -33,8 +34,11 @@ public static class SchedulerLogic
 
     public static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
+        if(wsb != null)
+            SchedulerServer.Start(wsb.ApplicationBuilder, wsb.ApplicationLifetime);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             AuthLogic.AssertStarted(sb);

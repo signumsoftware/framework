@@ -7,6 +7,10 @@ using Signum.Authorization;
 using Signum.Basics;
 using Signum.Authorization.Rules;
 using Signum.Engine.Sync;
+using Signum.API;
+using Signum.Translation.Translators;
+using Microsoft.AspNetCore.Mvc;
+using Signum.API.Filters;
 
 namespace Signum.Translation;
 
@@ -29,8 +33,11 @@ public static class TranslationLogic
         return targetDirectory;
     }
 
-    public static void Start(SchemaBuilder sb, bool countLocalizationHits)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool countLocalizationHits, params ITranslator[] translators)
     {
+        if(wsb != null)
+            TranslationServer.Start(wsb.ApplicationBuilder, translators);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             CultureInfoLogic.AssertStarted(sb);

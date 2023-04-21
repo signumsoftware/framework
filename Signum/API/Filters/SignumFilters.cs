@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Signum.Security;
 using System.Globalization;
 
 namespace Signum.API.Filters;
@@ -70,7 +71,7 @@ public class SignumAuthenticationFilter : SignumDisposableResourceFilter
 
 public class SignumCultureSelectorFilter : IResourceFilter
 {
-    public static Func<ResourceExecutingContext, CultureInfo?>? GetCurrentCulture;
+    public static Func<ResourceExecutingContext, CultureInfo?>? GetCurrentCulture = null;
 
     const string Culture_Key = "OldCulture";
     const string UICulture_Key = "OldUICulture";

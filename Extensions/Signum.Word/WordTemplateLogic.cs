@@ -11,6 +11,7 @@ using Signum.Templating;
 using Signum.Files;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
+using Signum.API;
 
 namespace Signum.Word;
 
@@ -41,8 +42,11 @@ public static class WordTemplateLogic
     public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
         As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model.Is(e)));
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
+        if (wsb != null)
+            WordServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             

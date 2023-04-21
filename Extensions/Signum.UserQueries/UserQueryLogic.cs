@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
@@ -21,8 +22,11 @@ public static class UserQueryLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
     As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uq.ToLite())));
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
+        if (wsb != null)
+            UserQueryServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             QueryLogic.Start(sb);

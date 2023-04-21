@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace Signum.Security;
 
 public interface IUserEntity : IEntity
@@ -43,6 +45,15 @@ public static class UserHolder
         {
             CurrentUserVariable.Value = value;
             CurrentUserChanged?.Invoke();
+        }
+    }
+
+    public static CultureInfo? CurrentUserCulture
+    {
+        get
+        {
+            var culture = UserHolder.Current?.GetClaim("Culture") as string;
+            return culture == null ? null : System.Globalization.CultureInfo.GetCultureInfo(culture);
         }
     }
 

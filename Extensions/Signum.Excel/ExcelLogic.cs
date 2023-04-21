@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Authorization.Rules;
 using System.IO;
 
@@ -5,8 +6,11 @@ namespace Signum.Excel;
 
 public static class ExcelLogic
 {
-    public static void Start(SchemaBuilder sb, bool excelReport)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool excelReport)
     {
+        if (wsb != null)
+            ExcelServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterTypes(typeof(ExcelPermission));

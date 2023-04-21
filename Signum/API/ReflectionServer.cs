@@ -28,7 +28,7 @@ public static class ReflectionServer
     public static ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>> cache =
      new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
-    public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = null!;
+    public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = new Dictionary<Assembly, HashSet<string>>();
 
     public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
         () => GetTypes().ToDictionaryEx(GetTypeName, "Types"));
@@ -47,18 +47,17 @@ public static class ReflectionServer
         DescriptionManager.Invalidated += InvalidateCache;
         Schema.Current.OnMetadataInvalidated += InvalidateCache;
         Schema.Current.InvalidateCache += InvalidateCache;
-
-       
-
-        Schema.Current.SchemaCompleted += ()=>
+      
+        Schema.Current.SchemaCompleted += () =>
         {
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
             var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
-            EntityAssemblies = mainTypes.Concat(mixins).Concat(operations).AgGroupToDictionary(t => t.Assembly, gr => gr.Select(a => a.Namespace!).ToHashSet());
-        }
-
-        
+            foreach (var item in mainTypes.Concat(mixins).Concat(operations))
+            {
+                EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
+            }
+        };        
     }
 
     public static void InvalidateCache()

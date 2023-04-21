@@ -16,6 +16,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using System.Globalization;
 
 namespace Signum.API;
 
@@ -91,6 +92,7 @@ public static class SignumServer
         Schema.Current.ApplicationName = wsb.MachineName ?? wsb.WebHostEnvironment.ContentRootPath;
 
         ReflectionServer.Start();
+
         ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
         ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
@@ -215,9 +217,10 @@ public interface IEmbeddedPropertyRouteResolver
 
 public class WebServerBuilder
 {
-    public IApplicationBuilder ApplicationBuilder { get; set; }
-    public IWebHostEnvironment WebHostEnvironment { get; set; }
-    public IHostApplicationLifetime ApplicationLifetime { get; set; }
-    public string? MachineName { get; set; }
-    public string AuthTokenEncryptionKey { get; set; }
+    public required IApplicationBuilder ApplicationBuilder { get; set; }
+    public required IWebHostEnvironment WebHostEnvironment { get; set; }
+    public required IHostApplicationLifetime ApplicationLifetime { get; set; }
+    public required string? MachineName { get; set; }
+    public required string AuthTokenEncryptionKey { get; set; }
+    public required CultureInfo DefaultCulture { get; set; }
 }

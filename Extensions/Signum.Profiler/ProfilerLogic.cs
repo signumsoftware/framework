@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Authorization.Rules;
 
 namespace Signum.Profiler;
@@ -11,8 +12,11 @@ public static class ProfilerLogic
         set { SessionTimeoutVariable.Value = value; }
     }
 
-    public static void Start(SchemaBuilder sb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
     {
+        if (wsb != null)
+            ProfilerServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             if (timeTracker)

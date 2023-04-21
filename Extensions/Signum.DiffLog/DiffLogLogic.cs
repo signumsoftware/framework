@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.DiffLog;
 
 namespace Signum.DiffLog;
@@ -6,8 +7,11 @@ public static class DiffLogLogic
 {
     public static Polymorphic<Func<IEntity, IOperation, bool>> ShouldLog = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
 
-    public static void Start(SchemaBuilder sb, bool registerAll)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool registerAll)
     {
+        if (wsb != null)
+            DiffLogServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));

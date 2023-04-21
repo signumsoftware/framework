@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Chart.ColorPalette;
 using Signum.Chart.UserChart;
 
@@ -5,8 +6,11 @@ namespace Signum.Chart;
 
 public static class ChartLogic
 {
-    public static void Start(SchemaBuilder sb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
+    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
     {
+        if (wsb != null)
+            ChartServer.Start(wsb.ApplicationBuilder);
+
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             QueryLogic.Start(sb);
