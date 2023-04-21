@@ -1,6 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Security;
-using Signum.Engine.Basics;
+using Signum.Basics;
 using Azure.Core;
 
 namespace Signum.DynamicQuery;

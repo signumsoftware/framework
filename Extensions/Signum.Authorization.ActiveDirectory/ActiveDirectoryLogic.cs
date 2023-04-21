@@ -1,5 +1,6 @@
 using Signum.ActiveDirectory;
 using Signum.Authorization;
+using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 

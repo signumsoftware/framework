@@ -8,7 +8,7 @@ import { Typeahead } from '@framework/Components'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import { ModifiableEntity, EntityControlMessage, getToString } from '@framework/Signum.Entities'
 import { QueryEntity } from '@framework/Signum.Basics'
-import { FilterOperation, PaginationMode } from '@framework/Signum.DynamicQuery'
+import { ColumnOptionsMode, FilterOperation, OrderType, PaginationMode } from '@framework/Signum.DynamicQuery'
 import { ExpressionOrValueComponent, DesignerModal } from './Designer'
 import { DesignerNode, Expression } from './NodeUtils'
 import { BaseNode } from './Nodes'
@@ -18,6 +18,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
+import { QueryDescription, QueryToken, SubTokensOptions, getFilterOperations } from '@framework/FindOptions'
 
 interface FindOptionsLineProps {
   binding: Binding<FindOptionsExpr | undefined>;

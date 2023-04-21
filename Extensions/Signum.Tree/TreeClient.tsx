@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Type, tryGetTypeInfo } from '@framework/Reflection'
 import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
-import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, DisabledMixin, UserTreePartEntity } from './Signum.Tree'
+import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, UserTreePartEntity } from './Signum.Tree'
 import TreeModal from './TreeModal'
 import { FilterRequest, FilterOption } from "@framework/FindOptions";
 import { ImportComponent } from '@framework/ImportComponent'
@@ -22,6 +22,7 @@ import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
 import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
+import { DisabledMixin } from '@framework/Signum.Basics';
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/tree/:typeName", element: <ImportComponent onImport={() => import("./TreePage")} /> });

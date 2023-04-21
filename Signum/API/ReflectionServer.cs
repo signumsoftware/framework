@@ -48,7 +48,7 @@ public static class ReflectionServer
         DescriptionManager.Invalidated += InvalidateCache;
         Schema.Current.OnMetadataInvalidated += InvalidateCache;
         Schema.Current.InvalidateCache += InvalidateCache;
-      
+
         Schema.Current.SchemaCompleted += () =>
         {
             var mainTypes = Schema.Current.Tables.Keys;
@@ -58,7 +58,7 @@ public static class ReflectionServer
             {
                 EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
             }
-        };        
+        };
     }
 
     public static void InvalidateCache()
@@ -177,7 +177,7 @@ public static class ReflectionServer
 
 
             var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Select(a => a.Type);
-            var allTypes =  normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
+            var allTypes = normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
 
             var entities = allTypes.Where(a => (a.IsModelEntity() && !a.IsAbstract) || (a.IsEntity() && TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
 
@@ -200,7 +200,10 @@ public static class ReflectionServer
         var settings = Schema.Current.Settings;
 
         var descOptions = LocalizedAssembly.GetDescriptionOptions(type);
-        var allOperations = !type.IsEntity() ? null : OperationLogic.GetAllOperationInfos(type);
+
+        var isEntity = type.IsEntity();
+
+        var allOperations = !isEntity ? null : OperationLogic.GetAllOperationInfos(type);
 
         var result = new TypeInfoTS
         {
@@ -219,26 +222,26 @@ public static class ReflectionServer
                 .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))
                 .Select(pr =>
                 {
-                    var validators = Validator.TryGetPropertyValidator(p)?.Validators;
-										var mi = new MemberInfoTS
-                                {
-                                    NiceName = pr.PropertyInfo!.NiceName(),
-                                    Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
-                                    IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
-                                    Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
-                                    Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
-                                    Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
-                                    IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                                    IsVirtualMList = pr.IsVirtualMList(),
-                                    MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
-                                    PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
-                                    AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
-                                    IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
-                                    IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
-                                    HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
-                                };
+                    var validators = Validator.TryGetPropertyValidator(pr)?.Validators;
+                    var mi = new MemberInfoTS
+                    {
+                        NiceName = pr.PropertyInfo!.NiceName(),
+                        Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                        IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
+                        Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
+                        Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
+                        Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
+                        IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+                        IsVirtualMList = pr.IsVirtualMList(),
+                        MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                        PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
+                        AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                        IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                        IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
+                        HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
+                    };
 
-                    return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
+                    return KeyValuePair.Create(pr.PropertyString(), OnPropertyRouteExtension(mi, pr)!);
                 })
                 .Where(kvp => kvp.Value != null)
                 .ToDictionaryEx("properties"),
@@ -248,10 +251,10 @@ public static class ReflectionServer
                         IsDefault = lmc.IsDefault,
                         ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression(), true)!
                     }),
-                   
 
-        						HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
-				            Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
+
+            HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
+            Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
             RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
         };
@@ -279,7 +282,7 @@ public static class ReflectionServer
 
     public static TypeInfoTS? GetEnumTypeInfo(Type type)
     {
-        var name = type.Name; 
+        var name = type.Name;
         var queries = QueryLogic.Queries;
         var descOptions = LocalizedAssembly.GetDescriptionOptions(type);
 

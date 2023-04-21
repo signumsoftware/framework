@@ -1,6 +1,3 @@
-
-using Signum.Engine.SchemaInfoTables;
-using Signum.Entities.DynamicQuery;
 using System.Data;
 using System.Diagnostics;
 using System.Threading;

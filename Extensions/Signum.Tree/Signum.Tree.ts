@@ -9,21 +9,6 @@ import * as Dashboard from '../Signum.Dashboard/Signum.Dashboard'
 import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
 
 
-export module DisabledMessage {
-  export const ParentIsDisabled = new MessageKey("DisabledMessage", "ParentIsDisabled");
-}
-
-export const DisabledMixin = new Type<DisabledMixin>("DisabledMixin");
-export interface DisabledMixin extends Entities.MixinEntity {
-  Type: "DisabledMixin";
-  isDisabled: boolean;
-}
-
-export module DisableOperation {
-  export const Disable : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Disable");
-  export const Enabled : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Enabled");
-}
-
 export const InsertPlace = new EnumType<InsertPlace>("InsertPlace");
 export type InsertPlace =
   "FirstNode" |

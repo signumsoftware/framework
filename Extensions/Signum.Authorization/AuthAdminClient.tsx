@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -105,7 +105,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_Unchecked", label: ()=> AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {

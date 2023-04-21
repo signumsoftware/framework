@@ -47,7 +47,9 @@ export type FilterOperation =
   "NotEndsWith" |
   "NotLike" |
   "IsIn" |
-  "IsNotIn";
+  "IsNotIn" |
+  "ComplexCondition" |
+  "FreeText";
 
 export const FilterType = new EnumType<FilterType>("FilterType");
 export type FilterType =
@@ -77,10 +79,10 @@ export const PinnedFilterActive = new EnumType<PinnedFilterActive>("PinnedFilter
 export type PinnedFilterActive =
   "Always" |
   "WhenHasValue" |
-  "Checkbox_StartChecked" |
-  "Checkbox_StartUnchecked" |
-  "NotCheckbox_StartChecked" |
-  "NotCheckbox_StartUnchecked";
+  "Checkbox_Checked" |
+  "Checkbox_Unchecked" |
+  "NotCheckbox_Checked" |
+  "NotCheckbox_Unchecked";
 
 export const RefreshMode = new EnumType<RefreshMode>("RefreshMode");
 export type RefreshMode =

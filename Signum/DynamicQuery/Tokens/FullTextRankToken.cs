@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Signum.Entities.DynamicQuery.Tokens;
+namespace Signum.DynamicQuery.Tokens;
 
 internal class FullTextRankToken : QueryToken
 {
