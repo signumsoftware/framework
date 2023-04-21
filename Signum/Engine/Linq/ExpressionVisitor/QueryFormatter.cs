@@ -612,7 +612,7 @@ internal class QueryFormatter : DbExpressionVisitor
 
     protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
     {
-        sb.Append(sqlFunction.SqlFunction.ToString());
+        sb.Append(sqlFunction.FunctionName);
         sb.Append('(');
         for (int i = 0, n = sqlFunction.Arguments.Count; i < n; i++)
         {

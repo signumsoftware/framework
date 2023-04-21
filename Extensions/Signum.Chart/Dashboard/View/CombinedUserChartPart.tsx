@@ -149,7 +149,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
       {infos.map((info, i) => <PinnedFilterBuilder key={i}
         filterOptions={info.chartRequest!.filterOptions}
         pinnedFilterVisible={fop => fop.dashboardBehaviour == null}
-        onFiltersChanged={() => info.makeQuery!()} extraSmall={true} />
+        onFiltersChanged={(fpo, avoidSearch) => !avoidSearch && info.makeQuery!()} extraSmall={true} />
       )}
       {p.content.allowChangeShowData &&
         <label>

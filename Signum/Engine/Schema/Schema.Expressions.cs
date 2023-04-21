@@ -12,7 +12,12 @@ public partial class Table
 
         if (IsView)
         {
-            var bindings = this.Fields.Values.Select(ef => new FieldBinding(ef.FieldInfo, ef.Field.GetExpression(tableAlias, binder, id!, null, null))).ToReadOnly();
+            var bindings = this.Fields.Values.Select(ef =>
+            {
+                var exp = ef.Field.GetExpression(tableAlias, binder, id!, null, null);
+
+                return new FieldBinding(ef.FieldInfo, exp.TryConvert(ef.FieldInfo.FieldType));
+            }).ToReadOnly();
 
             var hasValue = id == null ? Expression.Constant(true): SmartEqualizer.NotEqualNullable(id, Expression.Constant(null, id.Type.Nullify()));
 

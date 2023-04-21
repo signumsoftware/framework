@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage } from '@framework/Signum.Entities';
+import { ModifiableEntity, EntityPack, is, OperationSymbol, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong } from '@framework/Signum.Entities';
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
@@ -43,14 +43,14 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   permissions = options.permissions;
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
-    renderLite: (lite, subStr) => {
+    renderLite: (lite, hl) => {
       if (UserLiteModel.isInstance(lite.model))
         return (
-          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{TypeaheadOptions.highlightedText(getToString(lite), subStr)}</span></span>
+          <span className="d-inline-flex align-items-center"><SmallProfilePhoto user={lite} className="me-1" /><span>{hl.highlight(getToString(lite))}</span></span>
         );
 
       if (typeof lite.model == "string")
-        return TypeaheadOptions.highlightedText(getToString(lite), subStr);
+        return hl.highlight(getToString(lite));
 
       return lite.EntityType;
     }
@@ -66,7 +66,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     defaultFilters: [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.ToString", operation: "Contains" },
           { token: "Entity.Id", operation: "EqualTo" },
@@ -76,7 +76,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: UserEntity.token(a => a.state),
         value: UserState.value("Active"),
-        pinned: { label: () => AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_StartChecked" },
+        pinned: { label: () => AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
       },
     ],
     entityFormatter: new Finder.EntityFormatter((row, cols, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
@@ -96,7 +96,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     defaultFilters: [
       {
         groupOperation: "Or",
-        pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+        pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
         filters: [
           { token: "Entity.Id", operation: "EqualTo" },
           { token: "Entity.ToString", operation: "Contains" },
@@ -105,7 +105,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_StartUnchecked", label: ()=> AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_Unchecked", label: ()=> AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {

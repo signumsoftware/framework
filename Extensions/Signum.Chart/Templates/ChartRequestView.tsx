@@ -127,9 +127,10 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
       p.onFiltersChanged(cr.filterOptions);
   }
 
-  function handlePinnedFilterChanged() {
+  function handlePinnedFilterChanged(fop: FilterOptionParsed[], avoidSearch?: boolean) {
     handleFiltersChanged();
-    handleOnDrawClick();
+    if (!avoidSearch)
+      handleOnDrawClick();
   }
 
   function handleOnFullScreen(e: React.MouseEvent<any>) {

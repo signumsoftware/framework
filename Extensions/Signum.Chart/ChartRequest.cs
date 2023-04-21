@@ -84,7 +84,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
         var allTokens = Columns.Select(a => a.Token?.Token).NotNull().ToList();
 
         if (Filters != null)
-            allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
+            allTokens.AddRange(Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens()));
         
         return allTokens;
     }

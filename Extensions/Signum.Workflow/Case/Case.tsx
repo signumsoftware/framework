@@ -84,7 +84,7 @@ export default function CaseComponent(p: CaseComponentProps) {
                 queryName: CaseActivityEntity,
                 filterOptions: [
                   { token: CaseActivityEntity.token(e => e.case), value: ctx.value },
-                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, pinned: { active: "Checkbox_StartUnchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } },
+                  { token: CaseActivityEntity.token(e => e.doneDate), operation: "EqualTo", value: null, pinned: { active: "Checkbox_Unchecked", label: WorkflowActivityMessage.InprogressCaseActivities.niceToString(), column: 2 } },
                 ],
                 columnOptionsMode: "ReplaceAll",
                 columnOptions: [

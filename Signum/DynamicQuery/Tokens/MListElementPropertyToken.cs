@@ -12,6 +12,18 @@ public class MListElementPropertyToken : QueryToken
 
     QueryToken parent;
     public override QueryToken? Parent => parent;
+   
+    public static MListElementPropertyToken RowId(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 };
+    }
+
+    public static MListElementPropertyToken RowOrder(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 };
+    }
 
     internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
     {
@@ -106,7 +118,7 @@ public class MListElementPropertyToken : QueryToken
         var ctxTemp = new BuildExpressionContext(ctx.ElementType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
         {
             {  entityParent, new ExpressionBox(param)}
-        });
+        }, ctx.Filters);
 
         var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);
 

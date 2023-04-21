@@ -7,7 +7,7 @@ import { TypeContext } from '../TypeContext'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForceUpdate } from '../Hooks'
-import { TypeaheadOptions } from './Typeahead'
+import { TextHighlighter, TypeaheadOptions } from './Typeahead'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 
 export interface IconTypeaheadLineProps {
@@ -99,13 +99,13 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     return item as string;
   }
 
-  function handleRenderItem(item: unknown, query: string) {
+  function handleRenderItem(item: unknown, hl: TextHighlighter) {
     var icon = parseIcon(item as string);
 
     return (
       <span>
         {icon && <FontAwesomeIcon icon={icon} className="icon" style={{ width: "12px", height: "12px" }} />}
-        {TypeaheadOptions.highlightedTextAll(item as string, query)}
+        {hl.highlight(item as string)}
       </span>
     );
   }

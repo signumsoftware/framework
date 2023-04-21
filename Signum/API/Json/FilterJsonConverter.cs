@@ -133,7 +133,7 @@ public class ColumnTS
 
     public Column ToColumn(QueryDescription qd, bool canAggregate)
     {
-        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation));
+        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet  | (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation));
 
         return new Column(queryToken, displayName ?? queryToken.NiceName());
     }
@@ -355,7 +355,7 @@ public class OrderTS
 
     public Order ToOrder(QueryDescription qd, bool canAggregate)
     {
-        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
+        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
     }
 
     public override string ToString() => $"{token} {orderType}";

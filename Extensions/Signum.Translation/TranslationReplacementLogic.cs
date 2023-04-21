@@ -13,6 +13,7 @@ public static class TranslationReplacementLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Include<TranslationReplacementEntity>()
+                .WithUniqueIndex(tr => new { tr.CultureInfo, tr.WrongTranslation })
                 .WithSave(TranslationReplacementOperation.Save)
                 .WithDelete(TranslationReplacementOperation.Delete)
                 .WithQuery(() => e => new
@@ -24,7 +25,6 @@ public static class TranslationReplacementLogic
                     e.RightTranslation,
                 });
 
-            sb.AddUniqueIndex<TranslationReplacementEntity>(tr => new { tr.CultureInfo, tr.WrongTranslation });
             
             ReplacementsLazy = sb.GlobalLazy(() => Database.Query<TranslationReplacementEntity>()
                 .AgGroupToDictionary(a => a.CultureInfo.ToCultureInfo(),

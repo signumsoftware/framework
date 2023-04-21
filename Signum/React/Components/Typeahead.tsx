@@ -13,7 +13,7 @@ export interface TypeaheadProps {
   itemsDelay?: number;
   minLength?: number;
   renderList?: (typeahead: TypeaheadController) => React.ReactNode;
-  renderItem?: (item: unknown, query: string) => React.ReactNode;
+  renderItem?: (item: unknown, highlighter: TextHighlighter) => React.ReactNode;
   onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
@@ -257,6 +257,8 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
 
   function renderDefaultList() {
     var items = controller.items;
+
+    var highlighter = TextHighlighter.fromString(controller.query);
     return (
       <Dropdown.Menu align={controller.rtl ? "end" : undefined} className="typeahead">
         {
@@ -268,7 +270,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
                 onMouseLeave={e => controller.handleElementMouseLeave(e, i)}
                 onMouseUp={e => controller.handleMenuMouseUp(e, i)}
                 {...p.itemAttrs && p.itemAttrs(item)}>
-                {p.renderItem!(item, controller.query!)}
+                {p.renderItem!(item, highlighter)}
               </button>)
         }
       </Dropdown.Menu>
@@ -293,7 +295,7 @@ Typeahead.defaultProps = {
   getItems: undefined as any,
   itemsDelay: 200,
   minLength: 1,
-  renderItem: (item, query) => TypeaheadOptions.highlightedText(item as string, query),
+  renderItem: (item, highlighter) => highlighter.highlight(item as string),
   onSelect: (elem, event) => (elem as string),
   scrollHeight: 0,
 
@@ -302,57 +304,55 @@ Typeahead.defaultProps = {
 
 
 export namespace TypeaheadOptions {
-  export function highlightedText(val: string, query?: string): React.ReactChild {
-
-    if (query == undefined)
-      return val;
-
-    const index = val.toLowerCase().indexOf(query.toLowerCase());
-    if (index == -1)
-      return val;
-
-    return (
-      <>
-        {val.substr(0, index)}
-        <strong key={0}>{val.substr(index, query.length)}</strong>
-        {val.substr(index + query.length)}
-      </>
-    );
-  }
-
-  export function highlightedTextAll(val: string, query: string | undefined): React.ReactChild {
-    if (query == undefined)
-      return val;
-
-    const parts = query.toLocaleLowerCase().split(" ").filter(a => a.length > 0).orderByDescending(a => a.length);
-
-    function splitText(str: string, partIndex: number): React.ReactChild {
-
-      if (str.length == 0)
-        return str;
-
-      if (parts.length <= partIndex)
-        return str;
-
-      var part = parts[partIndex];
-
-      const index = str.toLowerCase().indexOf(part);
-      if (index == -1)
-        return splitText(str, partIndex + 1);
-
-      return (
-        <>
-          {splitText(str.substr(0, index), partIndex + 1)}
-          <strong key={0}>{str.substr(index, part.length)}</strong>
-          {splitText(str.substr(index + part.length), partIndex + 1)}
-        </>
-      );
-    }
-
-    return splitText(val, 0);
-  }
 
   export function normalizeString(str: string): string {
     return str;
+  }
+}
+
+export class TextHighlighter {
+  query?: string;
+  parts?: string[];
+  regex?: RegExp;
+
+  static fromString(query: string | undefined) {
+    var hl = new TextHighlighter(query?.split(" "));
+    hl.query = query;
+    return hl;
+  }
+
+  constructor(parts: string[] | undefined) {
+    this.parts = parts?.filter(a => a != null && a.length > 0).orderByDescending(a => a.length);
+    if (this.parts?.length)
+      this.regex = new RegExp(this.parts.map(p => RegExp.escape(p)).join("|"), "gi");
+  }
+
+  highlight(text: string): React.ReactChild {
+    if (!text || !this.regex)
+      return text;
+
+    var matches = Array.from(text.matchAll(this.regex));
+
+    if (matches.length == 0)
+      return text;
+
+    var result = [];
+
+    var pos = 0;
+    for (var i = 0; i < matches.length; i++) {
+      var m = matches[i];
+
+      if (pos < m.index!) {
+        result.push(text.substring(pos, m.index));
+      }
+
+      pos = m.index! + m[0].length;
+      result.push(<strong>{text.substring(m.index!, pos)}</strong>);
+    }
+
+    if (pos < text.length)
+      result.push(text.substring(pos));
+
+    return React.createElement(React.Fragment, undefined, ...result);
   }
 }

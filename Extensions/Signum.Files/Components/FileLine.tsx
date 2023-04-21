@@ -101,15 +101,20 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
         entityOrLite={val}
         htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
-    const removeButton = c.renderRemoveButton(true, val);
+    const buttons =
+      <>
+        {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
+        {c.renderRemoveButton(true, val)}
+        {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
+      </>;
 
-    if (removeButton == null)
+    if (!EntityBaseController.hasChildrens(buttons))
       return content;
 
     return (
       <div className={ctx.inputGroupClass}>
         {content}
-        {removeButton}
+        {buttons}
       </div>
     );
   }

@@ -1,5 +1,8 @@
 using Signum.Engine.Maps;
+using Signum.Utilities;
 using System.Data;
+using System.Data.Common;
+using static System.Net.WebRequestMethods;
 
 namespace Signum.Engine.Sync.SqlServer;
 
@@ -26,6 +29,7 @@ public static class SysTablesSchema
                 var tables =
                     (from s in Database.View<SysSchemas>()
                      from t in s.Tables().Where(t => !t.ExtendedProperties().Any(a => a.name == "microsoft_database_tools_support")) //IntelliSense bug
+                     let fti = t.FullTextSearchIndex()
                      select new DiffTable
                      {
                          Name = new ObjectName(new SchemaName(db, s.name, isPostgres), t.name, isPostgres),
@@ -123,6 +127,25 @@ public static class SysTablesSchema
 
                                         }).ToList(),
 
+                         FullTextIndex = fti == null ? null :
+                                   new DiffIndex
+                                   {
+                                       Columns = (from ic in fti.IndexColumns()
+                                                  join c in t.Columns() on ic.column_id equals c.column_id
+                                                  select new DiffIndexColumn { ColumnName = c.name }).ToList(),
+                                       IndexName = FullTextTableIndex.FULL_TEXT,
+                                       IsUnique = false,
+                                       IsPrimary = false,
+                                       Type = DiffIndexType.FullTextIndex,
+                                       FullTextIndex = new FullTextIndex
+                                       {
+                                           CatallogName = fti.Catallog().name,
+                                           StopList = fti.Stoplist().name,
+                                           PropertiesList = fti.Properties().property_name,
+                                       }
+                                   },
+
+
                          Stats = (from st in t.Stats()
                                   where st.user_created
                                   select new DiffStats
@@ -171,6 +194,21 @@ public static class SysTablesSchema
                 var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemas);
 
                 result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+            }
+        }
+        return result;
+    }
+
+    internal static List<FullTextCatallogName> GetFullTextSearchCatallogs(List<DatabaseName?> list)
+    {
+        var result = new List<FullTextCatallogName>();
+        foreach (var db in list)
+        {
+            using (Administrator.OverrideDatabaseInSysViews(db))
+            {
+                var catallogNames = Database.View<SysFullTextCatallog>().Select(s => new FullTextCatallogName(s.name, db)).ToHashSet();
+
+                result.AddRange(catallogNames);
             }
         }
         return result;

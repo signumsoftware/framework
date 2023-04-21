@@ -23,7 +23,7 @@ export namespace Options {
         filterOptions: [{
           groupOperation: "Or",
           value: search,
-          pinned: { splitText: true },
+          pinned: { splitValue: true },
           filters: columns.map(t => ({ token: t.token, operation: "Contains" } as FilterConditionOption))
         }],
         columnOptionsMode: "Add",

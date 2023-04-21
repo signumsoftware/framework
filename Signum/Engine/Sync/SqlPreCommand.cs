@@ -115,9 +115,22 @@ public static class SqlPreCommandExtensions
                 tr.Commit();
             }
         }
-        catch (ExecuteSqlScriptException)
+        catch (ExecuteSqlScriptException e)
         {
+            if (e.InnerException is SqlException sqle && sqle.Number == 574)
+            {
+                if (SafeConsole.Ask("Execute without transaction?"))
+                {
+                    var script = File.ReadAllText(fileName);
+                    ExecuteScript("script", script);
+                    return;
+                }
+                else
+                    throw;
+            }
+
             Console.WriteLine("The current script is in saved in:  " + Path.Combine(Directory.GetCurrentDirectory(), fileName));
+
             var answer = SafeConsole.AskRetry("Open or retry?", "retry", "open", "exit");
             if (answer == "retry")
                 goto retry;

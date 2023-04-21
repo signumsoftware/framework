@@ -21,6 +21,7 @@ public static class DynamicTypeConditionLogic
                 });
 
             sb.Include<DynamicTypeConditionEntity>()
+                .WithUniqueIndex(e => new { e.SymbolName, e.EntityType })
                 .WithSave(DynamicTypeConditionOperation.Save)
                 .WithQuery(() => e => new
                 {
@@ -64,7 +65,6 @@ public static class DynamicTypeConditionLogic
             DynamicLogic.OnWriteDynamicStarter += WriteDynamicStarter;
             EvalLogic.RegisteredDynamicTypes.Add(typeof(DynamicTypeConditionEntity));
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicTypeConditionEntity>().Where(dtc => dtc.EntityType.Is(type)));
-            sb.AddUniqueIndex((DynamicTypeConditionEntity e) => new { e.SymbolName, e.EntityType });
         }
     }
 

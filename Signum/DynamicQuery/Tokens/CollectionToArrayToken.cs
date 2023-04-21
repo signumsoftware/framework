@@ -44,12 +44,10 @@ public class CollectionToArrayToken : QueryToken
         var ept = MListElementPropertyToken.AsMListEntityProperty(this.parent);
         if (ept != null)
         {
-            var mleType = MListElementPropertyToken.MListElementType(ept);
-
-            st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowId")!, ept.PropertyRoute, "RowId", () => QueryTokenMessage.RowId.NiceToString()) { Priority = -5 });
+            st.Add(MListElementPropertyToken.RowId(this, ept));
 
             if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
-                st.Add(new MListElementPropertyToken(this, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 });
+                st.Add(MListElementPropertyToken.RowOrder(this, ept));
         }
 
         return st;
@@ -148,7 +146,7 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>
             {
                 { cta, new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute()) }
-            });
+            }, context.Filters);
         }
         else
         {
@@ -159,7 +157,7 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(elemeType, param, new Dictionary<QueryToken, ExpressionBox>()
             {
                 { cta, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))}
-            });
+            }, context.Filters);
         }
 
         var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
@@ -173,9 +171,9 @@ public class CollectionToArrayToken : QueryToken
                 query = Expression.Call(miSelectMany.MakeGenericMethod(query.Type.ElementType()!, mleType), query, Expression.Lambda(collection, subCtx.Parameter));
                 var param = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
                 subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
-                    {
-                        { ce, new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())}
-                    });
+                {
+                    { ce, new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())}
+                }, context.Filters);
             }
             else
             {
@@ -185,9 +183,9 @@ public class CollectionToArrayToken : QueryToken
 
                 var param = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
                 subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
-                    {
-                        { ce, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))}
-                    });
+                {
+                    { ce, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))}
+                }, context.Filters);
             }
         }
 

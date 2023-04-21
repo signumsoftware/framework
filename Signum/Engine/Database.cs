@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
+using System.Linq;
 
 namespace Signum.Engine;
 
@@ -1811,6 +1812,7 @@ internal class SignumTable<E> : Query<E>, IQuerySignumTable
         return this.Table.GetHashCode();
     }
 }
+
 
 public interface IUpdateable
 {

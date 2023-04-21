@@ -178,6 +178,7 @@ public class ImporterFromExcel
                                 QueryName = request.QueryName,
                                 Filters = request.Filters.And(new FilterCondition(matchBy, FilterOperation.EqualTo, rg.Key)).ToList(),
                                 Orders = new List<Order>(),
+                                Count = null,
                             }).SingleOrDefaultEx()!;
                         }
                         else

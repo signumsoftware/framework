@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -85,7 +85,7 @@ export interface PinnedFilter {
   row?: number;
   column?: number;
   active?: PinnedFilterActive;
-  splitText?: boolean;
+  splitValue?: boolean;
 }
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
@@ -95,14 +95,14 @@ export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterG
 }
 
 export function isActive(fo: FilterOptionParsed) {
-  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_StartUnchecked" || fo.pinned.active == "NotCheckbox_StartUnchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
+  return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
 export function isCheckBox(active: PinnedFilterActive | undefined) {
-  return active == "Checkbox_StartChecked" ||
-    active == "Checkbox_StartUnchecked" ||
-    active == "NotCheckbox_StartChecked" ||
-    active == "NotCheckbox_StartUnchecked";
+  return active == "Checkbox_Checked" ||
+    active == "Checkbox_Unchecked" ||
+    active == "NotCheckbox_Checked" ||
+    active == "NotCheckbox_Unchecked";
 }
 
 export interface FilterConditionOptionParsed {
@@ -119,7 +119,7 @@ export interface PinnedFilterParsed {
   row?: number;
   column?: number;
   active?: PinnedFilterActive;
-  splitText?: boolean;
+  splitValue?: boolean;
 }
 
 export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
@@ -128,7 +128,7 @@ export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
     row: pf.row,
     column: pf.column,
     active: pf.active,
-    splitText: pf.splitText
+    splitValue: pf.splitValue
   };
 }
 
@@ -184,6 +184,7 @@ export enum SubTokensOptions {
   CanElement = 4,
   CanOperation = 8,
   CanToArray = 16,
+  CanSnippet= 32,
 }
 
 export interface QueryToken {
@@ -233,6 +234,16 @@ export function hasAnyOrAll(token: QueryToken | undefined): boolean {
     return true;
 
   return hasAnyOrAll(token.parent);
+}
+
+export function hasAny(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "AnyOrAll" && token.key == "Any")
+    return true;
+
+  return hasAny(token.parent);
 }
 
 export function isPrefix(prefix: QueryToken, token: QueryToken): boolean {
@@ -321,6 +332,16 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     ...fop,
     pinned: undefined
   };
+}
+
+export function canSplitValue(fo: FilterOptionParsed) {
+  if (isFilterGroupOptionParsed(fo))
+    return fo.pinned != null;
+
+  else {
+    return fo.operation && isList(fo.operation) && hasAny(fo.token) ||
+      fo.token && fo.token.filterType == "String";
+  }
 }
 
 export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {
@@ -524,6 +545,22 @@ export function getFilterType(tr: TypeReference): FilterType | null {
     return "Lite";
 
   return null;
+}
+
+export function getFilterOperations(qt: QueryToken): FilterOperation[] {
+
+  if (qt.filterType == null)
+    return [];
+
+  var fops = filterOperations[qt.filterType];
+
+  if (qt.queryTokenType == null && qt.propertyRoute != null) {
+    var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
+
+    if (pr && pr.member?.hasFullTextIndex)
+      return ["ComplexCondition", "FreeText", ...fops];
+  }
+  return fops;
 }
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};

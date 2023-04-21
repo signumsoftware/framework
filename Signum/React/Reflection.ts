@@ -27,6 +27,7 @@ export interface TypeInfo {
   entityKind?: EntityKind;
   entityData?: EntityData;
   toStringFunction?: string;
+  toStringFunctionTokens?: string[];
   customLiteModels?: { [modelType: string]: CustomLiteModel };
   isLowPopulation?: boolean;
   isSystemVersioned?: boolean;
@@ -63,6 +64,7 @@ export interface MemberInfo {
   id?: any; //symbols
   isPhone?: boolean;
   isMail?: boolean;
+  hasFullTextIndex?: boolean;
 }
 
 export interface OperationInfo {

@@ -54,7 +54,7 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: string | 
 
 export function extractGroupFilter(filters: FilterOptionParsed[], fo: FilterGroupOption): FilterGroupOptionParsed | undefined
 {
-  var f = filters.firstOrNull(f => isFilterGroupOptionParsed(f) && Boolean(f.pinned) == Boolean(fo.pinned) && f.pinned?.splitText == fo.pinned?.splitText && f.groupOperation == fo.groupOperation
+  var f = filters.firstOrNull(f => isFilterGroupOptionParsed(f) && Boolean(f.pinned) == Boolean(fo.pinned) && f.pinned?.splitValue == fo.pinned?.splitValue && f.groupOperation == fo.groupOperation
     && f.filters.length == fo.filters.length &&
     f.filters.every((f2, i) => {
       var fo2 = fo.filters[i];
@@ -76,3 +76,4 @@ export function similarToken(tokenA: string | undefined, tokenB: string | undefi
   return (tokenA?.startsWith("Entity.") ? tokenA.after("Entity.") : tokenA) ==
     (tokenB?.startsWith("Entity.") ? tokenB.after("Entity.") : tokenB);
 }
+

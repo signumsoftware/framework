@@ -61,11 +61,21 @@ public class TreeController : ControllerBase
         var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false, SignumServer.JsonSerializerOptions)).ToList();
 
 
-        var frozenQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest { QueryName = typeof(T), Filters = frozenFilters, Orders = new List<Order>() })
-                        .Select(a => (T)a.Entity);
+        var frozenQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest
+        {
+            QueryName = typeof(T),
+            Filters = frozenFilters,
+            Orders = new List<Order>(),
+            Count = null
+        }).Select(a => (T)a.Entity);
 
-        var filteredQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest { QueryName = typeof(T), Filters = userFilters.Concat(frozenFilters).ToList(), Orders = new List<Order>() })
-                        .Select(a => (T)a.Entity);
+        var filteredQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest
+        {
+            QueryName = typeof(T),
+            Filters = userFilters.Concat(frozenFilters).ToList(),
+            Orders = new List<Order>(),
+            Count = null
+        }).Select(a => (T)a.Entity);
 
         var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
         var list = filteredQuery

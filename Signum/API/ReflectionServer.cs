@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Linq;
 using Signum.Utilities;
+using System.Collections.Generic;
 
 namespace Signum.API;
 
@@ -216,44 +217,43 @@ public static class ReflectionServer
             QueryDefined = queries.QueryDefined(type),
             Members = PropertyRoute.GenerateRoutes(type)
                 .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))
-                .Select(p =>
+                .Select(pr =>
                 {
                     var validators = Validator.TryGetPropertyValidator(p)?.Validators;
-
-                    var mi = new MemberInfoTS
-                    {
-                        NiceName = p.PropertyInfo!.NiceName(),
-                        Format = p.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(p) : null,
-                        IsReadOnly = !IsId(p) && (p.PropertyInfo?.IsReadOnly() ?? false),
-                        Required = !IsId(p) && ((p.Type.IsValueType && !p.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!p.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
-                        Unit = UnitAttribute.GetTranslation(p.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
-                        Type = new TypeReferenceTS(IsId(p) ? PrimaryKey.Type(type).Nullify() : p.PropertyInfo!.PropertyType, p.Type.IsMList() ? p.Add("Item").TryGetImplementations() : p.TryGetImplementations()),
-                        IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                        IsVirtualMList = p.IsVirtualMList(),
-                        MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
-                        PreserveOrder = settings.FieldAttributes(p)?.OfType<PreserveOrderAttribute>().Any() ?? false,
-                        AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
-                        IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
-                        IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
-                    };
+										var mi = new MemberInfoTS
+                                {
+                                    NiceName = pr.PropertyInfo!.NiceName(),
+                                    Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                                    IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
+                                    Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
+                                    Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
+                                    Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
+                                    IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+                                    IsVirtualMList = pr.IsVirtualMList(),
+                                    MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                                    PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
+                                    AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                                    IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                                    IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
+                                    HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
+                                };
 
                     return KeyValuePair.Create(p.PropertyString(), OnPropertyRouteExtension(mi, p)!);
                 })
                 .Where(kvp => kvp.Value != null)
                 .ToDictionaryEx("properties"),
-
             CustomLiteModels = !type.IsEntity() ? null : Lite.LiteModelConstructors.TryGetC(type)?.Values
                     .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
                     {
                         IsDefault = lmc.IsDefault,
                         ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression(), true)!
                     }),
+                   
 
-            HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
-            Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
+        						HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
+				            Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
             RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
-
         };
 
         return OnTypeExtension(result, type);
@@ -407,6 +407,7 @@ public class MemberInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public object? Id { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsPhone { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsMail { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasFullTextIndex { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();

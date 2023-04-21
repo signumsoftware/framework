@@ -98,7 +98,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       defaultFilters: [
         {
           groupOperation: "Or",
-          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
           filters: [
             { token: "DisplayName", operation: "Contains" },
             { token: "GivenName", operation: "Contains" },
@@ -107,7 +107,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
           ],
         },
         {
-          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_StartChecked", column: 2, row: 0 },
+          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_Checked", column: 2, row: 0 },
           token: "AccountEnabled", operation: "EqualTo", value: true
         },
         { token: "CreationType", operation: "DistinctTo", value: "Invitation" }
@@ -126,7 +126,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       defaultFilters: [
         {
           groupOperation: "Or",
-          pinned: { label: SearchMessage.Search.niceToString(), splitText: true, active: "WhenHasValue" },
+          pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
           filters: [
             { token: "DisplayName", operation: "Contains" },
           ],
@@ -199,7 +199,7 @@ export function toADGroupRequest(row: ResultRow, scl: SearchControlLoaded): ADGr
 }
 
 function getSearch(fo: FindOptionsParsed): string | null {
-  var bla = fo.filterOptions.firstOrNull(a => a.pinned?.splitText == true)?.value;
+  var bla = fo.filterOptions.firstOrNull(a => a.pinned?.splitValue == true)?.value;
   return !bla ? null : bla as string;
 }
 

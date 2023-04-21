@@ -528,7 +528,7 @@ export interface EntityFrame {
 }
 
 export function mlistItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
-  const elemPR = ctx.propertyRoute!.addMember("Indexer", "", true);
+  const elemPR = ctx.propertyRoute?.addMember("Indexer", "", true);
 
   if (ctx.previousVersion == null)
     return ctx.value!.map((mle, i) => new TypeContext<T>(ctx, undefined, elemPR,

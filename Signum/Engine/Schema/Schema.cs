@@ -828,7 +828,27 @@ public class Schema : IImplementationsFinder
         return typeCachesLazy.Value.IdToType[id];
     }
 
+    public bool HasFullTextIndex(PropertyRoute propertyRoute)
+    {
+        if (propertyRoute.Type != typeof(string))
+            return false;
 
+        var mlItem = propertyRoute.GetMListItemsRoute();
+
+        var table = mlItem == null ? (ITable)Table(propertyRoute.RootType) : ((FieldMList?)TryField(mlItem.Parent!))?.TableMList;
+
+        if (table == null)
+            return false;
+
+        var fullTextIndex = table.MultiColumnIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
+
+        if (fullTextIndex == null)
+            return false;
+
+        var field = TryField(propertyRoute);
+
+        return field is IColumn c && fullTextIndex.Columns.Contains(c);
+    }
 }
 
 public class RelationInfo

@@ -8,7 +8,7 @@ import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, get
 import { Typeahead } from '../Components'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
-import { TypeaheadController } from '../Components/Typeahead'
+import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
 import { useController } from './LineBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -203,7 +203,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
         getItems={query => ac!.getItems(query)}
         itemsDelay={ac.getItemsDelay()}
         minLength={ac.getMinLength()}
-        renderItem={(item, query) => ac!.renderItem(item, query)}
+        renderItem={(item, hl) => ac!.renderItem(item, hl)}
         renderList={ac!.renderList && (ta => ac!.renderList!(ta))}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
@@ -218,7 +218,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
 
     const str =
       p.renderItem ? p.renderItem :
-        c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item) :
+        c.currentItem && c.currentItem.item && p.autocomplete ? p.autocomplete.renderItem(c.currentItem.item, new TextHighlighter(undefined)) :
           getToString(value);
 
     if (p.ctx.readOnly)

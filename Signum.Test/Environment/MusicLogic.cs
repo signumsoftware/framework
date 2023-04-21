@@ -42,6 +42,9 @@ public static class MusicLogic
                     a.CreationTime,
                 });
 
+            if (Connector.Current.SupportsFullTextSearch)
+                sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Text });
+
             sb.Include<ConfigEntity>()
                 .WithSave(ConfigOperation.Save);
 

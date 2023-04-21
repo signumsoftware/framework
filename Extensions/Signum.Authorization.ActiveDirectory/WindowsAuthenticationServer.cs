@@ -10,15 +10,12 @@ namespace Signum.ActiveDirectory;
 
 public class WindowsAuthenticationServer
 {
-    private static PrincipalContext GetPrincipalContext(string domainName, ActiveDirectoryConfigurationEmbedded config)
+    private static PrincipalContext GetPrincipalContext(ActiveDirectoryConfigurationEmbedded config)
     {
         if (config.DirectoryRegistry_Username.HasText())
-            return new PrincipalContext(ContextType.Domain, domainName, config.DirectoryRegistry_Username + "@" + config.DomainServer, config.DirectoryRegistry_Password);
+            return new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username, config.DirectoryRegistry_Password);
 
-        if (config.DomainServer.HasText())
-            return new PrincipalContext(ContextType.Domain, config.DomainServer);
-        
-        return new PrincipalContext(ContextType.Domain, domainName); //Uses current user
+        return new PrincipalContext(ContextType.Domain, config.DomainName); //Uses current user
     }
 
     public static bool LoginWindowsAuthentication(ActionContext ac, bool throwError)
@@ -41,8 +38,7 @@ public class WindowsAuthenticationServer
                     return throwError ? throw new Exception($"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false")
                         : false;
 
-                var userName = wp.Identity.Name!;
-                var domainName = config.DomainName.DefaultToNull() ?? userName.TryAfterLast('@') ?? userName.TryBefore('\\')!;
+                var userName = wp.Identity.Name!;;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
 
@@ -62,17 +58,16 @@ public class WindowsAuthenticationServer
                     {
                         if (!config.AutoCreateUsers)
                         {
-                            return throwError ? throw new InvalidOperationException("AutoCreateUsers is false") 
-                                : false;
+                            return throwError ? throw new InvalidOperationException("AutoCreateUsers is false") : false;
                         }
 
-                        using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                        using (PrincipalContext pc = GetPrincipalContext(config))
                         {
                             user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == sid);
 
                             if (user == null)
                             {
-                                user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                user = ada.OnCreateUser(new DirectoryServiceAutoCreateUserContext(pc, localName, userName));
                             }
                         }
                     }
@@ -80,9 +75,9 @@ public class WindowsAuthenticationServer
                     {
                         if (config.AutoUpdateUsers)
                         {
-                            using (PrincipalContext pc = GetPrincipalContext(domainName, config))
+                            using (PrincipalContext pc = GetPrincipalContext(config))
                             {
-                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, domainName!));
+                                ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, userName));
                             }
                         }
                     }
@@ -90,7 +85,6 @@ public class WindowsAuthenticationServer
                 catch (Exception e)
                 {
                     e.Data["Identity.Name"] = wp.Identity.Name;
-                    e.Data["domainName"] = domainName;
                     e.Data["localName"] = localName;
 
                     throw;

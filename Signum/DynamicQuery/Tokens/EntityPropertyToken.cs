@@ -27,9 +27,15 @@ public class EntityPropertyToken : QueryToken
     }
 
 
-    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindField = null!;
+    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindFunc = null!;
+    public override DateTimeKind DateTimeKind => DateTimeKindFunc(this);
 
-    public override DateTimeKind DateTimeKind => DateTimeKindField(this);
+    internal static Func<EntityPropertyToken, bool> HasFullTextIndexFunc = null!;
+    public bool HasFullTextIndex => HasFullTextIndexFunc(this);
+
+    internal static Func<EntityPropertyToken, bool> HasSnippetFunc = null!;
+    public bool HasSnippet => HasSnippetFunc(this);
+
 
     public override Type Type
     {
@@ -122,6 +128,24 @@ public class EntityPropertyToken : QueryToken
                 if (format != null)
                     return StepTokens(this, Reflector.NumDecimals(format)).AndHasValue(this);
             }
+        }
+
+        if (uType == typeof(string))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+            var result = StringTokens();
+
+            if (this.HasFullTextIndex)
+            {
+                result.Add(new FullTextRankToken(this));
+            }
+
+            if (this.HasSnippet && (options & SubTokensOptions.CanSnippet) != 0)
+            {
+                result.Add(new StringSnippetToken(this));
+            }
+
+            return result.AndHasValue(this);
         }
 
         return SubTokensBase(this.Type, options, GetImplementations());

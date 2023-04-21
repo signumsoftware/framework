@@ -140,8 +140,12 @@ public class SysTables : IView
         As.Expression(() => Database.View<SysPeriods>().Where(p => p.object_id == object_id));
 
     [AutoExpressionField]
-    public SysSchemas Schema() =>
-        As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == schema_id));
+    public SysSchemas Schema() => 
+        As.Expression(() => Database.View<SysSchemas>().Single(a => a.schema_id == this.schema_id));
+
+    [AutoExpressionField]
+    public SysFullTextIndexes? FullTextSearchIndex() =>
+      As.Expression(() => Database.View<SysFullTextIndexes>().SingleOrDefaultEx(a => a.object_id == this.object_id));
 }
 
 [TableName("sys.views")]
@@ -297,6 +301,68 @@ public class SysIndexColumn : IView
     public int key_ordinal;
     public bool is_included_column;
     public bool is_descending_key;
+}
+
+
+[TableName("sys.fulltext_indexes")]
+public class SysFullTextIndexes : IView
+{
+    [ViewPrimaryKey]
+    public int object_id;
+    public int unique_index_id;
+    public int fulltext_catalog_id;
+    public bool is_enabled;
+    public char change_tracking_state;
+    public int stoplist_id; 
+    public int property_list_id;
+
+    [AutoExpressionField]
+    public IQueryable<SysFullTextIndexesColumns> IndexColumns() =>
+        As.Expression(() => Database.View<SysFullTextIndexesColumns>().Where(ixc => ixc.object_id == this.object_id));
+
+    [AutoExpressionField]
+    public SysFullTextCatallog Catallog() =>
+        As.Expression(() => Database.View<SysFullTextCatallog>().SingleOrDefaultEx(ixc => ixc.fulltext_catalog_id == this.fulltext_catalog_id)!);
+
+    [AutoExpressionField]
+    public SysRegisterSearchProperties Properties() =>
+        As.Expression(() => Database.View<SysRegisterSearchProperties>().SingleOrDefaultEx(ixc => ixc.property_list_id == this.property_list_id)!);
+
+    [AutoExpressionField]
+    public SysFullTextStoplist Stoplist() =>
+        As.Expression(() => Database.View<SysFullTextStoplist>().SingleOrDefaultEx(ixc => ixc.stoplist_id == this.stoplist_id)!);
+
+}
+
+[TableName("sys.fulltext_index_columns")]
+public class SysFullTextIndexesColumns : IView
+{
+    public int object_id;
+    public int column_id;
+    public int type_column_id;
+    public int language_id;
+    public int statistical_semantics;
+}
+
+[TableName("sys.fulltext_catalogs")]
+public class SysFullTextCatallog : IView
+{
+    public int fulltext_catalog_id;
+    public string name;
+}
+
+[TableName("sys.fulltext_stoplists")]
+public class SysFullTextStoplist : IView
+{
+    public int stoplist_id;
+    public string name;
+}
+
+[TableName("sys.registered_search_properties")]
+public class SysRegisterSearchProperties : IView
+{
+    public int property_list_id;
+    public string property_name;
 }
 
 [TableName("sys.stats")]

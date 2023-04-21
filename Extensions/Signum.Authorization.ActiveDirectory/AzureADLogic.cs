@@ -42,6 +42,7 @@ public static class AzureADLogic
             DisplayName = a.DisplayName!,
             JobTitle = a.JobTitle!,
             ObjectID = Guid.Parse(a.Id!),
+            SID = null,
         }).ToList();
     }
 
@@ -583,6 +584,7 @@ public class ActiveDirectoryUser
 {
     public required string DisplayName;
     public required string UPN;
-    public required Guid ObjectID;
+    public required Guid? ObjectID;
     public required string JobTitle;
+    public required string? SID;
 }

@@ -18,10 +18,23 @@ public static class QueryLogic
 
     static QueryLogic()
     {
+        FilterFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
+        FilterFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
         QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
         QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);
-        EntityPropertyToken.DateTimeKindField = ept =>
+        EntityPropertyToken.DateTimeKindFunc = ept =>
         Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(ept.PropertyRoute)?.DateTimeKind ?? DateTimeKind.Unspecified;
+        EntityPropertyToken.HasFullTextIndexFunc = ept => Schema.Current.HasFullTextIndex(ept.PropertyRoute);
+        EntityPropertyToken.HasSnippetFunc = ept =>
+        {
+            if (ept.Type != typeof(string))
+                return false;
+
+            var field = Schema.Current.TryField(ept.PropertyRoute);
+
+            return field is FieldValue fv && (fv.Size == null || fv.Size > 200);
+        };
+
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
         QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
         QueryToken.IsSystemVersioned = IsSystemVersioned;

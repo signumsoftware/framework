@@ -155,6 +155,7 @@ declare global {
 
   interface Array<T> {
     joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement<any>;
+    joinHtml(this: Array<T>, separator: string | React.ReactElement<any>): React.ReactElement<any>;
   }
 }
 
@@ -189,6 +190,23 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
     result.push(lastSeparator)
   }
 
+  if (this.length >= 1) {
+    result.push(this[this.length - 1]);
+  }
+
+  return React.createElement("span", undefined, ...result);
+}
+
+Array.prototype.joinHtml = function (this: any[], separator: string | React.ReactElement<any>) {
+  const args = arguments;
+
+  const result: (string | React.ReactElement<any>)[] = [];
+  for (let i = 0; i < this.length -1; i++) {
+    result.push(this[i]);
+    result.push(separator);
+  }
+
+ 
   if (this.length >= 1) {
     result.push(this[this.length - 1]);
   }

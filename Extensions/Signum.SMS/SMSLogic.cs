@@ -71,6 +71,7 @@ public static class SMSLogic
                 });
 
             sb.Include<SMSTemplateEntity>()
+                .WithUniqueIndex(t => new { t.Model }, where: t => t.Model != null && t.IsActive == true)
                 .WithQuery(() => t => new
                 {
                     Entity = t,
@@ -113,7 +114,6 @@ public static class SMSLogic
                 return null;
             };
 
-            sb.AddUniqueIndex((SMSTemplateEntity t) => new { t.Model }, where: t => t.Model != null && t.IsActive == true);
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
         } 

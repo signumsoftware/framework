@@ -1,4 +1,6 @@
 
+using Signum.Entities;
+
 namespace Signum.Engine;
 
 public static class LinqHintsExpand
@@ -36,3 +38,4 @@ public enum ExpandEntity
     EagerEntity,
     LazyEntity,
 }
+

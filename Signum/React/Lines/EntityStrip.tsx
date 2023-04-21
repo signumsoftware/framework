@@ -13,7 +13,7 @@ import { LineBaseController, LineBaseProps, tasks, useController } from './LineB
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
-import { TypeaheadController } from '../Components/Typeahead'
+import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
@@ -186,7 +186,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
         inputAttrs={{ className: classes(p.ctx.formControlClass, "sf-entity-autocomplete", c.mandatoryClass), placeholder: EntityControlMessage.Add.niceToString(), onPaste: p.paste == false ? undefined : handleOnPaste }}
         getItems={q => ac!.getItems(q)}
         itemsDelay={ac.getItemsDelay()}
-        renderItem={(e, str) => ac!.renderItem(e, str)}
+        renderItem={(e, hl) => ac!.renderItem(e, hl)}
         itemAttrs={item => ({ 'data-entity-key': ac!.getDataKeyFromItem(item) }) as React.HTMLAttributes<HTMLButtonElement>}
         onSelect={c.handleOnSelect}
         renderInput={renderInput}
@@ -252,7 +252,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   const toStr =
     p.onRenderItem ? p.onRenderItem(p.ctx.value) :
-      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item) :
+      currentEntityRef.current?.item ? p.autoComplete!.renderItem(currentEntityRef.current.item, new TextHighlighter(undefined)) :
         getToStr();
 
   function getToStr() {

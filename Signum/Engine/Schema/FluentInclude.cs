@@ -1,4 +1,6 @@
 
+using System.Security.AccessControl;
+
 namespace Signum.Engine.Maps;
 
 public class FluentInclude<T> where T : Entity
@@ -26,6 +28,13 @@ public class FluentInclude<T> where T : Entity
         return this;
     }
 
+    public FluentInclude<T> WithFullTextIndex(Expression<Func<T, object?>> fields, Action<FullTextTableIndex>? customize = null)
+    {
+        var result = this.SchemaBuilder.AddFullTextIndex<T>(fields);
+        customize?.Invoke(result);
+        return this;
+    }
+
     public FluentInclude<T> WithUniqueIndexMList<M>(Expression<Func<T, MList<M>>> mlist, 
         Expression<Func<MListElement<T, M>, object>>? fields = null, 
         Expression<Func<MListElement<T, M>, bool>>? where = null, 
@@ -47,11 +56,18 @@ public class FluentInclude<T> where T : Entity
         return this;
     }
 
+    public FluentInclude<T> WithFullTextIndexMList<M>(Expression<Func<T, MList<M>>> mlist,
+        Expression<Func<MListElement<T, M>, object>> fields, Action<FullTextTableIndex>? customize = null)
+    {
+        var result = this.SchemaBuilder.AddFullTextIndexMList<T, M>(mlist, fields);
+        customize?.Invoke(result);
+        return this;
+    }
+
     public FluentInclude<T> WithLiteModel<M>(Expression<Func<T, M>> constructorExpression, bool isDefault = true)
     {
         Lite.RegisterLiteModelConstructor(constructorExpression, isDefault);
         return this;
     }
-
 }
 

@@ -21,6 +21,19 @@ public class Order : IEquatable<Order>
     public override int GetHashCode() => Token.GetHashCode();
     public override bool Equals(object? obj) => obj is Order order && Equals(order);
     public bool Equals(Order? other) => other is Order o && o.Token.Equals(Token) && o.OrderType.Equals(OrderType);
+
+    internal Order ToFullText()
+    {
+        if(this.Token is StringSnippetToken s)
+        {
+            if (s.Parent is EntityPropertyToken ep && ep.HasFullTextIndex)
+                return new Order(new FullTextRankToken(ep), this.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending);
+
+            return new Order(s.Parent!, this.OrderType);
+        }
+
+        return this;
+    }
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description)]

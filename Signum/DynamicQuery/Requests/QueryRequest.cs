@@ -1,5 +1,7 @@
 using System.ComponentModel;
 using Signum.DynamicQuery.Tokens;
+using System.Runtime.CompilerServices;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
 namespace Signum.DynamicQuery;
@@ -11,6 +13,8 @@ public abstract class BaseQueryRequest
     public required List<Filter> Filters { get; set; }
 
     public string? QueryUrl { get; set; }
+
+    public abstract BaseQueryRequest CombineFullTextFilters();
 
     public override string ToString()
     {
@@ -30,32 +34,21 @@ public class QueryRequest : BaseQueryRequest
 
     public SystemTime? SystemTime { get; set; }
 
-    public bool MultiplicationsInSubQueries()
+    public bool CanDoMultiplicationsInSubQueries()
     {
         return GroupResults == false && Pagination is Pagination.All &&
             Orders.Select(a => a.Token).Concat(Columns.Select(a => a.Token)).Any(a => a.HasElement()) &&
-            !Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token).Any(t => t.HasElement());
+            !Filters.SelectMany(f => f.GetAllFilters()).SelectMany(f => f.GetTokens()).Any(t => t.HasElement());
     }
 
-    public List<CollectionElementToken> Multiplications()
-    {
-        HashSet<QueryToken> allTokens = new HashSet<QueryToken>(this.AllTokens());
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-        return CollectionElementToken.GetElements(allTokens);
-    }
-
-    public List<QueryToken> AllTokens()
-    {
-        var allTokens = Columns.Select(a => a.Token).ToList();
-
-        if (Filters != null)
-            allTokens.AddRange(Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token));
-
-        if (Orders != null)
-            allTokens.AddRange(Orders.Select(a => a.Token));
-
-        return allTokens;
-    }
+    public HashSet<QueryToken> AllTokens() => 
+        Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
+        .Concat(Columns.Select(a => a.Token))
+        .Concat(Orders.Select(a => a.Token))
+        .ToHashSet();
 
     public QueryRequest Clone() => new QueryRequest
     {
@@ -67,6 +60,25 @@ public class QueryRequest : BaseQueryRequest
         Pagination = Pagination,
         SystemTime = SystemTime,
     };
+
+    public override QueryRequest CombineFullTextFilters()
+    {
+        var result = new QueryRequest
+        {
+            QueryName = this.QueryName,
+            QueryUrl = this.QueryUrl,
+            Columns = this.Columns,
+            GroupResults = this.GroupResults,
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Orders = this.Orders.Select(o => o.ToFullText()).ToList(),
+            Pagination = this.Pagination,
+            SystemTime = this.SystemTime,
+        };
+
+        Filter.SetIsTable(result.Filters, result.AllTokens());
+
+        return result;
+    }
 }
 
 [DescriptionOptions(DescriptionOptions.Members | DescriptionOptions.Description), InTypeScript(true)]
@@ -173,79 +185,101 @@ public abstract class Pagination : IEquatable<Pagination>
 
 public class QueryValueRequest : BaseQueryRequest
 {
-    public QueryToken? ValueToken { get; set; }
+    public required QueryToken? ValueToken { get; set; }
 
-    public bool MultipleValues { get; set; }
+    public required bool MultipleValues { get; set; }
 
-    public SystemTime? SystemTime { get; set; }
+    public required SystemTime? SystemTime { get; set; }
 
-    public List<CollectionElementToken> Multiplications
-    {
-        get
-        {
-            return CollectionElementToken.GetElements(Filters
-              .SelectMany(a => a.GetFilterConditions())
-              .Select(fc => fc.Token)
+
+    public HashSet<QueryToken> AllTokens() => Filters
+              .SelectMany(f => f.GetAllFilters())
+              .SelectMany(f => f.GetTokens())
               .PreAnd(ValueToken)
               .NotNull()
-              .ToHashSet());
-        }
+              .ToHashSet();
+
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+
+    public override QueryValueRequest CombineFullTextFilters()
+    {
+        var result = new QueryValueRequest
+        {
+            QueryName = this.QueryName,
+            QueryUrl = this.QueryUrl,
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            SystemTime = this.SystemTime,
+            ValueToken = this.ValueToken,
+            MultipleValues = this.MultipleValues
+        };
+
+        Filter.SetIsTable(result.Filters, result.AllTokens());
+
+        return result;
     }
 
 }
 
 public class UniqueEntityRequest : BaseQueryRequest
 {
-    List<Order> orders;
-    public List<Order> Orders
-    {
-        get { return orders; }
-        set { orders = value; }
-    }
+    public required List<Order> Orders { get; set; }
 
-    UniqueType uniqueType;
-    public UniqueType UniqueType
-    {
-        get { return uniqueType; }
-        set { uniqueType = value; }
-    }
+    public required UniqueType UniqueType { get; set; }
 
-    public List<CollectionElementToken> Multiplications
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+
+    public HashSet<QueryToken> AllTokens() =>
+        Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
+        .Concat(Orders.Select(a => a.Token)).ToHashSet();
+
+    public override UniqueEntityRequest CombineFullTextFilters()
     {
-        get
+        var result = new UniqueEntityRequest
         {
-            var allTokens = Filters
-                .SelectMany(a => a.GetFilterConditions())
-                .Select(a => a.Token)
-                .Concat(Orders.Select(a => a.Token))
-                .ToHashSet();
+            QueryName = this.QueryName,
+            QueryUrl = this.QueryUrl,
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
+            UniqueType = this.UniqueType,
+        };
 
-            return CollectionElementToken.GetElements(allTokens);
-        }
+        Filter.SetIsTable(result.Filters, result.AllTokens());
+
+        return result;
     }
 }
 
 public class QueryEntitiesRequest : BaseQueryRequest
 {
-    List<Order> orders = new List<Order>();
-    public List<Order> Orders
-    {
-        get { return orders; }
-        set { orders = value; }
-    }
+    public required List<Order> Orders { get; set; }
 
-    public List<CollectionElementToken> Multiplications
-    {
-        get
-        {
-            var allTokens = Filters.SelectMany(a => a.GetFilterConditions()).Select(a => a.Token)
-                .Concat(Orders.Select(a => a.Token)).ToHashSet();
+    public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(AllTokens());
+    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-            return CollectionElementToken.GetElements(allTokens);
-        }
-    }
+    public HashSet<QueryToken> AllTokens() => 
+        Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
+        .Concat(Orders.Select(a => a.Token))
+        .ToHashSet();
 
-    public int? Count { get; set; }
+    public required int? Count { get; set; }
 
     public override string ToString() => QueryName.ToString()!;
+
+    public override QueryEntitiesRequest CombineFullTextFilters()
+    {
+        var result = new QueryEntitiesRequest
+        {
+            QueryName = this.QueryName,
+            QueryUrl = this.QueryUrl,
+            Filters = this.Filters.Select(f => f.ToFullText()).NotNull().ToList(),
+            Orders = this.Orders.Select(f => f.ToFullText()).ToList(),
+            Count = Count
+        };
+
+        Filter.SetIsTable(result.Filters, result.AllTokens());
+
+        return result;
+    }
 }

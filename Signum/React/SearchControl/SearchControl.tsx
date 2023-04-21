@@ -278,3 +278,4 @@ export interface ISimpleFilterBuilder {
   onDataChanged?(): void;
 }
 
+

@@ -47,6 +47,22 @@ public static class Untyped
         return giSelectManyE.GetInvoker(types)(collection, collectionSelector, resultSelector);
     }
 
+    public static MethodInfo miJoin = ReflectionTools.GetMethodInfo(() => ((IQueryable<string>)null!).Join(((IQueryable<string>)null!),
+        (Expression<Func<string, string>>)null!, 
+        (Expression<Func<string, string>>)null!,
+        (Expression<Func<string, string, string>>)null!)).GetGenericMethodDefinition();
+    public static IQueryable Join(IQueryable outer, IQueryable inner, LambdaExpression outerKeySelector, LambdaExpression innerKeySelector, LambdaExpression resultSelector)
+    {
+        var types = resultSelector.Type.GenericTypeArguments;
+
+        var mi = miJoin.MakeGenericMethod(outer.ElementType, inner.ElementType, outerKeySelector.ReturnType, resultSelector.ReturnType);
+
+        return outer.Provider.CreateQuery(Expression.Call(null, mi, new Expression[] { outer.Expression, inner.Expression, 
+            Expression.Quote(outerKeySelector),
+            Expression.Quote(innerKeySelector), 
+            Expression.Quote(resultSelector) }));
+    }
+
 
     static MethodInfo miWhereQ =
         ReflectionTools.GetMethodInfo(() => ((IQueryable<string>)null!).Where((Expression<Func<string, bool>>)null!)).GetGenericMethodDefinition();

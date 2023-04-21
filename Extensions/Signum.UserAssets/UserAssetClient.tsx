@@ -136,7 +136,7 @@ export module Converter {
         column: e.column,
         row: e.row,
         active: e.active ?? "Always",
-        splitText: e.splitText ?? false
+        splitValue: e.splitValue ?? false
       });
     }
 
@@ -163,7 +163,7 @@ export module Converter {
         column: pqf.column == null ? undefined : pqf.column,
         row: pqf.row == null ? undefined : pqf.row,
         active: pqf.active,
-        splitText: pqf.splitText
+        splitValue: pqf.splitValue
       })
     }
 

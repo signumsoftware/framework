@@ -39,9 +39,13 @@ public static class SchemaGenerator
         if (foreignKeys != null)
             foreignKeys.GoAfter = true;
 
+        HashSet<string> fullTextSearchCatallogs = new HashSet<string>(); 
+
         SqlPreCommand? indices = tables.Select(t =>
         {
-            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex)); ;
+            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex));
+
+            fullTextSearchCatallogs.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.CatallogName));
 
             var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
@@ -55,7 +59,11 @@ public static class SchemaGenerator
         if (indices != null)
             indices.GoAfter = true;
 
-        return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, indices);
+        var catallogs = fullTextSearchCatallogs.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
+        if (catallogs != null)
+            catallogs.GoAfter = true;
+
+        return SqlPreCommand.Combine(Spacing.Triple, createTables, foreignKeys, catallogs, indices);
     }
 
     public static SqlPreCommand? InsertEnumValuesScript()
