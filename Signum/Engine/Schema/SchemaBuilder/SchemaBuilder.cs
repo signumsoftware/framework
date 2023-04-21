@@ -900,6 +900,8 @@ public class SchemaBuilder
 
     public virtual SchemaName GetSchemaName(Type type)
     {
+        type = EnumEntity.Extract(type) ?? type;
+
         var isPostgres = this.Schema.Settings.IsPostgres;
         var assenbly = AssemblySchemaNameAttribute.OverridenAssembly.TryGetC(type) ?? type.Assembly!;
         var attributes = assenbly.GetCustomAttributes<AssemblySchemaNameAttribute>();
@@ -934,7 +936,7 @@ public class SchemaBuilder
     {
         var isPostgres = Schema.Settings.IsPostgres;
 
-        SchemaName sn = tn != null ? ToSchemaName(tn) : SchemaName.Default(isPostgres);
+        SchemaName sn = tn != null ? ToSchemaName(tn) : table.Name.Schema;
 
         return new ObjectName(sn, tn?.Name ?? (table.Name.Name + name.ToString()), isPostgres);
     }

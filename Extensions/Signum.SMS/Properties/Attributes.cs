@@ -1,2 +1,2 @@
-﻿[assembly: DefaultAssemblyCulture("en")]
-[assembly: AssemblySchemaName("sMS")]
+[assembly: DefaultAssemblyCulture("en")]
+[assembly: AssemblySchemaName("sms")]
