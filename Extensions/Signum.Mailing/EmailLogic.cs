@@ -39,9 +39,6 @@ public static class EmailLogic
         Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
         IFileTypeAlgorithm? attachment = null)
     {
-        if (wsb != null)
-            MailingServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             FilePathEmbeddedLogic.AssertStarted(sb);
@@ -74,8 +71,10 @@ public static class EmailLogic
 
             EmailGraph.Register();
 
-
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            if (wsb != null)
+                MailingServer.Start(wsb.WebApplication);
         }
     }
 

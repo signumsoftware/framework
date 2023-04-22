@@ -8,9 +8,6 @@ public static class ExcelLogic
 {
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool excelReport)
     {
-        if (wsb != null)
-            ExcelServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterTypes(typeof(ExcelPermission));
@@ -31,6 +28,9 @@ public static class ExcelLogic
                         s.DisplayName,
                     });
             }
+
+            if (wsb != null)
+                ExcelServer.Start(wsb.WebApplication);
         }
     }
   

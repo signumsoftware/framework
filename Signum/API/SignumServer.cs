@@ -89,7 +89,7 @@ public static class SignumServer
 
     public static void Start(WebServerBuilder wsb)
     {
-        Schema.Current.ApplicationName = wsb.MachineName ?? wsb.WebHostEnvironment.ContentRootPath;
+        Schema.Current.ApplicationName = wsb.MachineName ?? wsb.WebApplication.Environment.ContentRootPath;
 
         ReflectionServer.Start();
 
@@ -217,9 +217,7 @@ public interface IEmbeddedPropertyRouteResolver
 
 public class WebServerBuilder
 {
-    public required IApplicationBuilder ApplicationBuilder { get; set; }
-    public required IWebHostEnvironment WebHostEnvironment { get; set; }
-    public required IHostApplicationLifetime ApplicationLifetime { get; set; }
+    public required WebApplication WebApplication { get; set; }
     public required string? MachineName { get; set; }
     public required string AuthTokenEncryptionKey { get; set; }
     public required CultureInfo DefaultCulture { get; set; }

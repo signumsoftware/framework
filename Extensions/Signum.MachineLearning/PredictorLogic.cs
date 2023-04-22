@@ -74,8 +74,6 @@ public static class PredictorLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm predictorFileAlgorithm)
     {
-        if (wsb != null)
-            PredictorServer.Start(wsb.ApplicationBuilder);
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -199,6 +197,10 @@ public static class PredictorLogic
                     }
                 }.Register();
             });
+
+            if (wsb != null)
+                PredictorServer.Start(wsb.WebApplication);
+
         }
     }
 

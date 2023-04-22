@@ -60,14 +60,11 @@ public static class AuthLogic
 
     public static void AssertStarted(SchemaBuilder sb)
     {
-        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null!, null, null, null, null)));
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => AuthLogic.Start(null!, null, null)));
     }
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, string? systemUserName, string? anonymousUserName, Func<AuthTokenConfigurationEmbedded>? tokenConfig)
-    {
-        if(wsb != null && tokenConfig != null)
-            AuthServer.Start(wsb.ApplicationBuilder, tokenConfig, wsb.AuthTokenEncryptionKey);
-        
+    public static void Start(SchemaBuilder sb, string? systemUserName, string? anonymousUserName)
+    {   
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             SystemUserName = systemUserName;
@@ -80,8 +77,6 @@ public static class AuthLogic
                 userWithClaims.Claims["Role"] = ((UserEntity)user).Role;
                 userWithClaims.Claims["Culture"] = ((UserEntity)user).CultureInfo?.Name;
             };
-
-          
 
             CultureInfoLogic.AssertStarted(sb);
 
@@ -457,7 +452,7 @@ public static class AuthLogic
         }
     }
 
-    public static void StartAllModules(SchemaBuilder sb)
+    public static void StartAllModules(SchemaBuilder sb, WebServerBuilder? wsb, Func<AuthTokenConfigurationEmbedded>? tokenConfig)
     {
         TypeAuthLogic.Start(sb);
         PropertyAuthLogic.Start(sb);
@@ -465,7 +460,8 @@ public static class AuthLogic
         OperationAuthLogic.Start(sb);
         PermissionAuthLogic.Start(sb);
 
-
+        if (wsb != null && tokenConfig != null)
+            AuthServer.Start(wsb.WebApplication, tokenConfig, wsb.AuthTokenEncryptionKey);
     }
 
     public static HashSet<Lite<RoleEntity>> CurrentRoles()

@@ -7,9 +7,6 @@ public class RestLogLogic
 {
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
-        if (wsb != null)
-            RestServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             sb.Include<RestLogEntity>()
@@ -29,6 +26,10 @@ public class RestLogLogic
                 });
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
+
+            if (wsb != null)
+                RestServer.Start(wsb.WebApplication);
+
         }
     }
 

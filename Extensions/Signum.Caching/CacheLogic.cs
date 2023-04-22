@@ -50,7 +50,7 @@ public static class CacheLogic
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool? withSqlDependency = null, IServerBroadcast? serverBroadcast = null)
     {
         if (wsb != null)
-            CacheServer.Start(wsb.ApplicationBuilder);
+            CacheServer.Start(wsb.WebApplication);
         
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

@@ -14,9 +14,6 @@ public static class ProfilerLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
     {
-        if (wsb != null)
-            ProfilerServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             if (timeTracker)
@@ -27,6 +24,9 @@ public static class ProfilerLogic
 
             if (overrideSessionTimeout)
                 PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
+
+            if (wsb != null)
+                ProfilerServer.Start(wsb.WebApplication);
         }
     }
 

@@ -6,9 +6,6 @@ public static class FileLogic
 {
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
-        if (wsb != null)
-            FilesServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             sb.Include<FileEntity>()
@@ -18,6 +15,9 @@ public static class FileLogic
                     a.Id,
                     a.FileName,
                 });
+
+            if (wsb != null)
+                FilesServer.Start(wsb.WebApplication);
         }
     }
 }

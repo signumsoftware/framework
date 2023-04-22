@@ -31,7 +31,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
         if (context.Exception != null)
         {
-            LogException(context.Exception, context);
+            await LogException(context.Exception, context);
             
             if (ExpectsJsonResult(context))
             {
@@ -59,7 +59,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
         }
     }
 
-    internal static void LogException(Exception exception, ActionContext actionContext)
+    internal static async Task LogException(Exception exception, ActionContext actionContext)
     {
         if (ShouldLogException(exception))
         {
@@ -67,7 +67,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
             var connFeature = actionContext.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
-            var body = ReadAllBody(actionContext.HttpContext);
+            var body = await ReadAllBody(actionContext.HttpContext);
 
             var exLog = exception.LogException(e =>
             {
@@ -110,11 +110,11 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
         return false;
     };
 
-    public static byte[] ReadAllBody(HttpContext httpContext)
+    public static async Task<byte[]> ReadAllBody(HttpContext httpContext)
     {
         //httpContext.Request.EnableBuffering();
         httpContext.Request.Body.Seek(0, System.IO.SeekOrigin.Begin);
-        var result = httpContext.Request.Body.ReadAllBytes();
+        var result = await httpContext.Request.Body.ReadAllBytesAsync();
         return result;
     }
 

@@ -25,7 +25,7 @@ public static class UserQueryLogic
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
         if (wsb != null)
-            UserQueryServer.Start(wsb.ApplicationBuilder);
+            UserQueryServer.Start(wsb.WebApplication);
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

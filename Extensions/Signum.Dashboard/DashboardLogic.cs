@@ -32,8 +32,7 @@ public static class DashboardLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm cachedQueryAlgorithm)
     {
-        if (wsb != null)
-            DashboardServer.Start(wsb.ApplicationBuilder);
+
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -116,6 +115,9 @@ public static class DashboardLogic
             .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
             .GroupToDictionary(),
                 new InvalidateWith(typeof(DashboardEntity)));
+
+            if (wsb != null)
+                DashboardServer.Start(wsb.WebApplication);
         }
     }
 

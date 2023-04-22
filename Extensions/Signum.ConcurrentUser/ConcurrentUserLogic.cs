@@ -7,9 +7,6 @@ public static class ConcurrentUserLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, Func<Type, bool>? activatedFor = null)
     {
-        if (wsb != null)
-            ConcurrentUserServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             //Should be in sync with ConcurrentUserCLlient onlyFor!!
@@ -29,6 +26,9 @@ public static class ConcurrentUserLogic
                     e.StartTime,
                     e.SignalRConnectionID,
                 });
+
+            if (wsb != null)
+                ConcurrentUserServer.Start(wsb.WebApplication);
         }
     }
 }

@@ -36,8 +36,7 @@ public static class SchedulerLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
-        if(wsb != null)
-            SchedulerServer.Start(wsb.ApplicationBuilder, wsb.ApplicationLifetime);
+
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -174,6 +173,9 @@ public static class SchedulerLogic
             UserAssetsImporter.Register<HolidayCalendarEntity>("HolidayCalendar", HolidayCalendarOperation.Save);
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
+
+            if (wsb != null)
+                SchedulerServer.Start(wsb.WebApplication, wsb.WebApplication.Lifetime);
         }
     }
 

@@ -44,9 +44,6 @@ public static class WordTemplateLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
-        if (wsb != null)
-            WordServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             
@@ -154,6 +151,9 @@ public static class WordTemplateLogic
 
             Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
             Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
+
+            if (wsb != null)
+                WordServer.Start(wsb.WebApplication);
         }
     }
 

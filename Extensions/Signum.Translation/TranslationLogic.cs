@@ -36,7 +36,7 @@ public static class TranslationLogic
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool countLocalizationHits, params ITranslator[] translators)
     {
         if(wsb != null)
-            TranslationServer.Start(wsb.ApplicationBuilder, translators);
+            TranslationServer.Start(wsb.WebApplication, translators);
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

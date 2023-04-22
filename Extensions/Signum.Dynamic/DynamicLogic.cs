@@ -21,9 +21,6 @@ public static class DynamicLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
     {
-        if (wsb != null)
-            DynamicServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
@@ -31,6 +28,9 @@ public static class DynamicLogic
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
             EvalLogic.Namespaces.Add(CodeGenNamespace);
             EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
+
+            if (wsb != null)
+                DynamicServer.Start(wsb.WebApplication);
         }
     }
 

@@ -9,9 +9,6 @@ public static class DiffLogLogic
 
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool registerAll)
     {
-        if (wsb != null)
-            DiffLogServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
@@ -21,6 +18,9 @@ public static class DiffLogLogic
 
             if (registerAll)
                 RegisterShouldLog<Entity>((entity, oper) => true);
+
+            if (wsb != null)
+                DiffLogServer.Start(wsb.WebApplication);
         }
     }
 

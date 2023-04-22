@@ -8,9 +8,6 @@ public static class ChartLogic
 {
     public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
     {
-        if (wsb != null)
-            ChartServer.Start(wsb.ApplicationBuilder);
-
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             QueryLogic.Start(sb);
@@ -20,6 +17,9 @@ public static class ChartLogic
             ColorPaletteLogic.Start(sb);
             ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);
             UserChartLogic.Start(sb);
+
+            if (wsb != null)
+                ChartServer.Start(wsb.WebApplication);
         }
     }
 
