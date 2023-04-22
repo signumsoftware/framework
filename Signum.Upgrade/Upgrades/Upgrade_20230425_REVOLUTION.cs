@@ -6,7 +6,7 @@ using System.IO;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20230407_REVOLUTION : CodeUpgradeBase
+class Upgrade_20230425_REVOLUTION : CodeUpgradeBase
 {
     public override string Description => "Updates Nugets";
 

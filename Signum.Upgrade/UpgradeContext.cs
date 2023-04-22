@@ -49,7 +49,7 @@ public class UpgradeContext
     {
         var lists = Directory.GetFiles(rootFolder, "*.sln").Select(a => Path.GetFileNameWithoutExtension(a)).ToList();
 
-        return lists.SingleEx(a => Directory.Exists(Path.Combine(rootFolder, a + ".Entities")));
+        return lists.SingleEx(a => Directory.Exists(Path.Combine(rootFolder, a)));
     }
 
     public CodeFile? TryGetCodeFile(string fileName)
