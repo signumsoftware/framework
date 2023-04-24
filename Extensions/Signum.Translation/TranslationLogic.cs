@@ -100,21 +100,32 @@ public static class TranslationLogic
         Dictionary<string, string?> memory = new Dictionary<string, string?>();
 
 
-        foreach (var fileName in Directory.EnumerateFiles(directoryName, "{0}.*.xml".FormatWith(assemblyName)))
+        foreach (var path in Directory.EnumerateFiles(directoryName, "{0}.*.xml".FormatWith(assemblyName)))
         {
-            var doc = XDocument.Load(fileName);
+            var fileName = Path.GetFileNameWithoutExtension(path);
 
-            HashSet<string> oldNames = doc.Element("Translations")!.Elements("Type").Select(t => t.Attribute("Name")!.Value).ToHashSet();
+            var culture = fileName.After(assemblyName + ".");
 
-            Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(fileName)!); //cloning
+            if (culture.Contains('.'))
+                continue;
 
-            var culture = fileName.After(assemblyName + ".").Before(".xml");
+            var doc = XDocument.Load(path);
+
+            HashSet<string> oldNames = new HashSet<string>(); ; // doc.Element("Translations")!.Elements("Type").Where(t => !LocalizedType.IsEmpty(t)).Select(t => t.Attribute("Name")!.Value).ToHashSet();
+
+            Dictionary<string, string> replacements = AskForReplacementsWithMemory(newNames.ToHashSet(), oldNames.ToHashSet(), memory, replacementKey: Path.GetFileNameWithoutExtension(path)!); //cloning
 
             var locAssem = LocalizedAssembly.FromXml(assembly, CultureInfo.GetCultureInfo(culture), doc, replacements?.Inverse());
 
-            locAssem.ToXml().Save(fileName);
+            var xml = locAssem.ToXml();
+            if (xml == null)
+                File.Delete(path);
+            else
+                xml.Save(path);
         }
     }
+
+
 
     private static Dictionary<string, string> AskForReplacementsWithMemory(HashSet<string> newNames, HashSet<string> oldNames, Dictionary<string, string?> memory, string replacementKey)
     {

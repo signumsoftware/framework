@@ -134,7 +134,6 @@
     <Member Name="ToggleSideBar" Description="Seitenleiste ein-/ausblenden" />
     <Member Name="View" Description="Ansehen" />
   </Type>
-  <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" Description="Ausnahme">
     <Member Name="ActionName" Description="Aktionsname" />
     <Member Name="ApplicationName" Description="Anwendungsname" />
@@ -202,7 +201,6 @@
   <Type Name="ImmutableEntity" Description="Unveränderliche Entität" PluralDescription="Unveränderlichen Entitäten">
     <Member Name="AllowChange" Description="Änderungen erlauben" />
   </Type>
-  <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
     <Member Name="activateTimeMachine" Description="Zeitmaschine aktivieren" />
     <Member Name="addFilter" Description="Filter hinzufügen" />
@@ -257,7 +255,6 @@
     <Member Name="ToStr" Description="Text" />
     <Member Name="Type0NotFound" Description="Typ {0} wurde nicht gefunden" />
   </Type>
-  <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Modellentität" />
   <Type Name="ModifiableEntity" Description="Veränderbare Entität" />
   <Type Name="NormalControlMessage">
@@ -320,10 +317,6 @@
   </Type>
   <Type Name="PinnedFilterActive" Description="Vorgewahlter Filter aktiv">
     <Member Name="Always" Description="Immer" />
-    <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
-    <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="NotCheckbox_StartChecked" Description="Nicht Checkbox (aktiviert starten)" />
-    <Member Name="NotCheckbox_StartUnchecked" Description="Nicht Checkbox (unaktiviert starten)" />
     <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
@@ -470,7 +463,6 @@
     <Member Name="GroupKey" Description="Gruppenschlüssel" />
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
-    <Member Name="HidePinnedFiltersOptions" Description="Vorgewahlter Filteroptionen ausblenden" />
     <Member Name="InvalidColumnExpression" Description="Ungültiger Spaltenausdruck" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="MoreThanOne0Selected" Description="Mehr als ein {0} ausgewählt" />
@@ -490,7 +482,6 @@
     <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
-    <Member Name="PinnFilter" Description="Pinn-Filter" />
     <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie ein[m:en|f:e|n:] {0}" />
     <Member Name="PleaseSelectAnEntity" Description="Bitte wählen Sie eine Entität aus" />
     <Member Name="PleaseSelectOneOrMore0_G" Description="Wählen Sie ein[m:en|f:e|n:] oder mehrere {0}" />
@@ -504,14 +495,12 @@
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
-    <Member Name="ShowPinnedFiltersOptions" Description="Vorgewahlter Filteroptionen anzeigen" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
-    <Member Name="UnpinnFilter" Description="Unpinn-Filter" />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />

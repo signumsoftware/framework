@@ -32,7 +32,6 @@
     <Member Name="Add" Description="Añadir" />
     <Member Name="InsertStart" Description="Insertar Inicio" />
     <Member Name="Remove" Description="Quitar" />
-    <Member Name="Replace" Description="Reemplazar" />
   </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="distinto a" />
@@ -43,12 +42,10 @@
     <Member Name="LessThanOrEqualTo" Description="Menor o igual a" />
   </Type>
   <Type Name="ConnectionMessage">
-    <Member Name="AConnectionWithTheServerIsNecessaryToContinue" Description="Es necesario tener conexión con el servidor para continuar" />
     <Member Name="ANewVersionHasJustBeenDeployedConsiderReload" Description="¡Parece que se acaba de implementar una nueva versión! Si no tienes cambios que debas guardar, considera volver a cargar" />
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="¡Se acaba de desplegar una nueva versión! Guarde los cambios y {0}" />
     <Member Name="OutdatedClientApplication" Description="Aplicación cliente obsoleta" />
     <Member Name="Refresh" Description="Actualizar" />
-    <Member Name="SessionExpired" Description="Sesión caducada" />
   </Type>
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrupto" />
@@ -70,7 +67,6 @@
     <Member Name="EntityWithType0AndId1NotFound" Description="No se han encontrado {0} con Id {1}" />
     <Member Name="NoWayOfMappingType0Found" Description="No se ha encontrado manera de mapear el tipo {0}" />
     <Member Name="TheEntity0IsNew" Description="La entidad {0} es nueva" />
-    <Member Name="ThereAre0ThatReferThisEntity" Description="Hay '{0}' que refieren a esta entidad" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Hay registros en '{0}' que refieren a esta tabla por la columna '{1}'" />
     <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Ya hay [m:un|f:una] {0} con {1} igual a {2}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Acceso denegado a {0} porque {1}" />
@@ -90,7 +86,6 @@
     <Member Name="Remove" Description="Quitar" />
     <Member Name="View" Description="Ver" />
   </Type>
-  <Type Name="EnumEntity`1" />
   <Type Name="ExceptionEntity" Description="Excepción">
     <Member Name="ActionName" Description="Nombre de la acción" />
     <Member Name="ApplicationName" Description="Nombre de la aplicación" />
@@ -146,7 +141,6 @@
   <Type Name="ImmutableEntity" Description="Entidad inmutable">
     <Member Name="AllowChange" Description="Permitir cambios" />
   </Type>
-  <Type Name="IUserEntity" />
   <Type Name="JavascriptMessage">
     <Member Name="activateTimeMachine" Description="Activar Máquina del tiempo" />
     <Member Name="addFilter" Description="Añadir filtro" />
@@ -178,7 +172,6 @@
     <Member Name="popupErrorsStop" Description="Hay errores en la entidad" />
     <Member Name="remove" Description="Quitar" />
     <Member Name="removeColumn" Description="Eliminar columna" />
-    <Member Name="removeOtherColumns" Description="Eliminar otras columnas" />
     <Member Name="restoreDefaultColumns" Description="Restaurar columnas predeterminadas" />
     <Member Name="saveChangesBeforeOrPressCancel" Description="Guardar los cambios antes o pulse Cancelar" />
     <Member Name="saved" Description="Guardado" />
@@ -198,35 +191,14 @@
   <Type Name="LiteMessage">
     <Member Name="IdNotValid" Description="Id no válido" />
     <Member Name="InvalidFormat" Description="FormatWith inválido" />
-    <Member Name="New_G" Description="Nuev[m:o|f:a]" />
     <Member Name="ToStr" Description="Texto" />
     <Member Name="Type0NotFound" Description="Tipo {0} no encontrado" />
   </Type>
-  <Type Name="MixinEntity" />
   <Type Name="ModelEntity" Description="Entidad modelo" />
   <Type Name="ModifiableEntity" Description="Entidad modificable" />
   <Type Name="NormalControlMessage">
     <Member Name="SaveChangesFirst" Description="Guardar primero los cambios" />
     <Member Name="ViewForType0IsNotAllowed" Description="View para el tipo {0} no está permitido" />
-  </Type>
-  <Type Name="NormalWindowMessage">
-    <Member Name="_0Errors1" Description="{0} Errores: {1}" />
-    <Member Name="_1Error" Description="1 Error: {0}" />
-    <Member Name="Cancel" Description="Cancelar" />
-    <Member Name="ContinueAnyway" Description="Continuar de todas formas?" />
-    <Member Name="ContinueWithErrors" Description="Continuar con errores?" />
-    <Member Name="FixErrors" Description="Corrige los errores" />
-    <Member Name="ImpossibleToSaveIntegrityCheckFailed" Description="No se puede guardar porque existen errores de integridad:&#xD;&#xA;&#xD;&#xA;" />
-    <Member Name="Loading0" Description="Cargando {0}..." />
-    <Member Name="Main" Description="Principal" />
-    <Member Name="Message" Description="Mensaje" />
-    <Member Name="New0_G" Description="Nuevo {0}" />
-    <Member Name="NoDirectErrors" Description="No hay errores directos" />
-    <Member Name="Ok" Description="Aceptar" />
-    <Member Name="Reload" Description="Recargar" />
-    <Member Name="The0HasErrors1" Description="El/la {0} tiene errores: {1}" />
-    <Member Name="ThereAreErrors" Description="Hay errores" />
-    <Member Name="Type0Id1" Description="{0} {1}" />
   </Type>
   <Type Name="OperationLogEntity" Description="Registro de operación">
     <Member Name="Duration" Description="Duración" />
@@ -274,8 +246,6 @@
   </Type>
   <Type Name="PinnedFilterActive" Description="Filtro anclado activo">
     <Member Name="Always" Description="Siempre" />
-    <Member Name="Checkbox_StartChecked" Description="Checkbox (iniciar marcado)" />
-    <Member Name="Checkbox_StartUnchecked" Description="Checkbox (iniciar desmarcado)" />
     <Member Name="WhenHasValue" Description="Cuando tiene valor" />
   </Type>
   <Type Name="PropertyOperation" Description="Operación de propiedad">
@@ -331,7 +301,6 @@
     <Member Name="Not" Description="No" />
     <Member Name="Null" Description="Nulo" />
     <Member Name="Number" Description="número" />
-    <Member Name="Of" Description=" de " />
     <Member Name="Quarter" Description="Trimestre" />
     <Member Name="QuarterStart" Description="Trimestre de inicio" />
     <Member Name="Second" Description="Segundo" />
@@ -413,7 +382,6 @@
     <Member Name="GroupKey" Description="Clave de grupo" />
     <Member Name="HiddenColumn" Description="Columna oculta" />
     <Member Name="HideHiddenColumns" Description="Ocultar columnas ocultas" />
-    <Member Name="HidePinnedFiltersOptions" Description="Ocultar opciones de filtro ancladas" />
     <Member Name="Label" Description="Etiqueta" />
     <Member Name="Name" Description="Nombre" />
     <Member Name="NewColumnSName" Description="Nombre de la nueva columna" />
@@ -444,7 +412,6 @@
     <Member Name="Row" Description="Fila" />
     <Member Name="Search" Description="Buscar" />
     <Member Name="ShowHiddenColumns" Description="Mostrar columnas ocultas" />
-    <Member Name="ShowPinnedFiltersOptions" Description="Mostrar opciones de filtro ancladas" />
     <Member Name="SplitText" Description="Dividir texto" />
     <Member Name="SummaryHeader" Description="Resumen en cabecera" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Resumen en cabeceradebe ser un agregado (Suma, Recuento, etc.)" />
