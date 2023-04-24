@@ -6,40 +6,40 @@ using System.IO;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20230425_REVOLUTION : CodeUpgradeBase
+class Upgrade_20230426_ProjectRevolution : CodeUpgradeBase
 {
-    public override string Description => "Updates Nugets";
+    public override string Description => "Project REVOLUTION";
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile("*.js", "Framework", a =>
-        {
-            uctx.DeleteFile(a.FilePath);
-        });
+        //uctx.ForeachCodeFile("*.js", "Framework", a =>
+        //{
+        //    uctx.DeleteFile(a.FilePath);
+        //});
 
-        uctx.ForeachCodeFile("*.js.map", "Framework", a =>
-        {
-            uctx.DeleteFile(a.FilePath);
-        });
+        //uctx.ForeachCodeFile("*.js.map", "Framework", a =>
+        //{
+        //    uctx.DeleteFile(a.FilePath);
+        //});
 
-        uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
-        {
-            uctx.DeleteFile(a.FilePath);
-        });
+        //uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
+        //{
+        //    uctx.DeleteFile(a.FilePath);
+        //});
 
-        uctx.ForeachCodeFile("*.d.ts.map", "Framework", a =>
-        {
-            uctx.DeleteFile(a.FilePath);
-        });
+        //uctx.ForeachCodeFile("*.d.ts.map", "Framework", a =>
+        //{
+        //    uctx.DeleteFile(a.FilePath);
+        //});
 
-        var regex = new Regex(@"Framework\\Extensions\\Signum.(?<name>[^\.\\]*)");
-        uctx.ForeachCodeFile("Attributes.cs", "Framework/Extensions", a =>
-        {
-            var m = regex.Match(a.FilePath);
-            a.InsertAfterLastLine(l => m.Length > 0,  $"[assembly: AssemblySchemaName(\"{m.Groups["name"].Value.FirstLower()}\")]");
-        });
+        //var regex = new Regex(@"Framework\\Extensions\\Signum.(?<name>[^\.\\]*)");
+        //uctx.ForeachCodeFile("Attributes.cs", "Framework/Extensions", a =>
+        //{
+        //    var m = regex.Match(a.FilePath);
+        //    a.InsertAfterLastLine(l => m.Length > 0,  $"[assembly: AssemblySchemaName(\"{m.Groups["name"].Value.FirstLower()}\")]");
+        //});
 
-        regex = new Regex(@"(../)*Signum.React/Scripts");
+        //regex = new Regex(@"(../)*Signum.React/Scripts");
         //uctx.ForeachCodeFile("*.ts, *.tsx", "Framework/Extensions", a =>
         //{
         //    a.Replace(regex, "@framework");
