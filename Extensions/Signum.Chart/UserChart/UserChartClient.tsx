@@ -4,10 +4,13 @@ import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
+import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
-import { Entity, getToString, Lite, liteKey } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as AuthClient from '../../Signum.Authorization/AuthClient'
+import * as DashboardClient from '../../Signum.Dashboard/DashboardClient';
+import { CreateNewButton } from '../../Signum.Dashboard/DashboardClient';
 import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Chart'
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
@@ -15,6 +18,8 @@ import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } from '../Signum.Chart.UserChart';
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries';
+import SelectorModal from '@framework/SelectorModal';
+import { UserChartPartHandler } from '../Dashboard/View/UserChartPart';
 
 export function start(options: { routes: RouteObject[] }) {
 
@@ -66,6 +71,77 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
   Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('../Dashboard/Admin/UserChartPart')));
   Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('../Dashboard/Admin/CombinedUserChartPart')));
+
+
+  DashboardClient.registerRenderer(UserChartPartEntity, {
+    waitForInvalidation: true,
+    component: () => import('../Dashboard/View/UserChartPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "chart-bar", iconColor: "#6C3483" }),
+    defaultTitle: c => translated(c.userChart, uc => uc.displayName),
+    getQueryNames: c => [c.userChart?.query].notNull(),
+    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return Navigator.view(c.userChart!).then(e => Boolean(e));
+      },
+    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+      (p, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        const handler = cdRef.current as UserChartPartHandler;
+        ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
+          .then(path => AppContext.pushOrOpenInTab(path, ev));
+      },
+    customTitleButtons: (c, entity, customDataRef) => {
+      if (!c.createNew)
+        return null;
+
+      return <CreateNewButton queryKey={c.userChart.query.key} onClick={tis => {
+        const handler = customDataRef.current as UserChartPartHandler;
+        return SelectorModal.chooseType(tis)
+          .then(ti => ti && Finder.getPropsFromFilters(ti, handler.chartRequest!.filterOptions)
+            .then(props => Constructor.constructPack(ti.name, props)))
+          .then(pack => pack && Navigator.view(pack))
+          .then(() => handler.reloadQuery());
+      }} />
+    }
+  });
+
+  DashboardClient.registerRenderer(CombinedUserChartPartEntity, {
+    component: () => import('../Dashboard/View/CombinedUserChartPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "chart-line", iconColor: "#8E44AD" }),
+    getQueryNames: c => c.userCharts.map(a => a.element.userChart?.query).notNull(),
+    handleEditClick: !Navigator.isViewable(UserChartPartEntity) || Navigator.isReadOnly(UserChartPartEntity) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        return SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
+          title: SelectorMessage.SelectAnElement.niceToString(),
+          message: SelectorMessage.PleaseSelectAnElement.niceToString()
+        })
+          .then(lite => lite && Navigator.view(lite!))
+          .then(entity => Boolean(entity));
+      },
+    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+      (c, e, cdRef, ev) => {
+        ev.preventDefault();
+        ev.persist();
+        SelectorModal.chooseElement(c.userCharts.map(a => a.element), {
+          buttonDisplay: a => a.userChart.displayName ?? "",
+          buttonName: a => a.userChart.id!.toString(),
+          title: SelectorMessage.SelectAnElement.niceToString(),
+          message: SelectorMessage.PleaseSelectAnElement.niceToString()
+        }).then(uc => {
+          if (uc) {
+            Converter.toChartRequest(uc.userChart, e)
+              .then(cr => ChartClient.Encoder.chartPathPromise(cr, toLite(uc.userChart)))
+              .then(path => AppContext.pushOrOpenInTab(path, ev));
+          }
+        });
+      },
+  });
+
 }
 
 

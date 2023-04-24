@@ -12,12 +12,17 @@ class Upgrade_20230425_REVOLUTION : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
+        uctx.ForeachCodeFile("*.js", "Framework", a =>
         {
             uctx.DeleteFile(a.FilePath);
         });
 
-        uctx.ForeachCodeFile("*.js", "Framework", a =>
+        uctx.ForeachCodeFile("*.js.map", "Framework", a =>
+        {
+            uctx.DeleteFile(a.FilePath);
+        });
+
+        uctx.ForeachCodeFile("*.d.ts", "Framework", a =>
         {
             uctx.DeleteFile(a.FilePath);
         });

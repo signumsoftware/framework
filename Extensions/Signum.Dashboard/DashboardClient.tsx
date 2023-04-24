@@ -47,6 +47,7 @@ interface IconColor {
 
 export interface PartRenderer<T extends IPartEntity> {
   component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
+  waitForInvalidation?: boolean;
   defaultIcon: () => IconColor;
   defaultTitle?: (elenent: T) => string;
   withPanel?: (element: T) => boolean;
@@ -151,11 +152,17 @@ export function start(options: { routes: RouteObject[] }) {
       }), { group: null, icon: "eye", iconColor: "blue", color: "info" }));
 }
 
+
+
 export function home(): Promise<Lite<DashboardEntity> | null> {
   if (!Navigator.isViewable(DashboardEntity))
     return Promise.resolve(null);
 
   return API.home();
+}
+
+export function hasWaitForInvalidation(type: PseudoType) {
+  return partRenderers[getTypeName(type)].waitForInvalidation;
 }
 
 export function defaultIcon(type: PseudoType) {

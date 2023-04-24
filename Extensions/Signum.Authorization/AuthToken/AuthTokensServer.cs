@@ -8,6 +8,8 @@ using System.Text.Json;
 using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.API.Controllers;
+using Signum.API;
+
 namespace Signum.Authorization.AuthToken;
 
 public static class AuthTokenServer
@@ -21,7 +23,7 @@ public static class AuthTokenServer
         Configuration = tokenConfig;
         using var md5 = MD5.Create();
         CryptoKey = md5.ComputeHash(Encoding.UTF8.GetBytes(hashableEncryptionKey));
-
+        ReflectionServer.RegisterLike(typeof(AuthTokenConfigurationEmbedded), () => false);
         SignumAuthenticationFilter.Authenticators.Add(TokenAuthenticator);
         SignumAuthenticationFilter.Authenticators.Add(AnonymousUserAuthenticator);
         SignumAuthenticationFilter.Authenticators.Add(AllowAnonymousAuthenticator);

@@ -95,6 +95,7 @@ export function start(options: { routes: RouteObject[] }) {
   });
 
   DashboardClient.registerRenderer(UserQueryPartEntity, {
+    waitForInvalidation: true,
     component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
     defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
     defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
