@@ -15,7 +15,7 @@ public static class CultureInfoLogic
 
     public static void AssertStarted(SchemaBuilder sb)
     {
-        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null!, null)));
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => CultureInfoLogic.Start(null!)));
     }
 
     public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
@@ -23,7 +23,7 @@ public static class CultureInfoLogic
     public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity = null!;
     public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo = null!;
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -49,8 +49,8 @@ public static class CultureInfoLogic
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
 
-            if (wsb != null)
-                CultureServer.Start(wsb);
+            if (sb.WebServerBuilder != null)
+                CultureServer.Start(sb.WebServerBuilder);
         }
     }
 

@@ -4,7 +4,7 @@ namespace Signum.Files;
 
 public static class FileLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -16,8 +16,8 @@ public static class FileLogic
                     a.FileName,
                 });
 
-            if (wsb != null)
-                FilesServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                FilesServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Signum.Excel;
 
 public static class ExcelLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool excelReport)
+    public static void Start(SchemaBuilder sb, bool excelReport)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -29,8 +29,8 @@ public static class ExcelLogic
                     });
             }
 
-            if (wsb != null)
-                ExcelServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                ExcelServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
   

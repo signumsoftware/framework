@@ -5,7 +5,7 @@ public static class ConcurrentUserLogic
 {
     public static Func<Type, bool> WatchSaveFor = null!; 
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, Func<Type, bool>? activatedFor = null)
+    public static void Start(SchemaBuilder sb, Func<Type, bool>? activatedFor = null)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
@@ -27,8 +27,8 @@ public static class ConcurrentUserLogic
                     e.SignalRConnectionID,
                 });
 
-            if (wsb != null)
-                ConcurrentUserServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                ConcurrentUserServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 }

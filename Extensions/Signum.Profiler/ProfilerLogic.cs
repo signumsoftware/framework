@@ -12,7 +12,7 @@ public static class ProfilerLogic
         set { SessionTimeoutVariable.Value = value; }
     }
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
+    public static void Start(SchemaBuilder sb, bool timeTracker, bool heavyProfiler, bool overrideSessionTimeout)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -25,8 +25,8 @@ public static class ProfilerLogic
             if (overrideSessionTimeout)
                 PermissionLogic.RegisterPermissions(ProfilerPermission.OverrideSessionTimeout);
 
-            if (wsb != null)
-                ProfilerServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                ProfilerServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

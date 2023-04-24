@@ -10,17 +10,6 @@ public static class DynamicServer
 {
     public static void Start(IApplicationBuilder app)
     {
-        ReflectionServer.RegisterLike(typeof(DynamicViewMessage), () => UserEntity.Current != null);
-
-        SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
-        {
-            var route = PropertyRouteLogic.TryGetPropertyRouteEntity(wc.RootType, wc.Path);
-            if (route != null)
-            {
-                wc.SetId(route.Id);
-                wc.SetIsNew(false);
-                wc.SetCleanModified(false);
-            }
-        });
+        ReflectionServer.RegisterLike(typeof(DynamicPanelPermission), () => DynamicPanelPermission.RestartApplication.IsAuthorized());
     }
 }

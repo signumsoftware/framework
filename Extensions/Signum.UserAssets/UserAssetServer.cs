@@ -13,7 +13,7 @@ namespace Signum.UserAssets;
 
 public static class UserAssetServer
 {
-    public static Func<bool> RegisterLikeUserAssets = () => UserAssetPermission.UserAssetsToXML.IsAuthorized();
+
         //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
         //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
 
@@ -25,7 +25,8 @@ public static class UserAssetServer
 
         started = true;
 
-        ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded), () => RegisterLikeUserAssets.GetInvocationListTyped().Any(a => a()));
+        ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+
 
         var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(QueryTokenEmbedded));
         pcs.Add("token", new PropertyConverter

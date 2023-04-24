@@ -5,14 +5,14 @@ namespace Signum.Map;
 
 public static class MapLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterPermissions(MapPermission.ViewMap);
 
-            if (wsb != null)
-                MapServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                MapServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 }

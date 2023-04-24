@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.DynamicQuery.Tokens;
 using System.Reflection.Metadata.Ecma335;
+using Signum.API;
 
 namespace Signum.Engine.Maps;
 
@@ -13,6 +14,8 @@ public class SchemaBuilder
     {
         get { return schema.Settings; }
     }
+
+    public WebServerBuilder? WebServerBuilder { get; init; }
 
     public SchemaBuilder(bool isDefault)
     {

@@ -3,6 +3,8 @@ using Signum.UserAssets;
 using Signum.Eval;
 using System.Text.RegularExpressions;
 using Signum.Toolbar;
+using Signum.Eval.TypeHelp;
+using Signum.API;
 
 namespace Signum.Workflow;
 

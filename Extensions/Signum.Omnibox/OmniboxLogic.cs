@@ -5,14 +5,14 @@ namespace Signum.Omnibox;
 
 public static class OmniboxLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, params IOmniboxResultGenerator[] generators)
+    public static void Start(SchemaBuilder sb, params IOmniboxResultGenerator[] generators)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             PermissionLogic.RegisterTypes(typeof(OmniboxPermission));
 
-            if (wsb != null)
-                OmniboxServer.Start(wsb.WebApplication, generators);
+            if (sb.WebServerBuilder != null)
+                OmniboxServer.Start(sb.WebServerBuilder.WebApplication, generators);
         }
     }
 }

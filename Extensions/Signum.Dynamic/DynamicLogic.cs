@@ -5,6 +5,7 @@ using Signum.Dynamic;
 using Signum.Eval;
 using System.IO;
 using Signum.API;
+using Signum.Eval.TypeHelp;
 
 namespace Signum.Dynamic;
 
@@ -19,18 +20,19 @@ public static class DynamicLogic
     public static Action OnApplicationServerRestarted;
 
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+            TypeHelpLogic.Start(sb);
             PermissionLogic.RegisterPermissions(DynamicPanelPermission.RestartApplication);
             DynamicLogic.GetCodeFiles += GetCodeGenStarter;
             AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(AssemblyResolveHandler);
             EvalLogic.Namespaces.Add(CodeGenNamespace);
             EvalLogic.GetCodeGenAssemblyPath = () => CodeGenAssemblyPath;
 
-            if (wsb != null)
-                DynamicServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                DynamicServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

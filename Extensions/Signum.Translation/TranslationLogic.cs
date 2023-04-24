@@ -11,6 +11,7 @@ using Signum.API;
 using Signum.Translation.Translators;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
+using System.Text.RegularExpressions;
 
 namespace Signum.Translation;
 
@@ -19,24 +20,28 @@ public static class TranslationLogic
     public static ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>> NonLocalized =
      new ConcurrentDictionary<Lite<RoleEntity>, ConcurrentDictionary<CultureInfo, ConcurrentDictionary<Type, TypeOccurrentes>>>();
 
-    public static Func<System.IO.FileInfo, string, string, string> GetTargetDirectory = GetTargetDirectoryDefault;
-    public static string GetTargetDirectoryDefault(System.IO.FileInfo fi, string appName, string rootDir)
+    public static Func<System.IO.FileInfo, string, string, string, string> GetTargetDirectory = GetTargetDirectoryDefault;
+    public static string GetTargetDirectoryDefault(System.IO.FileInfo fi, string cleanFileName, string appName, string rootDir)
     {
+        if (cleanFileName == appName)
+            return $@"{rootDir}\{appName}\Translations";
 
-        var targetDirectory =
-                  fi.Name.StartsWith(appName + ".Entities") ? $@"{rootDir}\{appName}.Entities\Translations" :
-                  fi.Name.StartsWith("Signum.Entities.Extensions") ? $@"{rootDir}\Framework\Signum.Entities.Extensions\Translations" :
-                  fi.Name.StartsWith("Signum.Entities") ? $@"{rootDir}\Framework\Signum.Entities\Translations" :
-                  fi.Name.StartsWith("Signum.Utilities") ? $@"{rootDir}\Framework\Signum.Utilities\Translations" :
-                  throw new InvalidOperationException("Unexpected file with name " + fi.Name);
+        if (cleanFileName == "Signum.Utilities")
+            return $@"{rootDir}\Framework\Signum.Utilities\Translations";
 
-        return targetDirectory;
+        if (cleanFileName == "Signum")
+            return $@"{rootDir}\Framework\Signum\Translations";
+
+        if(cleanFileName.StartsWith("Signum"))
+            return $@"{rootDir}\Framework\Extensions\{cleanFileName}\Translations";
+
+        throw new InvalidOperationException("Unexpected file with name " + fi.Name);
     }
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool countLocalizationHits, params ITranslator[] translators)
+    public static void Start(SchemaBuilder sb, bool countLocalizationHits, params ITranslator[] translators)
     {
-        if(wsb != null)
-            TranslationServer.Start(wsb.WebApplication, translators);
+        if(sb.WebServerBuilder != null)
+            TranslationServer.Start(sb.WebServerBuilder.WebApplication, translators);
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -157,7 +162,7 @@ public static class TranslationLogic
         var appName = rootDir.AfterLast(@"\");
         rootDir = rootDir.BeforeLast(@"\");
 
-        var parentDir = $@"{rootDir}\{appName}.React\bin\";
+        var parentDir = $@"{rootDir}\{appName}\bin\";
 
         var reactDirs = new DirectoryInfo(parentDir).GetDirectories("Translations", SearchOption.AllDirectories).ToList();
 
@@ -177,7 +182,9 @@ public static class TranslationLogic
 
         foreach (var fi in reactDir.GetFiles("*.xml"))
         {
-            var targetDirectory = GetTargetDirectory(fi, appName, rootDir);
+            var cleanFileName = Regex.Replace(fi.Name, @"\.(?<culture>\w+)\.xml$", "");
+
+            var targetDirectory = GetTargetDirectory(fi, cleanFileName, appName, rootDir);
 
             if (!Directory.Exists(targetDirectory))
                 Directory.CreateDirectory(targetDirectory);

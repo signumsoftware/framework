@@ -72,7 +72,7 @@ public static class PredictorLogic
         return Trainings.TryGetC(lite)?.Context;
     }
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm predictorFileAlgorithm)
+    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm predictorFileAlgorithm)
     {
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -198,8 +198,8 @@ public static class PredictorLogic
                 }.Register();
             });
 
-            if (wsb != null)
-                PredictorServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                PredictorServer.Start(sb.WebServerBuilder.WebApplication);
 
         }
     }

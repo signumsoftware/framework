@@ -52,9 +52,13 @@ public static class ReflectionServer
         Schema.Current.SchemaCompleted += () =>
         {
             var mainTypes = Schema.Current.Tables.Keys;
-            var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t));
-            var operations = OperationLogic.RegisteredOperations.Select(o => o.FieldInfo.DeclaringType!);
-            foreach (var item in mainTypes.Concat(mixins).Concat(operations))
+            var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t)).ToList();
+            var symbols = SymbolLogic.AllSymbolContainers().ToList();
+
+            var messages = mainTypes.Concat(mixins).Concat(symbols).Select(a => a.Assembly).SelectMany(a => a.GetTypes())
+            .Where(t => t.IsPublic && t.IsEnum && LocalizedAssembly.GetDescriptionOptions(t) != DescriptionOptions.None).ToList();
+
+            foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(messages))
             {
                 EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
             }
@@ -67,7 +71,6 @@ public static class ReflectionServer
         LastModified = DateTimeOffset.UtcNow;
     }
 
-    const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
     const BindingFlags staticFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
     public static event Func<TypeInfoTS, Type, TypeInfoTS?>? TypeExtension;
@@ -179,7 +182,7 @@ public static class ReflectionServer
             var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Select(a => a.Type);
             var allTypes = normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
 
-            var entities = allTypes.Where(a => (a.IsModelEntity() && !a.IsAbstract) || (a.IsEntity() && TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
+            var entities = allTypes.Where(a => a.IsModifiableEntity() && !a.IsAbstract && (!a.IsEntity() || TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
 
             var enums = allTypes.Where(a => a.IsEnum && LocalizedAssembly.GetDescriptionOptions(a) != DescriptionOptions.None).ToList();
 
@@ -194,6 +197,9 @@ public static class ReflectionServer
 
     public static TypeInfoTS? GetEntityTypeInfo(Type type)
     {
+        if (!typeof(IRootEntity).IsAssignableFrom(type))
+            return null;
+
         var queries = QueryLogic.Queries;
 
         var schema = Schema.Current;
@@ -216,7 +222,7 @@ public static class ReflectionServer
             EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
             IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
             IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
-            ToStringFunction = typeof(Symbol).IsAssignableFrom(type) ? null : LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
+            ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
             QueryDefined = queries.QueryDefined(type),
             Members = PropertyRoute.GenerateRoutes(type)
                 .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))

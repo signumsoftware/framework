@@ -37,7 +37,7 @@ public static class CacheLogic
 
     public static void AssertStarted(SchemaBuilder sb)
     {
-        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null, null, null)));
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => Start(null!, null, null)));
     }
 
     /// <summary>
@@ -47,10 +47,10 @@ public static class CacheLogic
     ///    Change Server Authentication mode and enable SA: http://msdn.microsoft.com/en-us/library/ms188670.aspx
     ///    Change Database ownership to sa: ALTER AUTHORIZATION ON DATABASE::yourDatabase TO sa
     /// </summary>
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool? withSqlDependency = null, IServerBroadcast? serverBroadcast = null)
+    public static void Start(SchemaBuilder sb, bool? withSqlDependency = null, IServerBroadcast? serverBroadcast = null)
     {
-        if (wsb != null)
-            CacheServer.Start(wsb.WebApplication);
+        if (sb.WebServerBuilder != null)
+            CacheServer.Start(sb.WebServerBuilder.WebApplication);
         
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

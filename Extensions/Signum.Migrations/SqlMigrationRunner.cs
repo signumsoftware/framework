@@ -20,12 +20,22 @@ public class SqlMigrationRunner
         {
             List<MigrationInfo> list = ReadMigrationsDirectory();
 
-            if (!autoRun && !Connector.Current.HasTables() && list.Count == 0)
+            if (!autoRun && list.Count == 0)
             {
-                if (!SafeConsole.Ask("Create initial migration?"))
-                    return;
+                if (!Connector.Current.HasTables())
+                {
+                    if (!SafeConsole.Ask("Create initial migration?"))
+                        return;
 
-                CreateInitialMigration();
+                    CreateInitialMigration();
+                }
+                else
+                {
+                    if (!SafeConsole.Ask("There are no migrations yet, do you want to squash the current schema in an initial migration?"))
+                        return;
+
+                    SquashMigrationHistory();
+                }
             }
             else
             {
@@ -301,7 +311,7 @@ public class SqlMigrationRunner
         Console.WriteLine("Squash Migration History will reset all the SQL Migration history into one Initial Migration");
         Console.WriteLine();
 
-        Console.WriteLine("This operation doesn't change your database schema, but will delete your migration history.");
+        Console.WriteLine("This operation doesn't change your database schema, but will delete your migration history (if any).");
         Console.WriteLine();
 
         Console.WriteLine("First step is to check that there are no differences between the current database and the application");

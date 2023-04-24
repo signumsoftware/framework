@@ -60,35 +60,6 @@ public static class MigrationLogic
 
                 return false;
             };
-
-            Administrator.AvoidSimpleGenerate = () =>
-            {
-                if(SqlMigrationRunner.MigrationDirectoryIsEmpty())
-                {
-                    Console.WriteLine("Your SQL Migrations Directory is empty.");
-
-                    if (SafeConsole.Ask("Do you want to create the INITIAL SQL Migration instead?"))
-                    {
-                        SqlMigrationRunner.CreateInitialMigration();
-                        SqlMigrationRunner.SqlMigrations();
-                        return true;
-                    }
-                }
-                else
-                {
-                    var hasInitial = SqlMigrationRunner.ReadMigrationsDirectory(silent: true).MinBy(a => a.Version)?.Comment.Contains(SqlMigrationRunner.InitialMigrationComment);
-
-                    Console.WriteLine("You have an Initial SQL Migration.");
-
-                    if (SafeConsole.Ask("Do you want to run the SQL Migrations instead?", "continue", "migrations") == "migrations")
-                    {
-                        SqlMigrationRunner.SqlMigrations();
-                        return true;
-                    }
-                }
-
-                return false;
-            };
         }
     }
 

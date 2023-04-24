@@ -7,7 +7,7 @@ public static class DiffLogLogic
 {
     public static Polymorphic<Func<IEntity, IOperation, bool>> ShouldLog = new Polymorphic<Func<IEntity, IOperation, bool>>(minimumType: typeof(Entity));
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool registerAll)
+    public static void Start(SchemaBuilder sb, bool registerAll)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -19,8 +19,8 @@ public static class DiffLogLogic
             if (registerAll)
                 RegisterShouldLog<Entity>((entity, oper) => true);
 
-            if (wsb != null)
-                DiffLogServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                DiffLogServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

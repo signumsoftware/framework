@@ -256,7 +256,8 @@ public static class AuthServer
             return typesInNamespace.Any(t => TypeAuthLogic.GetAllowed(t).MaxUI() > TypeAllowedBasic.None);
 
 
-        throw new InvalidOperationException(@$"Unable to determine whether the metadata for '{type.FullName}' should be delivered to the client for role '{RoleEntity.Current}' because there are no entities in the namespace '{type.Namespace!}'.");
+        throw new InvalidOperationException(@$"Unable to determine whether the metadata for '{type.FullName}' should be delivered to the client because there are no entities in the namespace '{type.Namespace!}'.
+Consider calling ReflectionServer.RegisterLike(typeof({type.Name}), ()=> yourCondition);");
     }
 
 

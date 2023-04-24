@@ -20,7 +20,7 @@ public class RestLogFilter : ActionFilterAttribute
     public bool IgnoreRequestBody { get; set; }
     public bool IgnoreResponseBody{ get; set; }
 
-    public override void OnActionExecuting(ActionExecutingContext context)
+    public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         try
         {
@@ -53,7 +53,7 @@ public class RestLogFilter : ActionFilterAttribute
                 UserHostAddress = connection.RemoteIpAddress!.ToString(),
                 UserHostName = request.Host.Value,
                 Referrer = request.Headers["Referrer"].ToString(),
-                RequestBody = IgnoreRequestBody ? null : GetRequestBody(context.HttpContext.Request)
+                RequestBody = IgnoreRequestBody ? null : await GetRequestBody(context.HttpContext.Request)
             };
 
             context.HttpContext.Items.Add(typeof(RestLogEntity).FullName!, restLog);
@@ -63,9 +63,27 @@ public class RestLogFilter : ActionFilterAttribute
         {
             e.LogException();
         }
+
+        var executedContext = await next();
+
+        if (executedContext.Exception != null)
+        {
+            var restLog = (RestLogEntity)executedContext.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
+            restLog.EndDate = Clock.Now;
+            restLog.Exception = executedContext.Exception.LogException()?.ToLite();
+
+            if (!IgnoreResponseBody)
+            {
+                RestoreOriginalStream(executedContext);
+            }
+
+            using (ExecutionMode.Global())
+                restLog.Save();
+        }
     }
 
-    private string GetRequestBody(HttpRequest request)
+
+    private async Task<string> GetRequestBody(HttpRequest request)
     {
         // Allows using several time the stream in ASP.Net Core
         request.EnableBuffering();
@@ -76,7 +94,7 @@ public class RestLogFilter : ActionFilterAttribute
         request.Body.Position = 0;
         using (StreamReader reader = new StreamReader(request.Body, Encoding.UTF8, true, 1024, true))
         {
-            result = reader.ReadToEnd();
+            result = await reader.ReadToEndAsync();
         }
 
         // Rewind, so the core is not lost when it looks the body for the request
@@ -85,47 +103,29 @@ public class RestLogFilter : ActionFilterAttribute
         return result;
     }
 
-    public override void OnActionExecuted(ActionExecutedContext context)
+    public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
     {
-        if(context.Exception != null)
-        {
-            var restLog = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
-            restLog.EndDate = Clock.Now;
-            restLog.Exception = context.Exception.LogException()?.ToLite();
+        var resultContext = await next();
 
-            if (!IgnoreResponseBody)
-            {
-                RestoreOriginalStream(context);
-            }
-
-            using (ExecutionMode.Global())
-                restLog.Save();
-        }
-
-        base.OnActionExecuted(context);
-    }
-
-    public override void OnResultExecuted(ResultExecutedContext context)
-    {
         try
         {
-            var restLog = (RestLogEntity)context.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
+            var restLog = (RestLogEntity)resultContext.HttpContext.Items.GetOrThrow(typeof(RestLogEntity).FullName!)!;
             restLog.EndDate = Clock.Now;
 
             if (!IgnoreResponseBody)
             {
-                Stream memoryStream = RestoreOriginalStream(context);
+                Stream memoryStream = await RestoreOriginalStream(resultContext);
 
-                if (context.Exception == null)
+                if (resultContext.Exception == null)
                 {
                     memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
                     restLog.ResponseBody = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
                 }
             }
 
-            if (context.Exception != null)
+            if (resultContext.Exception != null)
             {
-                restLog.Exception = context.Exception.LogException()?.ToLite();
+                restLog.Exception = resultContext.Exception.LogException()?.ToLite();
             }
 
             using (ExecutionMode.Global())
@@ -135,14 +135,18 @@ public class RestLogFilter : ActionFilterAttribute
         {
             e.LogException();
         }
+
     }
 
-    private static Stream RestoreOriginalStream(FilterContext context)
+
+ 
+
+    private static async Task<Stream> RestoreOriginalStream(FilterContext context)
     {
         var originalStream = (Stream)context.HttpContext.Items.GetOrThrow(OriginalResponseStreamKey)!;
         var memoryStream = context.HttpContext.Response.Body;
         memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-        memoryStream.CopyTo(originalStream);
+        await memoryStream.CopyToAsync(originalStream);
 
         context.HttpContext.Response.Body = originalStream;
         return memoryStream;

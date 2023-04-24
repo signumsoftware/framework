@@ -30,7 +30,7 @@ public static class DashboardLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this DashboardEntity db) =>
         As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.Dashboard.Is(db)));
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, IFileTypeAlgorithm cachedQueryAlgorithm)
+    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm cachedQueryAlgorithm)
     {
 
 
@@ -116,8 +116,8 @@ public static class DashboardLogic
             .GroupToDictionary(),
                 new InvalidateWith(typeof(DashboardEntity)));
 
-            if (wsb != null)
-                DashboardServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                DashboardServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

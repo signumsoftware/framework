@@ -34,7 +34,7 @@ public static class SchedulerLogic
 
     public static ResetLazy<List<ScheduledTaskEntity>> ScheduledTasksLazy = null!;
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
 
 
@@ -174,8 +174,8 @@ public static class SchedulerLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            if (wsb != null)
-                SchedulerServer.Start(wsb.WebApplication, wsb.WebApplication.Lifetime);
+            if (sb.WebServerBuilder != null)
+                SchedulerServer.Start(sb.WebServerBuilder.WebApplication, sb.WebServerBuilder.WebApplication.Lifetime);
         }
     }
 

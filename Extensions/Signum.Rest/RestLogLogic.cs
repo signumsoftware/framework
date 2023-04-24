@@ -5,7 +5,7 @@ namespace Signum.Rest;
 
 public class RestLogLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
@@ -27,8 +27,8 @@ public class RestLogLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
 
-            if (wsb != null)
-                RestServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                RestServer.Start(sb.WebServerBuilder.WebApplication);
 
         }
     }

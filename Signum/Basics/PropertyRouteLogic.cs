@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 
@@ -33,6 +34,20 @@ public static class PropertyRouteLogic
             PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;
 
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += PropertyRouteLogic_PreDeleteSqlSync;
+
+            if (sb.WebServerBuilder != null)
+            {
+                SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((PropertyRouteEntity wc) =>
+                {
+                    var route = PropertyRouteLogic.TryGetPropertyRouteEntity(wc.RootType, wc.Path);
+                    if (route != null)
+                    {
+                        wc.SetId(route.Id);
+                        wc.SetIsNew(false);
+                        wc.SetCleanModified(false);
+                    }
+                });
+            }
         }
     }
 

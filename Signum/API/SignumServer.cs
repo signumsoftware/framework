@@ -17,6 +17,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using System.Globalization;
+using Signum.DynamicQuery.Tokens;
 
 namespace Signum.API;
 
@@ -93,8 +94,10 @@ public static class SignumServer
 
         ReflectionServer.Start();
 
+        ReflectionServer.RegisterLike(typeof(ValidationMessage), () => UserHolder.Current != null);
         ReflectionServer.RegisterLike(typeof(SearchMessage), () => UserHolder.Current != null);
         ReflectionServer.RegisterLike(typeof(PaginationMode), () => UserHolder.Current != null);
+        ReflectionServer.RegisterLike(typeof(AggregateFunction), () => UserHolder.Current != null);
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(DayOfWeek).Namespace!, () => UserHolder.Current != null);
         ReflectionServer.OverrideIsNamespaceAllowed.Add(typeof(CollectionMessage).Namespace!, () => UserHolder.Current != null);
     }

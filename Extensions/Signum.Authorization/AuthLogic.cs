@@ -452,7 +452,7 @@ public static class AuthLogic
         }
     }
 
-    public static void StartAllModules(SchemaBuilder sb, WebServerBuilder? wsb, Func<AuthTokenConfigurationEmbedded>? tokenConfig)
+    public static void StartAllModules(SchemaBuilder sb, Func<AuthTokenConfigurationEmbedded>? tokenConfig)
     {
         TypeAuthLogic.Start(sb);
         PropertyAuthLogic.Start(sb);
@@ -460,8 +460,8 @@ public static class AuthLogic
         OperationAuthLogic.Start(sb);
         PermissionAuthLogic.Start(sb);
 
-        if (wsb != null && tokenConfig != null)
-            AuthServer.Start(wsb.WebApplication, tokenConfig, wsb.AuthTokenEncryptionKey);
+        if (sb.WebServerBuilder != null && tokenConfig != null)
+            AuthServer.Start(sb.WebServerBuilder.WebApplication, tokenConfig, sb.WebServerBuilder.AuthTokenEncryptionKey);
     }
 
     public static HashSet<Lite<RoleEntity>> CurrentRoles()

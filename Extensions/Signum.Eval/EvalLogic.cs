@@ -1,6 +1,8 @@
 using System.IO;
 using Microsoft.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Builder;
+using Signum.API;
 
 namespace Signum.Eval;
 
@@ -110,6 +112,11 @@ public static class EvalLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             PermissionLogic.RegisterPermissions(EvalPanelPermission.ViewDynamicPanel);
+
+            if(sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(EvalPanelPermission), () => EvalPanelPermission.ViewDynamicPanel.IsAuthorized());
+            }    
         }
     }
 }

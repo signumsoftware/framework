@@ -1,3 +1,4 @@
+using Signum.API;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ public static class TypeHelpLogic
                 .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                 .ToHashSet();
 
-            }, new InvalidateWith(typeof(TypeEntity)));
+            }, new InvalidateWith());
 
             AvailableModelEntities = sb.GlobalLazy(() =>
             {
@@ -38,7 +39,12 @@ public static class TypeHelpLogic
                 .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
                 .ToHashSet();
 
-            }, new InvalidateWith(typeof(TypeEntity)));
+            }, new InvalidateWith());
+
+            if (sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(TypeHelpMessage), () => UserHolder.Current != null);
+            }
         }
     }
 }

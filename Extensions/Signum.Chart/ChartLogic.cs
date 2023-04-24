@@ -6,7 +6,7 @@ namespace Signum.Chart;
 
 public static class ChartLogic
 {
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
+    public static void Start(SchemaBuilder sb, bool googleMapsChartScripts, string[]? svgMapUrls = null)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -18,8 +18,8 @@ public static class ChartLogic
             ChartScriptLogic.Start(sb, googleMapsChartScripts, svgMapUrls);
             UserChartLogic.Start(sb);
 
-            if (wsb != null)
-                ChartServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                ChartServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

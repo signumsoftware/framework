@@ -1,3 +1,6 @@
+using Signum.API;
+using Signum.Eval.TypeHelp;
+
 namespace Signum.Templating;
 
 
@@ -10,6 +13,8 @@ public static class TemplatingLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             SymbolLogic<ModelConverterSymbol>.Start(sb, () => Converters.Keys);
+
+            TypeHelpLogic.Start(sb);
         }
     }
 

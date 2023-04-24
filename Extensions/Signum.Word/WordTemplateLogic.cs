@@ -42,11 +42,12 @@ public static class WordTemplateLogic
     public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
         As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model.Is(e)));
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-            
+            TemplatingLogic.Start(sb);
+
             sb.Include<WordTemplateEntity>()
                 .WithQuery(() => e => new
                 {
@@ -152,8 +153,8 @@ public static class WordTemplateLogic
             Validator.PropertyValidator((WordTemplateEntity e) => e.Template).StaticPropertyValidation += ValidateTemplate;
             Validator.PropertyValidator((WordTemplateEntity e) => e.FileName).StaticPropertyValidation += ValidateFileName;
 
-            if (wsb != null)
-                WordServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                WordServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

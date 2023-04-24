@@ -5,6 +5,7 @@ using Signum.Files;
 using Signum.Basics;
 using Signum.Mailing;
 using Signum.API;
+using Signum.Templating;
 
 namespace Signum.Mailing;
 
@@ -29,12 +30,11 @@ public static class EmailLogic
 
     public static void AssertStarted(SchemaBuilder sb)
     {
-        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null, null!, null!, null)));
+        sb.AssertDefined(ReflectionTools.GetMethodInfo(() => EmailLogic.Start(null!, null!, null!, null)));
     }
 
     public static void Start(
         SchemaBuilder sb,
-        WebServerBuilder? wsb,
         Func<EmailConfigurationEmbedded> getConfiguration,
         Func<EmailTemplateEntity?, Lite<Entity>?, EmailMessageEntity?, EmailSenderConfigurationEntity> getEmailSenderConfiguration,
         IFileTypeAlgorithm? attachment = null)
@@ -45,6 +45,7 @@ public static class EmailLogic
             CultureInfoLogic.AssertStarted(sb);
             EmailLogic.getConfiguration = getConfiguration;
             EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
+            TemplatingLogic.Start(sb);
             EmailSenderConfigurationLogic.Start(sb);
             if (attachment != null)
                 FileTypeLogic.Register(EmailFileType.Attachment, attachment);
@@ -73,8 +74,8 @@ public static class EmailLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            if (wsb != null)
-                MailingServer.Start(wsb.WebApplication);
+            if (sb.WebServerBuilder != null)
+                MailingServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

@@ -6,6 +6,7 @@ using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
+using Signum.API;
 
 namespace Signum.Mailing.Templates;
 
@@ -79,8 +80,6 @@ public static class EmailTemplateLogic
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             CultureInfoLogic.AssertStarted(sb);
-            TemplatingLogic.Start(sb);
-
 
             GetSmtpConfiguration = getSmtpConfiguration;
 

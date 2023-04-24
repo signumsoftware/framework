@@ -22,10 +22,10 @@ public static class UserQueryLogic
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
     As.Expression(() => Database.Query<CachedQueryEntity>().Where(a => a.UserAssets.Contains(uq.ToLite())));
 
-    public static void Start(SchemaBuilder sb, WebServerBuilder? wsb)
+    public static void Start(SchemaBuilder sb)
     {
-        if (wsb != null)
-            UserQueryServer.Start(wsb.WebApplication);
+        if (sb.WebServerBuilder != null)
+            UserQueryServer.Start(sb.WebServerBuilder.WebApplication);
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {

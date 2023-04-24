@@ -101,8 +101,6 @@ public static class Administrator
     }
 
 
-    public static Func<bool>? AvoidSimpleGenerate;
-
     public static void NewDatabase()
     {
         var databaseName = Connector.Current.DatabaseName();
@@ -123,9 +121,6 @@ public static class Administrator
         using(Connector.CommandTimeoutScope(5 * 60))
         CleanAllDatabases();
         Console.WriteLine("Done.");
-
-        if (AvoidSimpleGenerate?.Invoke() == true)
-            return;
 
         Console.Write("Generating new database database...");
         ExecuteGenerationScript();

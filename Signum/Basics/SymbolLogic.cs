@@ -7,6 +7,13 @@ namespace Signum.Basics;
 public static class SymbolLogic
 {
     public static event Action? OnLoadAll;
+    public static event Func<IEnumerable<Type>>? OnGetSymbolContainer;
+     
+    public static IEnumerable<Type> AllSymbolContainers()
+    {
+        return OnGetSymbolContainer.GetInvocationListTyped().SelectMany(f => f());
+
+    }
 
     public static void LoadAll()
     {
@@ -43,6 +50,7 @@ public static class SymbolLogic<T>
                 });
 
             SymbolLogic.OnLoadAll += () => lazy.Load();
+            SymbolLogic.OnGetSymbolContainer += () => SymbolLogic<T>.getSymbols().Select(a => a.FieldInfo.DeclaringType!).Distinct();
             sb.Schema.Initializing += () => lazy.Load();
             sb.Schema.Synchronizing += Schema_Synchronizing;
             sb.Schema.Generating += Schema_Generating;
