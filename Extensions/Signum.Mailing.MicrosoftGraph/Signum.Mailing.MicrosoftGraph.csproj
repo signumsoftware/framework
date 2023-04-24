@@ -29,9 +29,5 @@
 		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
 	</ItemGroup>
 
-    <ItemGroup>
-	    <None Update="Translations\*.xml">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    </None>
-    </ItemGroup>
+    
 </Project>

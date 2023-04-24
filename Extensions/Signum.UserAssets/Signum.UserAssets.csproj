@@ -24,30 +24,5 @@
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <None Update="Translations\Signum.UserAssets.de.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.en.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.es.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.fa.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.fr.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.it.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.nl.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="Translations\Signum.UserAssets.pt.xml">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	</ItemGroup>
+	
 </Project>

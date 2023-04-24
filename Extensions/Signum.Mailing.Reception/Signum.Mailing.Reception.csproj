@@ -25,9 +25,5 @@
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 	</ItemGroup>
 
-    <ItemGroup>
-	    <None Update="Translations\*.xml">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    </None>
-    </ItemGroup>
+    
 </Project>

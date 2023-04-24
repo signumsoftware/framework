@@ -29,10 +29,5 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
 	</ItemGroup>
-	
-	<ItemGroup>
-		<None Update="Translations\*.xml">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
+
 </Project>

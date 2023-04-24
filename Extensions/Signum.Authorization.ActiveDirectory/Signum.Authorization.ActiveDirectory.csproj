@@ -8,9 +8,6 @@
 		<NoWarn>8618</NoWarn>
 	</PropertyGroup>
 
-	<ItemGroup>
-	  <Content Remove="package.json" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
@@ -34,17 +31,4 @@
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 	</ItemGroup>
 
-    <ItemGroup>
-	    <None Update="Translations\*.xml">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="EmailSender\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="package.json" />
-    </ItemGroup>
 </Project>

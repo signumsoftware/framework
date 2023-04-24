@@ -27,9 +27,5 @@
 		<ProjectReference Include="..\Signum.Migrations\Signum.Migrations.csproj" />
 	</ItemGroup>
 
-    <ItemGroup>
-	    <None Update="Translations\*.xml">
-		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	    </None>
-    </ItemGroup>
+    
 </Project>
