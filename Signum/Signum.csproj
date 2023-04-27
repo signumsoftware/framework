@@ -13,7 +13,7 @@
 		<EmbeddedResource Include="Engine\Sync\Postgres\versioning_function.sql" />
 		<EmbeddedResource Include="Engine\Sync\Postgres\versioning_function_nochecks.sql" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
 		<PackageReference Include="Npgsql" Version="7.0.2" />
@@ -23,7 +23,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta8" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta9" />
 	</ItemGroup>
 
 	<ItemGroup>
