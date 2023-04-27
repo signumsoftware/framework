@@ -172,10 +172,12 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
+    <Member Name="ComplexCondition" Description="Komplexer Zustand" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EndsWith" Description="endet mit" />
     <Member Name="EqualTo" Description="gleich" />
+    <Member Name="FreeText" Description="Freitext" />
     <Member Name="GreaterThan" Description="größer als" />
     <Member Name="GreaterThanOrEqual" Description="größer als oder gleich" />
     <Member Name="IsIn" Description="ist in" />
@@ -320,10 +322,10 @@
   </Type>
   <Type Name="PinnedFilterActive" Description="Vorgewahlter Filter aktiv">
     <Member Name="Always" Description="Immer" />
-    <Member Name="Checkbox_StartChecked" Description="Checkbox (aktiviert starten)" />
-    <Member Name="Checkbox_StartUnchecked" Description="Checkbox (unaktiviert starten)" />
-    <Member Name="NotCheckbox_StartChecked" Description="Nicht Checkbox (aktiviert starten)" />
-    <Member Name="NotCheckbox_StartUnchecked" Description="Nicht Checkbox (unaktiviert starten)" />
+    <Member Name="Checkbox_Checked" Description="Kontrollkästchen (aktiviert)" />
+    <Member Name="Checkbox_Unchecked" Description="Kontrollkästchen (deaktiviert)" />
+    <Member Name="NotCheckbox_Checked" Description="Nicht Kontrollkästchen (aktiviert)" />
+    <Member Name="NotCheckbox_Unchecked" Description="Nicht Kontrollkästchen (deaktiviert)" />
     <Member Name="WhenHasValue" Description="Wenn er einen Wert hat" />
   </Type>
   <Type Name="PropertyOperation" Description="Eigenschaftsvorgang">
@@ -374,6 +376,9 @@
     <Member Name="HourStart" Description="Start Stunde" />
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
+    <Member Name="MatchRank" Description="Match-Rang" />
+    <Member Name="MatchRankFor0" Description="Match-Rang für {0}" />
+    <Member Name="MatchSnippet" Description="Match-Snippet" />
     <Member Name="Millisecond" Description="Millisekunde" />
     <Member Name="Minute" Description="Minute" />
     <Member Name="MinuteStart" Description="Start Minute" />
@@ -390,6 +395,7 @@
     <Member Name="RowOrder" Description="RowOrder" />
     <Member Name="Second" Description="Sekunde" />
     <Member Name="SecondStart" Description="Start Sekunde" />
+    <Member Name="SnippetOf0" Description="Snippet für {0}" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
@@ -451,6 +457,7 @@
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="Column" Description="Spalte" />
+    <Member Name="Columns" Description="Spalten" />
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
     <Member Name="Copy" Description="Kopieren" />
     <Member Name="Create" Description="Erstellen" />
@@ -460,6 +467,7 @@
     <Member Name="DerivedGroupKey" Description="Abgeleiteter Gruppenschlüssel" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
+    <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
     <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="Filters" Description="Filter" />
@@ -468,10 +476,11 @@
     <Member Name="First0Results_N" Description="erste {0} Ergebnis[se]." />
     <Member Name="GoBackToPageOne" Description="zurück zur ersten Seite" />
     <Member Name="GroupKey" Description="Gruppenschlüssel" />
+    <Member Name="GroupPrefix" Description="Gruppen-Präfix" />
     <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
     <Member Name="HideHiddenColumns" Description="Ausgeblendete Spalten ausblenden" />
-    <Member Name="HidePinnedFiltersOptions" Description="Vorgewahlter Filteroptionen ausblenden" />
     <Member Name="InvalidColumnExpression" Description="Ungültiger Spaltenausdruck" />
+    <Member Name="IsActive" Description="Ist aktiv" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="MoreThanOne0Selected" Description="Mehr als ein {0} ausgewählt" />
     <Member Name="Name" Description="Name" />
@@ -489,8 +498,8 @@
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
     <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
     <Member Name="ParentValue" Description="Übergeordneter Wert" />
+    <Member Name="PinFilter" Description="Pin-Filter" />
     <Member Name="PinnedFilter" Description="vorgewahlter Filter" />
-    <Member Name="PinnFilter" Description="Pinn-Filter" />
     <Member Name="PleaseSelectA0_G" Description="Bitte wählen Sie ein[m:en|f:e|n:] {0}" />
     <Member Name="PleaseSelectAnEntity" Description="Bitte wählen Sie eine Entität aus" />
     <Member Name="PleaseSelectOneOrMore0_G" Description="Wählen Sie ein[m:en|f:e|n:] oder mehrere {0}" />
@@ -504,14 +513,16 @@
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
-    <Member Name="ShowPinnedFiltersOptions" Description="Vorgewahlter Filteroptionen anzeigen" />
+    <Member Name="Split" Description="Teilen" />
+    <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
+    <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
-    <Member Name="UnpinnFilter" Description="Unpinn-Filter" />
+    <Member Name="UnpinFilter" Description="Unpin-Filter" />
     <Member Name="Value" Description="Wert" />
     <Member Name="View" Description="Anzeigen" />
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />
