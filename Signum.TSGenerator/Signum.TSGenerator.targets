@@ -15,6 +15,7 @@
 			$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
 		</CompileDependsOn>
 		<BuildDependsOn>
+			FixProjectLastWriteTime;
 			MyCustomTarget;
 			$(BuildDependsOn);
 			CompileTypeScriptWithTSConfig;
@@ -36,4 +37,43 @@
 	<Target Name="EndTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
 		<Message Text="TypeScript Compiler Finished" Importance="high" />
 	</Target>
+
+	<Target Name="FixProjectLastWriteTime">
+		<SetProjectLastWriteTime FileList="@(TypeScriptCompile)" ProjectFile="$(MSBuildProjectFile)"/>
+	</Target>
+
+	<UsingTask TaskName="SetProjectLastWriteTime"
+			       TaskFactory="RoslynCodeTaskFactory"
+    AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+
+		<ParameterGroup>
+			<FileList ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<ProjectFile ParameterType="System.String" Required="true" />
+		</ParameterGroup>
+		<Task>
+			<Using Namespace="System" />
+			<Code Type="Fragment" Language="cs">
+				<![CDATA[
+			var maxDate = DateTime.MinValue;
+			
+			foreach(var file in FileList)
+            {
+				var date = DateTime.Parse(file.GetMetadata("ModifiedTime"));
+                if(date > maxDate)
+                {
+				    maxDate = date; 
+                }
+            }
+			
+			DateTime cacheTimeStamp = File.GetLastWriteTime(ProjectFile);
+			
+			if(maxDate > cacheTimeStamp)
+			{
+			    File.SetLastWriteTime(ProjectFile, maxDate);
+				Log.LogMessage(MessageImportance.High, "Changing LastWriteTime of {0} to {1} (latest TypeScriptCompile)", ProjectFile, maxDate);
+			}
+          ]]>
+			</Code>
+		</Task>
+	</UsingTask>
 </Project>
