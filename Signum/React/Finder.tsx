@@ -2395,6 +2395,8 @@ export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
   if (similarToken(tokenA.fullKey, tokenB.fullKey))
     return true;
 
+  if (tokenA.propertyRoute == tokenB.propertyRoute)
+    return true;
 
   if (tokenA && tokenA.key == "ToString") {
     var steps = getToStringDependencies(tokenA.parent!.type);
