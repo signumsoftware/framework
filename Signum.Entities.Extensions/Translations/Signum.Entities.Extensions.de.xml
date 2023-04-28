@@ -14,7 +14,6 @@
     <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
     <Member Name="DirectoryRegistry_Username" Description="DirectoryRegistry Benutzername" />
     <Member Name="DomainName" Description="Domain-Name" />
-    <Member Name="DomainServer" Description="Domain-Server" />
     <Member Name="LoginWithActiveDirectoryRegistry" Description="Login mit Active Directory Registry" />
     <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
     <Member Name="LoginWithWindowsAuthenticator" Description="Login mit Windows-Authentifikator" />
@@ -1319,6 +1318,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="Hash" Description="Hash" />
+    <Member Name="KeepSuffix" Description="Suffix beibehalten" />
     <Member Name="MListRowId" Description="MListRowId" />
     <Member Name="PropertyRoute" Description="PropertyRoute" />
     <Member Name="RootType" Description="RootType" />
@@ -1332,6 +1332,7 @@
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="FileType" Description="Dateityp" />
     <Member Name="Hash" Description="Hash" />
+    <Member Name="KeepSuffix" Description="Suffix beibehalten" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">
@@ -1858,7 +1859,7 @@
     <Member Name="Column" Description="Spalte" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Row" Description="Zeile" />
-    <Member Name="SplitText" Description="Text aufteilen" />
+    <Member Name="SplitValue" Description="Geteilter Wert" />
   </Type>
   <Type Name="Pop3ConfigurationAction">
     <Member Name="ReceiveAllActivePop3Configurations" Description="Alle aktiven pop3-Konfigurationen empfangen" />

@@ -402,6 +402,7 @@ export namespace UserQueryMerger {
         oldF.pinned.row = newF.pinned.row;
         oldF.pinned.active = newF.pinned.active;
         oldF.pinned.splitValue = newF.pinned.splitValue;
+        oldF.pinned.modified = true;
       }
 
       oldF.modified = true;
