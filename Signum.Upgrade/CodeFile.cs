@@ -51,7 +51,7 @@ public class CodeFile
         }
     }
 
-    public void SafeIfNecessary()
+    public void SaveIfNecessary()
     {
         if (_content == null)
             return;
@@ -215,6 +215,30 @@ public class CodeFile
             return true;
         });
     }
+
+    public string GetLinesBetween(Expression<Predicate<string>> fromLine, int fromDelta, Expression<Predicate<string>> toLine, int toDelta)
+    {
+        var text = "";
+        ProcessLines(lines =>
+        {
+            var from = lines.FindIndex(fromLine.Compile());
+            if (from == -1)
+            {
+                Warning($"Unable to find a line where {fromLine} to insert after it the text: {text}");
+                return false;
+            }
+            var to = lines.FindIndex(from + 1, toLine.Compile());
+            if (to == -1)
+            {
+                Warning($"Unable to find a line where {toLine} after line {to} to insert before it the text: {text}");
+                return false;
+            }
+            text = lines.Where((l, i) =>  i >= (from + fromDelta) && i <= (to + toDelta)).ToList().ToString("\n");
+            return true;
+        });
+        return text;
+    }
+
 
     public void ReplaceLine(Expression<Predicate<string>> condition, string text)
     {
@@ -435,6 +459,11 @@ public class CodeFile
 
         this.Content = doc.ToString(SaveOptions.DisableFormatting);
 
+    }
+
+    internal void Solution_RemoveProject(string v)
+    {
+        throw new NotImplementedException();
     }
 }
 
