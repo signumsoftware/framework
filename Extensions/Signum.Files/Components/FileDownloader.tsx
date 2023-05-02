@@ -84,7 +84,9 @@ export function FileDownloader(p: FileDownloaderProps) {
       >
         {getChildren() ??
           <>
-            {p.showFileIcon && <FontAwesomeIcon className="me-1" icon={["far", info?.icon ?? "file"]} color={info?.color ?? "grey"} />}
+          {p.showFileIcon && <FontAwesomeIcon className="me-1"
+            icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
+            color={info?.color ?? "grey"} />}
             {toStr}
           </>}
       </a>
