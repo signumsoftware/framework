@@ -21,6 +21,7 @@ public static class PermissionAuthLogic
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
             AuthLogic.AssertStarted(sb);
+            PermissionLogic.Start(sb);
 
             sb.Include<RulePermissionEntity>()
                .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
