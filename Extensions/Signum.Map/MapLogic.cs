@@ -1,5 +1,6 @@
 
 using Signum.API;
+using Signum.Omnibox;
 
 namespace Signum.Map;
 
@@ -12,7 +13,10 @@ public static class MapLogic
             PermissionLogic.RegisterPermissions(MapPermission.ViewMap);
 
             if (sb.WebServerBuilder != null)
+            {
                 MapServer.Start(sb.WebServerBuilder.WebApplication);
+                OmniboxParser.Generators.Add(new MapOmniboxResultGenerator(type => OperationLogic.TypeOperations(type).Any()));
+            }
         }
     }
 }

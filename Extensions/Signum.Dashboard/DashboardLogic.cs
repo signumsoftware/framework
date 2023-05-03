@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using Signum.ViewLog;
 using Signum.Toolbar;
 using Signum.API;
+using Signum.Omnibox;
 
 namespace Signum.Dashboard;
 
@@ -117,7 +118,10 @@ public static class DashboardLogic
                 new InvalidateWith(typeof(DashboardEntity)));
 
             if (sb.WebServerBuilder != null)
+            {
                 DashboardServer.Start(sb.WebServerBuilder.WebApplication);
+                OmniboxParser.Generators.Add(new DashboardOmniboxResultGenerator(DashboardLogic.Autocomplete));
+            }
         }
     }
 

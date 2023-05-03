@@ -4,6 +4,7 @@ using Signum.Authorization.Rules;
 using Signum.Dashboard;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
+using Signum.Omnibox;
 using Signum.Toolbar;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
@@ -24,8 +25,7 @@ public static class UserQueryLogic
 
     public static void Start(SchemaBuilder sb)
     {
-        if (sb.WebServerBuilder != null)
-            UserQueryServer.Start(sb.WebServerBuilder.WebApplication);
+        
 
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -137,6 +137,12 @@ public static class UserQueryLogic
 
             UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
                 new InvalidateWith(typeof(UserQueryEntity)));
+
+            if (sb.WebServerBuilder != null)
+            {
+                UserQueryServer.Start(sb.WebServerBuilder.WebApplication);
+                OmniboxParser.Generators.Add(new UserQueryOmniboxResultGenerator(UserQueryLogic.Autocomplete));
+            }
         }
     }
 
