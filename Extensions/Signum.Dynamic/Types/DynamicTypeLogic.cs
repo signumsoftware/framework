@@ -893,6 +893,7 @@ public class DynamicBeforeSchemaGenerator
         foreach (var item in Usings)
             sb.AppendLine("using {0};".FormatWith(item));
 
+        sb.AppendLine("[assembly: AssemblySchemaName(\"codegen\")]");
         sb.AppendLine();
         sb.AppendLine($"namespace {Namespace}");
         sb.AppendLine($"{{");
