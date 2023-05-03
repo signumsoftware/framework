@@ -1,6 +1,7 @@
 using Signum.API;
 using Signum.Chart.ColorPalette;
 using Signum.Chart.UserChart;
+using Signum.Omnibox;
 
 namespace Signum.Chart;
 
@@ -19,7 +20,11 @@ public static class ChartLogic
             UserChartLogic.Start(sb);
 
             if (sb.WebServerBuilder != null)
+            {
                 ChartServer.Start(sb.WebServerBuilder.WebApplication);
+                OmniboxParser.Generators.Add(new ChartOmniboxResultGenerator());
+                OmniboxParser.Generators.Add(new UserChartOmniboxResultGenerator(UserChartLogic.Autocomplete));
+            }
         }
     }
 

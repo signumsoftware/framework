@@ -16,26 +16,33 @@
 		</CompileDependsOn>
 		<BuildDependsOn>
 			FixProjectLastWriteTime;
-			MyCustomTarget;
+			CleanCompilerDependsOn;
 			$(BuildDependsOn);
 			CompileTypeScriptWithTSConfig;
 			EndTypescript;
+			TSC_BuildAll;
 		</BuildDependsOn>
 	</PropertyGroup> 
-	<Target Name="MyCustomTarget">
-	    <!-- <Message Text="BEFORE $(CompileDependsOn)" Importance="high" /> -->
+	<Target Name="CleanCompilerDependsOn">
 	    <PropertyGroup>
 			<CompileDependsOn>
 				$([MSBuild]::Unescape($(CompileDependsOn.Replace("CompileTypeScriptWithTSConfig;", ""))))
 			</CompileDependsOn>
 		</PropertyGroup>
-		<!-- <Message Text="AFTER $(CompileDependsOn)" Importance="high" /> -->
 	</Target>
+	
+	<Target Name="TSC_BuildAll" Condition="'$(TSC_Build)' == 'true'">
+		<Message Text="Executing 'yarn tsc --build' (all projects)" Importance="high" />
+		<Exec Command="yarn run tsc --build" ConsoleToMSBuild="true">
+			<Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
+		</Exec>
+	</Target>
+	
 	<Target Name="StartTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
-		<Message Text="TypeScript Compiler Starting" Importance="high" />
+		<Message Text="TypeScript Compiler Starting $(MSBuildProjectFile)" Importance="high" />
 	</Target>
 	<Target Name="EndTypescript" Condition="'$(TypeScriptCompileBlocked)' == 'false'">
-		<Message Text="TypeScript Compiler Finished" Importance="high" />
+		<Message Text="TypeScript Compiler Finished $(MSBuildProjectFile)" Importance="high" />
 	</Target>
 
 	<Target Name="FixProjectLastWriteTime">
@@ -76,4 +83,6 @@
 			</Code>
 		</Task>
 	</UsingTask>
+	
+	
 </Project>

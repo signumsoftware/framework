@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
 using Signum.Basics;
+using Signum.Omnibox;
 
 namespace Signum.Help;
 
@@ -117,6 +118,11 @@ public static class HelpLogic
                invalidateWith: new InvalidateWith(typeof(QueryHelpEntity)));
 
             PermissionLogic.RegisterPermissions(HelpPermissions.ViewHelp);
+
+            if(sb.WebServerBuilder != null)
+            {
+                OmniboxParser.Generators.Add(new HelpModuleOmniboxResultGenerator());
+            }
         }
     }
 
