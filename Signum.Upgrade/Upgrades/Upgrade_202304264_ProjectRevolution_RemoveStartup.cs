@@ -143,7 +143,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
         starter.ReplaceBetween(l => l.Contains("GetSchemaNameName("), 0,
             l => l.Contains("Impossible to determine SchemaName"), 1, "");
 
-        starter.InsertAfterFirstLine(l => l.Contains("sb.Schema.Settings.FieldAttributes((SystemEventLogEntity a)"),
+        starter.InsertAfterLastLine(l => l.Contains("sb.Schema.Settings.FieldAttributes"),
             """
             
             sb.Schema.Settings.FieldAttributes((ToolbarEntity tb) => tb.Elements.First().Content).Replace(new ImplementedByAttribute(typeof(ToolbarMenuEntity), typeof(ToolbarEntity), typeof(QueryEntity), typeof(UserQueryEntity), typeof(UserChartEntity), typeof(DashboardEntity), typeof(PermissionSymbol)));
@@ -155,7 +155,6 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             """
 
             sb.Schema.Settings.FieldAttributes((DashboardEntity a) => a.Parts.First().Content).Replace(new ImplementedByAttribute(typeof(UserChartPartEntity), typeof(CombinedUserChartPartEntity), typeof(UserQueryPartEntity), typeof(ValueUserQueryListPartEntity), typeof(LinkListPartEntity)));
-
             sb.Schema.Settings.FieldAttributes((CachedQueryEntity a) => a.UserAssets.First()).Replace(new ImplementedByAttribute(typeof(UserQueryEntity), typeof(UserChartEntity)));
 
             """);

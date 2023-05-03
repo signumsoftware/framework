@@ -16,10 +16,15 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
         {
             file.Replace(new Regex(@"@extensions\/(?<ext>[\w]*)"), m => "@extensions/Signum." + m.Groups["ext"]);
-            
+            file.Replace(new Regex(@"(\.\.\/)*Framework/Extensions/(?<ext>[\w]*)"), m => "@extensions/Signum." + m.Groups["ext"]);
+            file.Replace(new Regex(@"@extensions/Signum.Files/(FileLine|FileImage|FileImageLine|MultiFileLine|ImageModal|FileDownloader|FileUploader)"), m => "@extensions/Signum.Files/Files");
+
             file.Replace(new Regex(@"(?<extension>[\w]*\.Entities\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Entities", ""));
 
-            file.Replace(new Regex(@"(\.\.\/)*Framework\/Signum.React\/Scripts"), m => "@framework");
+            file.Replace(new Regex(@"(\.\.\/)*Framework/Signum.React/Scripts"), m => "@framework");
+
+            file.Replace("@extensions/Signum.Basics/Color", "@framework/Basics/Color");
+            file.Replace("@extensions/Signum.Authorization/AzureAD", "@extensions/Signum.Authorization.ActiveDirectory/AzureAD");
         });
 
         uctx.ForeachCodeFile(@"*.cs", file =>

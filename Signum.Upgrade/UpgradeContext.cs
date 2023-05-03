@@ -194,74 +194,9 @@ public class UpgradeContext
         }
     }
 
-    public void Solution_RemoveProject(string name, WarningLevel showWarning = WarningLevel.Error)
-    {
-        this.ChangeCodeFile(this.ApplicationName + ".sln", f =>
-        {
-            var prj = f.Content.Lines().Where(l => l.Contains("Project(") && l.Contains(name + ".csproj")).SingleOrDefault();
+   
 
-            if (prj == null)
-            {
-                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
-                   showWarning.ToString().ToUpper() + " no reference to '" + name + "' found in " + f.FilePath);
-
-                return;
-            }
-
-            var regex = new Regex(@"(?<id>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})");
-
-            var projectId = regex.Match(prj.After(name)).Groups["id"].Value;
-
-            f.ReplaceBetween(l => l.Contains("Project(") && l.Contains(name + ".csproj"), 0, l => l.Contains("EndProject"), 0, "");
-
-            f.RemoveAllLines(l => l.Contains(projectId));
-
-        });
-    }
-
-    public void Solution_AddProject(string projectFile, string? parentFolder, WarningLevel showWarning = WarningLevel.Error)
-    {
-        this.ChangeCodeFile(this.ApplicationName + ".sln", f =>
-        {
-            var idRegex = new Regex(@"(?<id>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})");
-
-            var upgradeProject = f.Content.Lines().Where(l => l.Contains("Project(") && l.Contains("Signum.Upgrade.csproj")).FirstEx();
-
-            var solutionId = idRegex.Match(upgradeProject.Before("Signum.Upgrade.csproj")).Groups["id"].Value;
-
-            var prjRegex = new Regex(@"[\\]?(?<project>[\.\w]*).csproj");
-
-            var prjName = prjRegex.Match(projectFile).Groups["project"].Value;
-
-            var projectId = Guid.NewGuid().ToString();
-
-            f.InsertAfterLastLine(l => l.StartsWith("EndProject"), $$"""
-                Project("{{{solutionId}}}") = "{{prjName}}", "{{projectFile}}", "{{{projectId}}}"
-                EndProject
-                """);
-            var configs = f.GetLinesBetween(l => l.Contains("GlobalSection(SolutionConfigurationPlatforms) = preSolution"), 1,
-                l => l.Contains("EndGlobalSection"), -1).Split("\n");
-
-            f.InsertAfterFirstLine(l => l.Contains("GlobalSection(ProjectConfigurationPlatforms) = postSolution"),
-                configs.Select(config => $$"""
-                    {{{projectId}}}.{{config.Before("=").Trim()}}.ActiveCfg = {{config.After("=").Trim()}}
-                    {{{projectId}}}.{{config.Before("=").Trim()}}.Build.0 = {{config.After("=").Trim()}}
-                """).ToString("\n"));
-
-            if(parentFolder != null)
-            {
-                var parent = f.Content.Lines().Where(l => l.Contains("Project(") && l.Contains(parentFolder)).FirstEx();
-
-                var parentId = idRegex.Match(parent.After(parentFolder)).Groups["id"].Value;
-
-                f.InsertAfterFirstLine(l => l.Contains("GlobalSection(NestedProjects) = preSolution"), $"\t{{{projectId}}} = {{{parentId}}}");
-            }
-        });
-        
-        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Project {projectFile} added to solution.");
-    }
-
-    public void Solution_MoveFiles(string source, string destination, string searchPattern, string[]? ignoreDirectories = null, bool @override = false)
+    public void MoveFiles(string source, string destination, string searchPattern, string[]? ignoreDirectories = null, bool @override = false)
     {
         var files = GetCodeFiles(source, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), ignoreDirectories);
 
@@ -292,5 +227,12 @@ public class UpgradeContext
     public string ReplaceSouthwind(string val)
     {
         return val.Replace("Southwind", this.ApplicationName);
+    }
+
+    internal void MoveFile(string from, string to)
+    {
+        File.Move(AbsolutePathSouthwind(from), AbsolutePathSouthwind(to));
+
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {from} -> {to}");
     }
 }

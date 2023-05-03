@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Xml.Linq;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Upgrade;
 
@@ -216,6 +217,44 @@ public class CodeFile
         });
     }
 
+    /// <param name="fromLine">Not included</param>
+    /// <param name="toLine">Not included</param>
+    public void ReplaceBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, Func<string, string> getText) =>
+        ReplaceBetween(fromLine, +1, toLine, -1, getText);
+
+    /// <param name="fromLine">Not included</param>
+    /// <param name="toLine">Not included</param>
+    public void ReplaceBetweenIncluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine, Func<string, string> getText) =>
+        ReplaceBetween(fromLine, +0, toLine, -0, getText);
+
+    public void ReplaceBetween(Expression<Predicate<string>> fromLine, int fromDelta, Expression<Predicate<string>> toLine, int toDelta, Func<string, string> getText)
+    {
+        ProcessLines(lines =>
+        {
+            var from = lines.FindIndex(fromLine.Compile());
+            if (from == -1)
+            {
+                Warning($"Unable to find a line where {fromLine} to insert some text after it");
+                return false;
+            }
+            var to = lines.FindIndex(from + 1, toLine.Compile());
+            if (to == -1)
+            {
+                Warning($"Unable to find a line where {toLine} after line {to} to insert some before it");
+                return false;
+            }
+            var indent = GetIndent(lines[from]);
+            var oldText = lines.Where((l, i) => i >= (from + fromDelta) && i <= (to + toDelta)).ToList().ToString("\n");
+            lines.RemoveRange(from + fromDelta, (to + toDelta) - (from + fromDelta) + 1);
+
+            var text = getText(oldText);
+            if (text.HasText())
+                lines.InsertRange(from + fromDelta, text.Lines().Select(a => IndentAndReplace(a, indent)));
+
+            return true;
+        });
+    }
+
     public string GetLinesBetween(Expression<Predicate<string>> fromLine, int fromDelta, Expression<Predicate<string>> toLine, int toDelta)
     {
         var text = "";
@@ -233,7 +272,7 @@ public class CodeFile
                 Warning($"Unable to find a line where {toLine} after line {to} to insert before it the text: {text}");
                 return false;
             }
-            text = lines.Where((l, i) =>  i >= (from + fromDelta) && i <= (to + toDelta)).ToList().ToString("\n");
+            text = lines.Where((l, i) => i >= (from + fromDelta) && i <= (to + toDelta)).ToList().ToString("\n");
             return true;
         });
         return text;
@@ -382,7 +421,7 @@ public class CodeFile
             var indent = GetIndent(lines[pos]);
             lines.RemoveRange(pos, 1);
 
-            if(lines[pos].Trim().StartsWith("}"))
+            if (lines[pos].Trim().StartsWith("}"))
             {
                 if (!lines[pos - 1].Trim().EndsWith("{") && lines[pos - 1].Trim().EndsWith(","))
                 {
@@ -396,7 +435,7 @@ public class CodeFile
 
     public void UpdateNugetReferences(string xmlSnippets)
     {
-        foreach (var line in xmlSnippets.Lines().Where(a=>a.HasText()))
+        foreach (var line in xmlSnippets.Lines().Where(a => a.HasText()))
         {
             UpdateNugetReference(line.Between("Include=\"", "\""), line.Between("Version=\"", "\""));
         }
@@ -461,9 +500,93 @@ public class CodeFile
 
     }
 
-    internal void Solution_RemoveProject(string v)
+    public void Solution_RemoveProject(string name, WarningLevel showWarning = WarningLevel.Error)
     {
-        throw new NotImplementedException();
+        var prj = Content.Lines().Where(l => l.Contains("Project(") && l.Contains(name + ".csproj")).SingleOrDefault();
+
+        if (prj == null)
+        {
+            SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+               showWarning.ToString().ToUpper() + " no reference to '" + name + "' found in " + FilePath);
+
+            return;
+        }
+
+        var projectId = GuidRegex.Match(prj.After(name)).Groups["id"].Value;
+
+        ReplaceBetween(l => l.Contains("Project(") && l.Contains(name + ".csproj"), 0, l => l.Contains("EndProject"), 0, "");
+
+        RemoveAllLines(l => l.Contains(projectId));
+    }
+
+
+    static Regex GuidRegex = new Regex(@"(?<id>[\w]{8}-[\w]{4}-[\w]{4}-[\w]{4}-[\w]{12})");
+
+    public void Solution_AddProject(string projectFile, string? parentFolder, WarningLevel showWarning = WarningLevel.Error)
+    {
+        var prjRegex = new Regex(@"[\\]?(?<project>[\.\w]*).csproj");
+
+        var prjName = prjRegex.Match(projectFile).Groups["project"].Value;
+
+        var projectId = Guid.NewGuid().ToString();
+
+        Guid projectTypeId = Guid.Parse("9A19103F-16F7-4668-BE54-9A1E7A4F7556");
+
+        InsertAfterLastLine(l => l.StartsWith("EndProject"), $$"""
+                Project("{{{projectTypeId.ToString()}}}") = "{{prjName}}", "{{projectFile}}", "{{{projectId}}}"
+                EndProject
+                """);
+        var configs = GetLinesBetween(l => l.Contains("GlobalSection(SolutionConfigurationPlatforms) = preSolution"), 1,
+            l => l.Contains("EndGlobalSection"), -1).Split("\n");
+
+        InsertAfterFirstLine(l => l.Contains("GlobalSection(ProjectConfigurationPlatforms) = postSolution"),
+            configs.Select(config => $$"""
+                    {{{projectId}}}.{{config.Before("=").Trim()}}.ActiveCfg = {{config.After("=").Trim()}}
+                    {{{projectId}}}.{{config.Before("=").Trim()}}.Build.0 = {{config.After("=").Trim()}}
+                """).ToString("\n"));
+
+        if (parentFolder != null)
+        {
+            var parent = this.Content.Lines().Where(l => l.Contains("Project(") && l.Contains(parentFolder)).FirstEx();
+
+            var parentId = GuidRegex.Match(parent.After(parentFolder)).Groups["id"].Value;
+
+            InsertAfterFirstLine(l => l.Contains("GlobalSection(NestedProjects) = preSolution"), $"\t{{{projectId}}} = {{{parentId}}}");
+        }
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Project {projectFile} added to solution.");
+    }
+
+    public void Solution_AddFolder(string folderName)
+    {
+        var folderId = Guid.NewGuid().ToString();
+
+        Guid folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8");
+
+        InsertAfterLastLine(l => l.StartsWith("EndProject"), $$"""
+                Project("{{{folderTypeId.ToString()}}}") = "{{folderName}}", "{{folderName}}", "{{{folderId}}}"
+                EndProject
+                """);
+    }
+
+    public void Solution_SolutionItem(string relativeFilePath, string folderName)
+    {
+        var folderId = Guid.NewGuid().ToString();
+
+        Guid folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8");
+
+        ReplaceBetweenExcluded(l => l.StartsWith("Project") && l.Contains($"\"{folderName}\""),
+            l => l.Contains("EndProject"), text =>
+            {
+                if (text.IsEmpty())
+                    return
+                    "\tProjectSection(SolutionItems) = preProject\r\n" +
+                    "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    "\tEndProjectSection\r\n";
+
+                else
+                    return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
+                    "\tEndProjectSection");
+            });
     }
 }
 

@@ -78,6 +78,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<GenerateDocumentationFile>true</GenerateDocumentationFile>
             		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
             		<NoWarn>8618,1591</NoWarn>
+                    <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+                    <TSC_Build>true</TSC_Build>
             	</PropertyGroup>
 
             	<ItemGroup>
@@ -96,12 +98,13 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		</PackageReference>
             		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
             		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
-            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta9" />
+            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta10" />
             		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />FROM_CSPROJ Swashbuckle
             		<PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.11.0" />FROM_CSPROJ SciSharp
             	</ItemGroup>
 
             	<ItemGroup>
+            		<ProjectReference Include="..\Framework\Extensions\Signum.Alerts\Signum.Alerts.csproj" />FROM_CS AlertLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Authorization.ActiveDirectory\Signum.Authorization.ActiveDirectory.csproj" />FROM_CS activeDirectoryIntegration: true
             		<ProjectReference Include="..\Framework\Extensions\Signum.Authorization.ResetPassword\Signum.Authorization.ResetPassword.csproj" />FROM_CS ResetPasswordRequestLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Authorization\Signum.Authorization.csproj" />FROM_CS AuthLogic
@@ -152,12 +155,6 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
             			</ResolvedFileToPublish>
             		</ItemGroup>
-            	</Target>
-
-            	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-            		<Exec Command="yarn run tsc --build" ConsoleToMSBuild="true">
-            			<Output TaskParameter="ConsoleOutput" ItemName="OutputOfExec" />
-            		</Exec>
             	</Target>
             </Project>
             """.Lines().Select(l =>
@@ -247,14 +244,39 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         uctx.DeleteFile("Southwind.React/Southwind.React.csproj");
         uctx.DeleteFile("Southwind.React/Properties/GlobalUsings.cs");
 
-        uctx.Solution_MoveFiles("Southwind.Entities", "Southwind", "*.*");
-        uctx.Solution_MoveFiles("Southwind.Logic", "Southwind", "*.*");
-        uctx.Solution_MoveFiles("Southwind.React/App", "Southwind", "*.*");
-        uctx.Solution_MoveFiles("Southwind.React/Controllers", "Southwind", "*.*");
-        uctx.Solution_MoveFiles("Southwind.React/Views/Home", "Southwind", "*.*");
-        uctx.Solution_MoveFiles("Southwind.React", "Southwind", "*.*");
-        
-        uctx.Solution_MoveFiles("Southwind", "", "yarn.lock");
+        uctx.ForeachCodeFile("*.cs", "Southwind.Entities", a =>
+        {
+            var fileName = Path.GetFileNameWithoutExtension(a.FilePath);
+            if (!fileName.EndsWith("Entity") && fileName.Contains($"class {fileName}Entity"))
+                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Entity.cs");
+ 
+            if (!fileName.EndsWith("Embedded") && fileName.Contains($"class {fileName}Embedded"))
+                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Embedded.cs");
+
+            if (!fileName.EndsWith("Model") && fileName.Contains($"class {fileName}Model"))
+                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Model.cs");
+        });
+
+        uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
+        uctx.MoveFiles("Southwind.Logic", "Southwind", "*.*");
+
+        uctx.ForeachCodeFile("*.t4s", "Southwind.React/App", a =>
+        {
+            var newFilePath = a.FilePath.Replace(".Entities", "");
+            if (newFilePath != a.FilePath)
+            {
+                uctx.MoveFile(a.FilePath, newFilePath);
+                if (File.Exists(Path.ChangeExtension(a.FilePath, ".ts")))
+                    uctx.MoveFile(Path.ChangeExtension(a.FilePath, ".t4s"), Path.ChangeExtension(a.FilePath, ".ts"));
+            }
+        });
+
+        uctx.MoveFiles("Southwind.React/App", "Southwind", "*.*");
+        uctx.MoveFiles("Southwind.React/Controllers", "Southwind", "*.*");
+        uctx.MoveFiles("Southwind.React/Views/Home", "Southwind", "*.*");
+        uctx.MoveFiles("Southwind.React", "Southwind", "*.*");
+                
+        uctx.MoveFiles("Southwind", "", "yarn.lock");
 
 
         uctx.CreateCodeFile("Southwind/Properties/GlobalUsings.cs", """
@@ -281,35 +303,68 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
 
             """);
 
-        // fix solution
-        uctx.Solution_RemoveProject("Signum.Entities");
-        uctx.Solution_RemoveProject("Signum.Engine");
-        uctx.Solution_RemoveProject("Signum.React");
-
-        uctx.Solution_RemoveProject("Signum.Entities.Extensions");
-        uctx.Solution_RemoveProject("Signum.Engine.Extensions");
-        uctx.Solution_RemoveProject("Signum.React.Extensions");
-
-        uctx.Solution_RemoveProject("Signum.Engine.MachineLearning.TensorFlow");
-        uctx.Solution_RemoveProject("Signum.React.Extensions.Selenium");
-
-        uctx.Solution_RemoveProject(uctx.ApplicationName + ".Entities");
-        uctx.Solution_RemoveProject(uctx.ApplicationName + ".Logic");
-        uctx.Solution_RemoveProject(uctx.ApplicationName + ".React");
-
-        var appProject = $"{uctx.ApplicationName}\\{uctx.ApplicationName}.csproj";
-        uctx.Solution_AddProject(appProject, null);
-        
-        uctx.Solution_AddProject($"Framework\\Signum\\Signum.csproj", "1.Framework");
-
-        var project = File.ReadAllText(uctx.AbsolutePath(appProject));
-
-        var extRegex = new Regex(@"(?<ext>Framework\\Extensions\\[\w\.\\]*)");
-
-        project.Lines().Where(l => l.Contains("<ProjectReference Include=\"..\\Framework\\Extensions")).ToList().ForEach(l => 
+        uctx.ChangeCodeFile("Southwind/package.json", a =>
         { 
-            var extName = extRegex.Match(l).Groups["ext"].Value;
-            uctx.Solution_AddProject(extName, "2.Extensions");
+            //remove all dependencies, bring back all custom dependencies manually
+            a.ReplaceBetweenExcluded(a => a.Contains("\"dependencies\""), a => a.Contains("}"), "");
+        });
+
+        // fix solution
+
+        uctx.ChangeCodeFile(uctx.ApplicationName + ".sln", f =>
+        {
+            f.Solution_RemoveProject("Signum.Entities");
+            f.Solution_RemoveProject("Signum.Engine");
+            f.Solution_RemoveProject("Signum.React");
+
+            f.Solution_RemoveProject("Signum.Entities.Extensions");
+            f.Solution_RemoveProject("Signum.Engine.Extensions");
+            f.Solution_RemoveProject("Signum.React.Extensions");
+
+            f.Solution_RemoveProject("Signum.Engine.MachineLearning.TensorFlow");
+            f.Solution_RemoveProject("Signum.React.Extensions.Selenium");
+
+            f.Solution_RemoveProject(uctx.ApplicationName + ".Entities");
+            f.Solution_RemoveProject(uctx.ApplicationName + ".Logic");
+            f.Solution_RemoveProject(uctx.ApplicationName + ".React");
+
+            f.Solution_AddFolder("0.Solution Items");
+            f.Solution_SolutionItem("Directory.Build.props", "0.Solution Items");
+            f.Solution_SolutionItem("Directory.Build.targets", "0.Solution Items");
+
+            var appProject = $"{uctx.ApplicationName}\\{uctx.ApplicationName}.csproj";
+            f.Solution_AddProject(appProject, null);
+
+            f.Solution_AddProject($"Framework\\Signum\\Signum.csproj", "1.Framework");
+
+            var project = File.ReadAllText(uctx.AbsolutePath(appProject));
+
+            var extRegex = new Regex(@"(?<ext>Framework\\Extensions\\[\w\.\\]*)");
+
+            project.Lines().Where(l => l.Contains("<ProjectReference Include=\"..\\Framework\\Extensions")).ToList().ForEach(l =>
+            {
+                var extName = extRegex.Match(l).Groups["ext"].Value;
+                f.Solution_AddProject(extName, "2.Extensions");
+            });
+        });
+
+        uctx.ChangeCodeFile(".gitignore", file =>
+        {
+            file.RemoveAllLines(a => a.Contains(uctx.ApplicationName));
+            file.RemoveAllLines(a => a.Contains("packages"));
+            file.RemoveAllLines(a => a.Contains("node_modules"));
+
+            file.ProcessLines(lines =>
+            {
+                lines.Add("node_modules");
+                lines.Add(uctx.ReplaceSouthwind("/Southwind/CodeGen/**"));
+                lines.Add(uctx.ReplaceSouthwind("/Southwind/wwwroot/dist/**"));
+                lines.Add(uctx.ReplaceSouthwind("/Southwind/web.config/**"));
+                lines.Add(uctx.ReplaceSouthwind("/Southwind/ts_out/**"));
+                lines.Add(uctx.ReplaceSouthwind("/Southwind/TensorFlowModels/**"));
+
+                return true;
+            });
         });
     }
     
