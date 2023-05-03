@@ -8,7 +8,7 @@ using Azure.Core;
 using Microsoft.Graph.Models.ODataErrors;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Signum.Authorization;
-using Signum.ActiveDirectory;
+using Signum.Authorization.ActiveDirectory;
 using Signum.Files;
 
 namespace Signum.Mailing.MicrosoftGraph;

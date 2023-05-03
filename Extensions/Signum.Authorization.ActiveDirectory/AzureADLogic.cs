@@ -4,15 +4,16 @@ using Microsoft.Graph.DeviceManagement.Reports.GetReportFilters;
 using Microsoft.Graph.Models;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Identity.Client;
-using Signum.ActiveDirectory;
+using Signum.Authorization.ActiveDirectory;
 using Signum.Authorization;
 using Signum.DynamicQuery.Tokens;
 using Signum.Scheduler;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Text.Json;
+using Signum.API;
 
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 public static class AzureADLogic
 {
@@ -167,6 +168,7 @@ public static class AzureADLogic
 
             if (adGroups)
             {
+
                 sb.Include<ADGroupEntity>()
                     .WithQuery(() => e => new
                     {
@@ -356,6 +358,12 @@ public static class AzureADLogic
                 ,
                 Implementations.By());
             }
+            else
+            {
+                if (sb.WebServerBuilder != null)
+                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
+            }
+
         }
     }
 

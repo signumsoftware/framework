@@ -3,7 +3,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 public interface IAutoCreateUserContext
 {

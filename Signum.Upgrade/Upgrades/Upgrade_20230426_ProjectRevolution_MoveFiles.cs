@@ -61,8 +61,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         }
 
 
-        var starterCS = File.ReadAllText(uctx.AbsolutePath("Southwind.Logic/Starter.cs"));
-        var reactCSPROJ = File.ReadAllText(uctx.AbsolutePath("Southwind.React/Southwind.React.csproj"));
+        var starterCS = File.ReadAllText(uctx.AbsolutePath(uctx.ReplaceSouthwind("Southwind.Logic/Starter.cs")));
+        var reactCSPROJ = File.ReadAllText(uctx.AbsolutePath(uctx.ReplaceSouthwind("Southwind.React/Southwind.React.csproj")));
 
         uctx.CreateCodeFile("Southwind/Southwind.csproj", $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -238,7 +238,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
             """);
 
-        var southwind = uctx.AbsolutePath("Southwind");
+        var southwind = uctx.AbsolutePathSouthwind("Southwind");
 
         uctx.DeleteFile("Southwind.Entities/Southwind.Entities.csproj");
         uctx.DeleteFile("Southwind.Entities/Properties/GlobalUsings.cs");

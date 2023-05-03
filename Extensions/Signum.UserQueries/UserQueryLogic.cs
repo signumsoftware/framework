@@ -304,6 +304,12 @@ public static class UserQueryLogic
 
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
             uq => uq.Owner.Is(UserEntity.Current));
+
+        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
+             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
+
+        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
+            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)

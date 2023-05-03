@@ -283,9 +283,11 @@ public class UpgradeContext
             if (!Directory.Exists(newDir))
                 Directory.CreateDirectory(newDir);
 
-            File.Move(from, to, @override);
-
-            SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {f.FilePath} -> {newFilePath}");
+            if(!@override && !File.Exists(to))
+            {
+                File.Move(from, to, @override);
+                SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {f.FilePath} -> {newFilePath}");
+            }
         }
     }
 

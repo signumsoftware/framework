@@ -9,7 +9,7 @@
   "resolutions": {
   },
   "dependencies": {
-    "@types/codemirror": "5.60.7"
-
+    "@types/codemirror": "5.60.7",
+    "codemirror": "6.65.7"
   }
 }
