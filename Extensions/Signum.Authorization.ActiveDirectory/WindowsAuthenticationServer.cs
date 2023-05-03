@@ -4,7 +4,7 @@ using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;
 using Signum.Authorization;
 
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 

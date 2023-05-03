@@ -18,24 +18,28 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
         if (startup == null)
             throw new ApplicationException("startup.cs not found!!");
 
-        var sweagerContent = startup.Content.Before("public class Startup").Replace("Signum.React.Filters.", "") + "\n" +
-            """
-            internal static class SwaggerConfig
-            {
-                internal static void ConfigureSwaggerService(WebApplicationBuilder builder)
-                {
-                    //https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.1&tabs=visual-studio%2Cvisual-studio-xml            
-                    builder.Services.AddSwaggerGen(c =>
-            """ +
-            startup.Content.After("services.AddSwaggerGen(c =>").Before(@"}); //Swagger Services") +
-            @"}); //Swagger Services" + "\n" +
-            """
-                }
-            }
-            
-            """;
+        if (startup.Content.Contains("services.AddSwaggerGen(c =>"))
+        {
 
-        uctx.CreateCodeFile($"{uctx.ApplicationName}/SwaggerConfig.cs", sweagerContent);
+            var sweagerContent = startup.Content.Before("public class Startup").Replace("Signum.React.Filters.", "") + "\n" +
+                """
+                internal static class SwaggerConfig
+                {
+                    internal static void ConfigureSwaggerService(WebApplicationBuilder builder)
+                    {
+                        //https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.1&tabs=visual-studio%2Cvisual-studio-xml            
+                        builder.Services.AddSwaggerGen(c =>
+                """ +
+                startup.Content.After("services.AddSwaggerGen(c =>").Before(@"}); //Swagger Services") +
+                @"}); //Swagger Services" + "\n" +
+                """
+                    }
+                }
+            
+                """;
+
+            uctx.CreateCodeFile($"{uctx.ApplicationName}/SwaggerConfig.cs", sweagerContent);
+        }
 
         var program = uctx.TryGetCodeFile($"{uctx.ApplicationName}/program.cs");
         if (program == null)

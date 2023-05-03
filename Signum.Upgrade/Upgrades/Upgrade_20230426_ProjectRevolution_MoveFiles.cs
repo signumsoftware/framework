@@ -235,7 +235,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
             """);
 
-        var southwind = uctx.AbsolutePath("Southwind");
+        var southwind = uctx.AbsolutePathSouthwind("Southwind");
 
         uctx.DeleteFile("Southwind.Entities/Southwind.Entities.csproj");
         uctx.DeleteFile("Southwind.Entities/Properties/GlobalUsings.cs");

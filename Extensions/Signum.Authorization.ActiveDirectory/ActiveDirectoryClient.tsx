@@ -16,7 +16,7 @@ import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
-import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin, UserADQuery } from './Signum.ActiveDirectory';
+import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin, UserADQuery } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
