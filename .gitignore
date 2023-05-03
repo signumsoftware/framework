@@ -30,7 +30,6 @@ _ReSharper*/
 *.js.map
 *.js
 Signum.Analyzer/packages/*
-Signum.React/node_modules/*.js
 *.ncrunchproject
 .vs/config/applicationhost.config
 */.vs/*
@@ -40,4 +39,3 @@ Signum.React/node_modules/*.js
 /Signum.TSGenerator/Binaries/*
 /Utils/CheckUrl/.vs/**
 **/ts_out/**
-**/node_modules/**
