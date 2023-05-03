@@ -240,7 +240,7 @@ public class UpgradeContext
 
     public void DeleteDirectory(string directory)
     {
-        File.Delete(AbsolutePathSouthwind(directory));
+        Directory.Delete(AbsolutePathSouthwind(directory), true);
 
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Directory deleted {directory}");
     }

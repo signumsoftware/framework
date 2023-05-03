@@ -247,22 +247,20 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         uctx.ForeachCodeFile("*.cs", "Southwind.Entities", a =>
         {
             var fileName = Path.GetFileNameWithoutExtension(a.FilePath);
-            if (!fileName.EndsWith("Entity") && fileName.Contains($"class {fileName}Entity"))
-                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Entity.cs");
- 
-            if (!fileName.EndsWith("Embedded") && fileName.Contains($"class {fileName}Embedded"))
-                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Embedded.cs");
-
-            if (!fileName.EndsWith("Model") && fileName.Contains($"class {fileName}Model"))
-                uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Model.cs");
+            if (!fileName.EndsWith("Entity") && !fileName.EndsWith("Embedded")  && !fileName.EndsWith("Model"))
+            {
+                if (a.Content.Contains($"class {fileName}Entity"))
+                    uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Entity.cs");
+                else if (a.Content.Contains($"class {fileName}Embedded"))
+                    uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Embedded.cs");
+                else if (a.Content.Contains($"class {fileName}Model"))
+                    uctx.MoveFile(a.FilePath, Path.GetDirectoryName(a.FilePath) + "/" + fileName + "Model.cs");
+            }
         });
 
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.Logic", "Southwind", "*.*");
 
-        uctx.DeleteDirectory("Southwind.Entities");
-        uctx.DeleteDirectory("Southwind.Logic");
-        uctx.DeleteDirectory("Southwind.React");
 
         uctx.ForeachCodeFile("*.t4s", "Southwind.React/App", a =>
         {
@@ -281,6 +279,11 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         uctx.MoveFiles("Southwind.React", "Southwind", "*.*");
                 
         uctx.MoveFiles("Southwind", "", "yarn.lock");
+
+
+        uctx.DeleteDirectory("Southwind.Entities");
+        uctx.DeleteDirectory("Southwind.Logic");
+        uctx.DeleteDirectory("Southwind.React");
 
 
         uctx.CreateCodeFile("Southwind/Properties/GlobalUsings.cs", """
