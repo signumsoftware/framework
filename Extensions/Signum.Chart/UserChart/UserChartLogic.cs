@@ -261,6 +261,12 @@ public static class UserChartLogic
         sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
 
         TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
+
+        TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
+             ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+
+        TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
+            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
     }
 
 
