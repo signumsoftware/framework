@@ -61,8 +61,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         }
 
 
-        var starterCS = File.ReadAllText(uctx.AbsolutePath("Southwind.Logic/Starter.cs"));
-        var reactCSPROJ = File.ReadAllText(uctx.AbsolutePath("Southwind.React/Southwind.React.csproj"));
+        var starterCS = File.ReadAllText(uctx.AbsolutePathSouthwind("Southwind.Logic/Starter.cs"));
+        var reactCSPROJ = File.ReadAllText(uctx.AbsolutePathSouthwind("Southwind.React/Southwind.React.csproj"));
 
         uctx.CreateCodeFile("Southwind/Southwind.csproj", $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -260,6 +260,10 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.Logic", "Southwind", "*.*");
 
+        uctx.DeleteDirectory("Southwind.Entities");
+        uctx.DeleteDirectory("Southwind.Logic");
+        uctx.DeleteDirectory("Southwind.React");
+
         uctx.ForeachCodeFile("*.t4s", "Southwind.React/App", a =>
         {
             var newFilePath = a.FilePath.Replace(".Entities", "");
@@ -321,8 +325,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             f.Solution_RemoveProject("Signum.Engine.Extensions");
             f.Solution_RemoveProject("Signum.React.Extensions");
 
-            f.Solution_RemoveProject("Signum.Engine.MachineLearning.TensorFlow");
-            f.Solution_RemoveProject("Signum.React.Extensions.Selenium");
+            f.Solution_RemoveProject("Signum.Engine.MachineLearning.TensorFlow", WarningLevel.None);
+            f.Solution_RemoveProject("Signum.React.Extensions.Selenium", WarningLevel.Warning);
 
             f.Solution_RemoveProject(uctx.ApplicationName + ".Entities");
             f.Solution_RemoveProject(uctx.ApplicationName + ".Logic");
@@ -350,9 +354,9 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
 
         uctx.ChangeCodeFile(".gitignore", file =>
         {
+            file.RemoveAllLines(a => a.Contains("node_modules"));
             file.RemoveAllLines(a => a.Contains(uctx.ApplicationName));
             file.RemoveAllLines(a => a.Contains("packages"));
-            file.RemoveAllLines(a => a.Contains("node_modules"));
 
             file.ProcessLines(lines =>
             {

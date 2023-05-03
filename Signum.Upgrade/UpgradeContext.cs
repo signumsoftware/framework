@@ -229,10 +229,17 @@ public class UpgradeContext
         return val.Replace("Southwind", this.ApplicationName);
     }
 
-    internal void MoveFile(string from, string to)
+    public void MoveFile(string from, string to)
     {
         File.Move(AbsolutePathSouthwind(from), AbsolutePathSouthwind(to));
 
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {from} -> {to}");
+    }
+
+    public void DeleteDirectory(string directory)
+    {
+        File.Delete(AbsolutePathSouthwind(directory));
+
+        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Directory deleted {directory}");
     }
 }
