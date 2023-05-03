@@ -1,10 +1,10 @@
-using Signum.ActiveDirectory;
+using Signum.Authorization.ActiveDirectory;
 using Signum.Authorization;
 using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 public static class ActiveDirectoryLogic
@@ -171,6 +171,8 @@ public static class ActiveDirectoryLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
+          
+
             if (deactivateUsersTask)
             {
                 SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { EntityLine, EntityTable, ValueLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks';
-import { ActiveDirectoryConfigurationEmbedded } from '../Signum.ActiveDirectory';
+import { ActiveDirectoryConfigurationEmbedded } from '../Signum.Authorization.ActiveDirectory';
 
 export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }) {
   const ctx = p.ctx;

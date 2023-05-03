@@ -1,7 +1,7 @@
 using Signum.Authorization;
 using System.ComponentModel;
 
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 public class UserADMixin : MixinEntity
 {

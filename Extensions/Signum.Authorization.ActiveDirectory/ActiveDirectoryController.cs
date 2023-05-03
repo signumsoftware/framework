@@ -8,7 +8,7 @@ using Signum.Authorization;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
 
-namespace Signum.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory;
 
 [ValidateModelFilter]
 public class ActiveDirectoryController : ControllerBase
