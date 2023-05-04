@@ -62,7 +62,7 @@ public static class Program
                                           AssemblyName = assemblyName,
                                           //AssemblyFullPath = assemblyLocations[assemblyName],
                                           Directory = dir,
-                                          AllTypescriptFiles = GetAllT4SFiles(Path.GetFullPath(dir)),
+                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), dir).Replace('\\', Path.DirectorySeparatorChar)),
                                       }).ToDictionary(a => a.AssemblyName);
 
 
@@ -137,7 +137,7 @@ public static class Program
         {
             log.WriteLine($"SignumTSGenerator finished with errors ({sw.ElapsedMilliseconds}ms)");
             log.WriteLine($"{currentCsproj ?? "" }:error STSG0001:{ex.Message}");
-            log.WriteLine(ex.Message);
+            log.WriteLine(ex.StackTrace);
             return -1;
         }
     }
