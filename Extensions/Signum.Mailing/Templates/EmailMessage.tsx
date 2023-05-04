@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailFileType, EmailRecipientEmbedded } from '../Signum.Mailing'
-import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
+import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Tabs, Tab } from 'react-bootstrap';
 import { useForceUpdate } from '@framework/Hooks'
@@ -63,7 +63,7 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
         <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
         <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
         {ctx.value.isBodyHtml ? <div className="code-container">
-          <HtmlCodemirror ctx={ctx.subCtx(f => f.body.text)} />
+          <HtmlCodeMirror ctx={ctx.subCtx(f => f.body.text)} />
         </div> :
           <div>
             <ValueLine ctx={ctx.subCtx(f => f.body.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
