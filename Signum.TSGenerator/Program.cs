@@ -51,8 +51,8 @@ public static class Program
 
             assemblyLocations.Add(Path.GetFileNameWithoutExtension(intermediateAssembly), Path.Combine(Directory.GetCurrentDirectory(), intermediateAssembly));
 
-            var projXml = XDocument.Load(currentCsproj);
-            var candidates = projXml.Document.Descendants("ProjectReference").Select(a => a.Attribute("Include").Value).Prepend(currentCsproj).ToList();
+            var candidates = GetProjectReferences(currentCsproj).Prepend(currentCsproj).ToList();
+
             var assemblyReferences = (from csproj in candidates
                                       where ReferencesOrIsSignum(csproj)
                                       let dir = Path.GetDirectoryName(csproj)
@@ -62,7 +62,7 @@ public static class Program
                                           AssemblyName = assemblyName,
                                           //AssemblyFullPath = assemblyLocations[assemblyName],
                                           Directory = dir,
-                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), dir).Replace('\\', Path.DirectorySeparatorChar)),
+                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), dir)),
                                       }).ToDictionary(a => a.AssemblyName);
 
 
@@ -142,6 +142,15 @@ public static class Program
         }
     }
 
+    private static List<string> GetProjectReferences(string currentCsproj)
+    {
+        var projXml = XDocument.Load(currentCsproj);
+
+        return projXml.Document.Descendants("ProjectReference")
+            .Select(a => a.Attribute("Include").Value.Replace('\\', Path.DirectorySeparatorChar))
+            .ToList();
+    }
+
     private static string GetUpToDateContent(string intermediateAssembly, List<string> t4Files)
     {
         return string.Join("\r\n", new[] { intermediateAssembly }.Concat(t4Files.OrderBy(a => a))
@@ -155,8 +164,7 @@ public static class Program
         if (Path.GetFileName(csprojFilePath) == "Signum.csproj")
             return true;
 
-        var projectReferences = XDocument.Load(csprojFilePath).Document.Descendants("ProjectReference").ToList();
-        return projectReferences.Any(p => Path.GetFileName(p.Attribute("Include").Value) == "Signum.csproj");
+        return GetProjectReferences(csprojFilePath).Any(csproj => Path.GetFileName(csproj) == "Signum.csproj");
     }
 
     public static List<string> GetAllT4SFiles(string reactDirectory)

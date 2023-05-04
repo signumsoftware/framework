@@ -36,7 +36,7 @@ public static class EmailPackageLogic
                 });
 
 
-            Schema.Current.WhenIncluded<ProcessEntity>(() => EmailPackageLogic.Start(sb));
+
             QueryLogic.Expressions.Register((EmailPackageEntity a) => a.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages;
