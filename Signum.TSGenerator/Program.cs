@@ -62,7 +62,7 @@ public static class Program
                                           AssemblyName = assemblyName,
                                           //AssemblyFullPath = assemblyLocations[assemblyName],
                                           Directory = dir,
-                                          AllTypescriptFiles = GetAllT4SFiles(Path.Combine(Directory.GetCurrentDirectory(), dir)),
+                                          AllTypescriptFiles = GetAllT4SFiles(Path.GetFullPath(dir)),
                                       }).ToDictionary(a => a.AssemblyName);
 
 

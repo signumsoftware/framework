@@ -23,7 +23,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta10" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta11" />
 	</ItemGroup>
 
 	<ItemGroup>
