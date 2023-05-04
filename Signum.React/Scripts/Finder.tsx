@@ -2371,7 +2371,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
         var filterConditions = fo.filters.filter(sf => sf.token != null && !isFilterGroupOptionParsed(sf)) as FilterConditionOptionParsed[];
 
         var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation != undefined)
-          .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitText, sf.operation!));
+          .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitValue, sf.operation!));
 
         return filters;
       } else {
@@ -2380,7 +2380,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
     }
     else {
       if (fo.token && fo.operation && similarTokenToStr(fo.token, token)) {
-        return splitTokens(fo.value, fo.pinned?.splitText, fo.operation);
+        return splitTokens(fo.value, fo.pinned?.splitValue, fo.operation);
       } else {
         return [];
       }
