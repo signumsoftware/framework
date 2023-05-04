@@ -7,4 +7,4 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblySchemaName("basics", ForNamespace = "Signum.Basics")]
 [assembly: AssemblySchemaName("entities", ForNamespace = "Signum.Entities")]
 [assembly: AssemblySchemaName("operations", ForNamespace = "Signum.Operations")]
-[assembly: AssemblySchemaName("queries", ForNamespace = "Signum.Queries")]
+[assembly: AssemblySchemaName("queries", ForNamespace = "Signum.DynamicQuery")]

@@ -7,8 +7,8 @@
     },
     "Authorization": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
-      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Authorization\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\"
     },
     "Files": {
       "commandName": "Project",
