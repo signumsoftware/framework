@@ -444,7 +444,7 @@ export function parseFilterOptions(fos: (FilterOption | null | undefined)[], gro
 export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)[], groupResults: boolean, qd: QueryDescription): Promise<OrderOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | (groupResults ? SubTokensOptions.CanAggregate : 0);
+  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : 0);
   orderOptions.notNull().forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -457,7 +457,7 @@ export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)
 export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
+  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
   columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -775,10 +775,10 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
   if (fo.orderOptions)
-    fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | canAggregate));
+    fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate));
 
   if (fo.columnOptions) {
-    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperation));
+    fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation));
     fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   }
 
@@ -2332,7 +2332,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
     var result = value.split(/AND|OR|NOT|NEAR|\(|\)|\*/).map(a => {
       a = a.trim()
       if (a.startsWith("\"") && a.endsWith("\""))
-        a = a.afterLast("\"").beforeLast("\"");
+        a = a.after("\"").beforeLast("\"");
 
       return a;
     }).filter(a => a.length > 0);
@@ -2345,7 +2345,7 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
       return (value as string).split(/\s+/);
 
     if (operation == "ComplexCondition")
-      return extractComplexConditions(value as string);
+      return extractComplexConditions(value as string ?? "");
 
     if (operation == "IsIn" || operation == "IsNotIn") {
       if (Array.isArray(value))
@@ -2394,6 +2394,8 @@ export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
   if (similarToken(tokenA.fullKey, tokenB.fullKey))
     return true;
 
+  if (tokenA.propertyRoute == tokenB.propertyRoute)
+    return true;
 
   if (tokenA && tokenA.key == "ToString") {
     var steps = getToStringDependencies(tokenA.parent!.type);

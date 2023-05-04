@@ -200,7 +200,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
       ...fo.orderOptions?.map(a => a?.token) ?? [],
-    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanToArray));
+    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray));
 
     await parser.finished();
 
@@ -402,6 +402,7 @@ export namespace UserQueryMerger {
         oldF.pinned.row = newF.pinned.row;
         oldF.pinned.active = newF.pinned.active;
         oldF.pinned.splitValue = newF.pinned.splitValue;
+        oldF.pinned.modified = true;
       }
 
       oldF.modified = true;

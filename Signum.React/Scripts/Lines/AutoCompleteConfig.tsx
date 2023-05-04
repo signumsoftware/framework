@@ -14,7 +14,7 @@ export interface AutocompleteConfig<T> {
   getItems: (subStr: string) => Promise<T[]>;
   getItemsDelay(): number | undefined;
   getMinLength(): number | undefined;
-  renderItem(item: T, highlighter?: TextHighlighter): React.ReactNode;
+  renderItem(item: T, highlighter: TextHighlighter): React.ReactNode;
   renderList?(typeahead: TypeaheadController): React.ReactNode;
   getEntityFromItem(item: T): Promise<Lite<Entity> | ModifiableEntity | undefined>;
   getDataKeyFromItem(item: T): string | undefined;
@@ -427,7 +427,7 @@ export class MultiAutoCompleteConfig implements AutocompleteConfig<unknown>{
     return Object.values(this.implementations).map(a => a.getMinLength()).notNull().max() ?? undefined;
   }
 
-  renderItem(item: unknown, hl?: TextHighlighter): React.ReactNode {
+  renderItem(item: unknown, hl: TextHighlighter): React.ReactNode {
     for (var type in this.implementations) {
       var acc = this.implementations[type];
       if (acc.isCompatible(item, type))

@@ -314,6 +314,8 @@ internal class OrderByRewriter : DbExpressionVisitor
 
     protected void PrependOrderings(ReadOnlyCollection<OrderExpression>? newOrderings)
     {
+        newOrderings = newOrderings?.Where(o => o.Expression is not (ConstantExpression or SqlConstantExpression)).ToReadOnly();
+
         if (!newOrderings.IsNullOrEmpty())
         {
             if (this.gatheredOrderings.IsNullOrEmpty())

@@ -547,7 +547,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 columnOption={this.state.editingColumn}
                 onChange={this.handleColumnChanged}
                 queryDescription={qd}
-                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperation}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation}
                 close={this.handleColumnClose} />
             }
             <div ref={d => this.containerDiv = d}
