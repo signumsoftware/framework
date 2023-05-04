@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityCombo, EntityTabRepeater, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
+import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
 import IFrameRenderer from './IframeRenderer'
 import { useForceUpdate } from '@framework/Hooks'
 import { Tabs, Tab } from 'react-bootstrap'
@@ -53,7 +53,7 @@ export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComp
       <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} label={EmailTemplateViewMessage.Language.niceToString()} onChange={p.invalidate} />
       <div>
         <div className="code-container">
-          <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
+          <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
         </div>
         <br />
         <a href="#" onClick={handlePreviewClick}>

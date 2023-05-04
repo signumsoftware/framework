@@ -5,7 +5,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import TemplateControls from '../../Signum.Templating/TemplateControls'
-import HtmlCodemirror from '../../Signum.Codemirror/HtmlCodemirror'
+import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
 import IFrameRenderer from './IframeRenderer'
 import ValueLineModal from '@framework/ValueLineModal'
 import TemplateApplicable from '../../Signum.Templating/Templates/TemplateApplicable';
@@ -254,7 +254,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
         <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
         {p.messageFormat != 'HtmlSimple' ?
           <div className="code-container">
-            <HtmlCodemirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
+            <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
           </div> : <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} />}
         <br />
         {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>

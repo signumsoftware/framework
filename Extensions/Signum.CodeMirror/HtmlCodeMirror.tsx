@@ -18,7 +18,7 @@ import "codemirror/addon/search/match-highlighter"
 import "codemirror/addon/search/search"
 import "codemirror/addon/search/searchcursor"
 
-export default function HtmlCodemirror(p: {
+export default function HtmlCodeMirror(p: {
   ctx: TypeContext<string | null | undefined>,
   onChange?: (newValue: string) => void;
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
