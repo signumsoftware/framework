@@ -54,7 +54,7 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace(new Regex(@"(?<extension>[\w]*\.React\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".React", ""));
         });
 
-        uctx.ForeachCodeFile(@"*.xml", file =>
+        uctx.ForeachCodeFile(@"*.xml", "Southwind.Terminal", file =>
         {
             file.Replace("DynamicPanelPermission.ViewDynamicPanel", "EvalPanelPermission.ViewDynamicPanel");
         });
@@ -78,14 +78,14 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", file =>
         {
-            file.Replace(@"Configuration.GetValue<string>(""BroadcastUrls"")", "Configuration.GetValue<string>(\"BroadcastUrls\"), wsb: null");
+            file.Replace(@".GetValue<string>(""BroadcastUrls"")", ".GetValue<string>(\"BroadcastUrls\"), wsb: null");
             file.RemoveAllLines(l => l.Contains("{\"CT\", TranslationLogic.CopyTranslations}"));
             file.InsertAfterFirstLine(l => l.Contains("{\"L\", () => Load(null), \"Load\"}"), "{\"CT\", TranslationLogic.CopyTranslations},");
         });
 
         uctx.ChangeCodeFile(@"Southwind.Test.Environment\SouthwindEnvironment.cs", file =>
         {
-            file.Replace(@"Configuration.GetValue<string>(""BroadcastUrls"")", "Configuration.GetValue<string>(\"BroadcastUrls\"), wsb: null");
+            file.Replace(@".GetValue<string>(""BroadcastUrls"")", ".GetValue<string>(\"BroadcastUrls\"), wsb: null");
         });
 
         uctx.ChangeCodeFile(@"Southwind/HomeController.cs", file =>

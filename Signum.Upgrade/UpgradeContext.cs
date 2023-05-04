@@ -238,10 +238,18 @@ public class UpgradeContext
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {from} -> {to}");
     }
 
-    public void DeleteDirectory(string directory)
+    public void DeleteDirectory(string directory, WarningLevel showWarning = WarningLevel.Error)
     {
-        Directory.Delete(AbsolutePathSouthwind(directory), true);
+        try
+        {
+            Directory.Delete(AbsolutePathSouthwind(directory), true);
 
-        SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Directory deleted {directory}");
+            SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Directory deleted {directory}");
+        }
+        catch(Exception e)
+        {
+            SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                  $"Uanble to delete {directory}:" + e.Message);
+        }
     }
 }
