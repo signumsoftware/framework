@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { UserChartPartEntity } from '../../Signum.Chart.UserChart';
+import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 
@@ -24,8 +24,6 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
           <ValueLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
         </div>
       </div>
-
-
      
     </div>
   );

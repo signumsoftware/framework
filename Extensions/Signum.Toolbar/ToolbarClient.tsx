@@ -1,6 +1,4 @@
-import * as React from 'react'
-import { RouteObject, Location } from 'react-router'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { RouteObject } from 'react-router'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -8,26 +6,25 @@ import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
-import { Type } from '@framework/Reflection'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Toolbar'
 import * as Constructor from '@framework/Constructor'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
-import { parseIcon } from '@framework/Components/IconTypeahead';
 import { Dic } from '@framework/Globals';
-import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
+import QueryToolbarConfig from './QueryToolbarConfig';
+import { ToolbarConfig } from './ToolbarConfig';
 
-export function start(options: { routes: RouteObject[] }, ...configs: ToolbarConfig<any>[]) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
   Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
   Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));
+
+  registerConfig(new QueryToolbarConfig());
 
   Finder.addSettings({ queryName: ToolbarEntity, defaultOrders: [{ token: ToolbarEntity.token(a => a.priority), orderType: "Descending" }] });
 
   Constructor.registerConstructor(ToolbarElementEmbedded, tn => ToolbarElementEmbedded.New({ type: "Item" }));
 
   AppContext.clearSettingsActions.push(cleanConfigs);
-
-  configs.forEach(c => registerConfig(c));
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(ToolbarEntity);
@@ -37,62 +34,6 @@ export function cleanConfigs() {
   Dic.clear(configs);
 }
 
-
-export interface IconColor {
-  icon: IconProp;
-  iconColor: string;
-}
-
-export abstract class ToolbarConfig<T extends Entity> {
-  type: Type<T>;
-  constructor(type: Type<T>) {
-    this.type = type;
-  }
-
-
-  getIcon(element: ToolbarResponse<T>) {
-    const defaultIcon = this.getDefaultIcon();
-    return ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor);
-  }
-
-  abstract getDefaultIcon(): IconColor;
-
-  static coloredIcon(icon: IconProp | undefined, color: string | undefined): React.ReactChild | null {
-    if (!icon)
-      return null;
-
-    return <FontAwesomeIcon icon={icon} className={"icon"} color={color} />;
-  }
-
-  abstract navigateTo(element: ToolbarResponse<T>): Promise<string | null>;
-  abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
-
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
-    e.preventDefault();
-    this.navigateTo(res).then(url => {
-      if (url)
-        AppContext.pushOrOpenInTab(url, e);
-    });
-  }
-
-  isApplicableTo(element: ToolbarResponse<T>) {
-    return true;
-  }
-
-  getMenuItem(res: ToolbarResponse<T>, isActive: boolean, key: number | string, onAutoClose?: () => void) {
-    return (
-      <ToolbarNavItem key={key}
-        title={res.label}
-        onClick={(e: React.MouseEvent<any>) => {
-          this.handleNavigateClick(e, res);
-          if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-            onAutoClose();
-        }}
-        active={isActive}
-        icon={this.getIcon(res)}/>
-    );
-  }
-}
 
 
 export const configs: { [type: string]: ToolbarConfig<any>[] } = {};

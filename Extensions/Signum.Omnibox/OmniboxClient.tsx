@@ -1,13 +1,18 @@
 import * as React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
+import DynamicQueryOmniboxProvider from './DynamicQueryOmniboxProvider';
+import EntityOmniboxProvider from './EntityOmniboxProvider';
+import { OmniboxProvider } from './OmniboxProvider';
+import SpecialOmniboxProvider from './SpecialOmniboxProvider';
 
-export function start(...params: OmniboxProvider<OmniboxResult>[]) {
-  params.forEach(op => registerProvider(op));
+export function start() {
+
+  registerProvider(new EntityOmniboxProvider());
+  registerProvider(new DynamicQueryOmniboxProvider());
+  registerProvider(new SpecialOmniboxProvider());
 
   AppContext.clearSettingsActions.push(clearProviders);
 }
@@ -90,42 +95,6 @@ export namespace API {
     })
   }
 }
-
-export abstract class OmniboxProvider<T extends OmniboxResult> {
-  abstract getProviderName(): string;
-  abstract renderItem(result: T): React.ReactNode[];
-  abstract navigateTo(result: T): Promise<string | undefined> | undefined;
-  abstract toString(result: T): string;
-  abstract icon(): React.ReactNode;
-
-  renderMatch(match: OmniboxMatch, array: React.ReactNode[]) {
-
-    const regex = /#+/g;
-
-    let last = 0;
-    let m: RegExpExecArray;
-    while (m = regex.exec(match.boldMask)!) {
-      if (m.index > last)
-        array.push(<span>{match.text.substr(last, m.index - last)}</span>);
-
-      array.push(<strong>{match.text.substr(m.index, m[0].length)}</strong>)
-
-      last = m.index + m[0].length;
-    }
-
-    if (last < match.text.length)
-      array.push(<span>{match.text.substr(last)}</span>);
-  }
-
-  coloredSpan(text: string, colorName: string): React.ReactChild {
-    return <span style={{ color: colorName, lineHeight: "1.6em" }}>{text}</span>;
-  }
-
-  coloredIcon(icon: IconProp, color: string): React.ReactChild {
-    return <FontAwesomeIcon icon={icon} color={color} className="icon" />;
-  }
-}
-
 
 export interface OmniboxResult {
   resultTypeName: string;

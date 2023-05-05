@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Lite, liteKey } from '@framework/Signum.Entities'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as UserQueryClient from './UserQueryClient'

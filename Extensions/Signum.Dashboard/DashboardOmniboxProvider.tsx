@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Lite } from '@framework/Signum.Entities'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import * as DashboardClient from './DashboardClient'
 import { DashboardEntity } from './Signum.Dashboard'
 

@@ -8,7 +8,7 @@ import ChartTableComponent from '../../Templates/ChartTable'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useForceUpdate } from '@framework/Hooks'
 import { MemoRepository } from '../../D3Scripts/Components/ReactChart'
-import { CombinedUserChartPartEntity, UserChartEntity } from '../../Signum.Chart.UserChart'
+import { CombinedUserChartPartEntity, UserChartEntity } from '../../UserChart/Signum.Chart.UserChart'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { executeChartCached } from '../../ChartClient'
 import ChartRendererCombined from '../../Templates/ChartRendererCombined'

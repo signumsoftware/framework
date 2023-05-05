@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useLocation, Location } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as ToolbarClient from '../ToolbarClient'
-import { ToolbarConfig } from "../ToolbarClient";
+import { ToolbarConfig } from "../ToolbarConfig";
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { Nav } from 'react-bootstrap';

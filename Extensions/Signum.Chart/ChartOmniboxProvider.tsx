@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { OmniboxMessage } from '../Signum.Omnibox/Signum.Omnibox'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import * as ChartClient from './ChartClient'
 
 export default class ChartOmniboxProvider extends OmniboxProvider<ChartOmniboxResult>

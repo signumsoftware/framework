@@ -16,15 +16,7 @@ import { EvalPanelPermission } from './Signum.Eval';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 
-export function start(options: {
-  routes: RouteObject[],
-  pop3Config: boolean,
-  sendEmailTask: boolean,
-  contextual: boolean,
-  queryButton: boolean,
-  quickLinkInDefaultGroup?: boolean
-}) {
-
+export function start(options: { routes: RouteObject[] }) {
 
   OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),

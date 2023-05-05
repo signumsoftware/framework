@@ -27,10 +27,17 @@ import SelectorModal from '@framework/SelectorModal';
 import { Dic } from '@framework/Globals';
 import { QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 import { UserQueryPartHandler } from './Dashboard/View/UserQueryPart';
+import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
+import UserQueryToolbarConfig from './UserQueryToolbarConfig';
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import UserQueryOmniboxProvider from './UserQueryOmniboxProvider';
 
 export function start(options: { routes: RouteObject[] }) {
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserQueryEntity);
+
+  ToolbarClient.registerConfig(new UserQueryToolbarConfig());
+  OmniboxClient.registerProvider(new UserQueryOmniboxProvider());
 
   options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
 

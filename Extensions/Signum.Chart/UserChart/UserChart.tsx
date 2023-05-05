@@ -9,7 +9,7 @@ import "../Chart.css"
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient'
 import { getToString } from '@framework/Signum.Entities'
-import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 

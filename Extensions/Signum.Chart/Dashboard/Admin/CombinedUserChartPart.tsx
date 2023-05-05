@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ValueLine, EntityLine, EntityStrip, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { D3ChartScript } from '../../Signum.Chart';
-import { CombinedUserChartElementEmbedded, CombinedUserChartPartEntity, UserChartEntity } from '../../Signum.Chart.UserChart';
+import { CombinedUserChartElementEmbedded, CombinedUserChartPartEntity, UserChartEntity } from '../../UserChart/Signum.Chart.UserChart';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using Signum.API;
 using Signum.Authorization;
 using Signum.Cache;
@@ -13,11 +14,11 @@ public static class AlertsServer
 
     public static IHubContext<AlertsHub, IAlertsClient> AlertsHub { get; private set; }
 
-    public static void MapAlertsHub(IEndpointRouteBuilder endpoints)
+    public static void MapAlertsHub(WebApplication app)
     {
-        endpoints.MapHub<AlertsHub>("/api/alertshub");
+        app.MapHub<AlertsHub>("/api/alertshub");
         Connections = new ConnectionMapping<Lite<IUserEntity>>();
-        AlertsHub = (IHubContext<AlertsHub, IAlertsClient>)endpoints.ServiceProvider.GetService(typeof(IHubContext<AlertsHub, IAlertsClient>))!;
+        AlertsHub = app.Services.GetService<IHubContext<AlertsHub, IAlertsClient>>()!;
 
         var alertEvents = Schema.Current.EntityEvents<AlertEntity>();
 

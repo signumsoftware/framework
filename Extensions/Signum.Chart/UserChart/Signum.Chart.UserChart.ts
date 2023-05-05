@@ -2,16 +2,16 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
-import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Basics from '../../Signum/React/Signum.Basics'
-import * as Operations from '../../Signum/React/Signum.Operations'
-import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
-import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
-import * as Chart from './Signum.Chart'
-import * as Dashboard from '../Signum.Dashboard/Signum.Dashboard'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Signum/React/Reflection'
+import * as Entities from '../../../Signum/React/Signum.Entities'
+import * as Basics from '../../../Signum/React/Signum.Basics'
+import * as Operations from '../../../Signum/React/Signum.Operations'
+import * as UserAssets from '../../Signum.UserAssets/Signum.UserAssets'
+import * as Queries from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import * as Chart from '../Signum.Chart'
+import * as Dashboard from '../../Signum.Dashboard/Signum.Dashboard'
 
-import { ChartRequestModel } from './Signum.Chart'
+import { ChartRequestModel } from '../Signum.Chart'
 
 export type IChartBase = ChartRequestModel | UserChartEntity;
 

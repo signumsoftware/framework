@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Lite, Entity, getToString } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Omnibox'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from './OmniboxClient'
+import { OmniboxProvider } from "./OmniboxProvider"
 import * as Navigator from '@framework/Navigator'
 import { getTypeInfo, tryGetTypeInfo } from '@framework/Reflection'
 

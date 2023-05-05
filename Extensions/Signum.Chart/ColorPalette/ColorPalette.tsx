@@ -12,7 +12,7 @@ import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
 import { EntityLink } from '@framework/Search';
 import { calculateColor, ColorScheme } from './ColorPaletteClient';
-import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from '../Signum.Chart.ColorPalette';
+import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from './Signum.Chart.ColorPalette';
 
 export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }) {
   const ctx = p.ctx;

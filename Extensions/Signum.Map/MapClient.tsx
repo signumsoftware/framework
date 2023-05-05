@@ -7,6 +7,8 @@ import { } from './Signum.Map'
 import { ImportComponent } from '@framework/ImportComponent'
 import * as Navigator from "@framework/Navigator";
 import * as AppContext from "@framework/AppContext";
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import MapOmniboxProvider from './MapOmniboxProvider';
 
 export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = [];
 
@@ -20,6 +22,8 @@ export function start(options: { routes: RouteObject[], auth: boolean; cache: bo
     { path: "/map", element: <ImportComponent onImport={() => import("./Schema/SchemaMapPage")} /> },
     { path: "/map/:type", element: <ImportComponent onImport={() => import("./Operation/OperationMapPage")} /> }
   );
+
+  OmniboxClient.registerProvider(new MapOmniboxProvider());
 
   AppContext.clearSettingsActions.push(clearProviders);
 

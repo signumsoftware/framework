@@ -14,7 +14,7 @@ import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterCont
 import { toAbsoluteUrl } from '@framework/AppContext'
 import * as UserQueryClient from '../../Signum.UserQueries/UserQueryClient'
 import { Lite } from '@framework/Signum.Entities'
-import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
 
 export interface ChartRendererProps {

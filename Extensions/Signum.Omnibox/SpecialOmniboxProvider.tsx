@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from './OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from './OmniboxClient'
+import { OmniboxProvider } from "./OmniboxProvider";
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 
 export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmniboxResult>

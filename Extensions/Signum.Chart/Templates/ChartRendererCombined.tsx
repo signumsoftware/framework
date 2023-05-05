@@ -8,7 +8,7 @@ import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 import { handleDrillDown } from './ChartRenderer'
 import { ReactChartCombined } from '../D3Scripts/Components/ReactChartCombined'
 import { Lite } from '@framework/Signum.Entities'
-import { UserChartEntity } from '../Signum.Chart.UserChart';
+import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent';
 
 

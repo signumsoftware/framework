@@ -1,7 +1,7 @@
 using Signum.Engine.Maps;
 using System.IO;
 
-namespace Signum.Engine.Sync.Postgres;
+namespace Signum.Engine;
 
 
 public class StopProgressForeachException : Exception

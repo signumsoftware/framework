@@ -7,7 +7,7 @@ import { useAPI } from '@framework/Hooks'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries'
-import { UserChartEntity } from '../Signum.Chart/Signum.Chart.UserChart'
+import { UserChartEntity } from '../Signum.Chart/UserChart/Signum.Chart.UserChart'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ajaxGet } from '@framework/Services'

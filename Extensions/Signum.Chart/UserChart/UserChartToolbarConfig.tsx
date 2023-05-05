@@ -1,8 +1,9 @@
 import { Location } from 'react-router'
 import * as Navigator from '@framework/Navigator'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
-import * as UserChartClient from './UserChart/UserChartClient'
-import * as ChartClient from './ChartClient'
+import { ToolbarResponse } from '../../Signum.Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig } from '../../Signum.Toolbar/ToolbarConfig'
+import * as UserChartClient from '../UserChart/UserChartClient'
+import * as ChartClient from '../ChartClient'
 import { liteKey } from '@framework/Signum.Entities'
 import { UserChartEntity } from './Signum.Chart.UserChart'
 

@@ -12,8 +12,8 @@ import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
 import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
-import { IChartBase } from '../Signum.Chart.UserChart'
-import { ColorPaletteEntity } from '../Signum.Chart.ColorPalette'
+import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
+import { ColorPaletteEntity } from '../ColorPalette/Signum.Chart.ColorPalette'
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 
 export interface ChartColumnProps {

@@ -29,20 +29,24 @@ import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
 import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
-import { IChartBase, UserChartEntity } from './Signum.Chart.UserChart';
+import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
 import { UserChartPartHandler } from './Dashboard/View/UserChartPart';
 import SelectorModal from '@framework/SelectorModal';
 import { CachedQueryJS, getAllFilterTokens, getCachedResultTable } from '../Signum.Dashboard/CachedQueryExecutor';
 import { drilldownToUserQuery, onDrilldownEntity, onDrilldownGroup } from '../Signum.UserQueries/UserQueryClient';
 import { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import ChartOmniboxProvider from './ChartOmniboxProvider';
 
 export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
   
   options.routes.push({ path: "/chart/:queryName", element: <ImportComponent onImport={() => import("./Templates/ChartRequestPage")} /> });
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);
- 
+
+  OmniboxClient.registerProvider(new ChartOmniboxProvider());
+
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
       !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ||

@@ -28,6 +28,11 @@ import { downloadFile } from '../Signum.Files/Components/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { QueryDescription } from '@framework/FindOptions';
 
+import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import DashboardToolbarConfig from './DashboardToolbarConfig';
+import DashboardOmniboxProvider from './DashboardOmniboxProvider';
+
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
   content: T;
@@ -75,6 +80,8 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
   Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
 
+  ToolbarClient.registerConfig(new DashboardToolbarConfig());
+  OmniboxClient.registerProvider(new DashboardOmniboxProvider());
 
   Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,

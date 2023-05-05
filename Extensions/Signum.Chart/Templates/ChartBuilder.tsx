@@ -11,7 +11,7 @@ import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClien
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
-import { IChartBase } from '../Signum.Chart.UserChart'
+import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/

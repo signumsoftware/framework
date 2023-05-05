@@ -7,7 +7,7 @@ import * as ChartClient from '../ChartClient'
 import * as UserChartClient from './UserChartClient'
 import { useLocation, useParams } from "react-router";
 import { useForceUpdate } from '@framework/Hooks'
-import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { UserChartEntity } from './Signum.Chart.UserChart'
 
 
 

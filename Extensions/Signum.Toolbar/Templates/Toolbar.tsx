@@ -13,6 +13,7 @@ import * as Constructor from '@framework/Constructor';
 import * as Navigator from '@framework/Navigator';
 import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
+import { IconColor } from '../ToolbarConfig';
 
 export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
   const ctx = p.ctx;
@@ -36,7 +37,7 @@ export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
 }
 
 
-function getDefaultIcon(ti: TypeInfo): ToolbarClient.IconColor | null {
+function getDefaultIcon(ti: TypeInfo): IconColor | null {
 
   if (ti.name == ToolbarEntity.typeName)
     return ({ icon: "bars", iconColor: "#229954" });

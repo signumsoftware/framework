@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarMenuEntity } from '../Signum.Toolbar'
 import * as ToolbarClient from '../ToolbarClient'
-import { ToolbarConfig } from "../ToolbarClient";
+import { ToolbarConfig } from "../ToolbarConfig"
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import * as PropTypes from "prop-types";

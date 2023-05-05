@@ -12,7 +12,7 @@ import { FilterOptionParsed, isActive, isFilterGroupOptionParsed, QueryToken, to
 import { DashboardBehaviour } from '@framework/Signum.DynamicQuery'
 import { softCast } from '@framework/Globals'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
-import { UserChartPartEntity } from '../../Signum.Chart.UserChart'
+import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart'
 import { DashboardFilter, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from '../../../Signum.Dashboard/View/DashboardFilterController'
 import { executeChartCached } from '../../ChartClient'
 

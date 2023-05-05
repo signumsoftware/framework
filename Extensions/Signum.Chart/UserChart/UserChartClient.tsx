@@ -16,12 +16,19 @@ import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
-import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } from '../Signum.Chart.UserChart';
+import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } from './Signum.Chart.UserChart';
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries';
 import SelectorModal from '@framework/SelectorModal';
 import { UserChartPartHandler } from '../Dashboard/View/UserChartPart';
+import * as OmniboxClient from '../../Signum.Omnibox/OmniboxClient';
+import UserChartOmniboxProvider from './UserChartOmniboxProvider';
+import * as ToolbarClient from '../../Signum.Toolbar/ToolbarClient';
+import UserChartToolbarConfig from './UserChartToolbarConfig';
 
 export function start(options: { routes: RouteObject[] }) {
+  
+  ToolbarClient.registerConfig(new UserChartToolbarConfig());
+  OmniboxClient.registerProvider(new UserChartOmniboxProvider());
 
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserChartEntity);

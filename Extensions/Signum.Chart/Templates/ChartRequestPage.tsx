@@ -9,7 +9,7 @@ import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { getQueryNiceName } from '@framework/Reflection'
-import { UserChartEntity } from '../Signum.Chart.UserChart'
+import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 
 
 

@@ -16,7 +16,7 @@ import { tryGetOperationInfo } from '@framework/Operations'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
 import { UserQueryMerger } from '../../Signum.UserQueries/UserQueryMenu'
-import { UserChartEntity, UserChartOperation } from '../Signum.Chart.UserChart'
+import { UserChartEntity, UserChartOperation } from '../UserChart/Signum.Chart.UserChart'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;

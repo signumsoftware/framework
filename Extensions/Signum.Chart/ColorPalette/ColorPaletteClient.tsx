@@ -11,7 +11,7 @@ import * as Constructor from '@framework/Constructor';
 import * as Finder from '@framework/Finder';
 import { Dic } from '@framework/Globals';
 import { getColorInterpolation } from './ColorUtils';
-import { ColorPaletteEntity } from '../Signum.Chart.ColorPalette';
+import { ColorPaletteEntity } from './Signum.Chart.ColorPalette';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));

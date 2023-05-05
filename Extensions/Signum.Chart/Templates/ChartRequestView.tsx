@@ -24,7 +24,7 @@ import { ChartScript, cleanedChartRequest } from '../ChartClient';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
-import { UserChartEntity } from '../Signum.Chart.UserChart';
+import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
