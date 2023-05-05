@@ -200,10 +200,12 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             	</ItemGroup>
             	<ItemGroup>
             		<Content Update="package.json">
-            			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+                        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+                        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
             		</Content>
             		<Content Update="tsconfig.json">
             			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+                        <CopyToPublishDirectory>Never</CopyToPublishDirectory>
             		</Content>
             	</ItemGroup>
             	<ItemGroup>
@@ -385,8 +387,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 "FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim AS build");
 
             file.ReplaceBetween(
-                new ReplaceBetweenOption(a => a.StartsWith("COPY")),
-                new ReplaceBetweenOption(a => a.StartsWith("COPY")) { LastIndex = true },
+                new (a => a.StartsWith("COPY")),
+                new (a => a.StartsWith("COPY")) { LastIndex = true },
                 uctx.ReplaceSouthwind("""
                 COPY ["Framework.tar", "/"]
                 RUN tar -xvf /Framework.tar
@@ -397,6 +399,14 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 COPY ["yarn.lock", ""]
                 """));
 
+            file.Replace(uctx.ApplicationName + ".React", uctx.ApplicationName);
+
+        });
+
+        uctx.ForeachCodeFile("deploy*.ps1", a =>
+        {
+            a.InsertBeforeFirstLine(a => a.Contains("docker build"),
+                """Get-ChildItem -Path "Framework" -Recurse -Include "package.json","*.csproj" | Resolve-Path -Relative | tar -cf Framework.tar -T -""");
         });
     }
     

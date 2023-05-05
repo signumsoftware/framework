@@ -50,6 +50,7 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace("TranslatedInstanceLogic.TranslatedField", "PropertyRouteTranslationLogic.TranslatedField");
             file.Replace("using Signum.Validation", "using Signum.Entities.Validation");
             file.Replace("using Signum.Maps", "using Signum.Engine.Maps");
+            file.Replace("using Signum.ActiveDirectory", "using Signum.Authorization.ActiveDirectory");
         });
 
         uctx.ForeachCodeFile(@"*.cshtml", file =>
@@ -83,8 +84,30 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
                 uctx.ReplaceSouthwind("Extensions\\Signum.Selenium\\Signum.Selenium"));
         });
 
+        uctx.ForeachCodeFile(@"appsettings.json, appsettings.*.json", new[] { "Southwind.Text.Environment", "Southwind.Terminal" }, file =>
+        {
+            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Test.Environment/Southwind.Test.Environment.csproj", file =>
+        {
+            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Terminal/Southwind.Terminal.csproj", file =>
+        {
+            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
+        {
+            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+        });
+
         uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", file =>
         {
+            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+
             file.Replace(@".GetValue<string>(""BroadcastUrls"")", ".GetValue<string>(\"BroadcastUrls\"), wsb: null");
             file.RemoveAllLines(l => l.Contains("{\"CT\", TranslationLogic.CopyTranslations}"));
             file.InsertAfterFirstLine(l => l.Contains("{\"L\", () => Load(null), \"Load\"}"), "{\"CT\", TranslationLogic.CopyTranslations},");
