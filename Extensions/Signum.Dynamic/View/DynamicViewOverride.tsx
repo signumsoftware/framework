@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { EntityLine, TypeContext, FormGroup } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
-import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';

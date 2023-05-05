@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { WorkflowEventTaskConditionEval } from '../Signum.Workflow'
 import { TypeContext, EntityDetail } from '@framework/Lines'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror';
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
 import { useForceUpdate } from '@framework/Hooks'
 
 export interface WorkflowEventTaskConditionComponentProps {

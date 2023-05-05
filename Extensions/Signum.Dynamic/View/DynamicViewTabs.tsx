@@ -10,7 +10,7 @@ import { TypeContext, EntityTable, ValueLine } from '@framework/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
 import { DynamicViewInspector, PropsHelp } from './Designer';
 import { ModulesHelp } from "./ModulesHelp";
-import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror';
+import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror';
 import { DynamicViewEntity, DynamicViewPropEmbedded } from '../Signum.Dynamic.Views'
 
 export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicViewEntity>, rootNode: DesignerNode<BaseNode> }) {

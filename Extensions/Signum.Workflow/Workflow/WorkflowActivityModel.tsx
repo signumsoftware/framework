@@ -5,7 +5,7 @@ import {
 import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
 import * as DynamicViewClient from '../../Signum.Dynamic/DynamicViewClient'
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'

@@ -8,7 +8,6 @@
   },
   "references": [
     { "path": "../../Signum" },
-    { "path": "../Signum.Authorization" },
-    { "path": "../Signum.Dynamic" }
+    { "path": "../Signum.Authorization" }
   ]
 }

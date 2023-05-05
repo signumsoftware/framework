@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowScriptEntity } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'

@@ -17,7 +17,7 @@ import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as Lines from '@framework/Lines'
 import * as FileLineModule from '../Signum.Files/Components/FileLine'
 import DynamicViewEntityComponent from './View/DynamicView' //Just Typing
-import * as DynamicClientOptions from './DynamicClientOptions'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import * as Nodes from './View/Nodes' //Typings-only
 import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "@framework/Modals/MessageModal";
@@ -33,29 +33,29 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
   Navigator.addSettings(new EntitySettings(DynamicViewOverrideEntity, w => import('./View/DynamicViewOverride')));
 
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
+  EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicViewEntity,
     filterOptions: [{ token: DynamicViewEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
 
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
+  EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicViewSelectorEntity,
     filterOptions: [{ token: DynamicViewSelectorEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicViewEntity, t => [
     { token: t.append(p => p.entity.viewContent), type: "JSon" },
     { token: t.append(p => p.entity.locals), type: "Code" },
     { token: t.append(p => p.entity.viewName), type: "Text" },
     { token: t.append(p => p.entity.entityType!.cleanName), type: "Text" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewSelectorEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicViewSelectorEntity, t => [
     { token: t.append(p => p.entity.entityType!.cleanName), type: "Text" },
     { token: t.append(p => p.entity.script), type: "Code" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicViewOverrideEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicViewOverrideEntity, t => [
     { token: t.append(p => p.viewName), type: "Text" },
     { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.script), type: "Code" },

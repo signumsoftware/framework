@@ -6,7 +6,7 @@ import { StyleContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
 import { API, CompilationError, DynamicPanelInformation } from './DynamicClient'
-import CSharpCodeMirror from '../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../Signum.CodeMirror/CSharpCodeMirror'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation } from "react-router";

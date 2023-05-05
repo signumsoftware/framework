@@ -26,6 +26,9 @@ public static class UserAssetServer
         started = true;
 
         ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(QueryOrderEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(QueryFilterEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
 
 
         var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(QueryTokenEmbedded));

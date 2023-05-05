@@ -7,7 +7,7 @@ import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import * as Constructor from '@framework/Constructor'
-import * as DynamicClientOptions from './DynamicClientOptions'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import { globalModules } from './View/GlobalModules'
 import { DynamicClientEntity } from './Signum.Dynamic.Client';
 
@@ -15,7 +15,7 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicClientEntity, w => import('./Client/DynamicClientComponent')));
 
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicClientEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicClientEntity, t => [
     { token: t.append(p => p.entity.name), type: "Text" },
     { token: t.append(p => p.entity.code), type: "Code" },
   ]);

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Workflow'
 import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
