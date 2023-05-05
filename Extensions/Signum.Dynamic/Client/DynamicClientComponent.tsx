@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, TypeContext } from '@framework/Lines'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror';
+import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror';
 import { useForceUpdate } from '@framework/Hooks';
 import { ModulesHelp } from '../View/ModulesHelp';
 import { DynamicClientEntity } from '../Signum.Dynamic.Client'

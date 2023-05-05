@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';

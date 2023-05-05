@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ValueLine, TypeContext } from '@framework/Lines'
-import CSSCodeMirror from '../../Signum.Codemirror/CSSCodeMirror'
+import CSSCodeMirror from '../../Signum.CodeMirror/CSSCodeMirror'
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicCSSOverrideEntity } from '../Signum.Dynamic.CSS';
 

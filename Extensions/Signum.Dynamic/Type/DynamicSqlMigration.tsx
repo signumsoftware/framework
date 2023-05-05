@@ -6,7 +6,7 @@ import * as Navigator from '@framework/Navigator'
 import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
-import SqlCodeMirror from '../../Signum.Codemirror/SqlCodeMirror'
+import SqlCodeMirror from '../../Signum.CodeMirror/SqlCodeMirror'
 import { DynamicSqlMigrationEntity } from '../Signum.Dynamic.SqlMigrations'
 
 

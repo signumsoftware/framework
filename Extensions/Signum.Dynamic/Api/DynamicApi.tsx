@@ -4,7 +4,7 @@ import { ValueLine, TypeContext } from '@framework/Lines'
 import ValueLineModal from '@framework/ValueLineModal';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicApiEntity } from '../Signum.Dynamic.Controllers'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror'
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 
 interface DynamicApiProps {

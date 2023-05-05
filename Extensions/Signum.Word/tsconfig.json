@@ -9,7 +9,6 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.Mailing" },
-    { "path": "../Signum.Templating" },
-    { "path": "../Signum.Dynamic" }
+    { "path": "../Signum.Templating" }
   ]
 }

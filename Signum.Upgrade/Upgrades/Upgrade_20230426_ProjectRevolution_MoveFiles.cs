@@ -107,7 +107,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Authorization\Signum.Authorization.csproj" />FROM_CS AuthLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Caching\Signum.Caching.csproj" />FROM_CS CacheLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Chart\Signum.Chart.csproj" />FROM_CS ChartLogic
-            		<ProjectReference Include="..\Framework\Extensions\Signum.CodeMirror\Signum.Codemirror.csproj" />FROM_CS EmailLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.CodeMirror\Signum.CodeMirror.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.ConcurrentUser\Signum.ConcurrentUser.csproj" />FROM_CS ConcurrentUserLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Dashboard\Signum.Dashboard.csproj" />FROM_CS DashboardLogic.Start
             		<ProjectReference Include="..\Framework\Extensions\Signum.DiffLog\Signum.DiffLog.csproj" />FROM_CS DiffLogLogic.Start

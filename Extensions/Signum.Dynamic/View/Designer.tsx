@@ -6,7 +6,7 @@ import {PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import * as NodeUtils from './NodeUtils'
-import JavascriptCodeMirror from '../../Signum.Codemirror/JavascriptCodeMirror'
+import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'

@@ -4,7 +4,7 @@ import { TypeContext, PropertyRoute } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import ValueLineModal from '@framework/ValueLineModal'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror';
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
 import { useForceUpdate } from '@framework/Hooks'
 
 export interface WorkflowEventTaskActionComponentProps {

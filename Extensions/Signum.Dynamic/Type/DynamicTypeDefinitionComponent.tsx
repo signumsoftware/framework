@@ -15,7 +15,7 @@ import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import CSharpCodeMirror from '../../Signum.Codemirror/CSharpCodeMirror';
+import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
 import ValueLineModal from '@framework/ValueLineModal'
 import "./DynamicType.css"
 import { Tabs, Tab } from 'react-bootstrap';

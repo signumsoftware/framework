@@ -9,7 +9,7 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.Authorization" },
-    { "path": "../Signum.Codemirror" },
+    { "path": "../Signum.CodeMirror" },
     { "path": "../Signum.Eval" },
     { "path": "../Signum.Files" },
     { "path": "../Signum.Tree" },
