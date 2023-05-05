@@ -7,19 +7,19 @@ import * as Navigator from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import * as Constructor from '@framework/Constructor'
-import * as DynamicClientOptions from './DynamicClientOptions'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Dynamic.Validations';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicValidationEntity, w => import('./Validation/DynamicValidation')));
   Constructor.registerConstructor(DynamicValidationEntity, () => DynamicValidationEntity.New({ eval: DynamicValidationEval.New() }));
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: DynamicValidationEntity });
+  EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicValidationEntity,
     filterOptions: [{ token: DynamicValidationEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicValidationEntity, t => [
     { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.name), type: "Text" },
     { token: t.append(p => p.entity.eval!.script), type: "Text" },

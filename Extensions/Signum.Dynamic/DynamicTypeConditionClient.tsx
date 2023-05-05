@@ -9,7 +9,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Entity } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
-import * as DynamicClientOptions from './DynamicClientOptions'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Dynamic.Types';
 
 export function start(options: { routes: RouteObject[] }) {
@@ -21,12 +21,12 @@ export function start(options: { routes: RouteObject[] }) {
   }))
 
   Constructor.registerConstructor(DynamicTypeConditionEntity, () => DynamicTypeConditionEntity.New({ eval: DynamicTypeConditionEval.New() }));
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
+  EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeConditionEntity }} />);
+  EvalClient.Options.onGetDynamicLineForType.push((ctx, type) => <SearchValueLine ctx={ctx} findOptions={{
     queryName: DynamicTypeConditionEntity,
     filterOptions: [{ token: DynamicTypeConditionEntity.token(a => a.entityType!.cleanName), value: type}]
   }} />);
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicTypeConditionEntity, t => [
     { token: t.append(p => p.entity.entityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.symbolName.name), type: "Text" },
     { token: t.append(p => p.entity.eval!.script), type: "Code" },

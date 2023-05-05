@@ -13,13 +13,12 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import * as QuickLinks from '@framework/QuickLinks'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
-import * as DynamicClientOptions from './DynamicClientOptions'
+import * as EvalClient from '../Signum.Eval/EvalClient'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { DynamicTypeEntity, DynamicTypeMessage, DynamicTypeOperation } from './Signum.Dynamic.Types';
 import { DynamicMixinConnectionEntity } from './Signum.Dynamic.Mixins';
 import { DynamicRenameEntity, DynamicSqlMigrationEntity } from './Signum.Dynamic.SqlMigrations';
 import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval';
-import * as EvalClient from '../Signum.Eval/EvalClient';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(DynamicTypeEntity, w => import('./Type/DynamicType')));
@@ -63,8 +62,8 @@ export function start(options: { routes: RouteObject[] }) {
       iconColor: "purple",
     }));
 
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
-  DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
+  EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
+  EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);
   EvalClient.Options.getDynaicMigrationsStep = () =>
     <>
       <h3>{DynamicSqlMigrationEntity.nicePluralName()}</h3>
@@ -73,22 +72,22 @@ export function start(options: { routes: RouteObject[] }) {
       <SearchControl findOptions={{ queryName: DynamicRenameEntity }} />
     </>;
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicTypeEntity, t => [
     { token: t.append(p => p.typeName), type: "Text" },
     { token: t.append(p => p.entity.typeDefinition), type: "JSon" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicMixinConnectionEntity, t => [
     { token: t.append(p => p.mixinName), type: "Text" },
     { token: t.append(p => p.entity.entityType.entity!.cleanName), type: "Text" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicSqlMigrationEntity, t => [
     { token: t.append(p => p.comment), type: "Text" },
     { token: t.append(p => p.entity.script), type: "Code" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(DynamicRenameEntity, t => [
     { token: t.append(p => p.oldName), type: "Text" },
     { token: t.append(p => p.newName), type: "Text" },
     { token: t.append(p => p.replacementKey), type: "Text" },

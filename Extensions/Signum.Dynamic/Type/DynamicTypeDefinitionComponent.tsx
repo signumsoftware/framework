@@ -10,7 +10,7 @@ import { EntityControlMessage, toLite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal';
 import MessageModal from '@framework/Modals/MessageModal'
 import * as DynamicTypeClient from '../DynamicTypeClient';
-import * as DynamicClientOptions from '../DynamicClientOptions';
+import * as EvalClient from '../../Signum.Eval/EvalClient'
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
@@ -135,7 +135,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
 
   function renderOthers() {
     var ctx = new StyleContext(undefined, { labelColumns: 3 });
-    return React.createElement("div", {}, ...DynamicClientOptions.Options.onGetDynamicLineForType.map(f => f(ctx, p.dynamicType.typeName!)));
+    return React.createElement("div", {}, ...EvalClient.Options.onGetDynamicLineForType.map(f => f(ctx, p.dynamicType.typeName!)));
   }
   const def = p.definition;
     const primaryKey = def.primaryKey!;

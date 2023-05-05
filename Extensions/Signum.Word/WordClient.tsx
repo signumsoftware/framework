@@ -21,12 +21,12 @@ import WordSearchMenu from "./WordSearchMenu";
 import WordEntityMenu from "./WordEntityMenu";
 import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { Dropdown } from 'react-bootstrap';
-import * as DynamicClientOptions from '../Signum.Dynamic/DynamicClientOptions';
+import * as EvalClient from '../Signum.Eval/EvalClient';
 import { SearchControlLoaded } from '@framework/Search';
 
 export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
   register(QueryModel, {
     createFromTemplate: wt => Navigator.view(QueryModel.New({ queryKey: wt.query!.key })),
     createFromEntities: (wt, lites) => {
