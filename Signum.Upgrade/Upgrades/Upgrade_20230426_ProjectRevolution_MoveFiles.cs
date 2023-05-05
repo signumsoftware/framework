@@ -64,6 +64,18 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         var starterCS = File.ReadAllText(uctx.AbsolutePathSouthwind("Southwind.Logic/Starter.cs"));
         var reactCSPROJ = File.ReadAllText(uctx.AbsolutePathSouthwind("Southwind.React/Southwind.React.csproj"));
 
+
+
+        var references = new[] {
+            uctx.TryGetCodeFile("Southwind.Entities/Southwind.Entities.csproj"),
+            uctx.TryGetCodeFile("Southwind.Logic/Southwind.Logic.csproj"),
+            uctx.TryGetCodeFile("Southwind.React/Southwind.React.csproj")
+        }.NotNull()
+        .Select(a => a.Content.Lines())
+        .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum.TSGenerator"))
+        .Distinct()
+        .ToList();
+
         uctx.CreateCodeFile("Southwind/Southwind.csproj", $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
             	<PropertyGroup>
@@ -83,11 +95,11 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             	</PropertyGroup>
 
             	<ItemGroup>
-            	  <Compile Remove="CodeGen\**" />FROM_CS DynamicLogic
-            	  <Content Remove="CodeGen\**" />FROM_CS DynamicLogic
-            	  <EmbeddedResource Remove="CodeGen\**" />FROM_CS DynamicLogic
-            	  <None Remove="CodeGen\**" />FROM_CS DynamicLogic
-            	  <TypeScriptCompile Remove="CodeGen\**" />FROM_CS DynamicLogic
+            	  <Compile Remove="CodeGen\**" />FROM_CS CompileDynamicCode
+            	  <Content Remove="CodeGen\**" />FROM_CS CompileDynamicCode
+            	  <EmbeddedResource Remove="CodeGen\**" />FROM_CS CompileDynamicCode
+            	  <None Remove="CodeGen\**" />FROM_CS CompileDynamicCode
+            	  <TypeScriptCompile Remove="CodeGen\**" />FROM_CS CompileDynamicCode
             	  <TypeScriptCompile Remove="node_modules\**" />
             	</ItemGroup>
 
@@ -96,11 +108,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             			<PrivateAssets>all</PrivateAssets>
             			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             		</PackageReference>
-            		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-            		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
-            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta10" />
-            		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />FROM_CSPROJ Swashbuckle
-            		<PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.11.0" />FROM_CSPROJ SciSharp
+            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
+            {references}
             	</ItemGroup>
 
             	<ItemGroup>
@@ -110,11 +119,11 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Authorization\Signum.Authorization.csproj" />FROM_CS AuthLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Caching\Signum.Caching.csproj" />FROM_CS CacheLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Chart\Signum.Chart.csproj" />FROM_CS ChartLogic
-            		<ProjectReference Include="..\Framework\Extensions\Signum.CodeMirror\Signum.Codemirror.csproj" />FROM_CS EmailLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.CodeMirror\Signum.CodeMirror.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.ConcurrentUser\Signum.ConcurrentUser.csproj" />FROM_CS ConcurrentUserLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Dashboard\Signum.Dashboard.csproj" />FROM_CS DashboardLogic.Start
             		<ProjectReference Include="..\Framework\Extensions\Signum.DiffLog\Signum.DiffLog.csproj" />FROM_CS DiffLogLogic.Start
-            		<ProjectReference Include="..\Framework\Extensions\Signum.Dynamic\Signum.Dynamic.csproj" />FROM_CS DynamicLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.Dynamic\Signum.Dynamic.csproj" />FROM_CS CompileDynamicCode
             		<ProjectReference Include="..\Framework\Extensions\Signum.Eval\Signum.Eval.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Excel\Signum.Excel.csproj" />FROM_CS ExcelLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Files\Signum.Files.csproj" />FROM_CS FileLogic
@@ -164,13 +173,6 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 var dependency = l.After("FROM_CS");
 
                 return starterCS.Contains(dependency) ? l.Before("FROM_CS") : null;
-            }
-
-            if (l.Contains("FROM_CSPROJ"))
-            {
-                var dependency = l.After("FROM_CSPROJ");
-
-                return reactCSPROJ.Contains(dependency) ? l.Before("FROM_CSPROJ") : null;
             }
 
             return l;
@@ -269,7 +271,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             {
                 uctx.MoveFile(a.FilePath, newFilePath);
                 if (File.Exists(Path.ChangeExtension(a.FilePath, ".ts")))
-                    uctx.MoveFile(Path.ChangeExtension(a.FilePath, ".t4s"), Path.ChangeExtension(a.FilePath, ".ts"));
+                    uctx.MoveFile(Path.ChangeExtension(a.FilePath, ".ts"), Path.ChangeExtension(newFilePath, ".ts"));
             }
         });
 
@@ -369,9 +371,32 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 lines.Add(uctx.ReplaceSouthwind("/Southwind/web.config/**"));
                 lines.Add(uctx.ReplaceSouthwind("/Southwind/ts_out/**"));
                 lines.Add(uctx.ReplaceSouthwind("/Southwind/TensorFlowModels/**"));
+                lines.Add("Framework.tar");
 
                 return true;
             });
+        });
+
+        uctx.ChangeCodeFile("Southwind/Dockerfile", file =>
+        {
+            file.ReplaceLine(a => a.Contains("FROM mcr.microsoft.com/dotnet/aspnet"), 
+                "FROM mcr.microsoft.com/dotnet/aspnet:7.0-bullseye-slim AS base");
+            file.ReplaceLine(a => a.Contains("FROM mcr.microsoft.com/dotnet/sdk"), 
+                "FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim AS build");
+
+            file.ReplaceBetween(
+                new ReplaceBetweenOption(a => a.StartsWith("COPY")),
+                new ReplaceBetweenOption(a => a.StartsWith("COPY")) { LastIndex = true },
+                uctx.ReplaceSouthwind("""
+                COPY ["Framework.tar", "/"]
+                RUN tar -xvf /Framework.tar
+
+                COPY ["Southwind/Southwind.csproj", "Southwind/"]
+                COPY ["Southwind/package.json", "Southwind/"]
+                COPY ["package.json", ""]
+                COPY ["yarn.lock", ""]
+                """));
+
         });
     }
     

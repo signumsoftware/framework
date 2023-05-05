@@ -29,13 +29,17 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
 
         uctx.ForeachCodeFile(@"*.cs", file =>
         {
-            if(file.FilePath.StartsWith(uctx.ApplicationName  + "/"))
+            if (file.FilePath.EndsWith("GlobalUsings.cs"))
+                return;
+
+            if(file.FilePath.StartsWith(uctx.ApplicationName  + "\\"))
                 file.Replace(new Regex(@"namespace (?<namespace>[^;]*)"), m => $"namespace {Path.GetDirectoryName(file.FilePath)!.Replace("\\", ".")}");
 
             file.Replace(new Regex(@"(?<extension>[\w]*\.Entities\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Entities", ""));
             file.Replace(new Regex(@"(?<extension>[\w]*\.Engine\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Engine", ""));
             file.Replace(new Regex(@"(?<extension>[\w]*\.Logic\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Logic", ""));
             file.Replace(new Regex(@"(?<extension>[\w]*\.React\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".React", ""));
+            file.Replace(new Regex(uctx.ReplaceSouthwind(@"Southwind\.(Entities|Logic|React)")), uctx.ReplaceSouthwind("Southwind"));
 
             file.Replace("Security.EncodePassword(", "PasswordEncoding.EncodePassword(");
             file.Replace("DynamicCode.AssemblyTypes", "EvalLogic.AssemblyTypes");           
@@ -44,6 +48,8 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace("DynamicLogic.Start(sb, withCodeGen: true);", "EvalLogic.Start(sb);\nDynamicLogic.Start(sb);");
             file.Replace("DynamicLogic.Start(sb, withCodeGen: false);", "EvalLogic.Start(sb);");
             file.Replace("TranslatedInstanceLogic.TranslatedField", "PropertyRouteTranslationLogic.TranslatedField");
+            file.Replace("using Signum.Validation", "using Signum.Entities.Validation");
+            file.Replace("using Signum.Maps", "using Signum.Engine.Maps");
         });
 
         uctx.ForeachCodeFile(@"*.cshtml", file =>
@@ -52,6 +58,7 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace(new Regex(@"(?<extension>[\w]*\.Engine\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Engine", ""));
             file.Replace(new Regex(@"(?<extension>[\w]*\.Logic\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Logic", ""));
             file.Replace(new Regex(@"(?<extension>[\w]*\.React\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".React", ""));
+            file.Replace(new Regex(uctx.ReplaceSouthwind(@"Southwind\.(Entities|Logic|React)")), uctx.ReplaceSouthwind("Southwind"));
         });
 
         uctx.ForeachCodeFile(@"*.xml", "Southwind.Terminal", file =>
