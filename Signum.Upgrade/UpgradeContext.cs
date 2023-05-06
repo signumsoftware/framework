@@ -66,8 +66,8 @@ public class UpgradeContext
 
     public void DeleteFile(string fileName, WarningLevel showWarning = WarningLevel.Error)
     {
-        fileName = this.AbsolutePathSouthwind(fileName);
-        if (!File.Exists(fileName))
+        var fullFileName = this.AbsolutePathSouthwind(fileName);
+        if (!File.Exists(fullFileName))
         {
             if (showWarning != WarningLevel.None)
             {
@@ -81,7 +81,8 @@ public class UpgradeContext
         }
         else
         {
-            File.Delete(fileName);
+            File.Delete(fullFileName);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "Deleted " + fileName);
         }
     }
 

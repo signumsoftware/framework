@@ -13,16 +13,24 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var startup = uctx.TryGetCodeFile($"{uctx.ApplicationName}/startup.cs");
+        var startup = uctx.TryGetCodeFile($"{uctx.ApplicationName}/Startup.cs");
 
         if (startup == null)
             throw new ApplicationException("startup.cs not found!!");
 
-        bool hasSwagger = false;
-        if (startup.Content.Contains("services.AddSwaggerGen(c =>"))
+        uctx.ChangeCodeFile($"{uctx.ApplicationName}/Program.cs", program =>
         {
-            var sweagerContent = startup.Content.Before("public class Startup").Replace("Signum.React.Filters.", "") + "\n" +
-                """
+            var secret = startup.Content.Between("() => Starter.Configuration.Value.AuthTokens, \"", "\");");
+            var culture = startup.Content.Between("DefaultCulture = CultureInfo.GetCultureInfo(\"", "\");");
+
+            var servicesBody = startup.GetMethodBody(l => l.Contains("ConfigureServices(IServiceCollection services)"));
+
+            if(servicesBody.Contains("services.AddSwaggerGen(c =>"))
+            {
+                var swagger = startup.Content.Between("services.AddSwaggerGen(c =>", @"}); //Swagger Services");
+
+                var sweagerContent = startup.Content.Before("public class Startup").Replace("Signum.React.Filters.", "") + "\n" +
+             """
                 internal static class SwaggerConfig
                 {
                     internal static void ConfigureSwaggerService(WebApplicationBuilder builder)
@@ -30,34 +38,33 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                         //https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-2.1&tabs=visual-studio%2Cvisual-studio-xml            
                         builder.Services.AddSwaggerGen(c =>
                 """ +
-                startup.Content.After("services.AddSwaggerGen(c =>").Before(@"}); //Swagger Services") +
-                @"}); //Swagger Services" + "\n" +
-                """
+             startup.Content.After("services.AddSwaggerGen(c =>").Before(@"}); //Swagger Services") +
+             @"}); //Swagger Services" + "\n" +
+             """
                     }
                 }
             
                 """;
 
-            uctx.CreateCodeFile($"{uctx.ApplicationName}/SwaggerConfig.cs", sweagerContent);
+                uctx.CreateCodeFile($"{uctx.ApplicationName}/SwaggerConfig.cs", sweagerContent);
 
-            hasSwagger = true;
-        }
+                servicesBody = 
+                    servicesBody.Before("services.AddSwaggerGen(c =>") +
+                    "        SwaggerConfig.ConfigureSwaggerService(builder); \n\n" +
+                    servicesBody.After("}); //Swagger Services");
+            }
 
-        uctx.ChangeCodeFile($"{uctx.ApplicationName}/Program.cs", program =>
-        {
-            var secret = startup.Content.Between("() => Starter.Configuration.Value.AuthTokens, \"", "\");");
-            var culture = startup.Content.Between("DefaultCulture = CultureInfo.GetCultureInfo(\"", "\");");
+
+            var configure = startup.GetMethodBody(a => a.Contains("Configure(IApplicationBuilder app,"));
+
 
             var programContent = """
                     var builder = WebApplication.CreateBuilder(args);
             """ +
-                startup.GetMethodBody(l => l.Contains("ConfigureServices(IServiceCollection services)"))
-                .Replace("services", "builder.Services") +
-
-                "\n" +
-                (hasSwagger ? "        SwaggerConfig.ConfigureSwaggerService(builder); \n\n" : null) +
-                "        var app = builder.Build(); \n\n" +
-                startup.GetMethodBody(a => a.Contains("Configure(IApplicationBuilder app,"))
+                servicesBody.Replace("services", "builder.Services") +
+                "\r\n" +
+                "        var app = builder.Build(); \r\n\r\n" +
+               configure
                         .Replace("Configuration.", "app.Configuration.")
                         .Replace("lifetime", "app.Lifetime")
                         .Replace("DynamicCode.CodeGenDirectory = env.", "DynamicLogic.CodeGenDirectory = app.Environment.")
@@ -72,7 +79,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                         """) +
                 "\n" +
                 "        app.Run(); \n" +
-                "    }\n" +
+                "    }\n\n" +
                 startup.GetLinesBetween(
                     new(l => l.Contains("class NoAPIContraint : IRouteConstraint"), 0),
                     new(l => l.Contains("}"), 0) { SameIdentation = true}) + "\n";
@@ -87,7 +94,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             program.ReplaceBetween(
                 new(l => l.Contains(@"log.Switch(""WebStart"");"), 0),
-                new(l => l.Contains(@"WebStart(app, env, lifetime"), 0), "");
+                new(l => l.Contains(@"WebStart(app, env"), 0), "");
 
             program.ReplaceBetween(
                 new(a => a.Contains("app.UseEndpoints(endpoints =>")),
@@ -98,7 +105,6 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Starter.cs", starter =>
         {
-
             starter.ReplaceLine(l => l.Contains("public static void Start("),
                 @"public static void Start(string connectionString, bool isPostgres, string? azureStorageConnectionString, string? broadcastSecret, string? broadcastUrls, WebServerBuilder? wsb, bool includeDynamic = true)");
 
@@ -123,7 +129,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             """);
 
-            starter.ReplaceLine(l => l.Contains("DynamicLogic.Start("), "EvalLogic.Start(sb);");
+            //starter.ReplaceLine(l => l.Contains("DynamicLogic.Start("), "EvalLogic.Start(sb);");
 
             starter.InsertBeforeFirstLine(l => l.Contains(@"// Extensions modules"), "PermissionLogic.Start(sb);");
 
@@ -181,7 +187,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
         uctx.ChangeCodeFile("Southwind/Layout.tsx", layout =>
         {
             layout.Replace("@extensions/Signum.Translation/CultureDropdown", "@framework/Basics/CultureDropdown");
-            layout.RemoveAllLines(a => a.Contains("import OmniboxAutoComplete"));
+            layout.RemoveAllLines(a => a.Contains("Signum.Omnibox/OmniboxAutocomplete"));
 
             layout.InsertAfterFirstLine(a => a.Contains("const ToolbarRenderer"),
                 "const OmniboxAutocomplete = React.lazy(() => import('@extensions/Signum.Omnibox/OmniboxAutocomplete'));");

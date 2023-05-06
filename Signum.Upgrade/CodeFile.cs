@@ -209,7 +209,7 @@ public class CodeFile
                 return false;
             }
 
-            var indent = GetIndent(lines[from]);
+            var indent = GetIndent(lines[from - fromLine.Delta]);
             var to = toLine.FindEndIndex(lines, from, indent);
             if (to == -1)
             {
@@ -244,7 +244,7 @@ public class CodeFile
                 return false;
             }
 
-            var indent = GetIndent(lines[from]);
+            var indent = GetIndent(lines[from - fromLine.Delta]);
             var to = toLine.FindEndIndex(lines, from, indent);
             if (to == -1)
             {
@@ -290,7 +290,7 @@ public class CodeFile
                 return false;
             }
 
-            var indent = GetIndent(lines[from]);
+            var indent = GetIndent(lines[from - fromLine.Delta]);
 
             var to = toLine.FindEndIndex(lines, from, indent);
             if (to == -1)
@@ -554,12 +554,12 @@ public class CodeFile
 
         var prjName = prjRegex.Match(projectFile).Groups["project"].Value;
 
-        var projectId = Guid.NewGuid().ToString();
+        var projectId = Guid.NewGuid().ToString().ToUpper();
 
-        Guid projectTypeId = Guid.Parse("9A19103F-16F7-4668-BE54-9A1E7A4F7556");
+        var projectTypeId = Guid.Parse("9A19103F-16F7-4668-BE54-9A1E7A4F7556").ToString().ToUpper();
 
         InsertAfterLastLine(l => l.StartsWith("EndProject"), $$"""
-                Project("{{{projectTypeId.ToString()}}}") = "{{prjName}}", "{{projectFile}}", "{{{projectId}}}"
+                Project("{{{projectTypeId}}}") = "{{prjName}}", "{{projectFile}}", "{{{projectId}}}"
                 EndProject
                 """);
         var configs = GetLinesBetweenExcluded(
@@ -587,10 +587,10 @@ public class CodeFile
     {
         var folderId = Guid.NewGuid().ToString().ToUpper();
 
-        Guid folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8");
+        var folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8").ToString().ToUpper();
 
         InsertAfterLastLine(l => l.StartsWith("EndProject"), $$"""
-                Project("{{{folderTypeId.ToString()}}}") = "{{folderName}}", "{{folderName}}", "{{{folderId}}}"
+                Project("{{{folderTypeId}}}") = "{{folderName}}", "{{folderName}}", "{{{folderId}}}"
                 EndProject
                 """);
     }
@@ -599,7 +599,7 @@ public class CodeFile
     {
         var folderId = Guid.NewGuid().ToString().ToUpper();
 
-        Guid folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8");
+        var folderTypeId = Guid.Parse("2150E333-8FDC-42A3-9474-1A3956D46DE8").ToString().ToUpper();
 
         ReplaceBetweenExcluded(
             l => l.StartsWith("Project") && l.Contains($"\"{folderName}\""),

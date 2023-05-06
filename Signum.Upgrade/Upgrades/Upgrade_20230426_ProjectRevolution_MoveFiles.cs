@@ -71,7 +71,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             uctx.TryGetCodeFile("Southwind.Logic/Southwind.Logic.csproj"),
             uctx.TryGetCodeFile("Southwind.React/Southwind.React.csproj")
         }.NotNull()
-        .Select(a => a.Content.Lines())
+        .SelectMany(a => a.Content.Lines())
         .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum.TSGenerator"))
         .Distinct()
         .ToList();
@@ -109,7 +109,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             		</PackageReference>
             		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
-            {references}
+            {references.ToString("\r\n")}
             	</ItemGroup>
 
             	<ItemGroup>
@@ -170,7 +170,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         {
             if (l.Contains("FROM_CS"))
             {
-                var dependency = l.After("FROM_CS");
+                var dependency = l.After("FROM_CS").Trim();
 
                 return starterCS.Contains(dependency) ? l.Before("FROM_CS") : null;
             }
@@ -407,6 +407,12 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         {
             a.InsertBeforeFirstLine(a => a.Contains("docker build"),
                 """Get-ChildItem -Path "Framework" -Recurse -Include "package.json","*.csproj" | Resolve-Path -Relative | tar -cf Framework.tar -T -""");
+        });
+
+        uctx.ForeachCodeFile("Southwind/Properties/Attributes.cs", a =>
+        {
+            a.InsertAfterFirstLine(a => a.Contains("DefaultAssemblyCulture"),
+                "[assembly: AssemblySchemaName(\"dbo\")]");
         });
     }
     

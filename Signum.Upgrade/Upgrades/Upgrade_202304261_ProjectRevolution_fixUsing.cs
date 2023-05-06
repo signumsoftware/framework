@@ -84,29 +84,29 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
                 uctx.ReplaceSouthwind("Extensions\\Signum.Selenium\\Signum.Selenium"));
         });
 
-        uctx.ForeachCodeFile(@"appsettings.json, appsettings.*.json", new[] { "Southwind.Text.Environment", "Southwind.Terminal" }, file =>
+        uctx.ForeachCodeFile(@"appsettings.json, appsettings.*.json", new[] { "Southwind.Test.Environment", "Southwind.Terminal" }, file =>
         {
             uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
         });
 
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/Southwind.Test.Environment.csproj", file =>
         {
-            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+            file.Replace("appsettings", "settings");
         });
 
         uctx.ChangeCodeFile(@"Southwind.Terminal/Southwind.Terminal.csproj", file =>
         {
-            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+            file.Replace("appsettings", "settings");
         });
 
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
         {
-            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+            file.Replace("appsettings", "settings");
         });
 
         uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", file =>
         {
-            uctx.MoveFile(file.FilePath, file.FilePath.Replace("appsettings", "settings"));
+            file.Replace("appsettings", "settings");
 
             file.Replace(@".GetValue<string>(""BroadcastUrls"")", ".GetValue<string>(\"BroadcastUrls\"), wsb: null");
             file.RemoveAllLines(l => l.Contains("{\"CT\", TranslationLogic.CopyTranslations}"));
