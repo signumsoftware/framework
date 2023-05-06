@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { OmniboxResult, OmniboxMatch, OmniboxProvider } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import { Urls } from './HelpClient';
 
 export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmniboxResult>

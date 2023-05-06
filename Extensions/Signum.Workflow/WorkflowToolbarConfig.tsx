@@ -1,5 +1,6 @@
 import { Location } from 'react-router'
-import { IconColor, ToolbarConfig, ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
+import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
+import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
 import * as WorkflowClient from './WorkflowClient'
 import { WorkflowEntity, WorkflowMainEntityStrategy } from './Signum.Workflow'
 import { is } from '@framework/Signum.Entities'

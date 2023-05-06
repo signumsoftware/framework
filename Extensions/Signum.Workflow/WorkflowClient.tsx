@@ -4,7 +4,7 @@ import { Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
-import * as DynamicClientOptions from '../Signum.Dynamic/DynamicClientOptions';
+import * as EvalClient from '../Signum.Eval/EvalClient';
 import {
   EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
 } from '@framework/Signum.Entities'
@@ -71,45 +71,45 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
     { path: "/workflow/activityMonitor/:workflowId", element: <ImportComponent onImport={() => import("./ActivityMonitor/WorkflowActivityMonitorPage")} /> },
   );
 
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
-  DynamicClientOptions.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowLaneEntity, filterOptions: [{ token: WorkflowLaneEntity.token(e => e.entity.actorsEval), operation: "DistinctTo", value: null }] });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowConditionEntity });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowScriptEntity });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActivityEntity, filterOptions: [{ token: WorkflowActivityEntity.token(e => e.entity.subWorkflow), operation: "DistinctTo", value: null }] });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowActionEntity });
+  EvalClient.Options.checkEvalFindOptions.push({ queryName: WorkflowTimerConditionEntity });
 
   Navigator.addSettings(new EntitySettings(TimeSpanEmbedded, e => import('./Workflow/TimeSpan')));
   Constructor.registerConstructor(TimeSpanEmbedded, () => TimeSpanEmbedded.New({ days: 0, hours: 0, minutes: 0, seconds: 0 }));
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowActivityEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.entity.viewName), type: "Text" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowActionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowScriptEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
-  DynamicClientOptions.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
+  EvalClient.Options.registerDynamicPanelSearch(WorkflowTimerConditionEntity, t => [
     { token: t.append(p => p.name), type: "Text" },
     { token: t.append(p => p.mainEntityType.cleanName), type: "Text" },
     { token: t.append(p => p.entity.eval.script), type: "Code" },
