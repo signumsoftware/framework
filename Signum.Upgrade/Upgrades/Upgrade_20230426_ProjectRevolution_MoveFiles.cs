@@ -129,6 +129,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Files\Signum.Files.csproj" />FROM_CS FileLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Help\Signum.Help.csproj" />FROM_CS HelpLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.HtmlEditor\Signum.HtmlEditor.csproj" />FROM_CS EmailLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.Isolation\Signum.Isolation.csproj" />FROM_CS CompileDynamicCode
             		<ProjectReference Include="..\Framework\Extensions\Signum.MachineLearning\Signum.MachineLearning.csproj" />FROM_CS PredictorLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing.MicrosoftGraph\Signum.Mailing.MicrosoftGraph.csproj" />FROM_CS activeDirectoryIntegration: true
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing.Package\Signum.Mailing.Package.csproj" />FROM_CS EmailLogic
@@ -409,7 +410,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 """Get-ChildItem -Path "Framework" -Recurse -Include "package.json","*.csproj" | Resolve-Path -Relative | tar -cf Framework.tar -T -""");
         });
 
-        uctx.ForeachCodeFile("Southwind/Properties/Attributes.cs", a =>
+        uctx.ChangeCodeFile("Southwind/Properties/Attributes.cs", a =>
         {
             a.InsertAfterFirstLine(a => a.Contains("DefaultAssemblyCulture"),
                 "[assembly: AssemblySchemaName(\"dbo\")]");

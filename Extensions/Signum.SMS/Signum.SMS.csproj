@@ -21,7 +21,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
-		<ProjectReference Include="..\Signum.Isolation\Signum.Isolation.csproj" />
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />

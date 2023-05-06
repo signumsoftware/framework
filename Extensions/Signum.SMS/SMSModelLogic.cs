@@ -1,5 +1,4 @@
 using Signum.Engine.Sync;
-using Signum.Isolation;
 using System.Globalization;
 
 namespace Signum.SMS;
@@ -232,7 +231,7 @@ public static class SMSModelLogic
         if (smsModel.UntypedEntity == null)
             throw new InvalidOperationException("Entity property not set on SMSModel");
 
-        using (IsolationEntity.Override((smsModel.UntypedEntity as Entity)?.TryIsolation()))
+        using (ExecutionMode.SetIsolation(smsModel.UntypedEntity))
         {
             var smsModelEntity = ToSMSModelEntity(smsModel.GetType());
             var template = GetDefaultTemplate(smsModelEntity);

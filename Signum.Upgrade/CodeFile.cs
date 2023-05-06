@@ -603,13 +603,13 @@ public class CodeFile
 
         ReplaceBetweenExcluded(
             l => l.StartsWith("Project") && l.Contains($"\"{folderName}\""),
-            l => l.Contains("EndProject"), text =>
+            l => l.Trim() == "EndProject", text =>
             {
                 if (text.Trim().IsEmpty())
                     return
                     "\tProjectSection(SolutionItems) = preProject\r\n" +
                     "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
-                    "\tEndProjectSection\r\n";
+                    "\tEndProjectSection";
                 else
                     return text.Replace("\tEndProjectSection", "\t\t" + relativeFilePath + " = " + relativeFilePath + "\r\n" +
                     "\tEndProjectSection");
@@ -617,7 +617,7 @@ public class CodeFile
     }
 }
 
-public struct ReplaceBetweenOption
+public class ReplaceBetweenOption
 {
     public Expression<Predicate<string>> Condition;
     public int Delta;
@@ -654,7 +654,7 @@ public struct ReplaceBetweenOption
 
         var to = !LastIndex ?
         lines.FindIndex(startIndex, cond2) :
-        lines.FindLastIndex(startIndex, cond2);
+        lines.FindLastIndex(cond2);
 
         if (to == -1)
             return to;
