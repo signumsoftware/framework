@@ -136,7 +136,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing\Signum.Mailing.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Map\Signum.Map.csproj" />FROM_CS MapLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Migrations\Signum.Migrations.csproj" />FROM_CS MigrationLogic
-            		<ProjectReference Include="..\Framework\Extensions\Signum.Notes\Signum.Notes.csproj" />FROM_CS NotesLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.Notes\Signum.Notes.csproj" />FROM_CS NoteLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Omnibox\Signum.Omnibox.csproj" />FROM_CS OmniboxLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Processes\Signum.Processes.csproj" />FROM_CS ProcessLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Profiler\Signum.Profiler.csproj" />FROM_CS ProfilerLogic

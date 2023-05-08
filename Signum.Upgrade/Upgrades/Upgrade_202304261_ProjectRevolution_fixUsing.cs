@@ -49,9 +49,10 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace("DynamicCode.AssemblyTypes", "EvalLogic.AssemblyTypes");           
             file.Replace("DynamicCode.Namespaces", "EvalLogic.Namespaces");            
             file.Replace("DynamicCode.AddFullAssembly", "EvalLogic.AddFullAssembly");            
-            file.Replace("DynamicLogic.Start(sb, withCodeGen: true);", "EvalLogic.Start(sb);\nDynamicLogic.Start(sb);");
+            file.Replace("DynamicLogic.Start(sb, withCodeGen: true);", "DynamicLogic.Start(sb);");
             file.Replace("DynamicLogic.Start(sb, withCodeGen: false);", "EvalLogic.Start(sb);");
             file.Replace("TranslatedInstanceLogic.TranslatedField", "PropertyRouteTranslationLogic.TranslatedField");
+            file.Replace("using Signum.Services", "using Signum.Security");
             file.Replace("using Signum.Validation", "using Signum.Entities.Validation");
             file.Replace("using Signum.Maps", "using Signum.Engine.Maps");
             file.Replace("using Signum.ActiveDirectory", "using Signum.Authorization.ActiveDirectory");
