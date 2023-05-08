@@ -3,6 +3,8 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Signum.Upgrade.Upgrades;
@@ -106,6 +108,8 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             program.RemoveAllLines(a => a.Contains("ConcurrentUserServer.MapConcurrentUserHub"));
         });
 
+        var hasDynamic = false;
+
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Starter.cs", starter =>
         {
             starter.ReplaceLine(l => l.Contains("public static void Start("),
@@ -182,8 +186,22 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             """);
 
+            starter.InsertAfterFirstLine(a => a.Contains("sb.Schema.Settings.FieldAttributes((EmailSenderConfigurationEntity"), """
+                sb.Schema.Settings.FieldAttributes((EmailSenderConfigurationEntity em) => em.Service).Replace(new ImplementedByAttribute(typeof(SmtpEmailServiceEntity), typeof(MicrosoftGraphEmailServiceEntity) /*Remove?*/, typeof(ExchangeWebServiceEmailServiceEntity) /*Remove?*/));
+                """);
+
             starter.ReplaceLine(l => l.Contains("sb.Schema.Settings.FieldAttributes((DashboardEntity a) => a.Parts[0].Content)"), "");
+
+            hasDynamic = starter.Content.Contains("DynamicLogic.CompileDynamicCode");
         });
+
+        if (hasDynamic)
+        {
+            uctx.ChangeCodeFile("Southwind.Terminal/Program.cs", program =>
+            {
+                program.InsertBeforeFirstLine(a => a.Contains("Starter.Start("), uctx.ReplaceSouthwind(@"DynamicLogic.CodeGenDirectory = ""../../../../Southwind/CodeGen"";"));
+            });
+        }
 
         uctx.DeleteFile("Southwind/Startup.cs");
 
