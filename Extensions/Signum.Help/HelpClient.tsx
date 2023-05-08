@@ -8,9 +8,11 @@ import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
 import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Help';
 import { QueryString } from '@framework/QueryString';
+import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import HelpOmniboxProvider from './HelpOmniboxProvider';
 
 export function start(options: { routes: RouteObject[], markdownToHtml: (txt: string) => string }) {
-
+  OmniboxClient.registerProvider(new HelpOmniboxProvider());
   Options.markdownToHml = options.markdownToHtml;
   options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
   options.routes.push({ path: "/help/namespace/:namespace*", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
