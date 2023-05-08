@@ -14,7 +14,7 @@ public static class AlertsServer
 
     public static IHubContext<AlertsHub, IAlertsClient> AlertsHub { get; private set; }
 
-    public static void MapAlertsHub(WebApplication app)
+    public static void Start(WebApplication app)
     {
         app.MapHub<AlertsHub>("/api/alertshub");
         Connections = new ConnectionMapping<Lite<IUserEntity>>();
