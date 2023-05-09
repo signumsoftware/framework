@@ -8,16 +8,13 @@ import { ImportComponent } from '@framework/ImportComponent'
 
 export function start(options: { routes: RouteObject[], withCodeGen: boolean }) {
 
-  options.routes.push({ path: "/dynamic/panel", element: <ImportComponent onImport={() => import("./DynamicPanelCodeGenPage")} /> });
+  var route = options.routes.singleOrNull(a => a.path == "/dynamic/panel");
+  if (route == null)
+    throw new Error("DynamicClient.start should be called after EvalClient.start");
 
-
-  Options.withCodeGen = options.withCodeGen;
-
+  route.element = <ImportComponent onImport={() => import("./DynamicPanelCodeGenPage")} />;
 }
 
-export namespace Options {
-  export let withCodeGen: boolean;
-}
 
 export interface CompilationError {
   fileName: string;

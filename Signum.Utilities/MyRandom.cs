@@ -1,5 +1,6 @@
 
 using Signum.Utilities.DataStructures;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Signum.Utilities;
 
@@ -114,6 +115,11 @@ public static class RandomExtensions
     public static T NextElement<T>(this Random r, IList<T> elements)
     {
         return elements[r.Next(elements.Count)];
+    }
+
+    public static IEnumerable<T> NextElements<T>(this Random r, IList<T> elements, int numElements)
+    {
+        return elements.OrderBy(a => r.Next()).Take(numElements);
     }
 
     public static decimal NextDecimal(this Random r, decimal min, decimal max)

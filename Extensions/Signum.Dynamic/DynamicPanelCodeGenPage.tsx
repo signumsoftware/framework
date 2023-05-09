@@ -21,7 +21,7 @@ import { Options } from '../Signum.Eval/EvalClient'
 
 
 
-type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
+type DynamicPanelTab = "search" | "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
 export default function DynamicPanelPage() {
   const location = useLocation();

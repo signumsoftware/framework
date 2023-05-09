@@ -58,11 +58,17 @@ import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import MessageModal from '@framework/Modals/MessageModal';
 import { ExecuteSymbol } from '@framework/Signum.Operations';
 import { IUserEntity } from '@framework/Signum.Security';
+import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
+import WorkflowToolbarConfig from './WorkflowToolbarConfig';
+import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
 
 export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
 
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(WorkflowEntity);
+
+  ToolbarClient.registerConfig(new WorkflowToolbarConfig());
+  ToolbarClient.registerConfig(new WorkflowToolbarMenuConfig());
 
   options.routes.push(
     { path: "/workflow/activity/:caseActivityId", element: <ImportComponent onImport={() => import("./Case/CaseFramePage")} /> },

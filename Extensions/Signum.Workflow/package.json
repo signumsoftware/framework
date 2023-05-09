@@ -9,5 +9,7 @@
   "resolutions": {
   },
   "dependencies": {
+    "diagram-js-minimap": "2.0.4",
+    "bpmn-js": "7.5.0"
   }
 }
