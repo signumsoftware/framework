@@ -263,6 +263,13 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
         });
 
+        uctx.ForeachCodeFile("*.xml", "Southwind.Entities", a =>
+        {
+            var fileName = a.FilePath.Replace(".Entities", "");
+
+            uctx.MoveFile(a.FilePath, fileName);
+        });
+
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.Logic", "Southwind", "*.*");
 
