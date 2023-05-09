@@ -84,6 +84,8 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                     new(l => l.Contains("class NoAPIContraint : IRouteConstraint"), 0),
                     new(l => l.Contains("}"), 0) { SameIdentation = true}) + "\n";
 
+            program.RemoveAllLines(a => a.Contains("AddApplicationPart"));
+
             program.ReplaceBetween(
                 new(l => l.Contains("public class Program"), 4),
                 new(l => l == "}", -1), programContent);
