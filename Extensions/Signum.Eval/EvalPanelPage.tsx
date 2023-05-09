@@ -23,7 +23,7 @@ import { QueryString } from '@framework/QueryString'
 import { EvalPanelMessage, EvalPanelPermission } from './Signum.Eval'
 
 
-type DynamicPanelTab = "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
+type DynamicPanelTab = "search" | "checkEvals";
 
 export default function DynamicPanelSimplePage() {
   const location = useLocation();

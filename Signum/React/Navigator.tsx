@@ -26,6 +26,7 @@ import { Typeahead } from "./Components";
 import { TextHighlighter, TypeaheadOptions } from "./Components/Typeahead";
 import CopyLinkButton from "./Components/CopyLinkButton";
 import { object } from "prop-types";
+import { clearSpecialActions } from "./OmniboxSpecialAction";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -39,6 +40,8 @@ export function start(options: { routes: RouteObject[] }) {
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
   AppContext.clearSettingsActions.push(cleanEntityChanged);
+  AppContext.clearSettingsActions.push(clearSpecialActions);
+
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
