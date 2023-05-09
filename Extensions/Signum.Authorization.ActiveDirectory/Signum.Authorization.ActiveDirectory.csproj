@@ -19,8 +19,8 @@
 		<PackageReference Include="Microsoft.Graph" Version="5.5.0" />
 		<PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.7" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
+		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
