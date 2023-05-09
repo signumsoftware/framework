@@ -119,7 +119,17 @@ public static class RandomExtensions
 
     public static IEnumerable<T> NextElements<T>(this Random r, IList<T> elements, int numElements)
     {
+        if (numElements * 4 < elements.Count)
+            return Infinite().Select(a => r.NextElement(elements)).Distinct().Take(numElements);
+
         return elements.OrderBy(a => r.Next()).Take(numElements);
+    }
+
+    static IEnumerable<int> Infinite()
+    {
+        int i = 0;
+        while (true)
+            yield return i++;
     }
 
     public static decimal NextDecimal(this Random r, decimal min, decimal max)
