@@ -72,7 +72,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             uctx.TryGetCodeFile("Southwind.React/Southwind.React.csproj")
         }.NotNull()
         .SelectMany(a => a.Content.Lines())
-        .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum.TSGenerator"))
+        .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum"))
         .Distinct()
         .ToList();
 
@@ -108,7 +108,9 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             			<PrivateAssets>all</PrivateAssets>
             			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             		</PackageReference>
-            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
+            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
+                    <PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+                    <PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
             {references.ToString("\r\n")}
             	</ItemGroup>
 
@@ -285,6 +287,11 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
         });
 
+        uctx.ChangeCodeFile("Southwind.React/Properties/launchSettings.json", a =>
+        {
+            a.Replace(uctx.ApplicationName + ".React", uctx.ApplicationName);
+        });
+
         uctx.ForeachCodeFile("*.cs", "Southwind.React", a =>
         {
             if(a.Content.Contains(": ControllerBase") || a.Content.Contains(": ControllerBase") || a.Content.Contains("HttpPost") || a.Content.Contains("HttpGet") || a.Content.Contains("FromBody"))
@@ -293,7 +300,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
         });
 
-      uctx.MoveFiles("Southwind.React/App", "Southwind", "*.*");
+        uctx.MoveFiles("Southwind.React/App", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.React/Controllers", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.React/Views/Home", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.React", "Southwind", "*.*");
