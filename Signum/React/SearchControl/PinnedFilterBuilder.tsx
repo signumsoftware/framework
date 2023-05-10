@@ -7,7 +7,7 @@ import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
-import { ComplexConditionSyntax, createFilterValueControl, MultiEntity, MultiValue } from './FilterBuilder';
+import { ComplexConditionSyntax, createFilterValueControl, FilterTextArea, MultiEntity, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -54,7 +54,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const f = filter;
     const readOnly = f.frozen;
-    var label = f.pinned!.label || (f.token?.queryTokenType == "AnyOrAll" || f.token?.queryTokenType == "Element" ? f.token.parent?.niceName :  f.token?.niceName);
+    var label = f.pinned!.label || (f.token?.queryTokenType == "AnyOrAll" || f.token?.queryTokenType == "Element" ? f.token.parent?.niceName : f.token?.niceName);
 
     if (f.pinned && (isCheckBox(f.pinned.active))) {
       return (
@@ -66,8 +66,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                   f.pinned!.active == "Checkbox_Unchecked" ? "Checkbox_Checked" :
                     f.pinned!.active == "NotCheckbox_Checked" ? "NotCheckbox_Unchecked" :
                       f.pinned!.active == "NotCheckbox_Unchecked" ? "NotCheckbox_Checked" : undefined!;
-            p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
-          }} />{label}</label>
+              p.onFiltersChanged && p.onFiltersChanged(p.filterOptions);
+            }} />{label}</label>
         </div>
       );
     }
@@ -78,15 +78,16 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
       var isComplex = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition") : f.operation == "ComplexCondition";
       var textArea = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText")) : f.operation == "ComplexCondition" || f.operation == "FreeText";
-      //  valueHtmlAttributes={{ className: isBig ? "big-value-line" : undefined }}
 
-      return <ValueLine ctx={ctx} type={{ name: "string" }}
-        valueLineType={textArea ? "TextArea" : "TextBox"}
-        onChange={(() => handleValueChange(f, isComplex))}
-        valueHtmlAttributes={isComplex ? { onKeyUp: e => e.stopPropagation() } : undefined}
-        extraButtons={isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
-        label={label || SearchMessage.Search.niceToString()
-  } />
+      if (textArea)
+        return <FilterTextArea ctx={ctx}
+          isComplex={isComplex}
+          onChange={(() => handleValueChange(f, isComplex))}
+          label={label || SearchMessage.Search.niceToString()} />
+      else
+        return <ValueLine ctx={ctx} type={{ name: "string" }}
+          onChange={(() => handleValueChange(f, isComplex))}
+          label={label || SearchMessage.Search.niceToString()} />
     }
 
     if (isList(f.operation!))

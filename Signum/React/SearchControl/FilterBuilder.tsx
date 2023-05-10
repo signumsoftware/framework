@@ -650,12 +650,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     if (f.operation == "ComplexCondition" || f.operation == "FreeText") {
       const isComplex = f.operation == "ComplexCondition";
-      return <ValueLine ctx={ctx} type={{ name: "string" }}
-        valueLineType="TextArea"
-        valueHtmlAttributes={isComplex ? { onKeyUp: e => e.stopPropagation() } : undefined}
-        extraButtons={isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
-        onChange={handleValueChange}
-      />
+      return <FilterTextArea ctx={ctx} isComplex={isComplex} onChange={handleValueChange} />;
     }
 
     return createFilterValueControl(ctx, f.token!, handleValueChange, { });
@@ -912,11 +907,25 @@ function fixDashboardBehaviour(fop: FilterOptionParsed) {
 }
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void }) {
+export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }) {
   return <ValueLine ctx={p.ctx}
     type={{ name: "string" }}
+    label={p.label}
     valueLineType="TextArea"
-    valueHtmlAttributes={p.isComplex ? { onKeyUp: e => { e.keyCode == 13 && e.shiftKey && e.stopPropagation(); } } : undefined }
+    valueHtmlAttributes={p.isComplex ? {
+      onKeyDown: e => {
+        console.log(e);
+        if (e.keyCode == 13 && !e.shiftKey) {
+          e.preventDefault();
+        }
+      },
+      onKeyUp: e => {
+        console.log(e);
+        if (e.keyCode == 13 && e.shiftKey) {
+           e.stopPropagation() 
+        }
+      }
+    } : undefined}
     extraButtons={p.isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
     onChange={p.onChange}
   />

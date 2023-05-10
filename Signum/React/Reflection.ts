@@ -1545,6 +1545,14 @@ export class QueryTokenString<T> {
     return new QueryTokenString<boolean>(this.token + ".HasValue");
   }
 
+  matchSnippet(): QueryTokenString<string> {
+    return new QueryTokenString<string>(this.token + ".Snippet");
+  }
+
+  matchRank(): QueryTokenString<number> {
+    return new QueryTokenString<number>(this.token + ".Rank");
+  }
+
   operation(os: OperationSymbol): string { //operation tokens are leaf
     return this.token + ".[Operations]." + os.key.replace(".", "#");
   }
