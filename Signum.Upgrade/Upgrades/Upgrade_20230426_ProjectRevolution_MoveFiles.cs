@@ -430,6 +430,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         {
             a.InsertBeforeFirstLine(a => a.Contains("docker build"),
                 """Get-ChildItem -Path "Framework" -Recurse -Include "package.json","*.csproj" | Resolve-Path -Relative | tar -cf Framework.tar -T -""");
+
+            a.Replace(uctx.ApplicationName + ".React", uctx.ApplicationName);
         });
 
         uctx.ChangeCodeFile("Southwind/Properties/Attributes.cs", a =>
