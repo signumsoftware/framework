@@ -16,7 +16,7 @@
 		</PackageReference>
 		<PackageReference Include="System.DirectoryServices" Version="7.0.1" />
 		<PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Graph" Version="5.5.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.9.0" />
 		<PackageReference Include="Microsoft.Graph.Auth" Version="1.0.0-preview.7" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
