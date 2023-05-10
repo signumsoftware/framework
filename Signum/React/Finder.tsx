@@ -743,7 +743,6 @@ export function toFilterOptions(filterOptionsParsed: FilterOptionParsed[]): Filt
 }
 
 export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription, defaultIncludeDefaultFilters: boolean): Promise<FindOptionsParsed> {
-
   const fo = autoRemoveTrivialColumns(findOptions);
 
   fo.columnOptions = mergeColumns(Dic.getValues(qd.columns), fo.columnOptionsMode ?? "Add", fo.columnOptions?.notNull() ?? []);
@@ -1307,7 +1306,7 @@ export function parseFilterValues(filterOptions: FilterOptionParsed[]): Promise<
     else {
       if (isList(fo.operation!)) {
         if (!Array.isArray(fo.value))
-          fo.value = [fo.value];
+          fo.value = [fo.value].notNull();
 
         fo.value = (fo.value as any[]).map(v => parseValue(fo.token!, v, needsModel));
       }
