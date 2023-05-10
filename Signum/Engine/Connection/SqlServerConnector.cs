@@ -362,6 +362,9 @@ public class SqlServerConnector : Connector
                 -2 => new TimeoutException(ex.Message, ex),
                 2601 => new UniqueKeyException(ex),
                 547 => new ForeignKeyException(ex),
+
+                //https://stackoverflow.com/questions/10226314/what-is-the-best-way-to-catch-operation-cancelled-by-user-exception
+                0 when se.State == 0 && se.Class == 11 /*&& ex.Message.Contains("Operation cancelled by user")*/ => new OperationCanceledException(ex.Message, ex),
                 _ => ex,
             };
         }

@@ -88,6 +88,7 @@ export module ProcessMessage {
   export const ExceptionLines = new MessageKey("ProcessMessage", "ExceptionLines");
   export const SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway = new MessageKey("ProcessMessage", "SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway");
   export const ProcessSettings = new MessageKey("ProcessMessage", "ProcessSettings");
+  export const OnlyActive = new MessageKey("ProcessMessage", "OnlyActive");
 }
 
 export module ProcessOperation {
