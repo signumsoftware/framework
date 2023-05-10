@@ -26,7 +26,7 @@ import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
-import { RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
+import { AuthMessage, RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
 
 export let types: boolean;
 export let properties: boolean;
@@ -76,7 +76,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: UserEntity.token(a => a.state),
         value: UserState.value("Active"),
-        pinned: { label: () => AuthAdminMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
+        pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
       },
     ],
     entityFormatter: new Finder.EntityFormatter((row, cols, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}

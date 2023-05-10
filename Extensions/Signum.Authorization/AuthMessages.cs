@@ -101,5 +101,6 @@ public enum AuthMessage
     [Description("Not authorized to {0} the {1} with Id {2}")]
     NotAuthorizedTo0The1WithId2,
     [Description("Not authorized to retrieve '{0}'")]
-    NotAuthorizedToRetrieve0
+    NotAuthorizedToRetrieve0,
+    OnlyActive,
 }

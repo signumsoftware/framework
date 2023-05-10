@@ -100,7 +100,13 @@ public static class Program
             var missing = shouldT4s.Where(kvp => !currentT4s.ContainsKey(kvp.Key)).ToList();
             foreach (var m in missing)
             {
-                var newT4S = Path.Combine(currentDirectory, m.Key + ".t4s");
+                var index = m.Key.IndexOf('.');
+
+                var goodDirectory = index != -1 && Path.GetFileName(currentDirectory) == m.Key.Substring(0, index) ?
+                    Path.Combine(currentDirectory, m.Key.Substring(index + 1).Replace('.', Path.DirectorySeparatorChar)) : null;
+
+                var newT4S = Path.Combine(goodDirectory != null && Directory.Exists(goodDirectory) ? goodDirectory : currentDirectory, m.Key + ".t4s");
+
                 currentT4Files.Add(newT4S);
                 currentT4s.Add(m.Key, newT4S);
                 log.WriteLine($"Automatically creating {newT4S}");

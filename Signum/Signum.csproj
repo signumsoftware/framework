@@ -21,12 +21,12 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
 		<PackageReference Include="Npgsql" Version="7.0.2" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
-		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0-beta" />
+		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
 		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>

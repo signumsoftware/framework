@@ -16,7 +16,7 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
         {
             file.Replace(new Regex(@"@extensions\/(?<ext>[\w]*)"), m => "@extensions/Signum." + m.Groups["ext"]);
-            file.Replace(new Regex(@"(\.\.\/)*Framework/Extensions/(?<ext>[\w]*)"), m => "@extensions/Signum." + m.Groups["ext"]);
+            file.Replace(new Regex(@"(\.\.\/)*Framework/Signum.React.Extensions/(?<ext>[\w]*)/"), m => "@extensions/Signum." + m.Groups["ext"]+"/");
             file.Replace(new Regex(@"@extensions/Signum.Files/(FileLine|FileImage|FileImageLine|MultiFileLine|ImageModal|FileDownloader|FileUploader)"), m => "@extensions/Signum.Files/Files");
 
             file.Replace(new Regex(@"(?<extension>[\w]*\.Entities\.[\w]*)"), m => m.Groups["extension"].Value.Replace(".Entities", ""));
@@ -30,7 +30,11 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
         uctx.ForeachCodeFile(@"*.cs", file =>
         {
             if (file.FilePath.EndsWith("GlobalUsings.cs"))
+            {
+                file.Replace("Signum.Engine.Operations;", "Signum.Operations;");
+
                 return;
+            }
 
             if(file.FilePath.StartsWith(uctx.ApplicationName  + "\\"))
                 file.Replace(new Regex(@"namespace (?<namespace>[^;]*)"), m => $"namespace {Path.GetDirectoryName(file.FilePath)!.Replace("\\", ".")}");
@@ -45,9 +49,10 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace("DynamicCode.AssemblyTypes", "EvalLogic.AssemblyTypes");           
             file.Replace("DynamicCode.Namespaces", "EvalLogic.Namespaces");            
             file.Replace("DynamicCode.AddFullAssembly", "EvalLogic.AddFullAssembly");            
-            file.Replace("DynamicLogic.Start(sb, withCodeGen: true);", "EvalLogic.Start(sb);\nDynamicLogic.Start(sb);");
+            file.Replace("DynamicLogic.Start(sb, withCodeGen: true);", "DynamicLogic.Start(sb);");
             file.Replace("DynamicLogic.Start(sb, withCodeGen: false);", "EvalLogic.Start(sb);");
             file.Replace("TranslatedInstanceLogic.TranslatedField", "PropertyRouteTranslationLogic.TranslatedField");
+            file.Replace("using Signum.Services", "using Signum.Security");
             file.Replace("using Signum.Validation", "using Signum.Entities.Validation");
             file.Replace("using Signum.Maps", "using Signum.Engine.Maps");
             file.Replace("using Signum.ActiveDirectory", "using Signum.Authorization.ActiveDirectory");

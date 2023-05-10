@@ -16,6 +16,7 @@ export interface UserEntity {
 export module AuthMessage {
   export const NotAuthorizedTo0The1WithId2 = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0 = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
+  export const OnlyActive = new MessageKey("AuthMessage", "OnlyActive");
 }
 
 export module LoginAuthMessage {

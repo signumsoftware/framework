@@ -16,8 +16,6 @@ public enum AuthAdminMessage
     ResetChanges,
     SwitchTo,
 
-    OnlyActive,
-
     [Description("{0} (in UI)")]
     _0InUI,
     [Description("{0} (in DB only)")]

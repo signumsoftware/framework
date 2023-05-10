@@ -72,7 +72,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             uctx.TryGetCodeFile("Southwind.React/Southwind.React.csproj")
         }.NotNull()
         .SelectMany(a => a.Content.Lines())
-        .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum.TSGenerator"))
+        .Where(l => l.Contains("<PackageReference") && !l.Contains("Microsoft.TypeScript.MSBuild") && !l.Contains("Signum"))
         .Distinct()
         .ToList();
 
@@ -108,7 +108,9 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             			<PrivateAssets>all</PrivateAssets>
             			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
             		</PackageReference>
-            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0-beta16" />
+            		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
+                    <PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+                    <PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
             {references.ToString("\r\n")}
             	</ItemGroup>
 
@@ -136,7 +138,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing\Signum.Mailing.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Map\Signum.Map.csproj" />FROM_CS MapLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Migrations\Signum.Migrations.csproj" />FROM_CS MigrationLogic
-            		<ProjectReference Include="..\Framework\Extensions\Signum.Notes\Signum.Notes.csproj" />FROM_CS NotesLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.Notes\Signum.Notes.csproj" />FROM_CS NoteLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Omnibox\Signum.Omnibox.csproj" />FROM_CS OmniboxLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Processes\Signum.Processes.csproj" />FROM_CS ProcessLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Profiler\Signum.Profiler.csproj" />FROM_CS ProfilerLogic
@@ -263,6 +265,13 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             }
         });
 
+        uctx.ForeachCodeFile("*.xml", "Southwind.Entities", a =>
+        {
+            var fileName = a.FilePath.Replace(".Entities", "");
+
+            uctx.MoveFile(a.FilePath, fileName);
+        });
+
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
         uctx.MoveFiles("Southwind.Logic", "Southwind", "*.*");
 
@@ -273,8 +282,21 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             if (newFilePath != a.FilePath)
             {
                 uctx.MoveFile(a.FilePath, newFilePath);
-                if (File.Exists(Path.ChangeExtension(a.FilePath, ".ts")))
+                if (File.Exists(uctx.AbsolutePath(Path.ChangeExtension(a.FilePath, ".ts"))))
                     uctx.MoveFile(Path.ChangeExtension(a.FilePath, ".ts"), Path.ChangeExtension(newFilePath, ".ts"));
+            }
+        });
+
+        uctx.ChangeCodeFile("Southwind.React/Properties/launchSettings.json", a =>
+        {
+            a.Replace(uctx.ApplicationName + ".React", uctx.ApplicationName);
+        });
+
+        uctx.ForeachCodeFile("*.cs", "Southwind.React", a =>
+        {
+            if(a.Content.Contains(": ControllerBase") || a.Content.Contains(": ControllerBase") || a.Content.Contains("HttpPost") || a.Content.Contains("HttpGet") || a.Content.Contains("FromBody"))
+            {
+                a.InsertBeforeFirstLine(a => a.StartsWith("using "), "using Microsoft.AspNetCore.Mvc;");
             }
         });
 

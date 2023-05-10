@@ -3,6 +3,8 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Signum.Upgrade.Upgrades;
@@ -58,9 +60,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             var configure = startup.GetMethodBody(a => a.Contains("Configure(IApplicationBuilder app,"));
 
 
-            var programContent = """
-                    var builder = WebApplication.CreateBuilder(args);
-            """ +
+            var programContent = """var builder = WebApplication.CreateBuilder(args);\r\n""" + 
                 servicesBody.Replace("services", "builder.Services") +
                 "\r\n" +
                 "        var app = builder.Build(); \r\n\r\n" +
@@ -70,12 +70,12 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                         .Replace("DynamicCode.CodeGenDirectory = env.", "DynamicLogic.CodeGenDirectory = app.Environment.")
                         .Replace("detectSqlVersion: false", $$"""
                         new WebServerBuilder
-                        {
-                            WebApplication = app,
-                            AuthTokenEncryptionKey = "{{secret}}",
-                            MachineName = app.Configuration.GetValue<string?>("ServerName"),
-                            DefaultCulture = CultureInfo.GetCultureInfo("{{culture}}")
-                        }
+                                        {
+                                            WebApplication = app,
+                                            AuthTokenEncryptionKey = "{{secret}}",
+                                            MachineName = app.Configuration.GetValue<string?>("ServerName"),
+                                            DefaultCulture = CultureInfo.GetCultureInfo("{{culture}}")
+                                        }
                         """) +
                 "\n" +
                 "        app.Run(); \n" +
@@ -83,6 +83,8 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 startup.GetLinesBetween(
                     new(l => l.Contains("class NoAPIContraint : IRouteConstraint"), 0),
                     new(l => l.Contains("}"), 0) { SameIdentation = true}) + "\n";
+
+            program.RemoveAllLines(a => a.Contains("AddApplicationPart"));
 
             program.ReplaceBetween(
                 new(l => l.Contains("public class Program"), 4),
@@ -92,6 +94,8 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 new(l => l.Contains(".ConfigureApplicationPartManager(apm =>"), 0),
                 new(l => l.Contains("});"), 0), "");
 
+            program.Replace("AddSignumJsonConverters())", "AddSignumJsonConverters());");
+
             program.ReplaceBetween(
                 new(l => l.Contains(@"log.Switch(""WebStart"");"), 0),
                 new(l => l.Contains(@"WebStart(app, env"), 0), "");
@@ -99,9 +103,14 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             program.ReplaceBetween(
                 new(a => a.Contains("app.UseEndpoints(endpoints =>")),
                 new(a => a.Contains(" });")) { SameIdentation = true },
-                a => a.Lines().Skip(2).SkipLast(1).Select(a => a.After("    ").Replace("endpoints", "app")).ToString("\r\n")
+                a => a.Lines().Skip(2).SkipLast(1).Select(a => a.After("                ").Replace("endpoints", "app")).ToString("\r\n")
                 );
+
+            program.RemoveAllLines(a => a.Contains("AlertsServer.MapAlertsHub"));
+            program.RemoveAllLines(a => a.Contains("ConcurrentUserServer.MapConcurrentUserHub"));
         });
+
+        var hasDynamic = false;
 
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Starter.cs", starter =>
         {
@@ -179,8 +188,22 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             """);
 
+            starter.InsertAfterFirstLine(a => a.Contains("sb.Schema.Settings.FieldAttributes((EmailSenderConfigurationEntity"), """
+                sb.Schema.Settings.FieldAttributes((EmailSenderConfigurationEntity em) => em.Service).Replace(new ImplementedByAttribute(typeof(SmtpEmailServiceEntity), typeof(MicrosoftGraphEmailServiceEntity) /*Remove?*/, typeof(ExchangeWebServiceEmailServiceEntity) /*Remove?*/));
+                """);
+
             starter.ReplaceLine(l => l.Contains("sb.Schema.Settings.FieldAttributes((DashboardEntity a) => a.Parts[0].Content)"), "");
+
+            hasDynamic = starter.Content.Contains("DynamicLogic.CompileDynamicCode");
         });
+
+        if (hasDynamic)
+        {
+            uctx.ChangeCodeFile("Southwind.Terminal/Program.cs", program =>
+            {
+                program.InsertBeforeFirstLine(a => a.Contains("Starter.Start("), uctx.ReplaceSouthwind(@"DynamicLogic.CodeGenDirectory = ""../../../../Southwind/CodeGen"";"));
+            });
+        }
 
         uctx.DeleteFile("Southwind/Startup.cs");
 
@@ -204,7 +227,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 "Signum.Cache/CacheClient",
                 "Signum.Caching/CacheClient");
 
-            main.RemoveAllLines(a => a.Contains("import") && a.Contains("ToolbarConfig"));
+            main.RemoveAllLines(a => a.Contains("import") && (a.Contains("ToolbarConfig") || a.Contains("ToolbarMenuConfig")));
             main.ReplaceBetweenIncluded(a => a.Contains("ToolbarClient.start("), a => a.Contains(");"), 
                 "ToolbarClient.start({ routes });");
 
@@ -212,10 +235,20 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             main.ReplaceBetweenIncluded(a => a.Contains("OmniboxClient.start("), a => a.Contains(");"),
                 "OmniboxClient.start();");
 
-            main.ReplaceLine(a => a.Contains("import * as DynamicClient"),
-                "import * as EvalClient from \"@extensions/Signum.Eval/EvalClient\"");
 
-            main.ReplaceLine(a => a.Contains("DynamicClient.start({"), "EvalClient.start({ routes });");
+            if (main.Content.Contains("DynamicClient"))
+            {
+                if (main.Content.Contains("withCodeGen: true"))
+                {
+                    main.InsertBeforeFirstLine(a => a.Contains("import * as DynamicClient"), "import * as EvalClient from \"@extensions/Signum.Eval/EvalClient\"");
+                    main.InsertBeforeFirstLine(a => a.Contains("DynamicClient.start"), "EvalClient.start({ routes });");
+                }
+                else
+                {
+                    main.ReplaceLine(a => a.Contains("import * as DynamicClient"), "import * as EvalClient from \"@extensions/Signum.Eval/EvalClient\"");
+                    main.ReplaceLine(a => a.Contains("DynamicClient.start"), "EvalClient.start({ routes });");
+                }
+            }
         });
 
         uctx.ChangeCodeFile("Southwind/MainPublic.tsx", main =>
