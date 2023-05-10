@@ -4,7 +4,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20230504_FixCRLFAgain : CodeUpgradeBase
 {
-    public override string Description => "Update Nugets";
+    public override string Description => "Fix line ends";
 
     public override void Execute(UpgradeContext uctx)
     {
