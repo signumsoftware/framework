@@ -118,19 +118,19 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
         <div>
           <br />
           <div className="row">
-            <div className="col-sm-7">
+            <div className="col-sm-8">
               {exampleEntityRef.current && <button className="btn btn-success" onClick={reloadResponse}><FontAwesomeIcon icon="play" /> Evaluate</button>}
               <div className="btn-group" style={{ marginBottom: "3px" }}>
                 <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"bool Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
-                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} />
+                <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)}/>
                 <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
               </div>
               {renderTest()}
             </div>
-            <div className="col-sm-5">
+            <div className="col-sm-4">
               <TypeHelpComponent initialType={ctx.value.mainEntityType.cleanName} mode="CSharp" onMemberClick={handleTypeHelpClick} />
             </div>
           </div>
