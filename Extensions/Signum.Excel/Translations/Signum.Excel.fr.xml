@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ExcelMessage">
+    <Member Name="Data" Description="Données" />
+    <Member Name="Download" Description="Télécharger" />
+    <Member Name="ExcelReport" Description="Rapport Excel" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Modèle Excel doit avoir une extension .xlsx, et l'actuel a {0}" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Le modèle Excel possède une colonne {0} n'est pas présent dans le moteur de recherche" />
+    <Member Name="ThereAreNoResultsToWrite" Description="Il n'y a pas de réusltast à écrire" />
+  </Type>
+  <Type Name="ExcelReportEntity" Description="Rapport Excel">
+    <Member Name="DisplayName" Description="Afficher le nom" />
+    <Member Name="File" Description="Fichier" />
+    <Member Name="Query" Description="Recherche" />
+  </Type>
+</Translations>

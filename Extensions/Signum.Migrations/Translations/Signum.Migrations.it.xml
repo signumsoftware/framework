@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CSharpMigrationEntity" Description="C sharp migration">
+    <Member Name="ExecutionDate" Description="Data di esecuzione" />
+    <Member Name="UniqueName" Description="Nome univoco" />
+  </Type>
+  <Type Name="SqlMigrationEntity" Description="Migrazione di SQL">
+    <Member Name="VersionNumber" Description="Numero di versione" />
+  </Type>
+</Translations>

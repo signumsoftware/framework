@@ -33,9 +33,9 @@ internal class FieldAutoInitializer
         this.SystemType = tr.Resolve();
         this.GetTypeFromHandle = this.SystemType.GetMethods().Single(a => a.Name == "GetTypeFromHandle");
 
-        this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;
+        this.SigumEntities = assembly.Name.Name == "Signum" ? assembly : resolver.Signum;
         this.AutoInit = SigumEntities.MainModule.GetType("Signum.Entities", "AutoInitAttribute");
-        this.OperationSymbol = SigumEntities.MainModule.GetType("Signum.Entities", "OperationSymbol").Resolve();
+        this.OperationSymbol = SigumEntities.MainModule.GetType("Signum.Operations", "OperationSymbol").Resolve();
         this.OperationSymbolConstruct = this.OperationSymbol.NestedTypes.Single(t => t.Name == "Construct`1").Resolve();
 
     }
@@ -119,21 +119,21 @@ internal class FieldAutoInitializer
         {
             switch (generic.ElementType.FullName)
             {
-                case "Signum.Entities.ConstructSymbol`1/Simple":
+                case "Signum.Operations.ConstructSymbol`1/Simple":
                     return OperationSymbolConstruct.Methods.Single(a => a.Name == "Simple")
                         .MakeHostInstanceGeneric(generic.GenericArguments.First());
-                case "Signum.Entities.ConstructSymbol`1/From`1":
+                case "Signum.Operations.ConstructSymbol`1/From`1":
                     return OperationSymbolConstruct.Methods.Single(a => a.Name == "From")
                         .MakeHostInstanceGeneric(generic.GenericArguments.First())
                         .MakeGenericMethod(generic.GenericArguments.Last());
-                case "Signum.Entities.ConstructSymbol`1/FromMany`1":
+                case "Signum.Operations.ConstructSymbol`1/FromMany`1":
                     return OperationSymbolConstruct.Methods.Single(a => a.Name == "FromMany")
                         .MakeHostInstanceGeneric(generic.GenericArguments.First())
                         .MakeGenericMethod(generic.GenericArguments.Last());
-                case "Signum.Entities.ExecuteSymbol`1":
+                case "Signum.Operations.ExecuteSymbol`1":
                     return OperationSymbol.Methods.Single(a => a.Name == "Execute")
                        .MakeGenericMethod(generic.GenericArguments.Single());
-                case "Signum.Entities.DeleteSymbol`1":
+                case "Signum.Operations.DeleteSymbol`1":
                     return OperationSymbol.Methods.Single(a => a.Name == "Delete")
                        .MakeGenericMethod(generic.GenericArguments.Single());
             }

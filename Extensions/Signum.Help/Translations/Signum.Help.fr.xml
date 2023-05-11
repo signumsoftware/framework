@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HelpMessage">
+    <Member Name="Amount" Description="montant" />
+    <Member Name="Appendices" Description="Annexes" />
+    <Member Name="Buscador" Description="Moteur de recherche" />
+    <Member Name="Call0Over1OfThe2" Description="Call {0} sur {1} de la {2}" />
+    <Member Name="Character" Description="caractère" />
+    <Member Name="ConstructsANew0" Description="Construit un nouveau {0}" />
+    <Member Name="Date" Description="date" />
+    <Member Name="DateTime" Description="date et heure" />
+    <Member Name="ExpressedIn" Description="exprimée en " />
+    <Member Name="From0OfThe1" Description="à partir de {0} du {1} " />
+    <Member Name="FromMany0" Description="de nombreux {0}" />
+    <Member Name="HelpNotLoaded" Description="Aide non chargé" />
+    <Member Name="Integer" Description="entier" />
+    <Member Name="Key0NotFound" Description="Clé {0} introuvable" />
+    <Member Name="OfThe0" Description="du {0}" />
+    <Member Name="OrNull" Description="ou la valeur nulle" />
+    <Member Name="Property0NotExistsInType1" Description="La propriété {0} n'existe pas dans le type {1}" />
+    <Member Name="QueryOf0" Description="Requête de {0}" />
+    <Member Name="RemovesThe0FromTheDatabase" Description="Supprime le {0} de la base de données" />
+    <Member Name="Should" Description=". Devrait  " />
+    <Member Name="String" Description="chaîne" />
+    <Member Name="The0" Description="Le {0}" />
+    <Member Name="TheDatabaseVersion" Description="la version de base de données" />
+    <Member Name="Value" Description="valeur" />
+    <Member Name="ValueLike0" Description="valeur comme {0}" />
+    <Member Name="YourVersion" Description="votre version" />
+  </Type>
+</Translations>

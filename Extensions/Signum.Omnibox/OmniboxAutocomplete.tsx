@@ -1,0 +1,61 @@
+import * as React from 'react'
+import { AbortableRequest } from '@framework/Services';
+import * as AppContext from '@framework/AppContext'
+import * as Navigator from '@framework/Navigator'
+import { Typeahead, ErrorBoundary } from '@framework/Components'
+import * as OmniboxClient from './OmniboxClient'
+import { OmniboxMessage } from './Signum.Omnibox'
+import '@framework/Frames/MenuIcons.css'
+import { TypeaheadController } from '@framework/Components/Typeahead';
+
+export interface OmniboxAutocompleteProps {
+  inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
+}
+
+export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
+
+  const typeahead = React.useRef<TypeaheadController>(null);
+  const abortRequest = React.useMemo(() => new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac)), []);
+
+  function handleOnSelect(result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) {
+    abortRequest.abort();
+
+    const ke = e as React.KeyboardEvent<any>;
+    if (ke.key == "Tab") {
+      if (result.resultTypeName == "HelpOmniboxResult")
+        return "";
+
+      return OmniboxClient.toString(result);
+    }
+
+    const promise = OmniboxClient.navigateTo(result);
+    if (promise) {
+      promise
+        .then(url => {
+          if (url)
+            AppContext.pushOrOpenInTab(url, e);
+        });
+    }
+    typeahead.current!.blur();
+
+    return null;
+  }
+
+  let inputAttr = { placeholder: OmniboxMessage.Search.niceToString(), ...p.inputAttrs };
+
+  return (
+    <ErrorBoundary>
+      <Typeahead ref={typeahead } getItems={str => abortRequest.getData(str)}
+        renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
+        onSelect={(item, e) => handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
+        inputAttrs={inputAttr}
+        minLength={0} />
+    </ErrorBoundary>
+  );
+}
+
+
+
+
+
+

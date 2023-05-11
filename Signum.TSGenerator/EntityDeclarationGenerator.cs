@@ -12,36 +12,38 @@ namespace Signum.TSGenerator;
 public class PreloadingAssemblyResolver : DefaultAssemblyResolver
 {
     public AssemblyDefinition SignumUtilities { get; private set; }
-    public AssemblyDefinition SignumEntities { get; private set; }
+    public AssemblyDefinition Signum { get; private set; }
 
     Dictionary<string, string> assemblyLocations;
+    readonly ReaderParameters rp;
 
-    public PreloadingAssemblyResolver(string[] references)
+    public PreloadingAssemblyResolver(Dictionary<string, string> assemblyLocations)
     {
-        this.assemblyLocations = references.ToDictionary(a => Path.GetFileNameWithoutExtension(a));
+        this.rp = new ReaderParameters { AssemblyResolver = this };
 
-        foreach (var dll in references.Where(r => r.Contains("Signum")))
-        {
-            var assembly = ModuleDefinition.ReadModule(dll, new ReaderParameters { AssemblyResolver = this }).Assembly;
+        this.assemblyLocations = assemblyLocations;
 
-            if (assembly.Name.Name == "Signum.Entities")
-                SignumEntities = assembly;
-
-            if (assembly.Name.Name == "Signum.Utilities")
-                SignumUtilities = assembly;
-
-            RegisterAssembly(assembly);
-        }
+        this.RegisterAssembly(this.SignumUtilities = ModuleDefinition.ReadModule(assemblyLocations["Signum.Utilities"], rp).Assembly);
+        this.RegisterAssembly(this.Signum = ModuleDefinition.ReadModule(assemblyLocations["Signum"], rp).Assembly);
     }
 
     public override AssemblyDefinition Resolve(AssemblyNameReference name)
     {
-        var assembly = ModuleDefinition.ReadModule(this.assemblyLocations[name.Name], new ReaderParameters { AssemblyResolver = this }).Assembly;
+        var assembly = ModuleDefinition.ReadModule(this.assemblyLocations[name.Name], rp).Assembly;
 
         this.RegisterAssembly(assembly);
 
         return assembly;
     }
+}
+
+public class TSType 
+{
+    public required string Namespace;
+    public required TypeDefinition Type;
+    public required Func<Dictionary<string, Dictionary<string, NamespaceTSReference>>, string> GetText;
+
+    public override string ToString() => Type.Name;
 }
 
 static class EntityDeclarationGenerator
@@ -67,24 +69,15 @@ static class EntityDeclarationGenerator
 
     static ConcurrentDictionary<TypeReference, bool> IEntityCache = new ConcurrentDictionary<TypeReference, bool>();
 
-    internal static string Process(AssemblyOptions options, string templateFileName, string currentNamespace)
+    internal static List<TSType> GetAllTSTypes(AssemblyOptions options)
     {
-        StringBuilder sb = new StringBuilder();
-
-        var entities = options.Resolver.SignumEntities;
+        var entities = options.Resolver.Signum;
 
         Cache = new TypeCache(entities);
 
-        var namespacesReferences = new Dictionary<string, Dictionary<string, NamespaceTSReference>>();
-
-        namespacesReferences.GetNamespaceReference(options, Cache.ModifiableEntity);
-
-        var exportedTypes = options.ModuleDefinition.Types.Where(a => a.Namespace == currentNamespace).ToList();
-        if (exportedTypes.Count == 0)
-            throw new InvalidOperationException($"Assembly '{options.CurrentAssembly}' has not types in namespace '{currentNamespace}'");
+        var exportedTypes = options.ModuleDefinition.Types.ToList();
 
         var imported = options.ModuleDefinition.Assembly.CustomAttributes.Where(at => at.AttributeType.FullName == Cache.ImportInTypeScriptAttribute.FullName)
-            .Where(at => (string)at.ConstructorArguments[1].Value ==  currentNamespace)
             .Select(at => ((TypeReference)at.ConstructorArguments[0].Value).Resolve())
             .ToList();
 
@@ -93,23 +86,24 @@ static class EntityDeclarationGenerator
 
         var entityResults = (from type in exportedTypes
                              where !type.IsValueType && (type.InTypeScript() ?? IsModifiableEntity(type))
-                             select new
+                             select new TSType
                              {
-                                 ns = type.Namespace,
-                                 type,
-                                 text = EntityInTypeScript(type, options, namespacesReferences),
+                                 Namespace = type.Namespace,
+                                 Type = type,
+                                 GetText = nsr => EntityInTypeScript(type, options, nsr),
                              }).ToList();
 
         var interfacesResults = (from type in exportedTypes
-                                 where type.IsInterface && (type.InTypeScript() ?? type.AnyInterfaces(IEntityCache, i => i.FullName ==  Cache.IEntity.FullName))
-                                 select new
+                                 where type.IsInterface && (type.InTypeScript() ?? type.AnyInterfaces(IEntityCache, i => i.FullName == Cache.IEntity.FullName))
+                                 select new TSType
                                  {
-                                     ns = type.Namespace,
-                                     type,
-                                     text = EntityInTypeScript(type, options, namespacesReferences),
+                                     Namespace = type.Namespace,
+                                     Type = type,
+                                     GetText = nsr => EntityInTypeScript(type, options, nsr),
                                  }).ToList();
 
-        var usedEnums = (from type in entityResults.Select(a => a.type)
+
+        var usedEnums = (from type in entityResults.Select(a => a.Type)
                          from p in GetAllProperties(type)
                          let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
                          let def = pt.Resolve()
@@ -119,57 +113,59 @@ static class EntityDeclarationGenerator
         var symbolResults = (from type in exportedTypes
                              where !type.IsValueType && type.IsStaticClass() && type.ContainsAttribute("AutoInitAttribute")
                              && (type.InTypeScript() ?? true)
-                             select new
+                             select new TSType
                              {
-                                 ns = type.Namespace,
-                                 type,
-                                 text = SymbolInTypeScript(type, options, namespacesReferences),
+                                 Namespace = type.Namespace,
+                                 Type = type,
+                                 GetText = nsr => SymbolInTypeScript(type, options, nsr),
                              }).ToList();
 
         var enumResult = (from type in exportedTypes
                           where type.IsEnum && (type.InTypeScript() ?? usedEnums.Contains(type))
-                          select new
+                          select new TSType
                           {
-                              ns = type.Namespace,
-                              type,
-                              text = EnumInTypeScript(type, options),
+                              Namespace = type.Namespace,
+                              Type = type,
+                              GetText = nsr => EnumInTypeScript(type, options),
                           }).ToList();
 
-        var externalEnums = (from type in usedEnums.Where(options.IsExternal).Concat(importedEnums)
-                            select new
-                            {
-                                ns = currentNamespace + ".External",
-                                type,
-                                text = EnumInTypeScript(type, options),
-                            }).ToList();
+        var externalNamespace = Path.GetFileNameWithoutExtension(options.CurrentAssembly) + ".External";
+
+        var externalEnums = (from type in usedEnums.Where(td => options.IsExternal(td)).Concat(importedEnums)
+                             select new TSType
+                             {
+                                 Namespace = externalNamespace,
+                                 Type = type,
+                                 GetText = nsr => EnumInTypeScript(type, options),
+                             }).ToList();
 
         var externalMessages = (from type in importedMessage
-                                select new
+                                select new TSType
                                 {
-                                    ns = currentNamespace + ".External",
-                                    type,
-                                    text = MessageInTypeScript(type, options),
+                                    Namespace = externalNamespace,
+                                    Type = type,
+                                    GetText = nsr => MessageInTypeScript(type, options),
                                 }).ToList();
 
         var messageResults = (from type in exportedTypes
                               where type.IsEnum && type.Name.EndsWith("Message")
-                              select new
+                              select new TSType
                               {
-                                  ns = type.Namespace,
-                                  type,
-                                  text = MessageInTypeScript(type, options),
+                                  Namespace = type.Namespace,
+                                  Type = type,
+                                  GetText = nsr => MessageInTypeScript(type, options),
                               }).ToList();
 
         var queryResult = (from type in exportedTypes
                            where type.IsEnum && type.Name.EndsWith("Query")
-                           select new
+                           select new TSType
                            {
-                               ns = type.Namespace,
-                               type,
-                               text = QueryInTypeScript(type, options),
+                               Namespace = type.Namespace,
+                               Type = type,
+                               GetText = nsr => QueryInTypeScript(type, options),
                            }).ToList();
 
-        var namespaces = entityResults
+        var allTypes = entityResults
             .Concat(interfacesResults)
             .Concat(enumResult)
             .Concat(messageResults)
@@ -177,68 +173,54 @@ static class EntityDeclarationGenerator
             .Concat(symbolResults)
             .Concat(externalEnums)
             .Concat(externalMessages)
-            .GroupBy(a => a.ns)
-            .OrderBy(a => a.Key);
+            .ToList();
 
-
-        foreach (var ns in namespaces)
-        {
-            var key = RemoveNamespace(ns.Key.ToString(), currentNamespace);
-
-            if (key.Length == 0)
-            {
-                foreach (var item in ns.OrderBy(a => a.type.Name))
-                {
-                    sb.AppendLine(item.text);
-                }
-            }
-            else
-            {
-                sb.AppendLine("export namespace " + key + " {");
-                sb.AppendLine();
-
-                foreach (var item in ns.OrderBy(a => a.type.Name))
-                {
-                    foreach (var line in item.text.Split(new[] { "\r\n" }, StringSplitOptions.None))
-                        sb.AppendLine("  " + line);
-                }
-
-                sb.AppendLine("}");
-                sb.AppendLine();
-            }
-        }
-
-        var code = sb.ToString();
-
-        return WriteFillFile(options, code, templateFileName, namespacesReferences);
+        return allTypes;
     }
 
 
-
-    private static string WriteFillFile(AssemblyOptions options, string code, string templateFileName, Dictionary<string, Dictionary<string, NamespaceTSReference>> namespacesReferences)
+    internal static string WriteNamespaceFile(AssemblyOptions options, string templateFileName, string currentNamespace, List<TSType> types)
     {
+        var namespacesReferences = new Dictionary<string, Dictionary<string, NamespaceTSReference>>();
+
+        namespacesReferences.GetNamespaceReference(options, Cache.ModifiableEntity);
+        
+        var texts = types.Select(a => new
+        {
+            a.Type.Name,
+            Text = a.GetText(namespacesReferences)
+        }).ToList();
+
         StringBuilder sb = new StringBuilder();
         sb.AppendLine(@"//////////////////////////////////");
         sb.AppendLine(@"//Auto-generated. Do NOT modify!//");
         sb.AppendLine(@"//////////////////////////////////");
         sb.AppendLine();
-        var path = namespacesReferences.GetOrThrow("Signum.Entities").GetOrThrow("Signum.Entities").Path.Replace("Signum.Entities.ts", "Reflection.ts");
+        var path = namespacesReferences.GetOrThrow("Signum").GetOrThrow("Signum.Entities").FullPath.Replace("Signum.Entities.ts", "Reflection.ts");
         sb.AppendLine($"import {{ MessageKey, QueryKey, Type, EnumType, registerSymbol }} from '{RelativePath(path, templateFileName)}'");
 
-        foreach (var a in namespacesReferences.Values)
+        foreach (var assRef in namespacesReferences.Values)
         {
-            foreach (var ns in a.Values)
+            foreach (var nsRef in assRef.Values)
             {
-                sb.AppendLine($"import * as {ns.VariableName} from '{RelativePath(ns.Path, templateFileName)}'");
+                sb.AppendLine($"import * as {nsRef.VariableName} from '{RelativePath(nsRef.FullPath, templateFileName)}'");
             }
         }
         sb.AppendLine();
         sb.AppendLine(File.ReadAllText(templateFileName));
 
-        sb.AppendLine(code);
+        foreach (var t in texts.OrderBy(a => a.Name))
+        {
+            sb.Append(t.Text);
+            sb.AppendLine();
+        }
+
 
         return sb.ToString();
+
     }
+
+
 
     private static string RelativePath(string path, string fileName)
     {
@@ -358,7 +340,7 @@ static class EntityDeclarationGenerator
 
         foreach (var prop in properties)
         {
-            string context = $"By type {type.Name} and property {prop.Name}";
+            string context = $"Generating {type.Name}.{prop.Name}";
             var propertyType = TypeScriptNameInternal(prop.PropertyType, type, options, namespacesReferences, context) + (prop.GetTypescriptNull(defaultNullableCustomAttribute) ? " | null" : "");
 
             var undefined = prop.GetTypescriptUndefined() ? "?" : "";
@@ -648,7 +630,7 @@ static class EntityDeclarationGenerator
                 if (type.Interfaces.Any(i => i.InterfaceType.FullName == typeof(IEnumerable).FullName))
                     return "Array";
 
-                throw new InvalidOperationException($"{errorContext}:  Type {type.ToString()} is declared in the assembly '{type.Module.Assembly.Name}', but no React directory for it is found.");
+                throw new InvalidOperationException($"{errorContext}: Declaring a {type} requires a reference to '{type.Module.Assembly.Name.Name}.csproj'");
             }
 
             return CombineNamespace(nsReference.VariableName, BaseTypeScriptName(type));
@@ -688,7 +670,7 @@ static class EntityDeclarationGenerator
             .GetOrCreate(type.Namespace, () => new NamespaceTSReference
             {
                 Namespace = type.Namespace,
-                Path = FindDeclarationsFile(assemblyReference, type.Namespace, type),
+                FullPath = FindDeclarationsFile(assemblyReference, type.Namespace, type),
                 VariableName = GetVariableName(references, type.Namespace.Split('.'))
             });
     }
@@ -718,27 +700,27 @@ static class EntityDeclarationGenerator
 
     private static string FindDeclarationsFile(AssemblyReference assemblyReference, string @namespace, TypeDefinition typeForError)
     {
-        var fileTS = @namespace + ".ts";
+        //var fileTS = @namespace + ".ts";
 
-        var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
+        //var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileTS).ToList();
 
-        if (result.Count == 1)
-            return result.Single();
+        //if (result.Count == 1)
+        //    return result.Single();
 
-        if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+        //if (result.Count > 1)
+        //    throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileTS}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
         var fileT4S = @namespace + ".t4s";
 
-        result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
+        var result = assemblyReference.AllTypescriptFiles.Where(a => Path.GetFileName(a) == fileT4S).ToList();
 
         if (result.Count == 1)
             return result.Single().RemoveSuffix(".t4s") + ".ts";
 
         if (result.Count > 1)
-            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.ReactDirectory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
+            throw new InvalidOperationException($"importing '{typeForError}' required but multiple '{fileT4S}' were found inside '{assemblyReference.Directory}':\r\n{string.Join("\r\n", result.Select(a => "  " + a).ToArray())}");
 
-        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileTS}' or '{fileT4S}' found inside '{assemblyReference.ReactDirectory}'");
+        throw new InvalidOperationException($"importing '{typeForError}' required but no '{fileT4S}' found inside '{assemblyReference.Directory}'");
     }
 
     private static string BaseTypeScriptName(TypeDefinition type)
@@ -832,8 +814,8 @@ public class AssemblyOptions
 [Serializable]
 public class AssemblyReference
 {
-    public string ReactDirectory;
-    public string AssemblyFullPath;
+    public string Directory;
+    //public string AssemblyFullPath;
     public string AssemblyName;
 
     public List<string> AllTypescriptFiles;
@@ -842,8 +824,10 @@ public class AssemblyReference
 public class NamespaceTSReference
 {
     public string Namespace;
-    public string Path;
+    public string FullPath;
     public string VariableName;
+
+    public override string ToString() => $"{Namespace} => {VariableName} {FullPath}";
 }
 
 public static class DictionaryExtensions

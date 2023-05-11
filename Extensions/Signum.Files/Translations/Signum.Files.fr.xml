@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="FileEmbedded" Description="Fichier incorporé">
+    <Member Name="BinaryFile" Description="Fichier binaire" />
+    <Member Name="FileName" Description="Nom de fichier" />
+  </Type>
+  <Type Name="FileEntity" Description="Fichier">
+    <Member Name="BinaryFile" Description="Fichier binaire" />
+    <Member Name="FileName" Description="Nom de fichier" />
+  </Type>
+  <Type Name="FileMessage">
+    <Member Name="ErrorSavingFile" Description="Erreur en sauvegardant l'archive" />
+  </Type>
+  <Type Name="FilePathEntity" Description="Chemin d'accès du fichier">
+    <Member Name="BinaryFile" Description="Fichier binaire" />
+    <Member Name="FileLength" Description="Longueur du fichier" />
+    <Member Name="FileLengthString" Description="Longueur de fichier" />
+    <Member Name="FileName" Description="Nom du fichier" />
+    <Member Name="FileType" Description="Type de fichier" />
+  </Type>
+</Translations>

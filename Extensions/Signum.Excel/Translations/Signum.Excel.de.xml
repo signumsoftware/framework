@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CollectionElementEmbedded" Description="Collection-Element">
+    <Member Name="CollectionElement" Description="Collection-Element" />
+    <Member Name="MatchByColumn" Description="Übereinstimmung nach Spalte" />
+  </Type>
+  <Type Name="ExcelAttachmentEntity" Description="Excel-Anlage">
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="Related" Description="In Beziehung mit" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Verwalten" />
+    <Member Name="CreateNew" Description="Neu erstellen" />
+    <Member Name="Data" Description="Daten" />
+    <Member Name="Download" Description="Download" />
+    <Member Name="Excel2007Spreadsheet" Description="Microsoft Office Excel 2007 Spreadsheet (*.xlsx)|*.xlsx" />
+    <Member Name="ExcelReport" Description="Excel Bericht" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Die Excel Vorlage muss eine xlsx-Erweiterung haben, und die Aktuelle hat eine {0}-Erweiterung" />
+    <Member Name="FindLocationFoExcelReport" Description="Speicherort für Excel Bericht finden" />
+    <Member Name="Reports" Description="Berichte" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Die Excel Vorlage hat eine Spalte {0}, die nicht in der Suche vorhanden ist" />
+    <Member Name="ThereAreNoResultsToWrite" Description="Es gibt keine Ergebnisse für den Bericht zu exportieren" />
+  </Type>
+  <Type Name="ExcelPermission">
+    <Member Name="ImportFromExcel" Description="Import aus Excel" />
+    <Member Name="PlainExcel" Description="Einfaches Excel" />
+  </Type>
+  <Type Name="ExcelReportEntity" Description="Excel Bericht" PluralDescription="Excel Berichte" Gender="m">
+    <Member Name="DisplayName" Description="Berichtname" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="Query" Description="Abfrage" />
+  </Type>
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="ImportExcelMode" Description="Excel-Modus importieren">
+    <Member Name="Insert" Description="Insert" />
+    <Member Name="InsertOrUpdate" Description="Insert or update" />
+    <Member Name="Update" Description="Update" />
+  </Type>
+  <Type Name="ImportExcelModel" Description="Excel importieren">
+    <Member Name="Collections" Description="Collection" />
+    <Member Name="ExcelFile" Description="Excel-Datei" />
+    <Member Name="IdentityInsert" Description="Identity insert" />
+    <Member Name="MatchByColumn" Description="Nach Spalte abgleichen" />
+    <Member Name="Mode" Description="Modus" />
+    <Member Name="OperationKey" Description="Operation-Key" />
+    <Member Name="Transactional" Description="Transaktionale" />
+    <Member Name="TypeName" Description="Typname" />
+  </Type>
+  <Type Name="ImportFromExcelMessage">
+    <Member Name="_01CanAlsoBeUsed" Description="{0}.[{1}] kann auch verwendet werden" />
+    <Member Name="_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently" Description="{0} ({1}) kann nicht direkt zugeordnet werden. Jedes verschachtelte Feld sollte unabhängig zugewiesen werden." />
+    <Member Name="_01IsIncompatible" Description="{0} ({1}) ist inkompatibel" />
+    <Member Name="_0Errors" Description="{0} Fehler" />
+    <Member Name="_0IsNotSupported" Description="{0} wird nicht unterstützt" />
+    <Member Name="_0IsReadOnly" Description="{0} ist schreibgeschützt" />
+    <Member Name="Columns0AlreadyHaveConstanValuesFromFilters" Description="Spalte(n) {0} haben bereits konstante Werte aus Filtern" />
+    <Member Name="ColumnsDoNotMatchExcelColumns0QueryColumns1" Description="Die Spalten stimmen nicht überein. Excel-Spalten: {0} Abfragespalten: {1}" />
+    <Member Name="DownloadTemplate" Description="Excel-Vorlage für diese Abfrage herunterladen" />
+    <Member Name="DuplicatedNonConsecutive0Found1" Description="Duplikate nicht aufeinanderfolgender {0} gefunden: {1}" />
+    <Member Name="ErrorsIn0Rows_N" Description="Fehler in {0} Zeile(n)" />
+    <Member Name="Import0FromExcel" Description="{0} aus Excel Importieren" />
+    <Member Name="ImportFromExcel" Description="Aus Excel importieren" />
+    <Member Name="Importing0" Description="Importieren {0}" />
+    <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Viele Filter versuchen, die gleiche Eigenschaft {0} mit unterschiedlichen Werten {1} zuzuweisen" />
+    <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="Keine {0} gefunden in dieser Abfrage mit {1} gleich {2}" />
+    <Member Name="Operation0IsNotSupported" Description="Operation {0} wird nicht unterstützt" />
+    <Member Name="SomeColumnsAreIncompatibleWithImportingFromExcel" Description="Einige Spalten sind für den Import aus Excel nicht kompatibel:" />
+    <Member Name="ThisQueryHasMultipleImplementations0" Description="Diese Abfrage hat mehrere Implementierungen {0}" />
+    <Member Name="UnableToAssignMoreThanOneUnrelatedCollections0" Description="Es kann nicht mehr als eine unverbundene Sammlung zugewiesen werden: {0}" />
+  </Type>
+</Translations>

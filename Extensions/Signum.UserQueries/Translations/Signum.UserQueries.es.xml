@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="UserQueryEntity" Description="Consulta de Usuario">
+    <Member Name="AppendFilters" Description="Agregar filtros" />
+    <Member Name="Columns" Description="Columnas" />
+    <Member Name="ColumnsMode" Description="Modo columnas" />
+    <Member Name="DisplayName" Description="Nombre" />
+    <Member Name="ElementsPerPage" Description="Elementos por página" />
+    <Member Name="EntityType" Description="Tipo de entidad" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="GroupResults" Description="Agrupar resultados" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Ocultar quick link" />
+    <Member Name="IncludeDefaultFilters" Description="Incluir filtros predeterminados" />
+    <Member Name="Orders" Description="Ordenes" />
+    <Member Name="Owner" Description="Propietario" />
+    <Member Name="PaginationMode" Description="Modo de paginación" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="RefreshMode" Description="Modo de refresco" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="ApplyChanges" Description="Aplicar cambios" />
+    <Member Name="BackToDefault" Description="Restablecer por defecto" />
+    <Member Name="CreateNew" Description="Crear" />
+    <Member Name="Edit" Description="Editar" />
+    <Member Name="Preview" Description="Vista previa" />
+    <Member Name="TheSelected0" Description="la entidad {0} seleccionada " />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Utilice {0} para filtrar la entidad actual" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="UserQueryPartEntity" Description="Parte consulta de usuario">
+    <Member Name="AllowSelection" Description="Permitir selección" />
+    <Member Name="CreateNew" Description="Crear nuevo" />
+    <Member Name="RenderMode" Description="Modo de renderizado" />
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="ShowFooter" Description="Mostrar pie de página" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+  <Type Name="UserQueryPartRenderMode" Description="Modo de renderizado de parte de consulta de usuario">
+    <Member Name="BigValue" Description="Gran valor" />
+    <Member Name="SearchControl" Description="Control de búsqueda" />
+  </Type>
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Ver consultas de usuario" />
+  </Type>
+  <Type Name="ValueUserQueryElementEmbedded" Description="Valor de elemento de consulta de usuario">
+    <Member Name="Href" Description="Href" />
+    <Member Name="Label" Description="Etiqueta" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+  <Type Name="ValueUserQueryListPartEntity" Description="Parte de valor de lista de consulta de usuario" Gender="f">
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="UserQueries" Description="Consultas de usuario" />
+  </Type>
+</Translations>

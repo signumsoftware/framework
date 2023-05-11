@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ProfilerPermission">
+    <Member Name="OverrideSessionTimeout" Description="Sobrescrever timeout de sessao" />
+    <Member Name="ViewHeavyProfiler" Description="Ver medidor de tempos pesado" />
+    <Member Name="ViewTimeTracker" Description="Ver medidor de tempos" />
+  </Type>
+</Translations>

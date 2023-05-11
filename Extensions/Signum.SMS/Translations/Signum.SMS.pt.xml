@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MessageLengthExceeded" Description="Comprimento de mensagem excedido">
+    <Member Name="Allowed" Description="Permitido" />
+    <Member Name="NotAllowed" Description="Não permitido" />
+    <Member Name="TextPruning" Description="Cortar texto" />
+  </Type>
+  <Type Name="MultipleSMSModel" Description="SMS múltiplo">
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="From" Description="Desde" />
+    <Member Name="Message" Description="Mensagem" />
+  </Type>
+  <Type Name="SMSConfigurationEmbedded" Description="Configuração de SMS">
+    <Member Name="DefaultCulture" Description="Cultura predeterminada" />
+  </Type>
+  <Type Name="SMSMessageEntity" Description="Mensagem SMS" PluralDescription="Mensagens SMS">
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="DestinationNumber" Description="Número de destino" />
+    <Member Name="EditableMessage" Description="Mensagem editável" />
+    <Member Name="Exception" Description="Excepçao" />
+    <Member Name="From" Description="De" />
+    <Member Name="Message" Description="Mensagem" />
+    <Member Name="MessageID" Description="ID de mensagem" />
+    <Member Name="Referred" Description="Referenciado&#xD;&#xA;Referenciado" />
+    <Member Name="SendDate" Description="Data de Envio" />
+    <Member Name="SendPackage" Description="Enviar arquivo" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Template" Description="Modelo" />
+    <Member Name="UpdatePackage" Description="Arquivo de atualização" />
+    <Member Name="UpdatePackageProcessed" Description="Actualizar arquivo processado" />
+  </Type>
+  <Type Name="SMSMessageOperation">
+    <Member Name="CreateUpdateStatusPackage" Description="Criar arquivo de actualizaçao de estado" />
+    <Member Name="Send" Description="Enviar" />
+    <Member Name="UpdateStatus" Description="Actualizaçao de estado" />
+  </Type>
+  <Type Name="SMSMessageProcess">
+    <Member Name="Send" Description="Enviar" />
+    <Member Name="UpdateStatus" Description="Estado de actualizaçao" />
+  </Type>
+  <Type Name="SMSMessageState" Description="Estado de SMS">
+    <Member Name="Created" Description="Criado" />
+    <Member Name="Delivered" Description="Entregue" />
+    <Member Name="Sent" Description="Enviado" />
+  </Type>
+  <Type Name="SMSPackageEntity" Description="Arquivo SMS" PluralDescription="Arquivos SMS">
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="SMSSendPackageEntity" Description="Enviar arquivo SMS" PluralDescription="Enviar aqruivos SMS" />
+  <Type Name="SMSTemplateEntity" Description="Modelo de SMS">
+    <Member Name="Certified" Description="Certificado" />
+    <Member Name="EditableMessage" Description="Mensagem editável" />
+    <Member Name="From" Description="De" />
+    <Member Name="MessageLengthExceeded" Description="Comprimento da mensagem excedido" />
+    <Member Name="Messages" Description="Mensagem" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="RemoveNoSMSCharacters" Description="Eliminar caracteres nao SMS" />
+  </Type>
+  <Type Name="SMSTemplateMessage">
+    <Member Name="NewCulture" Description="Nova cultura" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="Nao existem mensagens para o modelo" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Deve haver uma mensagem para {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Existe mais de uma mensagem para o mesmo idioma" />
+  </Type>
+  <Type Name="SMSTemplateMessageEmbedded" Description="Mensagem SMS modelo">
+    <Member Name="CultureInfo" Description="Informaçao cultura" />
+    <Member Name="Message" Description="Mensagem" />
+  </Type>
+  <Type Name="SMSTemplateOperation">
+    <Member Name="Create" Description="Criar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="SMSUpdatePackageEntity" Description="Actualizar arquivo SMS" PluralDescription="Actualizar arquivos SMS" />
+</Translations>

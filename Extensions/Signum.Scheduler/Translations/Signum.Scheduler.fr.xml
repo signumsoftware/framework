@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HolidayEmbedded" Description="Vacances">
+    <Member Name="Date" Description="Date" />
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="ScheduledTaskEntity" Description="Tâches planifiées">
+    <Member Name="Rule" Description="Règle" />
+    <Member Name="Suspended" Description="Suspendu" />
+    <Member Name="Task" Description="Tâche" />
+  </Type>
+</Translations>

@@ -1,0 +1,17 @@
+﻿.sf-profiler-chart svg
+{
+    shape-rendering: crispEdges;
+}
+.sf-profiler-chart .entry
+{
+    cursor: pointer;
+}
+.sf-profiler-chart .shape-before
+{
+    opacity: 0.3;
+    fill: white;
+}
+.sf-profiler-chart .label
+{
+    font-size: 12px;
+}

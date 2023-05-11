@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="OmniboxMessage">
+    <Member Name="ComplementWordsRegex" Description="\b(el|la|los|las|de|del) " />
+    <Member Name="No" Description="No" />
+    <Member Name="NotFound" Description="[No encontrada]" />
+    <Member Name="Omnibox_Dashboard" Description="Panel de control" />
+    <Member Name="Omnibox_DatabaseAccess" Description="Buscar entre 'apóstrofe' hará consultas a la base de datos" />
+    <Member Name="Omnibox_Disambiguate" Description="Con [Tab] se elimina la ambigüedad de la consulta" />
+    <Member Name="Omnibox_Field" Description="Campo" />
+    <Member Name="Omnibox_Help" Description="Ayuda" />
+    <Member Name="Omnibox_MatchingOptions" Description="Puede encontrar resultados por (i)nicio, mi(tad) o (S)iglas(M)ayúsculas" />
+    <Member Name="Omnibox_OmniboxSyntaxGuide" Description="Guía de sintaxis del Omnibox:" />
+    <Member Name="Omnibox_Query" Description="Consulta" />
+    <Member Name="Omnibox_Type" Description="Tipo" />
+    <Member Name="Omnibox_UserChart" Description="Gráfico de usuario" />
+    <Member Name="Omnibox_UserQuery" Description="Consulta de usuario" />
+    <Member Name="Omnibox_Value" Description="Valor" />
+    <Member Name="Search" Description="Buscar..." />
+    <Member Name="Unknown" Description="Desconocido" />
+    <Member Name="Yes" Description="sí" />
+  </Type>
+  <Type Name="OmniboxPermission">
+    <Member Name="ViewOmnibox" Description="Ver omnibox" />
+  </Type>
+</Translations>

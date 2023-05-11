@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AlertCurrentState" Description="Stato attuale dell'avviso">
+    <Member Name="Alerted" Description="Avvisata" />
+    <Member Name="Attended" Description="Risolta" />
+    <Member Name="Future" Description="Futura" />
+  </Type>
+  <Type Name="AlertEntity" Description="Avviso" PluralDescription="Avvisi">
+    <Member Name="AlertDate" Description="Data avviso" />
+    <Member Name="Alerted" Description="Avvisati" />
+    <Member Name="AlertType" Description="Tipo di avviso" />
+    <Member Name="Attended" Description="Risolta" />
+    <Member Name="AttendedBy" Description="Risolta da" />
+    <Member Name="AttendedDate" Description="Data di revisione" />
+    <Member Name="CreatedBy" Description="Creato da" />
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="CurrentState" Description="Stato attuale" />
+    <Member Name="Future" Description="Futuro" />
+    <Member Name="NotAttended" Description="Non eseguito" />
+    <Member Name="State" Description="Stato" />
+    <Member Name="Target" Description="Destinazione" />
+    <Member Name="Text" Description="Testo" />
+    <Member Name="Title" Description="Titolo" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="Alert" Description="Avvisare" />
+    <Member Name="Alerts" Description="Avvisi" />
+    <Member Name="Alerts_Attended" Description="Eseguiti" />
+    <Member Name="Alerts_Future" Description="Futuri" />
+    <Member Name="Alerts_NotAttended" Description="Non eseguiti" />
+    <Member Name="CheckedAlerts" Description="Controllo" />
+    <Member Name="CreateAlert" Description="Creare avviso" />
+    <Member Name="FutureAlerts" Description="Futuri" />
+    <Member Name="NewAlert" Description="Nuovo avviso" />
+    <Member Name="WarnedAlerts" Description="Avvisi" />
+  </Type>
+  <Type Name="AlertOperation">
+    <Member Name="Attend" Description="Esegui" />
+    <Member Name="CreateAlertFromEntity" Description="Crea avviso dall'entità" />
+    <Member Name="Save" Description="Salva" />
+    <Member Name="Unattend" Description="Non eseguire" />
+  </Type>
+  <Type Name="AlertState" Description="Stato dell'avviso">
+    <Member Name="Attended" Description="Eseguito" />
+    <Member Name="New" Description="Nuovo" />
+    <Member Name="Saved" Description="Salvato" />
+  </Type>
+  <Type Name="AlertTypeOperation">
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+</Translations>

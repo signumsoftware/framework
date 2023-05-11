@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="UserQueryEntity" Description="Recherche de l'utilisateur">
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="ColumnsMode" Description="Mode de colonnes" />
+    <Member Name="DisplayName" Description="Afficher le nom" />
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="Orders" Description="Ordres" />
+    <Member Name="Query" Description="Requête" />
+  </Type>
+</Translations>

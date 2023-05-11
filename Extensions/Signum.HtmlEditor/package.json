@@ -1,0 +1,17 @@
+{
+  "name": "signum-htmleditor",
+  "version": "1.0.0",
+  "description": "Resable modules to use on top of Signum Framework",
+  "repository": "",
+  "keywords": [],
+  "author": "Signum Software",
+  "license": "MIT",
+  "resolutions": {
+  },
+  "dependencies": {
+    "@types/draft-js": "0.11.10",
+    "draft-js": "0.11.7",
+    "draftjs-to-html": "0.9.1",
+    "html-to-draftjs": "1.5.0"
+  }
+}

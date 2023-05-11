@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="QueryColumnEmbedded" Description="Colonne de requête">
+    <Member Name="DisplayName" Description="Nom" />
+  </Type>
+  <Type Name="QueryFilterEmbedded" Description="Filtre de requête">
+    <Member Name="Operation" Description="Opération" />
+    <Member Name="ValueString" Description="Chaîne de valeur" />
+  </Type>
+  <Type Name="QueryOrderEmbedded" Description="Ordre de requête">
+    <Member Name="OrderType" Description="Type d'ordre" />
+  </Type>
+</Translations>

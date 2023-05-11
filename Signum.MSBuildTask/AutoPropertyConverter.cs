@@ -1,4 +1,4 @@
-﻿using Mono.Cecil;
+using Mono.Cecil;
 using System.Linq;
 using Mono.Cecil.Cil;
 
@@ -19,7 +19,7 @@ internal class AutoPropertyConverter
         this.Assembly = assembly;
         this.Resolver = resolver;
 
-        this.SigumEntities = assembly.Name.Name == "Signum.Entities" ? assembly : resolver.SignumEntities;
+        this.SigumEntities = assembly.Name.Name == "Signum" ? assembly : resolver.Signum;
         this.ModifiableEntity = SigumEntities.MainModule.GetType("Signum.Entities", "ModifiableEntity");
         this.SetMethod = Assembly.MainModule.ImportReference(this.ModifiableEntity.Methods.Single(m => m.Name == "Set" && m.IsDefinition));
         this.GetMethod = Assembly.MainModule.ImportReference(this.ModifiableEntity.Methods.Single(m => m.Name == "Get" && m.IsDefinition));

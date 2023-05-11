@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ModelConverterSymbol" Description="Modell-Konverter" Gender="m" />
+  <Type Name="MultiEntityModel" Description="Multi-Entität">
+    <Member Name="Entities" Description="Entitäten" />
+  </Type>
+  <Type Name="QueryModel" Description="Abfrage">
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Pagination" Description="Paginierung" />
+    <Member Name="QueryName" Description="Abfrage-Name" />
+  </Type>
+  <Type Name="QueryModelMessage">
+    <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Konfigurieren Sie Ihre Abfrage und klicken Sie auf [suchen] vor Sie [Ok] drücken." />
+  </Type>
+  <Type Name="TemplateApplicableEval" Description="Vorlage für eval" />
+  <Type Name="TemplateTokenMessage">
+    <Member Name="Insert" Description="Einfügen" />
+    <Member Name="NoColumnSelected" Description="Keine Spalte ausgewählt" />
+    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Sie können keine Blöcke mit &quot;Alle&quot; oder &quot;Keine&quot; hinzufügen" />
+    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Sie können keine If-Blöcke in einem Collection-Feld hinzufügen" />
+    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="Sie können nur Foreach-Blöcke mit Collection-Feldern hinzufügen" />
+    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Sie müssen das Element Token zur Verwendung von Foreach in einem Collection-Feld hinzufügen" />
+  </Type>
+</Translations>

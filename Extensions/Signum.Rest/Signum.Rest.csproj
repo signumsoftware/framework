@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<OutputType>Library</OutputType>
+		<NoWarn>8618</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+		<ProjectReference Include="..\Signum.DiffLog\Signum.DiffLog.csproj" />
+	</ItemGroup>
+
+    
+</Project>

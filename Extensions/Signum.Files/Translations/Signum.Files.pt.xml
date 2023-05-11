@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="FileEmbedded" Description="Ficheiro incorporado">
+    <Member Name="BinaryFile" Description="Ficheiro binário" />
+    <Member Name="FileName" Description="Nome do ficheiro" />
+  </Type>
+  <Type Name="FileEntity" Description="Ficheiro" PluralDescription="Ficheiros">
+    <Member Name="BinaryFile" Description="Ficheiro binário" />
+    <Member Name="FileName" Description="Nome do ficheiro" />
+    <Member Name="Hash" Description="Hash" />
+  </Type>
+  <Type Name="FileMessage">
+    <Member Name="DownloadFile" Description="Descarregar ficheiro" />
+    <Member Name="ErrorSavingFile" Description="Erro ao guardar ficheiro" />
+    <Member Name="FileTypes" Description="Tipos de ficheiro" />
+    <Member Name="OnlyOneFileIsSupported" Description="Só se admite um ficheiro" />
+    <Member Name="Open" Description="Abrir" />
+    <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Abrir não tem uma implementação por defeito para {0}" />
+    <Member Name="Remove" Description="Eliminar" />
+    <Member Name="SavingHasNotDefaultImplementationFor0" Description="Guardar não tem uma implementação por defeito para {0}" />
+    <Member Name="SelectFile" Description="Seleccionar ficheiro" />
+    <Member Name="ViewFile" Description="Ver ficheiro" />
+    <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Ver não tem uma implementação por defeito para {0}" />
+    <Member Name="WebDownload" Description="Descarregar" />
+    <Member Name="WebImage" Description="Imagem" />
+  </Type>
+  <Type Name="FilePathEntity" Description="Endereço do ficheiro" PluralDescription="Endereços do ficheiro">
+    <Member Name="BinaryFile" Description="Ficheiro binário" />
+    <Member Name="FileLength" Description="Tamanho do ficheiro" />
+    <Member Name="FileLengthString" Description="string tamanho do ficheiro" />
+    <Member Name="FileName" Description="Nome do ficheiro" />
+    <Member Name="FileType" Description="Tipo de ficheiro" />
+  </Type>
+  <Type Name="FileTypeSymbol" Description="Tipo de ficheiro" PluralDescription="Tipos de ficheiro" />
+</Translations>

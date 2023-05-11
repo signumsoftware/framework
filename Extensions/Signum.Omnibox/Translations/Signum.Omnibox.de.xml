@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="OmniboxMessage">
+    <Member Name="ComplementWordsRegex" Description="\b(der|die|das|den|dem|von) " />
+    <Member Name="No" Description="nein" />
+    <Member Name="NotFound" Description="[Nicht gefunden]" />
+    <Member Name="Omnibox_Dashboard" Description="Dashboard" />
+    <Member Name="Omnibox_DatabaseAccess" Description="Suche zwischen 'Apostroph' wird Abfragen in der Datenbank vornehmen" />
+    <Member Name="Omnibox_Disambiguate" Description="Mit [Tab] wird Zweideutigkeit gelöscht" />
+    <Member Name="Omnibox_Field" Description="Feld" />
+    <Member Name="Omnibox_Help" Description="Hilfe" />
+    <Member Name="Omnibox_MatchingOptions" Description="Sie können Ergebnisse mit (st)art, mit(te) oder (G)roße(B)uchstaben finden" />
+    <Member Name="Omnibox_OmniboxSyntaxGuide" Description="Omnibox Syntax-Anleitung:" />
+    <Member Name="Omnibox_Query" Description="Abfrage" />
+    <Member Name="Omnibox_Type" Description="Typ" />
+    <Member Name="Omnibox_UserChart" Description="Benutzerdiagramm" />
+    <Member Name="Omnibox_UserQuery" Description="Benutzerabfrage" />
+    <Member Name="Omnibox_Value" Description="Wert" />
+    <Member Name="Search" Description="Suche..." />
+    <Member Name="Unknown" Description="Unbekannt" />
+    <Member Name="Yes" Description="Ja" />
+  </Type>
+  <Type Name="OmniboxPermission">
+    <Member Name="ViewOmnibox" Description="Omnibox anzeigen" />
+  </Type>
+</Translations>

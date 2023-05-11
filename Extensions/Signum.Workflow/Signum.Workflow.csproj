@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<OutputType>Library</OutputType>
+		<NoWarn>8618</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
+		<PackageReference Include="Signum.MSBuildTask" Version="7.5.0" />
+		<PackageReference Include="Signum.TSGenerator" Version="7.5.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Alerts\Signum.Alerts.csproj" />
+		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
+		<ProjectReference Include="..\Signum.Dynamic\Signum.Dynamic.csproj" />
+		<ProjectReference Include="..\Signum.Eval\Signum.Eval.csproj" />
+		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
+		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
+		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
+		<ProjectReference Include="..\Signum.SMS\Signum.SMS.csproj" />
+		<ProjectReference Include="..\Signum.Toolbar\Signum.Toolbar.csproj" />
+		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
+	</ItemGroup>
+
+    
+</Project>

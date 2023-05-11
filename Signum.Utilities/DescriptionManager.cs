@@ -413,20 +413,30 @@ public class LocalizedAssembly
 
         string fileName = TranslationFileName(Assembly, Culture);
 
-        doc.Save(fileName);
+        if (doc == null)
+            File.Delete(fileName);
+        else
+            doc.Save(fileName);
 
         DescriptionManager.Invalidate();
     }
 
-    public XDocument ToXml()
+    public XDocument? ToXml()
     {
+        var types = (from lt in Types.Values
+                     let doa = GetDescriptionOptions(lt.Type)
+                     where doa != DescriptionOptions.None
+                     orderby lt.Type.Name
+                     select lt.ExportXml() into xt
+                     where !LocalizedType.IsEmpty(xt)
+                     select xt).ToList();
+
+        if (types.IsEmpty())
+            return null;
+
         var doc = new XDocument(new XDeclaration("1.0", "UTF8", "yes"),
             new XElement("Translations",
-                from lt in Types.Values
-                let doa = GetDescriptionOptions(lt.Type)
-                where doa != DescriptionOptions.None
-                orderby lt.Type.Name
-                select lt.ExportXml()
+                types
             )
         );
         return doc;
@@ -499,7 +509,7 @@ public class LocalizedType
 
     public XElement ExportXml()
     {
-        return new XElement("Type",
+        var result = new XElement("Type",
                 new XAttribute("Name", Type.Name),
 
                 !Options.IsSetAssert(DescriptionOptions.Description, Type) ||
@@ -525,6 +535,8 @@ public class LocalizedType
                   where value != null && !(Assembly.IsDefault && (DescriptionManager.DefaultMemberDescription(m) == value))
                   select new XElement("Member", new XAttribute("Name", m.Name), new XAttribute("Description", value)))
             );
+
+        return result;
     }
 
     const BindingFlags instanceFlags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
@@ -610,6 +622,11 @@ public class LocalizedType
             return false;
 
         return true;
+    }
+
+    public static bool IsEmpty(XElement xt)
+    {
+        return !xt.Attributes().Any(a => a.Name != "Name") && !xt.Elements().Any();
     }
 }
 

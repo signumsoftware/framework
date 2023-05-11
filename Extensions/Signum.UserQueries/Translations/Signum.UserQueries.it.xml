@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="UserQueryEntity" Description="Query utente">
+    <Member Name="AppendFilters" Description="Aggiungere filtri" />
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="ColumnsMode" Description="Modalità colonne" />
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="ElementsPerPage" Description="Elementi per pagina" />
+    <Member Name="EntityType" Description="Tipo di entità" />
+    <Member Name="Filters" Description="Filtri" />
+    <Member Name="GroupResults" Description="Raggruppare i risultati" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
+    <Member Name="IncludeDefaultFilters" Description="Includere filtri predefiniti" />
+    <Member Name="Orders" Description="Ordini" />
+    <Member Name="Owner" Description="Proprietario" />
+    <Member Name="PaginationMode" Description="Modalità di impaginazione" />
+    <Member Name="Query" Description="Query" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="Edit" Description="Modifica" />
+    <Member Name="Preview" Description="Anteprima" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Utilizzare {0} per filtrare l'attuale entità" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Elimina" />
+    <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="UserQueryPartEntity" Description="Parte di query utente" PluralDescription="Parti di query utente">
+    <Member Name="RequiresTitle" Description="Titolo richiesto" />
+    <Member Name="UserQuery" Description="Query utente" />
+  </Type>
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Vedi query di utente" />
+  </Type>
+</Translations>

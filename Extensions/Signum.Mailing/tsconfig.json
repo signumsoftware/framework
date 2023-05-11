@@ -1,0 +1,19 @@
+{                                
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./ts_out",
+    "paths": {
+      "@framework/*": [ "../../Signum/React/*" ]
+    }
+  },
+  "references": [
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.UserAssets" },
+    { "path": "../Signum.Templating" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.Eval" },
+    { "path": "../Signum.HtmlEditor" },
+    { "path": "../Signum.CodeMirror" }
+  ]
+}

@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="EntityAction" Description="Azione dell'entità">
+    <Member Name="Different" Description="Diversi" />
+    <Member Name="Identical" Description="Identici" />
+    <Member Name="New" Description="Nuova" />
+  </Type>
+  <Type Name="IUserAssetEntity">
+    <Member Name="Guid" Description="Guid" />
+  </Type>
+  <Type Name="PinnedQueryFilterEmbedded" Description="Filtro fisso di query">
+    <Member Name="Active" Description="Attivo" />
+    <Member Name="Column" Description="Colonna" />
+    <Member Name="Label" Description="Etichetta" />
+    <Member Name="Row" Description="Riga" />
+  </Type>
+  <Type Name="QueryColumnEmbedded" Description="Colonna di query">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryFilterEmbedded" Description="Filtro Query">
+    <Member Name="GroupOperation" Description="Operazione di gruppo" />
+    <Member Name="Indentation" Description="Indentazione" />
+    <Member Name="IsGroup" Description="È un gruppo" />
+    <Member Name="Operation" Description="Operazione" />
+    <Member Name="Pinned" Description="Fisso" />
+    <Member Name="Token" Description="Token" />
+    <Member Name="ValueString" Description="Valore stringa" />
+  </Type>
+  <Type Name="QueryOrderEmbedded" Description="Ordine Query">
+    <Member Name="OrderType" Description="Tipo di ordine" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryTokenEmbedded" Description="Token di query">
+    <Member Name="TokenString" Description="Stringa di token" />
+  </Type>
+  <Type Name="UserAssetMessage">
+    <Member Name="ExportToXml" Description="Esporta in xml" />
+    <Member Name="ImportPreview" Description="Anteprima di importazione" />
+    <Member Name="ImportUserAssets" Description="Importa le risorse dell'utente" />
+    <Member Name="SelectTheEntitiesToOverride" Description="Seleziona le entità da ignorare" />
+    <Member Name="SucessfullyImported" Description="Importati con successo" />
+  </Type>
+  <Type Name="UserAssetPermission">
+    <Member Name="UserAssetsToXML" Description="User assets to XML" />
+  </Type>
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Linea di anteprima delle risorse dell'utente">
+    <Member Name="Action" Description="Azione" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="OverrideEntity" Description="Sostituire l'entità" />
+    <Member Name="Text" Description="Testo" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="UserAssetPreviewModel" Description="Anteprima risorse dell'utente">
+    <Member Name="Lines" Description="Linee" />
+  </Type>
+</Translations>

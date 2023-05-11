@@ -1,0 +1,13 @@
+﻿.sf-property-selector {
+    display: inline-table;
+    vertical-align: -webkit-baseline-middle;
+}
+
+.sf-property-part {
+    display: inline-block;
+    margin-right: 1px;
+}
+
+    .sf-property-part .rw-popup-container {
+        min-width: 400px;
+    }

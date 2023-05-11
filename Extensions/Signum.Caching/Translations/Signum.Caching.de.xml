@@ -1,0 +1,7 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CachePermission">
+    <Member Name="InvalidateCache" Description="Cache ungültig" />
+    <Member Name="ViewCache" Description="Cache sehen" />
+  </Type>
+</Translations>

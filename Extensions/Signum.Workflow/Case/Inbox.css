@@ -1,0 +1,38 @@
+﻿.new-row {
+    font-weight:bold;
+}
+
+.opened-row {
+}
+
+.in-progress-row {
+    font-style:italic;
+}
+
+.done-row {
+    color: gray;
+}
+
+.done-by-other-row {
+    color: brown;
+}
+
+a.case-icon:focus,
+a.case-icon:hover{
+    outline:none;
+    text-decoration:none;
+}
+
+.case-icon-ghost {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+tr:hover .case-icon-ghost{
+    opacity: 1;
+}
+
+a.case-icon .case-tag{
+    margin-left:  5px;
+}
+

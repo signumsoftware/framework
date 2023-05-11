@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="NoteEntity" Description="Nota">
+    <Member Name="CreatedBy" Description="Creato da" />
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="NoteType" Description="Tipo di nota" />
+    <Member Name="Target" Description="Destinazione" />
+    <Member Name="Text" Description="Testo" />
+    <Member Name="Title" Description="Titolo" />
+  </Type>
+  <Type Name="NoteMessage">
+    <Member Name="_note" Description="Nota" />
+    <Member Name="_notes" Description="Note" />
+    <Member Name="CreateNote" Description="Creare nota" />
+    <Member Name="NewNote" Description="Nuova nota" />
+    <Member Name="Note" Description="Nota:" />
+    <Member Name="NoteCreated" Description="Nota creata" />
+    <Member Name="Notes" Description="Note" />
+    <Member Name="ViewNotes" Description="Vedere note" />
+  </Type>
+  <Type Name="NoteOperation">
+    <Member Name="CreateNoteFromEntity" Description="Creare una nota dalla entità" />
+    <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="NoteTypeOperation">
+    <Member Name="Save" Description="Salva" />
+  </Type>
+</Translations>

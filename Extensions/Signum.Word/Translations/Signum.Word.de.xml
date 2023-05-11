@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="WordAttachmentEntity" Description="Word-Anhang" PluralDescription="Word-Anhänge" Gender="m">
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="ModelConverter" Description="Modell-Konverter" />
+    <Member Name="OverrideModel" Description="Modell überschreiben" />
+    <Member Name="WordTemplate" Description="Word-Vorlage" />
+  </Type>
+  <Type Name="WordConverterSymbol" Description="Word-Konverter" Gender="m" />
+  <Type Name="WordModelEntity" Description="Word-Modell" PluralDescription="Word-Modelle" Gender="n">
+    <Member Name="FullClassName" Description="Full Class Name" />
+  </Type>
+  <Type Name="WordTemplateEntity" Description="Word-Vorlage">
+    <Member Name="Applicable" Description="Anwendbar" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Model" Description="modell" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="Template" Description="Vorlage" />
+    <Member Name="WordConverter" Description="Word-Konverter" />
+    <Member Name="WordTransformer" Description="Word-Transformator" />
+  </Type>
+  <Type Name="WordTemplateMessage">
+    <Member Name="_01RequiresExtraParameters" Description="{0} {1} erfordert zusätzliche Parameter" />
+    <Member Name="ChooseAReportTemplate" Description="Wählen Sie eine Berichtsvorlage" />
+    <Member Name="ModelShouldBeSetToUseModel0" Description="Modell sollte angegeben werden, um Modell {0} zu benutzen" />
+    <Member Name="NoDefaultTemplateDefined" Description="Keine Standard-Vorlage definiert" />
+    <Member Name="SelectTheSourceOfDataForYourTableOrChart" Description="Wählen Sie die Quelle der Daten für Ihre Tabelle oder Diagramm" />
+    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Typ {0} verfügt nicht über eine Eigenschaft mit dem Namen {1}" />
+    <Member Name="WordReport" Description="Word-Bericht" />
+    <Member Name="WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart" Description="Schreiben Sie diesen Schlüssel als Titel in den &quot;Alternativen Text&quot; Ihre Tabelle oder Diagramm" />
+  </Type>
+  <Type Name="WordTemplateOperation">
+    <Member Name="CreateWordReport" Description="Word-Bericht erstellen" />
+    <Member Name="CreateWordTemplateFromWordModel" Description="Wortvorlage aus Wort-Modell erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="WordTemplatePermission">
+    <Member Name="GenerateReport" Description="Bericht generieren" />
+  </Type>
+  <Type Name="WordTransformerSymbol" Description="Word-Transformator" PluralDescription="Word-Transformatoren" />
+</Translations>

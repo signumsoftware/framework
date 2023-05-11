@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="WordConverterSymbol" Description="Word converter" />
+  <Type Name="WordTemplateEntity" Description="Modello Word" PluralDescription="Modelli Word">
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="DisableAuthorization" Description="Disattivare l'autorizzazione" />
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Query" Description="Query" />
+    <Member Name="Template" Description="Modello" />
+    <Member Name="WordConverter" Description="Word converter" />
+    <Member Name="WordTransformer" Description="Word transformer" />
+  </Type>
+  <Type Name="WordTemplateMessage">
+    <Member Name="ChooseAReportTemplate" Description="Scegli un modello di rapporto" />
+    <Member Name="ModelShouldBeSetToUseModel0" Description="Modello deve essere impostato per utilizzare il modello {0}" />
+    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} non ha una proprietà con nome {1}" />
+  </Type>
+  <Type Name="WordTemplateOperation">
+    <Member Name="CreateWordReport" Description="Crea rapporto Word" />
+    <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="WordTemplatePermission">
+    <Member Name="GenerateReport" Description="Genera rapporto" />
+  </Type>
+  <Type Name="WordTransformerSymbol" Description="Word transformer" />
+</Translations>

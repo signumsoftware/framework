@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "sourceMap": true,
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "incremental": true,
+    "composite": true,
+    //"noEmit": true,
+    "strict": true,
+    "declarationMap": true,
+    "lib": [
+      "ES2020",
+      "dom"
+    ]
+  }
+}

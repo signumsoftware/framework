@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ActiveDirectoryAuthorizerMessage">
+    <Member Name="ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication" Description="L'utente di Active Directory '{0}' non è associato a un utente dell'applicazione." />
+  </Type>
+  <Type Name="ActiveDirectoryConfigurationEmbedded" Description="Active directory configuration">
+    <Member Name="AllowMatchUsersBySimpleUserName" Description="Allow match users by simple user name" />
+    <Member Name="AutoCreateUsers" Description="Auto create users" />
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="DefaultRole" Description="Default role" />
+    <Member Name="DomainName" Description="Domain name" />
+    <Member Name="LoginWithActiveDirectoryRegistry" Description="Login with active directory registry" />
+    <Member Name="LoginWithAzureAD" Description="Login with azure AD" />
+    <Member Name="LoginWithWindowsAuthenticator" Description="Login with windows authenticator" />
+    <Member Name="RoleMapping" Description="Role mapping" />
+  </Type>
+  <Type Name="RoleMappingEmbedded" Description="Role mapping">
+    <Member Name="ADNameOrGuid" Description="AD name or guid" />
+    <Member Name="Role" Description="Role" />
+  </Type>
+</Translations>

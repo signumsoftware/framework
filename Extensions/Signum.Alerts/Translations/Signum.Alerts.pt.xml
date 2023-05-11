@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AlertCurrentState" Description="Estado actual do alerta">
+    <Member Name="Alerted" Description="Alertado" />
+    <Member Name="Attended" Description="Assistido" />
+    <Member Name="Future" Description="Futuro" />
+  </Type>
+  <Type Name="AlertEntity" Description="o Alerta" PluralDescription="os Alestras">
+    <Member Name="AlertDate" Description="Data de alerta" />
+    <Member Name="Alerted" Description="Alertado" />
+    <Member Name="AlertType" Description="Tipo de alerta" />
+    <Member Name="Attended" Description="Assistido" />
+    <Member Name="AttendedBy" Description="Assitido por" />
+    <Member Name="AttendedDate" Description="Data de revisão" />
+    <Member Name="CreatedBy" Description="Criado por " />
+    <Member Name="CreationDate" Description="Data de criação" />
+    <Member Name="CurrentState" Description="Estado actual" />
+    <Member Name="Future" Description="Futuro" />
+    <Member Name="NotAttended" Description="Não assistido" />
+    <Member Name="State" Description="Estado " />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="Text" Description="Texto" />
+    <Member Name="Title" Description="Título" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="Alert" Description="Alerta" />
+    <Member Name="Alerts" Description="Alertas" />
+    <Member Name="Alerts_Attended" Description="Assistidos" />
+    <Member Name="Alerts_Future" Description="Futuros" />
+    <Member Name="Alerts_NotAttended" Description="Não assistidos" />
+    <Member Name="CheckedAlerts" Description="Assistidos" />
+    <Member Name="CreateAlert" Description="Criar alerta" />
+    <Member Name="FutureAlerts" Description="Futuros" />
+    <Member Name="NewAlert" Description="Novo alerta" />
+    <Member Name="WarnedAlerts" Description="Alertados" />
+  </Type>
+  <Type Name="AlertOperation">
+    <Member Name="Attend" Description="Assistir" />
+    <Member Name="CreateAlertFromEntity" Description="Criar laerta desde entidade" />
+    <Member Name="Save" Description="Guardar" />
+    <Member Name="Unattend" Description="Abandonar" />
+  </Type>
+  <Type Name="AlertState" Description="Estado do alerta">
+    <Member Name="Attended" Description="Assistido" />
+    <Member Name="New" Description="Novo" />
+    <Member Name="Saved" Description="Guardado" />
+  </Type>
+  <Type Name="AlertTypeOperation">
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

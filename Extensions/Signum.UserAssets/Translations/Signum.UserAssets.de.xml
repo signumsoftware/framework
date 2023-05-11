@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="EntityAction" Description="Entity-Aktion">
+    <Member Name="Different" Description="Verschiedene" />
+    <Member Name="Identical" Description="Identische" />
+    <Member Name="New" Description="Neu" />
+  </Type>
+  <Type Name="IUserAssetEntity">
+    <Member Name="Guid" Description="Guid" />
+  </Type>
+  <Type Name="LiteConflictEmbedded" Description="Lite-Konflikt">
+    <Member Name="From" Description="Von" />
+    <Member Name="PropertyRoute" Description="Route der Immobilie" />
+    <Member Name="To" Description="An" />
+  </Type>
+  <Type Name="PinnedQueryFilterEmbedded" Description="Vorgewahlter Abfragefilter">
+    <Member Name="Active" Description="Aktiv" />
+    <Member Name="Column" Description="Spalte" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="Row" Description="Zeile" />
+  </Type>
+  <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
+    <Member Name="CombineRows" Description="Zeilen kombinieren" />
+    <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="HiddenColumn" Description="Ausgeblendete Spalte" />
+    <Member Name="SummaryToken" Description="Zusammenfassung Token" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryFilterEmbedded" Description="Abfragefilter">
+    <Member Name="DashboardBehaviour" Description="Dashboard-Verhalten" />
+    <Member Name="GroupOperation" Description="Gruppenoperation" />
+    <Member Name="Indentation" Description="Einrückung" />
+    <Member Name="IsGroup" Description="Ist Gruppe" />
+    <Member Name="Operation" Description="Betrieb" />
+    <Member Name="Pinned" Description="Vorgewahlter " />
+    <Member Name="Token" Description="Token" />
+    <Member Name="ValueString" Description="Wert String" />
+  </Type>
+  <Type Name="QueryOrderEmbedded" Description="Abfragereihenfolge">
+    <Member Name="OrderType" Description="Reihenfolgentyp" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryTokenEmbedded" Description="Abfrage Token">
+    <Member Name="TokenString" Description="Token string" />
+  </Type>
+  <Type Name="UserAssetMessage">
+    <Member Name="ExportToXml" Description="In xml exportieren" />
+    <Member Name="ImportPreview" Description="Importvorschau" />
+    <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
+    <Member Name="LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase" Description="Sieht so aus, als ob einige Entitäten in {0} in dieser Datenbank nicht existieren oder eine andere Bedeutung haben ..." />
+    <Member Name="SameSelectionForAllConflictsOf0" Description="Gleiche Auswahl für alle Konflikte der {0}" />
+    <Member Name="SelectTheEntitiesToOverride" Description="Wählen Sie die Elemente zum Überschreiben aus" />
+    <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
+    <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
+    <Member Name="SwitchToExpression" Description="Auf Ausdruck umschalten" />
+    <Member Name="SwitchToValue" Description="Auf Wert umschalten" />
+  </Type>
+  <Type Name="UserAssetPermission">
+    <Member Name="UserAssetsToXML" Description="Benutzer-Assets in XML" />
+  </Type>
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Benutzer-Asset-Vorschau-Linie">
+    <Member Name="Action" Description="Aktion" />
+    <Member Name="CustomResolution" Description="Benutzerdefinierte Auflösung" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="LiteConflicts" Description="Leichte Konflikte" />
+    <Member Name="OverrideEntity" Description="Entität überschreiben" />
+    <Member Name="Text" Description="Text" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="UserAssetPreviewModel" Description="Benutzer-Asset-Vorschau">
+    <Member Name="Lines" Description="Linien" />
+  </Type>
+</Translations>

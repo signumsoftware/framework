@@ -20,9 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Signum.Engine\Signum.Engine.csproj" />
-    <ProjectReference Include="..\..\Signum.Entities\Signum.Entities.csproj" />
     <ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
+    <ProjectReference Include="..\..\Signum\Signum.csproj" />
     <ProjectReference Include="..\Signum.Analyzer\Signum.Analyzer.csproj" />    <!--Remove before restore to workarround NuGet duplicated key bug -->
   </ItemGroup>
 

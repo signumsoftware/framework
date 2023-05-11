@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="WordAttachmentEntity" Description="Archivo adjunto de Word">
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="ModelConverter" Description="Conversor de modelo" />
+    <Member Name="OverrideModel" Description="Reemplazar el modelo" />
+    <Member Name="WordTemplate" Description="Plantilla Word" />
+  </Type>
+  <Type Name="WordConverterSymbol" Description="Convertidor Word" />
+  <Type Name="WordModelEntity" Description="Modelo de palabras">
+    <Member Name="FullClassName" Description="Full Class Name" />
+  </Type>
+  <Type Name="WordTemplateEntity" Description="Plantilla Word">
+    <Member Name="Applicable" Description="Aplicable" />
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="DisableAuthorization" Description="Desactivar autorización" />
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="Filters" Description="Filtros" />
+    <Member Name="GroupResults" Description="Agrupar resultados" />
+    <Member Name="Model" Description="Modelo" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Orders" Description="Órdenes" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Template" Description="Plantilla" />
+    <Member Name="WordConverter" Description="Convertidor Word" />
+    <Member Name="WordTransformer" Description="Transformador Word" />
+  </Type>
+  <Type Name="WordTemplateMessage">
+    <Member Name="_01RequiresExtraParameters" Description="{0} {1} requiere parámetros adicionales" />
+    <Member Name="ChooseAReportTemplate" Description="Seleccione una plantilla de informe" />
+    <Member Name="ModelShouldBeSetToUseModel0" Description="Modelo debe establecerse para usar el modelo {0}" />
+    <Member Name="NoDefaultTemplateDefined" Description="No hay plantilla predeterminada definida" />
+    <Member Name="SelectTheSourceOfDataForYourTableOrChart" Description="Seleccione la fuente de datos para la tabla o gráfico" />
+    <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} no tiene una propiedad con el nombre {1}" />
+    <Member Name="WordReport" Description="Informe Word" />
+    <Member Name="WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart" Description="Escriba esta clave como título en el 'texto alternativo' de su tabla o gráfico" />
+  </Type>
+  <Type Name="WordTemplateOperation">
+    <Member Name="CreateWordReport" Description="Crear informe Word" />
+    <Member Name="CreateWordTemplateFromWordModel" Description="Crear plantilla Word a partir del modelo Word" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="WordTemplatePermission">
+    <Member Name="GenerateReport" Description="Generar informe" />
+  </Type>
+  <Type Name="WordTransformerSymbol" Description="Transformador Word" />
+</Translations>

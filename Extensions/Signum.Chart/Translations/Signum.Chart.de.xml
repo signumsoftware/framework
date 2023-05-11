@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ChartColumnEmbedded" Description="Diagrammspalte">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="Format" Description="Format" />
+    <Member Name="OrderByIndex" Description="Sortieren nach index" />
+    <Member Name="OrderByType" Description="Sortieren nach typ" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="ChartColumnType">
+    <Member Name="Any" Description="Any" />
+    <Member Name="DateOnly" Description="Datum" />
+    <Member Name="DateTime" Description="Datum Uhrzeit" />
+    <Member Name="Enum" Description="Enum" />
+    <Member Name="Groupable" Description="Gruppierbar" />
+    <Member Name="Integer" Description="Ganze Zahl" />
+    <Member Name="Lite" Description="Lite" />
+    <Member Name="Magnitude" Description="Größe" />
+    <Member Name="Positionable" Description="Positionierbar" />
+    <Member Name="Real" Description="Real" />
+    <Member Name="RealGroupable" Description="Echte gruppierbare" />
+    <Member Name="String" Description="String" />
+    <Member Name="Time" Description="Zeit" />
+  </Type>
+  <Type Name="ChartMessage">
+    <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} kann nur aus dem Diagrammfenster erstellt werden" />
+    <Member Name="_0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} kann nur aus dem Suchfenster erstellt werden" />
+    <Member Name="_0IsAnAggregateButTheChartIsNotGrouping" Description="{0} ist ein Aggregat, aber das Diagramm ist keine Gruppierung" />
+    <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} ist Schlüssel, aber {1} ist ein Aggregat" />
+    <Member Name="_0IsNot1" Description="{0} ist nicht {1}" />
+    <Member Name="_0IsNotOptional" Description="{0} ist nicht optional" />
+    <Member Name="_0ShouldBeAnAggregate" Description="{0} sollte ein Aggregat" />
+    <Member Name="_0ShouldBeNull" Description="{0} sollte null sein" />
+    <Member Name="_0ShouldBeSet" Description="{0} sollte festgesetzt werden" />
+    <Member Name="ApplyChanges" Description="Änderungen anwenden" />
+    <Member Name="Chart" Description="Diagramm" />
+    <Member Name="ChartFor" Description="Diagramm für" />
+    <Member Name="ChartOf0" Description="Diagramm von {0}" />
+    <Member Name="ChartSettings" Description="Chart-Einstellungen" />
+    <Member Name="ChartToken" Description="Diagramm" />
+    <Member Name="ChooseABasePalette" Description="Wählen Sie eine Basispalette" />
+    <Member Name="ColorsFor0" Description="Farben für {0}" />
+    <Member Name="CreateNew" Description="Erstellen" />
+    <Member Name="CreatePalette" Description="Palette erstellen" />
+    <Member Name="Data" Description="Daten" />
+    <Member Name="DeletePalette" Description="Palette löschen" />
+    <Member Name="Dimension" Description="Dimension" />
+    <Member Name="DrawChart" Description="Diagramm zeichnen" />
+    <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="Group" Description="Gruppe" />
+    <Member Name="HideChartSettings" Description="Diagrammeinstellungen ausblenden" />
+    <Member Name="Maximize" Description="Maximieren" />
+    <Member Name="Minimize" Description="Minimieren" />
+    <Member Name="MyCharts" Description="Meine Charts" />
+    <Member Name="NewPalette" Description="Neue Palette" />
+    <Member Name="Preview" Description="Vorschau" />
+    <Member Name="Query0IsNotAllowed" Description="Abfrage {0} ist nicht erlaubt" />
+    <Member Name="QueryResultReachedMaxRows0" Description="Abfrageergebnis hat max. Zeilen erreicht ({0})" />
+    <Member Name="Reload" Description="Neu laden" />
+    <Member Name="SavePalette" Description="Palette speichern" />
+    <Member Name="ShowChartSettings" Description="Diagrammeinstellungen anzeigen" />
+    <Member Name="ToggleInfo" Description="Information anzeigen/verbergen" />
+    <Member Name="Type0NotFoundInTheDatabase" Description="Typ {0} nicht in der Datenbank enthalten ist" />
+    <Member Name="TypeNotFound" Description="Typ nicht gefunden" />
+    <Member Name="ViewPalette" Description="Palette anzeigen" />
+  </Type>
+  <Type Name="ChartParameterEmbedded" Description="Diagramm-parameter">
+    <Member Name="Name" Description="Name" />
+    <Member Name="ScriptParameter" Description="Skriptparameter" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
+  <Type Name="ChartPermission">
+    <Member Name="ViewCharting" Description="Diagramme anzeigen" />
+  </Type>
+  <Type Name="ChartRequestModel" Description="Diagrammanforderung">
+    <Member Name="ChartScript" Description="Diagrammskript" />
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
+    <Member Name="Multiplications" Description="Multiplikationen" />
+    <Member Name="Parameters" Description="Parameter" />
+    <Member Name="QueryName" Description="Abfrage-Name" />
+  </Type>
+  <Type Name="ChartScriptSymbol" Description="Diagrammskript" Gender="n" />
+  <Type Name="ColorPaletteEntity" Description="Farbpalette">
+    <Member Name="CategoryName" Description="Name der Kategorie" />
+    <Member Name="Seed" Description="Seed" />
+    <Member Name="SpecificColors" Description="Spezifische Farben" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="ColorPaletteMessage">
+    <Member Name="FillAutomatically" Description="Automatisch ausfüllen" />
+    <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Wählen Sie {0} nur aus, wenn Sie die automatische Farbe überschreiben möchten" />
+  </Type>
+  <Type Name="ColorPaletteOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="CombinedUserChartElementEmbedded" Description="Kombiniertes Benutzerdiagrammelement">
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="UserChart" Description="Benutzerdiagramm" />
+  </Type>
+  <Type Name="CombinedUserChartPartEntity" Description="Kombinierter Benutzerdiagrammteil" Gender="m">
+    <Member Name="AllowChangeShowData" Description="Daten anzeigen ändern lassen" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Kombinieren Vorgewahlter Filter Bezeichnung" />
+    <Member Name="MinHeight" Description="Min height" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowData" Description="Daten anzeigen" />
+    <Member Name="UserCharts" Description="Benutzerdiagramme" />
+    <Member Name="UseSameScale" Description="Verwenden der gleichen Skala" />
+  </Type>
+  <Type Name="D3ChartScript">
+    <Member Name="Bars" Description="Bars" />
+    <Member Name="BubblePack" Description="Bubble pack" />
+    <Member Name="Bubbleplot" Description="Blasenwolke" />
+    <Member Name="CalendarStream" Description="Kalenderstream" />
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="Line" Description="Zeile" />
+    <Member Name="MultiBars" Description="Multi-Bars" />
+    <Member Name="MultiColumns" Description="Multi-Spalten" />
+    <Member Name="MultiLines" Description="Multi-Linien" />
+    <Member Name="ParallelCoordinates" Description="Parallele Koordinaten" />
+    <Member Name="Pie" Description="Tortendiagramm" />
+    <Member Name="Punchcard" Description="Punchcard" />
+    <Member Name="Scatterplot" Description="Punktwolke" />
+    <Member Name="StackedBars" Description="Gestapelte Balken" />
+    <Member Name="StackedColumns" Description="Gestapelte Spalten" />
+    <Member Name="StackedLines" Description="Gestapelte Linien" />
+    <Member Name="Treemap" Description="Treemap" />
+  </Type>
+  <Type Name="GoogleMapsChartScript">
+    <Member Name="Heatmap" Description="Heatmap" />
+    <Member Name="Markermap" Description="Markermap" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Pivot-Tabelle" />
+  </Type>
+  <Type Name="SpecificColorEmbedded" Description="Spezifische Farbe">
+    <Member Name="Color" Description="Farbe" />
+    <Member Name="Entity" Description="Entität" />
+  </Type>
+  <Type Name="SvgMapsChartScript">
+    <Member Name="SvgMap" Description="Svg-Karte" />
+  </Type>
+  <Type Name="UserChartEntity" Description="Benutzerdiagramm" PluralDescription="Benutzerdiagramme" Gender="f">
+    <Member Name="ChartScript" Description="Diagrammskript" />
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
+    <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
+    <Member Name="MaxRows" Description="Max. Zeilen" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="Parameters" Description="Parameter" />
+    <Member Name="Query" Description="Abfrage" />
+  </Type>
+  <Type Name="UserChartOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="UserChartPartEntity" Description="Benutzerdiagramm Teil" PluralDescription="Benutzerdiagramm Teilen" Gender="n">
+    <Member Name="AllowChangeShowData" Description="Änderungsdaten anzeigen lassen" />
+    <Member Name="AutoRefresh" Description="Automatische Aktualisierung" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="MinHeight" Description="Min height" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowData" Description="Daten anzeigen" />
+    <Member Name="UserChart" Description="Benutzer-Diagramm" />
+  </Type>
+</Translations>

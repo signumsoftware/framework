@@ -1,0 +1,18 @@
+{                                
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./ts_out",
+    "paths": {
+      "@framework/*": [ "../../Signum/React/*" ]
+    }
+  },
+  "references": [
+    { "path": "../../Signum" },
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.Omnibox" },
+    { "path": "../Signum.Toolbar" },
+    { "path": "../Signum.Scheduler" },
+    { "path": "../Signum.UserAssets" }
+  ]
+}
