@@ -615,6 +615,13 @@ public class CodeFile
                     "\tEndProjectSection");
             });
     }
+
+    internal IDisposable OverrideWarningLevel(WarningLevel none)
+    {
+        var oldLevel = this.WarningLevel;
+        this.WarningLevel = none;
+        return new Disposable(() => this.WarningLevel = oldLevel);
+    }
 }
 
 public class ReplaceBetweenOption

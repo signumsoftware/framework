@@ -60,7 +60,10 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             var configure = startup.GetMethodBody(a => a.Contains("Configure(IApplicationBuilder app,"));
 
 
-            var programContent = """var builder = WebApplication.CreateBuilder(args);\r\n""" + 
+            var programContent = """
+            var builder = WebApplication.CreateBuilder(args);
+
+            """ + 
                 servicesBody.Replace("services", "builder.Services") +
                 "\r\n" +
                 "        var app = builder.Build(); \r\n\r\n" +
@@ -84,11 +87,12 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                     new(l => l.Contains("class NoAPIContraint : IRouteConstraint"), 0),
                     new(l => l.Contains("}"), 0) { SameIdentation = true}) + "\n";
 
-            program.RemoveAllLines(a => a.Contains("AddApplicationPart"));
 
             program.ReplaceBetween(
                 new(l => l.Contains("public class Program"), 4),
                 new(l => l == "}", -1), programContent);
+
+            program.RemoveAllLines(a => a.Contains("AddApplicationPart"));
 
             program.ReplaceBetween(
                 new(l => l.Contains(".ConfigureApplicationPartManager(apm =>"), 0),
@@ -100,14 +104,19 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                 new(l => l.Contains(@"log.Switch(""WebStart"");"), 0),
                 new(l => l.Contains(@"WebStart(app, env"), 0), "");
 
+            var endpoints = program.Content.TryBetween(".UseEndpoints(", "=>")?.Trim() ?? "endpoints";
+
             program.ReplaceBetween(
-                new(a => a.Contains("app.UseEndpoints(endpoints =>")),
+                new(a => a.Contains("app.UseEndpoints(")),
                 new(a => a.Contains(" });")) { SameIdentation = true },
-                a => a.Lines().Skip(2).SkipLast(1).Select(a => a.After("                ").Replace("endpoints", "app")).ToString("\r\n")
+                a => a.Lines().Skip(2).SkipLast(1).Select(a => a.After("                ").Replace(endpoints, "app")).ToString("\r\n")
                 );
 
-            program.RemoveAllLines(a => a.Contains("AlertsServer.MapAlertsHub"));
-            program.RemoveAllLines(a => a.Contains("ConcurrentUserServer.MapConcurrentUserHub"));
+            using (program.OverrideWarningLevel(WarningLevel.Warning))
+            {
+                program.RemoveAllLines(a => a.Contains("AlertsServer.MapAlertsHub"));
+                program.RemoveAllLines(a => a.Contains("ConcurrentUserServer.MapConcurrentUserHub"));
+            }
         });
 
         var hasDynamic = false;
@@ -126,10 +135,11 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
             starter.ReplaceLine(l => l.Contains("SqlServerVersionDetector.Detect(connectionString)"),
                 @"var sqlVersion = wsb == null ? SqlServerVersionDetector.Detect(connectionString) : SqlServerVersion.AzureSQL;");
 
-            starter.ReplaceLine(l => l.Contains("PostgresVersionDetector.Detect(connectionString)"),
-                @"var postgreeVersion = wsb == null ? PostgresVersionDetector.Detect(connectionString) : null;");
+            using (starter.OverrideWarningLevel(WarningLevel.Warning))
+                starter.ReplaceLine(l => l.Contains("PostgresVersionDetector.Detect(connectionString)"),
+                    @"var postgreeVersion = wsb == null ? PostgresVersionDetector.Detect(connectionString) : null;");
 
-            starter.InsertBeforeFirstLine(l => l.Contains("CacheLogic.Start(sb, serverBroadcast"), """
+            starter.InsertBeforeFirstLine(l => l.Contains("CacheLogic.Start"), """
 
             if (wsb != null)
             {
@@ -140,7 +150,7 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
             //starter.ReplaceLine(l => l.Contains("DynamicLogic.Start("), "EvalLogic.Start(sb);");
 
-            starter.InsertBeforeFirstLine(l => l.Contains(@"// Extensions modules"), "PermissionLogic.Start(sb);");
+            starter.InsertBeforeFirstLine(l => l.Contains(@"AuthLogic.Start"), "PermissionLogic.Start(sb);");
 
             starter.ReplaceLine(l => l.Contains("AuthLogic.StartAllModules("),
                 @"AuthLogic.StartAllModules(sb, () => Starter.Configuration.Value.AuthTokens);");
@@ -152,14 +162,15 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
                     new(l => l.Contains(");"), 0))
                 .Replace("Starter.Configuration", "Configuration") + "\n");
 
-            starter.ReplaceLine(l => l.Contains("WorkflowLogicStarter.Start("),
-                "WorkflowLogicStarter.Start(sb, () => Configuration.Value.Workflow);");
+            using (starter.OverrideWarningLevel(WarningLevel.Warning))
+                starter.ReplaceLine(l => l.Contains("WorkflowLogicStarter.Start("),
+                    "WorkflowLogicStarter.Start(sb, () => Configuration.Value.Workflow);");
 
-            starter.InsertAfterFirstLine(l => l.Contains(@"}//3"), """
+            //starter.InsertAfterFirstLine(l => l.Contains(@"}//3"), """
             
-            if (wsb != null)
-                ReflectionServer.RegisterLike(typeof(RegisterUserModel), () => true);
-            """);
+            //if (wsb != null)
+            //    ReflectionServer.RegisterLike(typeof(RegisterUserModel), () => true);
+            //""");
 
             starter.ReplaceBetween(
                 new(l => l.Contains("public override ObjectName GenerateTableName("), 0),
@@ -219,9 +230,10 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind/MainAdmin.tsx", main =>
         {
-            main.Replace(
-                "@extensions/Signum.Authorization/ActiveDirectoryClient",
-                "@extensions/Signum.Authorization.ActiveDirectory/ActiveDirectoryClient");
+            using (main.OverrideWarningLevel(WarningLevel.Warning))
+                main.Replace(
+                    "@extensions/Signum.Authorization/ActiveDirectoryClient",
+                    "@extensions/Signum.Authorization.ActiveDirectory/ActiveDirectoryClient");
 
             main.Replace(
                 "Signum.Cache/CacheClient",
