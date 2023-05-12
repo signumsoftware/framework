@@ -109,6 +109,11 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.Replace("appsettings", "settings");
         });
 
+        uctx.ForeachCodeFile("*.cs", @"Southwind.Test.React", file =>
+        {
+            file.Replace("appsettings", "settings");
+        });
+
         uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", file =>
         {
             file.Replace("appsettings", "settings");

@@ -131,7 +131,7 @@ export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.K
 
 export function toAbsoluteUrl(appRelativeUrl: string): string {
   if (appRelativeUrl?.startsWith("/") && window.__baseName != "")
-    if (!appRelativeUrl.startsWith(window.__baseName))
+    if (!appRelativeUrl.startsWith(window.__baseName + (window.__baseName.endsWith("/") ? "" :  "/")))
       return window.__baseName + appRelativeUrl;
 
   if (appRelativeUrl?.startsWith("~/"))

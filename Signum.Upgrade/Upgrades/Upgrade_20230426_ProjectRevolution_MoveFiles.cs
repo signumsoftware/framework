@@ -297,6 +297,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             if(a.Content.Contains(": ControllerBase") || a.Content.Contains(": ControllerBase") || a.Content.Contains("HttpPost") || a.Content.Contains("HttpGet") || a.Content.Contains("FromBody"))
             {
                 a.InsertBeforeFirstLine(a => a.StartsWith("using "), "using Microsoft.AspNetCore.Mvc;");
+                a.InsertBeforeFirstLine(a => a.StartsWith("using "), "using System.ComponentModel.DataAnnotations;");
+                a.Replace("FilesController.GetFileStreamResult", "MimeMapping.GetFileStreamResult");
             }
         });
 
