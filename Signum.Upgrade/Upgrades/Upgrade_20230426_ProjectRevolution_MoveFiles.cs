@@ -412,8 +412,8 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
                 "FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim AS build");
 
             file.ReplaceBetween(
-                new (a => a.StartsWith("COPY")),
-                new (a => a.StartsWith("COPY")) { LastIndex = true },
+                new (a => a.StartsWith("COPY [")),
+                new (a => a.StartsWith("COPY [")) { LastIndex = true },
                 uctx.ReplaceSouthwind("""
                 COPY ["Framework.tar", "/"]
                 RUN tar -xvf /Framework.tar
