@@ -269,7 +269,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         {
             var fileName = a.FilePath.Replace(".Entities", "");
 
-            uctx.MoveFile(a.FilePath, fileName);
+            uctx.MoveFile(a.FilePath, fileName, createDirectory: true);
         });
 
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");
