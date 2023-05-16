@@ -4,24 +4,20 @@ import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import ValueLineModal from '@framework/ValueLineModal'
 import { useAPI } from '@framework/Hooks'
-import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries'
-import { UserChartEntity } from '../Signum.Chart/UserChart/Signum.Chart.UserChart'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ajaxGet } from '@framework/Services'
 
 export interface TemplateControlsProps {
   queryKey: string;
   forHtml: boolean;
-  widgetButtons?: boolean;
+  widgetButtons?: React.ReactElement;
 }
 
 export default function TemplateControls(p: TemplateControlsProps) {
 
   const [currentToken, setCurrentToken] = React.useState<{ type: "Query", token?: QueryToken} | { type: "Global", expression?: GlobalVariable }>({ type: 'Query'});
-  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
+
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
     return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
@@ -36,22 +32,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
       })} />
   }
 
-  function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<string | undefined>) {
-    return <button className="btn btn-light btn-sm sf-button"
-
-      onClick={() =>
-        getCode()
-          .then(code =>
-            code &&
-            ValueLineModal.show({
-              type: { name: "string" },
-              valueLineType: "TextArea",
-              initialValue: code,
-              title: "Embedded Widget",
-              message: "Make a similar-looking Chart or Table in Excel and copy it to Word or PowerPoint. Then add the following code in the Alternative Text to bind the data:",
-              initiallyFocused: true,
-            }))} >{text}</button>
-  }
+  
 
 
   function tokenHasAnyOrAll(): boolean {
@@ -139,47 +120,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
           `<!--@any[${token}]--> <!--@notany--> <!--@endany-->` :
           `@any[${token}] @notany @endany`)}
       </div>
-      {p.widgetButtons &&
-        <div className="btn-group" style={{ marginLeft: "auto" }}>
-          {UserChartEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={"chart-bar"} color={"darkviolet"} className="icon" /> {UserChartEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
-            queryName: UserChartEntity,
-            filterOptions: [
-              {
-                groupOperation: "Or",
-                filters: [
-                  {
-                    token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-                    operation: "IsIn",
-                    value: [...getTypeInfos(qd?.columns["Entity"].type!).map(a => a.name)]
-                  },
-                  {
-                    token: UserChartEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-                    operation: "EqualTo",
-                    value: null
-                  }
-                ]
-              }
-            ]
-          }).then(uc => uc && Navigator.API.fetch(uc).then(uce => {
-            var text = "UserChart:" + uce.guid;
-
-            if ((uce.chartScript.key.contains("Multi") || uce.chartScript.key.contains("Stacked")) && uce.columns[1].element.token != null /*Split*/)
-              text += "\nPivot(0, 1, 2)";
-
-            return text;
-          })))}
-          {
-            UserQueryEntity.tryTypeInfo() && renderWidgetButton(<><FontAwesomeIcon icon={["far", "rectangle-list"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
-              queryName: UserQueryEntity,
-              filterOptions: [{
-                token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),
-                operation: "IsIn",
-                value: [null, ...getTypeInfos(qd?.columns["Entity"].type!).map(a => a.name)]
-              }]
-            }).then(uc => uc && Navigator.API.fetch(uc).then(uce => "UserQuery:" + uce.guid)))
-          }
-        </div>
-      }
+      {p.widgetButtons }
     </div>
   );
 }

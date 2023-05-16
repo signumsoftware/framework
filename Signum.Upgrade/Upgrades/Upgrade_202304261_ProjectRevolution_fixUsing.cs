@@ -82,7 +82,7 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
             file.RemoveAllLines(l => l.Contains("Signum.Engine.Extensions\\Signum.Engine.Extensions.csproj"));
             file.RemoveAllLines(l => l.Contains("Signum.Engine\\Signum.Engine.csproj"));
 
-            file.UpdateNugetReference("Signum.MSBuildTask", "7.5.0-beta");
+            file.UpdateNugetReference("Signum.MSBuildTask", "7.5.0");
 
             file.Replace(
                 uctx.ReplaceSouthwind("Signum.React.Extensions.Selenium\\Signum.React.Extensions.Selenium"), 
@@ -105,6 +105,11 @@ class Upgrade_202304261_ProjectRevolution_fixUsing : CodeUpgradeBase
         });
 
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
+        {
+            file.Replace("appsettings", "settings");
+        });
+
+        uctx.ForeachCodeFile("*.cs", @"Southwind.Test.React", file =>
         {
             file.Replace("appsettings", "settings");
         });
