@@ -9,8 +9,6 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.UserAssets" },
-    { "path": "../Signum.UserQueries" },
-    { "path": "../Signum.Chart" },
     { "path": "../Signum.CodeMirror" },
     { "path": "../Signum.Eval" }
   ]

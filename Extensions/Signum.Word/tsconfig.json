@@ -8,6 +8,7 @@
   },
   "references": [
     { "path": "../../Signum" },
+    { "path": "../Signum.Chart" },
     { "path": "../Signum.Mailing" },
     { "path": "../Signum.Templating" }
   ]
