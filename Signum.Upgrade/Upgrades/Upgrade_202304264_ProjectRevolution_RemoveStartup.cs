@@ -123,8 +123,26 @@ class Upgrade_202304264_ProjectRevolution_RemoveStartup : CodeUpgradeBase
 
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Starter.cs", starter =>
         {
-            starter.ReplaceLine(l => l.Contains("public static void Start("),
-                @"public static void Start(string connectionString, bool isPostgres, string? azureStorageConnectionString, string? broadcastSecret, string? broadcastUrls, WebServerBuilder? wsb, bool includeDynamic = true)");
+            starter.ProcessLines(lines =>
+            {
+                var index = lines.IndexOf(a => a.Contains("\"public static void Start(\""));
+
+                if (index == -1)
+                {
+                    starter.Warning($@"""public static void Start("" not found!");
+                    return false;
+                }
+
+                lines[index] = lines[index].Replace("bool detectSqlVersion = true", "");
+                lines[index] = lines[index].Replace("bool detectSqlVersion = false", "");
+                lines[index] = lines[index].Replace("bool detectSqlVersion ", "");
+
+                lines[index] = lines[index].Before(")") + ", WebServerBuilder? wsb)" + lines[index].After(")");
+
+                return true;
+
+            });
+            
 
             starter.ReplaceLine(l => l.Contains("SchemaBuilder sb = new CustomSchemaBuilder"),
                 @"SchemaBuilder sb = new CustomSchemaBuilder { LogDatabaseName = logDatabase, Tracer = initial, WebServerBuilder = wsb };");

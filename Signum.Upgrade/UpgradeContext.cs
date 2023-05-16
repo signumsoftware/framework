@@ -232,8 +232,11 @@ public class UpgradeContext
         return val.Replace("Southwind", this.ApplicationName);
     }
 
-    public void MoveFile(string from, string to)
+    public void MoveFile(string from, string to, bool createDirectory = false)
     {
+        if (createDirectory)
+            Directory.CreateDirectory(Path.GetDirectoryName(AbsolutePathSouthwind(to))!);
+
         File.Move(AbsolutePathSouthwind(from), AbsolutePathSouthwind(to));
 
         SafeConsole.WriteLineColor(ConsoleColor.Yellow, $"Moved {from} -> {to}");
