@@ -16,7 +16,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "This upgrade will completely re-structure your application!!");
         Console.WriteLine("Some important considerations:");
         Console.WriteLine("* After running this upgrade, manual work is expected fixing namespaces, so it is recommended that you run it from the framework branch origin/revolution to avoid extra changes that could come in the future.");
-        Console.WriteLine("* Read XXXXX before continuing.");
+        Console.WriteLine("* Read https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments before continuing.");
 
         Console.WriteLine();
         Console.WriteLine("Press any key when you have read it");
