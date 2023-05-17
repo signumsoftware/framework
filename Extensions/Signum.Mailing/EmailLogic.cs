@@ -76,6 +76,20 @@ public static class EmailLogic
 
             if (sb.WebServerBuilder != null)
                 MailingServer.Start(sb.WebServerBuilder.WebApplication);
+
+            sb.Schema.SchemaCompleted += () =>
+            {
+                var pr = PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service);
+
+                var implementations = sb.Schema.FindImplementations(PropertyRoute.Construct((EmailSenderConfigurationEntity s) => s.Service));
+
+                var notOverriden = implementations.Types.Except(EmailSenders.OverridenTypes);
+
+                if (notOverriden.Any())
+                {
+                    throw new InvalidOperationException($"The property {pr} is implemented by {notOverriden.CommaAnd(a => a.TypeName())} but has not been registered in EmailLogic.EmailSenders. Maybe you forgot to call something like {notOverriden.CommaAnd(a => a.TypeName().Replace("Entity", "Logic.Start(sb)"))}?");
+                }
+            };
         }
     }
 
