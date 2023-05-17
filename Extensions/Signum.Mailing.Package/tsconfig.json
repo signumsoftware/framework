@@ -9,6 +9,8 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.Mailing" },
+    { "path": "../Signum.Scheduler" },
+    { "path": "../Signum.UserQueries" },
     { "path": "../Signum.Processes" }
   ]
 }

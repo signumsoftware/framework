@@ -120,7 +120,7 @@ public class CodeUpgradeRunner: IEnumerable<CodeUpgradeBase>
         catch (Exception ex)
         {
             SafeConsole.WriteLineColor(ConsoleColor.Red, ex.Message);
-            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, ex.Message);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkGray, ex.StackTrace);
 
             if (!SafeConsole.Ask("Do you want to skip {0} and mark it as executed?".FormatWith(upgrade.Key)))
                 return false;
