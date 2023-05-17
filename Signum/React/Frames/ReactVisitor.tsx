@@ -142,9 +142,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  replaceFindOptions(filter: (findOptions: FindOptions) => boolean, modifier: (clone: FindOptions) => void) {
+  replaceFindOptions(filter: (findOptions: FindOptions, e: React.ReactElement) => boolean, modifier: (clone: FindOptions) => void) {
     this.result = new ReplaceVisitor(
-      e => e.props.findOptions && filter(e.props.findOptions),
+      e => e.props.findOptions && filter(e.props.findOptions, e),
       e => {
         var clone = cloneFindOptions(e.props.findOptions);
         modifier(clone);
