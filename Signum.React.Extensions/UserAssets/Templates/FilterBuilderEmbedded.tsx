@@ -8,7 +8,7 @@ import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { QueryTokenEmbedded, UserAssetMessage } from '../Signum.Entities.UserAssets'
 import { QueryFilterEmbedded, PinnedQueryFilterEmbedded } from '../../UserQueries/Signum.Entities.UserQueries'
-import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed } from '@framework/FindOptions'
+import { QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed, isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed, getFilterGroupUnifiedFilterType, getFilterType } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
 import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
@@ -16,6 +16,7 @@ import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
+import { ValueLineController } from '@framework/Lines/ValueLine'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
@@ -96,12 +97,20 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
     if (isFilterGroupOptionParsed(fc.filter)) {
 
       const f = fc.filter;
+      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
+        f.value = undefined;
 
       const readOnly = fc.readonly || f.frozen;
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
-      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
+      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
+      const vlt = tr && ValueLineController.getValueLineType(tr);
+      const ft = tr && getFilterType(tr);
+
+      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} />
 
     } else {
 
