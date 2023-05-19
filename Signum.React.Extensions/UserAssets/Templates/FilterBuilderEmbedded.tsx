@@ -109,8 +109,8 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         ctx.value = undefined;
 
       var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
-      var format = (tr && f.filters.map(a => a.token!).distinctBy(a => a.format ?? "").onlyOrNull()?.format) ?? undefined;
-      var unit = (tr && f.filters.map(a => a.token!).distinctBy(a => a.unit ?? "").onlyOrNull()?.unit) ?? undefined;
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
       const vlt = tr && ValueLineController.getValueLineType(tr);
       const ft = tr && getFilterType(tr);
 
