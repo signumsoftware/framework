@@ -157,7 +157,7 @@ export module VersionFilter {
       }
      
       if (latestVersion != ver) {
-        if (buildTime && initialBuildTime && DateTime.fromISO(buildTime).diff(DateTime.fromISO(initialBuildTime)).toMillis() > 0) {
+        if (buildTime && initialBuildTime && DateTime.fromISO(buildTime) > DateTime.fromISO(initialBuildTime)) {
           latestVersion = ver;
           if (versionHasChanged)
             versionHasChanged();
