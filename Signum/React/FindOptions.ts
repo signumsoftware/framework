@@ -532,7 +532,7 @@ export function getFilterType(tr: TypeReference): FilterType | null {
   if (tr.name == "string")
     return "String";
 
-  if (tr.name == "dateTime")
+  if (tr.name == "DateTime")
     return "DateTime";
 
   if (tr.name == "Guid")
@@ -561,6 +561,22 @@ export function getFilterOperations(qt: QueryToken): FilterOperation[] {
       return ["ComplexCondition", "FreeText", ...fops];
   }
   return fops;
+}
+
+export function getFilterGroupUnifiedFilterType(tr: TypeReference): FilterType | null {
+  if (tr.name == "number" || tr.name == "decmial" || tr.name == "boolean" || tr.name == "string" || tr.name == "Guid")
+    return "String";
+
+  if (tr.name == "DateTime")
+    return "DateTime";
+
+  if (tr.isEmbedded)
+    return "Embedded";
+
+  if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
+    return "Lite";
+
+  return null;
 }
 
 export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};

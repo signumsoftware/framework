@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions,
-  isList, isFilterGroupOptionParsed, isCheckBox
+  isList, isFilterGroupOptionParsed, isCheckBox, getFilterGroupUnifiedFilterType
 } from '../FindOptions'
 import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
@@ -11,6 +11,7 @@ import { ComplexConditionSyntax, createFilterValueControl, FilterTextArea, Multi
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ValueLineController } from '../Lines/ValueLine'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -84,10 +85,18 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
           isComplex={isComplex}
           onChange={(() => handleValueChange(f, isComplex))}
           label={label || SearchMessage.Search.niceToString()} />
-      else
-        return <ValueLine ctx={ctx} type={{ name: "string" }}
-          onChange={(() => handleValueChange(f, isComplex))}
-          label={label || SearchMessage.Search.niceToString()} />
+      else {
+    
+      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
+        f.value = undefined;
+
+      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
+      const vlt = tr && ValueLineController.getValueLineType(tr);
+
+      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
+    }
     }
 
     if (isList(f.operation!))
