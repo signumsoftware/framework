@@ -518,6 +518,9 @@ export function getFilterType(tr: TypeReference): FilterType | null {
   if (tr.isEmbedded)
     return "Embedded";
 
+  if (isTypeEnum(tr.name))
+    return "Enum";
+
   if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
     return "Lite";
 
