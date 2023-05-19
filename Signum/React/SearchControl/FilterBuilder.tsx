@@ -322,7 +322,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
               <small style={{ whiteSpace: "nowrap" }}>
-              Group Prefix:
+                Group Prefix:
               </small>
               <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
                 <QueryTokenBuilder
@@ -335,7 +335,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
               </div>
             </div>
           </div>
-             
+
         </td>
         <td>
           <select className="form-select form-select-xs sf-group-selector fw-bold" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
@@ -366,7 +366,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
         {p.showPinnedFiltersOptions && p.showDashboardBehaviour && <td>
           <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
-        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly}  />}
+        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly} />}
       </tr >
 
       {
@@ -449,9 +449,8 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
       const vlt = tr && ValueLineController.getValueLineType(tr);
 
-      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange()} />
-   }
-}
+      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange()} />;
+    }
   }
 
   function handleValueChange() {
@@ -464,6 +463,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     p.onFilterChanged();
   }
 }
+
 
 function isFilterActive(fo: FilterOptionParsed) {
   if (fo.pinned == null)
