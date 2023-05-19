@@ -109,8 +109,8 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
-      var format = (tr && f.filters.map((a, i) => a.token!.format ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
-      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
       const vlt = tr && ValueLineController.getValueLineType(tr);
       const ft = tr && getFilterType(tr);
 
