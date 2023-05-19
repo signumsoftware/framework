@@ -575,7 +575,7 @@ public class ActiveDirectoryUser
 {
     public required string DisplayName;
     public required string UPN;
-    public required Guid? ObjectID;
     public required string JobTitle;
-    public required string? SID;
+    public Guid? ObjectID;
+    public string? SID;
 }
