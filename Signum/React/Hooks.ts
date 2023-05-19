@@ -192,14 +192,16 @@ export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T |
   return [value, () => setCount(c => c + 1)];
 }
 
-export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
+export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T> | T, deps: ReadonlyArray<any>, options?: APIHookOptions): T | undefined {
 
   const [data, setData] = React.useState<{ deps: ReadonlyArray<any>; result: T } | undefined>(undefined);
 
   React.useEffect(() => {
     var abortController = new AbortController();
 
-    makeCall(abortController.signal, data && data.result)
+    var promiseOrValue = makeCall(abortController.signal, data && data.result);
+
+    (promiseOrValue instanceof Promise ? promiseOrValue : Promise.resolve(promiseOrValue))
       .then(result => !abortController.signal.aborted && setData({ result, deps }));
 
     return () => {
