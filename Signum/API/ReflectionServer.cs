@@ -51,7 +51,7 @@ public static class ReflectionServer
 
         Schema.Current.SchemaCompleted += () =>
         {
-        var mainTypes = Schema.Current.Tables.Keys;
+            var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t)).ToList();
             var symbols = SymbolLogic.AllSymbolContainers().ToList();
 
@@ -61,7 +61,7 @@ public static class ReflectionServer
             foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(messages))
             {
                 EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
-    }
+            }
         };
     }
 
@@ -135,7 +135,8 @@ public static class ReflectionServer
         return oi;
     }
 
-    public static HashSet<Type> ExcludeTypes = new HashSet<Type>();
+    //hack to allow controlling business dependencies
+    public static Func<Type, bool> ExcludeType = f => false;
 
     internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
     {
@@ -157,7 +158,7 @@ public static class ReflectionServer
                     return GetSymbolContainerTypeInfo(t);
 
                 throw new InvalidOperationException("Unable to generate TypeInfoTS for " + t.FullName);
-        });
+            });
 
             return allTypes.Where(kvp => kvp.Value != null).ToDictionaryEx(kvp => GetTypeName(kvp.Key), kvp => kvp.Value!);
         });
@@ -169,7 +170,7 @@ public static class ReflectionServer
         {
             var name = kvp.Key.GetName().Name;
 
-            var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeTypes.Contains(t) && kvp.Value.Contains(t.Namespace!)).ToList();
+            var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeType(t) && kvp.Value.Contains(t.Namespace!)).ToList();
 
             var usedEnums = (from type in normalTypes
                              where typeof(ModifiableEntity).IsAssignableFrom(type)
@@ -212,46 +213,47 @@ public static class ReflectionServer
         var allOperations = !isEntity ? null : OperationLogic.GetAllOperationInfos(type);
 
         var result = new TypeInfoTS
-                      {
-                          Kind = KindOfType.Entity,
-                          FullName = type.FullName!,
-                          NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
-                          NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
-                          Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
-                          EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
-                          EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
-                          IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
-                          IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
+        {
+            Kind = KindOfType.Entity,
+            FullName = type.FullName!,
+            NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
+            NicePluralName = descOptions.HasFlag(DescriptionOptions.PluralDescription) ? type.NicePluralName() : null,
+            Gender = descOptions.HasFlag(DescriptionOptions.Gender) ? type.GetGender().ToString() : null,
+            EntityKind = type.IsIEntity() ? EntityKindCache.GetEntityKind(type) : (EntityKind?)null,
+            EntityData = type.IsIEntity() ? EntityKindCache.GetEntityData(type) : (EntityData?)null,
+            IsLowPopulation = type.IsIEntity() ? EntityKindCache.IsLowPopulation(type) : false,
+            IsSystemVersioned = type.IsIEntity() ? schema.Table(type).SystemVersioned != null : false,
             ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
-                          QueryDefined = queries.QueryDefined(type),
-                          Members = PropertyRoute.GenerateRoutes(type)
-                            .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type) && !ReflectionServer.ExcludeTypes.Contains(pr.RootType) && (pr.Type.IsGenericType ? !ReflectionServer.ExcludeTypes.Contains(pr.Type.GenericTypeArguments[0]) : true))
-                .Select(pr =>
-                            {
-                    var validators = Validator.TryGetPropertyValidator(pr)?.Validators;
-                                var mi = new MemberInfoTS
-                                {
-                        NiceName = pr.PropertyInfo!.NiceName(),
-                        Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
-                        IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
-                        Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
-                        Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
-                        Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
-                                    IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                        IsVirtualMList = pr.IsVirtualMList(),
-                                    MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
-                        PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
-                                    AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
-                                    IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
-                                    IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
-                        HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
-                                };
+            QueryDefined = queries.QueryDefined(type),
+            Members = PropertyRoute.GenerateRoutes(type)
+                    .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeType(pr.Type))
+                    .Select(pr =>
+                    {
+                        var validators = Validator.TryGetPropertyValidator(pr)?.Validators;
+                        var mi = new MemberInfoTS
+                        {
+                            NiceName = pr.PropertyInfo!.NiceName(),
+                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                            IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
+                            Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
+                            Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
+                            Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
+                            IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+                            IsVirtualMList = pr.IsVirtualMList(),
+                            MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                            PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
+                            AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                            IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                            IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
+                            HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
+                        };
 
-                    return KeyValuePair.Create(pr.PropertyString(), OnPropertyRouteExtension(mi, pr)!);
-                            })
-                            .Where(kvp => kvp.Value != null)
-                            .ToDictionaryEx("properties"),
-                          CustomLiteModels = !type.IsEntity() ? null : Lite.LiteModelConstructors.TryGetC(type)?.Values
+                        return KeyValuePair.Create(pr.PropertyString(), OnPropertyRouteExtension(mi, pr)!);
+                    })
+                    .Where(kvp => kvp.Value != null)
+                    .ToDictionaryEx("properties"),
+
+            CustomLiteModels = !type.IsEntity() ? null : Lite.LiteModelConstructors.TryGetC(type)?.Values
                             .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
                             {
                                 IsDefault = lmc.IsDefault,
@@ -259,10 +261,10 @@ public static class ReflectionServer
                             }),
 
 
-                          HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
-                          Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
+            HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
+            Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
-                          RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
+            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
         };
 
         return OnTypeExtension(result, type);
@@ -270,7 +272,7 @@ public static class ReflectionServer
 
     public static bool InTypeScript(PropertyRoute pr)
     {
-        return (pr.Parent == null || InTypeScript(pr.Parent)) && 
+        return (pr.Parent == null || InTypeScript(pr.Parent)) &&
             (pr.PropertyInfo == null || (pr.PropertyInfo.GetCustomAttribute<InTypeScriptAttribute>()?.GetInTypeScript() ?? !IsExpression(pr.Parent!.Type, pr.PropertyInfo)));
     }
 
@@ -296,18 +298,18 @@ public static class ReflectionServer
                type.Name.EndsWith("Message") ? KindOfType.Message : KindOfType.Enum;
 
         var result = new TypeInfoTS
-                      {
-                          Kind = kind,
-                          FullName = type.FullName!,
-                          NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
-                          Members = type.GetFields(staticFlags)
+        {
+            Kind = kind,
+            FullName = type.FullName!,
+            NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
+            Members = type.GetFields(staticFlags)
                           .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
                           .Select(fi => KeyValuePair.Create(fi.Name, OnFieldInfoExtension(new MemberInfoTS
                           {
                               NiceName = fi.NiceName(),
                               IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                           }, fi)!))
-                          .Where(a=>a.Value != null)
+                          .Where(a => a.Value != null)
                           .ToDictionaryEx("query"),
         };
 
@@ -317,10 +319,10 @@ public static class ReflectionServer
     public static TypeInfoTS? GetSymbolContainerTypeInfo(Type type)
     {
         var result = new TypeInfoTS
-                      {
-                          Kind = KindOfType.SymbolContainer,
-                          FullName = type.FullName!,
-                          Members = type.GetFields(staticFlags)
+        {
+            Kind = KindOfType.SymbolContainer,
+            FullName = type.FullName!,
+            Members = type.GetFields(staticFlags)
                               .Select(f => GetSymbolInfo(f))
                               .Where(s =>
                               s.FieldInfo != null && /*Duplicated like in Dynamic*/
@@ -349,7 +351,7 @@ public static class ReflectionServer
         if (v is Symbol s)
             return (s.FieldInfo, s.IdOrNull);
 
-        if(v is SemiSymbol semiS)
+        if (v is SemiSymbol semiS)
             return (semiS.FieldInfo!, semiS.IdOrNull);
 
         throw new InvalidOperationException();
@@ -370,7 +372,7 @@ public class TypeInfoTS
 {
     public KindOfType Kind { get; set; }
     public string FullName { get; set; } = null!;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public string? NiceName { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NiceName { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? NicePluralName { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? Gender { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public EntityKind? EntityKind { get; set; }
@@ -396,7 +398,7 @@ public class TypeInfoTS
 public class CustomLiteModelTS
 {
     public string? ConstructorFunctionString = null!;
-    public bool IsDefault; 
+    public bool IsDefault;
 }
 
 public class MemberInfoTS
@@ -425,11 +427,11 @@ public class MemberInfoTS
 public class OperationInfoTS
 {
     public OperationType OperationType;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeNew;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? CanBeModified;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasCanExecute;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeNew;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeModified;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecute;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecuteExpression;
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]public bool? HasStates;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasStates;
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
@@ -447,10 +449,10 @@ public class OperationInfoTS
 
 public class TypeReferenceTS
 {
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsCollection { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsLite { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsNotNullable { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]public bool IsEmbedded { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsCollection { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsLite { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsNotNullable { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsEmbedded { get; set; }
     public required string Name { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? TypeNiceName { get; set; }
 
@@ -467,7 +469,7 @@ public class TypeReferenceTS
 
         if (this.IsEmbedded && !this.IsCollection)
             this.TypeNiceName = type.NiceName();
-        if(implementations != null)
+        if (implementations != null)
         {
             try
             {
