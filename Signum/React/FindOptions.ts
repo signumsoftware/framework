@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -541,6 +541,9 @@ export function getFilterType(tr: TypeReference): FilterType | null {
   if (tr.isEmbedded)
     return "Embedded";
 
+  if (isTypeEnum(tr.name))
+    return "Enum";
+
   if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
     return "Lite";
 
@@ -572,6 +575,9 @@ export function getFilterGroupUnifiedFilterType(tr: TypeReference): FilterType |
 
   if (tr.isEmbedded)
     return "Embedded";
+
+  if (isTypeEnum(tr.name))
+    return "Enum";
 
   if (tr.isLite || tryGetTypeInfos(tr)[0]?.name)
     return "Lite";

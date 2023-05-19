@@ -431,12 +431,17 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const f = p.filterGroup;
 
-    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
-      f.value = undefined;
+  
 
     const readOnly = p.readOnly || f.frozen;
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
+
+    if (f.filters.some(a => !a.token))
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
+
+    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
+      f.value = undefined;
 
     var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
     var textArea = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"));
