@@ -27,7 +27,7 @@ public static class QueryLogic
         EntityPropertyToken.HasFullTextIndexFunc = ept => Schema.Current.HasFullTextIndex(ept.PropertyRoute);
         EntityPropertyToken.HasSnippetFunc = ept =>
         {
-            if (ept.Type != typeof(string))
+            if (ept.Type != typeof(string)  || !ept.PropertyRoute.RootType.IsEntity())
                 return false;
 
             var field = Schema.Current.TryField(ept.PropertyRoute);
