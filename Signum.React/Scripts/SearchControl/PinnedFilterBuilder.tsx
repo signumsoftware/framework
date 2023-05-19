@@ -76,8 +76,11 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 
     if (isFilterGroupOptionParsed(f)) {
-      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
-        f.value = undefined;
+      if (f.filters.some(a => !a.token))
+        return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
+
+      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
+        ctx.value = undefined;
 
       var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
       var format = (tr && f.filters.map((a, i) => a.token!.format ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;

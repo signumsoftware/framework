@@ -410,12 +410,15 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const f = p.filterGroup;
 
-    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
-      f.value = undefined;
-
     const readOnly = p.readOnly || f.frozen;
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
+
+    if (f.filters.some(a => !a.token))
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
+
+    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
+      ctx.value = undefined;
 
     var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
     var format = (tr && f.filters.map((a, i) => a.token!.format ?? `${i}`).distinctBy().onlyOrNull()) ?? undefined;
