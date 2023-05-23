@@ -3,6 +3,7 @@ using Signum.Authorization;
 using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using Signum.API;
 
 namespace Signum.Authorization.ActiveDirectory;
 
@@ -171,7 +172,9 @@ public static class ActiveDirectoryLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-          
+            if (sb.WebServerBuilder != null)
+                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
+
 
             if (deactivateUsersTask)
             {

@@ -16,7 +16,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         SafeConsole.WriteLineColor(ConsoleColor.Magenta, "This upgrade will completely re-structure your application!!");
         Console.WriteLine("Some important considerations:");
         Console.WriteLine("* After running this upgrade, manual work is expected fixing namespaces, so it is recommended that you run it from the framework branch origin/revolution to avoid extra changes that could come in the future.");
-        Console.WriteLine("* Read XXXXX before continuing.");
+        Console.WriteLine("* Read https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments before continuing.");
 
         Console.WriteLine();
         Console.WriteLine("Press any key when you have read it");
@@ -151,7 +151,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Translation\Signum.Translation.csproj" />FROM_CS TranslationLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.UserAssets\Signum.UserAssets.csproj" />FROM_CS UserQueryLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.UserQueries\Signum.UserQueries.csproj" />FROM_CS UserQueryLogic 
-            		<ProjectReference Include="..\Framework\Extensions\Signum.ViewLog\Signum.ViewLog.csproj" />FROM_CS ViewLogLogic
+            		<ProjectReference Include="..\Framework\Extensions\Signum.ViewLog\Signum.ViewLog.csproj" />
             		<ProjectReference Include="..\Framework\Extensions\Signum.Word\Signum.Word.csproj" />FROM_CS WordTemplateLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Workflow\Signum.Workflow.csproj" />FROM_CS WorkflowLogicStarter
             		<ProjectReference Include="..\Framework\Signum.Utilities\Signum.Utilities.csproj" /> 
@@ -251,7 +251,12 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         uctx.DeleteFile("Southwind.React/Southwind.React.csproj");
         uctx.DeleteFile("Southwind.React/Properties/GlobalUsings.cs");
 
-        uctx.ForeachCodeFile("*.cs", "Southwind.Entities", a =>
+        uctx.ForeachCodeFile("*.cs", "Southwind.Logic", a =>
+        {
+            a.Replace("PermissionAuthLogic.Register", "PermissionLogic.Register");
+        });
+
+       uctx.ForeachCodeFile("*.cs", "Southwind.Entities", a =>
         {
             var fileName = Path.GetFileNameWithoutExtension(a.FilePath);
             if (!fileName.EndsWith("Entity") && !fileName.EndsWith("Embedded")  && !fileName.EndsWith("Model"))
@@ -269,7 +274,7 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
         {
             var fileName = a.FilePath.Replace(".Entities", "");
 
-            uctx.MoveFile(a.FilePath, fileName);
+            uctx.MoveFile(a.FilePath, fileName, createDirectory: true);
         });
 
         uctx.MoveFiles("Southwind.Entities", "Southwind", "*.*");

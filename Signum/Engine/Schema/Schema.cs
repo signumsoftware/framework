@@ -830,7 +830,7 @@ public class Schema : IImplementationsFinder
 
     public bool HasFullTextIndex(PropertyRoute propertyRoute)
     {
-        if (propertyRoute.Type != typeof(string))
+        if (propertyRoute.Type != typeof(string) || !propertyRoute.RootType.IsEntity())
             return false;
 
         var mlItem = propertyRoute.GetMListItemsRoute();

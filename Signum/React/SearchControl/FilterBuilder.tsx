@@ -3,10 +3,10 @@ import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue
+  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType
 } from '../FindOptions'
 import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
-import { isNumber, trimDateToFormat } from '../Lines/ValueLine'
+import { isNumber, trimDateToFormat, ValueLineController } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly, EntityStrip } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat, PropertyRoute } from '../Reflection'
 import { TypeContext } from '../TypeContext'
@@ -322,7 +322,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
               <small style={{ whiteSpace: "nowrap" }}>
-              Group Prefix:
+                Group Prefix:
               </small>
               <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
                 <QueryTokenBuilder
@@ -335,7 +335,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
               </div>
             </div>
           </div>
-             
+
         </td>
         <td>
           <select className="form-select form-select-xs sf-group-selector fw-bold" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
@@ -366,7 +366,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
         {p.showPinnedFiltersOptions && p.showDashboardBehaviour && <td>
           <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
-        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly}  />}
+        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly} />}
       </tr >
 
       {
@@ -431,17 +431,31 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const f = p.filterGroup;
 
+  
+
     const readOnly = p.readOnly || f.frozen;
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
+
+    if (f.filters.some(a => !a.token))
+      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
+
+    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
+      f.value = undefined;
 
     var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
     var textArea = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"));
 
     if (textArea)
       return <FilterTextArea ctx={ctx} isComplex={isComplex} onChange={() => handleValueChange()} />;
-    else
-      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />;
+    else {
+      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      const vlt = tr && ValueLineController.getValueLineType(tr);
+
+      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange()} />;
+    }
   }
 
   function handleValueChange() {
@@ -454,6 +468,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
     p.onFilterChanged();
   }
 }
+
 
 function isFilterActive(fo: FilterOptionParsed) {
   if (fo.pinned == null)
