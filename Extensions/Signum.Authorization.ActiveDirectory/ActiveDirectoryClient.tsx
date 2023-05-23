@@ -143,9 +143,6 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
   return Finder.findRow({
     queryName: UserADQuery.ActiveDirectoryUsers,
-    filterOptions: [
-      { token: "InGroup", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
-    ],
     columnOptions: [
       { token: "DisplayName" },
       { token: "UserPrincipalName" },

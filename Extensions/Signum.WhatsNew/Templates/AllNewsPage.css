@@ -1,5 +1,4 @@
-﻿
-.sf-news-notify-badge {
+﻿.sf-news-notify-badge {
     position: absolute;
     background: #2780e3;
     text-align: center;
@@ -14,7 +13,6 @@
     font-size: 10px;
 }
 
-
 .news-shadow {
     box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
     transition: box-shadow 0.3s
@@ -23,7 +21,6 @@
 .news-shadow:hover {
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.3);
 }
-
 
 .news-shadow.selected {
     color: white;
@@ -38,7 +35,7 @@
     padding: 30px 0px;
     max-height: 40vh;
     max-width: 400px;
-    justify-content: center;
+    display: table;
     margin: auto;
 }
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions,
-  isList, isFilterGroupOptionParsed, isCheckBox
+  isList, isFilterGroupOptionParsed, isCheckBox, getFilterGroupUnifiedFilterType
 } from '../FindOptions'
 import { ValueLine, FormGroup } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
@@ -11,6 +11,7 @@ import { ComplexConditionSyntax, createFilterValueControl, FilterTextArea, Multi
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { ValueLineController } from '../Lines/ValueLine'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -74,20 +75,38 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "xs" : "sm" }, undefined as any, Binding.create(f, a => a.value));
 
-    if (isFilterGroupOptionParsed(f) || f.operation == "ComplexCondition" || f.operation == "FreeText") {
+    if (isFilterGroupOptionParsed(f)) {
 
-      var isComplex = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition") : f.operation == "ComplexCondition";
-      var textArea = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText")) : f.operation == "ComplexCondition" || f.operation == "FreeText";
-
-      if (textArea)
+      if (f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"))) {
+        var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
         return <FilterTextArea ctx={ctx}
           isComplex={isComplex}
           onChange={(() => handleValueChange(f, isComplex))}
-          label={label || SearchMessage.Search.niceToString()} />
-      else
-        return <ValueLine ctx={ctx} type={{ name: "string" }}
-          onChange={(() => handleValueChange(f, isComplex))}
-          label={label || SearchMessage.Search.niceToString()} />
+          label={label || SearchMessage.Search.niceToString()} />;
+
+      }
+
+      if (f.filters.some(a => !a.token))
+        return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
+
+      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
+        ctx.value = undefined;
+
+      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      const vlt = tr && ValueLineController.getValueLineType(tr);
+
+      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange(f)} label={label || SearchMessage.Search.niceToString()} />
+
+    }
+
+    if (f.operation == "ComplexCondition" || f.operation == "FreeText") {
+      const isComplex = f.operation == "ComplexCondition";
+      return <FilterTextArea ctx={ctx}
+        isComplex={isComplex}
+        onChange={(() => handleValueChange(f, isComplex))}
+        label={label || SearchMessage.Search.niceToString()} />
     }
 
     if (isList(f.operation!))
