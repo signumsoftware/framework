@@ -693,6 +693,7 @@ public static class CaseActivityLogic
                         WorkflowActivity = next,
                         OriginalWorkflowActivityName = next.Name,
                         Case = @case,
+                       ScriptExecution=  GetScriptExecution(next)
                     };
 
                     //new WorkflowExecuteStepContext(@case, ca).ExecuteConnection(connection);
