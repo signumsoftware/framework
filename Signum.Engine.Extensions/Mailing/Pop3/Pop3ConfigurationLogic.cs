@@ -306,7 +306,7 @@ public static class Pop3ConfigurationLogic
         {
             var lastsEmails = forceGetLast15FromServer ? null :
                 Database.Query<EmailMessageEntity>()
-                 .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.Pop3Configuration.Is(config))
+                 .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!=null && e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.Pop3Configuration.Is(config))
                  .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
                  .OrderByDescending(c => c.CreationDate).Take(maxReceptionForTime).ToDictionary(e => e.UniqueId);
 
