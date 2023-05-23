@@ -399,13 +399,15 @@ public class ParsedToken
     {
         ParsedToken result = new ParsedToken(tokenString, qd);
 
+        var errorCtx = $"Parsing '{tokenString}': ";
+
         if (tokenString.StartsWith("$"))
         {
             string v = tokenString.TryBefore('.') ?? tokenString;
 
             if (!variables.TryGetValue(v, out ValueProviderBase? vp))
             {
-                addError(false, "Variable '{0}' is not defined at this scope".FormatWith(v));
+                addError(false, errorCtx + "Variable '{0}' is not defined at this scope".FormatWith(v));
                 return result;
             }
 
@@ -413,13 +415,13 @@ public class ParsedToken
 
             if(tvp == null)
             {
-                addError(false, "Variable '{0}' is not a token".FormatWith(v));
+                addError(false, errorCtx + "Variable '{0}' is not a token".FormatWith(v));
                 return result;
             }
 
             if (tvp.ParsedToken.QueryToken == null)
             {
-                addError(false, "Variable '{0}' is not a correctly parsed".FormatWith(v));
+                addError(false, errorCtx + "Variable '{0}' is not a correctly parsed".FormatWith(v));
                 return result;
             }
 
@@ -434,7 +436,7 @@ public class ParsedToken
         }
         catch (Exception ex)
         {
-            addError(false, ex.Message);
+            addError(false, errorCtx + ex.Message);
         }
         return result;
     }
