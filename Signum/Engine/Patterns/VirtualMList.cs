@@ -90,12 +90,13 @@ public static class VirtualMList
         if (nn != null && !nn.Disabled)
             throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
 
-        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
+        Func<T, MList<L>> getMList = GetAccessor(mListField);
+
+        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute, e => getMList((T)e)));
 
         var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
         var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
 
-        Func<T, MList<L>> getMList = GetAccessor(mListField);
         Action<L, Lite<T>>? setter = null;
         bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)!
             .OfType<PreserveOrderAttribute>()
@@ -384,10 +385,12 @@ public class VirtualMListInfo
 {
     public readonly PropertyRoute MListRoute;
     public readonly PropertyRoute BackReferenceRoute;
+    public readonly Func<Entity, IMListPrivate?> GetMList;
 
-    public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute)
+    public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute, Func<Entity, IMListPrivate?> getMList)
     {
         MListRoute = mListRoute;
         BackReferenceRoute = backReferenceRoute;
+        GetMList = getMList;
     }
 }
