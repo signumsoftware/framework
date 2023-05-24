@@ -27,7 +27,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getTimeMachineIcon, TimeMachineColors } from '@framework/Lines/TimeMachineIcon';
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine';
 
-export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
+export function start(options: { routes: RouteObject[] }) {
 
     QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
       new QuickLinks.QuickLinkAction(TimeMachineMessage.TimeMachine.niceToString(),

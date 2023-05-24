@@ -1158,10 +1158,8 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
     const ctx = this.props.ctx;
 
     const view = baseRender.call(this);
-    if (view == null)
-      return null;
 
-    const replacer = new ViewReplacer<T>(view, ctx);
+    const replacer = new ViewReplacer<T>(view!, ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };
@@ -1172,10 +1170,8 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
 export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
-    if (view == null)
-      return null;
 
-    const replacer = new ViewReplacer<T>(view, props.ctx);
+    const replacer = new ViewReplacer<T>(view!, props.ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };

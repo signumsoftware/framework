@@ -5,7 +5,7 @@ import * as Navigator from '@framework/Navigator'
 import { Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
-export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
+export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 }
 

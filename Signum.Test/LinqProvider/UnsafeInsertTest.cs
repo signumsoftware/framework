@@ -57,7 +57,7 @@ public class UpdateInsertTest
     {
         using (var tr = new Transaction())
         {
-            using (Administrator.SaveDisableIdentity<AlbumEntity>())
+            using (Administrator.DisableIdentity<AlbumEntity>())
             {
                 int value = Database.Query<AlbumEntity>().UnsafeInsert(a => new AlbumEntity
                 {
