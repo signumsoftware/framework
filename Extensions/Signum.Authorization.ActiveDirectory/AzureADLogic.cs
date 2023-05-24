@@ -179,20 +179,26 @@ public static class AzureADLogic
                 }.Register();
 
 
-            
+                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Auto(
+                from p in Database.Query<UserEntity>()
+                select new
+                {
+                    Entity = p,
+                    p.Id,
+                }));
 
-                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+                   QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
                  {
-                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
-                     {
-                         var tokenCredential = GetTokenCredential();
-                         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+                 using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
+                 {
+                     var tokenCredential = GetTokenCredential();
+                     GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
-                         var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+                     var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
 
 
-                         UserCollectionResponse response;
-                         if (inGroup?.Value is Lite<ADGroupEntity> group)
+                     UserCollectionResponse response;
+                     if (inGroup?.Value is Lite<ADGroupEntity> group)
                          {
                              response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
                              {

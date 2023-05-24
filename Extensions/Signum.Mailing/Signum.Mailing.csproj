@@ -23,7 +23,6 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
-		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
 		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
