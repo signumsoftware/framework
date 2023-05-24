@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailReceptionConfigurationEntity } from '../../Signum.MailingReception';
+import { EmailReceptionConfigurationEntity } from '../Signum.Mailing.Reception';
 
 export default function EmailReceptionConfiguration(p: { ctx: TypeContext<EmailReceptionConfigurationEntity> }) {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });

@@ -7,7 +7,7 @@ import { EntitySettings } from '@framework/Navigator'
 import { getMixin } from '@framework/Signum.Entities'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { Tab } from 'react-bootstrap';
-import { EmailReceptionConfigurationEntity, EmailReceptionEntity, EmailReceptionMixin } from '../Signum.MailingReception'
+import { EmailReceptionConfigurationEntity, EmailReceptionEntity, EmailReceptionMixin } from './Signum.Mailing.Reception'
 import { EmailMessageEntity } from '../Signum.Mailing'
 
 export function start(options: {  routes: RouteObject[] }) {

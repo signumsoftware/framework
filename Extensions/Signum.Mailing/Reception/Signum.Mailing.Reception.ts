@@ -2,11 +2,11 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
-import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Basics from '../../Signum/React/Signum.Basics'
-import * as Operations from '../../Signum/React/Signum.Operations'
-import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Signum/React/Reflection'
+import * as Entities from '../../../Signum/React/Signum.Entities'
+import * as Basics from '../../../Signum/React/Signum.Basics'
+import * as Operations from '../../../Signum/React/Signum.Operations'
+import * as Scheduler from '../../Signum.Scheduler/Signum.Scheduler'
 
 
 export const CompareInbox = new EnumType<CompareInbox>("CompareInbox");

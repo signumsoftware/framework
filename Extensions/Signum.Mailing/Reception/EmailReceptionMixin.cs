@@ -1,4 +1,4 @@
-namespace Signum.MailingReception;
+namespace Signum.Mailing.Reception;
 
 public class EmailReceptionMixin : MixinEntity
 {

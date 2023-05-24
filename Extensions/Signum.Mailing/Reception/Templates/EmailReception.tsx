@@ -3,8 +3,7 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailReceptionConfigurationEntity, EmailReceptionMixin } from '../../Signum.MailingReception'
-import { EmailReceptionEntity } from '../../Signum.MailingReception'
+import { EmailReceptionEntity, EmailReceptionMixin } from '../Signum.Mailing.Reception'
 import { EmailMessageEntity } from '../../Signum.Mailing'
 
 export default function EmailReception(p: { ctx: TypeContext<EmailReceptionEntity> }) {

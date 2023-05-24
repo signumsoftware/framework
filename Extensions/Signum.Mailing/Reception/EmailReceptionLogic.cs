@@ -1,13 +1,9 @@
-using Signum.Mailing;
-using Signum.MailingReception;
 using Signum.Scheduler;
 
-namespace Signum.MailingReception;
+namespace Signum.Mailing.Reception;
 
 public static class EmailReceptionLogic
 {
-
-
     [AutoExpressionField]
     public static IQueryable<EmailReceptionEntity> Receptions(this EmailReceptionConfigurationEntity c) =>
         As.Expression(() => Database.Query<EmailReceptionEntity>().Where(r => r.EmailReceptionConfiguration.Is(c)));

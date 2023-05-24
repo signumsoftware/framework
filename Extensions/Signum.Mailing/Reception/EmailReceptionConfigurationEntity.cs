@@ -1,7 +1,7 @@
 using Signum.Mailing;
 using Signum.Scheduler;
 
-namespace Signum.MailingReception;
+namespace Signum.Mailing.Reception;
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
 public class EmailReceptionConfigurationEntity : Entity, ITaskEntity
