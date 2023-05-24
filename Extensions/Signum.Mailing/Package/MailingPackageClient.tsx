@@ -4,19 +4,19 @@ import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
-import { EmailMessageEntity } from '../Signum.Mailing/Signum.Mailing'
 import { EntityLine } from '@framework/Lines'
 import { EmailMessagePackageMixin, EmailPackageEntity, SendEmailTaskEntity } from './Signum.Mailing.Package'
+import { EmailMessageEntity } from '../Signum.Mailing'
 
 export function start(options: {
   routes: RouteObject[],
   sendEmailTask: boolean,
 }) {
 
-  Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./Templates/EmailPackage')));
+  Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./EmailPackage')));
 
   if (options.sendEmailTask) {
-    Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./Templates/SendEmailTask')));
+    Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./SendEmailTask')));
   }
 
   Navigator.getSettings(EmailMessageEntity)!.overrideView((rep) => {

@@ -130,4 +130,10 @@
     <Member Name="UseDefaultCredentials" Description="Utilizzare le credenziali predefinite" />
     <Member Name="Username" Description="Nome utente" />
   </Type>
+	<Type Name="EmailMessageProcess">
+		<Member Name="SendEmails" Description="Inviare email" />
+	</Type>
+	<Type Name="EmailPackageEntity" Description="Pacchetto di posta elettronica">
+		<Member Name="Name" Description="Nome" />
+	</Type>
 </Translations>

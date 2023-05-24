@@ -5,7 +5,7 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { Lite, is } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { SendEmailTaskEntity } from '../Signum.Mailing.Package'
+import { SendEmailTaskEntity } from './Signum.Mailing.Package'
 
 export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity> }) {
 

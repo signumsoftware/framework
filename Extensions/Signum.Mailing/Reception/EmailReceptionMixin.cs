@@ -1,6 +1,5 @@
 namespace Signum.MailingReception;
 
-
 public class EmailReceptionMixin : MixinEntity
 {
     protected EmailReceptionMixin(ModifiableEntity mainEntity, MixinEntity next) : base(mainEntity, next)
@@ -24,7 +23,7 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
     public string UniqueId { get; set; }
 
 
-    public Lite<Pop3ReceptionEntity> Reception { get; set; }
+    public Lite<EmailReceptionEntity> Reception { get; set; }
 
     [BindParent]
     public BigStringEmbedded RawContent { get; set; } = new BigStringEmbedded();

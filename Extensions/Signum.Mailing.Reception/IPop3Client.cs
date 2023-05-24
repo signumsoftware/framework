@@ -2,36 +2,14 @@ using Signum.Mailing;
 
 namespace Signum.MailingReception;
 
-public interface IPop3Client : IDisposable
-{
-    List<MessageUid> GetMessageInfos();
 
-    EmailMessageEntity GetMessage(MessageUid messageInfo, Lite<Pop3ReceptionEntity> reception);
-
-    void DeleteMessage(MessageUid messageInfo);
-    void Disconnect();
-}
-
-public struct MessageUid
-{
-    public MessageUid(string uid, int number, int size)
-    {
-        Uid = uid;
-        Number = number;
-        Size = size;
-    }
-
-    public readonly string Uid;
-    public readonly int Number;
-    public readonly int Size;
-}
 
 /*-- Example implementation of IPop3Client by OpenPop.Pop3Client     
 public class OpenPop3Client : IPop3Client
 {
     Pop3Client client;
 
-    public OpenPop3Client(Pop3ConfigurationEntity configuration)
+    public OpenPop3Client(EmailReceptionConfigurationEntity configuration)
     {
         client = new Pop3Client();
         client.Connect(configuration.Host, configuration.Port, configuration.EnableSSL);

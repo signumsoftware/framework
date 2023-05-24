@@ -1,42 +1,28 @@
+using Signum.API.Json;
+using Signum.API;
 using Signum.Mailing;
+using Signum.Mailing.Pop3;
 using Signum.MailingReception;
 using Signum.Scheduler;
+using Signum.Utilities.Reflection;
+using System;
+using System.Linq;
+using System.Text.Json;
 
-namespace Signum.MailingPop3;
+namespace Signum.Mailing.Pop3;
 
 public static class Pop3ConfigurationLogic
 {
     public static CancellationToken CancelationToken;
-    public static int MaxReceptionPerTime = 15;
 
-    [AutoExpressionField]
-    public static IQueryable<Pop3ReceptionEntity> Receptions(this Pop3ConfigurationEntity c) =>
-        As.Expression(() => Database.Query<Pop3ReceptionEntity>().Where(r => r.Pop3Configuration.Is(c)));
-
-    [AutoExpressionField]
-    public static IQueryable<EmailMessageEntity> EmailMessages(this Pop3ReceptionEntity r) =>
-        As.Expression(() => Database.Query<EmailMessageEntity>().Where(m => m.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Is(r)));
-
-    [AutoExpressionField]
-    public static IQueryable<ExceptionEntity> Exceptions(this Pop3ReceptionEntity e) =>
-        As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(a => a.Reception.Is(e)).Select(a => a.Exception.Entity));
-
-    [AutoExpressionField]
-    public static Pop3ReceptionEntity? Pop3Reception(this ExceptionEntity ex) =>
-        As.Expression(() => Database.Query<Pop3ReceptionExceptionEntity>().Where(re => re.Exception.Is(ex)).Select(re => re.Reception.Entity).SingleOrDefaultEx());
-
-    public static Func<Pop3ConfigurationEntity, IPop3Client> GetPop3Client = null!;
-
+    public static Func<EmailReceptionConfigurationEntity, IPop3Client> GetPop3Client = null!;
     public static Func<string, string> EncryptPassword = s => s;
     public static Func<string, string> DecryptPassword = s => s;
+    public static int MaxReceptionPerTime = 15;
 
-    public static Action<Pop3ReceptionEntity>? ReceptionComunication;
-
-    public static bool IsStarted = false;
-
-    public static void Start(SchemaBuilder sb, Func<Pop3ConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
+    public static void Start(SchemaBuilder sb, Func<EmailReceptionConfigurationEntity, IPop3Client> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             GetPop3Client = getPop3Client;
 
@@ -46,123 +32,35 @@ public static class Pop3ConfigurationLogic
             if (decryptPassword != null)
                 DecryptPassword = decryptPassword;
 
-            MixinDeclarations.AssertDeclared(typeof(EmailMessageEntity), typeof(EmailReceptionMixin));
+            sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
 
-            sb.Include<Pop3ConfigurationEntity>()
-                .WithQuery(() => s => new
-                {
-                    Entity = s,
-                    s.Id,
-                    s.Host,
-                    s.Port,
-                    s.Username,
-                    s.EnableSSL
-                });
-            sb.Include<Pop3ReceptionEntity>();
-            sb.Include<Pop3ReceptionExceptionEntity>();
+            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, EmailReceptionEntity>(ReceiveEmails));
 
-            sb.Include<EmailMessageEntity>()
-                .WithQuery(() => e => new
-                {
-                    Entity = e,
-                    e.Id,
-                    e.From,
-                    e.Subject,
-                    e.Template,
-                    e.State,
-                    e.Sent,
-                    SentDate = (DateTime?)e.Mixin<EmailReceptionMixin>().ReceptionInfo!.SentDate,
-                    e.Exception,
-                });
-
-            QueryLogic.Queries.Register(typeof(Pop3ReceptionEntity), () => DynamicQueryCore.Auto(
-            from s in Database.Query<Pop3ReceptionEntity>()
-            select new
+            if(sb.WebServerBuilder != null)
             {
-                Entity = s,
-                s.Id,
-                s.Pop3Configuration,
-                s.StartDate,
-                s.EndDate,
-                s.NewEmails,
-                EmailMessages = s.EmailMessages().Count(),
-                Exceptions = s.Exceptions().Count(),
-                s.Exception,
-            })
-            .ColumnDisplayName(a => a.EmailMessages, () => typeof(EmailMessageEntity).NicePluralName())
-            .ColumnDisplayName(a => a.Exceptions, () => typeof(ExceptionEntity).NicePluralName()));
-
-            QueryLogic.Expressions.Register((Pop3ConfigurationEntity c) => c.Receptions(), () => typeof(Pop3ReceptionEntity).NicePluralName());
-            QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
-            QueryLogic.Expressions.Register((Pop3ReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
-            QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(Pop3ReceptionEntity).NiceName());
-
-            new Graph<Pop3ConfigurationEntity>.Execute(Pop3ConfigurationOperation.Save)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Execute = (e, _) => { }
-            }.Register();
-
-            new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveEmails)
-            {
-                CanBeNew = true,
-                CanBeModified = true,
-                Construct = (e, _) =>
+                var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
+                var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
+                pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
+                pcs.Add("newPassword", new PropertyConverter
                 {
-                    using (var tr = Transaction.None())
+                    AvoidValidate = true,
+                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
                     {
-                        var result = e.ReceiveEmails();
-                        return tr.Commit(result);
+                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+
+                        var password = reader.GetString()!;
+
+                        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
                     }
-                }
-            }.Register();
-
-            new Graph<Pop3ReceptionEntity>.ConstructFrom<Pop3ConfigurationEntity>(Pop3ConfigurationOperation.ReceiveLastEmails)
-            {
-                CanBeNew = true,
-                CanBeModified = false,
-                Construct = (e, _) =>
-                {
-                    using (var tr = Transaction.None())
-                    {
-                        var result = e.ReceiveEmails(true);
-                        return tr.Commit(result);
-                    }
-                }
-            }.Register();
-
-            
-            SchedulerLogic.ExecuteTask.Register((Pop3ConfigurationEntity smtp, ScheduledTaskContext ctx) => smtp.ReceiveEmails().ToLite());
-
-            SimpleTaskLogic.Register(Pop3ConfigurationAction.ReceiveAllActivePop3Configurations, (ScheduledTaskContext ctx) =>
-            {
-                if (!EmailLogic.Configuration.ReciveEmails)
-                    throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
-
-                foreach (var item in Database.Query<Pop3ConfigurationEntity>().Where(a => a.Active).ToList())
-                {
-                    item.ReceiveEmails();
-                }
-
-                return null;
-            });
+                });
+            }
         }
-
-        IsStarted = true;
     }
 
-    public static event Func<Pop3ConfigurationEntity, IDisposable>? SurroundReceiveEmail;
+    public static event Func<EmailReceptionConfigurationEntity, IDisposable>? SurroundReceiveEmail;
 
-    public static Pop3ReceptionEntity ReceiveEmails(this Pop3ConfigurationEntity config, bool forceGetLastFromServer = false)
-    {
-        if (config.FullComparation && !forceGetLastFromServer)
-            return ReceiveEmailsFullComparation(config);
-        else
-            return ReceiveEmailsPartialComparation(config, forceGetLastFromServer);
-    }
-
-    public static Pop3ReceptionEntity ReceiveEmailsPartialComparation(this Pop3ConfigurationEntity config, bool forceGetLastFromServer)
+    public static EmailReceptionEntity ReceiveEmails(Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config)
     {
         if (!EmailLogic.Configuration.ReciveEmails)
             throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
@@ -170,10 +68,8 @@ public static class Pop3ConfigurationLogic
         using (HeavyProfiler.Log("ReciveEmails"))
         using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
         {
-
-
-            Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
-                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = Clock.Now }.Save()));
+            EmailReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
+                new EmailReceptionEntity { EmailReceptionConfiguration = config.ToLite(), StartDate = Clock.Now }.Save()));
 
             var now = Clock.Now;
             try
@@ -183,7 +79,7 @@ public static class Pop3ConfigurationLogic
 
                     int messageInfosNum = 0;
 
-                    List<MessageUid> messagesToSave = GetMessagesToSave(config, MaxReceptionPerTime, client, forceGetLastFromServer, out messageInfosNum);
+                    List<MessageUid> messagesToSave = GetMessagesToSave(config, client, out messageInfosNum);
 
                     using (var tr = Transaction.ForceNew())
                     {
@@ -193,7 +89,7 @@ public static class Pop3ConfigurationLogic
                         tr.Commit();
                     }
 
-                    Boolean anomalousReception = false;
+                    bool anomalousReception = false;
                     string lastSuid = "";
                     foreach (var mi in messagesToSave)
                     {
@@ -202,8 +98,7 @@ public static class Pop3ConfigurationLogic
 
                         var sent = SaveEmail(config, reception, client, mi, ref anomalousReception);
                         lastSuid = mi.Uid;
-                        //DeleteSavedEmail(anomalousReception, config, now, client, mi, sent);
-                        DeleteSavedEmail(false, config, now, client, mi, sent);
+                        DeleteServerMessageIfNecessary(config, now, client, mi, sent);
                     }
 
                     using (var tr = Transaction.ForceNew())
@@ -235,59 +130,58 @@ public static class Pop3ConfigurationLogic
                 catch { }
             }
 
-            ReceptionComunication?.Invoke(reception);
+            EmailReceptionLogic.ReceptionComunication?.Invoke(reception);
 
             return reception;
         }
     }
 
-    private static List<MessageUid> GetMessagesToSave(Pop3ConfigurationEntity config, int maxReceptionForTime, IPop3Client client, bool forceGetLast15FromServer, out int messageInfosNum)
+    private static List<MessageUid> GetMessagesToSave(EmailReceptionConfigurationEntity config, IPop3Client client, out int messageCount)
     {
         var messageInfos = client.GetMessageInfos().OrderBy(m => m.Number);
-        messageInfosNum = messageInfos.Count();
+        messageCount = messageInfos.Count();
 
-        List<MessageUid>? messagesToSave = null;
 
-        var lastSuid = Database.Query<Pop3ReceptionEntity>()
-           .Where(e => e.Pop3Configuration.Is(config))
-           .OrderByDescending(r => r.EndDate)
-           .Select(e => new { e.MailsFromDifferentAccounts, e.LastServerMessageUID }).FirstOrDefault();
-
-        if (!forceGetLast15FromServer && lastSuid != null && lastSuid.MailsFromDifferentAccounts) //it seems that the account can download emails from other accounts so it will be last id
+        if (config.CompareInbox == CompareInbox.Full)
         {
-            var maxId = messageInfos.Where(e => e.Uid == lastSuid.LastServerMessageUID).Select(e => e.Number).SingleOrDefaultEx();
-            messagesToSave = messageInfos.Where(e => e.Number > maxId).Take(maxReceptionForTime).ToList();
+            var already = messageInfos.Select(a => a.Uid).Chunk(50).SelectMany(l =>
+                        (from em in Database.Query<EmailMessageEntity>()
+                         let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+                         where ri != null && l.Contains(ri.UniqueId)
+                         select KeyValuePair.Create(ri.UniqueId, (DateTime?)ri.SentDate)))
+                        .ToDictionary();
+
+            return messageInfos.Where(m => !already.ContainsKey(m.Uid)).ToList();
+        }
+
+
+        var lastsEmails = Database.Query<EmailMessageEntity>()
+            .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.EmailReceptionConfiguration.Is(config))
+            .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
+            .OrderByDescending(c => c.CreationDate).Take(MaxReceptionPerTime).ToDictionary(e => e.UniqueId);
+
+
+        if (lastsEmails != null && lastsEmails.Any())
+        {
+            var messageJoinDict = messageInfos.ToDictionary(e => e.Uid).OuterJoinDictionarySC(lastsEmails, (key, v1, v2) => new { key, v1, v2 });
+            var messageMachings = messageJoinDict.Where(e => e.Value.v1 != null && e.Value.v2 != null).ToList();
+
+            if (!messageMachings.Any())
+                return messageInfos.ToList();
+
+            var maxId = !messageMachings.Any() ? 0 : messageMachings.Select(e => e.Value.v1!.Value.Number).Max();
+
+            return messageInfos.Where(m => m.Number > maxId).OrderBy(m => m.Number)
+                .Take(MaxReceptionPerTime).ToList();// max maxReceptionForTime message per time
         }
         else
         {
-            var lastsEmails = forceGetLast15FromServer ? null :
-                Database.Query<EmailMessageEntity>()
-                 .Where(e => e.Mixin<EmailReceptionMixin>().ReceptionInfo!.Reception.Entity.Pop3Configuration.Is(config))
-                 .Select(d => new { d.CreationDate, d.Mixin<EmailReceptionMixin>().ReceptionInfo!.UniqueId })
-                 .OrderByDescending(c => c.CreationDate).Take(maxReceptionForTime).ToDictionary(e => e.UniqueId);
-
-            if (lastsEmails != null && lastsEmails.Any())
-            {
-                var messageJoinDict = messageInfos.ToDictionary(e => e.Uid).OuterJoinDictionarySC(lastsEmails, (key, v1, v2) => new { key, v1, v2 });
-                var messageMachings = messageJoinDict.Where(e => e.Value.v1 != null && e.Value.v2 != null).ToList();
-                var maxId = !messageMachings.Any() ? 0 : messageMachings.Select(e => e.Value.v1!.Value.Number).Max();
-
-                messagesToSave = !messageMachings.Any() ?
-                    messageInfos.ToList() :
-                    messageInfos.Where(m => m.Number > maxId).OrderBy(m => m.Number)
-                    .Take(maxReceptionForTime).ToList();// max maxReceptionForTime message per time
-            }
-            else
-            {
-                // the first time only get the last maxReceptionForTime messages
-                messagesToSave = messageInfos.OrderByDescending(m => m.Number).Take(maxReceptionForTime).ToList();
-            }
+            // the first time only get the last maxReceptionForTime messages
+            return messageInfos.OrderByDescending(m => m.Number).Take(MaxReceptionPerTime).ToList();
         }
-
-        return messagesToSave;
     }
 
-    private static DateTime? SaveEmail(Pop3ConfigurationEntity config, Pop3ReceptionEntity reception, IPop3Client client, MessageUid mi, ref bool anomalousReception)
+    private static DateTime? SaveEmail(EmailReceptionConfigurationEntity config, EmailReceptionEntity reception, IPop3Client client, MessageUid mi, ref bool anomalousReception)
     {
         DateTime? sent = null;
 
@@ -305,7 +199,7 @@ public static class Pop3ConfigurationLogic
                     {
                         email.Recipients.Add(new EmailRecipientEmbedded
                         {
-                            EmailAddress = config.Username ?? "",
+                            EmailAddress = config.EmailAddress ?? "",
                             Kind = EmailRecipientKind.To,
                         });
                     }
@@ -354,7 +248,7 @@ public static class Pop3ConfigurationLogic
 
                     using (var tr2 = Transaction.ForceNew())
                     {
-                        new Pop3ReceptionExceptionEntity
+                        new EmailReceptionExceptionEntity
                         {
                             Exception = ex.ToLite(),
                             Reception = reception.ToLite()
@@ -371,98 +265,29 @@ public static class Pop3ConfigurationLogic
 
 
 
-    private static void DeleteSavedEmail(bool delete, Pop3ConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
+    private static void DeleteServerMessageIfNecessary(EmailReceptionConfigurationEntity config, DateTime now, IPop3Client client, MessageUid mi, DateTime? sent)
     {
-        if (delete || (config.DeleteMessagesAfter != null && sent != null &&
+        if ((config.DeleteMessagesAfter != null && sent != null &&
              sent.Value.Date.AddDays(config.DeleteMessagesAfter.Value) < Clock.Now.Date))
         {
-            client.DeleteMessage(mi);
-
-            (from em in Database.Query<EmailMessageEntity>()
-             let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
-             where ri != null && ri.UniqueId == mi.Uid
-             select em)
-             .UnsafeUpdate()
-             .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo!.DeletionDate, em => now)
-             .Execute();
+            DeleteServerMessage(now, client, mi);
         }
     }
 
-    public static Pop3ReceptionEntity ReceiveEmailsFullComparation(this Pop3ConfigurationEntity config)
+    private static void DeleteServerMessage(DateTime now, IPop3Client client, MessageUid mi)
     {
-        if (!EmailLogic.Configuration.ReciveEmails)
-            throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
+        client.DeleteMessage(mi);
 
-        using (HeavyProfiler.Log("ReciveEmails"))
-        using (Disposable.Combine(SurroundReceiveEmail, func => func(config)))
-        {
-            Pop3ReceptionEntity reception = Transaction.ForceNew().Using(tr => tr.Commit(
-                new Pop3ReceptionEntity { Pop3Configuration = config.ToLite(), StartDate = Clock.Now }.Save()));
-
-            var now = Clock.Now;
-            try
-            {
-                using (var client = GetPop3Client(config))
-                {
-                    var messageInfos = client.GetMessageInfos();
-
-                    var already = messageInfos.Select(a => a.Uid).Chunk(50).SelectMany(l =>
-                        (from em in Database.Query<EmailMessageEntity>()
-                         let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
-                         where ri != null && l.Contains(ri.UniqueId)
-                         select KeyValuePair.Create(ri.UniqueId, (DateTime?)ri.SentDate))).ToDictionary();
-
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        reception.NewEmails = messageInfos.Count - already.Count;
-                        reception.Save();
-                        tr.Commit();
-                    }
-
-                    foreach (var mi in messageInfos)
-                    {
-                        var sent = already.TryGetS(mi.Uid);
-
-                        if (sent == null)
-                            sent = SaveEmail(config, reception, client, mi);
-
-                        DeleteSavedEmail(false, config, now, client, mi, sent);
-                    }
-
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        reception.EndDate = Clock.Now;
-                        reception.Save();
-                        tr.Commit();
-                    }
-
-                    client.Disconnect(); //Delete messages now
-                }
-            }
-            catch (Exception e)
-            {
-                var ex = e.LogException();
-
-                try
-                {
-                    using (var tr = Transaction.ForceNew())
-                    {
-                        reception.EndDate = Clock.Now;
-                        reception.Exception = ex.ToLite();
-                        reception.Save();
-                        tr.Commit();
-                    }
-                }
-                catch { }
-            }
-
-            ReceptionComunication?.Invoke(reception);
-
-            return reception;
-        }
+        (from em in Database.Query<EmailMessageEntity>()
+         let ri = em.Mixin<EmailReceptionMixin>().ReceptionInfo
+         where ri != null && ri.UniqueId == mi.Uid
+         select em)
+         .UnsafeUpdate()
+         .Set(em => em.Mixin<EmailReceptionMixin>().ReceptionInfo!.DeletionDate, em => now)
+         .Execute();
     }
 
-    private static DateTime? SaveEmail(Pop3ConfigurationEntity config, Pop3ReceptionEntity reception, IPop3Client client, MessageUid mi)
+    private static DateTime? SaveEmail(EmailReceptionConfigurationEntity config, EmailReceptionEntity reception, IPop3Client client, MessageUid mi)
     {
         DateTime? sent = null;
 
@@ -481,7 +306,7 @@ public static class Pop3ConfigurationLogic
                     {
                         email.Recipients.Add(new EmailRecipientEmbedded
                         {
-                            EmailAddress = config.Username!,
+                            EmailAddress = config.EmailAddress!,
                             Kind = EmailRecipientKind.To,
                         });
                     }
@@ -519,7 +344,7 @@ public static class Pop3ConfigurationLogic
 
                     using (var tr2 = Transaction.ForceNew())
                     {
-                        new Pop3ReceptionExceptionEntity
+                        new EmailReceptionExceptionEntity
                         {
                             Exception = ex.ToLite(),
                             Reception = reception.ToLite()
@@ -562,4 +387,28 @@ public static class Pop3ConfigurationLogic
 
     public static Action<EmailMessageEntity>? AssociateNewEmail;
     public static Action<EmailMessageEntity, EmailMessageEntity>? AssociateDuplicateEmail;
+}
+
+public interface IPop3Client : IDisposable
+{
+    List<MessageUid> GetMessageInfos();
+
+    EmailMessageEntity GetMessage(MessageUid messageInfo, Lite<EmailReceptionEntity> reception);
+
+    void DeleteMessage(MessageUid messageInfo);
+    void Disconnect();
+}
+
+public struct MessageUid
+{
+    public MessageUid(string uid, int number, int size)
+    {
+        Uid = uid;
+        Number = number;
+        Size = size;
+    }
+
+    public readonly string Uid;
+    public readonly int Number;
+    public readonly int Size;
 }
