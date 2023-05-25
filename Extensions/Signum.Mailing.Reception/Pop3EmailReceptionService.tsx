@@ -1,21 +1,13 @@
 import * as React from 'react'
 import { ValueLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import { Pop3ConfigurationEntity } from '../Signum.MailingReception'
+import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3';
 
-export default function Pop3Configuration(p: { ctx: TypeContext<Pop3ConfigurationEntity> }) {
+export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3EmailReceptionServiceEntity> }) {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
   return (
     <div>
-      <div className="row">
-        <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.active)} />
-        </div>
-        <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.fullComparation)} />
-        </div>
-      </div>
       <div className="row">
         <div className="col-sm-auto">
           <ValueLine ctx={sc.subCtx(s => s.host)} />
@@ -40,9 +32,6 @@ export default function Pop3Configuration(p: { ctx: TypeContext<Pop3Configuratio
       <div className="row">
         <div className="col-sm-auto">
           <ValueLine ctx={sc.subCtx(s => s.readTimeout)} />
-        </div>
-        <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)} />
         </div>
       </div>
 

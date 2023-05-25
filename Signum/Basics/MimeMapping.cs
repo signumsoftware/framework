@@ -6,13 +6,20 @@ namespace Signum.Basics;
 
 public static class MimeMapping
 {
+    public static FileExtensionContentTypeProvider MimeConverter = new FileExtensionContentTypeProvider();
+
+    public static Dictionary<string, string> MimeTypeToExtension = MimeConverter.Mappings.AgGroupToDictionary(a => a.Value, gr => gr.First().Key);
+
     public static string GetMimeType(string fileName)
     {
         var extension = Path.GetExtension(fileName);
 
-        FileExtensionContentTypeProvider mimeConverter = new FileExtensionContentTypeProvider();
+        return MimeConverter.Mappings.TryGetValue(extension ?? "", out var result) ? result : "application/octet-stream";
+    }
 
-        return mimeConverter.Mappings.TryGetValue(extension ?? "", out var result) ? result : "application/octet-stream";
+    public static string? GetExtensionFromMimeType(string mimeType)
+    {
+        return MimeTypeToExtension.TryGetC(mimeType);
     }
 
     /// <param name="stream">No need to close</param

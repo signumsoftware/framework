@@ -218,4 +218,21 @@
     <Member Name="NoRecipients" Description="Ningún destinatario" />
     <Member Name="ThrowException" Description="Lanzar excepción" />
   </Type>
+	<Type Name="EmailMessageProcess">
+		<Member Name="CreateEmailsSendAsync" Description="Crear correos electrónicos envío asincrónico" />
+		<Member Name="SendEmails" Description="Enviar correos electrónicos" />
+	</Type>
+	<Type Name="EmailPackageEntity" Description="Paquete de e-mail">
+		<Member Name="Name" Description="Nombre" />
+	</Type>
+	<Type Name="SendEmailTaskEntity" Description="Tareas de enviar correo electrónico">
+		<Member Name="EmailTemplate" Description="Plantilla de correo electrónico" />
+		<Member Name="ModelConverter" Description="Conversor de modelo" />
+		<Member Name="Name" Description="Nombre" />
+		<Member Name="TargetsFromUserQuery" Description="Objetivos de la consulta de usuario" />
+		<Member Name="UniqueTarget" Description="Único objetivo" />
+	</Type>
+	<Type Name="SendEmailTaskOperation">
+		<Member Name="Save" Description="Guardar" />
+	</Type>
 </Translations>

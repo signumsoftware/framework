@@ -2,15 +2,15 @@
 //Auto-generated. Do NOT modify!//
 //////////////////////////////////
 
-import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
-import * as Entities from '../../Signum/React/Signum.Entities'
-import * as Operations from '../../Signum/React/Signum.Operations'
-import * as Processes from '../Signum.Processes/Signum.Processes'
-import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
-import * as Templates from '../Signum.Mailing/Signum.Mailing.Templates'
-import * as Mailing from '../Signum.Mailing/Signum.Mailing'
-import * as UserQueries from '../Signum.UserQueries/Signum.UserQueries'
-import * as Templating from '../Signum.Templating/Signum.Templating'
+import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../Signum/React/Reflection'
+import * as Entities from '../../../Signum/React/Signum.Entities'
+import * as Operations from '../../../Signum/React/Signum.Operations'
+import * as Processes from '../../Signum.Processes/Signum.Processes'
+import * as Scheduler from '../../Signum.Scheduler/Signum.Scheduler'
+import * as Templates from '../Signum.Mailing.Templates'
+import * as Mailing from '../Signum.Mailing'
+import * as UserQueries from '../../Signum.UserQueries/Signum.UserQueries'
+import * as Templating from '../../Signum.Templating/Signum.Templating'
 
 
 export const EmailMessagePackageMixin = new Type<EmailMessagePackageMixin>("EmailMessagePackageMixin");

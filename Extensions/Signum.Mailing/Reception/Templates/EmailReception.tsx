@@ -3,15 +3,15 @@ import { ValueLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 import { TypeContext } from '@framework/TypeContext'
-import { EmailReceptionMixin, Pop3ReceptionEntity } from '../Signum.MailingReception'
-import { EmailMessageEntity } from '../../Signum.Mailing/Signum.Mailing'
+import { EmailReceptionEntity, EmailReceptionMixin } from '../Signum.Mailing.Reception'
+import { EmailMessageEntity } from '../../Signum.Mailing'
 
-export default function Pop3Reception(p : { ctx: TypeContext<Pop3ReceptionEntity> }){
+export default function EmailReception(p: { ctx: TypeContext<EmailReceptionEntity> }) {
   const sc = p.ctx;
 
   return (
     <div>
-      <EntityLine ctx={sc.subCtx(s => s.pop3Configuration)} />
+      <EntityLine ctx={sc.subCtx(s => s.emailReceptionConfiguration)} />
       <ValueLine ctx={sc.subCtx(s => s.startDate)} />
       <ValueLine ctx={sc.subCtx(s => s.endDate)} />
       <ValueLine ctx={sc.subCtx(s => s.newEmails)} />
