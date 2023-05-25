@@ -1727,15 +1727,33 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "Field", undefined, member, undefined);
   }
 
-  static mixin(parent: PropertyRoute, mixinName: string) {
-    return new PropertyRoute(parent, "Mixin", undefined, undefined, mixinName);
+  static mixin(parent: PropertyRoute, mixinName: string, throwIfNotFound?: boolean) {
+    var result = new PropertyRoute(parent, "Mixin", undefined, undefined, mixinName);
+
+    if (throwIfNotFound) {
+      var rootType = result.findRootType();
+      var members = Dic.getKeys(rootType.members)
+      var prefix = result.propertyPath();
+      if (!members.some(m => m.startsWith(prefix)))
+        throw new Error(`Wrong mixing ${rootType.name} does not contain any member starting with '${prefix}''`);
+    }
+
+    return result;
   }
 
   static mlistItem(parent: PropertyRoute) {
+
+    if (!parent.typeReference().isCollection)
+      throw new Error(`PropertyRoute ${this.toString()} is not a MList`);
+
     return new PropertyRoute(parent, "MListItem", undefined, undefined, undefined);
   }
 
   static liteEntity(parent: PropertyRoute) {
+
+    if (!parent.typeReference().isLite)
+      throw new Error(`PropertyRoute ${this.toString()} is not a Lite`);
+
     return new PropertyRoute(parent, "LiteEntity", undefined, undefined, undefined);
   }
 
@@ -1959,8 +1977,9 @@ export class PropertyRoute {
         const ti = tryGetTypeInfos(ref).single("Ambiguity due to multiple Implementations" + getErrorContext()); //[undefined]
         if (ti) {
 
-          if (memberType == "Mixin")
-            return PropertyRoute.mixin(this, memberName);
+          if (memberType == "Mixin") {
+            return PropertyRoute.mixin(this, memberName, throwIfNotFound);
+          }
           else {
             const m = ti.members[memberName];
             if (!m) {
@@ -1976,7 +1995,7 @@ export class PropertyRoute {
       }
 
       if (memberType == "Mixin")
-        return PropertyRoute.mixin(this, memberName);
+        return PropertyRoute.mixin(this, memberName, throwIfNotFound);
       else {
         const fullMemberName =
           this.propertyRouteType == "Root" ? memberName :
