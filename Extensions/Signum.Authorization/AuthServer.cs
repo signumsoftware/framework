@@ -138,7 +138,7 @@ public static class AuthServer
             {
                 if (fi.DeclaringType!.Name.EndsWith("Query"))
                 {
-                    var q = fi.GetValue(null);
+                    var q = fi.GetValue(null)!;
 
                     var allowed = UserEntity.Current == null ? QueryAllowed.None :
                     QueryLogic.Queries.QueryAllowed(q, fullScreen: true) ? QueryAllowed.Allow :
