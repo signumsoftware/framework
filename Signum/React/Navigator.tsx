@@ -1167,7 +1167,23 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
   component.prototype.render.withViewOverrides = true;
 }
 
-export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+interface FunctionCache<T extends ModifiableEntity>  {
+  overridenView: React.FunctionComponent<{ ctx: TypeContext<T> }>,
+  viewOverrides: ViewOverride<T>[]
+}
+
+export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]): React.FunctionComponent<{ ctx: TypeContext<T> }>{
+
+  var cache = (functionComponent as any).cache as FunctionCache<T>; 
+
+  if (cache) {
+    if (cache.viewOverrides.every((vo, i) => viewOverrides[i] == vo))
+      return cache.overridenView;
+    else {
+      (functionComponent as any).cache = null;
+    }
+  }
+
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
 
@@ -1177,6 +1193,11 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   };
 
   Object.defineProperty(result, "name", { value: functionComponent.name + "VO" });
+
+  (functionComponent as any).cache = softCast<FunctionCache<T>>({
+    overridenView: result,
+    viewOverrides: viewOverrides,
+  });
 
   return result;
 }
