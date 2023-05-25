@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CertFileType" Description="Tipo de arquivo de CERT">
+    <Member Name="CertFile" Description="Arquivo certificado" />
+    <Member Name="SignedFile" Description="Arquivo assinado" />
+  </Type>
+  <Type Name="ClientCertificationFileEmbedded" Description="Arquivo de certificação de cliente">
+    <Member Name="CertFileType" Description="Tipo de arquivo de certificado" />
+    <Member Name="FullFilePath" Description="Caminho completo do arquivo" />
+  </Type>
+  <Type Name="EmailAddressEmbedded" Description="Direcção e-mail">
+    <Member Name="DisplayName" Description="Nome" />
+    <Member Name="EmailAddress" Description="Direcção e-mail" />
+    <Member Name="EmailOwner" Description="Proprietário e-mail" />
+  </Type>
+  <Type Name="EmailAttachmentEmbedded" Description="Anexo de e-mail">
+    <Member Name="ContentId" Description="Content id" />
+    <Member Name="File" Description="Ficheiro" />
+    <Member Name="Type" Description="Tipo" />
+  </Type>
+  <Type Name="EmailAttachmentType" Description="Tipo de anexo de e-mail">
+    <Member Name="Attachment" Description="Anexo" />
+    <Member Name="LinkedResource" Description="Recursos acoplado" />
+  </Type>
+  <Type Name="EmailConfigurationEmbedded" Description="Configuração de email">
+    <Member Name="DefaultCulture" Description="Cultura predeterminada" />
+    <Member Name="OverrideEmailAddress" Description="Sobrepor direcção e-mail" />
+    <Member Name="ReciveEmails" Description="Receber e-mails" />
+    <Member Name="SendEmails" Description="Enviar e-mails" />
+    <Member Name="UrlLeft" Description="parte esquerda URL" />
+  </Type>
+  <Type Name="EmailFileType">
+    <Member Name="Attachment" Description="Anexo" />
+  </Type>
+  <Type Name="EmailMasterTemplateEntity" Description="Modelo master de e-amil" PluralDescription="Modelos master de e-amil">
+    <Member Name="Messages" Description="Mensagens" />
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="EmailMasterTemplateMessageEmbedded" Description="Mensagem modelo master de e-mail">
+    <Member Name="CultureInfo" Description="Informação cultura" />
+    <Member Name="Text" Description="Texto" />
+  </Type>
+  <Type Name="EmailMasterTemplateOperation">
+    <Member Name="Create" Description="Criar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmailMessageEntity" Description="Mensagem de e-mail" PluralDescription="Mensagem&#xD;&#xA;Mensagens de e-mail">
+    <Member Name="Attachments" Description="Anexos" />
+    <Member Name="Body" Description="Corpo" />
+    <Member Name="BodyHash" Description="Hash corpo" />
+    <Member Name="EditableMessage" Description="Mensagem editável" />
+    <Member Name="Exception" Description="Exceção" />
+    <Member Name="From" Description="De" />
+    <Member Name="IsBodyHtml" Description="body é html" />
+    <Member Name="ReceptionNotified" Description="Recepção notificada" />
+    <Member Name="Recipients" Description="Destinatários" />
+    <Member Name="Sent" Description="Enviado" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="Subject" Description="Assunto" />
+    <Member Name="Target" Description="Destino" />
+    <Member Name="Template" Description="Modelo" />
+    <Member Name="UniqueIdentifier" Description="Identificador único" />
+  </Type>
+  <Type Name="EmailMessageMessage">
+    <Member Name="ExceptionMessages" Description="Mensagem excecionais" />
+    <Member Name="Message" Description="Mensagem" />
+    <Member Name="Messages" Description="Mensagens" />
+    <Member Name="RemainingMessages" Description="Mensagens pendentes" />
+    <Member Name="TheEmailMessageCannotBeSentFromState0" Description="O e-mail não pode ser enviado desde o estado {0}" />
+  </Type>
+  <Type Name="EmailMessageOperation">
+    <Member Name="CreateMail" Description="Criar e-mail" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="ReSend" Description="Reenviar" />
+    <Member Name="Send" Description="Enviar" />
+  </Type>
+  <Type Name="EmailMessageState" Description="Estado de e-mail">
+    <Member Name="Created" Description="Criado" />
+    <Member Name="Received" Description="Recebido" />
+    <Member Name="ReceptionNotified" Description="Receção notificada" />
+    <Member Name="Sent" Description="Enviado" />
+    <Member Name="SentException" Description="Exceção de envio" />
+  </Type>
+  <Type Name="EmailRecipientKind" Description="Tipo destinatário de e-mail">
+    <Member Name="Bcc" Description="Bcc" />
+    <Member Name="Cc" Description="Cc" />
+    <Member Name="To" Description="Para" />
+  </Type>
+  <Type Name="EmailTemplateEntity" Description="Modelo de E-mail">
+    <Member Name="DisableAuthorization" Description="Desactivar autorizaçao" />
+    <Member Name="EditableMessage" Description="Mensagem editável" />
+    <Member Name="From" Description="De" />
+    <Member Name="MasterTemplate" Description="Modelo principal" />
+    <Member Name="Messages" Description="Mensagens" />
+    <Member Name="Name" Description="Noma" />
+    <Member Name="Query" Description="Consulta" />
+    <Member Name="Recipients" Description="Destinatários" />
+  </Type>
+  <Type Name="EmailTemplateMessage">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="Data de fim deve ser posterior à data de inicio" />
+    <Member Name="NewCulture" Description="Nova cultura" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="Nao há mensagens para o modelo" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Deve haver uma mensagem para {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Há mais de uma mensagem para o mesmo idioma" />
+    <Member Name="TheTextMustContain0IndicatingReplacementPoint" Description="O texto deve continuar {0} indicando punto de reinicio" />
+    <Member Name="TokenAndEmailAddressCanNotBeSetAtTheSameTime" Description="Nao se pode estabelecer Token e endereço de e-mail ao mesmo tempo" />
+    <Member Name="TokenMustBeA0" Description="Token deve ser um {0}" />
+    <Member Name="TokenOrEmailAddressMustBeSet" Description="Deve ser estabelecido Token ou endereço de e-mail" />
+  </Type>
+  <Type Name="EmailTemplateMessageEmbedded" Description="Mensagem de e-mail modelo">
+    <Member Name="CultureInfo" Description="Cultura" />
+    <Member Name="Subject" Description="Assunto" />
+    <Member Name="Text" Description="Texto" />
+  </Type>
+  <Type Name="EmailTemplateOperation">
+    <Member Name="Create" Description="Criar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="EmailTemplateViewMessage">
+    <Member Name="Insert" Description="Inserir" />
+    <Member Name="InsertMessageContent" Description="Inserir conteúdo da mensagem" />
+    <Member Name="Language" Description="Idioma" />
+  </Type>
+</Translations>

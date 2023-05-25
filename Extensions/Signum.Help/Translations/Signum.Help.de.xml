@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AppendixHelpEntity" Description="Anlagehilfe">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="UniqueName" Description="Einzigartiger Name" />
+  </Type>
+  <Type Name="AppendixHelpOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="HelpKindMessage">
+    <Member Name="AndAreFrequentlyCreatedOrModified" Description=" und sind häufig erstellt oder geändert" />
+    <Member Name="AndIsRarelyCreatedOrModified" Description=" und sind selten erstellt oder geändert" />
+    <Member Name="AutomaticallyByTheSystem" Description=" automatisch vom System" />
+    <Member Name="ClassifyOtherEntities" Description="andere Entitäten klassifizieren" />
+    <Member Name="HisMainFunctionIsTo0" Description="Ihre Hauptfunktion ist {0}" />
+    <Member Name="RelateOtherEntities" Description="auf andere Entitäten beziehen" />
+    <Member Name="StoreInformationOnItsOwn" Description="Speichern von Informationen auf eigene" />
+    <Member Name="StoreInformationSharedByOtherEntities" Description="von anderen Entitäten geteilte Informationen speichern" />
+    <Member Name="StorePartOfTheInformationOfAnotherEntity" Description="Teil der Informationen der anderen Entität speichern" />
+    <Member Name="StorePartsOfInformationSharedByDifferentEntities" Description="Teile der Informationen, die von verschiedenen Entitäten geteilt wurden, speichern" />
+  </Type>
+  <Type Name="HelpMessage">
+    <Member Name="_0IsA1" Description="{0} ist ein {1}" />
+    <Member Name="_0IsA1AndShows2" Description="{0} ist ein {1} und zeigt {2}" />
+    <Member Name="_0IsACalculated1" Description="{0} ist eine berechnete {1}" />
+    <Member Name="_0IsACollectionOfElements1" Description="{0} ist eine Liste von {1}-Elementen " />
+    <Member Name="_0IsThePrimaryKeyOf1OfType2" Description="{0} ist der Primärschlüssel von {1}, des Typs {2}" />
+    <Member Name="Amount" Description="Betrag" />
+    <Member Name="Any" Description="irgendein" />
+    <Member Name="Appendices" Description="Anhang" />
+    <Member Name="BooleanValue" Description="boolescher Wert (ja oder nein)" />
+    <Member Name="Buscador" Description="Suchmaschine" />
+    <Member Name="Call0Over1OfThe2" Description="Führt {0} auf {1} von {2}" />
+    <Member Name="Character" Description="Zeichen" />
+    <Member Name="ConstructsANew0" Description="Erstellt eine neue {0}" />
+    <Member Name="Date" Description="Datum" />
+    <Member Name="DateTime" Description="Datum und Uhrzeit" />
+    <Member Name="Entities" Description="Entitäten" />
+    <Member Name="ExpressedIn" Description="ausgedrückt in " />
+    <Member Name="From0OfThe1" Description="von {0} von {1} " />
+    <Member Name="FromMany0" Description="von vielen {0}" />
+    <Member Name="Help" Description="Hilfe" />
+    <Member Name="HelpNotLoaded" Description="Hilfe nicht geladen" />
+    <Member Name="In0" Description="(in {0})" />
+    <Member Name="Integer" Description="ganze Zahl " />
+    <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
+    <Member Name="OfThe0" Description="der {0}" />
+    <Member Name="OrNull" Description="oder null" />
+    <Member Name="Property0NotExistsInType1" Description="Die Eigenschaft {0} ist in Typ {1} nicht vorhanden" />
+    <Member Name="QueryOf0" Description="Abfrage von {0} " />
+    <Member Name="RemovesThe0FromTheDatabase" Description="Entfernt {0} aus der Datenbank" />
+    <Member Name="SearchText" Description="Text suchen" />
+    <Member Name="Should" Description=". Sollte  " />
+    <Member Name="String" Description="Zeichenkette" />
+    <Member Name="The0" Description="Der {0}" />
+    <Member Name="TheDatabaseVersion" Description="die Version der Datenbank" />
+    <Member Name="TheProperty0" Description="die Eigenschaft {0}" />
+    <Member Name="Value" Description="Wert" />
+    <Member Name="ValueLike0" Description="Wert wie {0}" />
+    <Member Name="YourVersion" Description="Ihre Version" />
+  </Type>
+  <Type Name="HelpPermissions">
+    <Member Name="ViewHelp" Description="Hilfe anzeigen" />
+  </Type>
+  <Type Name="HelpSearchMessage">
+    <Member Name="_0ResultsFor1In2" Description="{0} Ergebnis[se] für {1} (in {2}ms)" />
+    <Member Name="Results" Description="Ergebnisse" />
+    <Member Name="Search" Description="Suchen" />
+  </Type>
+  <Type Name="HelpSyntaxMessage">
+    <Member Name="BoldText" Description="Fette Schrift" />
+    <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="Example" Description="Beispiel" />
+    <Member Name="ExernalLink" Description="Externer Link" />
+    <Member Name="Images" Description="Bilder" />
+    <Member Name="InsertImage" Description="Bild einfügen" />
+    <Member Name="ItalicText" Description="Kursive Schrift" />
+    <Member Name="Links" Description="Links" />
+    <Member Name="LinksAllowAnExtraParameterForTheText" Description="Links ermöglichen einen zusätzlichen Parameter für den Text" />
+    <Member Name="LinkToEntity" Description="Link zur Entität" />
+    <Member Name="LinkToNamespace" Description="Link zum namespace" />
+    <Member Name="LinkToOperation" Description="Link zur Operation" />
+    <Member Name="LinkToProperty" Description="Link zur Eigenschaft" />
+    <Member Name="LinkToQuery" Description="Link zur Abfrage" />
+    <Member Name="Lists" Description="Listen" />
+    <Member Name="Options" Description="Optionen" />
+    <Member Name="OrderedListItem" Description="Geordnetes Listenelement" />
+    <Member Name="OtherItem" Description="Anderes Element" />
+    <Member Name="Save" Description="Speichern" />
+    <Member Name="StriketroughText" Description="Striketrough Text" />
+    <Member Name="Syntax" Description="Syntax" />
+    <Member Name="Texts" Description="Texte" />
+    <Member Name="Title" Description="Titel" />
+    <Member Name="TitleLevel" Description="Titel-Ebene" />
+    <Member Name="TranslateFrom" Description="Übersetzen aus..." />
+    <Member Name="UnderlineText" Description="Text unterstreichen" />
+    <Member Name="UnorderedListItem" Description="Ungeordnetes Listenelement" />
+  </Type>
+  <Type Name="NamespaceHelpEntity" Description="Namespacehilfe">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="NamespaceHelpOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="OperationHelpEmbedded" Description="Hilfe zur Operation">
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="Operation" Description="Operation" />
+  </Type>
+  <Type Name="PropertyRouteHelpEmbedded" Description="Eigenschaftsweghilfe">
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="Property" Description="Eigenschaft" />
+  </Type>
+  <Type Name="QueryColumnHelpEmbedded" Description="Abfrage Spaltenhilfe">
+    <Member Name="ColumnName" Description="Spaltenname" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="NiceName" Description="Schöner Name" />
+  </Type>
+  <Type Name="QueryHelpEntity" Description="Abfragehilfe">
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="IsEmpty" Description="Ist leer" />
+    <Member Name="Query" Description="Abfrage" />
+  </Type>
+  <Type Name="QueryHelpOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="TypeHelpEntity" Description="Typhilfe">
+    <Member Name="Culture" Description="Kultur" />
+    <Member Name="Description" Description="Beschreibung" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="IsEmpty" Description="Ist leer" />
+    <Member Name="Operations" Description="Operationen" />
+    <Member Name="Properties" Description="Eigenschaften" />
+    <Member Name="Queries" Description="Abfragen" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="TypeHelpOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="TypeSearchResult">
+    <Member Name="Appendix" Description="Anlage" />
+    <Member Name="Namespace" Description="Namespace" />
+    <Member Name="Operation" Description="Operation" />
+    <Member Name="Property" Description="Eigenschaft" />
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
+</Translations>

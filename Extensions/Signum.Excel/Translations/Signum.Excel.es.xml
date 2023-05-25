@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ExcelAttachmentEntity" Description="Archivo adjunto de Excel">
+    <Member Name="FileName" Description="Nombre de archivo" />
+    <Member Name="Related" Description="Relacionados con la" />
+    <Member Name="Title" Description="Título" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+  <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Administrar" />
+    <Member Name="CreateNew" Description="Crear nuevo" />
+    <Member Name="Data" Description="Datos" />
+    <Member Name="Download" Description="Descargar" />
+    <Member Name="Excel2007Spreadsheet" Description="Hoja de cálculo de Microsoft Office Excel 2007(*.xlsx)|*.xlsx" />
+    <Member Name="ExcelReport" Description="Informe Excel" />
+    <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="El template Excel debe tener extensión .xlsx, pero el actual tiene extensión {0}" />
+    <Member Name="FindLocationFoExcelReport" Description="Elija la ubicación del informe Excel" />
+    <Member Name="Reports" Description="Informe" />
+    <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="La plantilla Excel tiene una columna {0} que no está presente en el buscador" />
+    <Member Name="ThereAreNoResultsToWrite" Description="No hay resultados que exportar al informe" />
+  </Type>
+  <Type Name="ExcelPermission">
+    <Member Name="PlainExcel" Description="Excel plano" />
+  </Type>
+  <Type Name="ExcelReportEntity" Description="Informe excel">
+    <Member Name="DisplayName" Description="Nombre del informe" />
+    <Member Name="File" Description="Fichero" />
+    <Member Name="Query" Description="Consulta" />
+  </Type>
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

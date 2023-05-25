@@ -1,0 +1,16 @@
+{                                
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./ts_out",
+    "paths": {
+      "@framework/*": [ "../../Signum/React/*" ]
+    }
+  },
+  "references": [
+    { "path": "../../Signum" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.UserAssets" },
+    { "path": "../Signum.Chart" },
+    { "path": "../Signum.Processes" }
+  ]
+}

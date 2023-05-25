@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ToolbarElementEmbedded" Description="Elemento de la barra de herramientas">
+    <Member Name="AutoRefreshPeriod" Description="Período de actualización automática" />
+    <Member Name="Content" Description="Contenido" />
+    <Member Name="IconColor" Description="Color de icono" />
+    <Member Name="IconName" Description="Nombre de icono" />
+    <Member Name="Label" Description="Etiqueta" />
+    <Member Name="OpenInPopup" Description="Abrir en popup" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="Url" Description="URL" />
+  </Type>
+  <Type Name="ToolbarElementType" Description="Tipo de elemento de barra de herramientas">
+    <Member Name="Divider" Description="Divisor" />
+    <Member Name="Header" Description="Cabecera" />
+    <Member Name="Item" Description="Elemento" />
+  </Type>
+  <Type Name="ToolbarEntity" Description="Barra de herramientas">
+    <Member Name="Elements" Description="Elementos" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Location" Description="Ubicación" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Owner" Description="Propietario" />
+    <Member Name="Priority" Description="Prioridad" />
+  </Type>
+  <Type Name="ToolbarLocation" Description="Ubicación de la barra de herramientas">
+    <Member Name="Main" Description="Principal" />
+    <Member Name="Side" Description="Lado" />
+    <Member Name="Top" Description="Arriba" />
+  </Type>
+  <Type Name="ToolbarMenuEntity" Description="Menú barra de herramientas" Gender="m">
+    <Member Name="Elements" Description="Elementos" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="Owner" Description="Propietario" />
+  </Type>
+  <Type Name="ToolbarMenuOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="ToolbarOperation">
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+</Translations>

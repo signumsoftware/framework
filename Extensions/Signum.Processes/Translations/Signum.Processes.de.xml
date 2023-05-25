@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="PackageEntity" Description="Paket" PluralDescription="Pakete" Gender="n">
+    <Member Name="Name" Description="Name" />
+    <Member Name="OperationArguments" Description="Operationsargumente" />
+  </Type>
+  <Type Name="PackageLineEntity" Description="Paketzeile">
+    <Member Name="FinishTime" Description="Zeitende" />
+    <Member Name="Package" Description="Paket" />
+    <Member Name="Result" Description="Ergebnis" />
+    <Member Name="Target" Description="Ziel" />
+  </Type>
+  <Type Name="PackageOperationEntity" Description="Paket-Operation">
+    <Member Name="Operation" Description="Operation" />
+  </Type>
+  <Type Name="PackageOperationProcess">
+    <Member Name="PackageOperation" Description="Paket-Operation" />
+  </Type>
+  <Type Name="PackageQuery">
+    <Member Name="PackageLastProcess" Description="Paket letzter Prozess" />
+    <Member Name="PackageLineLastProcess" Description="Paketzeile letzter Prozess" />
+    <Member Name="PackageOperationLastProcess" Description="Paketvorgang letzter Prozess" />
+  </Type>
+  <Type Name="ProcessAlgorithmSymbol" Description="Prozess-Algorithmus" PluralDescription="Prozess-Algorithmen" Gender="m" />
+  <Type Name="ProcessEntity" Description="Prozess" PluralDescription="Prozesse" Gender="m">
+    <Member Name="Algorithm" Description="Algorithmus" />
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="CancelationDate" Description="Stornierungsdatum" />
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Data" Description="Daten" />
+    <Member Name="Duration" Description="Dauer" />
+    <Member Name="DurationSpan" Description="Dauer-span" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="ExceptionDate" Description="Ausnahmedatum" />
+    <Member Name="ExecutionEnd" Description="Ausführungsende" />
+    <Member Name="ExecutionStart" Description="Ausführungsstart" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="PlannedDate" Description="Geplantes Datum" />
+    <Member Name="Progress" Description="Fortschritt" />
+    <Member Name="QueuedDate" Description="Warteschlangendatum" />
+    <Member Name="State" Description="Status" />
+    <Member Name="Status" Description="Status" />
+    <Member Name="SuspendDate" Description="Aussetzungsdatum" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ProcessExceptionLineEntity" Description="Prozessausnahmezeile">
+    <Member Name="ElementInfo" Description="Elementinfo" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="Line" Description="Zeile" />
+    <Member Name="Process" Description="Prozess" />
+  </Type>
+  <Type Name="ProcessMessage">
+    <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
+    <Member Name="LastProcess" Description="Letzter Prozess" />
+    <Member Name="Lines" Description="Linien" />
+    <Member Name="Process0IsNotRunningAnymore" Description="Prozess {0} wird nicht mehr ausgeführt" />
+    <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Prozessstart ist größer als Prozessende" />
+    <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Prozessstart ist null aber Prozessende nicht" />
+    <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Aussetzen ist der sicherere Weg, um einen laufenden Prozess zu stoppen. Trotzdem Abbrechen?" />
+  </Type>
+  <Type Name="ProcessOperation">
+    <Member Name="Cancel" Description="Abbrechen" />
+    <Member Name="Execute" Description="Ausführen" />
+    <Member Name="Plan" Description="Plan" />
+    <Member Name="Retry" Description="Nochmals versuchen" />
+    <Member Name="Save" Description="Speichern" />
+    <Member Name="Suspend" Description="Aussetzen" />
+  </Type>
+  <Type Name="ProcessPermission">
+    <Member Name="ViewProcessPanel" Description="Prozesssteuerung anzeigen" />
+  </Type>
+  <Type Name="ProcessState" Description="Prozesszustand">
+    <Member Name="Canceled" Description="Abgebrochen" />
+    <Member Name="Created" Description="Erstellt" />
+    <Member Name="Error" Description="Fehler" />
+    <Member Name="Executing" Description="Ausführen" />
+    <Member Name="Finished" Description="Fertig" />
+    <Member Name="Planned" Description="Geplant" />
+    <Member Name="Queued" Description="In der Warteschlange" />
+    <Member Name="Suspended" Description="Ausgesetzt" />
+    <Member Name="Suspending" Description="Aussetzen" />
+  </Type>
+</Translations>

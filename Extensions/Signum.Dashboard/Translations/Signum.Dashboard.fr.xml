@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DashboardEntity" Description="Panneau de commande">
+    <Member Name="DisplayName" Description="Nom d'affichage" />
+    <Member Name="Parts" Description="Pièces" />
+  </Type>
+  <Type Name="LinkListPartEntity" Description="Lien liste partie">
+    <Member Name="Links" Description="Liens" />
+  </Type>
+</Translations>

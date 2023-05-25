@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HelpMessage">
+    <Member Name="_0IsA1" Description="{0} é um {1}" />
+    <Member Name="_0IsA1AndShows2" Description="{0} é um {1} e mostra {2}" />
+    <Member Name="_0IsACalculated1" Description="{0} é um {1} calculado" />
+    <Member Name="_0IsACollectionOfElements1" Description="{0} é uma colecção de elementos {1}" />
+    <Member Name="Amount" Description="Montante" />
+    <Member Name="Any" Description="qualquer" />
+    <Member Name="Appendices" Description="Apêndices" />
+    <Member Name="Buscador" Description="Pesquisa" />
+    <Member Name="Call0Over1OfThe2" Description="Executar {0} sobre {1} do {2}" />
+    <Member Name="Character" Description="caracter" />
+    <Member Name="ConstructsANew0" Description="Constrói um novo {0}" />
+    <Member Name="Date" Description="Data" />
+    <Member Name="DateTime" Description="Data e hora" />
+    <Member Name="ExpressedIn" Description="Expresso em " />
+    <Member Name="From0OfThe1" Description="A partir de {0} do {1} " />
+    <Member Name="FromMany0" Description="De vários {0}" />
+    <Member Name="HelpNotLoaded" Description="Ajuda não carregada" />
+    <Member Name="Integer" Description="Constante" />
+    <Member Name="Key0NotFound" Description="Chave {0} não encontrada" />
+    <Member Name="OfThe0" Description="Do {0}" />
+    <Member Name="OrNull" Description="ou nulo" />
+    <Member Name="Property0NotExistsInType1" Description="Propriedade {0} não existe no tipo {1}" />
+    <Member Name="QueryOf0" Description="Consulta de {0}" />
+    <Member Name="RemovesThe0FromTheDatabase" Description="Remove {0} da base de dados" />
+    <Member Name="Should" Description=". Deve  " />
+    <Member Name="String" Description="string" />
+    <Member Name="The0" Description="O {0}" />
+    <Member Name="TheDatabaseVersion" Description="Versão de base de dados" />
+    <Member Name="TheProperty0" Description="a propriedade {0}" />
+    <Member Name="Value" Description="valor" />
+    <Member Name="ValueLike0" Description="valor como {0}" />
+    <Member Name="YourVersion" Description="tua versão" />
+  </Type>
+</Translations>

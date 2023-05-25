@@ -1,17 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28516.95
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Engine", "..\Signum.Engine\Signum.Engine.csproj", "{7F2DB6FE-C109-4057-B207-C62A767F905D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Entities", "..\Signum.Entities\Signum.Entities.csproj", "{F2B51D08-498D-4C9F-8112-9521A7762B02}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Utilities", "..\Signum.Utilities\Signum.Utilities.csproj", "{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Analyzer", "Signum.Analyzer\Signum.Analyzer.csproj", "{C7E2DF3E-E66A-41E2-87E8-230F20CA533A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum.Analyzer.Test", "Signum.Analyzer.Test\Signum.Analyzer.Test.csproj", "{BB995FB7-0F23-43AD-BC67-FD6066FE7D9B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Signum", "..\Signum\Signum.csproj", "{6FEFEDCA-1B35-4B95-9803-30C00DD17EEC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,14 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F2DB6FE-C109-4057-B207-C62A767F905D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F2B51D08-498D-4C9F-8112-9521A7762B02}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7D3F72D-741D-4F67-8CF8-CD41B9035FED}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -39,6 +29,10 @@ Global
 		{BB995FB7-0F23-43AD-BC67-FD6066FE7D9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB995FB7-0F23-43AD-BC67-FD6066FE7D9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB995FB7-0F23-43AD-BC67-FD6066FE7D9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FEFEDCA-1B35-4B95-9803-30C00DD17EEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FEFEDCA-1B35-4B95-9803-30C00DD17EEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FEFEDCA-1B35-4B95-9803-30C00DD17EEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FEFEDCA-1B35-4B95-9803-30C00DD17EEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

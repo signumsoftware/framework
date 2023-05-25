@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MessageLengthExceeded" Description="Lunghezza del messaggio superata">
+    <Member Name="Allowed" Description="Consentito" />
+    <Member Name="NotAllowed" Description="Non consentito" />
+    <Member Name="TextPruning" Description="Snellisci testo" />
+  </Type>
+  <Type Name="MultipleSMSModel" Description="SMS multipli">
+    <Member Name="Certified" Description="Certificato" />
+    <Member Name="From" Description="Da" />
+    <Member Name="Message" Description="Messaggio" />
+  </Type>
+  <Type Name="SMSConfigurationEmbedded" Description="Configurazione di SMS">
+    <Member Name="DefaultCulture" Description="Impostazioni cultura predefinite" />
+  </Type>
+  <Type Name="SMSMessageEntity" Description="Messaggio SMS">
+    <Member Name="Certified" Description="Certificato" />
+    <Member Name="DestinationNumber" Description="Numero di destinazione" />
+    <Member Name="EditableMessage" Description="Messaggio modificabile" />
+    <Member Name="Exception" Description="Eccezione" />
+    <Member Name="From" Description="Da" />
+    <Member Name="Message" Description="Messaggio" />
+    <Member Name="MessageID" Description="ID messaggio" />
+    <Member Name="Referred" Description="Correlato" />
+    <Member Name="SendDate" Description="Data di invio" />
+    <Member Name="SendPackage" Description="Inviare il pacchetto" />
+    <Member Name="State" Description="Stato" />
+    <Member Name="Template" Description="Modello" />
+    <Member Name="UpdatePackage" Description="Pacchetto di aggiornamento" />
+    <Member Name="UpdatePackageProcessed" Description="Pacchetto di aggiornamento processato" />
+  </Type>
+  <Type Name="SMSMessageOperation">
+    <Member Name="CreateUpdateStatusPackage" Description="Crea il pacchetto di aggiornamento stato" />
+    <Member Name="Send" Description="Invia" />
+    <Member Name="UpdateStatus" Description="Aggiorna stato" />
+  </Type>
+  <Type Name="SMSMessageProcess">
+    <Member Name="Send" Description="Invia" />
+    <Member Name="UpdateStatus" Description="Aggiorna stato" />
+  </Type>
+  <Type Name="SMSMessageState" Description="Stato del messaggio SMS">
+    <Member Name="Created" Description="Creato" />
+    <Member Name="Delivered" Description="Consegnato" />
+    <Member Name="Sent" Description="Inviato" />
+  </Type>
+  <Type Name="SMSPackageEntity" Description="Pacchetto SMS" PluralDescription="Pacchetti SMS">
+    <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="SMSSendPackageEntity" Description="Pacchetto di invio SMS" PluralDescription="Pacchetti di invio SMS" />
+  <Type Name="SMSTemplateEntity" Description="Modello di SMS">
+    <Member Name="Certified" Description="Certificato" />
+    <Member Name="EditableMessage" Description="Messaggio modificabile" />
+    <Member Name="From" Description="Da" />
+    <Member Name="MessageLengthExceeded" Description="Lunghezza del messaggio superata" />
+    <Member Name="Messages" Description="Messaggi" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="RemoveNoSMSCharacters" Description="Rimuovere caratteri non SMS" />
+  </Type>
+  <Type Name="SMSTemplateMessage">
+    <Member Name="NewCulture" Description="Nuova cultura" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="Non ci sono messaggi per il modello" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Ci deve essere un messaggio per {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="C'è più di un messaggio per la stessa lingua" />
+  </Type>
+  <Type Name="SMSTemplateMessageEmbedded" Description="Messaggio del modello SMS">
+    <Member Name="CultureInfo" Description="Informazioni di cultura" />
+    <Member Name="Message" Description="Messaggio" />
+  </Type>
+  <Type Name="SMSTemplateOperation">
+    <Member Name="Create" Description="Crea" />
+    <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="SMSUpdatePackageEntity" Description="Pacchetto di aggiornamento SMS" PluralDescription="Pacchetti di aggiornamento SMS" />
+</Translations>

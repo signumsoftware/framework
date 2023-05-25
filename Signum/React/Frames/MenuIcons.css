@@ -1,0 +1,46 @@
+﻿.icon {
+    margin-left: 5px;
+    margin-right: 5px;
+    text-align: center;
+}
+
+body:not(.rtl) .dropdown-item .arrow-align,
+body:not(.rtl) .dropdown-header .arrow-align
+{
+    float: right;
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+body.rtl .dropdown-item .arrow-align,
+body.rtl .dropdown-header .arrow-align
+{
+    float: left;
+    font-size: 11px;
+    margin-top: 6px;
+}
+
+.dropdown-item {
+    padding: 0.25rem 1.5rem;
+}
+
+.dropdown-menu .icon {
+    display: inline-block;
+    margin-left: -8px;
+    margin-right: 8px;
+}
+
+.rtl .dropdown-menu .icon {
+    margin-left: 8px;
+    margin-right: -8px;
+}
+
+.sidebar-nav .dropdown-menu .icon {
+    margin-left: 0px;
+    margin-right: 8px;
+}
+
+.rtl .sidebar-nav li a .icon {
+    margin-left: 8px;
+    margin-right: 0px;
+}

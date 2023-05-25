@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MoveTreeModel" Description="Bewege Baum">
+    <Member Name="InsertPlace" Description="Platz einfügen" />
+    <Member Name="NewParent" Description="Neuer parent" />
+    <Member Name="Sibling" Description="Geschwister" />
+  </Type>
+  <Type Name="TreeEntity" Description="Baum" PluralDescription="Bäume" Gender="m">
+    <Member Name="FullName" Description="Vollständiger name" />
+    <Member Name="IsSibling" Description="Ist Geschwister" />
+    <Member Name="Level" Description="Level" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="ParentOrSibling" Description="Elternteil oder Geschwister" />
+    <Member Name="ParentRoute" Description="Eltern-route" />
+    <Member Name="Route" Description="Route" />
+    <Member Name="RouteToString" Description="Route zum string" />
+  </Type>
+  <Type Name="TreeMessage">
+    <Member Name="Ascendants" Description="Verwandte in aufsteigender Linie" />
+    <Member Name="Children" Description="Kinder" />
+    <Member Name="Copy0" Description="Kopiere {0}" />
+    <Member Name="Descendants" Description="Nachkommen" />
+    <Member Name="ImpossibleToMove01Of2" Description="Unmöglich, {0} {1} von {2} zu bewegen" />
+    <Member Name="ImpossibleToMove0InsideOf1" Description="Unmöglich, {0} innerhalb {1} zu bewegen" />
+    <Member Name="Level" Description="Level" />
+    <Member Name="LevelShouldNotBeGreaterThan0" Description="Niveau sollte nicht größer als {0} sein." />
+    <Member Name="Move0" Description="Verschiebe {0}" />
+    <Member Name="Parent" Description="Übergeordnete" />
+    <Member Name="Tree" Description="Baum" />
+    <Member Name="TreeType" Description="Baum-Typ" />
+  </Type>
+  <Type Name="TreeOperation">
+    <Member Name="Copy" Description="Kopie" />
+    <Member Name="CreateChild" Description="Erstellen Sie untergeordnete" />
+    <Member Name="CreateNextSibling" Description="Nächsten gleichgeordnetes Element erstellen" />
+    <Member Name="CreateRoot" Description="Stamm-erstellen" />
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Move" Description="Bewegen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="TreeViewerMessage">
+    <Member Name="AddChild" Description="Kind hinzufügen" />
+    <Member Name="AddRoot" Description="Stammverzeichnis hinzufügen" />
+    <Member Name="AddSibling" Description="Geschwister hinzufügen" />
+    <Member Name="None" Description="Keine" />
+    <Member Name="Remove" Description="Entfernen" />
+    <Member Name="Search" Description="Suche" />
+  </Type>
+  <Type Name="UserTreePartEntity" Description="Benutzerbaumteil" PluralDescription="Benutzerbaumteile" Gender="m">
+    <Member Name="RequiresTitle" Description="Titel erforderlich" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+</Translations>

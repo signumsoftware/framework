@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="PackageEntity" Description="Paquet">
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="PackageLineEntity" Description="Line de Paquet">
+    <Member Name="FinishTime" Description="Heure de fin" />
+    <Member Name="Package" Description="Paquet" />
+    <Member Name="Result" Description="Résultat" />
+    <Member Name="Target" Description="Cible" />
+  </Type>
+  <Type Name="ProcessEntity" Description="Processus" />
+  <Type Name="ProcessMessage">
+    <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Le début du processus est plus grand que sa fin" />
+    <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Le début du procéssus est nul mais pas sa fin" />
+  </Type>
+  <Type Name="ProcessOperation">
+    <Member Name="Cancel" Description="Annuler" />
+    <Member Name="Execute" Description="Executer" />
+    <Member Name="Plan" Description="Plan" />
+    <Member Name="Save" Description="Sauver" />
+    <Member Name="Suspend" Description="Suspendre" />
+  </Type>
+  <Type Name="ProcessState">
+    <Member Name="Canceled" Description="Annulé" />
+    <Member Name="Created" Description="Créé" />
+    <Member Name="Error" Description="Erreur" />
+    <Member Name="Executing" Description="S'execute" />
+    <Member Name="Finished" Description="Terminé" />
+    <Member Name="Planned" Description="Planifié" />
+    <Member Name="Queued" Description="Mise en queue" />
+    <Member Name="Suspended" Description="Suspendu" />
+    <Member Name="Suspending" Description="En suspension" />
+  </Type>
+</Translations>

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="TemplateTokenMessage">
+    <Member Name="NoColumnSelected" Description="Nessuna colonna selezionata" />
+    <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Non è possibile aggiungere blocchi con 'Tutti' o 'Alcuno'" />
+    <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Non è possibile aggiungere blocchi 'If' sui campi di elenchi" />
+    <Member Name="YouCanOnlyAddForeachBlocksWithCollectionFields" Description="È possibile aggiungere blocchi 'Foreach' solo con campi di elenchi" />
+    <Member Name="YouHaveToAddTheElementTokenToUseForeachOnCollectionFields" Description="Si deve aggiungere il token 'Elemento' per utilizzare Foreach in campi di elenchi" />
+  </Type>
+</Translations>

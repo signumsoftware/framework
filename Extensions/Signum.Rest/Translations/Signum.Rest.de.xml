@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="QueryStringValueEmbedded" Description="Abfrage-String-Wert">
+    <Member Name="Key" Description="Schlüssel" />
+    <Member Name="Value" Description="Wert" />
+  </Type>
+  <Type Name="RestApiKeyEntity" Description="Rest-API-Schlüssel" Gender="m">
+    <Member Name="ApiKey" Description="API-Schlüssel" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="RestApiKeyOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="RestLogEntity" Description="Rest-Protokoll" PluralDescription="Rest-Protokolle" Gender="n">
+    <Member Name="Action" Description="Aktion" />
+    <Member Name="AllowReplay" Description="Wiedergabe erlauben" />
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="ChangedPercentage" Description="Geänderter Prozentsatz" />
+    <Member Name="Controller" Description="Controller" />
+    <Member Name="ControllerName" Description="Controllername" />
+    <Member Name="Duration" Description="Dauer" />
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="HttpMethod" Description="HTTP-Methode" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="QueryString" Description="Query string" />
+    <Member Name="Referrer" Description="Referrer" />
+    <Member Name="ReplayDate" Description="Wiedergabe Datum" />
+    <Member Name="ReplayState" Description="Wiedergabe Zustand" />
+    <Member Name="RequestBody" Description="Request body" />
+    <Member Name="ResponseBody" Description="Response body" />
+    <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="UserHostAddress" Description="Benutzer Hostadresse" />
+    <Member Name="UserHostName" Description="Benutzer Hostname" />
+  </Type>
+  <Type Name="RestLogReplayState" Description="Restlog Wiederholungszustand">
+    <Member Name="NoChanges" Description="Keine Änderungen" />
+    <Member Name="WithChanges" Description="Mit Änderungen" />
+  </Type>
+</Translations>

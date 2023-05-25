@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HolidayCalendarEntity" Description="Ferienkalender" Gender="m">
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Holidays" Description="Urlaub" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="HolidayCalendarOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="HolidayEmbedded" Description="Feiertag">
+    <Member Name="Date" Description="Datum" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="IScheduleRuleEntity">
+    <Member Name="StartingOn" Description="Beginnend am" />
+  </Type>
+  <Type Name="ITaskMessage">
+    <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
+    <Member Name="Execute" Description="Ausführen" />
+    <Member Name="Executions" Description="Ausführungen" />
+    <Member Name="LastExecution" Description="Letzte Ausführung" />
+  </Type>
+  <Type Name="ITaskOperation">
+    <Member Name="ExecuteAsync" Description="Async ausführen" />
+    <Member Name="ExecuteSync" Description="Sync ausführen" />
+  </Type>
+  <Type Name="ScheduledTaskEntity" Description="Geplante Task" PluralDescription="Geplanten Tasks" Gender="f">
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="Rule" Description="Regel" />
+    <Member Name="Suspended" Description="Ausgesetzt" />
+    <Member Name="Task" Description="Task" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ScheduledTaskLogEntity" Description="Geplantes Task-Protokoll" PluralDescription="Geplante Task-Protokolle" Gender="n">
+    <Member Name="ApplicationName" Description="Anwendungsname" />
+    <Member Name="Duration" Description="Dauer" />
+    <Member Name="EndTime" Description="Endzeit" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="ProductEntity" Description="Produktentität" />
+    <Member Name="Remarks" Description="Bemerkungen" />
+    <Member Name="ScheduledTask" Description="Geplante Task" />
+    <Member Name="StartTime" Description="Startzeit" />
+    <Member Name="Task" Description="Task" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ScheduledTaskLogOperation">
+    <Member Name="CancelRunningTask" Description="Laufende Tasks abbrechen" />
+  </Type>
+  <Type Name="ScheduledTaskOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="SchedulerMessage">
+    <Member Name="Day0At1In2" Description="Tag {0} auf {1} in {2}" />
+    <Member Name="Each0Minutes" Description="Alle {0} Minuten" />
+    <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="und an Feiertagen" />
+    <Member Name="ScheduleRuleWeekDaysDN_At" Description="an" />
+    <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="aber Feiertage" />
+    <Member Name="ScheduleRuleWeekDaysDN_Fr" Description="Fr" />
+    <Member Name="ScheduleRuleWeekDaysDN_Mo" Description="Mo" />
+    <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="Sa" />
+    <Member Name="ScheduleRuleWeekDaysDN_Su" Description="So" />
+    <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Do" />
+    <Member Name="ScheduleRuleWeekDaysDN_Tu" Description="Di" />
+    <Member Name="ScheduleRuleWeekDaysDN_We" Description="Mi" />
+    <Member Name="TaskIsNotRunning" Description="Die Task wird nicht ausgeführt" />
+  </Type>
+  <Type Name="SchedulerPermission">
+    <Member Name="ViewSchedulerPanel" Description="Schedulersteuerung anzeigen" />
+  </Type>
+  <Type Name="SchedulerTaskExceptionLineEntity" Description="Geplantes Task Ausnahmezeile">
+    <Member Name="ElementInfo" Description="Elementinfo" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="SchedulerTaskLog" Description="Geplantes Task-Protokoll" />
+  </Type>
+  <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule-Regel minütlich">
+    <Member Name="EachMinutes" Description="Alle Minuten" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="IsAligned" Description="Ist ausgerichtet" />
+    <Member Name="StartingOn" Description="Beginnend am" />
+  </Type>
+  <Type Name="ScheduleRuleMonthsEntity" Description="Schedule-Regel monatlich">
+    <Member Name="April" Description="April" />
+    <Member Name="August" Description="August" />
+    <Member Name="December" Description="Dezember" />
+    <Member Name="February" Description="Februar" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="January" Description="Januar" />
+    <Member Name="July" Description="Juli" />
+    <Member Name="June" Description="Juni" />
+    <Member Name="March" Description="März" />
+    <Member Name="May" Description="Mai" />
+    <Member Name="November" Description="November" />
+    <Member Name="October" Description="Oktober" />
+    <Member Name="September" Description="September" />
+    <Member Name="StartingOn" Description="Beginnend am" />
+  </Type>
+  <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule-Regel Wochentage" PluralDescription="Schedule-Regeln Wochentage">
+    <Member Name="Calendar" Description="Kalender" />
+    <Member Name="Friday" Description="Freitag" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Holiday" Description="Feiertag" />
+    <Member Name="Monday" Description="Montag" />
+    <Member Name="Saturday" Description="Samstag" />
+    <Member Name="StartingOn" Description="Beginnend am" />
+    <Member Name="Sunday" Description="Sonntag" />
+    <Member Name="Thursday" Description="Donnerstag" />
+    <Member Name="Tuesday" Description="Dienstag" />
+    <Member Name="Wednesday" Description="Mittwoch" />
+  </Type>
+  <Type Name="SimpleTaskSymbol" Description="Einfache Task" PluralDescription="Einfache Tasks" Gender="f" />
+</Translations>

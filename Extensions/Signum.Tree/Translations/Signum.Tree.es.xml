@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MoveTreeModel" Description="Mover árbol">
+    <Member Name="InsertPlace" Description="Insertar lugar" />
+    <Member Name="NewParent" Description="Nuevo padre" />
+    <Member Name="Sibling" Description="Hermano" />
+  </Type>
+  <Type Name="TreeEntity" Description="Árbol">
+    <Member Name="FullName" Description="Nombre completo" />
+    <Member Name="IsSibling" Description="Es hermano" />
+    <Member Name="Level" Description="Nivel" />
+    <Member Name="Name" Description="Nombre" />
+    <Member Name="ParentOrSibling" Description="Padre o hermano" />
+    <Member Name="ParentRoute" Description="Ruta padre" />
+    <Member Name="Route" Description="Ruta" />
+    <Member Name="RouteToString" Description="Ruta a texto" />
+  </Type>
+  <Type Name="TreeMessage">
+    <Member Name="Ascendants" Description="Ascendientes" />
+    <Member Name="Children" Description="Hijos" />
+    <Member Name="Copy0" Description="Copiar {0}" />
+    <Member Name="Descendants" Description="Descendientes" />
+    <Member Name="ImpossibleToMove01Of2" Description="Imposible mover {0} {1} de {2}" />
+    <Member Name="ImpossibleToMove0InsideOf1" Description="Imposible mover {0} dentro de {1}" />
+    <Member Name="Level" Description="Nivel" />
+    <Member Name="LevelShouldNotBeGreaterThan0" Description="El nivel no debe ser mayor que {0}" />
+    <Member Name="Move0" Description="Mover {0}" />
+    <Member Name="Parent" Description="Padre" />
+    <Member Name="Tree" Description="Árbol" />
+    <Member Name="TreeType" Description="Tipo de árbol" />
+  </Type>
+  <Type Name="TreeOperation">
+    <Member Name="Copy" Description="Copiar" />
+    <Member Name="CreateChild" Description="Crear hijo" />
+    <Member Name="CreateNextSibling" Description="Crear siguiente hermano" />
+    <Member Name="CreateRoot" Description="Crear raíz" />
+    <Member Name="Delete" Description="Eliminar" />
+    <Member Name="Move" Description="Mover" />
+    <Member Name="Save" Description="Guardar" />
+  </Type>
+  <Type Name="TreeViewerMessage">
+    <Member Name="AddChild" Description="Añadir hijo" />
+    <Member Name="AddRoot" Description="Añadir raíz" />
+    <Member Name="AddSibling" Description="Añadir hermano" />
+    <Member Name="None" Description="Ninguno" />
+    <Member Name="Remove" Description="Quitar" />
+    <Member Name="Search" Description="Buscar" />
+  </Type>
+  <Type Name="UserTreePartEntity" Description="Parte árbol de usuario" Gender="f">
+    <Member Name="RequiresTitle" Description="Requiere título" />
+    <Member Name="UserQuery" Description="Consulta de usuario" />
+  </Type>
+</Translations>

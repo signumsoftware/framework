@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="HelpMessage">
+    <Member Name="From0OfThe1" Description="from {0} of the {1} " />
+  </Type>
+</Translations>

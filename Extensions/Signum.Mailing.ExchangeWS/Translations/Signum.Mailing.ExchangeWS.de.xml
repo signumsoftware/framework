@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ExchangeWebServiceEmailServiceEntity" Description="Exchange-Webdienstes-E-Mail-Dienst " Gender="m">
+    <Member Name="ExchangeVersion" Description="Exchange-Version" />
+    <Member Name="Password" Description="Passwort" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="UseDefaultCredentials" Description="Use default credentials" />
+    <Member Name="Username" Description="Benutzername" />
+  </Type>
+</Translations>

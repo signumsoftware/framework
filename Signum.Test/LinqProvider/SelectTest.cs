@@ -1,5 +1,7 @@
 using Signum.Utilities.DataStructures;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync.Postgres;
+using Signum.Engine.Sync.SqlServer;
 
 namespace Signum.Test.LinqProvider;
 
@@ -619,11 +621,11 @@ public class SelectTest
     {
         if (Schema.Current.Settings.IsPostgres)
         {
-            var list = Database.View<Signum.Engine.PostgresCatalog.PgClass>().ToList();
+            var list = Database.View<PgClass>().ToList();
         }
         else
         {
-            var list = Database.View<Signum.Engine.SchemaInfoTables.SysDatabases>().ToList();
+            var list = Database.View<SysDatabases>().ToList();
         }
     }
 

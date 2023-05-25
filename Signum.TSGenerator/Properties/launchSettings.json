@@ -1,14 +1,24 @@
 {
   "profiles": {
-    "Framework": {
+    "Signum": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp6.0\\Signum.React.dll\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Framework\\Signum.React\\obj\\SignumContent.txt\"",
-      "workingDirectory": "D:\\Signum\\Southwind\\Framework\\Signum.React\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum\\"
     },
-    "Extensions": {
+    "Authorization": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\x64\\Debug\\netcoreapp6.0\\Signum.React.Extensions.dll\" \"D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\obj\\SignumReferences.txt\" \"D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\obj\\SignumContent.txt\"",
-      "workingDirectory": "D:\\Signum\\Southwind\\Framework\\Signum.React.Extensions\\"
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\"
+    },
+    "Files": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Files.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\"
+    },
+    "MailingPackage": {
+      "commandName": "Project",
+      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.MailingPackage.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\obj\\SignumReferences.txt\"",
+      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\"
     },
     "Southwind": {
       "commandName": "Project",

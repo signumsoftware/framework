@@ -1,0 +1,58 @@
+﻿.task {
+    border-bottom: 1px solid #ddd;
+    list-style: none;
+}
+
+    .task .processName {
+        font-size: 150%;
+    }
+
+    .task .numTimes {
+        color: #666;
+    }
+
+    .task .max, .task .med, .task .min, .task .last, .task .sum {
+        display: block;
+        height: 10px;
+        float: left;
+        margin-right: 10px;
+        margin-left: 0px;
+    }
+
+    .task .max {
+        background: #b22222;
+    }
+
+    .task .med {
+        background: #ff7722;
+    }
+
+    .task .min {
+        background: #ffd700;
+    }
+
+    .task .last {
+        background: #b27aff;
+    }
+
+    .task .sum {
+        background: #597FFF;
+    }
+
+.leftBorder {
+    border-left: 1px solid #eee;
+}
+
+#tasks {
+    width: 1200px;
+}
+
+    #tasks .left {
+        float: left;
+    }
+
+
+.entityName {
+    color:darkgreen;
+    font-weight:bold;
+}

@@ -1,0 +1,71 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AutoUpdate" Description="Automatische Aktualisierung">
+    <Member Name="Dashboard" Description="Dashboard" />
+    <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
+    <Member Name="None" Description="Nichts" />
+  </Type>
+  <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
+    <Member Name="AppendFilters" Description="Filters anfügen" />
+    <Member Name="Columns" Description="Spalten" />
+    <Member Name="ColumnsMode" Description="Spalten-Modus" />
+    <Member Name="CustomDrilldowns" Description="Benutzerdefinierte Drilldowns" />
+    <Member Name="DisplayName" Description="Angezeigter Name" />
+    <Member Name="ElementsPerPage" Description="Elemente pro Seite" />
+    <Member Name="EntityType" Description="Entitätstyp" />
+    <Member Name="Filters" Description="Filter" />
+    <Member Name="GroupResults" Description="Ergebnisse gruppieren" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="IncludeDefaultFilters" Description="Standardfilter einschließen" />
+    <Member Name="Orders" Description="Reihenfolge" />
+    <Member Name="Owner" Description="Eigentümer" />
+    <Member Name="PaginationMode" Description="Paginierungsmodus" />
+    <Member Name="Query" Description="Abfrage" />
+    <Member Name="RefreshMode" Description="Aktualisierungsmodus" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="ApplyChanges" Description="Änderungen anwenden" />
+    <Member Name="BackToDefault" Description="Zurück zum Standard" />
+    <Member Name="CreateNew" Description="Erstellen" />
+    <Member Name="Edit" Description="Bearbeiten" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
+    <Member Name="MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0" Description="Macht die {0} für benutzerdefinierte Drilldowns und im Kontextmenü beim Gruppieren verfügbar {1}" />
+    <Member Name="Preview" Description="Vorschau" />
+    <Member Name="TheSelected0" Description="die ausgewählte {0}" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="UserQueryPartEntity" Description="Benutzerabfrage Teil" PluralDescription="Benutzerabfrage Teilen" Gender="n">
+    <Member Name="AggregateFromSummaryHeader" Description="Aggregieren aus Zusammenfassungskopfzeile" />
+    <Member Name="AllowMaxHeight" Description="Maximale Höhe zulassen" />
+    <Member Name="AllowSelection" Description="Auswahl zulassen" />
+    <Member Name="AutoUpdate" Description="Automatische Aktualisierung" />
+    <Member Name="CreateNew" Description="Neue erstellen" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="RenderMode" Description="Render-Modus" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="ShowFooter" Description="Show-Fußzeile" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrage Teil Rendermodus">
+    <Member Name="BigValue" Description="Großer Wert" />
+    <Member Name="SearchControl" Description="Suchsteuerung" />
+  </Type>
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
+  </Type>
+  <Type Name="ValueUserQueryElementEmbedded" Description="Wert der Benutzerabfrage">
+    <Member Name="Href" Description="Href" />
+    <Member Name="IsQueryCached" Description="Ist Cached-Abfrage" />
+    <Member Name="Label" Description="Etikett" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
+  <Type Name="ValueUserQueryListPartEntity" Description="Wert Benutzerabfrage Listen Teil" PluralDescription="Wert Benutzerabfrage Listen Teilen" Gender="n">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="UserQueries" Description="Benutzer-Abfragen" />
+  </Type>
+</Translations>

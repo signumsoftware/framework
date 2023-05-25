@@ -188,8 +188,8 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
         """);
 
             file.ReplaceBetween(
-                fromLine: a => a.Contains("<Router history={h}>"), 0,
-                toLine: a => a.Contains("</Router>"), 0,
+                new(a => a.Contains("<Router history={h}>"), 0),
+                new(a => a.Contains("</Router>"), 0),
                 "<RouterProvider router={router}/>");
 
             file.Replace(regexIsFull, """

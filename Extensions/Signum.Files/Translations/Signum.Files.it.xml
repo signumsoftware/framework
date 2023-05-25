@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="BigStringMixin">
+    <Member Name="File" Description="File" />
+  </Type>
+  <Type Name="FileEmbedded" Description="File incorporato">
+    <Member Name="BinaryFile" Description="File binario" />
+    <Member Name="FileName" Description="Nome del file" />
+  </Type>
+  <Type Name="FileEntity" Description="File">
+    <Member Name="BinaryFile" Description="File binario" />
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="Hash" Description="Hash" />
+  </Type>
+  <Type Name="FileMessage">
+    <Member Name="DownloadFile" Description="Scarica il file" />
+    <Member Name="ErrorSavingFile" Description="Errore durante il salvataggio del file" />
+    <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="Il file '{0}' è troppo grande, la dimensione massima è {1}" />
+    <Member Name="FileTypes" Description="Tipi di file" />
+    <Member Name="OnlyOneFileIsSupported" Description="È supportato un solo file" />
+    <Member Name="Open" Description="Apri" />
+    <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Apri non dispone di un'implementazione di default per {0}" />
+    <Member Name="OrDragAFileHere" Description="o trascina un file qui" />
+    <Member Name="Remove" Description="Rimuovi" />
+    <Member Name="SavingHasNotDefaultImplementationFor0" Description="Salva non ha alcuna implementazione predefinita per {0}" />
+    <Member Name="SelectFile" Description="Selezionare il file" />
+    <Member Name="TheFile0IsNotA1" Description="Il file {0} non è un {1}" />
+    <Member Name="TheNameOfTheFileMustNotContainPercentSymbol" Description="Il nome del file non deve contenere '%'" />
+    <Member Name="ViewFile" Description="Visualizza file" />
+    <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Vedi non ha alcuna implementazione predefinita per {0}" />
+    <Member Name="WebDownload" Description="Scarica" />
+    <Member Name="WebImage" Description="Immagine" />
+  </Type>
+  <Type Name="FilePathEmbedded" Description="File path">
+    <Member Name="BinaryFile" Description="Binary file" />
+    <Member Name="EntityId" Description="ID entità" />
+    <Member Name="FileLength" Description="Lunghezza file" />
+    <Member Name="FileLengthString" Description="Stringa di lunghezza del file" />
+    <Member Name="FileName" Description="Nome file" />
+    <Member Name="FileType" Description="Tipo file" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="MListRowId" Description="M list row id" />
+    <Member Name="PropertyRoute" Description="Property route" />
+    <Member Name="RootType" Description="Root type" />
+    <Member Name="Suffix" Description="Suffix" />
+  </Type>
+  <Type Name="FilePathEntity" Description="Percorso del file">
+    <Member Name="BinaryFile" Description="File binario" />
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="FileLength" Description="Dimensione file" />
+    <Member Name="FileLengthString" Description="Dimensione" />
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="FileType" Description="Tipo di file" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="Suffix" Description="Suffix" />
+  </Type>
+  <Type Name="FilePathOperation">
+    <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="FileTypeSymbol" Description="Simbolo tipo di file" />
+</Translations>

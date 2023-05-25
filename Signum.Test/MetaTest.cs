@@ -1,5 +1,4 @@
-using Signum.Engine.DynamicQuery;
-using Signum.Entities.DynamicQuery;
+using Signum.DynamicQuery;
 
 namespace Signum.Test;
 

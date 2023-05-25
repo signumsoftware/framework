@@ -1,0 +1,138 @@
+﻿.sf-auth-rules
+{
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+.sf-auth-rules th
+{
+    padding:2px;
+}
+.sf-auth-rules td
+{
+    vertical-align: top;
+}
+.sf-auth-rules .sf-auth-overriden
+{
+    text-align:center;
+}
+.sf-auth-rules a:hover
+{
+	cursor:pointer;
+}
+.sf-auth-rules tr.first
+{
+    border-top: 1px gray solid
+}
+.sf-auth-rules tr:hover
+{
+    background-color: #F6F6F6
+}
+.sf-auth-rules span
+{
+    line-height: 22px;
+}
+.sf-auth-rules .sf-auth-condition .sf-auth-label
+{
+    font-style: italic;
+}
+.sf-auth-rules .sf-auth-condition-button
+{
+    margin: 5px 0 5px 3px;
+    width: 1.2em;
+    background: none repeat scroll 0px 0px transparent !important;
+    border: 0px none !important;
+}
+.sf-auth-rules .sf-auth-label
+{
+    margin-left: 3px;
+    vertical-align: top;
+}
+
+    .sf-auth-rules small {
+        color:#bbb
+    }
+
+    .sf-auth-rules small.and {
+        color: #444
+    }
+
+a.sf-auth-chooser
+{
+    text-decoration: none !important;
+    font-size:18px;
+    vertical-align:middle;
+}
+
+.sf-auth-checkbox {
+    font-size: 18px;
+    vertical-align: middle;
+    color: #aaa
+}
+
+    .sf-auth-checkbox.fa-check-square-o {
+        cursor: pointer;
+        color: #555
+    }
+
+    .sf-not-allowed{
+        cursor: not-allowed !important;
+    }
+
+span.group.inactive
+{
+    color:#CCC
+}
+
+span.group.active
+{
+    color:black
+}
+
+
+table.sf-auth-rules tr.sf-auth-type td {
+    border-top: 1px solid #eee;
+}
+
+table.sf-auth-rules tr.sf-auth-type.sf-auth-with-conditions td {
+    padding-bottom: 0px;
+}
+
+
+table.sf-auth-rules tr.sf-auth-condition td {
+    border-top: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+table.sf-auth-rules tr.sf-auth-namespace td {
+    padding-top: 16px;
+    border-bottom: 1px solid #ddd;
+    border-top: 0;
+}
+
+.sf-placeholder-icon {
+    color: #d8d8d8
+}
+
+a.sf-condition-icon {
+    color: #999
+}
+
+a.sf-condition-icon:hover {
+    color: #666;
+    text-decoration:none;
+}
+
+a.sf-auth-link {
+    opacity:0.5;
+    text-decoration:none;
+}
+
+a.sf-auth-link:hover {
+    opacity:1;
+}
+
+.sf-master {
+    background: #fffbc2 !important;
+}

@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="TranslatedInstanceEntity" Description="Entità tradotta">
+    <Member Name="Culture" Description="Cultura" />
+    <Member Name="Instance" Description="Entità" />
+    <Member Name="OriginalText" Description="Testo originale" />
+    <Member Name="PropertyRoute" Description="Percorso di proprietà" />
+    <Member Name="RowId" Description="RowId" />
+    <Member Name="TranslatedText" Description="Testo tradotto" />
+  </Type>
+  <Type Name="TranslationJavascriptMessage">
+    <Member Name="RememberChange" Description="Ricordare il cambiamento" />
+    <Member Name="RightTranslation" Description="Traduzione corretta" />
+    <Member Name="WrongTranslationToSubstitute" Description="Traduzione sbagliata da sostituire" />
+  </Type>
+  <Type Name="TranslationMessage">
+    <Member Name="_0AlreadySynchronized" Description="{0} già sincronizzato" />
+    <Member Name="All" Description="Tutti" />
+    <Member Name="AllLanguages" Description="tutte le lingue" />
+    <Member Name="CodeTranslations" Description="Traduzioni di codice" />
+    <Member Name="Edit" Description="modifica" />
+    <Member Name="Instance" Description="Entità" />
+    <Member Name="InstanceTranslations" Description="Traduzione di entità" />
+    <Member Name="Member" Description="Membro" />
+    <Member Name="None" Description="niente" />
+    <Member Name="NoResultsFound" Description="Nessun risultato trovato" />
+    <Member Name="NothingToTranslate" Description="Niente da tradurre" />
+    <Member Name="NothingToTranslateIn0" Description="Niente da tradurre in {0}" />
+    <Member Name="PressSearchForResults" Description="Fare clic su Cerca per ottenere risultati." />
+    <Member Name="Property" Description="Proprietà" />
+    <Member Name="RepeatedCultures0" Description="Culture ripetute {0}" />
+    <Member Name="Save" Description="Salva" />
+    <Member Name="Search" Description="Cerca" />
+    <Member Name="Sync" Description="sinc" />
+    <Member Name="Synchronize0In1" Description="Sincronizzare {0} in {1}" />
+    <Member Name="Type" Description="Tipo" />
+    <Member Name="View" Description="vedere" />
+    <Member Name="View0In1" Description="Vedere {0} in {1}" />
+  </Type>
+  <Type Name="TranslationPermission">
+    <Member Name="TranslateCode" Description="Tradurre il codice" />
+    <Member Name="TranslateInstances" Description="Tradurre le entità" />
+  </Type>
+  <Type Name="TranslationReplacementEntity" Description="Sostituzione della traduzione">
+    <Member Name="CultureInfo" Description="Informazioni di cultura" />
+    <Member Name="RightTranslation" Description="Traduzione corretta" />
+    <Member Name="WrongTranslation" Description="Traduzione sbagliata" />
+  </Type>
+  <Type Name="TranslationReplacementOperation">
+    <Member Name="Delete" Description="Elimina" />
+    <Member Name="Save" Description="Salva" />
+  </Type>
+</Translations>

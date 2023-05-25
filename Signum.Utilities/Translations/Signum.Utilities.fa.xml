@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Translations>
-  <Type Name="CollectionMessage" />
-  <Type Name="ConsoleMessage" />
-  <Type Name="DateTimeMessage" />
-  <Type Name="DateTimePrecision" />
-</Translations>

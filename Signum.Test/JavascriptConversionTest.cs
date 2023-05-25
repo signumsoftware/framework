@@ -1,6 +1,4 @@
-using Signum.Engine.DynamicQuery;
-using Signum.Engine.Json;
-using Signum.Entities.DynamicQuery;
+using Signum.API.Json;
 
 namespace Signum.Test;
 

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="PrintLineEntity" Description="Línea de impresión">
+    <Member Name="CreationDate" Description="Fecha de creación" />
+    <Member Name="File" Description="Archivo" />
+    <Member Name="Package" Description="Paquete" />
+    <Member Name="PrintedOn" Description="Impreso en" />
+    <Member Name="Referred" Description="Relacionado" />
+    <Member Name="State" Description="Estado" />
+    <Member Name="TestFileType" Description="Tipo de archivo de prueba" />
+  </Type>
+  <Type Name="PrintLineOperation">
+    <Member Name="Cancel" Description="Cancelar" />
+    <Member Name="CreateTest" Description="Crear prueba" />
+    <Member Name="Print" Description="Impresión" />
+    <Member Name="Retry" Description="Reintentar" />
+    <Member Name="SaveTest" Description="Guardar prueba" />
+  </Type>
+  <Type Name="PrintPackageEntity" Description="Paquete de impresión">
+    <Member Name="Name" Description="Nombre" />
+  </Type>
+  <Type Name="PrintPackageProcess">
+    <Member Name="PrintPackage" Description="Imprimir paquete" />
+  </Type>
+  <Type Name="PrintPermission">
+    <Member Name="ViewPrintPanel" Description="Ver panel de impresión" />
+  </Type>
+  <Type Name="PrintTask">
+    <Member Name="RemoveOldFiles" Description="Eliminar archivos antiguos" />
+  </Type>
+</Translations>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="EmailMessageEntity" Description="Message d'email">
+    <Member Name="Body" Description="Corps" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="Sent" Description="Envoyé" />
+    <Member Name="State" Description="État" />
+    <Member Name="Subject" Description="Sujet" />
+    <Member Name="Template" Description="Modèle" />
+  </Type>
+  <Type Name="EmailTemplateEntity" Description="Modèle d'email" />
+  <Type Name="SmtpNetworkDeliveryEmbedded">
+    <Member Name="Username" Description="Login" />
+  </Type>
+	<Type Name="EmailPackageEntity" Description="Paquet d'email">
+		<Member Name="Name" Description="Nom" />
+	</Type>
+</Translations>

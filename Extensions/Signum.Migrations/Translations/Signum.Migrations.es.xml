@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="CSharpMigrationEntity" Description="Migración CSharp">
+    <Member Name="ExecutionDate" Description="Fecha de ejecución" />
+    <Member Name="UniqueName" Description="Nombre único" />
+  </Type>
+  <Type Name="LoadMethodLogEntity" Description="Registro de método de carga">
+    <Member Name="ClassName" Description="Nombre de clase" />
+    <Member Name="Description" Description="Descripción" />
+    <Member Name="Duration" Description="Duración" />
+    <Member Name="End" Description="Final" />
+    <Member Name="Exception" Description="Excepción" />
+    <Member Name="MethodName" Description="Nombre del método" />
+    <Member Name="Start" Description="Inicio" />
+  </Type>
+  <Type Name="SqlMigrationEntity" Description="Migración SQL">
+    <Member Name="Comment" Description="Comentario" />
+    <Member Name="VersionNumber" Description="Número de versión" />
+  </Type>
+</Translations>

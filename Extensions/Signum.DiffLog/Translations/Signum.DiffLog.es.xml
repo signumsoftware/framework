@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="DiffLogMessage">
+    <Member Name="CurrentEntity" Description="Entidad actual" />
+    <Member Name="DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity" Description="Diferencia entre el estado final y el estado actual de la entidad" />
+    <Member Name="DifferenceBetweenFinalStateAndTheInitialStateOfNextLog" Description="Diferencia entre el estado final y el estado inicial del siguiente registro" />
+    <Member Name="DifferenceBetweenFinalStateOfPreviousLogAndTheInitialState" Description="Diferencia entre el estado final del registro anterior y el estado inicial" />
+    <Member Name="DifferenceBetweenInitialStateAndFinalState" Description="Diferencia entre el estado inicial y estado final" />
+    <Member Name="NavigatesToTheCurrentEntity" Description="Navega a la entidad actual" />
+    <Member Name="NavigatesToTheNextOperationLog" Description="Navega al siguiente registro de operación" />
+    <Member Name="NavigatesToThePreviousOperationLog" Description="Navega al registro de operación anterior" />
+    <Member Name="NextLog" Description="Registro siguiente" />
+    <Member Name="PreviousLog" Description="Registro anterior" />
+    <Member Name="StateWhenTheOperationFinished" Description="Estado cuando finalizó la operación" />
+    <Member Name="StateWhenTheOperationStarted" Description="Estado cuando se inició la operación" />
+  </Type>
+  <Type Name="DiffLogMixin">
+    <Member Name="Cleaned" Description="Limpiar" />
+    <Member Name="FinalState" Description="Estado final" />
+    <Member Name="InitialState" Description="Estado inicial" />
+  </Type>
+</Translations>

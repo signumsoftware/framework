@@ -8,17 +8,23 @@ class Upgrade_20210816_RemoveWebAuth : CodeUpgradeBase
     {
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", file =>
         {
-            file.ReplaceBetween(a => a.Contains("WebAuthn = new WebAuthnConfigurationEmbedded"), -1, a => a.Contains("}, //Auth"), -0, "");
+            file.ReplaceBetween(
+                new (a => a.Contains("WebAuthn = new WebAuthnConfigurationEmbedded")) { Delta = -1 },
+                new (a => a.Contains("}, //Auth")) { Delta = -0 }, "");
         });
 
         uctx.ChangeCodeFile(@"Southwind.Terminal/SouthwindMigrations.cs", file =>
         {
-            file.ReplaceBetween(a => a.Contains("WebAuthn = new WebAuthnConfigurationEmbedded"), -1, a => a.Contains("}, //Auth"), -0, "");
+            file.ReplaceBetween(
+                new (a => a.Contains("WebAuthn = new WebAuthnConfigurationEmbedded")) { Delta = -1 },
+                new (a => a.Contains("}, //Auth")) { Delta = -0 }, "");
         });
 
         uctx.ChangeCodeFile(@"Southwind.React/App/Southwind/Templates/ApplicationConfiguration.tsx", file =>
         {
-            file.ReplaceBetween(a => a.Contains(@"<Tab eventKey=""webauthn"" title={ctx.niceName(a => a.webAuthn)}>"), -1, a => a.Contains(@"</Tab>"), -0, "");
+            file.ReplaceBetween(
+                new(a => a.Contains(@"<Tab eventKey=""webauthn"" title={ctx.niceName(a => a.webAuthn)}>")) { Delta = -1 },
+                new(a => a.Contains(@"</Tab>")) { Delta = -0 }, "");
         });
 
         uctx.ChangeCodeFile(@"Southwind.React/App/MainPublic.tsx", file =>

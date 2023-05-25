@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AuthMessage">
+    <Member Name="NotAuthorizedTo0The1WithId2" Description="Pas autorisée à {0} du {1} avec l'Id {2}" />
+    <Member Name="NotAuthorizedToRetrieve0" Description="Pas autorisé à récupérer '{0}'" />
+  </Type>
+  <Type Name="LoginAuthMessage">
+    <Member Name="ChangePassword" Description="Modifier le mot de passe" />
+    <Member Name="ConfirmNewPassword" Description="Confirmer mot de passe" />
+    <Member Name="EnterTheNewPassword" Description="Entrez le nouveau mot de passe" />
+    <Member Name="EnterYourUserEmail" Description="Saississez votre adresse e-mail" />
+    <Member Name="EnterYourUserNameAndPassword" Description="Saississez votre login et votre mot de passe" />
+    <Member Name="GiveUsYourUserEmailToResetYourPassword" Description="Indiquez ci-dessous votre adresse e-mail afin de recevoir un lien vous permettant de réinitialiser votre mot de passe." />
+    <Member Name="IForgotMyPassword" Description="J’ai oublié mon mot de passe" />
+    <Member Name="IHaveForgottenMyPassword" Description="J'ai oublié mon mot de passe" />
+    <Member Name="IncorrectPassword" Description="Mot de passe incorrecte" />
+    <Member Name="InvalidUsernameOrPassword" Description="Le nom d'utilisateur ou mot de passe est incorrect" />
+    <Member Name="Login" Description="Connexion" />
+    <Member Name="Logout" Description="Déconnexion" />
+    <Member Name="NewPassword" Description="Nouveau mot de passe" />
+    <Member Name="NotUserLogged" Description="Pas d'utilisateur connecté" />
+    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="PasswordHasBeenChangedSuccessfully" Description="Le mot de passe a été modifié avec succès" />
+    <Member Name="PasswordMustHaveAValue" Description="Le mot de passe doit être spécifié" />
+    <Member Name="PasswordsAreDifferent" Description="Les mots de passe sont différents" />
+    <Member Name="RememberMe" Description="Se souvenir de moi" />
+    <Member Name="SendEmail" Description="Envoyer" />
+    <Member Name="SwitchUser" Description="Changer d’utilisateur" />
+    <Member Name="Username" Description="Login" />
+    <Member Name="Username0IsNotValid" Description="Nom d'utilisateur {0} n'est pas valide" />
+    <Member Name="UserNameMustHaveAValue" Description="Vous devez entrer le nom d'utilisateur" />
+  </Type>
+  <Type Name="RoleEntity" Description="Role">
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="UserEntity" Description="Utilisateur">
+    <Member Name="CultureInfo" Description="Info de la culture" />
+    <Member Name="Email" Description="Email" />
+    <Member Name="PasswordHash" Description="Hachage du mot de passe" />
+    <Member Name="Role" Description="Role" />
+    <Member Name="State" Description="État" />
+    <Member Name="UserName" Description="Nom d'utilisateur" />
+  </Type>
+  <Type Name="UserOperation">
+    <Member Name="Create" Description="Créer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="UserTicketEntity" Description="Utilisateur ticket">
+    <Member Name="ConnectionDate" Description="Date de connexion" />
+    <Member Name="Device" Description="Dispositif" />
+    <Member Name="Ticket" Description="Billet" />
+    <Member Name="User" Description="Utilisateur" />
+  </Type>
+</Translations>
