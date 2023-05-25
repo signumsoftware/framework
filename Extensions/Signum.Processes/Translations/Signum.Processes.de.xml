@@ -53,7 +53,9 @@
     <Member Name="ExceptionLines" Description="Ausnahmezeilen" />
     <Member Name="LastProcess" Description="Letzter Prozess" />
     <Member Name="Lines" Description="Linien" />
+    <Member Name="OnlyActive" Description="Nur aktive" />
     <Member Name="Process0IsNotRunningAnymore" Description="Prozess {0} wird nicht mehr ausgeführt" />
+    <Member Name="ProcessSettings" Description="Prozess-Einstellungen" />
     <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Prozessstart ist größer als Prozessende" />
     <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Prozessstart ist null aber Prozessende nicht" />
     <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Aussetzen ist der sicherere Weg, um einen laufenden Prozess zu stoppen. Trotzdem Abbrechen?" />

@@ -5,6 +5,9 @@
     <Member Name="Identical" Description="Identische" />
     <Member Name="New" Description="Neu" />
   </Type>
+  <Type Name="FakeEntity" Description="Fälschung">
+    <Member Name="Guid" Description="Guid" />
+  </Type>
   <Type Name="IUserAssetEntity">
     <Member Name="Guid" Description="Guid" />
   </Type>
@@ -18,6 +21,7 @@
     <Member Name="Column" Description="Spalte" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Row" Description="Zeile" />
+    <Member Name="SplitValue" Description="Wert aufteilen" />
   </Type>
   <Type Name="QueryColumnEmbedded" Description="Abfrage-Spalte">
     <Member Name="CombineRows" Description="Zeilen kombinieren" />
@@ -44,6 +48,7 @@
     <Member Name="TokenString" Description="Token string" />
   </Type>
   <Type Name="UserAssetMessage">
+    <Member Name="_0IsNotFilterable" Description="{0} ist nicht filterbar" />
     <Member Name="ExportToXml" Description="In xml exportieren" />
     <Member Name="ImportPreview" Description="Importvorschau" />
     <Member Name="ImportUserAssets" Description="Benutzer-Assets importieren" />
@@ -54,6 +59,7 @@
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
     <Member Name="SwitchToExpression" Description="Auf Ausdruck umschalten" />
     <Member Name="SwitchToValue" Description="Auf Wert umschalten" />
+    <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Die Filteroperation {0} ist nicht kompatibel mit {1}" />
   </Type>
   <Type Name="UserAssetPermission">
     <Member Name="UserAssetsToXML" Description="Benutzer-Assets in XML" />

@@ -91,6 +91,8 @@
   <Type Name="ColorPaletteMessage">
     <Member Name="FillAutomatically" Description="Automatisch ausfüllen" />
     <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Wählen Sie {0} nur aus, wenn Sie die automatische Farbe überschreiben möchten" />
+    <Member Name="ShowList" Description="Liste anzeigen" />
+    <Member Name="ShowPalette" Description="Palette anzeigen" />
   </Type>
   <Type Name="ColorPaletteOperation">
     <Member Name="Delete" Description="Löschen" />
