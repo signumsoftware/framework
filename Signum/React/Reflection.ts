@@ -1372,6 +1372,15 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
     return count + " " + (count == 1 ? this.niceName() : this.nicePluralName());
   }
 
+  mixinNicePropertyName<M extends MixinEntity>(mixinType: Type<M>, lambdaToProperty: (v: M) => any): string {
+    const member = this.mixinMemberInfo(mixinType, lambdaToProperty);
+
+    if (!member.niceName)
+      throw new Error(`no nicePropertyName found for ${member.name}`);
+
+    return member.niceName;
+  }
+
   nicePropertyName(lambdaToProperty: (v: T) => any): string {
     const member = this.memberInfo(lambdaToProperty);
 
