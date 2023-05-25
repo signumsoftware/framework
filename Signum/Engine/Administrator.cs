@@ -122,7 +122,7 @@ public static class Administrator
         CleanAllDatabases();
         Console.WriteLine("Done.");
 
-        Console.Write("Generating new database database...");
+        Console.Write("Generating new database...");
         ExecuteGenerationScript();
         Console.WriteLine("Done.");
     }

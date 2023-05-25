@@ -7,6 +7,14 @@ namespace Signum.UserAssets;
 
 public static class UserAssetsExporter
 {
+    static void ToXmlMixin(IUserAssetEntity entity, XElement element, IToXmlContext ctx)
+    {
+        foreach (var m in ((Entity)entity).Mixins.OfType<IUserAssetMixin>())
+        {
+            m.ToXml(element, ctx);
+        }
+    }
+
     public static Func<XDocument, XDocument>? PreExport = null;
 
     class ToXmlContext : IToXmlContext
@@ -14,7 +22,12 @@ public static class UserAssetsExporter
         public Dictionary<Guid, XElement> elements = new();
         public Guid Include(IUserAssetEntity content)
         {
-            elements.GetOrCreate(content.Guid, () => content.ToXml(this));
+            elements.GetOrCreate(content.Guid, () =>
+            {
+                var element = content.ToXml(this);
+                ToXmlMixin(content, element, this);
+                return element;
+            });
 
             return content.Guid;
         }
@@ -52,6 +65,15 @@ public static class UserAssetsExporter
 
 public static class UserAssetsImporter
 {
+    static void FromXmlMixin(IUserAssetEntity entity, XElement element, IFromXmlContext ctx)
+    {
+        foreach (var m in ((Entity)entity).Mixins.OfType<IUserAssetMixin>())
+        {
+            m.FromXml(element, ctx);
+        }
+    }
+
+
     public static Dictionary<string, Type> UserAssetNames = new();
     public static Polymorphic<Action<Entity>> SaveEntity = new();
     public static Func<XDocument, XDocument>? PreImport = null;
@@ -103,6 +125,8 @@ public static class UserAssetsImporter
                 var entity = giRetrieveOrCreate.GetInvoker(type)(guid);
 
                 entity.FromXml(element, this);
+
+                FromXmlMixin(entity, element, this);
 
                 var action = entity.IsNew ? EntityAction.New :
                              customResolutionModel.ContainsKey(entity.Guid) ? EntityAction.Different :
@@ -251,6 +275,8 @@ public static class UserAssetsImporter
                 if (entity.IsNew || overrideEntity.TryGet(guid, false))
                 {
                     entity.FromXml(element, this);
+
+                    FromXmlMixin(entity, element, this);
 
                     SaveEntity.Invoke((Entity)entity);
                 }

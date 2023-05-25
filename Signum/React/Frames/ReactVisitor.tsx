@@ -38,7 +38,10 @@ export class ReactVisitor {
     return element;
   }
 
-  visit(element: React.ReactElement<any>): React.ReactElement<any> {
+  visit(element: React.ReactElement<any> | null): React.ReactElement<any> | null {
+    if (element == null)
+      return element;
+
     const result = this.visitElement(element);
 
     if (Array.isArray(result))
@@ -85,7 +88,7 @@ export class ReactValidator extends ReactVisitor {
 export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
-    public result: React.ReactElement<any>,
+    public result: React.ReactElement<any> | null,
     public ctx: TypeContext<T>
   ) {
   }

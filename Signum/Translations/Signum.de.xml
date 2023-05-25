@@ -23,6 +23,10 @@
     <Member Name="Name" Description="Name" />
     <Member Name="Stack" Description="Stapel" />
   </Type>
+  <Type Name="CollapsableCardMessage">
+    <Member Name="Collapse" Description="Einklappen" />
+    <Member Name="Expand" Description="Ausklappen" />
+  </Type>
   <Type Name="CollectionAnyAllType">
     <Member Name="All" Description="Alle" />
     <Member Name="Any" Description="Irgend" />
@@ -73,6 +77,16 @@
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
   </Type>
+  <Type Name="CultureInfoEntity" Description="Kultur">
+    <Member Name="EnglishName" Description="Englischer Name" />
+    <Member Name="IsNeutral" Description="Ist neutral" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="NativeName" Description="Einheimischer Name" />
+  </Type>
+  <Type Name="CultureInfoOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
   <Type Name="DashboardBehaviour" Description="Dashboard-Verhalten">
     <Member Name="PromoteToDasboardPinnedFilter" Description="Beförderung zum Dasboard-Pinned-Filter" />
     <Member Name="UseAsInitialSelection" Description="Verwendung als Erstauswahl" />
@@ -88,6 +102,23 @@
     <Member Name="DeleteLogsOlderThan" Description="Löschen von Protokollen, die älter als" />
     <Member Name="DeleteLogsWithExceptionsOlderThan" Description="Löschen von Protokollen mit Ausnahmen, die älter als" />
     <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="DisabledMessage">
+    <Member Name="ParentIsDisabled" Description="Elternteil ist deaktiviert" />
+  </Type>
+  <Type Name="DisabledMixin">
+    <Member Name="IsDisabled" Description="Ist deaktiviert" />
+  </Type>
+  <Type Name="DisableOperation">
+    <Member Name="Disable" Description="Deaktivieren" />
+    <Member Name="Enabled" Description="Aktiviert" />
+  </Type>
+  <Type Name="EmailOwnerData" Description="E-Mail-Eigentümerdaten">
+    <Member Name="AzureUserId" Description="Azure-Benutzer-ID" />
+    <Member Name="CultureInfo" Description="Kultur" />
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="Email" Description="E-Mail" />
+    <Member Name="Owner" Description="Eigentümer" />
   </Type>
   <Type Name="EmbeddedEntity" Description="Eingebettete Entität" />
   <Type Name="EngineMessage">
@@ -114,6 +145,8 @@
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Expand" Description="Ausklappen" />
     <Member Name="Find" Description="Finden" />
+    <Member Name="Maximize" Description="Maximieren" />
+    <Member Name="Minimize" Description="Minimieren" />
     <Member Name="Move" Description="Bewegen" />
     <Member Name="Moved" Description="Bewegt" />
     <Member Name="MoveDown" Description="Nach unten" />
@@ -317,6 +350,7 @@
     <Member Name="Firsts" Description="Erste" />
     <Member Name="Paginate" Description="Seiten" />
   </Type>
+  <Type Name="PermissionSymbol" Description="Erlaubnis" PluralDescription="Erlaubnisse" Gender="f" />
   <Type Name="PinnedFilterActive" Description="Vorgewahlter Filter aktiv">
     <Member Name="Always" Description="Immer" />
     <Member Name="Checkbox_Checked" Description="Kontrollkästchen (aktiviert)" />
@@ -556,6 +590,13 @@
   <Type Name="SynchronizerMessage">
     <Member Name="EndOfSyncScript" Description="--- ENDE DES SYNCHRONISIERUNGSSKRIPTS" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- ANFANG DES SYNCHRONISATIONSSKRIPTS GENERIERT AUF {0}" />
+  </Type>
+  <Type Name="SystemEventLogEntity" Description="Systemereignisprotokoll" PluralDescription="Systemereignisprotokolle" Gender="n">
+    <Member Name="Date" Description="Datum" />
+    <Member Name="EventType" Description="Ereignissestyp" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="MachineName" Description="Computername" />
+    <Member Name="User" Description="Benutzer" />
   </Type>
   <Type Name="SystemTimeJoinMode">
     <Member Name="AllCompatible" Description="Alle kompatibel" />

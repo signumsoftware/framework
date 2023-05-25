@@ -131,6 +131,13 @@ public interface IUserAssetEntity : IEntity
     void FromXml(XElement element, IFromXmlContext ctx);
 }
 
+public interface IUserAssetMixin 
+{
+    void ToXml(XElement elementToExpand, IToXmlContext ctx);
+
+    void FromXml(XElement element, IFromXmlContext ctx);
+}
+
 public interface IHasEntityType
 {
     Lite<TypeEntity>? EntityType { get; }
