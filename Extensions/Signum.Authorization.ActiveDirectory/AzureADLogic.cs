@@ -105,16 +105,13 @@ public static class AzureADLogic
                     userWithClaims.Claims["SID"] = mixin.SID;
                 };
 
-                var lambda = As.GetExpression((UserEntity u) => u.ToString());
-                var isDefault = lambda.Body is MemberExpression me && me.Member is PropertyInfo pi && pi.Name == nameof(UserEntity.UserName);
-
                 Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
                 {
                     UserName = u.UserName,
-                    ToStringValue = null,
+                    ToStringValue = u.ToString(),
                     OID = u.Mixin<UserADMixin>().OID,
                     SID = u.Mixin<UserADMixin>().SID,
-                }, isDefault);
+                });
             }
 
             if (deactivateUsersTask)
