@@ -125,7 +125,7 @@ public static class Administrator
         if (AvoidSimpleGenerate?.Invoke() == true)
             return;
 
-        Console.Write("Generating new database database...");
+        Console.Write("Generating new database...");
         ExecuteGenerationScript();
         Console.WriteLine("Done.");
     }
