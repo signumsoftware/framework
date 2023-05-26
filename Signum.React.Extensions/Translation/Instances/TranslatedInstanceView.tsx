@@ -64,7 +64,7 @@ export default function TranslationInstanceView(p: RouteComponentProps<{ type: s
         propertyRoute: pr,
         rowId: rowId,
         culture: c,
-        originalText: cultures[c].originalText,
+        originalText: cultures[c].newText ?? cultures[c].originalText,
         translatedText: cultures[c].translatedText
       }));
     }));
