@@ -2,7 +2,7 @@ using System.Security.Authentication;
 
 namespace Signum.Authorization;
 
-[EntityKind(EntityKind.Shared, EntityData.Master)]
+[EntityKind(EntityKind.Main, EntityData.Master)]
 public class RoleEntity : Entity
 {
     [UniqueIndex]
