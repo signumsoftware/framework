@@ -175,6 +175,13 @@ public static class ActiveDirectoryLogic
             if (sb.WebServerBuilder != null)
                 ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
 
+            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+            {
+                UserName = u.UserName,
+                ToStringValue = u.ToString(),
+                OID = u.Mixin<UserADMixin>().OID,
+                SID = u.Mixin<UserADMixin>().SID,
+            });
 
             if (deactivateUsersTask)
             {
@@ -186,31 +193,28 @@ public static class ActiveDirectoryLogic
 
                     using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
                     {
-                        stc.ForeachWriting(list.Chunk(10), gr => gr.Length + " user(s)...", gr =>
+                        stc.ForeachWriting(list, u => u.UserName, u =>
                         {
-                            foreach (var u in gr)
+                            if (u.State == UserState.Active)
                             {
-                                if (u.State == UserState.Active)
+                                var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
+
+                                if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
                                 {
-                                    var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
-                                    
-                                    if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
-                                    {
-                                        stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
-                                        u.Execute(UserOperation.Deactivate);
-                                    }
-                                    else
-                                    {
-
-                                    }
-
-                                    if (foundUser == null && u.PasswordHash == null)
-                                    {
-                                        stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
-                                        u.Execute(UserOperation.Deactivate);
-                                    }
+                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                    u.Execute(UserOperation.Deactivate);
+                                }
+                                else
+                                {
 
                                 }
+
+                                if (foundUser == null && u.PasswordHash == null)
+                                {
+                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                    u.Execute(UserOperation.Deactivate);
+                                }
+
                             }
                         });
 
