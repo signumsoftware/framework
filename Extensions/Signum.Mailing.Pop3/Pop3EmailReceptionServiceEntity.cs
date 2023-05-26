@@ -1,4 +1,4 @@
-using Signum.MailingReception;
+using Signum.Mailing.Reception;
 
 namespace Signum.Mailing.Pop3;
 

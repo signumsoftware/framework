@@ -4,12 +4,12 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
-import * as MailingReception from '../Signum.Mailing/Signum.MailingReception'
+import * as Reception from '../Signum.Mailing/Reception/Signum.Mailing.Reception'
 import * as Mailing from '../Signum.Mailing/Signum.Mailing'
 
 
 export const Pop3EmailReceptionServiceEntity = new Type<Pop3EmailReceptionServiceEntity>("Pop3EmailReceptionService");
-export interface Pop3EmailReceptionServiceEntity extends MailingReception.EmailReceptionServiceEntity {
+export interface Pop3EmailReceptionServiceEntity extends Reception.EmailReceptionServiceEntity {
   Type: "Pop3EmailReceptionService";
   port: number;
   host: string;

@@ -2,7 +2,7 @@ using MailKit.Net.Pop3;
 using MimeKit;
 using MimeKit.Tnef;
 using Signum.Files;
-using Signum.MailingReception;
+using Signum.Mailing.Reception;
 using System.IO;
 using System.Text.RegularExpressions;
 

@@ -2,12 +2,12 @@ using Signum.API.Json;
 using Signum.API;
 using Signum.Mailing;
 using Signum.Mailing.Pop3;
-using Signum.MailingReception;
 using Signum.Scheduler;
 using Signum.Utilities.Reflection;
 using System;
 using System.Linq;
 using System.Text.Json;
+using Signum.Mailing.Reception;
 
 namespace Signum.Mailing.Pop3;
 
