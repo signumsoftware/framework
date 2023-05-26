@@ -1987,7 +1987,7 @@ export class PropertyRoute {
         if (ti) {
 
           if (memberType == "Mixin") {
-            return PropertyRoute.mixin(this, memberName, throwIfNotFound);
+            return PropertyRoute.mixin(PropertyRoute.root(ti), memberName, throwIfNotFound);
           }
           else {
             const m = ti.members[memberName];
