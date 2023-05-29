@@ -80,3 +80,11 @@ table.st
             border:none;
             font-size:14px;
         }
+
+.auto-translate {
+    font-size: small;
+}
+
+.auto-translate-all {
+    font-size: smaller;
+}

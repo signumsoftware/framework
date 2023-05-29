@@ -116,6 +116,14 @@ export module API {
     return ajaxGet({ url: `~/api/translatedInstance/sync/${type}?${QueryString.stringify({ culture })}` });
   }
 
+  export function autoTranslate(type: string, culture: string): Promise<void> {
+    return ajaxGet({ url: `~/api/translatedInstance/autoTranslate/${type}?${QueryString.stringify({ culture })}` });
+  }
+
+  export function autoTranslateAll(culture: string): Promise<void> {
+    return ajaxGet({ url: `~/api/translatedInstance/autoTranslateAll?${QueryString.stringify({ culture })}` });
+  }
+
   export function saveTranslatedInstanceData(records: TranslationRecord[], type: string, isSync: boolean, culture?: string | undefined): Promise<void> {
     return ajaxPost({ url: `~/api/translatedInstance/save/${type}?${QueryString.stringify({ isSync, culture })}` }, records);
   }

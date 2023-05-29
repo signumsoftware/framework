@@ -7,6 +7,8 @@ using Signum.Entities.Translation;
 using Signum.Utilities.Reflection;
 using Signum.React.Files;
 using System.IO;
+using Signum.Utilities;
+using Signum.Entities.UserAssets;
 
 namespace Signum.React.Translation;
 
@@ -128,6 +130,51 @@ public class TranslatedInstanceController : ControllerBase
             }).ToList(),
             DeletedTranslations = deletedTranslations,
         };
+    }
+
+    [HttpGet("api/translatedInstance/autoTranslate/{type}")]
+    public void AutoTranslate(string type, string culture)
+    {
+        var changes = Sync(type, culture);
+        while (changes.Instances.Any())
+        {
+            var records = changes.Instances.SelectMany(ins => {
+                    return ins.RouteConflicts.Keys.Select(k =>
+                    {
+                        var pr = k.TryBefore(";") ?? k;
+                        var rowId = k.TryAfter(";");
+                        var support = ins.RouteConflicts[k].Support;
+                        var mc = changes.MasterCulture;
+
+                        return new TranslationRecordTS()
+                        {
+                            Culture = culture,
+                            PropertyRoute = pr,
+                            RowId = rowId,
+                            Lite = ins.Instance,
+                            OriginalText = support[mc].Original,
+                            TranslatedText = support[mc].AutomaticTranslations!.FirstEx().Text,
+                        };
+                    });
+                })
+                .ToList();
+
+            Save(records, type, true, culture);
+
+            changes = Sync(type, culture);
+        }
+    }
+
+    [HttpGet("api/translatedInstance/autoTranslateAll")]
+    public void AutoTranslateAll(string culture)
+    {
+        var summary = Status();
+
+        summary
+            .Where(s => s.State != TranslatedSummaryState.Completed)
+            .GroupBy(s => s.Type)
+            .ToList()
+            .ForEach(gr => AutoTranslate(gr.Key, culture));
     }
 
     [HttpPost("api/translatedInstance/save/{type}")]

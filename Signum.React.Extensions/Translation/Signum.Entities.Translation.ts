@@ -67,6 +67,9 @@ export module TranslationMessage {
   export const BackToSyncAssembly0 = new MessageKey("TranslationMessage", "BackToSyncAssembly0");
   export const ThisFieldIsTranslatable = new MessageKey("TranslationMessage", "ThisFieldIsTranslatable");
   export const _0OutdatedTranslationsFor1HaveBeenDeleted = new MessageKey("TranslationMessage", "_0OutdatedTranslationsFor1HaveBeenDeleted");
+  export const AutoTranslate = new MessageKey("TranslationMessage", "AutoTranslate");
+  export const AreYouSureToContinueAutoTranslation0For1WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslation0For1WithoutRevision");
+  export const AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision");
 }
 
 export module TranslationPermission {

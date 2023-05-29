@@ -72,6 +72,14 @@ public enum TranslationMessage
 
     [Description("{0} outdated translatiosn for {1} have been deleted")]
     _0OutdatedTranslationsFor1HaveBeenDeleted,
+
+    AutoTranslate,
+
+    [Description("Are you sure to continue auto translation {0} for {1} without revision?")]
+    AreYouSureToContinueAutoTranslation0For1WithoutRevision,
+
+    [Description("Are you sure to continue auto translation all types for {0} without revision?")]
+    AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision,
 }
 
 public enum TranslationJavascriptMessage
