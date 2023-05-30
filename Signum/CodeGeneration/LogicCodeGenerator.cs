@@ -1,5 +1,6 @@
 using System.Data;
 using System.IO;
+using System.Linq.Expressions;
 using Signum.Engine.Maps;
 
 namespace Signum.CodeGeneration;
@@ -26,22 +27,39 @@ public class LogicCodeGenerator
 
         foreach (var mod in GetModules())
         {
-            string str = WriteFile(mod);
-
             string fileName = Path.Combine(projectFolder, GetFileName(mod));
 
             FileTools.CreateParentDirectory(fileName);
 
-            if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
+            if (!File.Exists(fileName))
             {
+                string str = WriteFile(mod);
                 File.WriteAllText(fileName, str);
+            }
+            else
+            {
+                string str = File.ReadAllText(fileName);
+
+                var lines = str.Lines().ToList();
+
+                var expression = mod.Types.SelectMany(t => GetExpressions(t)).ToList();
+
+                var start = lines.FindIndex(a => a.Contains("public static void Start"));
+
+                lines.InsertRange(start, WriteExpressions(expression).Indent(4).Lines());
+
+                var notDefined = lines.FindIndex(a => a.Contains("sb.NotDefined"));
+
+                lines.InsertRange(notDefined + 2, WriteTypesAndExpresions(mod.Types, expression).Indent(4 + 4 + 4).Lines());
+
+                File.WriteAllText(fileName, lines.ToString("\r\n"));
             }
         }
     }
 
     protected virtual string GetProjectFolder()
     {
-        return Path.Combine(SolutionFolder, SolutionName + ".Logic");
+        return Path.Combine(SolutionFolder, SolutionName);
     }
 
     protected virtual void GetSolutionInfo(out string solutionFolder, out string solutionName)
@@ -63,7 +81,7 @@ public class LogicCodeGenerator
 
     protected virtual List<Type> CandidateTypes()
     {
-        var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
+        var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName));
 
         return assembly.GetTypes().Where(t => t.IsEntity() && !t.IsAbstract).ToList();
     }
@@ -90,26 +108,32 @@ public class LogicCodeGenerator
         sb.AppendLine("public static class " + mod.ModuleName + "Logic");
         sb.AppendLine("{");
 
-        foreach (var ei in expressions)
-        {
-            string info = WriteExpressionMethod(ei);
-            if (info != null)
-            {
-                sb.Append(info.Indent(4));
-                sb.AppendLine();
-            }
-        }
+        sb.Append(WriteExpressions(expressions).Indent(4));
 
         sb.Append(WriteStartMethod(mod, expressions).Indent(4));
         sb.AppendLine("}");
         return sb.ToString();
     }
 
+    private string WriteExpressions(List<ExpressionInfo> expressions)
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (var ei in expressions)
+        {
+            string info = WriteExpressionMethod(ei);
+            if (info != null)
+            {
+                sb.Append(info);
+                sb.AppendLine();
+            }
+        }
 
+        return sb.ToString();
+    }
 
     protected virtual string GetNamespace(Module mod)
     {
-        return SolutionName + ".Logic." + mod.ModuleName;
+        return SolutionName + mod.ModuleName;
     }
 
     protected virtual List<string> GetUsingNamespaces(Module mod, List<ExpressionInfo> expressions)
@@ -133,26 +157,40 @@ public class LogicCodeGenerator
         sb.AppendLine("    if (sb.NotDefined(MethodInfo.GetCurrentMethod()))");
         sb.AppendLine("    {");
 
-        foreach (var item in mod.Types)
+        sb.AppendLine(WriteTypesAndExpresions(mod.Types, expressions).Indent(8));
+
+
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    private string WriteTypesAndExpresions(List<Type> types, List<ExpressionInfo> expressions)
+    {
+        var allExpressions = expressions.ToList();
+
+        StringBuilder sb = new StringBuilder();
+        foreach (var item in types)
         {
             string include = WriteInclude(item, allExpressions);
             if (include != null)
             {
-                sb.Append(include.Indent(8));
+                sb.Append(include);
                 sb.AppendLine();
             }
 
             string? query = WriteQuery(item);
             if (query != null)
             {
-                sb.Append(query.Indent(8));
+                sb.Append(query);
                 sb.AppendLine();
             }
 
             string opers = WriteOperations(item);
             if (opers != null)
             {
-                sb.Append(opers.Indent(8));
+                sb.Append(opers);
                 sb.AppendLine();
             }
         }
@@ -163,15 +201,11 @@ public class LogicCodeGenerator
             {
                 string register = GetRegisterExpression(ei);
                 if (register != null)
-                    sb.AppendLine(register.Indent(8));
+                    sb.AppendLine(register);
             }
 
             sb.AppendLine();
         }
-
-
-        sb.AppendLine("    }");
-        sb.AppendLine("}");
 
         return sb.ToString();
     }
