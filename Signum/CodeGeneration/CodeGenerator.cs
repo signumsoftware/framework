@@ -71,7 +71,7 @@ public static class CodeGenerator
     {
         StringDistance sd = new StringDistance();
 
-        string? name = selected.Select(a => (a.Namespace ?? "").RemovePrefix(solutionName + ".Entities")).Distinct().Only();
+        string? name = selected.Select(a => (a.Namespace ?? "").RemovePrefix(solutionName)).Distinct().Only();
 
         if (name == null)
             return null;
