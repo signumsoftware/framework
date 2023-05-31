@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
+using Signum.Authorization;
 
 namespace Signum.Map;
 
@@ -55,7 +56,7 @@ public static class MapServer
             }
         };
 
-        if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+        if (Signum.Engine.Maps.Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
         {
             MapColorProvider.GetColorProviders += () => new[]
             {
@@ -76,7 +77,7 @@ public static class MapServer
             }
         };
 
-        if(Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+        if(Signum.Engine.Maps.Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
         {
             MapColorProvider.GetColorProviders += () => new[]
             {
@@ -86,6 +87,11 @@ public static class MapServer
                     NiceName = MapMessage.TableSizeHistory.NiceToString(),
                 }
             };
+        }
+
+        if (Signum.Engine.Maps.Schema.Current.Tables.ContainsKey(typeof(UserEntity)))
+        {
+            MapColorProvider.GetColorProviders += AuthColorProvider.GetMapColors;
         }
     }
 }

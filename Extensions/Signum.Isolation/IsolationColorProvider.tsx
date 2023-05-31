@@ -1,4 +1,5 @@
-import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
+import { ClientColorProvider, SchemaMapInfo } from '../Signum.Map/Schema/ClientColorProvider';
+
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
   return [

@@ -9,6 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Remove="IsolationColorProvider.tsx" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,6 +27,11 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.Map\Signum.Map.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <TypeScriptCompile Include="IsolationColorProvider.tsx" />
 	</ItemGroup>
 
     
