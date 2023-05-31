@@ -2446,7 +2446,7 @@ export interface EntityFormatRule {
 
 export class EntityFormatter {
   constructor(
-    public formatter: (row: ResultRow, columns: string[], sc?: SearchControlLoaded) => React.ReactChild | undefined,
+    public formatter: (ctx: CellFormatterContext) => React.ReactChild | undefined,
     public cellClass?: string) {
   }
 }
@@ -2458,7 +2458,7 @@ function initEntityFormatRules(): EntityFormatRule[] {
     {
       name: "View",
       isApplicable: sc => true,
-      formatter: new EntityFormatter((row, columns, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
         <EntityLink lite={row.entity}
           inSearch={true}
           onNavigated={sc?.handleOnNavigated}
@@ -2473,7 +2473,7 @@ function initEntityFormatRules(): EntityFormatRule[] {
     {
       name: "View",
       isApplicable: sc => sc?.state.resultFindOptions?.groupResults == true,
-      formatter: new EntityFormatter((row, columns, sc) =>
+      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) =>
         <a href="#"
           className="sf-line-button sf-view"
           onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}

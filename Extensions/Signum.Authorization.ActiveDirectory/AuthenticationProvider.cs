@@ -13,7 +13,7 @@ using Azure.Identity;
 
 namespace Signum.Authorization.ActiveDirectory;
 
-public static class AuthenticationProviderUtils
+public static class SignumTokenCredentials
 {
     public static AsyncThreadVariable<TokenCredential?> OverridenTokenCredential = Statics.ThreadVariable<TokenCredential?>("OverrideAuthenticationProvider");
 
@@ -25,15 +25,18 @@ public static class AuthenticationProviderUtils
         return new Disposable(() => OverridenTokenCredential.Value = old);
     }
 
-    public static TokenCredential GetTokenCredential(this ActiveDirectoryConfigurationEmbedded activeDirectoryConfig, string[]? scopes = null)
+    public static TokenCredential GetAuthorizerTokenCredential()
     {
         if (OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
+        var config = AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig() :
+            throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
+
         ClientSecretCredential result = new ClientSecretCredential(
-            tenantId: activeDirectoryConfig.Azure_DirectoryID.ToString(),
-            clientId: activeDirectoryConfig.Azure_ApplicationID.ToString(),
-            clientSecret: activeDirectoryConfig.Azure_ClientSecret);
+            tenantId: config.Azure_DirectoryID.ToString(),
+            clientId: config.Azure_ApplicationID.ToString(),
+            clientSecret: config.Azure_ClientSecret);
 
         return result;
     }

@@ -94,10 +94,9 @@ public class MicrosoftGraphSender : EmailSenderBase
                 }
             }
         }
-        catch (ODataError er)
+        catch (ODataError e)
         {
-            er.Data["MainError"] = er.Error;
-            throw;
+            throw new ODataException(e);
         }
     }
 
@@ -172,12 +171,11 @@ public static class MicrosoftGraphExtensions
 
     public static TokenCredential GeTokenCredential(this MicrosoftGraphEmailServiceEntity microsoftGraph, string[]? scopes = null)
     {
-        if (AuthenticationProviderUtils.OverridenTokenCredential.Value is var ap && ap != null)
+        if (SignumTokenCredentials.OverridenTokenCredential.Value is var ap && ap != null)
             return ap;
 
         if (microsoftGraph.UseActiveDirectoryConfiguration)
-            return AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig().GetTokenCredential() :
-                throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
+            return SignumTokenCredentials.GetAuthorizerTokenCredential();
 
         ClientSecretCredential result = new ClientSecretCredential(
             tenantId: microsoftGraph.Azure_DirectoryID.ToString(),

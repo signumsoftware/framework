@@ -79,7 +79,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
         pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
       },
     ],
-    entityFormatter: new Finder.EntityFormatter((row, cols, sc) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
+    entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
       inSearch={true}
       onNavigated={sc?.handleOnNavigated}
       getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}

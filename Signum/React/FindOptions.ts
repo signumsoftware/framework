@@ -454,7 +454,7 @@ export interface ResultTable {
 }
 
 export interface ResultRow {
-  entity?: Lite<Entity>;
+  entity: Lite<Entity> | undefined;
   columns: any[];
 }
 

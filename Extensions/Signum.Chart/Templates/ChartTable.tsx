@@ -138,7 +138,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
                   <tr key={i} onDoubleClick={e => handleOnDoubleClick(e, row)}>
                     {hasEntity &&
                       <td className={entityFormatter.cellClass}>
-                        {entityFormatter.formatter(row, resultTable.columns, undefined)}
+                        {entityFormatter.formatter(ctx)}
                       </td>
                     }
                     {columns.map((c, j) =>
