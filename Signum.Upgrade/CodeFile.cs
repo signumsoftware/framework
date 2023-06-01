@@ -268,6 +268,13 @@ public class CodeFile
             new(s => s.Contains("}"), -1) { SameIdentation = true });
 
 
+    public void ReplaceMethod(Expression<Predicate<string>> methodLine, string text) =>
+        ReplaceBetween(
+            new(methodLine, 0),
+            new(s => s.Contains("}"), 0) { SameIdentation = true }, 
+            text);
+
+
     /// <param name="fromLine">Not included</param>
     /// <param name="toLine">Not included</param>
     public string GetLinesBetweenExcluded(Expression<Predicate<string>> fromLine, Expression<Predicate<string>> toLine) =>
