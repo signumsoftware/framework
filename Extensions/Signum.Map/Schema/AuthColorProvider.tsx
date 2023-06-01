@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
-import { isPermissionAuthorized } from '../../../Signum.Authorization/AuthClient'
-import { BasicPermission, TypeAllowedBasic } from '../../../Signum.Authorization/Rules/Signum.Authorization.Rules';
+import { ClientColorProvider, SchemaMapInfo } from './ClientColorProvider';
+import { BasicPermission, TypeAllowedBasic } from '../../Signum.Authorization/Rules/Signum.Authorization.Rules';
+import { isPermissionAuthorized } from '../../Signum.Authorization/AuthClient'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
   if (!isPermissionAuthorized(BasicPermission.AdminRules))
