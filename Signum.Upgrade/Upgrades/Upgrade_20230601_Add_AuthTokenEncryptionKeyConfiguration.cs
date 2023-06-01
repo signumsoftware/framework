@@ -18,6 +18,8 @@ class Upgrade_20230601_Add_AuthTokenEncryptionKeyConfiguration : CodeUpgradeBase
             file.InsertAfterFirstLine(l => l.Contains(@"""ServerName"""),
                 $"\"AuthTokenEncryptionKey\": \"<Default Encryption Key for {uctx.ApplicationName} >\","
             );
+
+            SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Remember to add configuration Key 'AuthTokenEncryptionKey' in production before deployment (any random string is ok)");
         });
 
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Program.cs", program =>
@@ -39,6 +41,13 @@ class Upgrade_20230601_Add_AuthTokenEncryptionKeyConfiguration : CodeUpgradeBase
             starter.ReplaceBetweenIncluded(l => l.Contains($"{ConfigFunctionName}(SchemaBuilder sb)"), 
                 l => l.StartsWith("    }"), "");
         });
+
+        var dir = uctx.AbsolutePathSouthwind("Southwind/Globals");
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+            SafeConsole.WriteLineColor(ConsoleColor.Magenta, $"'{dir}' created, move ApplicationConfigurationEntity, UserMixin, etc.. there");
+        }
 
         uctx.CreateCodeFile("Southwind/Globals/GlobalsLogic.cs", $$"""
             namespace {{uctx.ApplicationName}}.Globals;
