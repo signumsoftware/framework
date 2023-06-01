@@ -3,6 +3,7 @@ using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Signum.Upgrade.Upgrades;
@@ -33,13 +34,10 @@ class Upgrade_20230601_Add_AuthTokenEncryptionKeyConfiguration : CodeUpgradeBase
         var ConfigFunctionBody = "";
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/Starter.cs", starter =>
         {
-            starter.RemoveAllLines(l => l.Contains($"{ConfigFunctionName}(sb);"));
+            starter.ReplaceLine(l => l.Contains($"{ConfigFunctionName}(sb);"), "GlobalsLogic.Start(sb);");
             
-            starter.InsertBeforeFirstLine(l => l.Contains("RegisterTypeConditions(sb);"), "GlobalsLogic.Start(sb);");
-
             ConfigFunctionBody = starter.GetMethodBody(l => l.Contains($"{ConfigFunctionName}(SchemaBuilder sb)")).Replace("Configuration =", "\tStarter.Configuration =");
-            starter.ReplaceBetweenIncluded(l => l.Contains($"{ConfigFunctionName}(SchemaBuilder sb)"), 
-                l => l.StartsWith("    }"), "");
+            starter.ReplaceMethod(l => l.Contains($"{ConfigFunctionName}(SchemaBuilder sb)"), "");
         });
 
         var dir = uctx.AbsolutePathSouthwind("Southwind/Globals");
