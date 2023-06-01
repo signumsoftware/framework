@@ -81,7 +81,6 @@ export interface EmailMessageComponentProps {
 }
 
 export function EmailMessageComponent(p: EmailMessageComponentProps) {
-  const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(true);
 
   function handlePreviewClick(e: React.FormEvent<any>) {
@@ -89,10 +88,6 @@ export function EmailMessageComponent(p: EmailMessageComponentProps) {
     setShowPreview(!showPreview);
   }
 
-  function handleCodeMirrorChange() {
-    if (showPreview)
-      forceUpdate();
-  }
 
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   return (

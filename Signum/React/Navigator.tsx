@@ -110,7 +110,7 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
     if (entity.isNew)
       return FrameMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return renderTitle(typeInfo, entity);
+    return renderSubTitle(typeInfo, entity);
   }
   else if (isTypeModel(entity.Type)) {
     return undefined;
@@ -120,8 +120,20 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
   }
 }
 
+let renderSubTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
+  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
+  return null;
+}
+
+export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
+  renderSubTitle = newFunction;
+}
+
+
 let renderId = (entity: Entity): React.ReactChild => {
-  const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
+  var idType = getTypeInfo(entity.Type).members["Id"].type;
+
+  const guid = idType!.name == "Guid";
   return (
     <>
       <span className={guid ? "sf-hide-id" : ""}>
@@ -137,14 +149,6 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
   renderId = newFunction;
 }
 
-let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
-  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
-  return null;
-}
-
-export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
-  renderTitle = newFunction;
-}
 
 export function navigateRoute(entity: Entity, viewName?: string): string;
 export function navigateRoute(lite: Lite<Entity>, viewName?: string): string;

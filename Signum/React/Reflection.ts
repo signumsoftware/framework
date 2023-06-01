@@ -478,7 +478,7 @@ export function getTypeName(pseudoType: IType | TypeInfo | string | Lite<Entity>
 
 export function isTypeEntity(type: PseudoType): boolean {
   const ti = tryGetTypeInfo(type);
-  return ti != null && ti.kind == "Entity" && !!ti.members["Id"];
+  return ti != null && ti.kind == "Entity" && ti.entityKind != null;
 }
 
 export function isTypeEnum(type: PseudoType): boolean {
@@ -488,7 +488,7 @@ export function isTypeEnum(type: PseudoType): boolean {
 
 export function isTypeModel(type: PseudoType): boolean {
   const ti = tryGetTypeInfo(type);
-  return ti != null && ti.kind == "Entity" && !ti.members["Id"];
+  return ti != null && ti.kind == "Entity" && ti.entityKind == null;
 }
 
 export function isTypeModifiableEntity(type: TypeReference): boolean {

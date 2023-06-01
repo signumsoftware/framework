@@ -1710,22 +1710,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return row.entity && this.getMarkedRow(row.entity);
   }
 
-  getColumnElement(row: ResultRow, rowIndex: number, c: ColumnParsed) {
-    const resultColumns = this.state.resultTable!.columns;
-
-    const fctx: Finder.CellFormatterContext = {
-      refresh: () => this.dataChanged(),
-      systemTime: this.props.findOptions.systemTime,
-      columns: resultColumns,
-      row: row,
-      rowIndex: rowIndex,
-      searchControl: this,
-    };
-
+  getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
+ 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? this.joinNodes((row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+      c.hasToArray != null ? this.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
-        c.cellFormatter.formatter(row.columns[c.resultIndex], fctx, c.column.token!);
+        c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
   }
 
   renderRows(): React.ReactNode {
@@ -1775,6 +1765,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         return rowSpan == 1 ? undefined : rowSpan;
       }
 
+      var fctx: Finder.CellFormatterContext = {
+        refresh: () => this.dataChanged(),
+        systemTime: this.props.findOptions.systemTime,
+        columns: this.state.resultTable!.columns,
+        row: row,
+        rowIndex: i,
+        searchControl: this,
+      };
+
       var tr = (
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
@@ -1790,8 +1789,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {this.hasEntityColumn() &&
             (
               anyCombineEquals && i != 0 && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
-                  {entityFormatter.formatter(row, resultTable.columns, this)}
+              <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
+                {entityFormatter.formatter(fctx)}
                 </td>
             )
           }
@@ -1805,7 +1804,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                       c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[c.resultIndex]) :
                       c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
                       undefined}>
-                  {this.getColumnElement(row, i, c)}
+                  {this.getColumnElement(fctx, c)}
                 </td>
             )
           }
@@ -1878,6 +1877,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       const markIcon = this.getRowMarketIcon(row, i);
       var ra = this.getRowAttributes(row);
 
+      var fctx: Finder.CellFormatterContext = {
+        refresh: () => this.dataChanged(),
+        systemTime: this.props.findOptions.systemTime,
+        columns: this.state.resultTable!.columns,
+        row: row,
+        rowIndex: i,
+        searchControl: this,
+      };
+
       var div = (
         <div key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
@@ -1894,7 +1902,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
               {this.hasEntityColumn() &&
                 <span className={classes("row-entity", entityFormatter.cellClass)}>
-                  {entityFormatter.formatter(row, resultTable.columns, this)}
+                  {entityFormatter.formatter(fctx)}
                 </span>
               }
 
@@ -1908,7 +1916,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 <div key={j} className={classes("row-data", isHeader && "row-header")}>
                   {<span className="row-title">{c.column.displayName}</span>}
                   <span data-column-index={j} className={classes("row-value", c.cellFormatter && c.cellFormatter.cellClass)}>
-                    {this.getColumnElement(row, i, c)}
+                    {this.getColumnElement(fctx, c)}
                   </span>
                   {isHeader && markIcon}
                 </div>
@@ -1966,28 +1974,28 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
   }
 
-  getRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
+  getRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true): Finder.AddToLite<T> | undefined {
 
-    var result = this.tryGetRowValue(ctx, token, automaticEntityPrefix, true);
+    var result = this.tryGetRowValue(row, token, automaticEntityPrefix, true);
 
     return result!.value;
   }
 
-  tryGetRowValue<T = unknown>(ctx: Finder.CellFormatterContext, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
+  tryGetRowValue<T = unknown>(row: ResultRow, token: QueryTokenString<T> | string, automaticEntityPrefix = true, throwError = false): { value: Finder.AddToLite<T> | undefined } | undefined {
 
     const tokenName = token.toString();
 
     const sc = this;
-    const colIndex = ctx.columns.indexOf(tokenName);
+    const colIndex = this.state.resultTable!.columns.indexOf(tokenName);
     if (colIndex != -1)
-      return { value: ctx.row.columns[colIndex] };
+      return { value: row.columns[colIndex] };
 
     var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
       return { value: filter?.value };
 
     if (automaticEntityPrefix) {
-      var result = this.tryGetRowValue(ctx, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
+      var result = this.tryGetRowValue(row, tokenName.startsWith("Entity.") ? tokenName.after("Entity.") : "Entity." + tokenName, false, false);
       if (result != null)
         return result as any;
     }

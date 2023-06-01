@@ -84,7 +84,7 @@ export function start(options: { routes: RouteObject[] }) {
     Finder.entityFormatRules.push({
       name: "ViewHistory",
       isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-      formatter: new Finder.EntityFormatter((row, columns, sc) => {
+      formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) => {
 
         var icon: undefined | React.ReactElement = undefined;
 

@@ -135,7 +135,6 @@ export async function onDrilldownUserChart(cr: ChartRequestModel, row: ChartRow,
   if (uc.entity!.customDrilldowns.length == 0 || hasAggregates(uc.entity!) != hasAggregates(cr))
     return false;
 
-  debugger;
   const fo = extractFindOptions(cr, row);
   const entity = row.entity ?? (hasAggregates(cr) ? undefined : fo.filterOptions?.singleOrNull(f => f?.token == "Entity")?.value);
   const filters = fo.filterOptions?.notNull();
