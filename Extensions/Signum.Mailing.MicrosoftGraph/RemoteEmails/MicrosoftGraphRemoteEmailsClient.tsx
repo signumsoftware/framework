@@ -53,9 +53,9 @@ export function start(options: {
         var isRead = cfc.searchControl?.getRowValue(cfc.row, "IsRead");
 
         if (isRead)
-          return <span>{hasAttachments} {val}</span>;
+          return <span className="try-no-wrap">{hasAttachments} {val}</span>;
         else
-          return <strong>{hasAttachments} {val}</strong>;
+          return <strong className="try-no-wrap">{hasAttachments} {val}</strong>;
       }, true)
     }
   });

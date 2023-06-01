@@ -2079,8 +2079,6 @@ function initFormatRules(): FormatRule[] {
           if (!cell)
             return cell;
 
-          debugger;
-
           return (cell as string).toString().split("(…)").map(str => hl.highlight(str)).joinHtml(<small className="text-muted">(…)</small>);
         }, true);
       }

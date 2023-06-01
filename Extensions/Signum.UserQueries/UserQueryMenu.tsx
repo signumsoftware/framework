@@ -181,7 +181,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   async function createUserQuery(): Promise<UserQueryEntity> {
 
-    debugger;
     const sc = p.searchControl;
 
     const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);

@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as MicrosoftGraphRemoteEmailsClient from './MicrosoftGraphRemoteEmailsClient'
 import { UserLiteModel } from '../../Signum.Authorization/Signum.Authorization'
 import { saveFile } from '@framework/Services'
+import { getToString } from '@framework/Signum.Entities'
 
 export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMessageModel> }) {
   const ctx = p.ctx.subCtx({ readOnly: true });
@@ -71,7 +72,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
                 <FontAwesomeIcon className="me-1"
                   icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
                   color={info?.color ?? "grey"} />
-                {item.name}
+                {item.toStr}
               </span>
             );
           }}
