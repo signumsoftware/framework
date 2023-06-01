@@ -22,14 +22,36 @@ public class ImageSharpConverter : IImageConverter<Image>
         return (size.Width, size.Height);
     }
 
-    public Image Resize(Image image, int maxWidth, int maxHeight)
+    public Image Resize(Image image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition, ImageHorizontalPosition horizontalPosition)
     {
+        AnchorPositionMode setPosition ()
+        {
+            switch (verticalPosition)
+            {
+                case ImageVerticalPosition.Top:
+                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.TopLeft :
+                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.TopRight :
+                        AnchorPositionMode.Top;
+
+                case ImageVerticalPosition.Center:
+                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.Left :
+                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.Right :
+                        AnchorPositionMode.Center;
+
+                case ImageVerticalPosition.Bottom:
+                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.BottomLeft :
+                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.BottomRight :
+                        AnchorPositionMode.Bottom;
+                default: throw new NotImplementedException("unknown image position values");                        
+            }
+        }
         return image.Clone(x =>
         {
             x.Resize(new ResizeOptions
             {
                 Size = new Size(maxWidth, maxHeight),
                 Mode = ResizeMode.Pad,
+                Position = setPosition()
             })
             .BackgroundColor(Color.White);
         });

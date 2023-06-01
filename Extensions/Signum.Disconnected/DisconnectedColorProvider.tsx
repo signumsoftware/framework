@@ -1,6 +1,8 @@
 import * as React from 'react'
-import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
-import { Upload, Download } from '../../../Signum.Disconnected/Signum.Disconnected'
+import * as Globals from '@framework/Globals'
+import { Download, Upload } from './Signum.Disconnected';
+import { SchemaMapInfo, ClientColorProvider } from '../Signum.Map/Schema/ClientColorProvider';
+
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
 
   return [

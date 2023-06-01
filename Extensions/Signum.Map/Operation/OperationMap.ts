@@ -1,7 +1,8 @@
 import * as d3 from "d3"
 import * as Finder from '@framework/Finder'
-import { Point, Rectangle, calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
+import { calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 import { OperationLogEntity } from "@framework/Signum.Operations";
+import { Point, Rectangle } from "../Schema/ClientColorProvider";
 
 export interface OperationMapInfo {
   states: MapState[];

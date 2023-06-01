@@ -1,15 +1,7 @@
 import * as d3 from "d3"
-
-export interface Point {
-  x?: number; //Realy not nullable, but d3.d.ts
-  y?: number; //Realy not nullable, but d3.d.ts
-}
+import { Point, Rectangle } from "./Schema/ClientColorProvider";
 
 
-export interface Rectangle extends Point {
-  width: number;
-  height: number;
-}
 
 var colors = [
   //"#7403D7",
