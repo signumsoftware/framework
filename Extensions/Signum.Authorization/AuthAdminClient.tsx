@@ -105,7 +105,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthAdminMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 2 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
