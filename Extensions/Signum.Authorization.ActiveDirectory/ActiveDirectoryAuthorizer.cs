@@ -1,4 +1,5 @@
 using Signum.Authorization;
+using Signum.Authorization.ActiveDirectory.Azure;
 using System.DirectoryServices.AccountManagement;
 using System.Security.Claims;
 
@@ -94,6 +95,7 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
         this.ClaimsPrincipal = claimsPrincipal;
     }
 }
+
 
 public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 {

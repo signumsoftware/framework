@@ -56,6 +56,7 @@ export default function LoginPage() {
 LoginPage.customLoginButtons = null as (null | ((ctx: LoginContext) => React.ReactElement<any>));
 LoginPage.showLoginForm = "yes" as "yes" | "no" | "initially_not";
 LoginPage.usernameLabel = () => LoginAuthMessage.Username.niceToString();
+LoginPage.resetPasswordControl = () => null as null | React.ReactElement;
 
 export function LoginForm(p: { ctx: LoginContext }) {
   const userName = React.useRef<HTMLInputElement>(null);
@@ -152,41 +153,9 @@ export function LoginForm(p: { ctx: LoginContext }) {
             {p.ctx.loading == "password" ? JavascriptMessage.loading.niceToString() : AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString()}
           </button>
           {error("login") && <span className="help-block text-danger ms-2" style={{ color: "red" }}>{error("login")}</span>}
-          {AuthClient.Options.resetPassword && !p.ctx.loading &&
-            <span>
-              &nbsp;
-              &nbsp;
-              <Link to="/auth/forgotPasswordEmail">{LoginAuthMessage.IHaveForgottenMyPassword.niceToString()}</Link>
-            </span>
-          }
+          {!p.ctx.loading && LoginPage.resetPasswordControl()}
         </div>
       </div>
     </form>
-  );
-}
-
-export function LoginWithWindowsButton() {
-
-  function onClick() {
-    return AuthClient.API.loginWindowsAuthentication(true)
-      .then(lr => {
-        if (lr == null) {
-          MessageModal.showError(LoginAuthMessage.LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication.niceToString(), LoginAuthMessage.NoWindowsUserFound.niceToString());
-        } else {
-          AuthClient.setAuthToken(lr.token, lr.authenticationType);
-          AuthClient.setCurrentUser(lr.userEntity);
-          AuthClient.Options.onLogin();
-        }
-      });
-  }
-
-  return (
-    <div className="row mt-2">
-      <div className="col-md-6 offset-md-3">
-        <button onClick={e => { e.preventDefault(); onClick(); }} className="btn btn-info">
-          <FontAwesomeIcon icon={["fab", "windows"]} /> {LoginAuthMessage.LoginWithWindowsUser.niceToString()}
-        </button>
-      </div>
-    </div>
   );
 }

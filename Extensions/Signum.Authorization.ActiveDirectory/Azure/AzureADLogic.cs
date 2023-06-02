@@ -4,8 +4,6 @@ using Microsoft.Graph.DeviceManagement.Reports.GetReportFilters;
 using Microsoft.Graph.Models;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Identity.Client;
-using Signum.Authorization.ActiveDirectory;
-using Signum.Authorization;
 using Signum.Scheduler;
 using System.Collections.Concurrent;
 using System.IO;
@@ -14,7 +12,7 @@ using Signum.API;
 using Microsoft.Graph.Models.ODataErrors;
 using System;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Azure;
 
 public static class AzureADLogic
 {
@@ -69,7 +67,7 @@ public static class AzureADLogic
     {
         using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
         {
-            var tokenCredential = AzureADLogic.GetTokenCredential();
+            var tokenCredential = GetTokenCredential();
             GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
             var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
             {
@@ -84,7 +82,7 @@ public static class AzureADLogic
 
     public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
             {
@@ -176,7 +174,7 @@ public static class AzureADLogic
                     Delete = (e, _) => e.Delete(),
                 }.Register();
 
-                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+                QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryUsers, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
                 {
                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryUsers"))
                     {
@@ -217,7 +215,7 @@ public static class AzureADLogic
                                 }))!;
                             }
                         }
-                        catch(ODataError e)
+                        catch (ODataError e)
                         {
                             throw new ODataException(e);
                         }
@@ -278,7 +276,7 @@ public static class AzureADLogic
                ,
                Implementations.By());
 
-                QueryLogic.Queries.Register(UserADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+                QueryLogic.Queries.Register(AzureADQuery.ActiveDirectoryGroups, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
                 {
                     using (HeavyProfiler.Log("Microsoft Graph", () => "ActiveDirectoryGroups"))
                     {
@@ -351,6 +349,9 @@ public static class AzureADLogic
                 .Column(a => a.HasUser, c => { c.Implementations = Implementations.By(typeof(UserEntity)); c.OverrideDisplayName = () => ActiveDirectoryMessage.HasUser.NiceToString(); })
                 ,
                 Implementations.By());
+
+                if (sb.WebServerBuilder != null)
+                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false));
             }
             else
             {
@@ -466,6 +467,6 @@ public class ODataException : Exception
     public ODataException() { }
     public ODataException(ODataError error) : base(error.Error?.Message ?? error.Message)
     {
-        this.Data["MainError"] = error.Error;
+        Data["MainError"] = error.Error;
     }
 }

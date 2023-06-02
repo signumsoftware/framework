@@ -1,14 +1,13 @@
-using Signum.Authorization.ActiveDirectory;
-using Signum.Authorization;
 using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
+using Signum.Authorization.ActiveDirectory.Azure;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Windows;
 
 #pragma warning disable CA1416 // Validate platform compatibility
-public static class ActiveDirectoryLogic
+public static class WindowsActiveDirectoryLogic
 {
     static PrincipalContext GetPrincipalContext()
     {
@@ -137,7 +136,7 @@ public static class ActiveDirectoryLogic
 
                 if (directoryEntry!.Properties.Contains("thumbnailPhoto"))
                 {
-                    var byteFile = (directoryEntry!.Properties["thumbnailPhoto"][0] as byte[]);
+                    var byteFile = directoryEntry!.Properties["thumbnailPhoto"][0] as byte[];
 
                     return byteFile;
                 }
@@ -162,7 +161,7 @@ public static class ActiveDirectoryLogic
                 }
                 else
                 {
-                    return false; 
+                    return false;
                 }
             }
         }
@@ -170,7 +169,7 @@ public static class ActiveDirectoryLogic
 
     public static void Start(SchemaBuilder sb, bool deactivateUsersTask)
     {
-        if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             if (sb.WebServerBuilder != null)
                 ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
@@ -227,6 +226,6 @@ public static class ActiveDirectoryLogic
 
     public static void CheckAllUserActive()
     {
-        
+
     }
 }

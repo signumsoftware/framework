@@ -450,6 +450,9 @@ export interface TypeInfoDictionary {
 
 let _types: TypeInfoDictionary = {};
 
+export function isStarted() {
+  return Object.keys(_types).length > 0;
+}
 
 let _queryNames: {
   [queryKey: string]: MemberInfo
@@ -652,6 +655,8 @@ export function isQueryDefined(queryName: PseudoType | QueryKey): boolean {
 
   return false;
 }
+
+
 
 export function reloadTypes(): Promise<void> {
   return ajaxGet<TypeInfoDictionary>({

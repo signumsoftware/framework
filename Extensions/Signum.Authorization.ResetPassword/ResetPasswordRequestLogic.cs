@@ -23,6 +23,7 @@ public static class ResetPasswordRequestLogic
                 e.User.Email
             });
 
+
         AuthLogic.OnDeactivateUser = u =>
         {
             var config = EmailLogic.Configuration;

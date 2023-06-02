@@ -4,9 +4,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Signum.Authorization;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Azure;
 
 
 public class AzureADAuthenticationServer
@@ -29,7 +28,7 @@ public class AzureADAuthenticationServer
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
-                if(user == null)
+                if (user == null)
                 {
                     user = Database.Query<UserEntity>().SingleOrDefault(a => a.UserName == ctx.UserName) ??
                     (ctx.UserName.Contains("@") && config.AllowMatchUsersBySimpleUserName ? Database.Query<UserEntity>().SingleOrDefault(a => a.Email == ctx.UserName || a.UserName == ctx.UserName.Before("@")) : null);
@@ -52,7 +51,7 @@ public class AzureADAuthenticationServer
                 AuthServer.AddUserSession(ac, user);
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ex.LogException();
                 if (throwErrors)

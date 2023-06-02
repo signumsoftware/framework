@@ -1,6 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Azure;
 
 public class MicrosoftGraphQueryConverter
 {
@@ -89,7 +89,7 @@ public class MicrosoftGraphQueryConverter
     }
 
 
-   
+
 
     public virtual string[]? GetSelect(IEnumerable<Column> columns)
     {

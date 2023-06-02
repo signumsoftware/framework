@@ -16,17 +16,17 @@ import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
-import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin, UserADQuery } from './Signum.Authorization.ActiveDirectory';
+import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
+import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
-  Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./AzureAD/ActiveDirectoryConfiguration')));
+  Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./ActiveDirectoryConfiguration')));
 
   User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null);
   User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
   User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
-
 
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
@@ -92,9 +92,9 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
   });
 
   if (options.adGroups) {
-    Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./AzureAD/ADGroup'), { isCreable: "Never" }));
+    Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./ADGroup'), { isCreable: "Never" }));
     Finder.addSettings({
-      queryName: UserADQuery.ActiveDirectoryUsers,
+      queryName: AzureADQuery.ActiveDirectoryUsers,
       defaultFilters: [
         {
           groupOperation: "Or",
@@ -122,7 +122,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
     });
 
     Finder.addSettings({
-      queryName: UserADQuery.ActiveDirectoryGroups,
+      queryName: AzureADQuery.ActiveDirectoryGroups,
       defaultFilters: [
         {
           groupOperation: "Or",
@@ -142,7 +142,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
 function findActiveDirectoryUser(): Promise<Lite<UserEntity> | undefined> {
   return Finder.findRow({
-    queryName: UserADQuery.ActiveDirectoryUsers,
+    queryName: AzureADQuery.ActiveDirectoryUsers,
     columnOptions: [
       { token: "DisplayName" },
       { token: "UserPrincipalName" },
@@ -168,7 +168,7 @@ export function toActiveDirectoryUser(row: ResultRow, scl: SearchControlLoaded):
 
 export function findActiveDirectoryGroup(): Promise<Lite<ADGroupEntity> | undefined> {
   return Finder.findRow({
-    queryName: UserADQuery.ActiveDirectoryGroups,
+    queryName: AzureADQuery.ActiveDirectoryGroups,
     filterOptions: [
       { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
     ]
@@ -178,7 +178,7 @@ export function findActiveDirectoryGroup(): Promise<Lite<ADGroupEntity> | undefi
 
 export function findManyActiveDirectoryGroup(): Promise<Lite<ADGroupEntity>[] | undefined> {
   return Finder.findManyRows({
-    queryName: UserADQuery.ActiveDirectoryGroups,
+    queryName: AzureADQuery.ActiveDirectoryGroups,
     filterOptions: [
       { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
     ]
@@ -238,6 +238,10 @@ export module API {
   export function createADGroup(request: ADGroupRequest): Promise<Lite<ADGroupEntity>> {
     return ajaxPost({ url: `/api/createADGroup` }, request);
   }
+
+
+
+
 }
 
 export interface ActiveDirectoryUser {
