@@ -34,6 +34,11 @@ export default function SelectorModal(p: SelectorModalProps) {
     setShow(false);
   }
 
+  function handleDoubleClickClicked(val: any) {
+    selectedValue.current = [val];
+    setShow(false);
+  }
+
   function handleCancelClicked() {
     setShow(false);
   }
@@ -68,7 +73,7 @@ export default function SelectorModal(p: SelectorModalProps) {
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
           {p.multiSelect ? <div>
             {p.options.map((o, i) =>
-              <label className="m-2" style={{ display: "block" }} key={i}>
+              <label className="m-2" style={{ display: "block", userSelect: "none" }} onDoubleClick={e => { e.preventDefault(); handleDoubleClickClicked(o.value); } } key={i}>
                 <input type="checkbox" onChange={e => handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} />
                 {" "}{o.displayName}
               </label>)}
