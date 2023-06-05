@@ -116,7 +116,7 @@ public static class TimeMachineLogic
         var mlistExpression = prMList.GetLambdaExpression<E, MList<L>>(safeNullAccess: false);
 
         //BulkInsert becahse there is no way to DisableIdentity for the MListTable's RowId column
-        using (Administrator.DisableIdentity(Schema.Current.TableMList(mlistExpression)))
-            BulkInserter.BulkInsertMListTable(elements, mlistExpression, BulkInserter.SafeDefaults | Microsoft.Data.SqlClient.SqlBulkCopyOptions.KeepIdentity);
+
+        BulkInserter.BulkInsertMListTable(elements, mlistExpression, disableMListIdentity: true);
     }
 }
