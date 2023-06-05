@@ -42,12 +42,6 @@ export module AuthAdminMessage {
   export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
   export const ConflictMergingTypeConditions = new MessageKey("AuthAdminMessage", "ConflictMergingTypeConditions");
   export const Save = new MessageKey("AuthAdminMessage", "Save");
-  export const DefaultAuthorization = new MessageKey("AuthAdminMessage", "DefaultAuthorization");
-  export const MaximumOfThe0 = new MessageKey("AuthAdminMessage", "MaximumOfThe0");
-  export const MinumumOfThe0 = new MessageKey("AuthAdminMessage", "MinumumOfThe0");
-  export const SameAs0 = new MessageKey("AuthAdminMessage", "SameAs0");
-  export const Nothing = new MessageKey("AuthAdminMessage", "Nothing");
-  export const Everything = new MessageKey("AuthAdminMessage", "Everything");
   export const SelectTypeConditions = new MessageKey("AuthAdminMessage", "SelectTypeConditions");
   export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
   export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
@@ -55,7 +49,6 @@ export module AuthAdminMessage {
   export const RepeatedTypeCondition = new MessageKey("AuthAdminMessage", "RepeatedTypeCondition");
   export const TheFollowingTypeConditionsHaveAlreadyBeenUsed = new MessageKey("AuthAdminMessage", "TheFollowingTypeConditionsHaveAlreadyBeenUsed");
   export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
-  export const IncludeTrivialMerges = new MessageKey("AuthAdminMessage", "IncludeTrivialMerges");
   export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
   export const Check = new MessageKey("AuthAdminMessage", "Check");
   export const Uncheck = new MessageKey("AuthAdminMessage", "Uncheck");

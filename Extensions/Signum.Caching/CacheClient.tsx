@@ -5,6 +5,7 @@ import { CachePermission } from './Signum.Cache'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { getColorProviders } from '../Signum.Map/Schema/ClientColorProvider';
 
 
 export function start(options: { routes: RouteObject[] }) {
@@ -15,6 +16,8 @@ export function start(options: { routes: RouteObject[] }) {
     key: "ViewCache",
     onClick: () => Promise.resolve("/cache/statistics")
   });
+
+  getColorProviders.push(smi => import("./CacheColorProvider").then((c: any) => c.default(smi)));
 }
 
 

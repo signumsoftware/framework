@@ -3,4 +3,14 @@
   <Type Name="EvalEmbedded`1">
     <Member Name="Script" Description="Skript" />
   </Type>
+  <Type Name="EvalPanelMessage">
+    <Member Name="OpenErrors" Description="Offene Fehler" />
+  </Type>
+  <Type Name="EvalPanelPermission">
+    <Member Name="ViewDynamicPanel" Description="Dynamisches panel anzeigen" />
+  </Type>
+  <Type Name="TypeHelpMessage">
+    <Member Name="Next" Description="Nächster" />
+    <Member Name="Previous" Description="Vorherige" />
+  </Type>
 </Translations>

@@ -6,7 +6,7 @@ namespace Signum.Mailing;
 
 public static class EmailSenderConfigurationLogic
 {
-    public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> SmtpConfigCache = null!;
+    public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> EmailSenderCache = null!;
 
     public static Func<string, string> EncryptPassword = s => s;
     public static Func<string, string> DecryptPassword = s => s;
@@ -33,7 +33,7 @@ public static class EmailSenderConfigurationLogic
                     s.Service
                 });
             
-            SmtpConfigCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
+            EmailSenderCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
 
             new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)
@@ -59,7 +59,7 @@ public static class EmailSenderConfigurationLogic
 
     public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)
     {
-        return SmtpConfigCache.Value.GetOrThrow(config);
+        return EmailSenderCache.Value.GetOrThrow(config);
     }
 
     public static SmtpClient GenerateSmtpClient(this SmtpEmailServiceEntity config)

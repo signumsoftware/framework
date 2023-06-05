@@ -98,7 +98,7 @@ public class ReactCodeGenerator
 
     protected virtual string GetProjectFolder()
     {
-        return Path.Combine(SolutionFolder, SolutionName + ".React");
+        return Path.Combine(SolutionFolder, SolutionName);
     }
 
     protected virtual void GetSolutionInfo(out string solutionFolder, out string solutionName)
@@ -133,12 +133,12 @@ public class ReactCodeGenerator
 
     protected virtual string BaseFileName(Module m)
     {
-        return Path.Combine(GetProjectFolder(), "App\\" + m.ModuleName + "\\");
+        return Path.Combine(GetProjectFolder(),  m.ModuleName + "\\");
     }
 
     protected virtual IEnumerable<Module> GetModules()
     {
-        var files = Directory.GetFiles(Path.Combine(GetProjectFolder(), "App"), "*.tsx", new EnumerationOptions { RecurseSubdirectories = true }).GroupToDictionary(a => Path.GetFileNameWithoutExtension(a));
+        var files = Directory.GetFiles(Path.Combine(GetProjectFolder()), "*.tsx", new EnumerationOptions { RecurseSubdirectories = true }).GroupToDictionary(a => Path.GetFileNameWithoutExtension(a));
 
         Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, a => files.ContainsKey(a.Name) || files.ContainsKey(Reflector.CleanTypeName(a)));
 
@@ -209,7 +209,7 @@ public class ReactCodeGenerator
 
     protected virtual string GetServerNamespace(Module mod)
     {
-        return SolutionName + ".React." + mod.ModuleName;
+        return SolutionName + "." + mod.ModuleName;
     }
 
     protected virtual string WriteServerClass(Module mod)
@@ -276,8 +276,8 @@ public class ReactCodeGenerator
     protected virtual string WriteControllerExampleMethod(Module mod)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"//[Route(\"api/{mod.ModuleName.ToLower()}/login\"), HttpPost]");
-        sb.AppendLine(@"//public MyResponse Login([Required, FromBody]MyRequest data)");
+        sb.AppendLine($"//[Route(\"api/{mod.ModuleName.ToLower()}/myMethod\"), HttpPost]");
+        sb.AppendLine(@"//public MyResponse MyMethod([Required, FromBody]MyRequest data)");
         sb.AppendLine(@"//{");
         sb.AppendLine(@"//}");
         return sb.ToString();

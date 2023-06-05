@@ -17,6 +17,13 @@ export module AuthMessage {
   export const NotAuthorizedTo0The1WithId2 = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0 = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
   export const OnlyActive = new MessageKey("AuthMessage", "OnlyActive");
+  export const IncludeTrivialMerges = new MessageKey("AuthMessage", "IncludeTrivialMerges");
+  export const DefaultAuthorization = new MessageKey("AuthMessage", "DefaultAuthorization");
+  export const MaximumOfThe0 = new MessageKey("AuthMessage", "MaximumOfThe0");
+  export const MinumumOfThe0 = new MessageKey("AuthMessage", "MinumumOfThe0");
+  export const SameAs0 = new MessageKey("AuthMessage", "SameAs0");
+  export const Nothing = new MessageKey("AuthMessage", "Nothing");
+  export const Everything = new MessageKey("AuthMessage", "Everything");
 }
 
 export module LoginAuthMessage {

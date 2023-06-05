@@ -4,7 +4,7 @@ import { ModifiableEntity } from '../Signum.Entities'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute } from '../Reflection'
 import { ColumnOption, OrderOption, Pagination } from '../Search';
-import { Tab } from 'react-bootstrap'
+import { Tab, Tabs } from 'react-bootstrap'
 
 export class ReactVisitor {
   visitChild(child: React.ReactChild): React.ReactNode {
@@ -38,7 +38,10 @@ export class ReactVisitor {
     return element;
   }
 
-  visit(element: React.ReactElement<any>): React.ReactElement<any> {
+  visit(element: React.ReactElement<any> | null): React.ReactElement<any> | null {
+    if (element == null)
+      return element;
+
     const result = this.visitElement(element);
 
     if (Array.isArray(result))
@@ -85,7 +88,7 @@ export class ReactValidator extends ReactVisitor {
 export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
-    public result: React.ReactElement<any>,
+    public result: React.ReactElement<any> | null,
     public ctx: TypeContext<T>
   ) {
   }
@@ -210,10 +213,19 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  removeTab(tabId: string | number): this {
+  removeTab(eventKey: string): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tab && e.props.eventKey == tabId,
+      e => e.type == Tab && e.props.eventKey == eventKey,
       e => [])
+      .visit(this.result);
+
+    return this;
+  }
+
+  addTab(tabsId: string, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
+    this.result = new ReplaceVisitor(
+      e => e.type == Tabs && e.props.id == tabsId,
+      e => [React.cloneElement(e, { children: [...React.Children.toArray(e.props.children), ...newTabs] })])
       .visit(this.result);
 
     return this;

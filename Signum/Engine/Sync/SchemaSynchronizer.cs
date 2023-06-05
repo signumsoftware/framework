@@ -413,8 +413,6 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
-            bool? createMissingFreeIndexes = null;
-
             SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
                  Spacing.Double,
                  modelTables,
@@ -462,7 +460,7 @@ public static class SchemaSynchronizer
                     var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix is UniqueTableIndex or FullTextTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
+                        createNew: (i, mix) => mix is UniqueTableIndex or FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
@@ -485,7 +483,7 @@ public static class SchemaSynchronizer
                     var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || (replacements.Interactive ? SafeConsole.Ask(ref createMissingFreeIndexes, "Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
+                        createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                         removeOld: null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
@@ -531,6 +529,9 @@ public static class SchemaSynchronizer
             );
         }
     }
+
+    public static Func<TableIndex, ITable, Replacements, bool> ShouldCreateMissingIndex = (mix, tab, replacements) => true;
+        //return (replacements.Interactive ? SafeConsole.Ask("Create missing non-unique index {0} in {1}?".FormatWith(mix.IndexName, tab.Name)) : true)
 
     private static SqlPreCommand ForHistoryTable(SqlPreCommand sqlCommand, ITable tab)
     {

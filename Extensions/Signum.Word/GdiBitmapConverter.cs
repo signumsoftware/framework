@@ -22,7 +22,7 @@ public class GdiBitmapConverter : IImageConverter<Bitmap>
         return (size.Width, size.Height);
     }
 
-    public Bitmap Resize(Bitmap image, int maxWidth, int maxHeight)
+    public Bitmap Resize(Bitmap image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition, ImageHorizontalPosition horizontalPosition)
     {
         return ResizeBitmap(image, maxWidth, maxHeight);
     }

@@ -134,7 +134,6 @@ class Upgrade_20230426_ProjectRevolution_MoveFiles : CodeUpgradeBase
             		<ProjectReference Include="..\Framework\Extensions\Signum.Isolation\Signum.Isolation.csproj" />FROM_CS CompileDynamicCode
             		<ProjectReference Include="..\Framework\Extensions\Signum.MachineLearning\Signum.MachineLearning.csproj" />FROM_CS PredictorLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing.MicrosoftGraph\Signum.Mailing.MicrosoftGraph.csproj" />FROM_CS activeDirectoryIntegration: true
-            		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing.Package\Signum.Mailing.Package.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Mailing\Signum.Mailing.csproj" />FROM_CS EmailLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Map\Signum.Map.csproj" />FROM_CS MapLogic
             		<ProjectReference Include="..\Framework\Extensions\Signum.Migrations\Signum.Migrations.csproj" />FROM_CS MigrationLogic

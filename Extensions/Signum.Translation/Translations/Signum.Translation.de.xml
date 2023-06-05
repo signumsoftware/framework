@@ -21,6 +21,8 @@
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
+    <Member Name="DownloadSync" Description="Sync herunterladen" />
+    <Member Name="DownloadView" Description="Ansicht herunterladen" />
     <Member Name="Edit" Description="bearbeiten" />
     <Member Name="Instance" Description="Instanz" />
     <Member Name="InstanceTranslations" Description="Instanz-Übersetzungen" />
