@@ -41,9 +41,17 @@ public class EntityPropertyToken : QueryToken
         get { return PropertyInfo.Name; }
     }
 
+    public static Dictionary<PropertyRoute, Func<BuildExpressionContext, Expression/* parent/base expression*/, Expression>> CustomPropertyExpression = new Dictionary<PropertyRoute, Func<BuildExpressionContext, Expression , Expression>>();
+
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
+
         var baseExpression = parent.BuildExpression(context);
+
+        CustomPropertyExpression.TryGetValue(PropertyRoute, out var customExpression);
+
+        if (customExpression != null)
+            return customExpression(context, baseExpression);
 
         if (PropertyInfo.Name == nameof(Entity.Id) ||
             PropertyInfo.Name == nameof(Entity.ToStringProperty))
