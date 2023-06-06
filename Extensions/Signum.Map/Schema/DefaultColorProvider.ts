@@ -1,9 +1,9 @@
 import * as d3 from 'd3'
-import { ClientColorProvider, SchemaMapInfo } from '../SchemaMap'
-import { colorScaleLog } from '../../Utils'
-import { MapMessage } from '../../Signum.Map'
+import { colorScaleLog } from '../Utils'
+import { MapMessage } from '../Signum.Map'
 import { bytesToSize } from '@framework/Globals'
 import { toNumberFormat } from '@framework/Reflection'
+import { ClientColorProvider, SchemaMapInfo } from './ClientColorProvider'
 
 export default function getDefaultProviders(info: SchemaMapInfo): ClientColorProvider[] {
   const namespaceColor = d3.scaleOrdinal(d3.schemePaired);

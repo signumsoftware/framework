@@ -6,4 +6,38 @@
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
     <Member Name="UseActiveDirectoryConfiguration" Description="Active Directory-Konfiguration verwenden" />
   </Type>
+  <Type Name="RecipientEmbedded" Description="Empfänger">
+    <Member Name="EmailAddress" Description="E-Mail-Adresse" />
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="RemoteAttachmentEmbedded" Description="Remote-Anhang">
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsInline" Description="Ist inline" />
+    <Member Name="LastModifiedDateTime" Description="Letzten-Änderung-Datum" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="Size" Description="Größe" />
+  </Type>
+  <Type Name="RemoteEmailMessageModel" Description="Remote-E-Mail-Nachricht">
+    <Member Name="Attachments" Description="Anhänge" />
+    <Member Name="BccRecipients" Description="Bcc-Empfänger" />
+    <Member Name="Body" Description="Körper" />
+    <Member Name="CcRecipients" Description="Cc-Empfänger" />
+    <Member Name="CreatedDateTime" Description="Erstellungsdatum" />
+    <Member Name="From" Description="Von" />
+    <Member Name="HasAttachments" Description="Hat Anhänge" />
+    <Member Name="Id" Description="Id" />
+    <Member Name="IsBodyHtml" Description="Ist Körper html" />
+    <Member Name="IsDraft" Description="Ist Entwurf" />
+    <Member Name="IsRead" Description="Wird gelesen" />
+    <Member Name="LastModifiedDateTime" Description="Letzten-Änderung-Datum" />
+    <Member Name="ReceivedDateTime" Description="Empfangsdatum " />
+    <Member Name="SentDateTime" Description="Versanddatum" />
+    <Member Name="Subject" Description="Betreff" />
+    <Member Name="ToRecipients" Description="An-Empfänger" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="WebLink" Description="Weblink" />
+  </Type>
+  <Type Name="RemoteEmailMessageQuery">
+    <Member Name="RemoteEmailMessages" Description="Remote-E-Mail-Nachrichten" />
+  </Type>
 </Translations>

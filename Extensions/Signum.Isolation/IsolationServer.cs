@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
+using Signum.Map;
 
 namespace Signum.Isolation;
 

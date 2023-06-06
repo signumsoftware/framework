@@ -74,7 +74,7 @@ public class RestLogFilter : ActionFilterAttribute
 
             if (!IgnoreResponseBody)
             {
-                RestoreOriginalStream(executedContext);
+                await RestoreOriginalStream(executedContext);
             }
 
             using (ExecutionMode.Global())

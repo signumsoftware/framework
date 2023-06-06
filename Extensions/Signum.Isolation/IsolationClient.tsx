@@ -6,7 +6,7 @@ import { Lite, liteKey, ModifiableEntity } from '@framework/Signum.Entities'
 import { ajaxGet, addContextHeaders } from '@framework/Services'
 import { onWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { IsolationWidget } from './IsolationWidget'
-
+import { getColorProviders } from '../Signum.Map/Schema/ClientColorProvider';
 
 export function start(options: { routes: RouteObject[] }) {
 
@@ -22,6 +22,9 @@ export function start(options: { routes: RouteObject[] }) {
       };
     }
   });
+
+  getColorProviders.push(smi => import("./IsolationColorProvider").then((c: any) => c.default(smi)));
+
 }
 
 export namespace Options {

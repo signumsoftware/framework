@@ -61,7 +61,7 @@ public class EntityCodeGenerator
 
     protected virtual string GetProjectFolder()
     {
-        return Path.Combine(SolutionFolder, SolutionName + ".Entities");
+        return Path.Combine(SolutionFolder, SolutionName);
     }
 
     protected virtual List<DiffTable> GetTables()
@@ -148,7 +148,7 @@ public class EntityCodeGenerator
 
     protected virtual string GetNamespace(string fileName)
     {
-        var result = SolutionName + ".Entities";
+        var result = SolutionName;
 
         string? folder = fileName.TryBeforeLast('\\');
 

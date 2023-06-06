@@ -234,10 +234,10 @@ public static class ReflectionServer
                         {
                             NiceName = pr.PropertyInfo!.NiceName(),
                             Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
-                            IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
-                            Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
+                            IsReadOnly = !IsId(pr, isEntity) && (pr.PropertyInfo?.IsReadOnly() ?? false),
+                            Required = !IsId(pr, isEntity) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
                             Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
-                            Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
+                            Type = new TypeReferenceTS(IsId(pr, isEntity) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
                             IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
                             IsVirtualMList = pr.IsVirtualMList(),
                             MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
@@ -281,11 +281,12 @@ public static class ReflectionServer
         return propertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(type, propertyInfo);
     }
 
-    public static bool IsId(PropertyRoute p)
+    public static bool IsId(PropertyRoute p, bool isEntity)
     {
         return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
             p.PropertyInfo!.Name == nameof(Entity.Id) &&
-            p.Parent!.PropertyRouteType == PropertyRouteType.Root;
+            p.Parent!.PropertyRouteType == PropertyRouteType.Root &&
+            isEntity;
     }
 
     public static TypeInfoTS? GetEnumTypeInfo(Type type)

@@ -6,7 +6,6 @@ using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Identity.Client;
 using Signum.Authorization.ActiveDirectory;
 using Signum.Authorization;
-using Signum.DynamicQuery.Tokens;
 using Signum.Scheduler;
 using System.Collections.Concurrent;
 using System.IO;
@@ -17,12 +16,14 @@ using FilterGroup = Signum.DynamicQuery.FilterGroup;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using Microsoft.Azure.Amqp.Framing;
 using Order = Signum.DynamicQuery.Order;
+using Microsoft.Graph.Models.ODataErrors;
+using System;
 
 namespace Signum.Authorization.ActiveDirectory;
 
 public static class AzureADLogic
 {
-    public static Func<TokenCredential> GetTokenCredential = () => ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig().GetTokenCredential();
+    public static Func<TokenCredential> GetTokenCredential = () => SignumTokenCredentials.GetAuthorizerTokenCredential();
 
     public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
     {
@@ -211,33 +212,41 @@ public static class AzureADLogic
 
                         var inGroup = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "InGroup" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
 
-
                         UserCollectionResponse response;
-                        if (inGroup?.Value is Lite<ADGroupEntity> group)
+                        try
                         {
-                            response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
+                            var converter = new MicrosoftGraphQueryConverter();
+
+                            if (inGroup?.Value is Lite<ADGroupEntity> group)
                             {
-                                req.QueryParameters.Filter = GetFilters(request.Filters);
-                                req.QueryParameters.Search = GetSearch(request.Filters);
-                                req.QueryParameters.Select = GetSelect(request.Columns);
-                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
-                                req.QueryParameters.Top = GetTop(request.Pagination);
-                                req.QueryParameters.Count = true;
-                                req.Headers.Add("ConsistencyLevel", "eventual");
-                            }))!;
+                                response = (await graphClient.Groups[group.Id.ToString()].TransitiveMembers.GraphUser.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                    req.QueryParameters.Count = true;
+                                    req.Headers.Add("ConsistencyLevel", "eventual");
+                                }))!;
+                            }
+                            else
+                            {
+                                response = (await graphClient.Users.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                    req.QueryParameters.Count = true;
+                                    req.Headers.Add("ConsistencyLevel", "eventual");
+                                }))!;
+                            }
                         }
-                        else
+                        catch(ODataError e)
                         {
-                            response = (await graphClient.Users.GetAsync(req =>
-                            {
-                                req.QueryParameters.Filter = GetFilters(request.Filters);
-                                req.QueryParameters.Search = GetSearch(request.Filters);
-                                req.QueryParameters.Select = GetSelect(request.Columns);
-                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
-                                req.QueryParameters.Top = GetTop(request.Pagination);
-                                req.QueryParameters.Count = true;
-                                req.Headers.Add("ConsistencyLevel", "eventual");
-                            }))!;
+                            throw new ODataException(e);
                         }
 
                         var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
@@ -307,35 +316,43 @@ public static class AzureADLogic
 
 
                         GroupCollectionResponse response;
-                        if (inGroup?.Value is Lite<UserEntity> user)
+                        try
                         {
-                            var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
-                            if (oid == null)
-                                throw new InvalidOperationException($"User {user} has no OID");
+                            var converter = new MicrosoftGraphQueryConverter();
+                            if (inGroup?.Value is Lite<UserEntity> user)
+                            {
+                                var oid = user.InDB(a => a.Mixin<UserADMixin>().OID);
+                                if (oid == null)
+                                    throw new InvalidOperationException($"User {user} has no OID");
 
-                            response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+                                response = (await graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                    req.QueryParameters.Count = true;
+                                    req.Headers.Add("ConsistencyLevel", "eventual");
+                                }))!;
+                            }
+                            else
                             {
-                                req.QueryParameters.Filter = GetFilters(request.Filters);
-                                req.QueryParameters.Search = GetSearch(request.Filters);
-                                req.QueryParameters.Select = GetSelect(request.Columns);
-                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
-                                req.QueryParameters.Top = GetTop(request.Pagination);
-                                req.QueryParameters.Count = true;
-                                req.Headers.Add("ConsistencyLevel", "eventual");
-                            }))!;
+                                response = (await graphClient.Groups.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Filter = converter.GetFilters(request.Filters);
+                                    req.QueryParameters.Search = converter.GetSearch(request.Filters);
+                                    req.QueryParameters.Select = converter.GetSelect(request.Columns);
+                                    req.QueryParameters.Orderby = converter.GetOrderBy(request.Orders);
+                                    req.QueryParameters.Top = converter.GetTop(request.Pagination);
+                                    req.QueryParameters.Count = true;
+                                    req.Headers.Add("ConsistencyLevel", "eventual");
+                                }))!;
+                            }
                         }
-                        else
+                        catch (ODataError e)
                         {
-                            response = (await graphClient.Groups.GetAsync(req =>
-                            {
-                                req.QueryParameters.Filter = GetFilters(request.Filters);
-                                req.QueryParameters.Search = GetSearch(request.Filters);
-                                req.QueryParameters.Select = GetSelect(request.Columns);
-                                req.QueryParameters.Orderby = GetOrderBy(request.Orders);
-                                req.QueryParameters.Top = GetTop(request.Pagination);
-                                req.QueryParameters.Count = true;
-                                req.Headers.Add("ConsistencyLevel", "eventual");
-                            }))!;
+                            throw new ODataException(e);
                         }
 
                         var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
@@ -371,139 +388,7 @@ public static class AzureADLogic
         }
     }
 
-    private static string[]? GetOrderBy(List<Order> orders)
-    {
-        return orders.Select(c => ToGraphField(c.Token) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToArray();
-    }
 
-    static string ToGraphField(QueryToken token, bool simplify = false)
-    {
-        var field = token.FullKey().Split(".").ToString(a => a.FirstLower(), "/");
-
-        if (simplify)
-            return field.TryBefore("/") ?? field;
-
-        return field;
-    }
-
-
-    private static string ToStringValue(object? value)
-    {
-        return value is string str ? $"'{str}'" :
-            value is DateOnly date ? $"'{date.ToIsoString()}'" :
-            value is DateTime dt ? $"'{dt.ToIsoString()}'" :
-            value is DateTimeOffset dto ? $"'{dto.DateTime.ToIsoString()}'" :
-            value is Guid guid ? $"'{guid}'" :
-            value is bool b ? b.ToString().ToLower() :
-            value?.ToString() ?? "";
-    }
-
-    private static string? GetFilters(List<Filter> filters)
-    {
-        return filters.Select(f => ToFilter(f)).Combined(FilterGroupOperation.And);
-    }
-
-    static string? ToFilter(Filter f)
-    {
-        if (f is FilterCondition fc)
-        {
-            return fc.Operation switch
-            {
-                FilterOperation.EqualTo => ToGraphField(fc.Token) + " eq " + ToStringValue(fc.Value),
-                FilterOperation.DistinctTo => ToGraphField(fc.Token) + " ne " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThan => ToGraphField(fc.Token) + " gt " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThanOrEqual => ToGraphField(fc.Token) + " ge " + ToStringValue(fc.Value),
-                FilterOperation.LessThan => ToGraphField(fc.Token) + " lt " + ToStringValue(fc.Value),
-                FilterOperation.LessThanOrEqual => ToGraphField(fc.Token) + " le " + ToStringValue(fc.Value),
-                FilterOperation.Contains => null,
-                FilterOperation.NotContains => "NOT (" + ToGraphField(fc.Token) + ":" + ToStringValue(fc.Value) + ")",
-                FilterOperation.StartsWith => "startswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.EndsWith => "endswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotStartsWith => "not startswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotEndsWith => "not endswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.IsIn => "(" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token) + " eq " + ToStringValue(a), " OR ") + ")",
-                FilterOperation.IsNotIn => "not (" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token) + " eq " + ToStringValue(a), " OR ") + ")",
-                FilterOperation.Like or
-                FilterOperation.NotLike or
-                _ => throw new InvalidOperationException(fc.Operation + " is not implemented in Microsoft Graph API")
-            };
-        }
-        else if (f is FilterGroup fg)
-        {
-            return fg.Filters.Select(f2 => ToFilter(f2)).Combined(fg.GroupOperation);
-        }
-        else
-            throw new UnexpectedValueException(f);
-    }
-
-    private static string? GetSearch(List<Filter> filters)
-    {
-        return filters.Select(f => ToSearch(f)).Combined(FilterGroupOperation.And);
-    }
-
-    static string? ToSearch(Filter f)
-    {
-        if (f is FilterCondition fc)
-        {
-            return fc.Operation switch
-            {
-                FilterOperation.Contains => "\"" + ToGraphField(fc.Token) + ":" + fc.Value?.ToString()?.Replace(@"""", @"\""") + "\"",
-                _ => null
-            };
-        }
-        else if (f is FilterGroup fg)
-        {
-            return fg.Filters.Select(f2 => ToSearch(f2)).Combined(fg.GroupOperation);
-        }
-        else
-            throw new UnexpectedValueException(f);
-    }
-
-
-    static string? Combined(this IEnumerable<string?> filterEnumerable, FilterGroupOperation groupOperation)
-    {
-        var filters = filterEnumerable.ToList();
-        var cleanFilters = filters.NotNull().ToList();
-
-        if (groupOperation == FilterGroupOperation.And)
-        {
-            if (cleanFilters.IsEmpty())
-                return null;
-
-            return cleanFilters.ToString(" AND ");
-        }
-        else
-        {
-            if (cleanFilters.IsEmpty())
-                return null;
-
-            if (cleanFilters.Count != filters.Count)
-                throw new InvalidOperationException("Unable to convert filter (mix $filter and $search in an OR");
-
-            if (cleanFilters.Count == 1)
-                return cleanFilters.SingleEx();
-
-            return "(" + cleanFilters.ToString(" OR ") + ")";
-        }
-    }
-
-    private static string[]? GetSelect(List<Column> columns)
-    {
-        return columns.Select(c => ToGraphField(c.Token, simplify: true)).Distinct().ToArray();
-    }
-
-    static int? GetTop(Pagination pagination)
-    {
-        var top = pagination switch
-        {
-            Pagination.All => (int?)null,
-            Pagination.Firsts f => f.TopElements,
-            Pagination.Paginate p => p.ElementsPerPage * p.CurrentPage,
-            _ => throw new UnexpectedValueException(pagination)
-        };
-
-        return top;
-    }
 
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
     {
@@ -599,4 +484,15 @@ public class ActiveDirectoryUser
     public required string JobTitle;
     public Guid? ObjectID;
     public string? SID;
+}
+
+
+[Serializable]
+public class ODataException : Exception
+{
+    public ODataException() { }
+    public ODataException(ODataError error) : base(error.Error?.Message ?? error.Message)
+    {
+        this.Data["MainError"] = error.Error;
+    }
 }
