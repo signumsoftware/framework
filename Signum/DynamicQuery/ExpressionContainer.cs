@@ -111,7 +111,7 @@ public class ExpressionContainer
                 if(mi.GetCustomAttribute<ExpressionFieldAttribute>() == null)
                     throw new InvalidOperationException("The parameter 'lambdaToMethodOrProperty' should be an expression calling a expression method or property");
 
-                return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.SpacePascalOrUnderscores()), mi.Name);
             }
             else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
             {
