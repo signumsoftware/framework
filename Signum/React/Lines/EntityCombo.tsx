@@ -45,7 +45,7 @@ export class EntityComboController extends EntityBaseController<EntityComboProps
   overrideProps(p: EntityComboProps, overridenProps: EntityComboProps) {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
-      p.onRenderItem = (row, role, searchTerm) => (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
+      p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span>: (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
     }
   }
 
