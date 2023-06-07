@@ -1,4 +1,7 @@
+using Signum.Authorization;
 using Signum.DiffLog;
+using Signum.Entities;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,6 +61,17 @@ public static class TimeMachineLogic
                 item.SetModified();
                 item.SetIsNew();
                 Administrator.SaveDisableIdentity(item);
+
+                //not tested
+                if (GraphExplorer.FromRootEntity(entity).OfType<IMListPrivate>().Any())
+                {
+                    var mlists = PropertyRoute.GenerateRoutes(item.GetType(), includeIgnored: false).Where(a => a.Type.IsMList());
+
+                    foreach (var prMList in mlists)
+                    {
+                        giInsertMListElements.GetInvoker(item.GetType(), prMList.Type.ElementType()!)(item, prMList);
+                    }
+                }
             }
 
             var dic = VirtualMList.RegisteredVirtualMLists.TryGetC(item.GetType());
@@ -76,5 +90,33 @@ public static class TimeMachineLogic
                 }
             }
         }
+    }
+
+    static GenericInvoker<Action<Entity, PropertyRoute>> giInsertMListElements = 
+        new GenericInvoker<Action<Entity, PropertyRoute>>((e, pr) => InsertMListElements<UserEntity, string>((UserEntity)e, pr));
+
+    private static void InsertMListElements<E, L>(E item, PropertyRoute prMList)
+        where E : Entity
+    {
+        var ex = prMList.GetLambdaExpression<E, MList<L>>(safeNullAccess: true);
+
+        var mlist = ex.Compile()(item);
+
+        if (mlist == null)
+            return;
+
+        var elements = ((IMListPrivate<L>)mlist).InnerList.Select(rid => new MListElement<E, L>
+        {
+            RowId = rid.RowId!.Value,
+            Element = rid.Element,
+            Parent = item,
+            RowOrder = rid.OldIndex ?? 0
+        });
+
+        var mlistExpression = prMList.GetLambdaExpression<E, MList<L>>(safeNullAccess: false);
+
+        //BulkInsert becahse there is no way to DisableIdentity for the MListTable's RowId column
+
+        BulkInserter.BulkInsertMListTable(elements, mlistExpression, disableMListIdentity: true);
     }
 }
