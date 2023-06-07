@@ -5,9 +5,10 @@ import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } f
 import { CustomRenderer } from './CustomRenderer'
 import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
-import { calculatePoint, Rectangle } from "../../Signum.Map/Utils"
+import { calculatePoint } from "../../Signum.Map/Utils"
 import { getToString } from "@framework/Signum.Entities"
 import { Color, Gradient } from "@framework/Basics/Color"
+import { Rectangle } from "../../Signum.Map/Schema/ClientColorProvider"
 
 export class CaseFlowRenderer extends CustomRenderer {
   static $inject = ['config.bpmnRenderer', 'eventBus', 'styles', 'pathMap', 'canvas', 'textRenderer'];
