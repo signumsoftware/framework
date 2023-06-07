@@ -19,7 +19,7 @@ class Upgrade_20230607_UpdateNugets3 : CodeUpgradeBase
                     """);
         });
 
-        uctx.ForeachCodeFile(@"Southwind/package.json", file =>
+        uctx.ChangeCodeFile(@"Southwind/package.json", file =>
         {
             file.UpdateNpmPackages("""
                 "assets-webpack-plugin": "7.1.1",
@@ -38,6 +38,8 @@ class Upgrade_20230607_UpdateNugets3 : CodeUpgradeBase
                 "webpack-cli": "5.1.3",
                 "webpack-notifier": "1.15.0"
                 """);
+
+            file.WarningLevel = WarningLevel.None;
 
             file.RemoveAllLines(a => a.Contains(""""@types/react": "file:../Framework/Signum.React/node_modules/@types/react""""));
         });
