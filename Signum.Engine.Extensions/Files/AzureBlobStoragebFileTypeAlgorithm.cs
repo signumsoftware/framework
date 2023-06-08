@@ -167,8 +167,19 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             {
                 using (HeavyProfiler.LogNoStackTrace("AzureBlobStorage CreateIfNotExists"))
                 {
-                    client.CreateIfNotExists();
-                    CreateBlobContainerIfNotExists = false;
+                    try
+                    {
+                        client.CreateIfNotExists();
+                    }
+                    catch (Azure.RequestFailedException ex) when (ex.ErrorCode == "ContainerAlreadyExists")
+                    {
+                        // The error message "The specified container already exists" suggests that there is a concurrency issue at play
+                        // Ignore it and continue, since the container exists which is what we wanted anyway
+                    }
+                    finally
+                    {
+                        CreateBlobContainerIfNotExists = false;
+                    }
                 }
             }
 
