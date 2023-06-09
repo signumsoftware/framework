@@ -53,5 +53,11 @@ public class FluentInclude<T> where T : Entity
         return this;
     }
 
+    public FluentInclude<T> WithAdditionalField<M>(Expression<Func<T, M>> property, Func<bool> shouldSet, Expression<Func<T, PrimaryKey?, M>> expression)
+    {
+        this.SchemaBuilder.Schema.EntityEvents<T>().RegisterBinding(property, shouldSet, expression);
+        return this;
+    }
+
 }
 
