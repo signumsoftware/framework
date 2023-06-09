@@ -130,7 +130,6 @@ public static class AuthServer
                 }
                 return mi;
             };
-
         }
 
         if (PropertyAuthLogic.IsStarted)
@@ -158,6 +157,8 @@ public static class AuthServer
 
                 return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
             };
+
+            PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);
         }
 
         if (OperationAuthLogic.IsStarted)
