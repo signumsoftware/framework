@@ -16,6 +16,13 @@ public class PropertyConverter
     public ReadJsonPropertyDelegate? CustomReadJsonProperty { get; set; }
     public WriteJsonPropertyDelegate? CustomWriteJsonProperty { get; set; }
 
+    /// <summary>
+    /// Return <c>true</c> to block writing to entity property silently.
+    /// To block with raise exception use <c>PropertyValidator.IsReadonly</c> or <c>Entity.IsPropertyReadonly</c> or <c>GlobalIsReadonly</c>
+    /// </summary>
+    public AvoidReadJsonPropertyDelegate? AvoidReadJsonProperty { get; set; }
+    public AvoidWriteJsonPropertyDelegate? AvoidWriteJsonProperty { get; set; }
+
     public bool AvoidValidate { get; set; }
 
     public PropertyConverter()
@@ -42,6 +49,7 @@ public class PropertyConverter
     }
 }
 
+public delegate bool AvoidReadJsonPropertyDelegate(ReadJsonPropertyContext ctx);
 public delegate void ReadJsonPropertyDelegate(ref Utf8JsonReader reader, ReadJsonPropertyContext ctx);
 public class ReadJsonPropertyContext
 {
@@ -61,6 +69,7 @@ public class ReadJsonPropertyContext
     public EntityJsonConverterFactory Factory { get; set; }
 }
 
+public delegate bool AvoidWriteJsonPropertyDelegate(WriteJsonPropertyContext ctx);
 public delegate void WriteJsonPropertyDelegate(Utf8JsonWriter writer, WriteJsonPropertyContext ctx);
 public class WriteJsonPropertyContext
 {
@@ -316,6 +325,15 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
+            if (pc.AvoidWriteJsonProperty!= null && pc.AvoidWriteJsonProperty(new WriteJsonPropertyContext(
+                    entity: mod,
+                    lowerCaseName: lowerCaseName,
+                    propertyConverter: pc,
+                    parentPropertyRoute: route,
+                    jsonSerializerOptions: options,
+                    factory: this.Factory)))
+                return;
+
             var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
             if (Factory.Strategy == EntityJsonConverterStrategy.WebAPI)
@@ -438,6 +456,14 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
+            if (pc.AvoidReadJsonProperty != null && pc.AvoidReadJsonProperty(new ReadJsonPropertyContext(
+                    jsonSerializerOptions: options,
+                    entity: entity,
+                    parentPropertyRoute: parentRoute,
+                    propertyConverter: pc,
+                    factory: this.Factory)))
+                return; //silently block writing to property
+
             object? oldValue = pc.GetValue!(entity);
 
             var pi = pc.PropertyValidator!.PropertyInfo;
