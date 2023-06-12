@@ -79,6 +79,8 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
   //Is conditionally but the condition is a constant
   React.useEffect(() => {
     const handle = window.setTimeout(() => {
+
+      console.log("Effect", { ticks: ticksRef.current, entityTicks: entityRef.current.ticks });
       if (ticksRef.current != null && ticksRef.current != entityRef.current.ticks) {
         MessageModal.show({
           title: ConcurrentUserMessage.DatabaseChangesDetected.niceToString(),
@@ -103,7 +105,10 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
       }
     }, 1000);
     return () => clearTimeout(handle);
-  }, [ticks !== p.entity.ticks]);
+  }, [ticks, p.entity.ticks]);
+
+  console.log("Render", { ticks, entityTicks: p.entity.ticks });
+
 
   var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
