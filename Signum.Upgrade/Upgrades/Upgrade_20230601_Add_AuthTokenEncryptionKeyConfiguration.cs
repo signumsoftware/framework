@@ -16,7 +16,7 @@ class Upgrade_20230601_Add_AuthTokenEncryptionKeyConfiguration : CodeUpgradeBase
     {
         uctx.ChangeCodeFile($"{uctx.ApplicationName}/appsettings.json", file =>
         {
-            file.InsertAfterFirstLine(l => l.Contains(@"""ServerName"""),
+            file.InsertBeforeLastLine(l => l.Contains(@"}"),
                 $"\"AuthTokenEncryptionKey\": \"<Default Encryption Key for {uctx.ApplicationName} >\","
             );
 
