@@ -311,8 +311,8 @@ public class ExtensionInfo
                 {
                     result.Implementations = metaImps;
                 }
-                result.Format = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
-                result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
+                result.Format = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
+                result.Unit = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
             }
 
             result.IsAllowed = () => me?.Meta.IsAllowed();
