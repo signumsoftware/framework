@@ -4,7 +4,7 @@ namespace Signum.Security;
 
 public static class PasswordEncoding
 {
-    public static Func<string, byte[]> EncodePassword = (originalPassword) => MD5Hash(originalPassword);
+    public static Func<string, string, IList<byte[]>> EncodePassword = (userName, originalPassword) => new List<byte[]> { MD5Hash(originalPassword) };
 
     public static byte[] MD5Hash(string saltedPassword)
     {
