@@ -323,16 +323,40 @@ internal class QueryBinder : ExpressionVisitor
             {
                 ee = Completed(ee);
 
+                if (m is MethodInfo mi && mi.Name == nameof(Entity.Mixin))
+                {
+                    var type = mi.GetGenericArguments()[0];
 
+                    var newMixin = (MixinEntityExpression)ChangeProjector(index + 1, members, ee.Mixins!.SingleEx(a=>a.Type == type), changeExpression);
+
+                    var mixins = ee.Mixins!.Select(mixin => mixin.Type == type ? newMixin : mixin);
+
+                    return new EntityExpression(ee.Type, ee.ExternalId, ee.ExternalPeriod, ee.TableAlias, ee.Bindings, mixins, ee.TablePeriod, ee.AvoidExpandOnRetrieving);
+                }
+                else
+                {
+                    var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType!, (PropertyInfo)m);
+
+                    var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
+
+                    var binding = ee.Bindings!.Select(fb =>
+                    !ReflectionTools.FieldEquals(fb.FieldInfo, fi) ? fb :
+                    new FieldBinding(fi, newBinding));
+
+                    return new EntityExpression(ee.Type, ee.ExternalId, ee.ExternalPeriod, ee.TableAlias, binding, ee.Mixins, ee.TablePeriod, ee.AvoidExpandOnRetrieving);
+                }
+            }
+            if (projector is MixinEntityExpression mee)
+            {
                 var fi = m as FieldInfo ?? Reflector.FindFieldInfo(m.DeclaringType!, (PropertyInfo)m);
 
-                var newBinding = ChangeProjector(index + 1, members, ee.GetBinding(fi), changeExpression);
+                var newBinding = ChangeProjector(index + 1, members, mee.GetBinding(fi), changeExpression);
 
-                var binding = ee.Bindings!.Select(fb =>
+                var binding = mee.Bindings!.Select(fb =>
                 !ReflectionTools.FieldEquals(fb.FieldInfo, fi) ? fb :
                 new FieldBinding(fi, newBinding));
 
-                return new EntityExpression(ee.Type, ee.ExternalId, ee.ExternalPeriod, ee.TableAlias, binding, ee.Mixins, ee.TablePeriod, ee.AvoidExpandOnRetrieving);
+                return new MixinEntityExpression(mee.Type, binding, mee.MainEntityAlias, mee.FieldMixin, mee.EntityContext);
             }
             else if (projector is NewExpression ne)
             {
