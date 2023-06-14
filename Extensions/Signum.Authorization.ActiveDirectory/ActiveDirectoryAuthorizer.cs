@@ -106,7 +106,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 
     public virtual UserEntity Login(string userName, string password, out string authenticationType)
     {
-        var passwordHashes = PasswordEncoding.EncodePassword(userName, password);
+        var passwordHashes = PasswordEncoding.EncodePasswordAlternatives(userName, password);
         if (AuthLogic.TryRetrieveUser(userName, passwordHashes) != null)
             return AuthLogic.Login(userName, passwordHashes, out authenticationType); //Database is faster than Active Directory
 
@@ -117,7 +117,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
             return user;
         }
 
-        return AuthLogic.Login(userName, PasswordEncoding.EncodePassword(userName, password), out authenticationType);
+        return AuthLogic.Login(userName, passwordHashes, out authenticationType);
     }
 
     public virtual UserEntity? LoginWithActiveDirectoryRegistry(string userName, string password)
