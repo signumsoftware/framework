@@ -25,6 +25,8 @@ export function start(options: { routes: RouteObject[] }) {
 
   AppContext.clearSettingsActions.push(clearProviders);
 
+  getColorProviders.push(smi => import("./Schema/DefaultColorProvider").then((c: any) => c.default(smi)));
+
   if (tryGetTypeInfo(RoleEntity))
     getColorProviders.push(smi => import("./Schema/AuthColorProvider").then((c: any) => c.default(smi)));
 
