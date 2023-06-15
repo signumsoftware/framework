@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, FilterConditionOption, FilterConditionOptionParsed
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -37,6 +37,7 @@ import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstr
 import { getBreakpoint, Breakpoints } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faFilter } from '@fortawesome/free-solid-svg-icons'
+import { similarToken } from '../Search'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -965,40 +966,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
 
-    const token = fo.columnOptions[cm.columnIndex!].token;
-    let newToken = token;
-    let op: FilterOperation | undefined;
-
-    var toArray = hasToArray(token);
-    if (toArray) {
-      newToken = await Finder.parseSingleToken(fo.queryKey, token!.fullKey.split(".").map(p => p == toArray!.key ? "Any" : p).join("."), SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
-      op = "IsIn";
-    }
-    else {
-
-      if (newToken != null && newToken.key == "Snippet" && newToken.parent?.filterType == "String")
-        newToken = newToken.parent;
-
-      op = token?.preferEquals || cm.rowIndex != null ? "EqualTo" as FilterOperation | undefined :
-        token ? (getFilterOperations(token) || []).firstOrNull() as FilterOperation | undefined :
-          undefined as FilterOperation | undefined;
-    }
-
+    const token = fo.columnOptions[cm.columnIndex!].token!;
     const rt = this.state.resultTable;
+    let value = cm.rowIndex == undefined || rt == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)];
 
-    let value = cm.rowIndex == undefined || rt == null || token == null ? (op == "IsIn" ? [] : undefined) : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)]
+    var rule = Finder.quickFilterRules.first(a => a.applicable(token, value, this));
 
-    if (token?.filterType == "Embedded" && value != null) {
-      value = null;
-      op = "DistinctTo";
-    }
-
-    fo.filterOptions.push({
-      token: newToken!,
-      operation: op,
-      value: value,
-      frozen: false
-    });
+    await rule.execute(token, value, this);
 
     if (!this.state.showFilters)
       this.setState({ showFilters: true });
@@ -1006,6 +980,27 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.handleFiltersChanged();
 
     this.forceUpdate(() => this.handleHeightChanged());
+  }
+
+  addQuickFilter(token: QueryToken, operation: FilterOperation, value: unknown) {
+    const filterOptions = this.props.findOptions;
+    var alreadyPinned = filterOptions.filterOptions
+      .firstOrNull(f => !isFilterGroupOptionParsed(f) &&
+        similarToken(f.token?.fullKey, token?.fullKey) &&
+        f.operation == operation &&
+        (f.value == null || f.value == "")  &&
+        f.pinned != null && f.pinned?.active == "WhenHasValue"
+    );
+
+    if (alreadyPinned)
+      alreadyPinned.value = value;
+    else
+      filterOptions.filterOptions.push({ token, operation, value, frozen: false });
+
+  }
+
+  parseSingleFilterToken(token: string) {
+    return Finder.parseSingleToken(this.props.findOptions.queryKey, token, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement);
   }
 
   handleInsertColumn = () => {

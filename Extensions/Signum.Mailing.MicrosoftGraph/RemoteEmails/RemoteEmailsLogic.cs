@@ -1,0 +1,266 @@
+using Signum.Authorization;
+using Microsoft.Graph;
+using Microsoft.Graph.Models;
+using Microsoft.Azure.Amqp.Framing;
+using Signum.Utilities.Reflection;
+using Signum.API;
+using Signum.DynamicQuery.Tokens;
+using Microsoft.Graph.Models.ODataErrors;
+using Microsoft.Graph.Groups.Item.MembersWithLicenseErrors;
+using Signum.Authorization.ActiveDirectory.Azure;
+using Signum.UserAssets;
+using System.Security.Cryptography;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using DocumentFormat.OpenXml.Math;
+
+namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
+
+public static class RemoteEmailsLogic
+{
+    public static Action<QueryRequest> AuthorizeQueryRequest = qr =>
+    {
+        if (!qr.Filters.Any(a => a is FilterCondition fc && fc.Token.FullKey() == "User" && fc.Value is Lite<UserEntity> u && u.Is(UserEntity.Current)))
+        {
+            if (!RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers.IsAuthorized())
+                throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
+        }
+    };
+
+    public static Action<Lite<UserEntity>, Message> AuthorizeMessage = (user, qr) =>
+    { 
+        if (!user.Is(UserEntity.Current))
+        {
+            if (!RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers.IsAuthorized())
+                throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
+        }
+    };
+
+    public static MessageMicrosoftGraphQueryConverter Converter = new MessageMicrosoftGraphQueryConverter();
+
+    public static void Start(SchemaBuilder sb)
+    {
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        {
+            PermissionLogic.RegisterTypes(typeof(RemoteEmailMessagePermission));
+
+            QueryLogic.Queries.Register(RemoteEmailMessageQuery.RemoteEmailMessages, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
+            {
+                using (HeavyProfiler.Log("Microsoft Graph", () => "EmailMessage"))
+                {
+                    var tokenCredential = AzureADLogic.GetTokenCredential();
+
+                    RemoteEmailsLogic.AuthorizeQueryRequest(request);
+
+                    GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+                    var userFilter = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "User" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
+                    MessageCollectionResponse response;
+                    Lite<UserEntity>? user = userFilter?.Value as Lite<UserEntity>;
+                    Dictionary<string, RemoteEmailFolderModel> mailFolders = null!; 
+                    try
+                    {
+
+                        var (filters, orders) = FixFiltersAndOrders(request.Filters.ToList(), request.Orders.ToList());
+
+                        if (user != null)
+                        {
+                            if (user.Model is UserLiteModel um && um.OID is Guid oid)
+                            {
+                                response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Filter = Converter.GetFilters(filters);
+                                    req.QueryParameters.Search = Converter.GetSearch(filters);
+                                    req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
+                                    req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
+                                    req.QueryParameters.Top = Converter.GetTop(request.Pagination);
+                                    req.QueryParameters.Count = true;
+                                    req.Headers.Add("ConsistencyLevel", "eventual");
+                                    req.Headers.Add("Prefer", "IdType='ImmutableId'");
+                                }))!;
+
+                                var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
+                                {
+                                    req.QueryParameters.Select = new[] { "displayName" };
+                                    req.QueryParameters.Top = 100;
+                                    req.QueryParameters.IncludeHiddenFolders = "true";
+                                }))!;
+
+                    
+
+                                mailFolders = folders.Value!.ToDictionary(a => a.Id!, a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! });
+                            }
+                            else
+                            {
+                                response = new MessageCollectionResponse { Value = new List<Message>(), OdataCount = 0 };
+                            }
+                        }
+                        else
+                        {
+                            response = new MessageCollectionResponse { Value = new List<Message>(), OdataCount = 0 };
+                        }
+                    }
+                    catch (ODataError e)
+                    {
+                        throw new ODataException(e);
+                    }
+
+                    var skip = request.Pagination is Pagination.Paginate p ? (p.CurrentPage - 1) * p.ElementsPerPage : 0;
+
+       
+                    var list = response.Value!.Skip(skip).Select(u => new
+                    {
+                        Entity = (Lite<UserEntity>?)null,/*Lie*/
+                        Id = u.Id,
+                        u.Subject,
+                        From = new RecipientEmbedded
+                        {
+                            EmailAddress = u.From?.EmailAddress?.Address,
+                            Name = u.From?.EmailAddress?.Name,
+                        },
+                        u.CreatedDateTime,
+                        u.ReceivedDateTime,
+                        u.SentDateTime,
+                        u.LastModifiedDateTime,
+                        u.IsRead,
+                        u.IsDraft,
+                        u.HasAttachments,
+                        Folder = u.ParentFolderId == null ? null : mailFolders.TryGetC(u.ParentFolderId) ?? new RemoteEmailFolderModel
+                        {
+                            FolderId = u.ParentFolderId,
+                            DisplayName = "Unknown"
+                        },
+                        User = user,
+                        Extension0 = Converter.GetExtension(u, 0),
+                        Extension1 = Converter.GetExtension(u, 1),
+                        Extension2 = Converter.GetExtension(u, 2),
+                        Extension3 = Converter.GetExtension(u, 3),
+                    });
+
+                    return list.ToDEnumerable(queryDescription).Select(request.Columns).OrderBy(request.Orders).WithCount((int?)response.OdataCount);
+                }
+            })
+            .Column(a => a.Entity, c => c.Implementations = Implementations.By())
+            .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Id))
+            .ColumnProperyRoutes(a => a.Subject, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.Subject))
+            .ColumnProperyRoutes(a => a.CreatedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.CreatedDateTime))
+            .ColumnProperyRoutes(a => a.ReceivedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.ReceivedDateTime))
+            .ColumnProperyRoutes(a => a.SentDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.SentDateTime))
+            .ColumnProperyRoutes(a => a.LastModifiedDateTime, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.LastModifiedDateTime))
+            .ColumnProperyRoutes(a => a.From, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.From))
+            .ColumnProperyRoutes(a => a.User, PropertyRoute.Construct((RemoteEmailMessageModel a) => a.User)),
+            Implementations.By(typeof(UserEntity)) /*Lie*/);
+
+            if(sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(RemoteEmailMessageQuery), () => QueryLogic.Queries.QueryAllowed(RemoteEmailMessageQuery.RemoteEmailMessages, false));
+            }
+        }
+    }
+
+    // https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0&tabs=http#using-filter-and-orderby-in-the-same-query
+    private static (List<Filter> filters, List<Order> orders) FixFiltersAndOrders(List<Filter> filters, List<Order> orders)
+    {
+        orders.Extract(o => o.Token.FullKey() == "Id");
+
+        if (filters.IsEmpty())
+            return (filters, orders);
+
+        if(filters.Any(a=>a is FilterCondition fc && fc.Operation == FilterOperation.Contains))
+            return (filters, new List<Order>());
+
+        var newFilters = new List<Filter>();
+        foreach (var order in orders)
+        {
+            var f = filters.FirstOrDefault(f => f is FilterCondition fc && fc.Token.Equals(order.Token));
+            if (f == null)
+                f = CreateTrivialFilter(order.Token);
+            else
+                filters.Remove(f);
+
+            newFilters.Add(f);
+        }
+        newFilters.AddRange(filters);
+
+        return (newFilters, orders);
+    }
+
+    private static Filter CreateTrivialFilter(QueryToken token)
+    {
+        var utype = token.Type.UnNullify();
+        var value =
+            utype == typeof(string) ? (object)"124536786543214567" :
+            utype == typeof(DateTime) ? (object)new DateTime(1990, 1, 1) :
+            utype == typeof(DateTimeOffset) ? (object)new DateTimeOffset(new DateTime(1990, 1, 1)) :
+            utype == typeof(bool) ? (object)true :
+            ReflectionTools.IsNumber(utype) ? (object)0 :
+            null;
+
+        return new FilterGroup(FilterGroupOperation.Or, null, new List<Filter>
+        {
+            new FilterCondition(token, FilterOperation.EqualTo, value),
+            new FilterCondition(token, FilterOperation.DistinctTo, value),
+        });
+    }
+
+    static bool InMSGRaph(QueryToken token)
+    {
+        if (token.FullKey().StartsWith("Entity") || token.FullKey().StartsWith("User"))
+            return false;
+
+        return true;
+    }
+}
+
+public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
+{
+    static PropertyInfo piEmailAddress = ReflectionTools.GetPropertyInfo((RecipientEmbedded re) => re.EmailAddress);
+    static PropertyInfo piName = ReflectionTools.GetPropertyInfo((RecipientEmbedded re) => re.Name);
+
+    static Func<QueryToken, string?>? ExtensionPoint;
+
+    public override string ToGraphField(QueryToken token, GraphFieldUsage usage)
+    {
+        if (token.Key.StartsWith("Extension"))
+            return ToGraphFieldExtension(token, usage);
+
+        if (token.FullKey().StartsWith("Folder"))
+            return "parentFolderId";
+
+        var field = token.Follow(a => a.Parent).Reverse().ToString(a =>
+        {
+            if (a is EntityPropertyToken ept)
+            {
+                if (ReflectionTools.PropertyEquals(ept.PropertyInfo, piEmailAddress))
+                    return "emailAddress/address";
+
+                if (ReflectionTools.PropertyEquals(ept.PropertyInfo, piName))
+                    return "emailAddress/name";
+            }
+            return a.Key.FirstLower();
+        }, "/");
+
+        return field;
+    }
+
+
+
+    public override string? ToFilter(Filter f)
+    {
+        if(f is FilterCondition fc && fc.Token.Type == typeof(RemoteEmailFolderModel))
+        {
+            return ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(fc.Value is RemoteEmailFolderModel fol ? fol.FolderId : null);
+        }
+
+        return base.ToFilter(f);
+    }
+
+    public virtual string? GetExtension(Message u, int v)
+    {
+        return null;
+    }
+
+    public virtual string ToGraphFieldExtension(QueryToken token, GraphFieldUsage usage)
+    {
+        throw new NotImplementedException();
+    }
+}

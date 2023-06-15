@@ -13,6 +13,9 @@ using Signum.Authorization.ActiveDirectory;
 using System.Security.Cryptography;
 using Microsoft.Graph.Models;
 using DocumentFormat.OpenXml.Drawing;
+using Signum.Authorization.ActiveDirectory.Azure;
+using Microsoft.Azure.Amqp.Framing;
+using Microsoft.Graph.Models.ODataErrors;
 
 namespace Signum.Mailing;
 
@@ -22,52 +25,77 @@ public class RemoteEmailController : ControllerBase
     [HttpGet("api/remoteEmail/{oid}/{messageId}/")]
     public async Task<RemoteEmailMessageModel> GetRemoteEmail([FromRoute] Guid oid, [FromRoute] string messageId)
     {
+
+        try
+        {
+            var tokenCredential = AzureADLogic.GetTokenCredential();
+
+            GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+            var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+
+            var message = (await graphClient.Users[oid.ToString()].Messages[messageId].GetAsync(req =>
+            {
+                req.QueryParameters.Expand = new[] { "attachments" };
+                req.Headers.Add("Prefer", "IdType='ImmutableId'");
+            }))!;
+
+            RemoteEmailsLogic.AuthorizeMessage(user, message);
+
+            return new RemoteEmailMessageModel
+            {
+                Id = message.Id!,
+                User = user,
+                From = message.From == null ? null! : ToRecipientEmbedded(message.From),
+                ToRecipients = message.ToRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
+                CcRecipients = message.CcRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
+                BccRecipients = message.BccRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
+                Subject = message.Subject!,
+                Body = message.Body!.Content!,
+                IsBodyHtml = message.Body.ContentType == BodyType.Html,
+                IsDraft = message.IsDraft!.Value,
+                IsRead = message.IsRead!.Value,
+                CreatedDateTime = message.CreatedDateTime,
+                LastModifiedDateTime = message.LastModifiedDateTime,
+                ReceivedDateTime = message.ReceivedDateTime,
+                SentDateTime = message.SentDateTime,
+                WebLink = message.WebLink,
+                Attachments = message.Attachments.EmptyIfNull().Select(a => new RemoteAttachmentEmbedded
+                {
+                    Id = a.Id!,
+                    IsInline = a.IsInline!.Value,
+                    LastModifiedDateTime = a.LastModifiedDateTime!.Value,
+                    Name = a.Name!,
+                    Size = a.Size!.Value,
+                }).ToMList(),
+                HasAttachments = message.HasAttachments!.Value,
+
+            };
+        }
+        catch (ODataError e)
+        {
+            throw new ODataException(e);
+        }
+    }
+
+    [HttpGet("api/remoteEmailFolders/{oid}/"), SignumAllowAnonymous]
+    public async Task<List<RemoteEmailFolderModel>> GetRemoteFolders([FromRoute] Guid oid)
+    {
         var tokenCredential = AzureADLogic.GetTokenCredential();
 
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
         var user = Database.Query<UserEntity>().Where(a => a.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
-        var message = (await graphClient.Users[oid.ToString()].Messages[messageId].GetAsync(req =>
+        var folders = (await graphClient.Users[oid.ToString()].MailFolders.GetAsync(req =>
         {
-            req.QueryParameters.Expand = new[] { "attachments" };
-            req.Headers.Add("Prefer", "IdType='ImmutableId'");
-        }));
+            req.QueryParameters.IncludeHiddenFolders = "true";
+            req.QueryParameters.Select = new[] { "displayName" };
+            req.QueryParameters.Top = 100;
+        }))!;
 
-
-        return new RemoteEmailMessageModel
-        {
-            Id = message!.Id!,
-            User = user,
-            From = message.From == null ? null! : ToRecipientEmbedded(message.From),
-            ToRecipients = message.ToRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
-            CcRecipients = message.CcRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
-            BccRecipients = message.BccRecipients.EmptyIfNull().Select(r => ToRecipientEmbedded(r)).ToMList(),
-            Subject = message.Subject!,
-            Body = message.Body!.Content!,
-            IsBodyHtml = message.Body.ContentType == BodyType.Html,
-            IsDraft = message.IsDraft!.Value,
-            IsRead = message.IsRead!.Value,
-            CreatedDateTime = message.CreatedDateTime,
-            LastModifiedDateTime = message.LastModifiedDateTime,
-            ReceivedDateTime = message.ReceivedDateTime,
-            SentDateTime = message.SentDateTime,
-            WebLink = message.WebLink,
-            Attachments = message.Attachments.EmptyIfNull().Select(a=>new RemoteAttachmentEmbedded
-            {
-                Id = a.Id!,
-                IsInline = a.IsInline!.Value,
-                LastModifiedDateTime = a.LastModifiedDateTime!.Value,
-                Name = a.Name!,
-                Size = a.Size!.Value,
-            }).ToMList(),
-            HasAttachments = message.HasAttachments!.Value,
-            
-        };
+        return folders.Value!.Select(a => new RemoteEmailFolderModel { FolderId = a.Id!, DisplayName = a.DisplayName! }).ToList();
     }
-
-
- 
 
     private RecipientEmbedded ToRecipientEmbedded(Recipient r) => new RecipientEmbedded
     {

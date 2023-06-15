@@ -11,12 +11,14 @@ import {
   FindOptionsParsed, FilterOption, FilterOptionParsed, OrderOptionParsed,
   QueryToken, ColumnDescription, ColumnOption, ColumnOptionParsed, Pagination,
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
-  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption, FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement, toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue
+  isFilterGroupOption, FilterGroupOptionParsed, FilterConditionOptionParsed, isFilterGroupOptionParsed, FilterGroupOption,
+  FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
+  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations
 } from './FindOptions';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
 
-import { Entity, Lite, toLite, liteKey, parseLite, isLite, isEntity, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString } from './Signum.Entities';
+import { Entity, Lite, toLite, liteKey, parseLite, isLite, isEntity, SearchMessage, ModifiableEntity, is, JavascriptMessage, isMListElement, MListElement, getToString, EmbeddedEntity } from './Signum.Entities';
 import { TypeEntity, QueryEntity } from './Signum.Basics';
 
 import {
@@ -2016,6 +2018,9 @@ function resetFormatRules() {
 
   entityFormatRules.clear();
   entityFormatRules.push(...initEntityFormatRules());
+
+  quickFilterRules.clear();
+  quickFilterRules.push(...initializeQuickFilterRules());
 }
 
 export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
@@ -2483,4 +2488,71 @@ function initEntityFormatRules(): EntityFormatRule[] {
     },
   ]
 }
+
+
+export interface QuickFilterRule {
+  name: string
+  applicable: (qt: QueryToken, cellValue: unknown, sc: SearchControlLoaded) => boolean;
+  execute: (qt: QueryToken, cellValue: unknown, sc: SearchControlLoaded) => Promise<void>;
+}
+
+
+
+export const quickFilterRules: QuickFilterRule[] = initializeQuickFilterRules();
+
+
+function initializeQuickFilterRules(): QuickFilterRule[] {
+  return ([
+    {
+      name: "ToArray",
+      applicable: qt => hasToArray(qt) != null,
+      execute: async (qt, cellValue, sc) => {
+        var toArray = hasToArray(qt)!;
+        const newToken = await sc.parseSingleFilterToken(qt!.fullKey.split(".").map(p => p == toArray!.key ? "Any" : p).join("."));
+        return sc.addQuickFilter(newToken, "IsIn", cellValue ?? []);
+      },
+    },
+
+    {
+      name: "Snippet",
+      applicable: qt => qt.key == "Snippet" && qt.parent?.filterType == "String",
+      execute: async (qt, cellValue, sc) => {
+
+        return sc.addQuickFilter(qt.parent!, getFilterOperations(qt.parent!).first(), cellValue);
+      },
+    },
+
+    {
+      name: "Embedded",
+      applicable: qt => qt.filterType == "Embedded",
+      execute: async (qt, cellValue, sc) => {
+
+        return sc.addQuickFilter(qt, cellValue == null ? "EqualTo" : "DistinctTo", null);
+      },
+    },
+
+    {
+      name: "PreferEquals",
+      applicable: qt => Boolean(qt.preferEquals),
+      execute: async (qt, cellValue, sc) => {
+
+        return sc.addQuickFilter(qt, "EqualTo", cellValue);
+      },
+    },
+
+    {
+      name: "Default",
+      applicable: qt => true,
+      execute: async (qt, cellValue, sc) => {
+
+        return sc.addQuickFilter(qt, getFilterOperations(qt).first(), cellValue);
+      },
+    },
+  ]);
+}
+
+  
+
+export const embeddedAddQuickFilter: { [embeddedTypeName: string]: (e: EmbeddedEntity, qt: QueryToken, sc: SearchControlLoaded) => Promise<void> } = {};
+
 
