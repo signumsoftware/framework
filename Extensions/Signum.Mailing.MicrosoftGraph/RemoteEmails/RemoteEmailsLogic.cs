@@ -1,17 +1,10 @@
 using Signum.Authorization;
 using Microsoft.Graph;
-using Microsoft.Graph.Models;
-using Microsoft.Azure.Amqp.Framing;
 using Signum.Utilities.Reflection;
 using Signum.API;
 using Signum.DynamicQuery.Tokens;
 using Microsoft.Graph.Models.ODataErrors;
-using Microsoft.Graph.Groups.Item.MembersWithLicenseErrors;
 using Signum.Authorization.ActiveDirectory.Azure;
-using Signum.UserAssets;
-using System.Security.Cryptography;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using DocumentFormat.OpenXml.Math;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 
@@ -26,7 +19,7 @@ public static class RemoteEmailsLogic
         }
     };
 
-    public static Action<Lite<UserEntity>, Message> AuthorizeMessage = (user, qr) =>
+    public static Action<Lite<UserEntity>, Microsoft.Graph.Models.Message> AuthorizeMessage = (user, qr) =>
     { 
         if (!user.Is(UserEntity.Current))
         {
@@ -54,7 +47,7 @@ public static class RemoteEmailsLogic
                     GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
 
                     var userFilter = (FilterCondition?)request.Filters.Extract(f => f is FilterCondition fc && fc.Token.Key == "User" && fc.Operation == FilterOperation.EqualTo).SingleOrDefaultEx();
-                    MessageCollectionResponse response;
+                    Microsoft.Graph.Models.MessageCollectionResponse response;
                     Lite<UserEntity>? user = userFilter?.Value as Lite<UserEntity>;
                     Dictionary<string, RemoteEmailFolderModel> mailFolders = null!; 
                     try
@@ -91,12 +84,12 @@ public static class RemoteEmailsLogic
                             }
                             else
                             {
-                                response = new MessageCollectionResponse { Value = new List<Message>(), OdataCount = 0 };
+                                response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
                             }
                         }
                         else
                         {
-                            response = new MessageCollectionResponse { Value = new List<Message>(), OdataCount = 0 };
+                            response = new Microsoft.Graph.Models.MessageCollectionResponse { Value = new List<Microsoft.Graph.Models.Message>(), OdataCount = 0 };
                         }
                     }
                     catch (ODataError e)
@@ -158,7 +151,7 @@ public static class RemoteEmailsLogic
     }
 
     // https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0&tabs=http#using-filter-and-orderby-in-the-same-query
-    private static (List<Filter> filters, List<Order> orders) FixFiltersAndOrders(List<Filter> filters, List<Order> orders)
+    private static (List<DynamicQuery.Filter> filters, List<Order> orders) FixFiltersAndOrders(List<DynamicQuery.Filter> filters, List<Order> orders)
     {
         orders.Extract(o => o.Token.FullKey() == "Id");
 
@@ -168,7 +161,7 @@ public static class RemoteEmailsLogic
         if(filters.Any(a=>a is FilterCondition fc && fc.Operation == FilterOperation.Contains))
             return (filters, new List<Order>());
 
-        var newFilters = new List<Filter>();
+        var newFilters = new List<DynamicQuery.Filter>();
         foreach (var order in orders)
         {
             var f = filters.FirstOrDefault(f => f is FilterCondition fc && fc.Token.Equals(order.Token));
@@ -184,7 +177,7 @@ public static class RemoteEmailsLogic
         return (newFilters, orders);
     }
 
-    private static Filter CreateTrivialFilter(QueryToken token)
+    private static DynamicQuery.Filter CreateTrivialFilter(QueryToken token)
     {
         var utype = token.Type.UnNullify();
         var value =
@@ -195,7 +188,7 @@ public static class RemoteEmailsLogic
             ReflectionTools.IsNumber(utype) ? (object)0 :
             null;
 
-        return new FilterGroup(FilterGroupOperation.Or, null, new List<Filter>
+        return new DynamicQuery.FilterGroup(FilterGroupOperation.Or, null, new List<DynamicQuery.Filter>
         {
             new FilterCondition(token, FilterOperation.EqualTo, value),
             new FilterCondition(token, FilterOperation.DistinctTo, value),
@@ -244,7 +237,7 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
 
 
 
-    public override string? ToFilter(Filter f)
+    public override string? ToFilter(DynamicQuery.Filter f)
     {
         if(f is FilterCondition fc && fc.Token.Type == typeof(RemoteEmailFolderModel))
         {
@@ -254,7 +247,7 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
         return base.ToFilter(f);
     }
 
-    public virtual string? GetExtension(Message u, int v)
+    public virtual string? GetExtension(Microsoft.Graph.Models.Message u, int v)
     {
         return null;
     }

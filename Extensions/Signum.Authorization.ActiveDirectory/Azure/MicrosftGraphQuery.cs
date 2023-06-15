@@ -1,4 +1,3 @@
-using Microsoft.Graph.Models;
 using Signum.DynamicQuery.Tokens;
 
 namespace Signum.Authorization.ActiveDirectory.Azure;
