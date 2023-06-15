@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  isFilterGroupOptionParsed, hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType
+  hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType, FilterOption, isFilterGroup, isFilterCondition
 } from '../FindOptions'
 import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
 import { isNumber, trimDateToFormat, ValueLineController } from '../Lines/ValueLine'
@@ -19,6 +19,7 @@ import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../H
 import { Button, Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import { TypeEntity } from '../Signum.Basics'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
+import { renderFilterValue } from '../Finder'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -92,7 +93,6 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
 
-    if (showPinnedFiltersOptions)
       forceUpdate();
   };
 
@@ -139,8 +139,9 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             </tr>
           </thead>
           <tbody>
-            {p.filterOptions.map((f) => isFilterGroupOptionParsed(f) ?
+            {p.filterOptions.map((f) => isFilterGroup(f) ?
               <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                allFilterOptions={p.filterOptions}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
@@ -151,6 +152,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                 level={0}
               /> :
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                allFilterOptions={p.filterOptions}
                 prefixToken={undefined}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
@@ -198,6 +200,7 @@ export interface RenderValueContext {
 
 export interface FilterGroupComponentsProps {
   prefixToken: QueryToken | undefined;
+  allFilterOptions: FilterOptionParsed[];
   filterGroup: FilterGroupOptionParsed;
   readOnly: boolean;
   onDeleteFilter: (fo: FilterGroupOptionParsed) => void;
@@ -372,9 +375,10 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       {
         fg.expanded ?
           <>
-            {fg.filters.map((f) => isFilterGroupOptionParsed(f) ?
+            {fg.filters.map((f) => isFilterGroup(f) ?
 
               <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                allFilterOptions={p.allFilterOptions}
                 prefixToken={fg.token}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged}
@@ -386,6 +390,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
               /> :
 
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                allFilterOptions={p.allFilterOptions}
                 prefixToken={fg.token}
                 subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
                 onTokenChanged={p.onTokenChanged} onFilterChanged={p.onFilterChanged} renderValue={p.renderValue}
@@ -431,31 +436,11 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const f = p.filterGroup;
 
-  
-
     const readOnly = p.readOnly || f.frozen;
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    if (f.filters.some(a => !a.token))
-      return <ValueLine ctx={ctx} type={{ name: "string" }} onChange={() => handleValueChange()} />
-
-    if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && f.value)
-      f.value = undefined;
-
-    var isComplex = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition");
-    var textArea = f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText"));
-
-    if (textArea)
-      return <FilterTextArea ctx={ctx} isComplex={isComplex} onChange={() => handleValueChange()} />;
-    else {
-      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
-      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
-      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
-      const vlt = tr && ValueLineController.getValueLineType(tr);
-
-      return <ValueLine ctx={ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => handleValueChange()} />;
-    }
+    return renderFilterValue(f, { ctx, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
   }
 
   function handleValueChange() {
@@ -486,6 +471,7 @@ function isFilterActive(fo: FilterOptionParsed) {
 
 export interface FilterConditionComponentProps {
   filter: FilterConditionOptionParsed;
+  allFilterOptions: FilterOptionParsed[];
   prefixToken: QueryToken | undefined;
   readOnly: boolean;
   onDeleteFilter: (fo: FilterConditionOptionParsed) => void;
@@ -619,7 +605,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
         </td>
         {p.showPinnedFiltersOptions &&
           <td>
-            {f.token && f.token.filterType && f.operation && !p.disableValue && < button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => {
+            {f.token && f.token.filterType && f.operation && !p.disableValue && <button className={classes("btn", "btn-link", "btn-sm", "sf-user-filter", f.pinned && "active")} onClick={e => {
               f.pinned = f.pinned ? undefined : {};
               fixDashboardBehaviour(f);
               changeFilter();
@@ -654,21 +640,9 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     const readOnly = p.readOnly || f.frozen;
 
-    if (isList(f.operation!)) {
-      if (f.token?.filterType == "Lite" && !p.renderValue)
-        return <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={handleValueChange} />;
-
-      return <MultiValue values={f.value} onRenderItem={ctx => createFilterValueControl(ctx, f.token!, handleValueChange, { mandatory: true })} readOnly={readOnly} onChange={handleValueChange} />;
-    }
-
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    if (f.operation == "ComplexCondition" || f.operation == "FreeText") {
-      const isComplex = f.operation == "ComplexCondition";
-      return <FilterTextArea ctx={ctx} isComplex={isComplex} onChange={handleValueChange} />;
-    }
-
-    return createFilterValueControl(ctx, f.token!, handleValueChange, { });
+    return renderFilterValue(f, { ctx: ctx, filterOptions: p.allFilterOptions, handleValueChange });
   }
 
   function handleValueChange() {
@@ -718,7 +692,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
             onChange={e => { pinned.splitValue = e.currentTarget.checked; p.onChange() }}
             title={
               !canSplitValue(p.fo) ? undefined :
-                !isFilterGroupOptionParsed(p.fo) && isList(p.fo.operation!) ? SearchMessage.SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup.niceToString() :
+                isFilterCondition(p.fo) && isList(p.fo.operation!) ? SearchMessage.SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup.niceToString() :
                   SearchMessage.SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup.niceToString()
             } />
         }
@@ -796,121 +770,8 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-export function createFilterValueControl(ctx: TypeContext<any>, token: QueryToken, handleValueChange: () => void, options: { label?: string, forceNullable?: boolean, mandatory?: boolean }): React.ReactElement<any> {
-
-  var { label, forceNullable, mandatory } = options;
-
-  var tokenType = token.type;
-  if (forceNullable)
-    tokenType = { ...tokenType, isNotNullable: false };
-
-  switch (token.filterType) {
-    case "Lite":
-      if (token.key == "[EntityType]" && token.parent!.type.name != IsByAll)
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} findOptions={{
-          queryName: TypeEntity,
-          filterOptions: [{ token: TypeEntity.token(a => a.cleanName), operation: "IsIn", value: token.parent!.type.name.split(", ") }]
-        }} />;
-
-      if (tokenType.name == IsByAll || getTypeInfos(tokenType).some(ti => !ti.isLowPopulation))
-        return <EntityLine ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} />;
-      else
-        return <EntityCombo ctx={ctx} type={tokenType} create={false} onChange={handleValueChange} label={label} mandatory={mandatory} />
-    case "Embedded":
-      return <EntityLine ctx={ctx} type={tokenType} create={false} autocomplete={null} onChange={handleValueChange} label={label} mandatory={mandatory} />;
-    case "Enum":
-      const ti = tryGetTypeInfos(tokenType).single();
-      if (!ti)
-        throw new Error(`EnumType ${tokenType.name} not found`);
-      const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} optionItems={members} onChange={handleValueChange} label={label} mandatory={mandatory} />;
-    default:
-      return <ValueLine ctx={ctx} type={tokenType} format={token.format} unit={token.unit} onChange={handleValueChange} label={label} mandatory={mandatory} />;
-  }
-}
-
-export interface MultiValueProps {
-  values: any[],
-  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
-  readOnly: boolean;
-  onChange: () => void;
-}
-
-export function MultiValue(p: MultiValueProps) {
-
-  const forceUpdate = useForceUpdate();
-
-  function handleDeleteValue(e: React.MouseEvent<any>, index: number) {
-    e.preventDefault();
-    p.values.removeAt(index);
-    p.onChange();
-    forceUpdate();
-  }
-
-  function handleAddValue(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    p.values.push(undefined);
-    p.onChange();
-    forceUpdate();
-  }
-
-  return (
-    <table style={{ marginBottom: "0px" }} className="sf-multi-value">
-      <tbody>
-        {
-          p.values.map((v, i) =>
-            <tr key={i}>
-              <td>
-                {!p.readOnly &&
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-                    className="sf-line-button sf-remove"
-                    onClick={e => handleDeleteValue(e, i)}>
-                    <FontAwesomeIcon icon="xmark" />
-                  </a>}
-              </td>
-              <td>
-                {
-                  p.onRenderItem(new TypeContext<any>(undefined,
-                    {
-                      formGroupStyle: "None",
-                      formSize: "xs",
-                      readOnly: p.readOnly
-                    }, undefined, new Binding<any>(p.values, i)))
-                }
-              </td>
-            </tr>)
-        }
-        <tr >
-          <td colSpan={4}>
-            {!p.readOnly &&
-              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddValue.niceToString() : undefined}
-                className="sf-line-button sf-create"
-                onClick={handleAddValue}>
-                <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddValue.niceToString()}
-              </a>}
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  );
-}
-
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }) {
-  const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
 
 
-  mListEntity.current.clear();
-  mListEntity.current.push(...p.values.map(lite => newMListElement(lite)));
-
-  var ctx = new TypeContext<MList<Lite<Entity>>>(undefined, { formGroupStyle: "None", readOnly: p.readOnly, formSize: "xs" }, undefined, Binding.create(mListEntity, a => a.current));
-
-
-  return <EntityStrip ctx={ctx} type={{ name: p.type, isLite: true, isCollection: true }} create={false} vertical={p.vertical} onChange={() => {
-    p.values.clear();
-    p.values.push(...mListEntity.current.map(a => a.element));
-    p.onChange();
-  }} />
-}
 
 
 function fixDashboardBehaviour(fop: FilterOptionParsed) {
@@ -921,62 +782,6 @@ function fixDashboardBehaviour(fop: FilterOptionParsed) {
     fop.dashboardBehaviour = undefined;
 }
 
-
-export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }) {
-  return <ValueLine ctx={p.ctx}
-    type={{ name: "string" }}
-    label={p.label}
-    valueLineType="TextArea"
-    valueHtmlAttributes={p.isComplex ? {
-      onKeyDown: e => {
-        console.log(e);
-        if (e.keyCode == 13 && !e.shiftKey) {
-          e.preventDefault();
-        }
-      },
-      onKeyUp: e => {
-        console.log(e);
-        if (e.keyCode == 13 && e.shiftKey) {
-           e.stopPropagation() 
-        }
-      }
-    } : undefined}
-    extraButtons={p.isComplex ? (vlc => <ComplexConditionSyntax />) : undefined}
-    onChange={p.onChange}
-  />
-}
-
-export function ComplexConditionSyntax() {
-  const popover = (
-    <Popover id="popover-basic">
-      <Popover.Header as="h3">Full-Text Search Syntax</Popover.Header>
-      <Popover.Body>
-        <ul className="ps-3">
-          {ComplexConditionSyntax.examples.map((a, i) => <li key={i} style={{ whiteSpace: "nowrap" }}><code>{a}</code></li>)}
-        </ul>
-        <a href="https://learn.microsoft.com/en-us/sql/relational-databases/search/query-with-full-text-search" target="_blank">Microsoft Docs <FontAwesomeIcon icon="arrow-up-right-from-square" /></a>
-      </Popover.Body>
-    </Popover>
-  );
-
-  return (
-    <OverlayTrigger trigger="click" placement="right" overlay={popover} >
-      <button className="sf-line-button sf-view btn input-group-text"><FontAwesomeIcon icon="asterisk" title="syntax" /></button>
-    </OverlayTrigger>
-  );
-
-}
-
-
-ComplexConditionSyntax.examples = [
-  "banana AND strawberry",
-  "banana OR strawberry",
-  "apple AND NOT (banana OR strawberry)",
-  "\"Dragon Fruit\" OR \"Passion Fruit\"",
-  "*berry",
-  "NEAR(\"apple\", \"orange\")",
-  "NEAR((\"apple\", \"orange\"), 3)",
-];
 
 
 

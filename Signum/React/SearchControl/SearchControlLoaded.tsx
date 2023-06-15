@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, FilterConditionOption, FilterConditionOptionParsed
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, FilterConditionOption, FilterConditionOptionParsed, isFilterCondition
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -970,32 +970,39 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const rt = this.state.resultTable;
     let value = cm.rowIndex == undefined || rt == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)];
 
-    var rule = Finder.quickFilterRules.first(a => a.applicable(token, value, this));
+    var rule = Finder.quickFilterRules.filter(a => a.applicable(token, value, this)).last("QuickFilterRule");
 
-    await rule.execute(token, value, this);
+    var showFilter = await rule.execute(token, value, this);
 
-    if (!this.state.showFilters)
+    if (!this.state.showFilters && showFilter)
       this.setState({ showFilters: true });
+    else {
+      this.doSearchPage1();
+    }
 
     this.handleFiltersChanged();
 
     this.forceUpdate(() => this.handleHeightChanged());
   }
 
-  addQuickFilter(token: QueryToken, operation: FilterOperation, value: unknown) {
+  addQuickFilter(token: QueryToken, operation: FilterOperation, value: unknown): boolean {
     const filterOptions = this.props.findOptions;
-    var alreadyPinned = filterOptions.filterOptions
-      .firstOrNull(f => !isFilterGroupOptionParsed(f) &&
+    var alreadyPinned = value != null && value != "" && filterOptions.filterOptions
+      .firstOrNull(f => isFilterCondition(f) &&
         similarToken(f.token?.fullKey, token?.fullKey) &&
         f.operation == operation &&
         (f.value == null || f.value == "")  &&
         f.pinned != null && f.pinned?.active == "WhenHasValue"
     );
 
-    if (alreadyPinned)
+    if (alreadyPinned) {
       alreadyPinned.value = value;
-    else
+      return false;
+    }
+    else {
       filterOptions.filterOptions.push({ token, operation, value, frozen: false });
+      return true;
+    }
 
   }
 
@@ -1985,7 +1992,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (colIndex != -1)
       return { value: row.columns[colIndex] };
 
-    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => isFilterCondition(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
       return { value: filter?.value };
 
@@ -2039,7 +2046,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       }
     }
 
-    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => !isFilterGroupOptionParsed(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => isFilterCondition(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
       return { value: filter?.value };
 

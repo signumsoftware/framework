@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroupOptionParsed } from '@framework/FindOptions'
+import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroup } from '@framework/FindOptions'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'

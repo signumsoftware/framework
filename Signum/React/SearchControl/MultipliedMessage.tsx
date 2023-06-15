@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { Dic } from '../Globals'
-import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroupOptionParsed } from '../FindOptions'
+import { FindOptionsParsed, QueryToken, getTokenParents, isFilterGroup } from '../FindOptions'
 import { tryGetTypeInfos, TypeReference, getTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FilterOptionParsed } from '../Search';
@@ -12,7 +12,7 @@ export default function MultipliedMessage(p: { findOptions: FindOptionsParsed, m
   const fops = p.findOptions;
 
   function getFilterTokens(fop: FilterOptionParsed): (QueryToken | undefined)[] {
-    if (isFilterGroupOptionParsed(fop))
+    if (isFilterGroup(fop))
       return [fop.token, ...fop.filters.flatMap(f => getFilterTokens(f))];
     else
       return [fop.operation == undefined ? undefined : fop.token]

@@ -8,7 +8,7 @@ import ChartRenderer, { handleDrillDown } from '../../Templates/ChartRenderer'
 import ChartTableComponent from '../../Templates/ChartTable'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
-import { FilterOptionParsed, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions'
+import { FilterOptionParsed, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { DashboardBehaviour } from '@framework/Signum.DynamicQuery'
 import { softCast } from '@framework/Globals'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
@@ -37,7 +37,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
     var dashboardFilters = p.dashboardController.getFilterOptions(p.partEmbedded, chartRequest!.queryKey);
 
     function allTokens(fs: FilterOptionParsed[]): QueryToken[] {
-      return fs.flatMap(f => isFilterGroupOptionParsed(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
+      return fs.flatMap(f => isFilterGroup(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
     }
 
     var tokens = allTokens(dashboardFilters.filter(df => isActive(df)));
@@ -53,7 +53,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
     if (initialSelection) {
 
-      if (isFilterGroupOptionParsed(initialSelection))
+      if (isFilterGroup(initialSelection))
         throw new Error(DashboardBehaviour.niceToString("UseAsInitialSelection") + " is not compatible with groups");
 
       var dashboarFilter = new DashboardFilter(p.partEmbedded, chartRequest!.queryKey);
