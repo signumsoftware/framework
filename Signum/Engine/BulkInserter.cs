@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Security;
 using Signum.Utilities.Reflection;
@@ -9,7 +10,7 @@ namespace Signum.Engine;
 
 public static class BulkInserter
 {
-    const SqlBulkCopyOptions SafeDefaults = SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.KeepNulls;
+    public const SqlBulkCopyOptions SafeDefaults = SqlBulkCopyOptions.CheckConstraints | SqlBulkCopyOptions.KeepNulls;
 
     public static int BulkInsert<T>(this IEnumerable<T> entities,
         SqlBulkCopyOptions copyOptions = SafeDefaults,
@@ -233,13 +234,14 @@ public static class BulkInserter
     static int BulkInsertMListTablePropertyRoute<E, V>(List<E> entities, PropertyRoute route, SqlBulkCopyOptions copyOptions, int? timeout, string? message)
          where E : Entity
     {
-        return BulkInsertMListTable<E, V>(entities, route.GetLambdaExpression<E, MList<V>>(safeNullAccess: false), copyOptions, timeout, message);
+        return BulkInsertMListTable<E, V>(entities, route.GetLambdaExpression<E, MList<V>>(safeNullAccess: false), copyOptions, disableMListIdentity: false, timeout, message);
     }
 
     public static int BulkInsertMListTable<E, V>(
         List<E> entities,
         Expression<Func<E, MList<V>>> mListProperty,
         SqlBulkCopyOptions copyOptions = SafeDefaults,
+        bool disableMListIdentity = false,
         int? timeout = null,
         string? message = null)
         where E : Entity
@@ -259,7 +261,7 @@ public static class BulkInserter
                                      })
                                      select mle).ToList();
 
-                return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, updateParentTicks: false, message: message);
+                return BulkInsertMListTable(mlistElements, mListProperty, copyOptions, disableMListIdentity, timeout, updateParentTicks: false, message: message);
             }
             catch (InvalidOperationException e) when (e.Message.Contains("has no Id"))
             {
@@ -272,6 +274,7 @@ public static class BulkInserter
         this IEnumerable<MListElement<E, V>> mlistElements,
         Expression<Func<E, MList<V>>> mListProperty,
         SqlBulkCopyOptions copyOptions = SafeDefaults,
+        bool disableMListIdentity = false,
         int? timeout = null,
         bool? updateParentTicks = null, /*Needed for concurrency and Temporal tables*/
         string? message = null)
@@ -281,10 +284,13 @@ public static class BulkInserter
         {
             if (message != null)
                 return SafeConsole.WaitRows(message == "auto" ? $"BulkInsering MList<{ typeof(V).TypeName()}> in { typeof(E).TypeName()}" : message,
-                    () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, timeout, updateParentTicks, message: null));
+                    () => BulkInsertMListTable(mlistElements, mListProperty, copyOptions, disableMListIdentity, timeout, updateParentTicks, message: null));
 
             if (copyOptions.HasFlag(SqlBulkCopyOptions.UseInternalTransaction))
                 throw new InvalidOperationException("BulkInsertDisableIdentity not compatible with UseInternalTransaction");
+
+            if (disableMListIdentity)
+                copyOptions |= SqlBulkCopyOptions.KeepIdentity;
 
             var mlistTable = ((FieldMList)Schema.Current.Field(mListProperty)).TableMList;
 
@@ -295,8 +301,10 @@ public static class BulkInserter
 
             var maxRowId = updateParentTicks.Value ? Database.MListQuery(mListProperty).Max(a => (PrimaryKey?)a.RowId) : null;
 
+            bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
+
             var dt = new DataTable();
-            var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && !c.IdentityBehaviour).ToList();
+            var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (!c.IdentityBehaviour || disableIdentityBehaviour)).ToList();
             foreach (var c in columns)
                 dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
 
@@ -311,7 +319,10 @@ public static class BulkInserter
             {
                 Schema.Current.OnPreBulkInsert(typeof(E), inMListTable: true);
 
-                Executor.BulkCopy(dt, columns, mlistTable.Name, copyOptions, timeout);
+                using (disableIdentityBehaviour ? Administrator.DisableIdentity(mlistTable) : null)
+                {
+                    Executor.BulkCopy(dt, columns, mlistTable.Name, copyOptions, timeout);
+                }
 
                 var result = list.Count;
 

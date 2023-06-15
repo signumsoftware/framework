@@ -9,6 +9,11 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Text.Json;
 using Signum.API;
+using Filter = Signum.DynamicQuery.Filter;
+using FilterGroup = Signum.DynamicQuery.FilterGroup;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using Microsoft.Azure.Amqp.Framing;
+using Order = Signum.DynamicQuery.Order;
 using Microsoft.Graph.Models.ODataErrors;
 using System;
 
@@ -44,6 +49,28 @@ public static class AzureADLogic
             ObjectID = Guid.Parse(a.Id!),
             SID = null,
         }).ToList();
+    }
+
+    public static async Task<ActiveDirectoryUser> GetActiveDirectoryUser(Guid oid, CancellationToken token)
+    {
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+        var u = await graphClient.Users[oid.ToString()].GetAsync(cancellationToken: token);
+
+        if (u == null)
+            throw new Exception("User with OID '" + oid.ToString() + "' not found in Active Directory");
+        else
+        {
+            return new ActiveDirectoryUser
+            {
+                UPN = u.UserPrincipalName!,
+                DisplayName = u.DisplayName!,
+                JobTitle = u.JobTitle!,
+                ObjectID = Guid.Parse(u.Id!),
+                SID = null,
+            };
+        }
     }
 
     public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);

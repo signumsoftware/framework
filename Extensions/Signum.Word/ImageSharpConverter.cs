@@ -22,7 +22,7 @@ public class ImageSharpConverter : IImageConverter<Image>
         return (size.Width, size.Height);
     }
 
-    public Image Resize(Image image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition, ImageHorizontalPosition horizontalPosition)
+    public Image Resize(Image image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         AnchorPositionMode setPosition ()
         {

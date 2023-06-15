@@ -111,7 +111,7 @@ public class ExpressionContainer
                 if(mi.GetCustomAttribute<ExpressionFieldAttribute>() == null)
                     throw new InvalidOperationException("The parameter 'lambdaToMethodOrProperty' should be an expression calling a expression method or property");
 
-                return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.NiceName()), mi.Name);
+                return Register<E, S>(lambdaToMethodOrProperty, niceName ?? (() => mi.Name.SpacePascalOrUnderscores()), mi.Name);
             }
             else if (lambdaToMethodOrProperty.Body.NodeType == ExpressionType.MemberAccess)
             {
@@ -311,8 +311,8 @@ public class ExtensionInfo
                 {
                     result.Implementations = metaImps;
                 }
-                result.Format = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
-                result.Unit = dirtyMeta.CleanMetas.Select(cm => ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
+                result.Format = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetFormat(cm.PropertyRoutes)).Distinct().Only();
+                result.Unit = dirtyMeta.CleanMetas.Select(cm => cm.PropertyRoutes.Length == 0 ? null : ColumnDescriptionFactory.GetUnit(cm.PropertyRoutes)).Distinct().Only();
             }
 
             result.IsAllowed = () => me?.Meta.IsAllowed();

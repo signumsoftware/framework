@@ -503,9 +503,6 @@ public static class Csv
             if(longs.All(a=> a != null))
                 return longs.All(a => int.MinValue <= a && a <= int.MaxValue) ? "int" : "long";
 
-            if (vals.All(a => decimal.TryParse(a, defCulture, out _)))
-                return "decimal";
-
             if (vals.All(a => DateOnly.TryParse(a, defCulture, out _)))
                 return "DateOnly";
 
@@ -514,6 +511,9 @@ public static class Csv
 
             if (vals.All(a => DateTime.TryParse(a, defCulture, out _)))
                 return "DateTime";
+
+            if (vals.All(a => decimal.TryParse(a, defCulture, out _)))
+                return "decimal";
 
             return "string";
         }

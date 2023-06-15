@@ -234,7 +234,7 @@ public static class AuthServer
                     if (error != null)
                         throw new ApplicationException(error);
 
-                    ((UserEntity)ctx.Entity).PasswordHash = PasswordEncoding.EncodePassword(password);
+                    ((UserEntity)ctx.Entity).PasswordHash = PasswordEncoding.EncodePassword(((UserEntity)ctx.Entity).UserName, password);
                 }
             }
         });

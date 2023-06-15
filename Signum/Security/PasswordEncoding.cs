@@ -2,9 +2,13 @@ using System.Security.Cryptography;
 
 namespace Signum.Security;
 
+public delegate byte[] EncodePasswordDelegate(string username, string password) ;
+public delegate List<byte[]> EncodePasswordAlternativesDelegate(string username, string password);
+
 public static class PasswordEncoding
 {
-    public static Func<string, byte[]> EncodePassword = (originalPassword) => MD5Hash(originalPassword);
+    public static EncodePasswordDelegate EncodePassword = (userName, originalPassword) => MD5Hash(originalPassword);
+    public static EncodePasswordAlternativesDelegate EncodePasswordAlternatives = (userName, originalPassword) => new List<byte[]> { EncodePassword(userName, originalPassword) };
 
     public static byte[] MD5Hash(string saltedPassword)
     {

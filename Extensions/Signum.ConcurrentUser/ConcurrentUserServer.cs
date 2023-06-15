@@ -23,10 +23,13 @@ public static class ConcurrentUserServer
         ConcurrentUserHub = app.Services.GetService<IHubContext<ConcurrentUserHub, IConcurrentUserClient>>()!;
 
         var s = Schema.Current;
-        foreach (var type in Schema.Current.Tables.Keys.Where(t => ConcurrentUserLogic.WatchSaveFor(t)))
+        Schema.Current.SchemaCompleted += () =>
         {
-            giAttachSchemaEvents.GetInvoker(type)(s);
-        }
+            foreach (var type in Schema.Current.Tables.Keys.Where(t => ConcurrentUserLogic.WatchSaveFor(t)))
+            {
+                giAttachSchemaEvents.GetInvoker(type)(s);
+            }
+        };
 
         CacheLogic.BroadcastReceivers.Add("ConcurrentUsersChanged", args =>
         {

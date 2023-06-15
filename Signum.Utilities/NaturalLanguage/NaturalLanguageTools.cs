@@ -115,7 +115,7 @@ public static class NaturalLanguageTools
     }
 
 
-    public static string NiceName(this string memberName)
+    public static string SpacePascalOrUnderscores(this string memberName)
     {
         return memberName.Contains('_') ?
           memberName.Replace('_', ' ') :
