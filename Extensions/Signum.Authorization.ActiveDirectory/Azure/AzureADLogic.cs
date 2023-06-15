@@ -386,7 +386,7 @@ public static class AzureADLogic
                 {
                     adAuthorizer.UpdateUser(user, acuCtx);
 
-                    return user;
+                    return tr.Commit(user);
                 }
 
                 var result = adAuthorizer.OnCreateUser(acuCtx);
