@@ -7,7 +7,8 @@ import { LoginAuthMessage } from "../Signum.Authorization/Signum.Authorization";
 import LoginPage from "../Signum.Authorization/Login/LoginPage";
 import * as AuthClient from "../Signum.Authorization/AuthClient";
 
-export function startPublic(options: { routes: RouteObject[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
+export function startPublic(options: { routes: RouteObject[] }) {
+
   options.routes.push({ path: "/auth/forgotPasswordEmail", element: <ImportComponent onImport={() => import("./ForgotPasswordEmailPage")} /> });
   options.routes.push({ path: "/auth/resetPassword", element: <ImportComponent onImport={() => import("./ResetPassword")} /> });
 
