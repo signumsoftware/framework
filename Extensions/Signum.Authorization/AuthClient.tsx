@@ -60,6 +60,7 @@ export function assertPermissionAuthorized(permission: PermissionSymbol | string
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = tryGetTypeInfo(key.before("."));
+
   if (!type)
     return false;
 

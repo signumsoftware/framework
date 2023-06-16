@@ -4,6 +4,7 @@ using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
+using Signum.Mailing;
 
 namespace Signum.Authorization.ActiveDirectory;
 
