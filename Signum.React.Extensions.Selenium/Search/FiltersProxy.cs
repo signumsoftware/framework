@@ -42,6 +42,11 @@ public class FiltersProxy
         get { return this.Element.WithLocator(By.CssSelector(".sf-line-button.sf-create-group")); }
     }
 
+    public WebElementLocator RemoveAllButton
+    {
+        get { return this.Element.WithLocator(By.CssSelector("thead th .sf-remove")); }
+    }
+
     public FilterConditionProxy AddFilter()
     {
         return (FilterConditionProxy)GetNewFilter(() => this.AddFilterButton.Find().Click());
@@ -58,6 +63,11 @@ public class FiltersProxy
         fo.QueryToken.SelectToken(token);
         fo.Operation = operation;
         fo.SetValue(value);
+    }
+
+    public void RemoveAll()
+    {
+        this.RemoveAllButton.Find().Click();
     }
 
     public bool IsAddFilterEnabled
