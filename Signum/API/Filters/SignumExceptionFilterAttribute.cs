@@ -67,7 +67,15 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
             var connFeature = actionContext.HttpContext.Features.Get<IHttpConnectionFeature>()!;
 
-            var body = await ReadAllBody(actionContext.HttpContext);
+            byte[] body;
+            try
+            {
+                body = await ReadAllBody(actionContext.HttpContext);
+            }
+            catch(Exception e)
+            {
+                body = Encoding.UTF8.GetBytes(e.GetType().Name + ":" + e.Message);
+            }
 
             var exLog = exception.LogException(e =>
             {
