@@ -80,6 +80,9 @@ public static class QueryUtils
                 if (type.IsEmbeddedEntity())
                     return FilterType.Embedded;
 
+                if (type.IsModelEntity())
+                    return FilterType.Model;
+
                 goto default;
             default:
                 return null;
@@ -205,6 +208,13 @@ public static class QueryUtils
         },
         {
             FilterType.Embedded, new List<FilterOperation>
+            {
+                FilterOperation.EqualTo,
+                FilterOperation.DistinctTo,
+            }.ToReadOnly()
+        },
+        {
+            FilterType.Model, new List<FilterOperation>
             {
                 FilterOperation.EqualTo,
                 FilterOperation.DistinctTo,

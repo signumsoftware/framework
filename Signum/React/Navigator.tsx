@@ -103,6 +103,11 @@ export function raiseEntityChanged(typeOrEntity: Type<any> | string | Entity, is
 
 export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | undefined): React.ReactNode | undefined {
 
+  var settings = entitySettings[entity.Type];
+
+  if (settings?.renderSubTitle)
+    return settings.renderSubTitle(entity);
+
   if (isTypeEntity(entity.Type)) {
 
     const typeInfo = getTypeInfo(entity.Type);
@@ -110,7 +115,7 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
     if (entity.isNew)
       return FrameMessage.New0_G.niceToString().forGenderAndNumber(typeInfo.gender).formatWith(typeInfo.niceName);
 
-    return renderTitle(typeInfo, entity);
+    return defaultRenderSubTitle(typeInfo, entity);
   }
   else if (isTypeModel(entity.Type)) {
     return undefined;
@@ -120,8 +125,19 @@ export function getTypeSubTitle(entity: ModifiableEntity, pr: PropertyRoute | un
   }
 }
 
+let defaultRenderSubTitle = (typeInfo: TypeInfo, entity: ModifiableEntity): React.ReactElement | null => {
+  return <span>{typeInfo.niceName} {renderId(entity as Entity)}</span>;
+}
+
+export function setDefaultRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
+  defaultRenderSubTitle = newFunction;
+}
+
+
 let renderId = (entity: Entity): React.ReactChild => {
-  const guid = getTypeInfo(entity.Type).members["Id"].type!.name == "Guid";
+  var idType = getTypeInfo(entity.Type).members["Id"].type;
+
+  const guid = idType!.name == "Guid";
   return (
     <>
       <span className={guid ? "sf-hide-id" : ""}>
@@ -137,14 +153,6 @@ export function setRenderIdFunction(newFunction: (entity: Entity) => React.React
   renderId = newFunction;
 }
 
-let renderTitle = (typeInfo: TypeInfo, entity: ModifiableEntity) => {
-  return "{0} {1}".formatHtml(typeInfo.niceName, renderId(entity as Entity));
-  return null;
-}
-
-export function setRenderTitleFunction(newFunction: (typeInfo: TypeInfo, entity: ModifiableEntity) => React.ReactElement | null) {
-  renderTitle = newFunction;
-}
 
 export function navigateRoute(entity: Entity, viewName?: string): string;
 export function navigateRoute(lite: Lite<Entity>, viewName?: string): string;
@@ -939,6 +947,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   onAssignServerChanges?: (local: T, server: T) => void;
 
+  renderSubTitle?: (entity: T) => React.ReactNode;
+
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
@@ -1014,6 +1024,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   stickyHeader?: boolean;
 
   onAssignServerChanges?: (local: T, server: T) => void;
+
+  renderSubTitle?: (entity: T) => React.ReactNode;
 
   autocomplete?: (fo: FindOptions | undefined, showType: boolean) => AutocompleteConfig<any> | undefined | null;
   autocompleteDelay?: number;
@@ -1158,10 +1170,8 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
     const ctx = this.props.ctx;
 
     const view = baseRender.call(this);
-    if (view == null)
-      return null;
 
-    const replacer = new ViewReplacer<T>(view, ctx);
+    const replacer = new ViewReplacer<T>(view!, ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };
@@ -1169,18 +1179,37 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
   component.prototype.render.withViewOverrides = true;
 }
 
-export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]) {
+interface FunctionCache<T extends ModifiableEntity>  {
+  overridenView: React.FunctionComponent<{ ctx: TypeContext<T> }>,
+  viewOverrides: ViewOverride<T>[]
+}
+
+export function surroundFunctionComponent<T extends ModifiableEntity>(functionComponent: React.FunctionComponent<{ ctx: TypeContext<T> }>, viewOverrides: ViewOverride<T>[]): React.FunctionComponent<{ ctx: TypeContext<T> }>{
+
+  var cache = (functionComponent as any).cache as FunctionCache<T>; 
+
+  if (cache) {
+    if (cache.viewOverrides.every((vo, i) => viewOverrides[i] == vo))
+      return cache.overridenView;
+    else {
+      (functionComponent as any).cache = null;
+    }
+  }
+
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
-    if (view == null)
-      return null;
 
-    const replacer = new ViewReplacer<T>(view, props.ctx);
+    const replacer = new ViewReplacer<T>(view!, props.ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };
 
   Object.defineProperty(result, "name", { value: functionComponent.name + "VO" });
+
+  (functionComponent as any).cache = softCast<FunctionCache<T>>({
+    overridenView: result,
+    viewOverrides: viewOverrides,
+  });
 
   return result;
 }

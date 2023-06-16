@@ -54,11 +54,9 @@ public static class ReflectionServer
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t)).ToList();
             var symbols = SymbolLogic.AllSymbolContainers().ToList();
+            var queries = QueryLogic.Queries.GetQueryNames().Where(a => a is Enum).Select(a => a.GetType()).Distinct();
 
-            var messages = mainTypes.Concat(mixins).Concat(symbols).Select(a => a.Assembly).SelectMany(a => a.GetTypes())
-            .Where(t => t.IsPublic && t.IsEnum && LocalizedAssembly.GetDescriptionOptions(t) != DescriptionOptions.None).ToList();
-
-            foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(messages))
+            foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(queries))
             {
                 EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
             }
@@ -135,7 +133,8 @@ public static class ReflectionServer
         return oi;
     }
 
-    public static HashSet<Type> ExcludeTypes = new HashSet<Type>();
+    //hack to allow controlling business dependencies
+    public static Func<Type, bool> ExcludeType = f => false;
 
     internal static Dictionary<string, TypeInfoTS> GetTypeInfoTS()
     {
@@ -169,7 +168,7 @@ public static class ReflectionServer
         {
             var name = kvp.Key.GetName().Name;
 
-            var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeTypes.Contains(t) && kvp.Value.Contains(t.Namespace!)).ToList();
+            var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeType(t) && kvp.Value.Contains(t.Namespace!)).ToList();
 
             var usedEnums = (from type in normalTypes
                              where typeof(ModifiableEntity).IsAssignableFrom(type)
@@ -225,38 +224,39 @@ public static class ReflectionServer
             ToStringFunction = LambdaToJavascriptConverter.ToJavascript(ExpressionCleaner.GetFieldExpansion(type, miToString)!, false),
             QueryDefined = queries.QueryDefined(type),
             Members = PropertyRoute.GenerateRoutes(type)
-                .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeTypes.Contains(pr.Type))
-                .Select(pr =>
-                {
-                    var validators = Validator.TryGetPropertyValidator(pr)?.Validators;
-                    var mi = new MemberInfoTS
+                    .Where(pr => InTypeScript(pr) && !ReflectionServer.ExcludeType(pr.Type))
+                    .Select(pr =>
                     {
-                        NiceName = pr.PropertyInfo!.NiceName(),
-                        Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
-                        IsReadOnly = !IsId(pr) && (pr.PropertyInfo?.IsReadOnly() ?? false),
-                        Required = !IsId(pr) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
-                        Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
-                        Type = new TypeReferenceTS(IsId(pr) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
-                        IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
-                        IsVirtualMList = pr.IsVirtualMList(),
-                        MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
-                        PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
-                        AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
-                        IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
-                        IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
-                        HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
-                    };
+                        var validators = Validator.TryGetPropertyValidator(pr)?.Validators;
+                        var mi = new MemberInfoTS
+                        {
+                            NiceName = pr.PropertyInfo!.NiceName(),
+                            Format = pr.PropertyRouteType == PropertyRouteType.FieldOrProperty ? Reflector.FormatString(pr) : null,
+                            IsReadOnly = !IsId(pr, isEntity) && (pr.PropertyInfo?.IsReadOnly() ?? false),
+                            Required = !IsId(pr, isEntity) && ((pr.Type.IsValueType && !pr.Type.IsNullable()) || (validators?.Any(v => !v.DisabledInModelBinder && (!pr.Type.IsMList() ? (v is NotNullValidatorAttribute) : (v is CountIsValidatorAttribute c && c.IsGreaterThanZero))) ?? false)),
+                            Unit = UnitAttribute.GetTranslation(pr.PropertyInfo?.GetCustomAttribute<UnitAttribute>()?.UnitName),
+                            Type = new TypeReferenceTS(IsId(pr, isEntity) ? PrimaryKey.Type(type).Nullify() : pr.PropertyInfo!.PropertyType, pr.Type.IsMList() ? pr.Add("Item").TryGetImplementations() : pr.TryGetImplementations()),
+                            IsMultiline = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.MultiLine ?? false,
+                            IsVirtualMList = pr.IsVirtualMList(),
+                            MaxLength = validators?.OfType<StringLengthValidatorAttribute>().FirstOrDefault()?.Max.DefaultToNull(-1),
+                            PreserveOrder = settings.FieldAttributes(pr)?.OfType<PreserveOrderAttribute>().Any() ?? false,
+                            AvoidDuplicates = validators?.OfType<NoRepeatValidatorAttribute>().Any() ?? false,
+                            IsPhone = (validators?.OfType<TelephoneValidatorAttribute>().Any() ?? false) || (validators?.OfType<MultipleTelephoneValidatorAttribute>().Any() ?? false),
+                            IsMail = validators?.OfType<EMailValidatorAttribute>().Any() ?? false,
+                            HasFullTextIndex = isEntity && schema.HasFullTextIndex(pr),
+                        };
 
-                    return KeyValuePair.Create(pr.PropertyString(), OnPropertyRouteExtension(mi, pr)!);
-                })
-                .Where(kvp => kvp.Value != null)
-                .ToDictionaryEx("properties"),
+                        return KeyValuePair.Create(pr.PropertyString(), OnPropertyRouteExtension(mi, pr)!);
+                    })
+                    .Where(kvp => kvp.Value != null)
+                    .ToDictionaryEx("properties"),
+
             CustomLiteModels = !type.IsEntity() ? null : Lite.LiteModelConstructors.TryGetC(type)?.Values
-                    .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
-                    {
-                        IsDefault = lmc.IsDefault,
-                        ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression(), true)!
-                    }),
+                            .ToDictionary(lmc => lmc.ModelType.TypeName(), lmc => new CustomLiteModelTS
+                            {
+                                IsDefault = lmc.IsDefault,
+                                ConstructorFunctionString = LambdaToJavascriptConverter.ToJavascript(lmc.GetConstructorExpression(), true)!
+                            }),
 
 
             HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
@@ -279,11 +279,12 @@ public static class ReflectionServer
         return propertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(type, propertyInfo);
     }
 
-    public static bool IsId(PropertyRoute p)
+    public static bool IsId(PropertyRoute p, bool isEntity)
     {
         return p.PropertyRouteType == PropertyRouteType.FieldOrProperty &&
             p.PropertyInfo!.Name == nameof(Entity.Id) &&
-            p.Parent!.PropertyRouteType == PropertyRouteType.Root;
+            p.Parent!.PropertyRouteType == PropertyRouteType.Root &&
+            isEntity;
     }
 
     public static TypeInfoTS? GetEnumTypeInfo(Type type)
@@ -307,8 +308,8 @@ public static class ReflectionServer
                               NiceName = fi.NiceName(),
                               IsIgnoredEnum = kind == KindOfType.Enum && fi.HasAttribute<IgnoreAttribute>()
                           }, fi)!))
-                    .Where(a => a.Value != null)
-                    .ToDictionaryEx("query"),
+                          .Where(a => a.Value != null)
+                          .ToDictionaryEx("query"),
         };
 
         return OnTypeExtension(result, type);

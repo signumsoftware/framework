@@ -8,6 +8,7 @@
   },
   "references": [
     { "path": "../../Signum" },
-    { "path": "../Signum.Authorization" }
+    { "path": "../Signum.Authorization" },
+    { "path": "../Signum.Map" }
   ]
 }

@@ -71,26 +71,6 @@ export module ADGroupOperation {
   export const Delete : Operations.DeleteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Delete");
 }
 
-export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
-export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
-  Type: "OnPremisesExtensionAttributesModel";
-  extensionAttribute1: string | null;
-  extensionAttribute2: string | null;
-  extensionAttribute3: string | null;
-  extensionAttribute4: string | null;
-  extensionAttribute5: string | null;
-  extensionAttribute6: string | null;
-  extensionAttribute7: string | null;
-  extensionAttribute8: string | null;
-  extensionAttribute9: string | null;
-  extensionAttribute10: string | null;
-  extensionAttribute11: string | null;
-  extensionAttribute12: string | null;
-  extensionAttribute13: string | null;
-  extensionAttribute14: string | null;
-  extensionAttribute15: string | null;
-}
-
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");
 export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
   Type: "RoleMappingEmbedded";
@@ -112,11 +92,6 @@ export interface UserADMixin extends Entities.MixinEntity {
   Type: "UserADMixin";
   oID: string /*Guid*/ | null;
   sID: string | null;
-}
-
-export module UserADQuery {
-  export const ActiveDirectoryUsers = new QueryKey("UserADQuery", "ActiveDirectoryUsers");
-  export const ActiveDirectoryGroups = new QueryKey("UserADQuery", "ActiveDirectoryGroups");
 }
 
 export module UserOIDMessage {

@@ -240,7 +240,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
   if (state) {
     frame = {
       tabs: undefined,
-      frameComponent: { forceUpdate, type: FrameModalEx },
+      frameComponent: { forceUpdate: forceUpdate, type: FrameModalEx },
       entityComponent: entityComponent.current,
       onReload: (pack, reloadComponent, callback) => {
         const newPack = pack || state!.pack;
@@ -374,7 +374,7 @@ export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPro
   const entity = pack.entity;
 
   if (title === undefined) {
-    title = getToString(entity) ?? "";
+    title = Navigator.renderEntity(entity) ?? "";
   }
 
   if (subTitle === undefined) {

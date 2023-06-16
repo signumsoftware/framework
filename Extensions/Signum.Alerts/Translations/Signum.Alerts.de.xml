@@ -58,6 +58,7 @@
     <Member Name="NewUnreadNotifications" Description="Neue ungelesene Benachrichtigungen" />
     <Member Name="OtherNotifications" Description="Andere Benachrichtigungen" />
     <Member Name="PleaseVisit0" Description="Bitte besuchen Sie {0}" />
+    <Member Name="Ringing" Description="Klingeln!" />
     <Member Name="Show0AlertsMore" Description="Weitere {0} Benachrichtigungen anzeigen" />
     <Member Name="Show0GroupsMore1Remaining" Description="Weitere {0} Gruppen anzeigen ({1} verbleibend)" />
     <Member Name="Text" Description="Text" />

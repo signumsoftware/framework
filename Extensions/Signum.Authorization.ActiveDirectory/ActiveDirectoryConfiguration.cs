@@ -93,11 +93,7 @@ public enum UserADMessage
     NameOrEmail,
 }
 
-public enum UserADQuery
-{
-    ActiveDirectoryUsers,
-    ActiveDirectoryGroups,
-}
+
 
 public enum ActiveDirectoryMessage
 {
@@ -117,43 +113,6 @@ public enum ActiveDirectoryMessage
     SecurityEnabled,
     Visibility,
     HasUser,
-}
-
-public class OnPremisesExtensionAttributesModel : ModelEntity
-{
-    public string? ExtensionAttribute1 { get; set; }
-    public string? ExtensionAttribute2 { get; set; }
-    public string? ExtensionAttribute3 { get; set; }
-    public string? ExtensionAttribute4 { get; set; }
-    public string? ExtensionAttribute5 { get; set; }
-    public string? ExtensionAttribute6 { get; set; }
-    public string? ExtensionAttribute7 { get; set; }
-    public string? ExtensionAttribute8 { get; set; }
-    public string? ExtensionAttribute9 { get; set; }
-    public string? ExtensionAttribute10 { get; set; }
-    public string? ExtensionAttribute11 { get; set; }
-    public string? ExtensionAttribute12 { get; set; }
-    public string? ExtensionAttribute13 { get; set; }
-    public string? ExtensionAttribute14 { get; set; }
-    public string? ExtensionAttribute15 { get; set; }
-}
-
-[EntityKind(EntityKind.String, EntityData.Master), PrimaryKey(typeof(Guid))]
-public class ADGroupEntity : Entity
-{
-    [UniqueIndex]
-    [StringLengthValidator(Max = 100)]
-    public string DisplayName { get; set; }
-
-    [AutoExpressionField]
-    public override string ToString() => As.Expression(() => DisplayName);
-}
-
-[AutoInit]
-public static class ADGroupOperation
-{
-    public static readonly ExecuteSymbol<ADGroupEntity> Save;
-    public static readonly DeleteSymbol<ADGroupEntity> Delete;
 }
 
 [AutoInit]

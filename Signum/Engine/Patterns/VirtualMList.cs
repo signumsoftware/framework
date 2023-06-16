@@ -90,12 +90,13 @@ public static class VirtualMList
         if (nn != null && !nn.Disabled)
             throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
 
-        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute));
+        Func<T, MList<L>> getMList = GetAccessor(mListField);
+
+        RegisteredVirtualMLists.GetOrCreate(typeof(T)).Add(mListPropertRoute, new VirtualMListInfo(mListPropertRoute, backReferenceRoute, e => getMList((T)e)));
 
         var defLazyRetrieve = lazyRetrieve ?? (typeof(L) == typeof(T));
         var defLazyDelete = lazyDelete ?? (typeof(L) == typeof(T));
 
-        Func<T, MList<L>> getMList = GetAccessor(mListField);
         Action<L, Lite<T>>? setter = null;
         bool preserveOrder = fi.SchemaBuilder.Settings.FieldAttributes(mListPropertRoute)!
             .OfType<PreserveOrderAttribute>()
@@ -224,7 +225,7 @@ public static class VirtualMList
                 if (mlist.Any())
                 {
                     if (setter == null)
-                        setter = CreateSetter(backReference);
+                        setter = CreateBackreferenceSetter(backReference);
 
                     mlist.ForEach(line => setter!(line, e.ToLite()));
                     if (onSave == null)
@@ -310,7 +311,7 @@ public static class VirtualMList
                 return;
 
             if (setter == null)
-                setter = CreateSetter(backReference);
+                setter = CreateBackreferenceSetter(backReference);
 
             mlist.ForEach(line => setter!(line, e.ToLite()));
             if (onSave == null)
@@ -356,7 +357,7 @@ public static class VirtualMList
             );
     }
 
-    public static Action<L, Lite<T>>? CreateSetter<T, L>(Expression<Func<L, Lite<T>?>> getBackReference)
+    public static Action<L, Lite<T>>? CreateBackreferenceSetter<T, L>(Expression<Func<L, Lite<T>?>> getBackReference)
         where T : Entity
         where L : Entity
     {
@@ -364,7 +365,18 @@ public static class VirtualMList
         if (body.NodeType == ExpressionType.Convert)
             body = ((UnaryExpression)body).Operand;
 
-        return ReflectionTools.CreateSetter<L, Lite<T>>(((MemberExpression)body).Member);
+        using (HeavyProfiler.LogNoStackTrace("CreateSetter"))
+        {
+            ParameterExpression t = getBackReference.Parameters.SingleEx();
+            ParameterExpression p = Expression.Parameter(typeof(Lite<T>), "p");
+
+            var me = ((MemberExpression)body);
+
+            var p2 = p.TryConvert(me.Member.ReturningType());
+
+            var exp = Expression.Lambda(typeof(Action<L, Lite<T>>), Expression.Assign(me, p2), t, p);
+            return (Action<L, Lite<T>>)exp.Compile();
+        }
     }
 
     public static MList<T> ToVirtualMListWithOrder<T>(this IEnumerable<T> elements)
@@ -384,10 +396,12 @@ public class VirtualMListInfo
 {
     public readonly PropertyRoute MListRoute;
     public readonly PropertyRoute BackReferenceRoute;
+    public readonly Func<Entity, IMListPrivate?> GetMList;
 
-    public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute)
+    public VirtualMListInfo(PropertyRoute mListRoute, PropertyRoute backReferenceRoute, Func<Entity, IMListPrivate?> getMList)
     {
         MListRoute = mListRoute;
         BackReferenceRoute = backReferenceRoute;
+        GetMList = getMList;
     }
 }

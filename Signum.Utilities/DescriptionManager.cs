@@ -164,7 +164,7 @@ public static class DescriptionManager
 
         if (!LocalizedAssembly.HasDefaultAssemblyCulture(type.Assembly))
         {
-            return type.GetCustomAttribute<DescriptionAttribute>()?.Description ?? type.Name.NiceName();
+            return type.GetCustomAttribute<DescriptionAttribute>()?.Description ?? type.Name.SpacePascalOrUnderscores();
         }
 
         var result = Fallback(type, lt => lt.Description, lt => OnNotLocalizedMember(type));
@@ -200,7 +200,7 @@ public static class DescriptionManager
         if (fi != null)
             return GetMemberNiceName(fi) ?? DefaultMemberDescription(fi);
 
-        return a.ToString().NiceName();
+        return a.ToString().SpacePascalOrUnderscores();
     }
 
     public static string NiceName<R>(Expression<Func<R>> expressionToProperty)
@@ -241,7 +241,7 @@ public static class DescriptionManager
             if (f != null)
                 return f(memberInfo);
 
-            return memberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? memberInfo.Name.NiceName();
+            return memberInfo.GetCustomAttribute<DescriptionAttribute>()?.Description ?? memberInfo.Name.SpacePascalOrUnderscores();
         }
 
         var result = Fallback(type, lt => lt.Members!.TryGetC(memberInfo.Name), lt => OnNotLocalizedMember(memberInfo));
@@ -352,7 +352,7 @@ public static class DescriptionManager
 
     internal static string DefaultMemberDescription(MemberInfo m)
     {
-        return m.GetCustomAttribute<DescriptionAttribute>()?.Description ?? m.Name.NiceName();
+        return m.GetCustomAttribute<DescriptionAttribute>()?.Description ?? m.Name.SpacePascalOrUnderscores();
     }
 }
 

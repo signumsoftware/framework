@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { FindOptions, FilterOption, isFilterGroupOption, FilterGroupOption, FilterConditionOption } from '../FindOptions'
+import { FindOptions, FilterOption, FilterGroupOption, FilterConditionOption, isFilterGroup } from '../FindOptions'
 import { ModifiableEntity } from '../Signum.Entities'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute } from '../Reflection'
 import { ColumnOption, OrderOption, Pagination } from '../Search';
-import { Tab } from 'react-bootstrap'
+import { Tab, Tabs } from 'react-bootstrap'
 
 export class ReactVisitor {
   visitChild(child: React.ReactChild): React.ReactNode {
@@ -38,7 +38,10 @@ export class ReactVisitor {
     return element;
   }
 
-  visit(element: React.ReactElement<any>): React.ReactElement<any> {
+  visit(element: React.ReactElement<any> | null): React.ReactElement<any> | null {
+    if (element == null)
+      return element;
+
     const result = this.visitElement(element);
 
     if (Array.isArray(result))
@@ -85,7 +88,7 @@ export class ReactValidator extends ReactVisitor {
 export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
-    public result: React.ReactElement<any>,
+    public result: React.ReactElement<any> | null,
     public ctx: TypeContext<T>
   ) {
   }
@@ -142,9 +145,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  replaceFindOptions(filter: (findOptions: FindOptions) => boolean, modifier: (clone: FindOptions) => void) {
+  replaceFindOptions(filter: (findOptions: FindOptions, e: React.ReactElement) => boolean, modifier: (clone: FindOptions) => void) {
     this.result = new ReplaceVisitor(
-      e => e.props.findOptions && filter(e.props.findOptions),
+      e => e.props.findOptions && filter(e.props.findOptions, e),
       e => {
         var clone = cloneFindOptions(e.props.findOptions);
         modifier(clone);
@@ -210,10 +213,19 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  removeTab(tabId: string | number): this {
+  removeTab(eventKey: string): this {
     this.result = new ReplaceVisitor(
-      e => e.type == Tab && e.props.eventKey == tabId,
+      e => e.type == Tab && e.props.eventKey == eventKey,
       e => [])
+      .visit(this.result);
+
+    return this;
+  }
+
+  addTab(tabsId: string, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
+    this.result = new ReplaceVisitor(
+      e => e.type == Tabs && e.props.id == tabsId,
+      e => [React.cloneElement(e, { children: [...React.Children.toArray(e.props.children), ...newTabs] })])
       .visit(this.result);
 
     return this;
@@ -241,7 +253,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 export function cloneFindOptions(fo: FindOptions): FindOptions {
 
   function cloneFilter(f: FilterOption): FilterOption {
-    if (isFilterGroupOption(f))
+    if (isFilterGroup(f))
       return ({
         groupOperation: f.groupOperation,
         token: f.token,

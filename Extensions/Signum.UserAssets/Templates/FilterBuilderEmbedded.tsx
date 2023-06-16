@@ -8,17 +8,20 @@ import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import { UserAssetMessage } from '../Signum.UserAssets'
 import {
-  QueryDescription, SubTokensOptions, isFilterGroupOptionParsed, FilterConditionOptionParsed,
-  isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed
+  QueryDescription, SubTokensOptions, FilterConditionOptionParsed,
+  isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
+	getFilterGroupUnifiedFilterType, getFilterType, isFilterGroup
 } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
 import * as Navigator from "@framework/Navigator";
-import FilterBuilder, { MultiValue, FilterConditionComponent, FilterGroupComponent, RenderValueContext } from '@framework/SearchControl/FilterBuilder';
+import FilterBuilder, { RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
+import { ValueLineController } from '@framework/Lines/ValueLine'
+import { MultiValue } from '@framework/FinderRules'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
@@ -43,7 +46,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
 
     function pushFilter(fo: FilterOptionParsed, indent: number) {
-      if (isFilterGroupOptionParsed(fo)) {
+      if (isFilterGroup(fo)) {
         ctx.value.push(newMListElement(QueryFilterEmbedded.New({
           isGroup: true,
           indentation: indent,
@@ -96,7 +99,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
   }
 
   function handleRenderValue(fc: RenderValueContext) {
-    if (isFilterGroupOptionParsed(fc.filter)) {
+    if (isFilterGroup(fc.filter)) {
 
       const f = fc.filter;
 
@@ -104,7 +107,19 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
-      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
+      if (f.filters.some(a => !a.token))
+        return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
+
+      if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
+        ctx.value = undefined;
+
+      var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
+      var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
+      const vlt = tr && ValueLineController.getValueLineType(tr);
+      const ft = tr && getFilterType(tr);
+
+      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} />
 
     } else {
 
@@ -127,6 +142,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
     switch (token.filterType) {
       case "Lite":
       case "Embedded":
+      case "Model":
         return <EntityLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
       default:
         return <ValueLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
@@ -293,7 +309,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
     else
       return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
-  else if (p.filterType == "Embedded") {
+  else if (p.filterType == "Embedded" || p.filterType == "Model") {
     return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else

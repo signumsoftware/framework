@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Translations>
-  <Type Name="EmailPackageEntity" Description="Paquet d'email">
-    <Member Name="Name" Description="Nom" />
-  </Type>
-</Translations>

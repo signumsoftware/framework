@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Signum.API;
+using Signum.Map;
 
 namespace Signum.Cache;
 

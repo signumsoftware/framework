@@ -13,7 +13,7 @@ public class SimpleHttpBroadcast : IServerBroadcast
 
     public SimpleHttpBroadcast(string broadcastSecret, string broadcastUrls)
     {
-        this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.EncodePassword(broadcastSecret));
+        this.bordcastSecretHash = Convert.ToBase64String(PasswordEncoding.EncodePassword("", broadcastSecret));
         this.broadcastUrls = broadcastUrls
             .SplitNoEmpty(new char[] { ';', ',' } /*In theory ; and , are valid in a URL, but since we talk only domain names or IPs...*/)
             .Select(a => a.Trim())

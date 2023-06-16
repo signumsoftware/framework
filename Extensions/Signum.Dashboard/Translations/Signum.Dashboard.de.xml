@@ -43,6 +43,7 @@
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
+    <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />
     <Member Name="LasUpdateWasOn0" Description="Die letzte Aktualisierung erfolgte am {0}" />
     <Member Name="Part0IsTooLarge" Description="Teil {0} ist zu groß" />
@@ -61,6 +62,7 @@
     <Member Name="ViewDashboard" Description="Dashboard anzeigen" />
   </Type>
   <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
+    <Member Name="AltText" Description="Alt-Text" />
     <Member Name="ClickActionURL" Description="Aktions-URL" />
     <Member Name="ImageSrcContent" Description="Bild src Inhalt" />
     <Member Name="RequiresTitle" Description="Erfordert Titel" />

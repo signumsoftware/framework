@@ -1,5 +1,5 @@
 import * as Finder from '@framework/Finder'
-import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, isFilterGroupOptionParsed, isFilterGroupRequest, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable } from '@framework/FindOptions'
+import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable, isFilterGroup } from '@framework/FindOptions'
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 import { useFetchAll } from '@framework/Navigator';
 import { ignoreErrors } from '@framework/QuickLinks';
@@ -68,7 +68,7 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
 
 
 export function getAllFilterTokens(fos: FilterOptionParsed[]): QueryToken[]{
-  return fos.flatMap(f => isFilterGroupOptionParsed(f) ?
+  return fos.flatMap(f => isFilterGroup(f) ?
     [f.token, ...getAllFilterTokens(f.filters)] :
     [f.token])
     .notNull();
@@ -121,7 +121,7 @@ export function getCachedResultTable(cachedQuery: CachedQueryJS, request: QueryR
       }
     }
 
-    const aggregateFilters = extraFilters.extract(f => !isFilterGroupRequest(f) && parsedTokens[f.token].queryTokenType == "Aggregate");
+    const aggregateFilters = extraFilters.extract(f => !isFilterGroup(f) && parsedTokens[f.token].queryTokenType == "Aggregate");
 
     const filtered = filterRows(cachedQuery.resultTable, extraFilters);
     
@@ -423,7 +423,7 @@ function createFilterer(result: ResultTable, filters: FilterRequest[]): ((rows: 
   }
 
   function getExpression(f: FilterRequest): string {
-    if (isFilterGroupRequest(f)) {
+    if (isFilterGroup(f)) {
 
       const parts = f.filters.map(ff => getExpression(ff));
 
@@ -525,8 +525,8 @@ function extractRequestedFilters(cached: FilterRequest[], request: FilterRequest
 }
 
 function equalFilter(c: FilterRequest, r: FilterRequest): boolean {
-  if (isFilterGroupRequest(c)) {
-    if (!isFilterGroupRequest(r))
+  if (isFilterGroup(c)) {
+    if (!isFilterGroup(r))
       return false;
 
     if (c.groupOperation != r.groupOperation)
@@ -540,7 +540,7 @@ function equalFilter(c: FilterRequest, r: FilterRequest): boolean {
 
     return c.filters.every((cf, i) => equalFilter(cf, r.filters[i]));
   } else {
-    if (isFilterGroupRequest(r))
+    if (isFilterGroup(r))
       return false;
 
     if (c.token != r.token)

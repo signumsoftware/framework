@@ -200,7 +200,7 @@ public class TypeMemberHelpTS
             pr.PropertyInfo?.Name.FirstLower() :
             pr.PropertyInfo?.Name;
 
-        type = mode == TypeHelpMode.Typescript && ReflectionServer.IsId(pr) ?
+        type = mode == TypeHelpMode.Typescript && ReflectionServer.IsId(pr, pr.RootType.IsEntity()) ?
             PrimaryKey.Type(pr.RootType).Nullify().TypeName() :
             pr.Let(propertyRoute =>
             {

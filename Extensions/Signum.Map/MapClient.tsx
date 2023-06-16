@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxGet } from '@framework/Services';
-import { SchemaMapInfo, ClientColorProvider } from './Schema/SchemaMap'
 import { OperationMapInfo } from './Operation/OperationMap'
 import { } from './Signum.Map'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -9,14 +8,13 @@ import * as Navigator from "@framework/Navigator";
 import * as AppContext from "@framework/AppContext";
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import MapOmniboxProvider from './MapOmniboxProvider';
+import { SchemaMapInfo, getColorProviders } from './Schema/ClientColorProvider';
+import { tryGetTypeInfo } from '@framework/Reflection';
+import { RoleEntity, UserEntity } from '../Signum.Authorization/Signum.Authorization';
 
-export const getProviders: Array<(info: SchemaMapInfo) => Promise<ClientColorProvider[]>> = [];
 
-export function getAllProviders(info: SchemaMapInfo): Promise<ClientColorProvider[]> {
-  return Promise.all(getProviders.map(func => func(info))).then(result => result.filter(ps => !!ps).flatMap(ps => ps).filter(p => !!p));
-}
 
-export function start(options: { routes: RouteObject[], auth: boolean; cache: boolean; disconnected: boolean; isolation: boolean }) {
+export function start(options: { routes: RouteObject[] }) {
 
   options.routes.push(
     { path: "/map", element: <ImportComponent onImport={() => import("./Schema/SchemaMapPage")} /> },
@@ -27,19 +25,15 @@ export function start(options: { routes: RouteObject[], auth: boolean; cache: bo
 
   AppContext.clearSettingsActions.push(clearProviders);
 
-  getProviders.push(smi => import("./Schema/ColorProviders/Default").then((c: any) => c.default(smi)));
-  if (options.auth)
-    getProviders.push(smi => import("./Schema/ColorProviders/Auth").then((c: any) => c.default(smi)));
-  if (options.cache)
-    getProviders.push(smi => import("./Schema/ColorProviders/Cache").then((c: any) => c.default(smi)));
-  if (options.disconnected)
-    getProviders.push(smi => import("./Schema/ColorProviders/Disconnected").then((c: any) => c.default(smi)));
-  if (options.isolation)
-    getProviders.push(smi => import("./Schema/ColorProviders/Isolation").then((c: any) => c.default(smi)));
+  getColorProviders.push(smi => import("./Schema/DefaultColorProvider").then((c: any) => c.default(smi)));
+
+  if (tryGetTypeInfo(RoleEntity))
+    getColorProviders.push(smi => import("./Schema/AuthColorProvider").then((c: any) => c.default(smi)));
+
 }
 
 export function clearProviders() {
-  getProviders.clear();
+  getColorProviders.clear();
 }
 
 export namespace API {

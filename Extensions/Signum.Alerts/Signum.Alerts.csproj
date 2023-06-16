@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.1.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -23,7 +23,6 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
-		<ProjectReference Include="..\Signum.Mailing.Package\Signum.Mailing.Package.csproj" />
 		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />

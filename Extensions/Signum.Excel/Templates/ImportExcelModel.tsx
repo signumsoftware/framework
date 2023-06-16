@@ -120,8 +120,6 @@ export async function onImportFromExcel(sc: SearchControlLoaded) {
 
   async function onImportFromExcelRetry() {
 
-    debugger;
-
     model = (await Navigator.view(model, {
       extraProps: { searchControl: sc, fop: sc.state.resultFindOptions, topElementToken: topToken },
       title: ImportFromExcelMessage.Import0FromExcel.niceToString(ti.nicePluralName)

@@ -1,16 +1,15 @@
 import * as React from 'react'
 import {
-  FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions,
-  isList, isFilterGroupOptionParsed, isCheckBox
-} from '../FindOptions'
-import { ValueLine, FormGroup } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat } from '../Reflection'
+  FilterOptionParsed, 
+  isCheckBox,
+  isFilterGroup} from '../FindOptions'
+import { Binding } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import "./FilterBuilder.css"
-import { ComplexConditionSyntax, createFilterValueControl, FilterTextArea, MultiEntity, MultiValue } from './FilterBuilder';
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { renderFilterValue } from '../Finder'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -74,38 +73,19 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "xs" : "sm" }, undefined as any, Binding.create(f, a => a.value));
 
-    if (isFilterGroupOptionParsed(f) || f.operation == "ComplexCondition" || f.operation == "FreeText") {
-
-      var isComplex = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && sf.operation == "ComplexCondition") : f.operation == "ComplexCondition";
-      var textArea = isFilterGroupOptionParsed(f) ? f.filters.some(sf => !isFilterGroupOptionParsed(sf) && (sf.operation == "ComplexCondition" || sf.operation == "FreeText")) : f.operation == "ComplexCondition" || f.operation == "FreeText";
-
-      if (textArea)
-        return <FilterTextArea ctx={ctx}
-          isComplex={isComplex}
-          onChange={(() => handleValueChange(f, isComplex))}
-          label={label || SearchMessage.Search.niceToString()} />
-      else
-        return <ValueLine ctx={ctx} type={{ name: "string" }}
-          onChange={(() => handleValueChange(f, isComplex))}
-          label={label || SearchMessage.Search.niceToString()} />
-    }
-
-    if (isList(f.operation!))
-      return (
-        <FormGroup ctx={ctx} label={label}>
-          {inputId => f.token?.filterType == "Lite" ?
-            <MultiEntity values={f.value} readOnly={readOnly} type={f.token.type.name} onChange={() => handleValueChange(f)} /> :
-            <MultiValue values={f.value} readOnly={readOnly} onChange={() => handleValueChange(f)}
-              onRenderItem={ctx => createFilterValueControl(ctx, f.token!, () => handleValueChange(f), { mandatory: true })} />}
-        </FormGroup>
-      );
-
-    return createFilterValueControl(ctx, f.token!, () => handleValueChange(f), { label, forceNullable: f.pinned!.active == "WhenHasValue" });
+    return renderFilterValue(f, {
+      ctx,
+      filterOptions: p.filterOptions,
+      label: label,
+      handleValueChange: handleValueChange,
+      forceNullable: f.pinned!.active == "WhenHasValue",
+      mandatory: undefined,
+    });
   }
 
   function handleValueChange(f: FilterOptionParsed, avoidSearch?: boolean) {
 
-    if (isFilterGroupOptionParsed(f) || f.token && f.token.filterType == "String") {
+    if (isFilterGroup(f) || f.token && f.token.filterType == "String") {
 
       if (timeoutWriteText.current)
         clearTimeout(timeoutWriteText.current);
@@ -134,7 +114,7 @@ function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[]
   var direct = filterOptions.filter(a => a.pinned != null);
 
   var recursive = filterOptions
-    .flatMap(f => f.pinned == null && isFilterGroupOptionParsed(f) ? getAllPinned(f.filters) : []);
+    .flatMap(f => f.pinned == null && isFilterGroup(f) ? getAllPinned(f.filters) : []);
 
   return direct.concat(recursive);
 }

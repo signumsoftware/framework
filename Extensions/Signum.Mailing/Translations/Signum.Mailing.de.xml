@@ -11,6 +11,10 @@
     <Member Name="CertFileType" Description="Zertifikationsdateityp" />
     <Member Name="FullFilePath" Description="Vollständiger Pfad" />
   </Type>
+  <Type Name="CompareInbox" Description="Posteingang vergleichen">
+    <Member Name="Full" Description="Voll" />
+    <Member Name="LastNEmails" Description="Letzte n E-Mails" />
+  </Type>
   <Type Name="EmailAddressEmbedded" Description="E-Mail-Adresse">
     <Member Name="DisplayName" Description="Namen" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
@@ -101,6 +105,16 @@
     <Member Name="Save" Description="Speichern" />
     <Member Name="Send" Description="Senden" />
   </Type>
+  <Type Name="EmailMessagePackageMixin">
+    <Member Name="Package" Description="Paket" />
+  </Type>
+  <Type Name="EmailMessagePackageOperation">
+    <Member Name="ReSendEmails" Description="E-Mails erneut senden" />
+  </Type>
+  <Type Name="EmailMessageProcess">
+    <Member Name="CreateEmailsSendAsync" Description="E-Mails erstellen und async senden" />
+    <Member Name="SendEmails" Description="E-Mails senden" />
+  </Type>
   <Type Name="EmailMessageState" Description="E-Mailstatus">
     <Member Name="Created" Description="Erstellt" />
     <Member Name="Draft" Description="Entwurf " />
@@ -115,6 +129,50 @@
   <Type Name="EmailModelEntity" Description="E-Mail-Modell" Gender="n">
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
+  <Type Name="EmailPackageEntity" Description="E-Mail-Paket" PluralDescription="E-Mail-Pakete" Gender="n">
+    <Member Name="Name" Description="Name" />
+  </Type>
+  <Type Name="EmailReceptionAction">
+    <Member Name="ReceiveAllActiveEmailConfigurations" Description="Erhalten Sie alle aktiven E-Mail-Konfigurationen" />
+  </Type>
+  <Type Name="EmailReceptionConfigurationEntity" Description="Konfiguration des E-Mail-Empfangs" PluralDescription="Konfigurationen für den E-Mail-Empfang" Gender="f">
+    <Member Name="Active" Description="Aktiv" />
+    <Member Name="CompareInbox" Description="Posteingang vergleichen" />
+    <Member Name="DeleteMessagesAfter" Description="Nachrichten löschen nach:" />
+    <Member Name="EmailAddress" Description="E-Mail-Adresse" />
+    <Member Name="Service" Description="Dienst" />
+  </Type>
+  <Type Name="EmailReceptionConfigurationOperation">
+    <Member Name="ReceiveEmails" Description="E-Mails empfangen" />
+    <Member Name="ReceiveLastEmails" Description="Letzte E-Mails erhalten" />
+    <Member Name="Save" Description="Speichern" />
+  </Type>
+  <Type Name="EmailReceptionEntity" Description="E-Mail-Rezeption" PluralDescription="E-Mail-Empfänge">
+    <Member Name="EmailReceptionConfiguration" Description="Konfiguration des E-Mail-Empfangs" />
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="LastServerMessageUID" Description="Letzte Server-Nachricht UID" />
+    <Member Name="MailsFromDifferentAccounts" Description="E-Mails von verschiedenen Konten" />
+    <Member Name="NewEmails" Description="Neue E-Mails" />
+    <Member Name="ServerEmails" Description="Server-E-Mails" />
+    <Member Name="StartDate" Description="Startdatum" />
+  </Type>
+  <Type Name="EmailReceptionExceptionEntity" Description="Ausnahme für den E-Mail-Empfang" Gender="f">
+    <Member Name="Exception" Description="Ausnahme" />
+    <Member Name="Reception" Description="Empfang" />
+  </Type>
+  <Type Name="EmailReceptionInfoEmbedded" Description="E-Mail-Empfangsinformationen">
+    <Member Name="DeletionDate" Description="Datum der Löschung" />
+    <Member Name="RawContent" Description="Roher Inhalt" />
+    <Member Name="ReceivedDate" Description="Empfangsdatum" />
+    <Member Name="Reception" Description="Empfang" />
+    <Member Name="SentDate" Description="Sendedatum" />
+    <Member Name="UniqueId" Description="Eindeutige ID" />
+  </Type>
+  <Type Name="EmailReceptionMixin">
+    <Member Name="ReceptionInfo" Description="Empfangsinfo" />
+  </Type>
+  <Type Name="EmailReceptionServiceEntity" Description="E-Mail-Empfangsdienst" PluralDescription="E-Mail-Empfangsdienste" Gender="m" />
   <Type Name="EmailRecipientEmbedded" Description="E-Mail-Empfänger">
     <Member Name="Kind" Description="Art" />
   </Type>
@@ -201,6 +259,16 @@
     <Member Name="File" Description="Datei" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Type" Description="Typ" />
+  </Type>
+  <Type Name="SendEmailTaskEntity" Description="E-Mail Senden Aufgabe">
+    <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
+    <Member Name="ModelConverter" Description="Modell-Konverter" />
+    <Member Name="Name" Description="Name" />
+    <Member Name="TargetsFromUserQuery" Description="Ziele von Benutzerabfrage" />
+    <Member Name="UniqueTarget" Description="Einzigartiges Ziel" />
+  </Type>
+  <Type Name="SendEmailTaskOperation">
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="SmtpEmailServiceEntity" Description="SMTP-E-Mail-Dienst" PluralDescription="SMTP-E-Mail-Dienste" Gender="m">
     <Member Name="DeliveryFormat" Description="Delivery format" />

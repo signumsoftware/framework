@@ -9,7 +9,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.0.4">
+	  <Compile Remove="Senders\**" />
+	  <Content Remove="Senders\**" />
+	  <EmbeddedResource Remove="Senders\**" />
+	  <None Remove="Senders\**" />
+	  <TypeScriptCompile Remove="Senders\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.1.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -23,13 +31,11 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
-		<ProjectReference Include="..\Signum.Chart\Signum.Chart.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
 		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Senders\" />
+		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
+		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
+		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
 </Project>

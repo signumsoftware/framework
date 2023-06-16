@@ -122,7 +122,7 @@ public static class Administrator
         CleanAllDatabases();
         Console.WriteLine("Done.");
 
-        Console.Write("Generating new database database...");
+        Console.Write("Generating new database...");
         ExecuteGenerationScript();
         Console.WriteLine("Done.");
     }
@@ -316,9 +316,7 @@ public static class Administrator
         }
     }
 
-
-
-    public static IDisposable SaveDisableIdentity<T>()
+    public static IDisposable DisableIdentity<T>()
         where T : Entity
     {
         Table table = Schema.Current.Table<T>();
@@ -369,7 +367,7 @@ public static class Administrator
         where T : Entity
     {
         using (var tr = new Transaction())
-        using (Administrator.SaveDisableIdentity<T>())
+        using (Administrator.DisableIdentity(Schema.Current.Table(entity.GetType())))
         {
             Database.Save(entity);
             return tr.Commit(entity);
@@ -379,8 +377,13 @@ public static class Administrator
     public static void SaveListDisableIdentity<T>(IEnumerable<T> entities)
         where T : Entity
     {
+        var list = entities.ToList();
+        var type = list.Select(a => a.GetType()).Distinct().SingleOrDefaultEx();
+        if (type == null)
+            return;
+
         using (var tr = new Transaction())
-        using (Administrator.SaveDisableIdentity<T>())
+        using (Administrator.DisableIdentity(Schema.Current.Table(type)))
         {
             Database.SaveList(entities);
             tr.Commit();
@@ -788,4 +791,5 @@ public static class Administrator
 
         return DeleteWhereScript(table, column, value.Id);
     }
+
 }

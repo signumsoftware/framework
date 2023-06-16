@@ -5,12 +5,13 @@ import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Map'
 import * as MapClient from '../MapClient'
-import { SchemaMapInfo, ITableInfo, MListRelationInfo, IRelationInfo, ClientColorProvider, SchemaMapD3 } from './SchemaMap'
+import { SchemaMapD3 } from './SchemaMap'
 import { useLocation, useParams, Location } from "react-router";
 import "./schemaMap.css"
 import { useSize } from '@framework/Hooks'
 import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
+import { ClientColorProvider, IRelationInfo, ITableInfo, MListRelationInfo, SchemaMapInfo, getAllProviders } from './ClientColorProvider'
 
 interface SchemaMapState {
   schemaMapInfo?: SchemaMapInfo;
@@ -67,7 +68,7 @@ export default function SchemaMapPage() {
     MapClient.API.types()
       .then(smi => {
         const parsedQuery = getParsedQuery(location);
-        MapClient.getAllProviders(smi).then(providers => {
+        getAllProviders(smi).then(providers => {
 
           const missingProviders = smi.providers.filter(p => !providers.some(p2 => p2.name == p.name));
           if (missingProviders.length)

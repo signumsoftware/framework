@@ -122,7 +122,7 @@ public class ColumnDescriptionFactory
                 return result;
         }
 
-        return Name.NiceName();
+        return Name.SpacePascalOrUnderscores();
     }
 
     public void SetPropertyRoutes<T>(params Expression<Func<T, object>>[] propertyRoutes)

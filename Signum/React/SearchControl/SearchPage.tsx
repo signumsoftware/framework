@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLocation, useParams } from 'react-router'
 import * as Finder from '../Finder'
-import { FindOptions, FilterOption, isFilterGroupOption, QueryDescription } from '../FindOptions'
+import { FindOptions, FilterOption, QueryDescription, isFilterGroup } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
@@ -101,15 +101,6 @@ function SearchPage() {
     </div>
   );
 }
-
-
-function anyPinned(filterOptions?: FilterOption[]): boolean {
-  if (filterOptions == null)
-    return false;
-
-  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOption(a) && anyPinned(a.filters.notNull()));
-}
-
 
 namespace SearchPage {
   export let marginDown = 90;

@@ -17,14 +17,16 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
+    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png, 
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+        ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         var blip = doc.FindBlip(titleOrDescription);
 
         if (adaptSize && AvoidAdaptSize == false)
         {
             var size = doc.GetBlipBitmapSize(blip, converter);
-            image = converter.Resize(image, size.width, size.height);
+            image = converter.Resize(image, size.width, size.height, verticalPosition, horizontalPosition);
         }
 
         doc.ReplaceBlipContent(blip, image, converter, newImagePartId, imagePartType);
@@ -35,7 +37,9 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceMultipleImages<TImage>(WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png)
+    public static void ReplaceMultipleImages<TImage>(WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png, 
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+        ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         Blip[] blips = FindAllBlips(doc, d => d.Title == titleOrDescription || d.Description == titleOrDescription);
 
@@ -52,7 +56,7 @@ public static class WordImageReplacer
                 {
                     TImage oldImage = converter.FromStream(stream);
                     var size = converter.GetSize(oldImage);
-                    return converter.Resize(bitmap, size.width, size.height);
+                    return converter.Resize(bitmap, size.width, size.height, verticalPosition, horizontalPosition);
                 }
             }).ToArray();
         }
@@ -175,5 +179,20 @@ public interface IImageConverter<TImage>
     (int width, int height) GetSize(TImage image);
     TImage FromStream(Stream str);
     void Save(TImage image, Stream str, ImagePartType imagePartType);
-    TImage Resize(TImage image, int maxWidth, int maxHeight);
+    TImage Resize(TImage image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition, ImageHorizontalPosition horizontalPosition);
+}
+
+
+public enum ImageVerticalPosition
+{
+    Top,
+    Center,
+    Bottom,
+}
+
+public enum ImageHorizontalPosition
+{
+    Left,
+    Center,
+    Right,
 }

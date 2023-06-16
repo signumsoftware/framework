@@ -14,7 +14,7 @@ import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import * as Operations from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
-import { FindOptionsParsed, isFilterGroupOption, isFilterGroupOptionParsed, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
+import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
@@ -181,7 +181,6 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   async function createUserQuery(): Promise<UserQueryEntity> {
 
-    debugger;
     const sc = p.searchControl;
 
     const fo = Finder.toFindOptions(sc.props.findOptions, sc.props.queryDescription, sc.props.defaultIncudeDefaultFilters);
@@ -319,7 +318,7 @@ function anyPinned(filterOptions?: FilterOptionParsed[]): boolean {
   if (filterOptions == null)
     return false;
 
-  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroupOptionParsed(a) && anyPinned(a.filters));
+  return filterOptions.some(a => Boolean(a.pinned) || isFilterGroup(a) && anyPinned(a.filters));
 }
 
 
@@ -380,8 +379,8 @@ export namespace UserQueryMerger {
       const merged = mergeFilters(
         ch.removed.elements,
         ch.added.elements,
-        isFilterGroupOption(ch.removed.filter) ? ch.removed.filter.filters.notNull() : [],
-        isFilterGroupOption(ch.added.filter) ? ch.added.filter.filters.notNull() : [], identation + 1, sd);
+        isFilterGroup(ch.removed.filter) ? ch.removed.filter.filters.notNull() : [],
+        isFilterGroup(ch.added.filter) ? ch.added.filter.filters.notNull() : [], identation + 1, sd);
 
 
       const oldF = ch.removed.key.element;
@@ -435,8 +434,8 @@ export namespace UserQueryMerger {
   }
 
   function distanceFilter(fo: FilterOption, fo2: FilterOption): number {
-    if (isFilterGroupOption(fo)) {
-      if (isFilterGroupOption(fo2)) {
+    if (isFilterGroup(fo)) {
+      if (isFilterGroup(fo2)) {
         return (fo.token?.toString() == fo2.token?.toString() ? 0 : 1) +
           (fo.groupOperation == fo2.groupOperation ? 0 : 1) +
           (similarValues(fo.value, fo2.value) ? 0 : 1) +
@@ -446,7 +445,7 @@ export namespace UserQueryMerger {
       else return 10;
     }
     else {
-      if (isFilterGroupOption(fo2))
+      if (isFilterGroup(fo2))
         return 10;
       else
         return (fo.token?.toString() == fo2.token?.toString() ? 0 : 1) +

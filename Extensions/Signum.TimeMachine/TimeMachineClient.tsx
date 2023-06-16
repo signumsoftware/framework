@@ -27,7 +27,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getTimeMachineIcon, TimeMachineColors } from '@framework/Lines/TimeMachineIcon';
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine';
 
-export function start(options: { routes: RouteObject[], timeMachine: boolean }) {
+export function start(options: { routes: RouteObject[] }) {
 
     QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
       new QuickLinks.QuickLinkAction(TimeMachineMessage.TimeMachine.niceToString(),
@@ -84,7 +84,7 @@ export function start(options: { routes: RouteObject[], timeMachine: boolean }) 
     Finder.entityFormatRules.push({
       name: "ViewHistory",
       isApplicable: (sc) => sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(sc.props.queryDescription.columns["Entity"].type),
-      formatter: new Finder.EntityFormatter((row, columns, sc) => {
+      formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) => {
 
         var icon: undefined | React.ReactElement = undefined;
 
