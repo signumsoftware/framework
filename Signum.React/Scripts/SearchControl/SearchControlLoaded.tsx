@@ -1906,11 +1906,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const m = this.state.markedRows[liteKey(entity)];
 
-    if (typeof m === "string") {
-      if (m == "")
-        return { status: "Success", message: undefined };
-      else
+    if (m === null || typeof m === "string") {
+      if (m)
         return { status: "Error", message: m };
+      else
+        return { status: "Success", message: undefined };
     }
     else {
       return m;
