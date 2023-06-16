@@ -63,6 +63,7 @@ public class RemoteEmailController : ControllerBase
                 Attachments = message.Attachments.EmptyIfNull().Select(a => new RemoteAttachmentEmbedded
                 {
                     Id = a.Id!,
+                    ContentId = (a as FileAttachment)?.ContentId,
                     IsInline = a.IsInline!.Value,
                     LastModifiedDateTime = a.LastModifiedDateTime!.Value,
                     Name = a.Name!,
