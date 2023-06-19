@@ -108,9 +108,9 @@ export function start(options: {
         var popIcon = <RemoteEmailPopover subject={val} isRead={isRead} user={user} remoteEmailId={id} />
 
         if (isRead)
-          return <span className="try-no-wrap">{popIcon} {hasAttachments} {val}</span>;
+          return <span className="try-no-wrap">{popIcon} {hasAttachments} {(val as string)?.etc(100)}</span>;
         else
-          return <strong className="try-no-wrap">{popIcon} {hasAttachments} {val}</strong>;
+          return <strong className="try-no-wrap">{popIcon} {hasAttachments} {(val as string)?.etc(100)}</strong>;
       }, true)
     }
   });

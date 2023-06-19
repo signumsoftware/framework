@@ -23,6 +23,7 @@ export interface RemoteAttachmentEmbedded extends Entities.EmbeddedEntity {
   size: number;
   lastModifiedDateTime: string /*DateTimeOffset*/;
   isInline: boolean;
+  contentId: string | null;
 }
 
 export const RemoteEmailFolderModel = new Type<RemoteEmailFolderModel>("RemoteEmailFolderModel");

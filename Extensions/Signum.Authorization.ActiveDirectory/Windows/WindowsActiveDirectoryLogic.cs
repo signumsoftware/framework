@@ -2,6 +2,7 @@ using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
+using Signum.Mailing;
 using Signum.Authorization.ActiveDirectory.Azure;
 
 namespace Signum.Authorization.ActiveDirectory.Windows;
