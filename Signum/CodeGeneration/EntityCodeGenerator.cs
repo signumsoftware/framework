@@ -768,6 +768,9 @@ public class EntityCodeGenerator
         if (col.DefaultConstraint != null)
             parts.Add("Default = \"" + CleanDefault(col.DefaultConstraint.Definition) + "\"");
 
+        if (col.CheckConstraint != null)
+            parts.Add("Check = \"" + col.CheckConstraint.Definition + "\"");
+
         return parts;
     }
 
