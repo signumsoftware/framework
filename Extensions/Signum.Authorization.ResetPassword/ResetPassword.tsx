@@ -3,11 +3,12 @@ import { classes, Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { LoginAuthMessage } from '../Signum.Authorization'
-import * as AuthClient from '../AuthClient'
+import * as ResetPasswordClient from './ResetPasswordClient'
+import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { useLocation, useParams } from 'react-router'
 import { useStateWithPromise } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
 
 export default function ResetPassword() {
   const location = useLocation();
@@ -29,12 +30,12 @@ export default function ResetPassword() {
       if (ms && Dic.getValues(ms).some(array => array.length > 0))
         return;
 
-      const request: AuthClient.API.ResetPasswordRequest = {
+      const request: ResetPasswordClient.API.ResetPasswordRequest = {
         code: code,
         newPassword: newPassword.current!.value,
       };
 
-      AuthClient.API.resetPassword(request)
+      ResetPasswordClient.API.resetPassword(request)
         .then(lr => {
           AuthClient.setAuthToken(lr.token, lr.authenticationType);
           AuthClient.setCurrentUser(lr.userEntity);

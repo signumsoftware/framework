@@ -1,5 +1,5 @@
 import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.Dashboard';
-import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroupOptionParsed, QueryToken, tokenStartsWith } from '@framework/FindOptions';
+import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
 import * as Finder from '@framework/Finder';
@@ -149,7 +149,7 @@ export class DashboardController {
     var dashboardFOs = Finder.toFilterOptions(dashboardFilters);
 
     function allTokens(fs: FilterOptionParsed[]): QueryToken[] {
-      return fs.flatMap(f => isFilterGroupOptionParsed(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
+      return fs.flatMap(f => isFilterGroup(f) ? [f.token, ...allTokens(f.filters)].notNull() : [f.token].notNull())
     }
 
     const simpleFilters = fo.filterOptions?.filter(a => a && a.dashboardBehaviour == null) ?? [];
@@ -177,7 +177,7 @@ function translateFilterToken(fop: FilterOptionParsed, tokenEquivalences: { [tok
       return null;
   }
 
-  if (isFilterGroupOptionParsed(fop)) {
+  if (isFilterGroup(fop)) {
     return ({ ...fop, token: newToken, filters: fop.filters.map(f => translateFilterToken(f, tokenEquivalences)).notNull() });
   }
   else

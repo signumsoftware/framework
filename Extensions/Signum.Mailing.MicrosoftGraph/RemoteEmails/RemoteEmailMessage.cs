@@ -44,9 +44,30 @@ public class RemoteEmailMessageModel : ModelEntity
     public override string ToString() => As.Expression(() => Subject);
 }
 
+public enum RemoteEmailMessage
+{
+    NotAuthorizedToViewEmailsFromOtherUsers
+}
+
+[AutoInit]
+public static class RemoteEmailMessagePermission
+{
+    public static PermissionSymbol ViewRemoveEmailMessagesFromOthers;
+}
+
 public enum RemoteEmailMessageQuery
 {
     RemoteEmailMessages
+}
+
+public class RemoteEmailFolderModel : ModelEntity
+{
+    public string FolderId { get; set; }
+
+    public string DisplayName { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => DisplayName);
 }
 
 public class RecipientEmbedded : EmbeddedEntity
@@ -72,6 +93,7 @@ public class RemoteAttachmentEmbedded : EmbeddedEntity
     public DateTimeOffset LastModifiedDateTime { get; set; }
 
     public bool IsInline { get; set; }
+    public string? ContentId { get; set; }
 
     public override string ToString()
     {

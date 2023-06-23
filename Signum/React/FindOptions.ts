@@ -58,9 +58,20 @@ export interface FindOptionsParsed {
 
 export type FilterOption = FilterConditionOption | FilterGroupOption;
 
-export function isFilterGroupOption(fo: FilterOption): fo is FilterGroupOption {
-  return (fo as FilterGroupOption).groupOperation != undefined;
+export function isFilterGroup(fo: FilterOptionParsed): fo is FilterGroupOptionParsed
+export function isFilterGroup(fo: FilterOption): fo is FilterGroupOption
+export function isFilterGroup(fr: FilterRequest): fr is FilterGroupRequest 
+export function isFilterGroup(fo: FilterOption | FilterOptionParsed | FilterRequest): boolean{
+  return (fo as FilterGroupOptionParsed | FilterGroupOption | FilterGroupRequest).groupOperation != undefined;
 }
+
+export function isFilterCondition(fo: FilterOptionParsed): fo is FilterConditionOptionParsed
+export function isFilterCondition(fo: FilterOption): fo is FilterConditionOption
+export function isFilterCondition(fr: FilterRequest): fr is FilterConditionRequest
+export function isFilterCondition(fo: FilterOptionParsed | FilterOption | FilterRequest): boolean {
+  return (fo as FilterGroupOptionParsed | FilterGroupOption | FilterGroupRequest).groupOperation == undefined;
+}
+
 
 export interface FilterConditionOption {
   token: string | QueryTokenString<any>;
@@ -90,9 +101,7 @@ export interface PinnedFilter {
 
 export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOptionParsed;
 
-export function isFilterGroupOptionParsed(fo: FilterOptionParsed): fo is FilterGroupOptionParsed {
-  return (fo as FilterGroupOptionParsed).groupOperation != undefined;
-}
+
 
 export function isActive(fo: FilterOptionParsed) {
   return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
@@ -295,7 +304,7 @@ export function withoutAggregate(fop: FilterOptionParsed): FilterOptionParsed | 
   if (hasAggregate(fop.token))
     return undefined;
 
-  if (isFilterGroupOptionParsed(fop)) {
+  if (isFilterGroup(fop)) {
     var newFilters = fop.filters.map(f => withoutAggregate(f)).filter(Boolean);
     if (newFilters.length == 0)
       return undefined;
@@ -316,7 +325,7 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     return undefined;
   }
 
-  if (isFilterGroupOptionParsed(fop)) {
+  if (isFilterGroup(fop)) {
     var newFilters = fop.filters.map(f => withoutPinned(f)).filter(Boolean);
     if (newFilters.length == 0)
       return undefined;
@@ -335,7 +344,7 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
 }
 
 export function canSplitValue(fo: FilterOptionParsed) {
-  if (isFilterGroupOptionParsed(fo))
+  if (isFilterGroup(fo))
     return fo.pinned != null;
 
   else {
@@ -346,7 +355,7 @@ export function canSplitValue(fo: FilterOptionParsed) {
 
 export function mapFilterTokens(fo: FilterOption, mapToken : (token: string) => string): FilterOption {
   
-  if (isFilterGroupOption(fo)) {
+  if (isFilterGroup(fo)) {
     return {
       ...fo,
       groupOperation: fo.groupOperation,
@@ -392,9 +401,6 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
 
 export type FilterRequest = FilterConditionRequest | FilterGroupRequest;
 
-export function isFilterGroupRequest(fr: FilterRequest): fr is FilterGroupRequest {
-  return (fr as FilterGroupRequest).groupOperation != null;
-}
 
 export interface FilterGroupRequest {
   groupOperation: FilterGroupOperation;
@@ -671,6 +677,11 @@ filterOperations["Lite"] = [
 ];
 
 filterOperations["Embedded"] = [
+  "EqualTo",
+  "DistinctTo",
+];
+
+filterOperations["Model"] = [
   "EqualTo",
   "DistinctTo",
 ];

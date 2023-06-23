@@ -60,6 +60,7 @@ export type FilterType =
   "Time" |
   "Lite" |
   "Embedded" |
+  "Model" |
   "Boolean" |
   "Enum" |
   "Guid";

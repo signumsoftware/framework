@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Identity;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Azure;
 
 public static class SignumTokenCredentials
 {

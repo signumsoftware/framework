@@ -1,10 +1,25 @@
 import * as React from "react";
 import * as msal from "@azure/msal-browser";
 import * as AppContext from "@framework/AppContext";
+import * as Reflection from "@framework/Reflection";
 import * as AuthClient from "../../Signum.Authorization/AuthClient";
-import { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
-import { ExternalServiceError } from "@framework/Services";
+import LoginPage, { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
+import { ExternalServiceError, ajaxPost } from "@framework/Services";
 import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
+
+export function registerAzureADAuthenticator() {
+
+  if (Reflection.isStarted())
+    throw new Error("call AzureADClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
+
+  LoginPage.customLoginButtons = ctx =>
+    <>
+      <MicrosoftSignIn ctx={ctx} />
+    </>;
+  LoginPage.showLoginForm = "initially_not";
+  AuthClient.authenticators.push(loginWithAzureAD);
+}
+
 
 /*     Add this to Index.cshtml
        var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
@@ -48,7 +63,7 @@ export function signIn(ctx: LoginContext) {
   (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
   msalClient.loginPopup(userRequest)
     .then(a => {
-      return AuthClient.API.loginWithAzureAD(a.idToken, true)
+      return API.loginWithAzureAD(a.idToken, true)
         .then(r => {
           if (r == null)
             throw new Error("User " + a.account?.username + " not found in the database");
@@ -90,7 +105,7 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
     .then(res => {
       const rawIdToken = res.idToken;
 
-      return AuthClient.API.loginWithAzureAD(rawIdToken, false);
+      return API.loginWithAzureAD(rawIdToken, false);
     }, e => {
       if (e instanceof msal.InteractionRequiredAuthError ||
         e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode =="user_cancelled"))
@@ -167,3 +182,11 @@ export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
 }
 
 MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
+
+export module API {
+
+
+  export function loginWithAzureAD(jwt: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
+    return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
+  }
+}

@@ -20,7 +20,7 @@ import Notify from './Frames/Notify';
 import { FilterOperation } from "./Signum.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
-import { isActive, isFilterGroupOption, isFilterGroupOptionParsed } from "./FindOptions";
+import { isActive } from "./FindOptions";
 import { CellFormatter, CellFormatterContext } from "./Finder";
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperation";
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";

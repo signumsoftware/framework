@@ -2,38 +2,23 @@ import * as React from "react";
 import { RouteObject, Location } from 'react-router'
 import * as Services from '@framework/Services';
 import { ImportComponent } from '@framework/ImportComponent'
-import LoginPage, { LoginWithWindowsButton } from "./Login/LoginPage";
+import LoginPage from "./Login/LoginPage";
 import * as AppContext from "@framework/AppContext";
 import { ajaxGet, ajaxPost, ServiceError } from "@framework/Services";
 import { is } from '@framework/Signum.Entities';
 import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
+import * as Reflection from "@framework/Reflection";
 import { UserEntity} from './Signum.Authorization';
 import { PermissionSymbol } from "@framework/Signum.Basics";
 
-export function startPublic(options: { routes: RouteObject[], userTicket: boolean, windowsAuthentication: boolean, resetPassword: boolean, notifyLogout: boolean }) {
+export function startPublic(options: { routes: RouteObject[], userTicket: boolean, notifyLogout: boolean }) {
   Options.userTicket = options.userTicket;
-  Options.windowsAuthentication = options.windowsAuthentication;
-  Options.resetPassword = options.resetPassword;
-
-  if (Options.userTicket) {
-    if (!authenticators.contains(loginFromCookie))
-      throw new Error("call AuthClient.registerUserTicketAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
-  }
-
-  if (Options.windowsAuthentication) {
-    if (!authenticators.contains(loginWindowsAuthentication))
-      throw new Error("call AuthClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
-
-    LoginPage.customLoginButtons = () => <LoginWithWindowsButton />;
-  }
 
   options.routes.push({ path: "/auth/login", element: <ImportComponent onImport={() => import("./Login/LoginPage")} /> });
   options.routes.push({ path: "/auth/changePassword", element: <ImportComponent onImport={() => import("./Login/ChangePasswordPage")} /> });
   options.routes.push({ path: "/auth/changePasswordSuccess", element: <ImportComponent onImport={() => import("./Login/ChangePasswordSuccessPage")} /> });
-  options.routes.push({ path: "/auth/resetPassword", element: <ImportComponent onImport={() => import("./Login/ResetPassword")} /> });
-  options.routes.push({ path: "/auth/forgotPasswordEmail", element: <ImportComponent onImport={() => import("./Login/ForgotPasswordEmailPage")} /> });
 
   if (options.notifyLogout) {
     notifyLogout = options.notifyLogout;
@@ -60,6 +45,7 @@ export function assertPermissionAuthorized(permission: PermissionSymbol | string
 export function isPermissionAuthorized(permission: PermissionSymbol | string) {
   var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = tryGetTypeInfo(key.before("."));
+
   if (!type)
     return false;
 
@@ -72,6 +58,7 @@ export function isPermissionAuthorized(permission: PermissionSymbol | string) {
 
 export namespace Options {
   export let AuthHeader = "Authorization";
+  export let disableWindowsAuthentication = false;
 }
 
 var notifyLogout: boolean;
@@ -97,16 +84,7 @@ export function loginFromCookie(): Promise<AuthenticatedUser | undefined> {
   });
 }
 
-export function loginWindowsAuthentication(): Promise<AuthenticatedUser | undefined> {
 
-  if (Options.disableWindowsAuthentication)
-    return Promise.resolve(undefined);
-
-  return API.loginWindowsAuthentication(false).then(au => {
-    au && console.log("loginWindowsAuthentication");
-    return au;
-  }).catch(() => undefined);
-}
 
 export async function authenticate(): Promise<AuthenticatedUser | undefined> {
   for (let i = 0; i < authenticators.length; i++) {
@@ -211,13 +189,11 @@ export function setAuthToken(authToken: string | undefined, authenticationType: 
 }
 
 export function registerUserTicketAuthenticator() {
-  authenticators.push(loginFromCookie);
-}
 
-/* Install and enable Windows authentication in IIS https://docs.microsoft.com/en-us/aspnet/core/security/authentication/windowsauth?view=aspnetcore-2.2&tabs=visual-studio */
-export function registerWindowsAuthenticator() {
-  Options.AuthHeader = "Signum_Authorization"; //Authorization is used by IIS with Negotiate prefix
-  authenticators.push(loginWindowsAuthentication);
+  if (Reflection.isStarted())
+    throw new Error("call AuthClient.registerUserTicketAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
+
+  authenticators.push(loginFromCookie);
 }
 
 export function autoLogin(): Promise<UserEntity | undefined> {
@@ -282,10 +258,7 @@ export namespace Options {
     throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
   }
 
-  export let disableWindowsAuthentication: boolean;
-  export let windowsAuthentication: boolean;
   export let userTicket: boolean;
-  export let resetPassword: boolean;
 }
 
 export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows";
@@ -312,35 +285,14 @@ export module API {
     return ajaxPost({ url: "/api/auth/loginFromCookie", avoidAuthToken: true }, undefined);
   }
 
-  export function loginWindowsAuthentication(throwError: boolean): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: `/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);
-  }
-
-  export function loginWithAzureAD(jwt: string, throwErrors: boolean): Promise<LoginResponse | undefined> {
-    return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
-  }
 
   export interface ChangePasswordRequest {
     oldPassword: string;
     newPassword: string;
   }
 
-  export interface ForgotPasswordEmailRequest {
-    email: string;
-  }
 
-  export interface ResetPasswordRequest {
-    code: string;
-    newPassword: string;
-  }
 
-  export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<string> {
-    return ajaxPost({ url: "/api/auth/forgotPasswordEmail" }, request);
-  }
-
-  export function resetPassword(request: ResetPasswordRequest): Promise<LoginResponse> {
-    return ajaxPost({ url: "/api/auth/resetPassword" }, request);
-  }
 
   export function changePassword(request: ChangePasswordRequest): Promise<LoginResponse> {
     return ajaxPost({ url: "/api/auth/changePassword" }, request);

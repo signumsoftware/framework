@@ -4,7 +4,10 @@ import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
-import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
+import {
+  FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
+  FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup
+} from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { IUserAssetEntity, UserAssetMessage, UserAssetPreviewModel, UserAssetPermission } from './Signum.UserAssets'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
@@ -108,7 +111,7 @@ export module Converter {
 
   export function toFilterNode(fr: FilterOption) : API.FilterNode {
 
-    if (isFilterGroupOption(fr))
+    if (isFilterGroup(fr))
       return ({
         groupOperation: fr.groupOperation,
         tokenString: fr.token && fr.token.toString(),

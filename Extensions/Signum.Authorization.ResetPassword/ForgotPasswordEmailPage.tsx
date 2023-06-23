@@ -2,8 +2,8 @@ import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
-import { LoginAuthMessage } from '../Signum.Authorization'
-import * as AuthClient from '../AuthClient'
+import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
+import * as ResetPasswordClient from './ResetPasswordClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
 export default function ForgotPasswordEmailPage() {
@@ -23,11 +23,11 @@ export default function ForgotPasswordEmailPage() {
       if (ms && Dic.getValues(ms).some(array => array.length > 0))
         return;
 
-      const request: AuthClient.API.ForgotPasswordEmailRequest = {
+      const request: ResetPasswordClient.API.ForgotPasswordEmailRequest = {
         email: eMail.current!.value,
       };
 
-      AuthClient.API.forgotPasswordEmail(request)
+      ResetPasswordClient.API.forgotPasswordEmail(request)
         .then(msg => {
 
           setSuccess(msg == undefined);

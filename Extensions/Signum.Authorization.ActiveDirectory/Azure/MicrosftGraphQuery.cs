@@ -1,15 +1,24 @@
 using Signum.DynamicQuery.Tokens;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.Azure;
+
+public enum GraphFieldUsage
+{
+    Filter,
+    Search,
+    Select,
+    Order,
+}
 
 public class MicrosoftGraphQueryConverter
 {
     public virtual string[]? GetOrderBy(IEnumerable<Order> orders)
     {
-        return orders.Select(c => ToGraphField(c.Token) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToArray();
+        return orders.Select(c => ToGraphField(c.Token, GraphFieldUsage.Order) + " " + (c.OrderType == OrderType.Ascending ? "asc" : "desc")).ToArray();
     }
 
-    public virtual string ToGraphField(QueryToken token)
+    
+    public virtual string ToGraphField(QueryToken token, GraphFieldUsage usage)
     {
         var field = token.Follow(a => a.Parent).Reverse().ToString(a => a.Key.FirstLower(), "/");
 
@@ -38,20 +47,20 @@ public class MicrosoftGraphQueryConverter
         {
             return fc.Operation switch
             {
-                FilterOperation.EqualTo => ToGraphField(fc.Token) + " eq " + ToStringValue(fc.Value),
-                FilterOperation.DistinctTo => ToGraphField(fc.Token) + " ne " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThan => ToGraphField(fc.Token) + " gt " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThanOrEqual => ToGraphField(fc.Token) + " ge " + ToStringValue(fc.Value),
-                FilterOperation.LessThan => ToGraphField(fc.Token) + " lt " + ToStringValue(fc.Value),
-                FilterOperation.LessThanOrEqual => ToGraphField(fc.Token) + " le " + ToStringValue(fc.Value),
+                FilterOperation.EqualTo => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(fc.Value),
+                FilterOperation.DistinctTo => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " ne " + ToStringValue(fc.Value),
+                FilterOperation.GreaterThan => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " gt " + ToStringValue(fc.Value),
+                FilterOperation.GreaterThanOrEqual => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " ge " + ToStringValue(fc.Value),
+                FilterOperation.LessThan => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " lt " + ToStringValue(fc.Value),
+                FilterOperation.LessThanOrEqual => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " le " + ToStringValue(fc.Value),
                 FilterOperation.Contains => null,
-                FilterOperation.NotContains => "NOT (" + ToGraphField(fc.Token) + ":" + ToStringValue(fc.Value) + ")",
-                FilterOperation.StartsWith => "startswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.EndsWith => "endswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotStartsWith => "not startswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotEndsWith => "not endswith(" + ToGraphField(fc.Token) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.IsIn => "(" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token) + " eq " + ToStringValue(a), " OR ") + ")",
-                FilterOperation.IsNotIn => "not (" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token) + " eq " + ToStringValue(a), " OR ") + ")",
+                FilterOperation.NotContains => "NOT (" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + ":" + ToStringValue(fc.Value) + ")",
+                FilterOperation.StartsWith => "startswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
+                FilterOperation.EndsWith => "endswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
+                FilterOperation.NotStartsWith => "not startswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
+                FilterOperation.NotEndsWith => "not endswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
+                FilterOperation.IsIn => "(" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(a), " OR ") + ")",
+                FilterOperation.IsNotIn => "not (" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(a), " OR ") + ")",
                 FilterOperation.Like or
                 FilterOperation.NotLike or
                 _ => throw new InvalidOperationException(fc.Operation + " is not implemented in Microsoft Graph API")
@@ -76,7 +85,7 @@ public class MicrosoftGraphQueryConverter
         {
             return fc.Operation switch
             {
-                FilterOperation.Contains => "\"" + ToGraphField(fc.Token) + ":" + fc.Value?.ToString()?.Replace(@"""", @"\""") + "\"",
+                FilterOperation.Contains => "\"" + ToGraphField(fc.Token, GraphFieldUsage.Search) + ":" + fc.Value?.ToString()?.Replace(@"""", @"\""") + "\"",
                 _ => null
             };
         }
@@ -89,11 +98,11 @@ public class MicrosoftGraphQueryConverter
     }
 
 
-   
+
 
     public virtual string[]? GetSelect(IEnumerable<Column> columns)
     {
-        return columns.Select(c => ToGraphField(c.Token)).Distinct().ToArray();
+        return columns.Select(c => ToGraphField(c.Token, GraphFieldUsage.Select)).Distinct().ToArray();
     }
 
     public virtual int? GetTop(Pagination pagination)

@@ -430,6 +430,7 @@ public enum FilterType
     Time,
     Lite,
     Embedded,
+    Model,
     Boolean,
     Enum,
     Guid,

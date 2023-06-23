@@ -54,11 +54,9 @@ public static class ReflectionServer
             var mainTypes = Schema.Current.Tables.Keys;
             var mixins = mainTypes.SelectMany(t => MixinDeclarations.GetMixinDeclarations(t)).ToList();
             var symbols = SymbolLogic.AllSymbolContainers().ToList();
+            var queries = QueryLogic.Queries.GetQueryNames().Where(a => a is Enum).Select(a => a.GetType()).Distinct();
 
-            var messages = mainTypes.Concat(mixins).Concat(symbols).Select(a => a.Assembly).SelectMany(a => a.GetTypes())
-            .Where(t => t.IsPublic && t.IsEnum && LocalizedAssembly.GetDescriptionOptions(t) != DescriptionOptions.None).ToList();
-
-            foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(messages))
+            foreach (var item in mainTypes.Concat(mixins).Concat(symbols).Concat(queries))
             {
                 EntityAssemblies.GetOrCreate(item.Assembly).Add(item.Namespace!);
             }

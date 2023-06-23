@@ -86,7 +86,7 @@ export class LiteAutocompleteConfig<T extends Entity> implements AutocompleteCon
     var toStr = getToString(item);
     var html = Navigator.renderLite(item, hl);
     if (this.showType)
-      return <span className="d-flex align-items-center flex-wrap" title={toStr}>{html}<TypeBadge entity={item} /></span>;
+      return <span title={toStr}>{html}<TypeBadge entity={item} /></span>;
     else
       return html;
   }
@@ -312,7 +312,7 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
     var toStr = getToString(item.entity!);
     var html = Navigator.renderLite(item.entity!, hl);
     if (this.showType)
-      return <span className="d-flex align-items-center flex-wrap"  title={toStr}>{html}<TypeBadge entity={item.entity!} /></span>;
+      return <span title={toStr}>{html}<TypeBadge entity={item.entity!} /></span>;
     else
       return html;
   }

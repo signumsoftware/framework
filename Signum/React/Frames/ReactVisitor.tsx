@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FindOptions, FilterOption, isFilterGroupOption, FilterGroupOption, FilterConditionOption } from '../FindOptions'
+import { FindOptions, FilterOption, FilterGroupOption, FilterConditionOption, isFilterGroup } from '../FindOptions'
 import { ModifiableEntity } from '../Signum.Entities'
 import { TypeContext } from '../TypeContext'
 import { PropertyRoute } from '../Reflection'
@@ -253,7 +253,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
 export function cloneFindOptions(fo: FindOptions): FindOptions {
 
   function cloneFilter(f: FilterOption): FilterOption {
-    if (isFilterGroupOption(f))
+    if (isFilterGroup(f))
       return ({
         groupOperation: f.groupOperation,
         token: f.token,

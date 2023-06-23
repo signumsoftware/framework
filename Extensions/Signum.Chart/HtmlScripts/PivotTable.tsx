@@ -11,7 +11,7 @@ import { Color } from '@framework/Basics/Color';
 import './PivotTable.css'
 import { isLite, Lite, Entity, BooleanEnum } from '@framework/Signum.Entities';
 import { FilterOptionParsed } from '@framework/Search';
-import { QueryToken, FilterConditionOptionParsed, isFilterGroupOptionParsed } from '@framework/FindOptions';
+import { QueryToken, FilterConditionOptionParsed, isFilterCondition } from '@framework/FindOptions';
 import { EntityBaseController } from '@framework/Lines';
 import { QueryTokenMessage } from '@framework/Signum.DynamicQuery.Tokens';
 
@@ -431,7 +431,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
   const vertStyles = vertColsWitParams.map((cp, i) => getCellStyle(() => getLevelValues(verticalDic as RowDictionary, i).map(firstValue), cp.params, cp.col));
 
 
-  const baseFilters = chartRequest.filterOptions.filter(fo => !isFilterGroupOptionParsed(fo)) as FilterConditionOptionParsed[];
+  const baseFilters = chartRequest.filterOptions.filter(fo => isFilterCondition(fo)) as FilterConditionOptionParsed[];
   const horizontalGroups = getRowGroups(horizontalDic, horStyles, 0, []);
   const verticalGroups = getRowGroups(verticalDic, vertStyles, 0, []);
 

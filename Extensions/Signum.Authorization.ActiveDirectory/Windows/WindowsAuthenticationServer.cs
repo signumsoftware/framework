@@ -2,9 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Principal;
 using System.DirectoryServices.AccountManagement;
 using Signum.Utilities.Reflection;
-using Signum.Authorization;
 
-namespace Signum.Authorization.ActiveDirectory;
+namespace Signum.Authorization.ActiveDirectory.WindowsAuthentication;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 
@@ -29,7 +28,7 @@ public class WindowsAuthenticationServer
                         : false;
 
                 if (AuthLogic.Authorizer is not ActiveDirectoryAuthorizer ada)
-                    return throwError ? throw new InvalidOperationException("No AuthLogic.Authorizer set") 
+                    return throwError ? throw new InvalidOperationException("No AuthLogic.Authorizer set")
                         : false;
 
                 var config = ada.GetConfig();
@@ -38,7 +37,7 @@ public class WindowsAuthenticationServer
                     return throwError ? throw new Exception($"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false")
                         : false;
 
-                var userName = wp.Identity.Name!;;
+                var userName = wp.Identity.Name!; ;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
 
 
@@ -106,4 +105,4 @@ public class WindowsAuthenticationServer
         }
     }
 }
-  
+

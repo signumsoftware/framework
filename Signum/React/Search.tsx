@@ -1,5 +1,5 @@
 import type { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable, FilterConditionOptionParsed, FilterGroupOptionParsed, FilterGroupOption } from './FindOptions'
-import { isFilterGroupOption, isFilterGroupOptionParsed, isActive } from './FindOptions'
+import { isActive, isFilterCondition, isFilterGroup } from './FindOptions'
 export { FindOptions, ColumnOption, ColumnOptionsMode, FilterOption, FilterOperation, FilterOptionParsed, FindOptionsParsed, OrderOption, OrderType, Pagination, PaginationMode, ResultTable };
 
 import EntityLink from './SearchControl/EntityLink'
@@ -39,7 +39,7 @@ export function extractFilterValue(filters: FilterOptionParsed[], token: string 
 export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): FilterConditionOptionParsed | undefined;
 export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
 export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
-  var f = filters.firstOrNull(f => !isFilterGroupOptionParsed(f) && isActive(f) && 
+  var f = filters.firstOrNull(f => isFilterCondition(f) && isActive(f) && 
     similarToken(f.token!.fullKey, token.toString()) &&
     (typeof operation == "function" ? operation(f.operation!) : f.operation == operation) &&
     (valueCondition == null || valueCondition(f.value))) as FilterConditionOptionParsed | undefined;
@@ -54,11 +54,11 @@ export function extractFilter<T>(filters: FilterOptionParsed[], token: string | 
 
 export function extractGroupFilter(filters: FilterOptionParsed[], fo: FilterGroupOption): FilterGroupOptionParsed | undefined
 {
-  var f = filters.firstOrNull(f => isFilterGroupOptionParsed(f) && Boolean(f.pinned) == Boolean(fo.pinned) && f.pinned?.splitValue == fo.pinned?.splitValue && f.groupOperation == fo.groupOperation
+  var f = filters.firstOrNull(f => isFilterGroup(f) && Boolean(f.pinned) == Boolean(fo.pinned) && f.pinned?.splitValue == fo.pinned?.splitValue && f.groupOperation == fo.groupOperation
     && f.filters.length == fo.filters.length &&
     f.filters.every((f2, i) => {
       var fo2 = fo.filters[i];
-      if (fo2 == null || isFilterGroupOptionParsed(f2) || isFilterGroupOption(fo2))
+      if (fo2 == null || isFilterGroup(f2) || isFilterGroup(fo2))
         return false;
 
       return similarToken(f2.token?.fullKey, fo2.token?.toString()) && f2.operation == fo2.operation && f2.value == fo2.value;

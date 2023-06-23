@@ -47,9 +47,7 @@ public class DirtyMeta : Meta
     public DirtyMeta(Implementations? implementations, Meta[] properties)
         : base(implementations)
     {
-        CleanMetas = properties.OfType<CleanMeta>().Concat(
-            properties.OfType<DirtyMeta>().SelectMany(d => d.CleanMetas))
-            .ToReadOnly();
+        CleanMetas = properties.SelectMany(m => m is CleanMeta cm ? new[] { cm } : ((DirtyMeta)m).CleanMetas.ToArray()).ToReadOnly();
     }
 
     public override string? IsAllowed()
