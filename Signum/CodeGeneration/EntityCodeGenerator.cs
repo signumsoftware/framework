@@ -82,11 +82,15 @@ public class EntityCodeGenerator
         if (mli != null && !mli.IsVirtual)
             return this.GetFileName(this.Tables.GetOrThrow(mli.BackReferenceColumn.ForeignKey!.TargetTable));
 
-        string name = t.Name.Schema.IsDefault() ? t.Name.Name : t.Name.ToString().Replace('.', '\\');
+        var folder = GetModuleName(t);
+        var fileName = GetEntityName(t) + ".cs";
 
-        name = Regex.Replace(name, "[" + Regex.Escape(new string(Path.GetInvalidPathChars())) + "]", "");
+        return Path.Combine(folder, fileName);
+    }
 
-        return Singularize(name) + ".cs";
+    protected virtual string GetModuleName(DiffTable t)
+    {
+        return t.Name.Schema.IsDefault() ? "MainModule" : t.Name.Schema.ToString();
     }
 
     protected virtual string? WriteFile(string fileName, IEnumerable<DiffTable> tables)
@@ -123,6 +127,7 @@ public class EntityCodeGenerator
     {
         var result = new List<string>
         {
+            "System.Data"
         };
 
         var currentNamespace = GetNamespace(fileName);
