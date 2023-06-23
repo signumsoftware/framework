@@ -604,7 +604,6 @@ export module SearchMessage {
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
   export const Row = new MessageKey("SearchMessage", "Row");
-  export const SplitText = new MessageKey("SearchMessage", "SplitText");
   export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
   export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
   export const ParentValue = new MessageKey("SearchMessage", "ParentValue");
