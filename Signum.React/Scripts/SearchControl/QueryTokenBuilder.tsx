@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { areEqual, classes } from '../Globals'
+import { areEqual, classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
 import * as PropTypes from "prop-types";
@@ -127,12 +127,27 @@ interface QueryTokenPartProps{
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
+export const manualSubTokens: { [key: string]: (typeName: string) => QueryToken[] } = {};
+
+export function registerManualSubTokens(key: string, func: (typeName: string) => QueryToken[] | undefined) {
+  Dic.addOrThrow(manualSubTokens, key, func);
+}
+
 export function QueryTokenPart(p: QueryTokenPartProps) {
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
       return Promise.resolve(undefined);
 
+    const manualContainer = p.parentToken?.isManual && p.parentToken;
+    if (manualContainer) {
+      var typeName = manualContainer.parent!.type.name; //todo: revise QuickLinksToken.Type
+      var manuals = manualSubTokens[manualContainer.key] && manualSubTokens[manualContainer.key](typeName);
+      if (manuals) {
+        manuals.forEach(m => { m.parent = manualContainer; m.fullKey = manualContainer.fullKey + "." + m.fullKey });
+        return Promise.resolve(manuals)
+      };
+    }
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
   }, [p.readOnly, p.parentToken && p.parentToken.fullKey, p.subTokenOptions, p.queryKey])

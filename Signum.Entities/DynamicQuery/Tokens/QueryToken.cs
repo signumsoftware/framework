@@ -118,6 +118,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public abstract QueryToken? Parent { get; }
 
+
     public QueryToken()
     {
     }
@@ -127,6 +128,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public QueryToken? SubTokenInternal(string key, SubTokensOptions options)
     {
+        if (IsManual)
+            return GetManualSubToken(key);
+        
         var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnDynamicEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
         if (result == null)
@@ -166,6 +170,13 @@ public abstract class QueryToken : IEquatable<QueryToken>
             return dictionary;
         });
     }
+    public virtual bool IsManual => false;
+
+    protected virtual QueryToken? GetManualSubToken(string key) 
+    {
+        throw new NotImplementedException();
+    }
+
 
     public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
 
@@ -210,6 +221,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
                     ((options & SubTokensOptions.CanOperation) != 0) ? new OperationsToken(this) : null,
+                    new QuickLinksToken(this),
                 }
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);

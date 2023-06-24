@@ -194,6 +194,7 @@ export interface QueryToken {
   typeColor: string;
   niceTypeName: string;
   isGroupable: boolean;
+  isManual: boolean;
   hasOrderAdapter?: boolean;
   preferEquals?: boolean;
   filterType?: FilterType;
@@ -361,6 +362,7 @@ export function toQueryToken(cd: ColumnDescription): QueryToken {
     niceTypeName: cd.niceTypeName,
     filterType: cd.filterType,
     isGroupable: cd.isGroupable,
+    isManual: cd.isManual,
     hasOrderAdapter: cd.hasOrderAdapter,
     preferEquals: cd.preferEquals,
     propertyRoute: cd.propertyRoute
@@ -485,6 +487,7 @@ export interface ColumnDescription {
   format?: string;
   displayName: string;
   isGroupable: boolean;
+  isManual: boolean;
   hasOrderAdapter?: boolean;
   preferEquals?: boolean;
   propertyRoute?: string;
