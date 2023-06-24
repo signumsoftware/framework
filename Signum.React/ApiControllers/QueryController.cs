@@ -247,8 +247,11 @@ public class QueryTokenTS
         if (qt is CollectionToArrayToken)
             return QueryTokenType.ToArray;
 
-        if (qt is OperationsToken ot)
+        if (qt is OperationsToken)
             return QueryTokenType.Operation;
+        
+        if (qt is ManualContainerToken)
+            return QueryTokenType.Manual;
         
         return null;
     }
@@ -279,5 +282,6 @@ public enum QueryTokenType
     Element,
     AnyOrAll,
     Operation,
-    ToArray
+    ToArray,
+    Manual
 }

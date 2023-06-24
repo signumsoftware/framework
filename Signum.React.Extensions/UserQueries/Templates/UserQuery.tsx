@@ -85,7 +85,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                       ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                       queryKey={p.ctx.value.query!.key}
                       onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
-                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (canAggregate ? canAggregate : SubTokensOptions.CanOperation)} />
+                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual)} />
 
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>

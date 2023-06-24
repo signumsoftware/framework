@@ -213,7 +213,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidFrom): null,
                     IsSystemVersioned(onlyType) ? new SystemTimeToken(this, SystemTimeProperty.SystemValidTo): null,
                     ((options & SubTokensOptions.CanOperation) != 0) ? new OperationsToken(this) : null,
-                    new QuickLinksToken(this),
+                    ((options & SubTokensOptions.CanManual) != 0) ? new QuickLinksToken(this) : null,
                 }
                 .NotNull()
                 .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
@@ -368,10 +368,10 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public static List<QueryToken> CollectionProperties(QueryToken parent, SubTokensOptions options)
     {
         if (parent.HasAllOrAny())
-            options &= ~(SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate);
+            options &= ~(SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate | SubTokensOptions.CanManual);
 
         if (parent.HasToArray() != null)
-            options &= ~(SubTokensOptions.CanAnyAll | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate);
+            options &= ~(SubTokensOptions.CanAnyAll | SubTokensOptions.CanToArray | SubTokensOptions.CanOperation | SubTokensOptions.CanAggregate | SubTokensOptions.CanManual);
 
         List<QueryToken> tokens = new List<QueryToken>() { new CountToken(parent) };
 

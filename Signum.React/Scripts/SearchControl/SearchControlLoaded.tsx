@@ -506,7 +506,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
-    const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+    const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
 
     return (
       <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
@@ -542,7 +542,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 columnOption={this.state.editingColumn}
                 onChange={this.handleColumnChanged}
                 queryDescription={qd}
-                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperation}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | canAggregateXorOperationOrManual}
                 close={this.handleColumnClose} />
             }
             <div ref={d => this.containerDiv = d}

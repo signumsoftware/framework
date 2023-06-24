@@ -48,7 +48,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
   const co = p.columnOption;
 
   const isCollection = co.token && co.token.type.isCollection;
-  const isInvalid = co.token && co.token.type.name == "OperationsToken";
+  const isInvalid = co.token && (co.token.queryTokenType == "Operation" || co.token.queryTokenType == "Manual");
 
   const summaryNotAggregate = co.summaryToken != null && co.summaryToken.queryTokenType != "Aggregate";
 
