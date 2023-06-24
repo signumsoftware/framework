@@ -118,7 +118,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public abstract QueryToken? Parent { get; }
 
-
     public QueryToken()
     {
     }
@@ -128,8 +127,8 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public QueryToken? SubTokenInternal(string key, SubTokensOptions options)
     {
-        if (IsManual)
-            return GetManualSubToken(key);
+        if (this is ManualContainerToken mc)
+            return new ManualToken(mc, key, mc.Parent!.Type);
         
         var result = CachedSubTokensOverride(options).TryGetC(key) ?? OnDynamicEntityExtension(this).SingleOrDefaultEx(a => a.Key == key);
 
@@ -170,13 +169,6 @@ public abstract class QueryToken : IEquatable<QueryToken>
             return dictionary;
         });
     }
-    public virtual bool IsManual => false;
-
-    protected virtual QueryToken? GetManualSubToken(string key) 
-    {
-        throw new NotImplementedException();
-    }
-
 
     public static Func<QueryToken, Type, SubTokensOptions, List<QueryToken>> ImplementedByAllSubTokens = (quetyToken, type, options) => throw new NotImplementedException("QueryToken.ImplementedByAllSubTokens not set");
 

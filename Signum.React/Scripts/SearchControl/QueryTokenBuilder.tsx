@@ -139,7 +139,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
     if (p.readOnly)
       return Promise.resolve(undefined);
 
-    const manualContainer = p.parentToken?.isManual && p.parentToken;
+    const manualContainer = p.parentToken?.parent && manualSubTokens[p.parentToken.key] && p.parentToken;
     if (manualContainer) {
       var typeName = manualContainer.parent!.type.name; //todo: revise QuickLinksToken.Type
       var manuals = manualSubTokens[manualContainer.key] && manualSubTokens[manualContainer.key](typeName);
@@ -148,6 +148,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
         return Promise.resolve(manuals)
       };
     }
+
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
   }, [p.readOnly, p.parentToken && p.parentToken.fullKey, p.subTokenOptions, p.queryKey])

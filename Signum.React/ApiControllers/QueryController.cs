@@ -174,7 +174,6 @@ public class ColumnDescriptionTS
     public string? format;
     public string displayName;
     public bool isGroupable;
-    public bool isManual;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool hasOrderAdapter;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -191,7 +190,6 @@ public class ColumnDescriptionTS
         this.typeColor = token.TypeColor;
         this.niceTypeName = token.NiceTypeName;
         this.isGroupable = token.IsGroupable;
-        this.isManual = token.IsManual;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(token) != null);
         this.preferEquals = token.Type == typeof(string) &&
             token.GetPropertyRoute() is PropertyRoute pr &&
@@ -223,7 +221,6 @@ public class QueryTokenTS
         this.niceTypeName = qt.NiceTypeName;
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
-        this.isManual = qt.IsManual;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
 
         this.preferEquals = qt.Type == typeof(string) &&
@@ -268,7 +265,6 @@ public class QueryTokenTS
     public string? format;
     public string? unit;
     public bool isGroupable;
-    public bool isManual;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool hasOrderAdapter;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]

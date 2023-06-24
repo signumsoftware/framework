@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
 import { classes, Dic } from './Globals'
-import { FindOptions, QueryToken, toQueryToken } from './FindOptions'
+import { FindOptions, ManualCellDTO, QueryToken, toQueryToken } from './FindOptions'
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
@@ -27,10 +27,9 @@ export function start() {
 
   Finder.formatRules.push({
     name: "CellQuickLink",
-    isApplicable: c => {
-      return c.type.name == "CellQuickLinkDTO";
-    },
-    formatter: (c, sc) => new CellFormatter((dto: CellQuickLinkDto, ctx, token) => (<CellQuickLink quickLinkKey={dto.quickLinkKey} lite={dto.lite} />), false),
+    isApplicable: qt => qt.parent?.key == "[QuickLinks]",
+
+    formatter: (c, sc) => new CellFormatter((dto: ManualCellDTO, ctx, token) => (<CellQuickLink quickLinkKey={dto.manualTokenKey} lite={dto.lite} />), false),
   });
 
   registerManualSubTokens("[QuickLinks]", (typeName) => getQuickLinkTokens(typeName));
@@ -57,11 +56,6 @@ function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
     {quickLink.icon && "\u00A0"}
     {quickLink.text()}
   </a>)
-}
-
-export interface CellQuickLinkDto {
-  lite: Lite<Entity>;
-  quickLinkKey: string;
 }
 
 export interface QuickLinkContext<T extends Entity> {

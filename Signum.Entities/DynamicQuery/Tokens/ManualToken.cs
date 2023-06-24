@@ -3,14 +3,14 @@ using Signum.Entities.Reflection;
 
 namespace Signum.Entities.DynamicQuery;
 
-public class QuickLinkToken : QueryToken
+public class ManualToken : QueryToken
 {
-    QueryToken parent;
+    ManualContainerToken parent;
     Type entityType;
 
     public override QueryToken? Parent => parent;
 
-    public QuickLinkToken(QueryToken parent, string key, Type entityType)
+    public ManualToken(ManualContainerToken parent, string key, Type entityType)
     {
         var cleanType = entityType.CleanType();
 
@@ -33,7 +33,7 @@ public class QuickLinkToken : QueryToken
         return Key;
     }
 
-    public override Type Type { get { return typeof(CellQuickLinkDTO); } }
+    public override Type Type { get { return typeof(ManualCellDTO); } }
 
     string key;
     public override string Key { get { return key; } }
@@ -43,11 +43,12 @@ public class QuickLinkToken : QueryToken
 
         var parentExpression = parent.BuildExpression(context);
         var entity = parentExpression.ExtractEntity(false);
-        var quickLinkKey = Expression.Constant(key);
+        var containerTokenKey = Expression.Constant(parent.GetTokenKey());
+        var tokenKey = Expression.Constant(key);
 
-        var dtoConstructor = typeof(CellQuickLinkDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string) });
+        var dtoConstructor = typeof(ManualCellDTO).GetConstructor(new[] { typeof(Lite<IEntity>), typeof(string) , typeof(string) });
 
-        NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), quickLinkKey);
+        NewExpression newExpr = Expression.New(dtoConstructor!, entity.BuildLite(), containerTokenKey, tokenKey);
 
         return newExpr;
     }
@@ -57,9 +58,9 @@ public class QuickLinkToken : QueryToken
         return parent.IsAllowed();
     }
 
-    public override QueryToken Clone()
+    public override ManualToken Clone()
     {
-        return new QuickLinkToken(this.parent.Clone(), key, entityType);
+        return new ManualToken((ManualContainerToken)this.parent.Clone(), key, entityType);
     }
 
     public override string? Format
@@ -88,15 +89,17 @@ public class QuickLinkToken : QueryToken
     }
 }
 
-public class CellQuickLinkDTO
+public class ManualCellDTO
 {
-    public CellQuickLinkDTO(Lite<IEntity> lite, string quickLinkKey)
+    public ManualCellDTO(Lite<IEntity> lite, string manualContainerTokenKey, string manualTokenKey)
     {
         Lite = lite;
-        QuickLinkKey = quickLinkKey;
+        ManualContainerTokenKey = manualContainerTokenKey;
+        ManualTokenKey = manualTokenKey;
     }
     public Lite<IEntity> Lite { get; set; }
-    public string QuickLinkKey { get; set; }
+    public string ManualContainerTokenKey { get; set; }
+    public string ManualTokenKey { get; set; }
 
 }
 
