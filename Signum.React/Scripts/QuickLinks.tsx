@@ -29,7 +29,7 @@ export function start() {
     name: "CellQuickLink",
     isApplicable: qt => qt.parent?.key == "[QuickLinks]",
 
-    formatter: (c, sc) => new CellFormatter((dto: ManualCellDTO, ctx, token) => (<CellQuickLink quickLinkKey={dto.manualTokenKey} lite={dto.lite} />), false),
+    formatter: (c, sc) => new CellFormatter((dto: ManualCellDTO, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
   });
 
   registerManualSubTokens("[QuickLinks]", (typeName) => getQuickLinkTokens(typeName));
@@ -41,7 +41,7 @@ function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
 
   React.useEffect(() => {
     getQuickLink(p.quickLinkKey, p.lite)
-      .then(l => setQuickLink(l[0]));
+      .then(l => l && l.length ? setQuickLink(l[0]) : setQuickLink(null));
   }, [p]);
 
   if (!quickLink)
@@ -111,16 +111,14 @@ function getQuickLinkTokens(typeName: string): QueryToken[] {
   return links.map(l => {
     let o = l.rql.options!;
     return {
-      //      parent: parentToken,
       toStr: o.tokenNiceName,
       niceName: o.tokenNiceName,
       key: l.key,
       fullKey: l.key,
-      type: { name: "CellQuickLinkDTO" },
+      type: { name: "ManualCellDTO" },
       typeColor: o.tokenColor,
       niceTypeName: "CellQuickLink",
       isGroupable: false,
-      isManual: true,
     } as QueryToken
   });
 }
