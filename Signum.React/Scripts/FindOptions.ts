@@ -204,7 +204,14 @@ export interface QueryToken {
   propertyRoute?: string;
 }
 
-export interface ManualCellDTO {
+export interface ManualToken { 
+  toStr: string;
+  niceName: string;
+  key: string;
+  typeColor: string;
+  niceTypeName: string;
+}
+export interface ManualCellDto {
   lite: Lite<Entity>;
   manualContainerTokenKey: string;
   manualTokenKey: string;

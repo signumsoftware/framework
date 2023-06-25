@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { areEqual, classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
-import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
+import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets'
@@ -127,10 +127,33 @@ interface QueryTokenPartProps{
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
-export const manualSubTokens: { [key: string]: (typeName: string) => QueryToken[] } = {};
+export const manualSubTokens: { [key: string]: (typeName: string) => ManualToken[] } = {};
 
-export function registerManualSubTokens(key: string, func: (typeName: string) => QueryToken[] | undefined) {
+export function registerManualSubTokens(key: string, func: (typeName: string) => ManualToken[] | undefined) {
   Dic.addOrThrow(manualSubTokens, key, func);
+}
+function getManualSubTokens(token?: QueryToken) {
+
+  //if (token?.type.name == "ManualCellDTO")
+  if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
+    return Promise.resolve([]); //prevent send to server
+
+  const container = token?.parent && manualSubTokens[token.key] && token;
+  if (container) {
+    const typeName = container.parent!.type.name;
+    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](typeName);
+    const tokens = manuals && manuals.map(m =>
+    ({
+      ...m, parent: container,
+      fullKey: (container.fullKey + "." + m.key),
+      type: { name: "ManualCellDTO" },
+      queryTokenType: "Manual",
+      isGroupable: false
+    } as QueryToken));
+    if (tokens) {
+      return Promise.resolve(tokens)
+    };
+  }
 }
 
 export function QueryTokenPart(p: QueryTokenPartProps) {
@@ -139,15 +162,9 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
     if (p.readOnly)
       return Promise.resolve(undefined);
 
-    const manualContainer = p.parentToken?.parent && manualSubTokens[p.parentToken.key] && p.parentToken;
-    if (manualContainer) {
-      var typeName = manualContainer.parent!.type.name; //todo: revise QuickLinksToken.Type
-      var manuals = manualSubTokens[manualContainer.key] && manualSubTokens[manualContainer.key](typeName);
-      if (manuals) {
-        manuals.forEach(m => { m.parent = manualContainer; m.fullKey = manualContainer.fullKey + "." + m.fullKey });
-        return Promise.resolve(manuals)
-      };
-    }
+    const manuals = getManualSubTokens(p.parentToken);
+    if (manuals)
+      return manuals;
 
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])

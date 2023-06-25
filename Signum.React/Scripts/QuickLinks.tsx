@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
 import { classes, Dic } from './Globals'
-import { FindOptions, ManualCellDTO, QueryToken, toQueryToken } from './FindOptions'
+import { FindOptions, ManualCellDto, QueryToken, toQueryToken } from './FindOptions'
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
@@ -29,7 +29,7 @@ export function start() {
     name: "CellQuickLink",
     isApplicable: qt => qt.parent?.key == "[QuickLinks]",
 
-    formatter: (c, sc) => new CellFormatter((dto: ManualCellDTO, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
+    formatter: (c, sc) => new CellFormatter((dto: ManualCellDto, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
   });
 
   registerManualSubTokens("[QuickLinks]", (typeName) => getQuickLinkTokens(typeName));
@@ -103,10 +103,9 @@ export function registerQuickLink_New<T extends Entity>(type: Type<T>, key: stri
 function getQuickLinkTokens(typeName: string): QueryToken[] {
 
   let links = Dic.map(onGlobalQuickLinks_New, (key, rql) => ({ key, rql }));
+  let specifics = Dic.map(onQuickLinks_New[typeName], (key, rql) => ({ key, rql }));
 
-  const specifics = onQuickLinks_New[typeName];
-
-  links = Dic.map(specifics, (key, rql) => ({ key, rql })).concat(links).filter(a => a.rql.options && !a.rql.options.allowsMultiple);
+  links = specifics.concat(links).filter(a => a.rql.options && a.rql.options.tokenNiceName);
 
   return links.map(l => {
     let o = l.rql.options!;
@@ -115,10 +114,8 @@ function getQuickLinkTokens(typeName: string): QueryToken[] {
       niceName: o.tokenNiceName,
       key: l.key,
       fullKey: l.key,
-      type: { name: "ManualCellDTO" },
       typeColor: o.tokenColor,
-      niceTypeName: "CellQuickLink",
-      isGroupable: false,
+      niceTypeName: "Cell QuickLink",
     } as QueryToken
   });
 }
@@ -127,7 +124,7 @@ export function getQuickLink(key: string, lite: Lite<Entity>): Promise<QuickLink
 
   const typeName = lite.EntityType;
 
-  let link = onQuickLinks_New[typeName][key]
+  let link = (onQuickLinks_New[typeName] ?? {})[key]
 
   if (!link)
     link = onGlobalQuickLinks_New[key];

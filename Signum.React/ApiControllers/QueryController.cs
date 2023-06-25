@@ -250,7 +250,7 @@ public class QueryTokenTS
         if (qt is OperationsToken)
             return QueryTokenType.Operation;
         
-        if (qt is ManualContainerToken)
+        if (qt is ManualContainerToken or ManualToken)
             return QueryTokenType.Manual;
         
         return null;
