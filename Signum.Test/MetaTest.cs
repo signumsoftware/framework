@@ -60,7 +60,7 @@ public class MetaTest
         Assert.IsType<DirtyMeta>(dic["Sum"]);
 
         var metas = ((DirtyMeta)dic["Sum"]!).CleanMetas;
-        Assert.Equal("(Album).Name,(Label).Name", metas.SelectMany(cm => cm.PropertyRoutes).Distinct().ToString(","));
+        Assert.Equal("(Album).Name,(Label).Name", metas.SelectMany(cm => cm.PropertyRoutes).Distinct().Select(a => a.ToString()).Order().ToString(","));
     }
 
     [Fact]
