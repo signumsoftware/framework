@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
 import { classes, Dic } from './Globals'
-import { FindOptions, ManualCellDto, QueryToken, toQueryToken } from './FindOptions'
+import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } from './FindOptions'
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
@@ -25,14 +25,14 @@ export function start() {
 
   AppContext.clearSettingsActions.push(clearQuickLinks);
 
+  registerManualSubTokens("[QuickLinks]", (typeName) => getQuickLinkTokens(typeName));
+
   Finder.formatRules.push({
     name: "CellQuickLink",
     isApplicable: qt => qt.parent?.key == "[QuickLinks]",
 
     formatter: (c, sc) => new CellFormatter((dto: ManualCellDto, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
   });
-
-  registerManualSubTokens("[QuickLinks]", (typeName) => getQuickLinkTokens(typeName));
 }
 
 function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
@@ -58,6 +58,22 @@ function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
   </a>)
 }
 
+export function getQuickLink(key: string, lite: Lite<Entity>): Promise<QuickLink[]> {
+
+  const typeName = lite.EntityType;
+
+  let link = (onQuickLinks[typeName] ?? {})[key]
+
+  if (!link)
+    link = onGlobalQuickLinks[key];
+
+  if (!link)
+    throw new Error(`QuickLink with key "${key}" for type "${typeName}" not found`);
+
+  return safeCall(link.factory, { lite: lite, lites: [lite] });
+}
+
+
 export interface QuickLinkContext<T extends Entity> {
   lite: Lite<T>;
   lites: Lite<T>[];
@@ -68,7 +84,7 @@ export interface QuickLinkContext<T extends Entity> {
 type Seq<T> = (T | undefined)[] | T | undefined;
 
 export function clearQuickLinks() {
-  onGlobalQuickLinks.clear();
+  Dic.clear(onGlobalQuickLinks);
   Dic.clear(onQuickLinks);
 }
 
@@ -77,78 +93,39 @@ export interface RegisteredQuickLink<T extends Entity> {
   options?: QuickLinkRegisterOptions;
 }
 
-
-export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
+export const onGlobalQuickLinks: { [key: string]: RegisteredQuickLink<any> } = { };
+export function registerGlobalQuickLink(key: string, quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
+  Dic.addOrThrow(onGlobalQuickLinks, key, { factory: quickLinkGenerator, options: options });
 }
 
-//======================================
+export const onQuickLinks: { [typeName: string]: { [key: string]: RegisteredQuickLink<any> }} = { };
+export function registerQuickLink<T extends Entity>(type: Type<T>, key: string,
+  quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
 
-export const onGlobalQuickLinks_New: { [key: string]: RegisteredQuickLink<any> } = { };
-export function registerGlobalQuickLink_New(key: string, quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  Dic.addOrThrow(onGlobalQuickLinks_New, key, { factory: quickLinkGenerator, options: options });
-}
-
-export const onQuickLinks_New: { [typeName: string]: { [key: string]: RegisteredQuickLink<any> }} = { };
-export function registerQuickLink_New<T extends Entity>(type: Type<T>, key: string, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
   const typeName = getTypeName(type);
 
-  const typeDic = onQuickLinks_New[typeName] || (onQuickLinks_New[typeName] = {});
+  const typeDic = onQuickLinks[typeName] || (onQuickLinks[typeName] = {});
 
   Dic.addOrThrow(typeDic, key, { factory: quickLinkGenerator, options: options });
 }
 
+function getQuickLinkTokens(typeName: string): ManualToken[] {
 
-function getQuickLinkTokens(typeName: string): QueryToken[] {
-
-  let links = Dic.map(onGlobalQuickLinks_New, (key, rql) => ({ key, rql }));
-  let specifics = Dic.map(onQuickLinks_New[typeName], (key, rql) => ({ key, rql }));
+  let links = Dic.map(onGlobalQuickLinks, (key, rql) => ({ key, rql }));
+  let specifics = Dic.map(onQuickLinks[typeName], (key, rql) => ({ key, rql }));
 
   links = specifics.concat(links).filter(a => a.rql.options && a.rql.options.tokenNiceName);
 
   return links.map(l => {
     let o = l.rql.options!;
-    return {
+    return ({
       toStr: o.tokenNiceName,
       niceName: o.tokenNiceName,
       key: l.key,
-      fullKey: l.key,
       typeColor: o.tokenColor,
       niceTypeName: "Cell QuickLink",
-    } as QueryToken
+    } as ManualToken)
   });
-}
-
-export function getQuickLink(key: string, lite: Lite<Entity>): Promise<QuickLink[]> {
-
-  const typeName = lite.EntityType;
-
-  let link = (onQuickLinks_New[typeName] ?? {})[key]
-
-  if (!link)
-    link = onGlobalQuickLinks_New[key];
-
-/*  if (link && link.options?.allowsMultiple)
-    throw new Error("allowsMultiple not supported");*/
-
-  if (!link)
-    throw new Error(`QuickLink with key "${key}" for type "${typeName}" not found`);
-
-
-  return safeCall(link.factory, { lite: lite, lites: [lite] });
-
-}
-
-//======================================
-
-export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  const typeName = getTypeName(type);
-
-  const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
-
-  col.push({ factory: quickLinkGenerator, options: options });
 }
 
 export var ignoreErrors = false;
@@ -159,10 +136,10 @@ export function setIgnoreErrors(value: boolean) {
 
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
 
-  let promises = onGlobalQuickLinks.filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
+  let promises = Dic.filter(onGlobalQuickLinks, (kv) => kv.value.options && kv.value.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.value.factory, ctx));
 
   if (onQuickLinks[ctx.lite.EntityType]) {
-    const specificPromises = onQuickLinks[ctx.lite.EntityType].filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
+    const specificPromises = Dic.filter(onQuickLinks[ctx.lite.EntityType], (kv) => kv.value.options && kv.value.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.value.factory, ctx));
 
     promises = promises.concat(specificPromises);
   }

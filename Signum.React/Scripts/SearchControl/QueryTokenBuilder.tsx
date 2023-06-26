@@ -132,11 +132,12 @@ export const manualSubTokens: { [key: string]: (typeName: string) => ManualToken
 export function registerManualSubTokens(key: string, func: (typeName: string) => ManualToken[] | undefined) {
   Dic.addOrThrow(manualSubTokens, key, func);
 }
+
 function getManualSubTokens(token?: QueryToken) {
 
   //if (token?.type.name == "ManualCellDTO")
   if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
-    return Promise.resolve([]); //prevent send to server
+    return Promise.resolve([]); //prevents sending to server
 
   const container = token?.parent && manualSubTokens[token.key] && token;
   if (container) {

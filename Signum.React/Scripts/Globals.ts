@@ -1030,6 +1030,11 @@ export module Dic {
     return result;
   }
 
+  export function filter<V>(obj: { [key: string]: V }, predicate: (kv: { key: string, value: V }) => any): {key: string , value: V}[] {
+
+    return Dic.map(obj, (k, v) => ({ key: k, value: v })).filter(predicate);
+  }
+
   export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
     let index = 0;
     const result: { [key: string]: R } = {};
