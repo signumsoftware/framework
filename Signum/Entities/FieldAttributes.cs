@@ -299,6 +299,17 @@ public class DbTypeAttribute : Attribute
         return (isPostgres ? DefaultPostgres : DefaultSqlServer) ?? Default;
     }
 
+    public string? Check { get; set; }
+
+    public string? CheckSqlServer { get; set; }
+    public string? CheckPostgres { get; set; }
+
+    public string? GetCheck(bool isPostgres)
+    {
+        return (isPostgres ? CheckPostgres : CheckSqlServer) ?? Check;
+    }
+
+
     public string? Collation { get; set; }
 
     public const string SqlServer_NewId = "NEWID()";

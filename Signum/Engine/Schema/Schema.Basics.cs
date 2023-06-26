@@ -106,6 +106,7 @@ public class SystemVersionedInfo
         public bool IdentityBehaviour => false;
         public bool Identity => false;
         public string? Default { get; set; }
+        public string? Check { get; set; }
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -133,6 +134,7 @@ public class SystemVersionedInfo
         public bool IdentityBehaviour => false;
         public bool Identity => false;
         public string? Default { get; set; }
+        public string? Check { get; set; }
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -469,6 +471,7 @@ public partial interface IColumn
     bool IdentityBehaviour { get; }
     bool Identity { get; }
     string? Default { get; }
+    string? Check { get; }
     int? Size { get; }
     byte? Precision { get; }
     byte? Scale { get; }
@@ -531,6 +534,7 @@ public partial class FieldPrimaryKey : Field, IColumn
     public Type Type { get; set; }
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
+    public string? Check { get; set; }
 
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -588,6 +592,7 @@ public partial class FieldValue : Field, IColumn
     Table? IColumn.ReferenceTable => null;
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
+    public string? Check { get; set; }
     public DateTimeKind DateTimeKind { get; set; }
 
     public FieldValue(PropertyRoute route, Type? fieldType, string name)
@@ -655,6 +660,7 @@ public partial class FieldEmbedded : Field, IFieldFinder
         Type IColumn.Type => typeof(bool);
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
+        public string? Check { get; set; }
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public EmbeddedHasValueColumn(string name)
@@ -933,6 +939,7 @@ public partial class FieldReference : Field, IColumn, IFieldReference
 
     public bool AvoidExpandOnRetrieving { get; set; }
     public string? Default { get; set; }
+    public string? Check { get; set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
@@ -1189,6 +1196,7 @@ public partial class ImplementationColumn : IColumn
     public Type Type => this.Nullable.ToBool() ? ReferenceTable.PrimaryKey.Type.Nullify() : ReferenceTable.PrimaryKey.Type;
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
+    public string? Check { get; set; }
     public Type? CustomLiteModelType { get; internal set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -1221,6 +1229,7 @@ public partial class ImplementedByAllIdColumn : IColumn
     public Type Type { get; private set;  }
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
+    public string? Check { get; set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
@@ -1322,6 +1331,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public Type Type { get; set; }
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
+        public string? Check { get; set; }
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public PrimaryKeyColumn(Type type, string name)

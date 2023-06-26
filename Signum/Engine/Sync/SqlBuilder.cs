@@ -54,7 +54,7 @@ public class SqlBuilder
 
         var systemPeriod = t.SystemVersioned == null || IsPostgres || forHistoryTable || avoidSystemVersioning ? null : Period(t.SystemVersioned);
 
-        var columns = t.Columns.Values.Select(c => ColumnLine(c, GetDefaultConstaint(t, c), isChange: false, avoidSystemVersion: avoidSystemVersioning, forHistoryTable: forHistoryTable))
+        var columns = t.Columns.Values.Select(c => ColumnLine(c, GetDefaultConstaint(t, c), GetCheckConstaint(t, c), isChange: false, avoidSystemVersion: avoidSystemVersioning, forHistoryTable: forHistoryTable))
             .And(primaryKeyConstraint)
             .And(systemPeriod)
             .NotNull()
@@ -151,7 +151,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
 
     public SqlPreCommand AlterTableAddColumn(ITable table, IColumn column, DefaultConstraint? tempDefault = null)
     {
-        return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, ColumnLine(column, tempDefault ?? GetDefaultConstaint(table, column), isChange: false)));
+        return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, ColumnLine(column, tempDefault ?? GetDefaultConstaint(table, column), checkConst: null, isChange: false)));
     }
 
     public SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
@@ -164,7 +164,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         var tableName = forceTableName ?? table.Name;
 
         var alterColumn = !IsPostgres ?
-             new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLine(column, null, isChange: true))) :
+             new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1};".FormatWith(tableName, ColumnLine(column, null, null, isChange: true))) :
              new[]
              {
                  !diffColumn.DbType.Equals(column.DbType) || diffColumn.Collation != column.Collation || !diffColumn.ScaleEquals(column) || !diffColumn.SizeEquals(column) ?
@@ -173,16 +173,19 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
                  !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
              }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
-        if (column.Default == null)
+        //if (column.Default == null && column.Check == null)
             return alterColumn;
 
-        var defCons = GetDefaultConstaint(table, column)!;
+        //var defCons = GetDefaultConstaint(table, column)!;
+        //var checkCons = GetCheckConstaint(table, column)!;
 
-        return SqlPreCommand.Combine(Spacing.Simple,
-            AlterTableDropConstraint(table.Name, diffColumn.DefaultConstraint?.Name ?? defCons.Name),
-            alterColumn,
-            AlterTableAddDefaultConstraint(table.Name, defCons)
-        )!;
+        //return SqlPreCommand.Combine(Spacing.Simple,
+        //    checkCons == null ? null : AlterTableDropConstraint(table.Name, diffColumn.CheckConstraint?.Name ?? checkCons.Name),
+        //    defCons == null ? null : AlterTableDropConstraint(table.Name, diffColumn.DefaultConstraint?.Name ?? defCons.Name),
+        //    alterColumn,
+        //    defCons == null ? null : AlterTableAddDefaultConstraint(table.Name, defCons),
+        //    checkCons == null ? null : AlterTableAddCheckConstraint(table.Name, checkCons)
+        //)!;
     }
 
     public DefaultConstraint? GetDefaultConstaint(ITable t, IColumn c)
@@ -191,6 +194,14 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             return null;
 
         return new DefaultConstraint(c.Name, $"DF_{t.Name.Name}_{c.Name}", Quote(c.DbType, c.Default));
+    }
+
+    public CheckConstraint? GetCheckConstaint(ITable t, IColumn c)
+    {
+        if (c.Check == null)
+            return null;
+
+        return new CheckConstraint(c.Name, $"CK_{t.Name.Name}_{c.Name}", c.Check);
     }
 
     public class DefaultConstraint
@@ -204,6 +215,20 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             ColumnName = columnName;
             Name = name;
             QuotedDefinition = quotedDefinition;
+        }
+    }
+
+    public class CheckConstraint
+    {
+        public string ColumnName;
+        public string Name;
+        public string Definition;
+
+        public CheckConstraint(string columnName, string name, string quotedDefinition)
+        {
+            ColumnName = columnName;
+            Name = name;
+            Definition = quotedDefinition;
         }
     }
 
@@ -228,7 +253,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             );
     }
 
-    public string ColumnLine(IColumn c, DefaultConstraint? constraint, bool isChange, bool avoidSystemVersion = false, bool forHistoryTable = false)
+    public string ColumnLine(IColumn c, DefaultConstraint? defaultConst, CheckConstraint? checkConst, bool isChange, bool avoidSystemVersion = false, bool forHistoryTable = false)
     {
         string fullType = GetColumnType(c);
 
@@ -236,7 +261,8 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
             null;
 
-        var defaultConstraint = constraint != null ? $"CONSTRAINT {constraint.Name} DEFAULT " + constraint.QuotedDefinition : null;
+        var defaultConstraint = defaultConst != null ? $"CONSTRAINT {defaultConst.Name} DEFAULT " + defaultConst.QuotedDefinition : null;
+        var checkConstraint = checkConst != null ? $"CONSTRAINT {checkConst.Name} CHECK " + checkConst.Definition : null;
 
         return $" ".Combine(
             c.Name.SqlEscape(isPostgres),
@@ -245,7 +271,8 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
             generatedAlways,
             c.Collation != null ? "COLLATE " + c.Collation : null,
             c.Nullable.ToBool() ? "NULL" : "NOT NULL",
-            defaultConstraint
+            defaultConstraint,
+            checkConstraint
             );
     }
 
@@ -517,9 +544,14 @@ WHERE {primaryKey.Name} NOT IN
             columnName.SqlEscape(isPostgres)));
     }
 
-    public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint constraint)
+    public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint defCons)
     {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {constraint.Name} DEFAULT {constraint.QuotedDefinition} FOR {constraint.ColumnName};");
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName};");
+    }
+
+    public SqlPreCommandSimple AlterTableAddCheckConstraint(ObjectName tableName, CheckConstraint checkCons)
+    {
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {checkCons.Name} CHECK {checkCons.Definition};");
     }
 
     public SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)

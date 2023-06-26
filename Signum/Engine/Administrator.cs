@@ -127,7 +127,7 @@ public static class Administrator
         Console.WriteLine("Done.");
     }
 
-    public static Func<bool> AvoidSimpleSynchronize = () => true;
+    public static Func<bool> AvoidSimpleSynchronize = () => false;
 
     public static void Synchronize()
     {

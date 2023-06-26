@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
+using Signum.Utilities;
 using System.Data;
 using System.Text.RegularExpressions;
 
@@ -162,14 +163,19 @@ public static class SchemaSynchronizer
                 mergeBoth: (tn, tab, dif) =>
                 {
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
-
-                    var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
+                    
+                    bool IsColumnRemovedOrModified(DiffIndexColumn c)
+                    {
+                        var newName = dif.Columns.ContainsKey(c.ColumnName) ? c.ColumnName : dif.Columns.SingleEx(a => a.Value.Name == c.ColumnName).Key;
+                        var tc = tab.Columns.TryGetC(newName);
+                        return tc == null || !dif.Columns[newName].ColumnEquals(tc, true, true, true);
+                    }
 
                     var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
-                        removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
+                        removeOld: (i, dix) => dix.IsControlledIndex || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
@@ -314,11 +320,18 @@ public static class SchemaSynchronizer
                                 {
                                     if (difCol.CompatibleTypes(tabCol) && difCol.Identity == tabCol.Identity)
                                     {
+                                        var columnEquals = difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true);
+                                        var defaultEquals = difCol.DefaultEquals(tabCol);
+                                        var checkEquals = difCol.CheckEquals(tabCol);
+
                                         return SqlPreCommand.Combine(Spacing.Simple,
 
                                             difCol.Name == tabCol.Name ? null : sqlBuilder.RenameColumn(tab.Name, difCol.Name, tabCol.Name),
 
-                                            difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true) /* && !(tabCol.GetGeneratedAlwaysType() != GeneratedAlwaysType.None && DifferentDatabase(tab.Name, dif.Name))*/ ?
+                                            (!columnEquals || !defaultEquals) && difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
+                                            (!columnEquals || !checkEquals) && difCol.CheckConstraint != null ? sqlBuilder.AlterTableDropConstraint(tab.Name, difCol.CheckConstraint.Name) : null,
+
+                                            columnEquals ?
                                                 null :
                                                 SqlPreCommand.Combine(Spacing.Simple,
                                                     tabCol.PrimaryKey && !difCol.PrimaryKey && dif.PrimaryKeyName != null ? sqlBuilder.DropPrimaryKeyConstraint(tab.Name) : null,
@@ -329,9 +342,8 @@ public static class SchemaSynchronizer
 
                                             UpdateByFkChange(tn, difCol, tabCol, ChangeName),
 
-                                            difCol.DefaultEquals(tabCol) ? null : SqlPreCommand.Combine(Spacing.Simple,
-                                                difCol.DefaultConstraint != null ? sqlBuilder.AlterTableDropDefaultConstaint(tab.Name, difCol) : null,
-                                                tabCol.Default != null ? sqlBuilder.AlterTableAddDefaultConstraint(tab.Name, sqlBuilder.GetDefaultConstaint(tab, tabCol)!) : null)
+                                            (!columnEquals || !defaultEquals) && tabCol.Default != null ? sqlBuilder.AlterTableAddDefaultConstraint(tab.Name, sqlBuilder.GetDefaultConstaint(tab, tabCol)!) : null,
+                                            (!columnEquals || !defaultEquals) && tabCol.Check != null ? sqlBuilder.AlterTableAddCheckConstraint(tab.Name, sqlBuilder.GetCheckConstaint(tab, tabCol)!) : null
                                         );
                                     }
                                     else
@@ -403,6 +415,7 @@ public static class SchemaSynchronizer
                             createPrimaryKey);
                     });
 
+            
             if (tables != null)
                 tables.GoAfter = true;
 
@@ -1040,6 +1053,7 @@ public class DiffTable
     public List<DiffStats> Stats = new List<DiffStats>();
 
     public List<DiffForeignKey> MultiForeignKeys = new List<DiffForeignKey>();
+    public List<DiffCheckConstraint> CheckConstraints = new List<DiffCheckConstraint>();
 
     public void ForeignKeysToColumns()
     {
@@ -1048,6 +1062,19 @@ public class DiffTable
             this.Columns[fk.Columns.SingleEx().Parent].ForeignKey = fk;
             MultiForeignKeys.Remove(fk);
         }
+
+        foreach (var cc in CheckConstraints.Where(a => a.ColumnName != null).ToList())
+        {
+            this.Columns[cc.ColumnName!].CheckConstraint = cc;
+            CheckConstraints.Remove(cc);
+        }
+    }
+
+    public DiffColumn AddColumn(DiffColumn col)
+    {
+        Columns.Add(col.Name, col);
+
+        return col;
     }
 
     public override string ToString()
@@ -1221,6 +1248,8 @@ public class DiffColumn
 
     public DiffDefaultConstraint? DefaultConstraint;
 
+    public DiffCheckConstraint? CheckConstraint;
+
     public GeneratedAlwaysType GeneratedAlwaysType;
 
     public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
@@ -1263,6 +1292,16 @@ public class DiffColumn
             return true;
 
         var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
+
+        return result;
+    }
+
+    public bool CheckEquals(IColumn other)
+    {
+        if (other.Check == null && this.CheckConstraint == null)
+            return true;
+
+        var result = this.CheckConstraint?.Definition == other.Check;
 
         return result;
     }
@@ -1515,6 +1554,13 @@ public class DiffColumn
                 throw new NotImplementedException("Unexpected SqlDbType");
         }
     }
+}
+
+public class DiffCheckConstraint
+{
+    public string Name;
+    public string Definition; 
+    public string? ColumnName;
 }
 
 public class DiffForeignKey
