@@ -93,6 +93,7 @@ public class RemoteAttachmentEmbedded : EmbeddedEntity
     public DateTimeOffset LastModifiedDateTime { get; set; }
 
     public bool IsInline { get; set; }
+    public string? ContentId { get; set; }
 
     public override string ToString()
     {

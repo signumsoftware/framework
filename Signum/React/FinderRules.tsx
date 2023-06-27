@@ -340,8 +340,8 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
     return result;
   }
 
-  function splitTokens(value: unknown, splitText: boolean | undefined, operation: FilterOperation): string[] {
-    if (typeof value == "string" && (splitText || operation == "FreeText"))
+  function splitTokens(value: unknown, splitValue: boolean | undefined, operation: FilterOperation): string[] {
+    if (typeof value == "string" && (splitValue || operation == "FreeText"))
       return (value as string).split(/\s+/);
 
     if (operation == "ComplexCondition")

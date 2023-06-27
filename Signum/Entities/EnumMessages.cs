@@ -231,8 +231,7 @@ public enum SearchMessage
     Label,
     Column,
     Row,
-    SplitText,
-    [Description("When pressed, the filter wil take no effect if the value is null")]
+    [Description("When pressed, the filter will take no effect if the value is null")]
     WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull,
     [Description("When pressed, the filter value will be splited and all the words have to be found")]
     WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound,
