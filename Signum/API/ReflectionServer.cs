@@ -289,6 +289,11 @@ public static class ReflectionServer
 
     public static TypeInfoTS? GetEnumTypeInfo(Type type)
     {
+        if(type.Name == "AzureADQuery")
+        {
+
+        }
+
         var name = type.Name;
         var queries = QueryLogic.Queries;
         var descOptions = LocalizedAssembly.GetDescriptionOptions(type);

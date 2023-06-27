@@ -22,6 +22,9 @@ public class MicrosoftGraphQueryConverter
     {
         var field = token.Follow(a => a.Parent).Reverse().ToString(a => a.Key.FirstLower(), "/");
 
+        if (usage == GraphFieldUsage.Select && field.StartsWith("onPremisesExtensionAttributes/"))
+            return "onPremisesExtensionAttributes";
+
         return field;
     }
 
