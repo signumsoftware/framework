@@ -296,7 +296,9 @@ public static class AzureADLogic
                 if (sb.WebServerBuilder != null)
                 {
                     ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
-                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false));
+                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () =>  
+						QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false) ||
+                    	QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryUsers, false));
                 }
             }
             else
