@@ -97,6 +97,14 @@ public static class SysTablesSchema
                                                  }).ToList(),
                                              }).ToList(),
 
+                         CheckConstraints = (from cc in t.CheckConstraints()
+                                             select new DiffCheckConstraint
+                                             {
+                                                 Name = cc.name,
+                                                 Definition = cc.definition,
+                                                 ColumnName = cc.parent_column_id == 0 ? null : t.Columns().SingleOrDefaultEx(c => c.column_id == cc.parent_column_id)!.name,
+                                             }).ToList(),
+
                          SimpleIndices = (from i in t.Indices()
                                           where /*!i.is_primary_key && */i.type != 0  /*heap indexes*/
                                           select new DiffIndex

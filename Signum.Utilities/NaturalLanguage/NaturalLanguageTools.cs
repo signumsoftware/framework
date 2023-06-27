@@ -215,7 +215,7 @@ public static class NaturalLanguageTools
 
     public static string ToPascal(this string str)
     {
-        return str.ToPascal(true, false);
+        return str.ToPascal(firstUpper: true, keepUppercase: false);
     }
 
     public static string ToPascal(this string str, bool firstUpper, bool keepUppercase)
@@ -224,7 +224,7 @@ public static class NaturalLanguageTools
 
         StringBuilder sb = new StringBuilder(str.Length);
 
-        bool upper = true;
+        bool upper = firstUpper;
         for (int i = 0; i < str.Length; i++)
         {
             char c = str[i];

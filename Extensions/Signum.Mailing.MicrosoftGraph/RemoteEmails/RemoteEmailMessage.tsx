@@ -97,11 +97,9 @@ export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel })
     doc.body.querySelectorAll("a").forEach(a => a.target = "_blank");
     doc.body.querySelectorAll("img").forEach(a => {
       if (a.src && a.src.startsWith("cid")) {
-        var name = a.src.after("cid:");
+        var contentId = a.src.after("cid:");
 
-        name = name.tryBefore("@") ?? name;
-
-        var att = p.remoteEmail.attachments.firstOrNull(a => a.element.name == name);
+        var att = p.remoteEmail.attachments.firstOrNull(a => a.element.contentId == contentId || contentId.tryBefore("@") != null && a.element.contentId == contentId.tryBefore("@"));
         if (att) {
           a.src = AppContext.toAbsoluteUrl(RemoteEmailsClient.API.getRemoteAttachmentUrl(oid, p.remoteEmail.id, att?.element.id));
         }

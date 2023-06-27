@@ -65,6 +65,7 @@ public static class RemoteEmailsLogic
                                     req.QueryParameters.Search = Converter.GetSearch(filters);
                                     req.QueryParameters.Select = Converter.GetSelect(request.Columns.Where(c => InMSGRaph(c.Token)));
                                     req.QueryParameters.Orderby = Converter.GetOrderBy(orders.Where(c => InMSGRaph(c.Token)));
+                                    req.QueryParameters.Expand = Converter.GetExpand(request.Columns.Where(c => InMSGRaph(c.Token)));
                                     req.QueryParameters.Top = Converter.GetTop(request.Pagination);
                                     req.QueryParameters.Count = true;
                                     req.Headers.Add("ConsistencyLevel", "eventual");
@@ -255,5 +256,10 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
     public virtual string ToGraphFieldExtension(QueryToken token, GraphFieldUsage usage)
     {
         throw new NotImplementedException();
+    }
+
+    public virtual string[]? GetExpand(IEnumerable<Column> enumerable)
+    {
+        return null;
     }
 }

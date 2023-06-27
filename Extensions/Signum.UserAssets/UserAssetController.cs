@@ -167,7 +167,7 @@ public class UserAssetController : ControllerBase
         public int? row;
         public int? column;
         public PinnedFilterActive? active;
-        public bool? splitText;
+        public bool? splitValue;
     }
 
     public class FilterNode

@@ -984,7 +984,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroup(fop)) {
 
-      if (fop.pinned.active == "WhenHasValue" && fop.value == null) {
+      if (fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value == "")) {
         return undefined;
       }
 

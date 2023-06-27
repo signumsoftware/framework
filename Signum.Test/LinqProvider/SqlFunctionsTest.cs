@@ -1,6 +1,8 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.SqlServer.Types;
 using Signum.Engine.Maps;
 using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Signum.Test.LinqProvider;
 
@@ -469,5 +471,54 @@ public class SqlFunctionsTest
         Small,
         Medium,
         Large
+    }
+
+    [Fact]
+    public void EvaluateBeforeAfter()
+    {
+
+        var note = Database.Query<NoteWithDateEntity>().Select(a => a.ToLite()).FirstEx();
+        T Test<T>(string value, Expression<Func<string, T>> function)
+        {
+            using (var tr = new Transaction())
+            {
+                note.InDB().UnsafeUpdate(a => a.Text, a => value);
+
+                return note.InDB(n => function.Evaluate(n.Text).InSql());
+
+                //tr.Commit()
+            }
+        }
+
+
+        Assert.Equal("A", Test("A=>B=>C", a => a.TryBefore("=>")));
+        Assert.Equal("B=>C", Test("A=>B=>C", a => a.TryAfter("=>")));
+        Assert.Equal("A=>B", Test("A=>B=>C", a => a.TryBeforeLast("=>")));
+        Assert.Equal("C", Test("A=>B=>C", a => a.TryAfterLast("=>")));
+
+
+        Assert.Equal("A", Test("A_B_C", a => a.TryBefore("_")));
+        Assert.Equal("B_C", Test("A_B_C", a => a.TryAfter("_")));
+        Assert.Equal("A_B", Test("A_B_C", a => a.TryBeforeLast("_")));
+        Assert.Equal("C", Test("A_B_C", a => a.TryAfterLast("_")));
+
+        Assert.Null(Test("ABC", a => a.TryBefore("_")));
+        Assert.Null(Test("ABC", a => a.TryAfter("_")));
+        Assert.Null(Test("ABC", a => a.TryBeforeLast("_")));
+        Assert.Null(Test("ABC", a => a.TryAfterLast("_")));
+
+        //In the database, Before behaves like TryBefore, etc..
+
+        Assert.Equal("A", Test("A_B_C", a => a.Before("_")));
+        Assert.Equal("B_C", Test("A_B_C", a => a.After("_")));
+        Assert.Equal("A_B", Test("A_B_C", a => a.BeforeLast("_")));
+        Assert.Equal("C", Test("A_B_C", a => a.AfterLast("_")));
+
+        Assert.Null(Test("ABC", a => a.Before("_")));
+        Assert.Null(Test("ABC", a => a.After("_")));
+        Assert.Null(Test("ABC", a => a.BeforeLast("_")));
+        Assert.Null(Test("ABC", a => a.AfterLast("_")));
+
+
     }
 }

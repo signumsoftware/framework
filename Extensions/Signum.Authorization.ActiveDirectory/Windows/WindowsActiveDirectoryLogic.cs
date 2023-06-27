@@ -2,6 +2,7 @@ using Signum.Scheduler;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using Signum.API;
+using Signum.Mailing;
 using Signum.Authorization.ActiveDirectory.Azure;
 
 namespace Signum.Authorization.ActiveDirectory.Windows;
@@ -9,6 +10,66 @@ namespace Signum.Authorization.ActiveDirectory.Windows;
 #pragma warning disable CA1416 // Validate platform compatibility
 public static class WindowsActiveDirectoryLogic
 {
+    public static void Start(SchemaBuilder sb, bool deactivateUsersTask)
+    {
+        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
+        {
+            if (sb.WebServerBuilder != null)
+            {
+                ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
+            }
+
+            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+            {
+                UserName = u.UserName,
+                ToStringValue = u.ToString(),
+                OID = u.Mixin<UserADMixin>().OID,
+                SID = u.Mixin<UserADMixin>().SID,
+            });
+
+            if (deactivateUsersTask)
+            {
+                SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
+                {
+                    var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+
+                    var list = Database.Query<UserEntity>().ToList();
+
+                    using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
+                    {
+                        stc.ForeachWriting(list, u => u.UserName, u =>
+                        {
+                            if (u.State == UserState.Active)
+                            {
+                                var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
+
+                                if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
+                                {
+                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                    u.Execute(UserOperation.Deactivate);
+                                }
+                                else
+                                {
+
+                                }
+
+                                if (foundUser == null && u.PasswordHash == null)
+                                {
+                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
+                                    u.Execute(UserOperation.Deactivate);
+                                }
+
+                            }
+                        });
+
+                        return null;
+                    }
+                });
+            }
+        }
+    }
+
     static PrincipalContext GetPrincipalContext()
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
@@ -167,62 +228,7 @@ public static class WindowsActiveDirectoryLogic
         }
     }
 
-    public static void Start(SchemaBuilder sb, bool deactivateUsersTask)
-    {
-        if (sb.NotDefined(MethodBase.GetCurrentMethod()))
-        {
-            if (sb.WebServerBuilder != null)
-                ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
-
-            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
-            {
-                UserName = u.UserName,
-                ToStringValue = u.ToString(),
-                OID = u.Mixin<UserADMixin>().OID,
-                SID = u.Mixin<UserADMixin>().SID,
-            });
-
-            if (deactivateUsersTask)
-            {
-                SimpleTaskLogic.Register(ActiveDirectoryTask.DeactivateUsers, stc =>
-                {
-                    var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
-
-                    var list = Database.Query<UserEntity>().ToList();
-
-                    using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
-                    {
-                        stc.ForeachWriting(list, u => u.UserName, u =>
-                        {
-                            if (u.State == UserState.Active)
-                            {
-                                var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
-
-                                if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
-                                {
-                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
-                                    u.Execute(UserOperation.Deactivate);
-                                }
-                                else
-                                {
-
-                                }
-
-                                if (foundUser == null && u.PasswordHash == null)
-                                {
-                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
-                                    u.Execute(UserOperation.Deactivate);
-                                }
-
-                            }
-                        });
-
-                        return null;
-                    }
-                });
-            }
-        }
-    }
+  
 
     public static void CheckAllUserActive()
     {
