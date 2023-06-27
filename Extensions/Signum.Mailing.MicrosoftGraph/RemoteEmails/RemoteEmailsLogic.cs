@@ -5,6 +5,8 @@ using Signum.API;
 using Signum.DynamicQuery.Tokens;
 using Microsoft.Graph.Models.ODataErrors;
 using Signum.Authorization.ActiveDirectory.Azure;
+using Microsoft.Graph.Models;
+using Signum.UserAssets;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
 
@@ -35,6 +37,8 @@ public static class RemoteEmailsLogic
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
             PermissionLogic.RegisterTypes(typeof(RemoteEmailMessagePermission));
+
+            FilterValueConverter.SpecificConverters.Add(new RemoteEmailFolderConverter());
 
             QueryLogic.Queries.Register(RemoteEmailMessageQuery.RemoteEmailMessages, () => DynamicQueryCore.Manual(async (request, queryDescription, cancellationToken) =>
             {
@@ -106,11 +110,8 @@ public static class RemoteEmailsLogic
                         Entity = (Lite<UserEntity>?)null,/*Lie*/
                         Id = u.Id,
                         u.Subject,
-                        From = new RecipientEmbedded
-                        {
-                            EmailAddress = u.From?.EmailAddress?.Address,
-                            Name = u.From?.EmailAddress?.Name,
-                        },
+                        From = u.From == null ? null : ToRecipientEmbedded(u.From),
+                        ToRecipients = u.ToRecipients?.ToString(a => a.EmailAddress!.Name, ", "),
                         u.CreatedDateTime,
                         u.ReceivedDateTime,
                         u.SentDateTime,
@@ -150,6 +151,12 @@ public static class RemoteEmailsLogic
             }
         }
     }
+
+    private static RecipientEmbedded ToRecipientEmbedded(Recipient a) => new RecipientEmbedded
+    {
+        EmailAddress = a.EmailAddress?.Address,
+        Name = a.EmailAddress?.Name,
+    };
 
     // https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0&tabs=http#using-filter-and-orderby-in-the-same-query
     private static (List<DynamicQuery.Filter> filters, List<Order> orders) FixFiltersAndOrders(List<DynamicQuery.Filter> filters, List<Order> orders)
@@ -214,9 +221,6 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
 
     public override string ToGraphField(QueryToken token, GraphFieldUsage usage)
     {
-        if (token.Key.StartsWith("Extension"))
-            return ToGraphFieldExtension(token, usage);
-
         if (token.FullKey().StartsWith("Folder"))
             return "parentFolderId";
 
@@ -236,29 +240,62 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
         return field;
     }
 
-
+    public override string[]? GetSelect(IEnumerable<Column> columns)
+    {
+        return columns.Where(a => !a.Token.FullKey().StartsWith("Extension"))
+            .Select(c => ToGraphField(c.Token, GraphFieldUsage.Select))
+            .Distinct().ToArray();
+    }
 
     public override string? ToFilter(DynamicQuery.Filter f)
     {
-        if(f is FilterCondition fc && fc.Token.Type == typeof(RemoteEmailFolderModel))
+        if(f is FilterCondition fc)
         {
-            return ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(fc.Value is RemoteEmailFolderModel fol ? fol.FolderId : null);
+            if (fc.Token.FullKey().StartsWith("Extension")) {
+
+                var id = GetExpansionPropertyId(int.Parse(fc.Token.FullKey().After("Extension")));
+
+                if (id == null)
+                    return null;
+
+                return $"singleValueExtendedProperties/Any(ep: ep/id eq '{id}' and {BuildCondition("ep/value", fc.Operation, ToStringValue(fc.Value))})";
+            }
+
+            if (fc.Token.Type == typeof(RemoteEmailFolderModel))
+            {
+                return ToGraphField(fc.Token, GraphFieldUsage.Filter) +
+                    (fc.Operation == FilterOperation.EqualTo ? " eq " : " ne ") +
+                    ToStringValue(fc.Value is RemoteEmailFolderModel fol ? fol.FolderId : null);
+            }
         }
 
         return base.ToFilter(f);
     }
 
-    public virtual string? GetExtension(Microsoft.Graph.Models.Message u, int v)
+    public virtual string? GetExtension(Microsoft.Graph.Models.Message u, int index)
     {
-        return null;
+        if (u.SingleValueExtendedProperties == null)
+            return null;
+
+        var guid = GetExpansionPropertyId(index);
+
+        if (guid == null)
+            return null;
+
+        return u.SingleValueExtendedProperties!.SingleOrDefaultEx(a => a.Id == guid)?.Value;
     }
 
-    public virtual string ToGraphFieldExtension(QueryToken token, GraphFieldUsage usage)
+    public virtual string[]? GetExpand(IEnumerable<Column> columns)
     {
-        throw new NotImplementedException();
+        return columns
+            .Where(a => a.Token.FullKey().StartsWith("Extension"))
+            .Select(c => GetExpansionPropertyId(int.Parse(c.Token.FullKey().After("Extension"))))
+            .NotNull()
+            .Select(id => $"singleValueExtendedProperties($filter=id eq '{id}')")
+            .ToArray();
     }
 
-    public virtual string[]? GetExpand(IEnumerable<Column> enumerable)
+    public virtual string? GetExpansionPropertyId(int index)
     {
         return null;
     }

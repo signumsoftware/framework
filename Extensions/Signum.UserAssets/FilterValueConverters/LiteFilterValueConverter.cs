@@ -26,7 +26,12 @@ public class LiteFilterValueConverter : IFilterValueConverter
 
         string? error = Lite.TryParseLite(expression, out Lite<Entity>? lite);
         if (error == null)
+        {
+            if (lite != null && (lite.Model == null || Lite.DefaultModelType(lite.EntityType) != typeof(string)))
+                return new Result<object?>.Success(Database.RetrieveLite(lite.EntityType, lite.Id));
+
             return new Result<object?>.Success(lite);
+        }
         else
             return new Result<object?>.Error(error);
     }
