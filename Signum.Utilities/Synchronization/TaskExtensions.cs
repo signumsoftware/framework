@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Signum.Utilities.Synchronization;
-
 public static class TaskExtensions
 {
     public static void WaitSafe(this Task task)
@@ -14,25 +13,39 @@ public static class TaskExtensions
         {
             task.Wait();
         }
-        catch (AggregateException ag)
+        catch(AggregateException ex)
         {
-            var ex = ag.InnerExceptions.FirstEx();
-            ex.PreserveStackTrace();
-            throw ex;
+            var only = ex.InnerExceptions.Only();
+            if (only != null)
+            {
+                only.PreserveStackTrace();
+                throw only;
+            }
+            else
+            {
+                throw;
+            }
         }
     }
 
-    public static TResult ResultSave<TResult>(this Task<TResult> task)
+    public static T ResultSafe<T>(this Task<T> task)
     {
         try
         {
             return task.Result;
         }
-        catch (AggregateException ag)
+        catch (AggregateException ex)
         {
-            var ex = ag.InnerExceptions.FirstEx();
-            ex.PreserveStackTrace();
-            throw ex;
+            var only = ex.InnerExceptions.Only();
+            if (only != null)
+            {
+                only.PreserveStackTrace();
+                throw only;
+            }
+            else
+            {
+                throw;
+            }
         }
     }
 }
