@@ -1509,7 +1509,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token)));
 
     var keyFilters = resFo.columnOptions
       .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
