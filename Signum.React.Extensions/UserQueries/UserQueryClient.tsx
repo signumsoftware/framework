@@ -28,6 +28,8 @@ import { DynamicTypeConditionSymbolEntity } from '../Dynamic/Signum.Entities.Dyn
 import { Dic } from '@framework/Globals';
 import { ChartRequestModel, UserChartEntity } from '../Chart/Signum.Entities.Chart';
 import { ChartRow, hasAggregates } from '../Chart/ChartClient';
+import UserQuery from './Templates/UserQuery';
+import { QuickLinkFactory } from '@framework/QuickLinks';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -44,9 +46,15 @@ export function start(options: { routes: JSX.Element[] }) {
     return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
   });
 
-  QuickLinks.registerGlobalQuickLink(ctx => {
-    if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      return undefined;
+/*  if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery)) {
+    const qls: { [key: string]: QuickLinkFactory<Entity> } = {};
+
+    QuickLinks.registerGlobalQuickLink_New(() => {
+
+
+      return Promise.resolve(qls)
+
+    });
 
     var promise = ctx.widgetContext ?
       Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
@@ -56,11 +64,44 @@ export function start(options: { routes: JSX.Element[] }) {
       uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
       }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
+  }*/
+  
+  QuickLinks.registerGlobalQuickLink_New(entityType => {
+    if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+      return Promise.resolve({});
+
+    return API.forEntityType(entityType)
+      .then(uqs =>
+        Dic.toDic(uqs.map(uq =>
+        ({
+          key: liteKey(uq),
+          value:
+          {
+            func: (lite: Lite<Entity>) => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
+              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+            }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info" }),
+            niceStr: getToString(uq)
+          }
+        }))));
   });
 
-  QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
+  QuickLinks.registerGlobalQuickLink("ViewUserQuery", ctx => {
+    if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+      return undefined;
+
+    var promise = ctx.widgetContext ?
+      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
+      API.forEntityType(ctx.lite.EntityType);
+
+    return promise.then(uqs =>
+      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
+        window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite!)}`));
+      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
+  }, { tokenNiceName: UserQueryEntity.nicePluralName() });
+
+  QuickLinks.registerQuickLink(UserQueryEntity, UserQueryMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
     e => {
-      Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
+      Navigator.API.fetchAndRemember(ctx.lite!).then(uq => {
         if (uq.entityType == undefined)
           window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
         else
@@ -73,7 +114,8 @@ export function start(options: { routes: JSX.Element[] }) {
               window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
             });
       });
-    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
+    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }),
+    { tokenNiceName: UserQueryMessage.Preview.niceToString() });
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
 

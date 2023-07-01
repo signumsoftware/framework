@@ -14,6 +14,11 @@ export type ColumnOptionsMode =
   "InsertStart" |
   "ReplaceOrAdd";
 
+export const ContainerTokenKey = new EnumType<ContainerTokenKey>("ContainerTokenKey");
+export type ContainerTokenKey =
+  "Operations" |
+  "QuickLinks";
+
 export const DashboardBehaviour = new EnumType<DashboardBehaviour>("DashboardBehaviour");
 export type DashboardBehaviour =
   "PromoteToDasboardPinnedFilter" |

@@ -19,12 +19,12 @@ export function start(options: { routes: JSX.Element[], couldHaveNotes?: (typeNa
     contextual: { isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(NoteEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
     queryName: NoteEntity,
     filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
     icon: "note-sticky",
     iconColor: "#337ab7",
-  }));
+  }), { tokenNiceName: NoteEntity.nicePluralName() });
 }

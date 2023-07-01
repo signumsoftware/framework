@@ -38,25 +38,25 @@ export function start(options: { routes: JSX.Element[] }) {
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
   Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
 
-  QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+  QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadCsv.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadCsv.name,
     () => PredictorMessage.DownloadCsv.niceToString(),
-    e => API.downloadCsvById(ctx.lite)));
+    e => API.downloadCsvById(ctx.lite)), { tokenNiceName: PredictorMessage.DownloadCsv.niceToString() });
 
-  QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+  QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadTsv.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadTsv.name,
     () => PredictorMessage.DownloadTsv.niceToString(),
-    e => API.downloadTsvById(ctx.lite)));
+    e => API.downloadTsvById(ctx.lite)), { tokenNiceName: PredictorMessage.DownloadTsv.niceToString() });
 
-  QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+  QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadTsvMetadata.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadTsvMetadata.name,
     () => PredictorMessage.DownloadTsvMetadata.niceToString(),
     e => API.downloadTsvMetadataById(ctx.lite)));
 
-  QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
+/*  QuickLinks.registerQuickLink(PredictorEntity, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.OpenTensorflowProjector.name,
     () => PredictorMessage.OpenTensorflowProjector.niceToString(),
-    e => window.open("http://projector.tensorflow.org/", "_blank")));
+    e => window.open("http://projector.tensorflow.org/", "_blank")));*/
 
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
   Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));

@@ -127,9 +127,9 @@ interface QueryTokenPartProps{
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
-export const manualSubTokens: { [key: string]: (typeName: string) => ManualToken[] } = {};
+export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
 
-export function registerManualSubTokens(key: string, func: (typeName: string) => ManualToken[] | undefined) {
+export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
   Dic.addOrThrow(manualSubTokens, key, func);
 }
 
@@ -141,19 +141,18 @@ function getManualSubTokens(token?: QueryToken) {
 
   const container = token?.parent && manualSubTokens[token.key] && token;
   if (container) {
-    const typeName = container.parent!.type.name;
-    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](typeName);
-    const tokens = manuals && manuals.map(m =>
+    const entityType = container.parent!.type.name;
+    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](entityType);
+    const tokens = manuals.then(ms => ms.map(m =>
     ({
       ...m, parent: container,
       fullKey: (container.fullKey + "." + m.key),
       type: { name: "ManualCellDTO" },
       queryTokenType: "Manual",
       isGroupable: false
-    } as QueryToken));
-    if (tokens) {
-      return Promise.resolve(tokens)
-    };
+    } as QueryToken)));
+
+    return tokens;
   }
 }
 

@@ -30,11 +30,11 @@ export function start(options: { routes: JSX.Element[] }) {
   //  hideOnCanExecute: true
   //}));
 
-  QuickLinks.registerQuickLink(WhatsNewEntity, ctx => new QuickLinks.QuickLinkLink("Preview",
+/*  QuickLinks.registerQuickLink(WhatsNewEntity, ctx => new QuickLinks.QuickLinkLink("Preview",
     () => WhatsNewMessage.Preview.niceToString(), "~/newspage/" + ctx.lite.id, {
     icon: "newspaper",
     iconColor: "purple",
-  }));
+  }));*/
 
   const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
   const NumericPlaceholder = /^[ \d]+$/;

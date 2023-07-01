@@ -31,6 +31,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { UserChartPartHandler } from './View/UserChartPart';
 import type { UserQueryPartHandler } from './View/UserQueryPart';
 import { QueryDescription } from '@framework/FindOptions';
+import { Dic } from '../../Signum.React/Scripts/Globals';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
@@ -256,7 +257,7 @@ export function start(options: { routes: JSX.Element[] }) {
     });
   });
 
-  QuickLinks.registerGlobalQuickLink(ctx => {
+  QuickLinks.registerGlobalQuickLink("ViewDashboard", ctx => {
     if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
       return undefined;
 
@@ -268,9 +269,28 @@ export function start(options: { routes: JSX.Element[] }) {
       das.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
         AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
       }, { icon: "gauge", iconColor: "darkslateblue" })));
+  }, { tokenNiceName: DashboardEntity.nicePluralName() });
+
+  QuickLinks.registerGlobalQuickLink_New(entityType => {
+    if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
+      return Promise.resolve({});
+
+    return API.forEntityType(entityType)
+      .then(das =>
+        Dic.toDic(das.map(d =>
+        ({
+          key: liteKey(d),
+          value:
+          {
+            func: (lite: Lite<Entity>) => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
+              AppContext.pushOrOpenInTab(dashboardUrl(d, lite), e)
+            }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
+            niceStr: getToString(d)
+          }
+        }))));
   });
 
-  QuickLinks.registerQuickLink(DashboardEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(DashboardEntity, DashboardMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
     e => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
@@ -284,7 +304,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             });
-      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }));
+      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }), { tokenNiceName: DashboardMessage.Preview.niceToString() });
 }
 
 export function home(): Promise<Lite<DashboardEntity> | null> {

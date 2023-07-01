@@ -707,3 +707,12 @@ public enum QueryTokenMessage
     [Description("Entity Type")]
     EntityType
 }
+
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]
+public enum ContainerTokenKey
+{
+    [Description("[Operations]")]
+    Operations,
+    [Description("[QuickLinks]")]
+    QuickLinks,
+}

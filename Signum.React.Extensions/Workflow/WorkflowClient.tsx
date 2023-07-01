@@ -113,7 +113,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
-  QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
+/*  QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
     new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
       API.fetchCaseFlowPack(ctx.lite)
         .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
@@ -124,7 +124,7 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
         icon: "shuffle",
         iconColor: "green"
       })
-  ]);
+  ]);*/
 
 
   Finder.addSettings({
@@ -137,10 +137,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     ]
   })
 
-  QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
+/*  QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
     new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] },
       { icon: "list-check", iconColor: "blue" })
-  ]);
+  ]);*/
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
@@ -358,10 +358,10 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
   }));
 
-  QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
+/*  QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
     () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
     workflowActivityMonitorUrl(ctx.lite),
-    { icon: "gauge", iconColor: "green" }));
+    { icon: "gauge", iconColor: "green" }));*/
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));

@@ -47,19 +47,7 @@ export function start() {
 
   AppContext.clearSettingsActions.push(clearOperationSettings);
 
-  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
-    queryName: OperationLogEntity,
-    filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite}]
-  },
-    {
-      isVisible: getTypeInfo(ctx.lite.EntityType) && getTypeInfo(ctx.lite.EntityType).operations && Finder.isFindable(OperationLogEntity, false),
-      icon: "clock-rotate-left",
-      iconColor: "green",
-    }));
-
-
-
-  QuickLinks.registerGlobalQuickLink_New(OperationLogEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(OperationLogEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
     filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
   },

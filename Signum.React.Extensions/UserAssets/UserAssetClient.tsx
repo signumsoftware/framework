@@ -37,7 +37,7 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  QuickLinks.registerQuickLink(type, ctx => {
+  QuickLinks.registerQuickLink(type, UserAssetMessage.ExportToXml.name, ctx => {
     if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       return undefined;
 
@@ -46,8 +46,8 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
     }, {
         iconColor: "#FCAE25",
         icon: "file-code"
-      });
-  }, { allowsMultiple : true });
+    });
+  }, { allowsMultiple: true, tokenNiceName: UserAssetMessage.ExportToXml.niceToString() });
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

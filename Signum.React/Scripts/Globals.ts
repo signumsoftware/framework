@@ -975,6 +975,17 @@ export module Dic {
     }
   }
 
+  export function simplify<T extends {}>(a: T | undefined): T | undefined {
+    if (a == null)
+      return a;
+
+    var result: T = {} as any;
+    for (const key in a) {
+      if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
+        result[key] = a[key];
+    }
+    return result;
+  }
 
   export function getValues<V>(obj: { [key: string]: V }): V[] {
     const result: V[] = [];
@@ -1030,12 +1041,38 @@ export module Dic {
     return result;
   }
 
-  export function filter<V>(obj: { [key: string]: V }, predicate: (kv: { key: string, value: V }) => any): {key: string , value: V}[] {
+  export function filter<V>(obj: { [key: string]: V }, predicate: (kv: { key: string, value: V }) => any) {
 
     return Dic.map(obj, (k, v) => ({ key: k, value: v })).filter(predicate);
   }
 
-  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
+  export function toDic<V>(obj: { key: string, value: V }[]) {
+    const result: { [key: string]: V } = {};
+    obj.forEach(o => Dic.addOrThrow(result, o.key, o.value));
+
+    return result;
+  }
+
+  export function concat<V>(dics: ({ [key: string]: V } | undefined)[]) {
+    const result: { [key: string]: V } = {};
+
+    dics.forEach(d => d && Dic.foreach(d, ((k, v) => Dic.addOrThrow(result, k, v))));
+
+    return result;
+  }
+
+  export function join<V>(a: { [key: string]: V }, b: { [key: string]: V }) {
+
+    Dic.foreach(b, ((k, v) => Dic.addOrThrow(a, k, v)));
+
+    return a;
+  }
+
+  export function add<V>(to: { [key: string]: V }, from: { [key: string]: V }): void {
+    Dic.foreach(from, ((k, v) => Dic.addOrThrow(to, k, v)));
+  }
+
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): { [key: string]: R } {
     let index = 0;
     const result: { [key: string]: R } = {};
     for (const name in obj) {
@@ -1055,24 +1092,11 @@ export module Dic {
     }
   }
 
-
   export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
     if (dic[key])
       throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
 
     dic[key] = value;
-  }
-
-  export function simplify<T extends {}>(a: T | undefined): T | undefined{
-    if (a == null)
-      return a;
-
-    var result: T = {} as any;
-    for (const key in a) {
-      if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
-        result[key] = a[key];
-    }
-    return result;
   }
 
   export function deepFreeze<T extends object>(object: T): T {

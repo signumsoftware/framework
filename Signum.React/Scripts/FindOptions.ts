@@ -208,8 +208,9 @@ export interface ManualToken {
   toStr: string;
   niceName: string;
   key: string;
-  typeColor: string;
+  typeColor?: string;
   niceTypeName: string;
+  subToken?: Promise<ManualToken[]>;
 }
 export interface ManualCellDto {
   lite: Lite<Entity>;

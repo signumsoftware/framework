@@ -26,15 +26,15 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
-    QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
+    QuickLinks.registerGlobalQuickLink("TimeMachine", ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
       new QuickLinks.QuickLinkLink("TimeMachine",
         () => TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
           icon: "clock-rotate-left",
-          iconColor: "blue",
-      }) : undefined);
+        iconColor: "blue",
+      }) : undefined, { tokenNiceName: TimeMachineMessage.TimeMachine.niceToString() });
 
-    QuickLinks.registerGlobalQuickLink(ctx => {
+    QuickLinks.registerGlobalQuickLink("CompareTimeMachine", ctx => {
       if (!getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
         return undefined;
 
@@ -65,7 +65,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         icon: "not-equal",
         iconColor: "blue",
       });
-    }, { allowsMultiple : true });
+    }, { allowsMultiple: true, tokenNiceName: TimeMachineMessage.CompareVersions.niceToString() });
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 

@@ -120,7 +120,7 @@ export function start(options: {
 
   API.getAllTypes().then(types => {
     allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
+    QuickLinks.registerGlobalQuickLink(EmailMessageEntity.typeName, ctx => new QuickLinks.QuickLinkExplore(
       {
         queryName: EmailMessageEntity,
         filterOptions: [{ token: "Target", value: ctx.lite}],
@@ -131,7 +131,7 @@ export function start(options: {
         iconColor: "orange",
         color: "warning",
         group: options.quickLinkInDefaultGroup ? undefined : null,
-      }));
+      }), { tokenNiceName: EmailMessageEntity.nicePluralName() });
   });
 
   registerExportAssertLink(EmailTemplateEntity);

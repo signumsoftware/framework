@@ -33,14 +33,14 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
     contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(AlertEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
     queryName: AlertEntity,
     filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite}]
   }, {
     isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
     icon: "bell",
     iconColor: "orange",
-  }));
+  }), { tokenNiceName: AlertEntity.nicePluralName() });
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],

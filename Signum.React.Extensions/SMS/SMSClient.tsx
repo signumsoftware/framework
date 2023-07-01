@@ -36,14 +36,14 @@ export function start(options: { routes: JSX.Element[] }) {
 
   API.getAllTypes().then(types => {
     allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
+    QuickLinks.registerGlobalQuickLink(SMSMessageEntity.typeName, ctx => new QuickLinks.QuickLinkAction("smsMessages",
       () => SMSMessageEntity.nicePluralName(),
       e => getSMSMessages(ctx.lite),
       {
         isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(SMSMessageEntity),
         icon: "comment-sms",
         iconColor: "green"
-      }));
+      }), { tokenNiceName: SMSMessageEntity.nicePluralName() });
   });
 }
 
