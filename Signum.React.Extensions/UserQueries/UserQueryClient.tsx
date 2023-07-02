@@ -46,58 +46,23 @@ export function start(options: { routes: JSX.Element[] }) {
     return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
   });
 
-/*  if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery)) {
-    const qls: { [key: string]: QuickLinkFactory<Entity> } = {};
-
-    QuickLinks.registerGlobalQuickLink_New(() => {
-
-
-      return Promise.resolve(qls)
-
-    });
-
-    var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
-      API.forEntityType(ctx.lite.EntityType);
-
-    return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
-  }*/
-  
-  QuickLinks.registerGlobalQuickLink_New(entityType => {
+  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      return Promise.resolve({});
+      return Promise.resolve([]);
 
     return API.forEntityType(entityType)
-      .then(uqs =>
-        Dic.toDic(uqs.map(uq =>
-        ({
-          key: liteKey(uq),
-          value:
-          {
-            func: (lite: Lite<Entity>) => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
-            }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info" }),
-            niceStr: getToString(uq)
-          }
-        }))));
+      .then(uqs => uqs.map(uq =>
+      ({
+        key: liteKey(uq),
+        factory:
+        {
+          func: (lite: Lite<Entity>) => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
+            window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+          }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info" }),
+          niceStr: getToString(uq)
+        }
+      })));
   });
-
-  QuickLinks.registerGlobalQuickLink("ViewUserQuery", ctx => {
-    if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      return undefined;
-
-    var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
-      API.forEntityType(ctx.lite.EntityType);
-
-    return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite!)}`));
-      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
-  }, { tokenNiceName: UserQueryEntity.nicePluralName() });
 
   QuickLinks.registerQuickLink(UserQueryEntity, UserQueryMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
     e => {

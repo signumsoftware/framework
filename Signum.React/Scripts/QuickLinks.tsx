@@ -69,8 +69,8 @@ export interface QuickLinkContext<T extends Entity> {
 type Seq<T> = (T | undefined)[] | T | undefined;
 
 export function clearQuickLinks() {
-  Dic.clear(onGlobalQuickLinks);
-  Dic.clear(onQuickLinks);
+  Dic.clear(globalQuickLinks);
+  Dic.clear(typeQuickLinks);
 }
 
 export interface RegisteredQuickLink<T extends Entity> {
@@ -78,17 +78,11 @@ export interface RegisteredQuickLink<T extends Entity> {
   options?: QuickLinkRegisterOptions;
 }
 
-export const onGlobalQuickLinks: { [key: string]: RegisteredQuickLink<any> } = { };
-export function registerGlobalQuickLink(key: string, quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  Dic.addOrThrow(onGlobalQuickLinks, key, { factory: quickLinkGenerator, options: options });
-}
-
 const globalQuickLinks: Array<(entityType: string) => (Promise<{ [key: string]: QuickLinkFactory<Entity> }>)> = [];
 const quickLinksCache: { [entityType: string]: Promise<{ [key: string]: QuickLinkFactory<Entity> }> } = {};
-const cacheMutex : { [entityType: string]: Mutex } = {};
 
-export function registerGlobalQuickLink_New(generator: (entityType: string) => (Promise<{ [key: string]: QuickLinkFactory<Entity> }>)) {
-  globalQuickLinks.push(generator);
+export function registerGlobalQuickLink(generator: (entityType: string) => (Promise<{ key: string, factory: QuickLinkFactory<Entity> }[]>)) {
+  globalQuickLinks.push((t: string) => generator(t).then(ar => Dic.toDic(ar.map(a => ({ key: a.key, value: a.factory})))));
 }
 
 const typeQuickLinks: Array<{ entityType: string, generator: <T extends Entity>() => { key: string, factory: QuickLinkFactory<T> } }> = [];
@@ -165,20 +159,6 @@ export var ignoreErrors = false;
 export function setIgnoreErrors(value: boolean) {
   ignoreErrors = value;
 }
-
-export function getQuickLinks_old(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
-
-  let promises = Dic.filter(onGlobalQuickLinks, (kv) => kv.value.options && kv.value.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.value.factory, ctx));
-
-  if (onQuickLinks[ctx.lite.EntityType]) {
-    const specificPromises = Dic.filter(onQuickLinks[ctx.lite.EntityType], (kv) => kv.value.options && kv.value.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.value.factory, ctx));
-
-    promises = promises.concat(specificPromises);
-  }
-
-  return Promise.all(promises).then(links => links.flatMap(a => a ?? []).filter(a => a?.isVisible).orderBy(a => a.order));
-}
-
 
 function safeCall(f: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
   if (!ignoreErrors)

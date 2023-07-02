@@ -30,9 +30,9 @@ export function start(options: { routes: JSX.Element[] }) {
     return <UserChartMenu chartRequestView={ctx.chartRequestView} />;
   });
 
-  QuickLinks.registerGlobalQuickLink(UserChartEntity.typeName, ctx => {
+  QuickLinks.registerGlobalQuickLink(UserChartEntity, ctx => {
     if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
-      return undefined;
+      return Promise.resolve([]);
 
     var promise = ctx.widgetContext ?
       Promise.resolve(ctx.widgetContext.frame.pack.userCharts ?? []) :
