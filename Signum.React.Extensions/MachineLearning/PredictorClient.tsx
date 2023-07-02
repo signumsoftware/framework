@@ -41,12 +41,12 @@ export function start(options: { routes: JSX.Element[] }) {
   QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadCsv.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadCsv.name,
     () => PredictorMessage.DownloadCsv.niceToString(),
-    e => API.downloadCsvById(ctx.lite)), { tokenNiceName: PredictorMessage.DownloadCsv.niceToString() });
+    e => API.downloadCsvById(ctx.lite)), { text: () => PredictorMessage.DownloadCsv.niceToString() });
 
   QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadTsv.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadTsv.name,
     () => PredictorMessage.DownloadTsv.niceToString(),
-    e => API.downloadTsvById(ctx.lite)), { tokenNiceName: PredictorMessage.DownloadTsv.niceToString() });
+    e => API.downloadTsvById(ctx.lite)), { text: () => PredictorMessage.DownloadTsv.niceToString() });
 
   QuickLinks.registerQuickLink(PredictorEntity, PredictorMessage.DownloadTsvMetadata.name, ctx => new QuickLinks.QuickLinkAction(
     PredictorMessage.DownloadTsvMetadata.name,

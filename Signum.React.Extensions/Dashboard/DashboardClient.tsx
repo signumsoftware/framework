@@ -257,22 +257,27 @@ export function start(options: { routes: JSX.Element[] }) {
     });
   });
 
-  QuickLinks.registerGlobalQuickLink(entityType => {
+  QuickLinks.registerGlobalQuickLink_New(entityType => {
     if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
       return Promise.resolve([]);
 
     return API.forEntityType(entityType)
       .then(das => das.map(d =>
-        ({
-          key: liteKey(d),
-          factory:
+      ({
+        key: liteKey(d),
+        generator:
+        {
+          factory: (ctx: QuickLinks.QuickLinkContext<Entity>) => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
+            AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
+          }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
+          options:
           {
-            func: (lite: Lite<Entity>) => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
-              AppContext.pushOrOpenInTab(dashboardUrl(d, lite), e)
-            }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
-            niceStr: getToString(d)
+            key: liteKey(d),
+            text: () => getToString(d),
+            order: 0,
           }
-        })));
+        }
+      })));
   });
 
   QuickLinks.registerQuickLink(DashboardEntity, DashboardMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
@@ -289,7 +294,7 @@ export function start(options: { routes: JSX.Element[] }) {
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             });
-      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }), { tokenNiceName: DashboardMessage.Preview.niceToString() });
+      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }), { text: () => DashboardMessage.Preview.niceToString() });
 }
 
 export function home(): Promise<Lite<DashboardEntity> | null> {

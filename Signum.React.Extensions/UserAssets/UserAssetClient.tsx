@@ -47,7 +47,7 @@ export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
         iconColor: "#FCAE25",
         icon: "file-code"
     });
-  }, { allowsMultiple: true, tokenNiceName: UserAssetMessage.ExportToXml.niceToString() });
+  }, { allowsMultiple: true, text: () => UserAssetMessage.ExportToXml.niceToString() });
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

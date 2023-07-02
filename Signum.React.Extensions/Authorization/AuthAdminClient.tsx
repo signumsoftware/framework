@@ -130,7 +130,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, AuthAdminMessage.TypeRules.name, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
       e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null }), { tokenNiceName: AuthAdminMessage.TypeRules.niceToString() });
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null }), { text: () => AuthAdminMessage.TypeRules.niceToString() });
   }
 
   if (options.operations) {
@@ -149,7 +149,7 @@ export function start(options: { routes: JSX.Element[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, AuthAdminMessage.PermissionRules.name, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
       e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }), { tokenNiceName: AuthAdminMessage.PermissionRules.niceToString() });
+      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }), { text: () => AuthAdminMessage.PermissionRules.niceToString() });
   }
 
   OmniboxClient.registerSpecialAction({

@@ -33,7 +33,7 @@ export function start(options: { routes: JSX.Element[], showAlerts?: (typeName: 
     contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(AlertEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: AlertEntity,
     filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite}]
   }, {

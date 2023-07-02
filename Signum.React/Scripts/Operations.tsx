@@ -47,7 +47,7 @@ export function start() {
 
   AppContext.clearSettingsActions.push(clearOperationSettings);
 
-  QuickLinks.registerGlobalQuickLink(OperationLogEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: OperationLogEntity,
     filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
   },
@@ -56,7 +56,7 @@ export function start() {
       icon: "clock-rotate-left",
       iconColor: "green",
       color: "success",
-    }), { tokenNiceName: OperationLogEntity.nicePluralName(), tokenColor: "brown" });
+    }), { tokenNiceName: OperationLogEntity.nicePluralName() });
 
   Finder.formatRules.push({
     name: "CellOperation",

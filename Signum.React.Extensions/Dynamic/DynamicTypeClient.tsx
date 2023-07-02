@@ -59,7 +59,7 @@ export function start(options: { routes: JSX.Element[] }) {
       isVisible: AuthClient.isPermissionAuthorized(DynamicPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
     iconColor: "purple",
-  }), { tokenNiceName: symbolNiceName(DynamicPanelPermission.ViewDynamicPanel) });
+  }), { text: () => symbolNiceName(DynamicPanelPermission.ViewDynamicPanel) });
 
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   DynamicClientOptions.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);

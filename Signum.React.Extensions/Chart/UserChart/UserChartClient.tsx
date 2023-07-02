@@ -30,7 +30,7 @@ export function start(options: { routes: JSX.Element[] }) {
     return <UserChartMenu chartRequestView={ctx.chartRequestView} />;
   });
 
-  QuickLinks.registerGlobalQuickLink(UserChartEntity, ctx => {
+/*  QuickLinks.registerGlobalQuickLink(UserChartEntity, ctx => {
     if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
       return Promise.resolve([]);
 
@@ -42,7 +42,7 @@ export function start(options: { routes: JSX.Element[] }) {
       uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc) ?? "", e => {
         window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
       }, { icon: "chart-bar", iconColor: "darkviolet" })));
-  }, { tokenNiceName: UserChartEntity.nicePluralName() });
+  }, { tokenNiceName: UserChartEntity.nicePluralName() });*/
 
   QuickLinks.registerQuickLink(UserChartEntity, ChartMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
     e => {

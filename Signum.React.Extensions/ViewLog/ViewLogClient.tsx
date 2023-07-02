@@ -4,7 +4,7 @@ import { ViewLogEntity } from './Signum.Entities.ViewLog'
 
 export function start(options: { routes: JSX.Element[], showQuickLink?: (typeName: string) => boolean }) {
 
-  QuickLinks.registerGlobalQuickLink(ViewLogEntity.typeName, ctx => new QuickLinks.QuickLinkExplore({
+  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
     queryName: ViewLogEntity,
     filterOptions: [{ token: ViewLogEntity.token(e => e.target), value: ctx.lite}]
   }, {

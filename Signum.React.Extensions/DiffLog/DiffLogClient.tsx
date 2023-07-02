@@ -26,7 +26,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
 
   if (options.timeMachine) {
-    QuickLinks.registerGlobalQuickLink("TimeMachine", ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
+    QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
       new QuickLinks.QuickLinkLink("TimeMachine",
         () => TimeMachineMessage.TimeMachine.niceToString(),
         timeMachineRoute(ctx.lite), {
@@ -34,7 +34,7 @@ export function start(options: { routes: JSX.Element[], timeMachine: boolean }) 
         iconColor: "blue",
       }) : undefined, { tokenNiceName: TimeMachineMessage.TimeMachine.niceToString() });
 
-    QuickLinks.registerGlobalQuickLink("CompareTimeMachine", ctx => {
+    QuickLinks.registerGlobalQuickLink(ctx => {
       if (!getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
         return undefined;
 
