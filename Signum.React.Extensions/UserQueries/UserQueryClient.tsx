@@ -46,28 +46,28 @@ export function start(options: { routes: JSX.Element[] }) {
     return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
   });
 
-  QuickLinks.registerGlobalQuickLink_New(entityType => {
+  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      return Promise.resolve([]);
+      return undefined;
 
     return API.forEntityType(entityType)
       .then(uqs => uqs.map(uq =>
       ({
         key: liteKey(uq),
         generator:
-        {
-          factory: (ctx: QuickLinks.QuickLinkContext<Entity>) => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-            window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-          }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info" }),
+          {
+            factory: (ctx) => new QuickLinks.QuickLinkAction(e => {
+              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+            }),
             options: {
-              key: liteKey(uq),
               text: () => getToString(uq),
+              icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
             }
           } as QuickLinks.QuickLinkGenerator<Entity>
       })));
   });
 
-  QuickLinks.registerQuickLink(UserQueryEntity, UserQueryMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(UserQueryEntity, UserQueryMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction(
     e => {
       Navigator.API.fetchAndRemember(ctx.lite!).then(uq => {
         if (uq.entityType == undefined)
@@ -82,8 +82,13 @@ export function start(options: { routes: JSX.Element[] }) {
               window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
             });
       });
-    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }),
-    { text: () => UserQueryMessage.Preview.niceToString() });
+    }),
+    {
+      key: "preview",
+      text: () => UserQueryMessage.Preview.niceToString(),
+      isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+    }
+  );
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
 

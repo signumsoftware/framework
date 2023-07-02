@@ -30,21 +30,28 @@ export function start(options: { routes: JSX.Element[] }) {
     return <UserChartMenu chartRequestView={ctx.chartRequestView} />;
   });
 
-/*  QuickLinks.registerGlobalQuickLink(UserChartEntity, ctx => {
+  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
       return Promise.resolve([]);
 
-    var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.frame.pack.userCharts ?? []) :
-      API.forEntityType(ctx.lite.EntityType);
+    return API.forEntityType(entityType)
+      .then(ucs => ucs.map(uc =>
+      ({
+        key: liteKey(uc),
+        generator:
+        {
+          factory: ctx => new QuickLinks.QuickLinkAction(e => {
+            window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
+          }),
+          options: {
+            text: () => UserChartEntity.nicePluralName(),
+            icon: "chart-bar", iconColor: "darkviolet"
+          }
+        }
+      })));
+  });
 
-    return promise.then(uqs =>
-      uqs.map(uc => new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
-      }, { icon: "chart-bar", iconColor: "darkviolet" })));
-  }, { tokenNiceName: UserChartEntity.nicePluralName() });*/
-
-  QuickLinks.registerQuickLink(UserChartEntity, ChartMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink(UserChartEntity, ChartMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction(
     e => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
         if (uc.entityType == undefined)
@@ -59,7 +66,12 @@ export function start(options: { routes: JSX.Element[] }) {
               window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
             });
       });
-    }, { isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info" }));
+    }),
+    {
+      key: "preview", text: () => ChartMessage.Preview.niceToString(),
+      isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info"
+    }
+  );
 
 
   Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));

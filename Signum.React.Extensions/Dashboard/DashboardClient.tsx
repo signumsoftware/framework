@@ -257,7 +257,7 @@ export function start(options: { routes: JSX.Element[] }) {
     });
   });
 
-  QuickLinks.registerGlobalQuickLink_New(entityType => {
+  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
       return Promise.resolve([]);
 
@@ -267,12 +267,11 @@ export function start(options: { routes: JSX.Element[] }) {
         key: liteKey(d),
         generator:
         {
-          factory: (ctx: QuickLinks.QuickLinkContext<Entity>) => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d) ?? "", e => {
+          factory: ctx => new QuickLinks.QuickLinkAction(e => {
             AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
           }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
           options:
           {
-            key: liteKey(d),
             text: () => getToString(d),
             order: 0,
           }
@@ -280,7 +279,32 @@ export function start(options: { routes: JSX.Element[] }) {
       })));
   });
 
-  QuickLinks.registerQuickLink(DashboardEntity, DashboardMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
+  QuickLinks.registerQuickLink_New<DashboardEntity>(DashboardEntity, () => ({
+    key: "preview",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkAction(e => Navigator.API.fetchAndRemember(ctx.lite)
+        .then(db => {
+          if (db.Type == undefined)
+            AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
+          else
+            Navigator.API.fetchAndRemember(db.entityType)
+              .then(t => Finder.find({ queryName: t.cleanName }))
+              .then(entity => {
+                if (!entity)
+                  return;
+
+                AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
+              });
+        })),
+      options: 
+      {
+        text: () => DashboardMessage.Preview.niceToString(),
+        group: null, icon: "eye", iconColor: "blue", color: "info"
+      }
+    }
+  })
+
+  QuickLinks.registerQuickLink_New(DashboardEntity, DashboardMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
     e => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
