@@ -103,23 +103,26 @@ export function registerQuickLink<T extends Entity>(factory: TypeQuickLink<T>) {
 
 function getCachedOrAdd(entityType: string) {
 
-  const typeLinks = Dic.toDic(typeQuickLinks.filter(tql => getTypeName(tql.type) == entityType)
-    .map(tql => ({ key: tql.key, value: tql.generator })));
-
   return quickLinksCache[entityType] ??=
     Promise.all(globalQuickLinks.map(a => a(entityType)))
-      .then(globalLinks => globalLinks.concat(typeLinks))
-      .then((allQuickLinks) => Dic.concat(allQuickLinks));
+      .then(globalLinks => {
+
+        const typeLinks = Dic.toDic(typeQuickLinks.filter(tql => getTypeName(tql.type) == entityType)
+          .map(tql => ({ key: tql.key, value: tql.generator })));
+
+        return globalLinks.concat(typeLinks)
+      }).then((allQuickLinks) => Dic.concat(allQuickLinks));
 }
 
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink> {
 
   return getCachedOrAdd(ctx.lite.EntityType)
-    .then(qg =>
-      Dic.map(qg, (k, v) => {
-        const quikLink = v.factory(ctx);
-        quikLink && Dic.assign(quikLink, { isVisible: true, text: () => "", order: 0, ...v.options, key: k })
-        return quikLink;
+    .then(gs =>
+      Dic.map(gs, (k, g) => {
+        const qLink = g.factory(ctx);
+        applyKeyAndOptions(k, qLink, g.options);
+
+        return qLink;
       }).filter(ql => ql && ql.isVisible).orderBy(ql => ql!.order));
 }
 
@@ -129,17 +132,25 @@ function getQuickLinkTokens(entityType: string): Promise<ManualToken[]> {
   return qls.then(ql => toManualTokens(ql))
 }
 
-export function getQuickLink(key: string, ctx: QuickLinkContext<Entity>): Promise<QuickLink | undefined> {
+function getQuickLink(key: string, ctx: QuickLinkContext<Entity>): Promise<QuickLink | undefined> {
   const entityType = ctx.lite.EntityType;
 
   return getCachedOrAdd(entityType)
-    .then(ql => ql && ql[key]?.factory(ctx));
+    .then(gs => gs && gs[key])
+    .then(g => {
+      const qLink = g && g.factory(ctx);
+      applyKeyAndOptions(key, qLink, g.options);
+
+      return qLink;
+    });
 }
 
+function applyKeyAndOptions(key: string, quickLink?: QuickLink, options?: QuickLinkOptions) {
+  quickLink && Dic.assign(quickLink, { isVisible: true, text: () => "", order: 0, ...options, key: key })
+}
 
 function toManualTokens(qlDic: { [key: string]: QuickLinkGenerator<Entity> }) {
-
-  return qlDic && Dic.filter(qlDic, (kv) => kv.value.options?.key && kv.value.options?.text).map((kv) => ({
+  return qlDic && Dic.filter(qlDic, (kv) => kv.value.options?.text).map((kv) => ({
     toStr: kv.value.options!.text!(),
     niceName: kv.value.options!.text!(),
     key: kv.key,

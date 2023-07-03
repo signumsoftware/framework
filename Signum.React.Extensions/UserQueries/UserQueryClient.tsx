@@ -56,7 +56,7 @@ export function start(options: { routes: JSX.Element[] }) {
         key: liteKey(uq),
         generator:
           {
-            factory: (ctx) => new QuickLinks.QuickLinkAction(e => {
+            factory: ctx => new QuickLinks.QuickLinkAction(e => {
               window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
             }),
             options: {
