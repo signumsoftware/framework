@@ -975,17 +975,6 @@ export module Dic {
     }
   }
 
-  export function simplify<T extends {}>(a: T | undefined): T | undefined {
-    if (a == null)
-      return a;
-
-    var result: T = {} as any;
-    for (const key in a) {
-      if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
-        result[key] = a[key];
-    }
-    return result;
-  }
 
   export function getValues<V>(obj: { [key: string]: V }): V[] {
     const result: V[] = [];
@@ -1092,11 +1081,24 @@ export module Dic {
     }
   }
 
+
   export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
     if (dic[key])
       throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
 
     dic[key] = value;
+  }
+
+  export function simplify<T extends {}>(a: T | undefined): T | undefined{
+    if (a == null)
+      return a;
+
+    var result: T = {} as any;
+    for (const key in a) {
+      if ((a.hasOwnProperty == null || a.hasOwnProperty(key)) && a[key] !== undefined)
+        result[key] = a[key];
+    }
+    return result;
   }
 
   export function deepFreeze<T extends object>(object: T): T {

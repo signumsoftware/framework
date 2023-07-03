@@ -5,7 +5,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, isFilterGroupOptionParsed, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -1509,7 +1509,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token)));
 
     var keyFilters = resFo.columnOptions
       .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
