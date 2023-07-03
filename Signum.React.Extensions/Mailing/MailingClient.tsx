@@ -125,7 +125,7 @@ export function start(options: {
       generator:
       {
         factory: ctx => new QuickLinks.QuickLinkExplore({
-          queryName: EmailMessageEntity, filterOptions: [{ token: "Target", value: ctx.lite }]
+          queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }]
         }),
         options:
         {
