@@ -9,7 +9,7 @@ import {
 } from '@framework/Signum.Entities'
 import * as OmniboxClient from '../Omnibox/OmniboxClient'
 import { TypeEntity, IUserEntity } from '@framework/Signum.Entities.Basics'
-import { Type, PropertyRoute, OperationInfo } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo, getQueryKey, getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
@@ -59,6 +59,7 @@ import { UserEntity } from '../Authorization/Signum.Entities.Authorization';
 import { SearchControl } from '../../Signum.React/Scripts/Search';
 import SearchModal from '../../Signum.React/Scripts/SearchControl/SearchModal';
 import MessageModal from '../../Signum.React/Scripts/Modals/MessageModal';
+import { getQueryNames } from '../Dashboard/DashboardClient';
 
 export function start(options: { routes: JSX.Element[], overrideCaseActivityMixin?: boolean }) {
 
@@ -113,19 +114,24 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     { token: t.append(p => p.entity.eval.script), type: "Code" },
   ]);
 
-/*  QuickLinks.registerQuickLink(CaseActivityEntity, ctx => [
-    new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), e => {
-      API.fetchCaseFlowPack(ctx.lite)
-        .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
-        .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}));
-    },
-      {
+
+  QuickLinks.registerQuickLink({
+    type: CaseActivityEntity,
+    key: "caseFlow",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkAction(e => {
+        API.fetchCaseFlowPack(ctx.lite)
+          .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
+          .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
+      }),
+      options: {
+        text: () => WorkflowActivityMessage.CaseFlow.niceToString(),
         isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
         icon: "shuffle",
         iconColor: "green"
-      })
-  ]);*/
-
+      }
+    }
+  });
 
   Finder.addSettings({
     queryName: CaseActivityEntity,
@@ -137,10 +143,17 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     ]
   })
 
-/*  QuickLinks.registerQuickLink(WorkflowEntity, ctx => [
-    new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] },
-      { icon: "list-check", iconColor: "blue" })
-  ]);*/
+  QuickLinks.registerQuickLink({
+    type: WorkflowEntity,
+    key: getQueryKey(CaseEntity),
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] }),
+      options: {
+        text: () => getQueryNiceName(CaseEntity),
+        icon: "list-check", iconColor: "blue"
+      }
+    }
+  });
 
   OmniboxClient.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
@@ -358,10 +371,17 @@ export function start(options: { routes: JSX.Element[], overrideCaseActivityMixi
     },
   }));
 
-/*  QuickLinks.registerQuickLink(WorkflowEntity, ctx => new QuickLinks.QuickLinkLink("bam",
-    () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
-    workflowActivityMonitorUrl(ctx.lite),
-    { icon: "gauge", iconColor: "green" }));*/
+  QuickLinks.registerQuickLink({
+    type: WorkflowEntity,
+    key: "bam",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkLink(workflowActivityMonitorUrl(ctx.lite)),
+      options: {
+        text: () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
+        icon: "gauge", iconColor: "green"
+      }
+    }
+  });
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
