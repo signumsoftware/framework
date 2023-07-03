@@ -37,17 +37,27 @@ export function start(options: { routes: JSX.Element[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  QuickLinks.registerQuickLink(type, UserAssetMessage.ExportToXml.name, ctx => {
-    if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-      return undefined;
+  QuickLinks.registerQuickLink({
+    type: type,
+    key: UserAssetMessage.ExportToXml.name,
+    generator: {
+      factory: ctx => {
+        if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+          return undefined;
 
-    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), () => {
-      API.exportAsset(ctx.lites);
-    }, {
-        iconColor: "#FCAE25",
-        icon: "file-code"
-    });
-  }, { allowsMultiple: true, text: () => UserAssetMessage.ExportToXml.niceToString() });
+        return new QuickLinks.QuickLinkAction(() => {
+          API.exportAsset(ctx.lites);
+        }, {
+          iconColor: "#FCAE25",
+          icon: "file-code"
+        });
+      },
+      options: {
+        allowsMultiple: true,
+        text: () => UserAssetMessage.ExportToXml.niceToString()
+      }
+    }
+  });
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

@@ -51,28 +51,32 @@ export function start(options: { routes: JSX.Element[] }) {
       })));
   });
 
-  QuickLinks.registerQuickLink(UserChartEntity, ChartMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction(
-    e => {
-      Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
-        if (uc.entityType == undefined)
-          window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}`));
-        else
-          Navigator.API.fetch(uc.entityType)
-            .then(t => Finder.find({ queryName: t.cleanName }))
-            .then(lite => {
-              if (!lite)
-                return;
+  QuickLinks.registerQuickLink({
+    type: UserChartEntity,
+    key: "preview",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkAction(
+        e => {
+          Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
+            if (uc.entityType == undefined)
+              window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}`));
+            else
+              Navigator.API.fetch(uc.entityType)
+                .then(t => Finder.find({ queryName: t.cleanName }))
+                .then(lite => {
+                  if (!lite)
+                    return;
 
-              window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
-            });
-      });
-    }),
-    {
-      key: "preview", text: () => ChartMessage.Preview.niceToString(),
+                  window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(lite)}`));
+                });
+          })
+        }),
+      options: {
+      text: () => ChartMessage.Preview.niceToString(),
       isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info"
+      }
     }
-  );
-
+  });
 
   Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
 }

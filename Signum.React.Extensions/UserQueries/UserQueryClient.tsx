@@ -67,28 +67,31 @@ export function start(options: { routes: JSX.Element[] }) {
       })));
   });
 
-  QuickLinks.registerQuickLink(UserQueryEntity, UserQueryMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction(
-    e => {
-      Navigator.API.fetchAndRemember(ctx.lite!).then(uq => {
-        if (uq.entityType == undefined)
-          window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
-        else
-          Navigator.API.fetch(uq.entityType)
-            .then(t => Finder.find({ queryName: t.cleanName }))
-            .then(lite => {
-              if (!lite)
-                return;
+  QuickLinks.registerQuickLink({
+    type: UserQueryEntity,
+    key: "preview",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkAction( e => {
+          Navigator.API.fetchAndRemember(ctx.lite!).then(uq => {
+            if (uq.entityType == undefined)
+              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}`));
+            else
+              Navigator.API.fetch(uq.entityType)
+                .then(t => Finder.find({ queryName: t.cleanName }))
+                .then(lite => {
+                  if (!lite)
+                    return;
 
-              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
-            });
-      });
-    }),
-    {
-      key: "preview",
-      text: () => UserQueryMessage.Preview.niceToString(),
-      isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+                  window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(lite)}`));
+                });
+          });
+        }),
+      options: {
+        text: () => UserQueryMessage.Preview.niceToString(),
+        isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+      }
     }
-  );
+  });
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
 

@@ -73,9 +73,13 @@ export function clearQuickLinks() {
   Dic.clear(typeQuickLinks);
 }
 
-export interface RegisteredQuickLink<T extends Entity> {
-  factory: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>;
-  options?: QuickLinkOptions;
+export interface GlobalQuickLink<T extends Entity> {
+  key: string,
+  generator: QuickLinkGenerator<T>
+}
+
+export interface TypeQuickLink<T extends Entity> extends GlobalQuickLink<T> {
+  type: Type<T>,
 }
 
 export interface QuickLinkGenerator<T extends Entity> {
@@ -83,63 +87,58 @@ export interface QuickLinkGenerator<T extends Entity> {
   options?: QuickLinkOptions,
 }
 
-/////////////// temporary, for backward build
-/*export interface QuickLinkRegisterOptions {
-  allowsMultiple?: boolean;
-  tokenNiceName?: string;
-}
-
-export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
-}*/
-/////////////// temporary, for backward build
-
 const globalQuickLinks: Array<(entityType: string) => (Promise<{ [key: string]: QuickLinkGenerator<Entity> }>)> = [];
+const typeQuickLinks: Array<TypeQuickLink<any>> = [];
+
 const quickLinksCache: { [entityType: string]: Promise<{ [key: string]: QuickLinkGenerator<Entity> }> } = {};
 
-export function registerGlobalQuickLink(f: (entityType: string) => (PromiSeq<{ key: string, generator: QuickLinkGenerator<Entity> }>)) {
+export function registerGlobalQuickLink(f: (entityType: string) => (PromiSeq<GlobalQuickLink<Entity>>)) {
 
   globalQuickLinks.push((t: string) => asPromiseArray(f(t)).then(kg => Dic.toDic(kg.map(kg => ({ key: kg.key, value: kg.generator })))));
 }
 
-const typeQuickLinks: Array<{ entityType: string, generator: <T extends Entity>() => { key: string, generator: QuickLinkGenerator<T> } }> = [];
-export function registerQuickLink_New<T extends Entity>(type: Type<T>, f: <T extends Entity>() => { key: string, generator: QuickLinkGenerator<T>}) {
-  const entityType = getTypeName(type);
+export function registerQuickLink<T extends Entity>(factory: TypeQuickLink<T>) {
+  typeQuickLinks.push(factory);
+}
 
-  typeQuickLinks.push({ entityType, generator: f });
+function getCachedOrAdd(entityType: string) {
+
+  const typeLinks = Dic.toDic(typeQuickLinks.filter(tql => getTypeName(tql.type) == entityType)
+    .map(tql => ({ key: tql.key, value: tql.generator })));
+
+  return quickLinksCache[entityType] ??=
+    Promise.all(globalQuickLinks.map(a => a(entityType)))
+      .then(globalLinks => globalLinks.concat(typeLinks))
+      .then((allQuickLinks) => Dic.concat(allQuickLinks));
+}
+
+export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink> {
+
+  return getCachedOrAdd(ctx.lite.EntityType)
+    .then(qg =>
+      Dic.map(qg, (k, v) => {
+        const quikLink = v.factory(ctx);
+        quikLink && Dic.assign(quikLink, { isVisible: true, text: () => "", order: 0, ...v.options, key: k })
+        return quikLink;
+      }).filter(ql => ql && ql.isVisible).orderBy(ql => ql!.order));
+}
+
+function getQuickLinkTokens(entityType: string): Promise<ManualToken[]> {
+  const qls = getCachedOrAdd(entityType);
+
+  return qls.then(ql => toManualTokens(ql))
 }
 
 export function getQuickLink(key: string, ctx: QuickLinkContext<Entity>): Promise<QuickLink | undefined> {
-
   const entityType = ctx.lite.EntityType;
 
   return getCachedOrAdd(entityType)
     .then(ql => ql && ql[key]?.factory(ctx));
 }
 
-function getCachedOrAdd(entityType: string) {
-  return quickLinksCache[entityType] ??=
-    Promise.all(globalQuickLinks.map(a => a(entityType))).then((qls) => Dic.concat(qls));
-}
-
-export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink> {
-
-  return getCachedOrAdd(ctx.lite.EntityType)
-    .then(qf =>
-      Dic.map(qf, (k, v) => {
-        const ql = v.factory(ctx);
-        ql && Dic.assign(ql, { isVisible: true, text: () => "", order: 0, ...v.options, key: k })
-      return ql;
-    }).filter(ql => ql && ql.isVisible).orderBy(ql => ql!.order));
-}
-
-function getQuickLinkTokens(entityType: string): Promise<ManualToken[]> {
-  const qls = getCachedOrAdd(entityType);
-  return qls.then(ql => toManualTokens(ql))
-}
 
 function toManualTokens(qlDic: { [key: string]: QuickLinkGenerator<Entity> }) {
+
   return qlDic && Dic.filter(qlDic, (kv) => kv.value.options?.key && kv.value.options?.text).map((kv) => ({
     toStr: kv.value.options!.text!(),
     niceName: kv.value.options!.text!(),
@@ -159,17 +158,6 @@ export function registerQuickLink_New1<T extends Entity>(type: Type<T>, factory:
   factory.then(fs => {
     Dic.foreach(fs, (k, f) => Dic.addOrThrow(typeDic, k, f))
   });
-}
-
-export const onQuickLinks: { [typeName: string]: { [key: string]: RegisteredQuickLink<any> } } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, key: string,
-  quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkOptions) {
-
-  const typeName = getTypeName(type);
-
-  const typeDic = onQuickLinks[typeName] || (onQuickLinks[typeName] = {});
-
-  Dic.addOrThrow(typeDic, key, { factory: quickLinkGenerator, options: options });
 }
 
 export var ignoreErrors = false;

@@ -124,7 +124,7 @@ export function start(options: { routes: JSX.Element[] }) {
         ev.preventDefault();
         ev.persist();
         const handler = cdRef.current as UserChartPartHandler;
-          ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
+        ChartClient.Encoder.chartPathPromise(handler.chartRequest!, toLite(p.userChart!))
           .then(path => AppContext.pushOrOpenInTab(path, ev));
       },
     customTitleButtons: (c, entity, customDataRef) => {
@@ -279,47 +279,32 @@ export function start(options: { routes: JSX.Element[] }) {
       })));
   });
 
-  QuickLinks.registerQuickLink_New<DashboardEntity>(DashboardEntity, () => ({
+  QuickLinks.registerQuickLink({
+    type: DashboardEntity,
     key: "preview",
-    generator: {
+    generator:
+    {
       factory: ctx => new QuickLinks.QuickLinkAction(e => Navigator.API.fetchAndRemember(ctx.lite)
-        .then(db => {
-          if (db.Type == undefined)
-            AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
-          else
-            Navigator.API.fetchAndRemember(db.entityType)
-              .then(t => Finder.find({ queryName: t.cleanName }))
-              .then(entity => {
-                if (!entity)
-                  return;
+          .then(db => {
+            if (db.entityType == undefined)
+              AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
+            else
+              Navigator.API.fetchAndRemember(db.entityType)
+                .then(t => Finder.find({ queryName: t.cleanName }))
+                .then(entity => {
+                  if (!entity)
+                    return;
 
-                AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
-              });
-        })),
-      options: 
-      {
-        text: () => DashboardMessage.Preview.niceToString(),
-        group: null, icon: "eye", iconColor: "blue", color: "info"
+                  AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
+                });
+          })),
+        options:
+        {
+          text: () => DashboardMessage.Preview.niceToString(),
+          group: null, icon: "eye", iconColor: "blue", color: "info"
+        }
       }
-    }
-  })
-
-  QuickLinks.registerQuickLink_New(DashboardEntity, DashboardMessage.Preview.name, ctx => new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
-    e => Navigator.API.fetchAndRemember(ctx.lite)
-      .then(db => {
-        if (db.entityType == undefined)
-          AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
-        else
-          Navigator.API.fetchAndRemember(db.entityType)
-            .then(t => Finder.find({ queryName: t.cleanName }))
-            .then(entity => {
-              if (!entity)
-                return;
-
-              AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
-            });
-      }), { group: null, icon: "eye", iconColor: "blue", color: "info" }), { text: () => DashboardMessage.Preview.niceToString() });
-}
+  })};
 
 export function home(): Promise<Lite<DashboardEntity> | null> {
   if (!Navigator.isViewable(DashboardEntity))
