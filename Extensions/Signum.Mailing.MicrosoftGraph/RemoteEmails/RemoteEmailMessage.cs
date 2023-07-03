@@ -1,3 +1,4 @@
+using Microsoft.Graph.Models;
 using Signum.Authorization;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
@@ -29,6 +30,11 @@ public class RemoteEmailMessageModel : ModelEntity
     public DateTimeOffset? SentDateTime { get; set; }
 
     public string? WebLink { get; internal set; }
+
+    public string? Extension0 { get; internal set; }
+    public string? Extension1 { get; internal set; }
+    public string? Extension2 { get; internal set; }
+    public string? Extension3 { get; internal set; }
 
     protected override void PreSaving(PreSavingContext ctx)
     {
@@ -72,6 +78,12 @@ public class RemoteEmailFolderModel : ModelEntity
 
 public class RecipientEmbedded : EmbeddedEntity
 {
+
+    public RecipientEmbedded()
+    {
+
+    }
+
     public string? EmailAddress { get; set; }
     
     public string? Name { get; set; }

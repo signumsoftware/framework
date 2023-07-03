@@ -29,12 +29,6 @@ export function start(options: { routes: RouteObject[] }) {
     text: () => ITaskMessage.Execute.niceToString()
   };
 
-  Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteAsync, {
-    icon: "hourglass",
-    iconColor: "#5499C7",
-    group: group
-  }));
-
   Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteSync, {
     icon: "bolt",
     iconColor: "#F1C40F",

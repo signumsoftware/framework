@@ -1810,7 +1810,7 @@ const HIDDEN = "__";
 
 export module Decoder {
 
-  export const decodeModel: { [typeName: string]: (string: string) => ModelEntity | null } = {};
+  export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
 
   interface FilterPart {
