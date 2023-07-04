@@ -16,13 +16,13 @@ export type MessageModalButtons = "ok" | "cancel" | "ok_cancel" | "yes_no" | "ye
 
 export type MessageModalResult = "ok" | "cancel" | "yes" | "no";
 
-interface MessageModalContext {
+export interface MessageModalHandler {
   handleButtonClicked(m: MessageModalResult): void;
 }
 
 interface MessageModalProps extends IModalProps<MessageModalResult | undefined> {
   title: React.ReactChild;
-  message: React.ReactChild | ((ctx: MessageModalContext) => React.ReactChild);
+  message: React.ReactChild | ((ctx: MessageModalHandler) => React.ReactChild);
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
   buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
@@ -32,6 +32,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   size?: BsSize;
   shouldSelect?: boolean;
   additionalDialogClassName?: string;
+  modalRef?: React.RefObject<MessageModalHandler>; //For closing the modal imperatively
 }
 
 export default function MessageModal(p: MessageModalProps) {
@@ -39,6 +40,13 @@ export default function MessageModal(p: MessageModalProps) {
   const [show, setShow] = React.useState(true);
 
   const selectedValue = React.useRef<MessageModalResult | undefined>(undefined);
+
+  React.useImperativeHandle(p.modalRef, () => {
+
+    return {
+      handleButtonClicked
+    }
+  }, []);
 
   function handleButtonClicked(val: MessageModalResult) {
     selectedValue.current = val;
@@ -168,21 +176,7 @@ export default function MessageModal(p: MessageModalProps) {
 }
 
 MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | undefined> => {
-  return openModal<MessageModalResult>(
-    <MessageModal
-      title={options.title}
-      message={options.message}
-      buttons={options.buttons}
-      buttonContent={options.buttonContent}
-      buttonHtmlAttributes={options.buttonHtmlAttributes}
-      icon={options.icon}
-      size={options.size}
-      customIcon={options.customIcon}
-      style={options.style}
-      shouldSelect={options.shouldSelect}
-      additionalDialogClassName={options.additionalDialogClassName}
-    />
-  );
+  return openModal<MessageModalResult>(<MessageModal {...options} />);
 }
 
 MessageModal.showError = (message: React.ReactChild, title?: string): Promise<undefined> => {
