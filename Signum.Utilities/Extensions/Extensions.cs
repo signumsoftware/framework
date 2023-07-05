@@ -396,12 +396,6 @@ styles ?? DateTimeStyles.None, out DateTime result))
             yield return i;
     }
 
-    public static IEnumerable<T> For<T>(this T start, Func<T, bool> condition, Func<T, T> increment)
-    {
-        for (T i = start; condition(i); i = increment(i))
-            yield return i;
-    }
-
     public delegate R FuncCC<in T, R>(T input)
         where T : class
         where R : class?;

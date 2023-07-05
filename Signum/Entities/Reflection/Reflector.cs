@@ -169,9 +169,11 @@ public static class Reflector
     {
         using (HeavyProfiler.LogNoStackTrace("Reflector", () => type.Name))
         {
-            var result = type.For(t => t != typeof(object), t => t.BaseType!)
+            var result = type.Follow(a => a.BaseType)
+                .TakeWhile(t => t != typeof(object))
                 .Reverse()
-                .SelectMany(t => t.GetFields(flags | BindingFlags.DeclaredOnly).OrderBy(f => f.MetadataToken)).ToArray();
+                .SelectMany(t => t.GetFields(flags | BindingFlags.DeclaredOnly).OrderBy(f => f.MetadataToken))
+                .ToArray();
 
             return result;
         }
