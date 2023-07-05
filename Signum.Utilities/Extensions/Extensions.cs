@@ -258,39 +258,6 @@ styles ?? DateTimeStyles.None, out DateTime result))
         return value == -1 ? defaultValue : value;
     }
 
-    public static T ThrowIfNull<T>([NotNull]this T? t, string message)
-     where T : struct
-    {
-        if (t == null)
-            throw new NullReferenceException(message);
-        return t.Value;
-    }
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, string message)
-        where T : class
-    {
-        if (t == null)
-            throw new NullReferenceException(message);
-        return t;
-    }
-
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
-     where T : struct
-    {
-        if (t == null)
-            throw new NullReferenceException(message());
-        return t.Value;
-    }
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
-        where T : class
-    {
-        if (t == null)
-            throw new NullReferenceException(message());
-        return t;
-    }
-
     public static R Let<T, R>(this T t, Func<T, R> func)
     {
         return func(t);
