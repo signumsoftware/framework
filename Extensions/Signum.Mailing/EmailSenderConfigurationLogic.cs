@@ -54,7 +54,7 @@ public static class EmailSenderConfigurationLogic
 
     public static SmtpClient GenerateSmtpClient(this Lite<EmailSenderConfigurationEntity> config)
     {
-        return (config.RetrieveFromCache().Service as SmtpEmailServiceEntity).ThrowIfNull("No SMTP config").GenerateSmtpClient();
+        return ((config.RetrieveFromCache().Service as SmtpEmailServiceEntity) ?? throw new InvalidOperationException("No SMTP config")).GenerateSmtpClient();
     }
 
     public static EmailSenderConfigurationEntity RetrieveFromCache(this Lite<EmailSenderConfigurationEntity> config)
