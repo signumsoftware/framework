@@ -151,6 +151,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
 
+  if (color == null)
+    color = eoc.color;
+
   if (group) {
 
     const item =
@@ -158,7 +161,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         {...props as any}
         disabled={disabled}
         title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
+        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className, (color ? "text-" + color : undefined))}
         onClick={disabled ? undefined : handleOnClick}
         data-operation={eoc.operationInfo.key}>
         {renderChildren()}
@@ -181,9 +184,6 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
 
   if (outline == null)
     outline = eoc.outline;
-
-  if (color == null)
-    color = eoc.color;
 
   var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
     {...props}

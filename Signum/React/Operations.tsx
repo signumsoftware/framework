@@ -771,7 +771,7 @@ export const CreateGroup: EntityOperationGroup = {
 
 export interface EntityOperationGroup {
   key: string;
-  text: () => string;
+  text: () => React.ReactNode;
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;
