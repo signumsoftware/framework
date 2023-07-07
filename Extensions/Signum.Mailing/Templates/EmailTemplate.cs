@@ -98,6 +98,9 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
         foreach (var o in Orders)
             o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+
+        foreach (var a in Attachments)
+            a.ParseData(this, description);
     }
 
     public bool IsApplicable(Entity? entity)
@@ -403,6 +406,7 @@ public interface IAttachmentGeneratorEntity : IEntity
     XElement ToXml(IToXmlContext ctx);
 
     void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset);
+    void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description);
 }
 
 [AutoInit]

@@ -46,6 +46,10 @@ public class ImageAttachmentEntity : Entity, IAttachmentGeneratorEntity
         );
     }
 
+    public void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description)
+    {
+    }
+
     static ImageAttachmentEntity()
     {
         AttachmentFromXmlExtensions.TypeMapping.Add("ImageAttachment", typeof(ImageAttachmentEntity));

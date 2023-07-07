@@ -44,6 +44,10 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
         );
     }
 
+    public void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description)
+    {
+    }
+
     static WordAttachmentEntity()
     {
         AttachmentFromXmlExtensions.TypeMapping.Add("WordAttachment", typeof(WordAttachmentEntity));
