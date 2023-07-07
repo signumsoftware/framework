@@ -1708,10 +1708,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return this.props.findOptions.groupResults || this.props.view;
   }
 
-  getRowMarked(row: ResultRow) {
-    return row.entity && this.getMarkedRow(row.entity);
-  }
-
   getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
  
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
@@ -1744,7 +1740,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var anyCombineEquals = columns.some(a => a.column.combineRows != null);
 
     return resultTable.rows.map((row, i, rows) => {
-      const mark = this.getRowMarked(row);
+      const mark = this.getMarkedRow(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
           mark?.status == "Error" ? "table-danger" :
@@ -1829,7 +1825,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   getRowMarketIcon(row: ResultRow, rowIndex: number) {
-    const mark = this.getRowMarked(row);
+    const mark = this.getMarkedRow(row);
     if (!mark)
       return undefined;
 
@@ -1958,12 +1954,17 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.dataChanged();
   }
 
-  getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
+  getMarkedRow(row: ResultRow): MarkedRow | undefined {
 
-    if (!entity || !this.state.markedRows)
+    if (!this.state.markedRows)
       return undefined;
 
-    const m = this.state.markedRows[liteKey(entity)];
+    var key = this.props.querySettings?.markRowsColumn ? row.columns[this.state.resultTable!.columns.indexOf(this.props.querySettings?.markRowsColumn)] : row.entity && liteKey(row.entity);
+
+    if (key == null)
+      return;
+
+    const m = this.state.markedRows[key];
 
     if (typeof m === "string") {
       if (m == "")

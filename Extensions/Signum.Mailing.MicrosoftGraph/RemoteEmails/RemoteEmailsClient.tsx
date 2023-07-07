@@ -87,6 +87,7 @@ export function start(options: {
 
   Finder.addSettings({
     queryName: RemoteEmailMessageQuery.RemoteEmailMessages,
+    markRowsColumn: "Id",
     defaultFilters: [
       { token: "User", value: AppContext.currentUser, pinned: { active: "Always" } },
     ],
