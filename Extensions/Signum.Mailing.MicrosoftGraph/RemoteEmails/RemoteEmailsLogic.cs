@@ -124,6 +124,7 @@ public static class RemoteEmailsLogic
                             FolderId = u.ParentFolderId,
                             DisplayName = "Unknown"
                         },
+                        WellKnownFolderName = (string?)null,
                         User = user,
                         Extension0 = Converter.GetExtension(u, 0),
                         Extension1 = Converter.GetExtension(u, 1),
@@ -221,7 +222,7 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
 
     public override string ToGraphField(QueryToken token, GraphFieldUsage usage)
     {
-        if (token.FullKey().StartsWith("Folder"))
+        if (token.FullKey().StartsWith("Folder") || token.FullKey().StartsWith("WellKnownFolderName"))
             return "parentFolderId";
 
         var field = token.Follow(a => a.Parent).Reverse().ToString(a =>
@@ -240,11 +241,14 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
         return field;
     }
 
+    public override string[]? GetOrderBy(IEnumerable<Order> orders)
+    {
+        return base.GetOrderBy(orders.Where(a => !a.Token.FullKey().StartsWith("WellKnownFolderName")));
+    }
+
     public override string[]? GetSelect(IEnumerable<Column> columns)
     {
-        return columns.Where(a => !a.Token.FullKey().StartsWith("Extension"))
-            .Select(c => ToGraphField(c.Token, GraphFieldUsage.Select))
-            .Distinct().ToArray();
+        return base.GetSelect(columns.Where(a => !a.Token.FullKey().Let(a => a.StartsWith("Extension") || a.StartsWith("WellKnownFolderName"))));
     }
 
     public override string? ToFilter(DynamicQuery.Filter f)
