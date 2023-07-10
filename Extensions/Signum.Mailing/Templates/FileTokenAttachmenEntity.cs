@@ -47,6 +47,11 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
         );
     }
 
+    public void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description)
+    {
+        FileToken.ParseData(emailTemplateEntity, description, SubTokensOptions.CanElement);
+    }
+
     static FileTokenAttachmentEntity()
     {
         AttachmentFromXmlExtensions.TypeMapping.Add("FileTokenAttachment", typeof(FileTokenAttachmentEntity));
