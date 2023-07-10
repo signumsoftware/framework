@@ -16,7 +16,7 @@ public static class RemoteEmailsLogic
     {
         if (!qr.Filters.Any(a => a is FilterCondition fc && fc.Token.FullKey() == "User" && fc.Value is Lite<UserEntity> u && u.Is(UserEntity.Current)))
         {
-            if (!RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers.IsAuthorized())
+            if (!RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers.IsAuthorized())
                 throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
         }
     };
@@ -25,7 +25,7 @@ public static class RemoteEmailsLogic
     { 
         if (!user.Is(UserEntity.Current))
         {
-            if (!RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers.IsAuthorized())
+            if (!RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers.IsAuthorized())
                 throw new UnauthorizedAccessException(RemoteEmailMessage.NotAuthorizedToViewEmailsFromOtherUsers.NiceToString());
         }
     };
@@ -217,8 +217,6 @@ public class MessageMicrosoftGraphQueryConverter : MicrosoftGraphQueryConverter
 {
     static PropertyInfo piEmailAddress = ReflectionTools.GetPropertyInfo((RecipientEmbedded re) => re.EmailAddress);
     static PropertyInfo piName = ReflectionTools.GetPropertyInfo((RecipientEmbedded re) => re.Name);
-
-    static Func<QueryToken, string?>? ExtensionPoint;
 
     public override string ToGraphField(QueryToken token, GraphFieldUsage usage)
     {

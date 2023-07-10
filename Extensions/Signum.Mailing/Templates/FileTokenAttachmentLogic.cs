@@ -9,14 +9,7 @@ public static class FileTokenAttachmentLogic
     {
         sb.Settings.AssertImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(FileTokenAttachmentEntity));
 
-        sb.Include<FileTokenAttachmentEntity>()
-            .WithQuery(() => s => new
-            {
-                Entity = s,
-                s.Id,
-                s.FileName,
-                s.ContentId
-            });
+        sb.Include<FileTokenAttachmentEntity>();
 
         Validator.PropertyValidator((FileTokenAttachmentEntity e) => e.FileName).StaticPropertyValidation = FileTokenAttachmentFileName_StaticPropertyValidation;
 

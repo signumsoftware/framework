@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.IO;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Entities.Validation;
 
@@ -759,12 +760,11 @@ public class YearGreaterThanValidatorAttribute : ValidatorAttribute
 
 
         if (dateTime.Year < MinYear)
-            return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThan.NiceToString(), MinYear);
-
+            return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThanOrEqualTo.NiceToString(), MinYear);
         return null;
     }
 
-    public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
+    public override string HelpMessage => ValidationMessage.Be0.NiceToString(ComparisonType.GreaterThanOrEqualTo.NiceToString().ToLower() + " " + MinYear);
 }
 
 
