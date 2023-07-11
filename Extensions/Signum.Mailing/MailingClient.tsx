@@ -27,7 +27,7 @@ import MailingMenu from "./MailingMenu";
 import { Dropdown } from 'react-bootstrap';
 import "./Mailing.css";
 import { SearchControlLoaded } from '@framework/Search';
-import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn } from './Signum.Mailing.Templates';
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn, FileTokenAttachmentEntity, ImageAttachmentEntity } from './Signum.Mailing.Templates';
 import { CultureInfoEntity } from '@framework/Signum.Basics';
 
 
@@ -57,6 +57,8 @@ export function start(options: {
 
   Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => import('./Templates/EmailMessage')));
   Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => import('./Templates/EmailTemplate')));
+  Navigator.addSettings(new EntitySettings(ImageAttachmentEntity, e => import('./Templates/ImageAttachment')));
+  Navigator.addSettings(new EntitySettings(FileTokenAttachmentEntity, e => import('./Templates/FileTokenAttachment')));
   Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => import('./Templates/EmailMasterTemplate')));
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));

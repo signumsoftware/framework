@@ -58,10 +58,14 @@ export interface RemoteEmailMessageModel extends Entities.ModelEntity {
   receivedDateTime: string /*DateTimeOffset*/ | null;
   sentDateTime: string /*DateTimeOffset*/ | null;
   webLink: string | null;
+  extension0: string | null;
+  extension1: string | null;
+  extension2: string | null;
+  extension3: string | null;
 }
 
 export module RemoteEmailMessagePermission {
-  export const ViewRemoveEmailMessagesFromOthers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers");
+  export const ViewEmailMessagesFromOtherUsers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers");
 }
 
 export module RemoteEmailMessageQuery {

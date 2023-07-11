@@ -1823,7 +1823,7 @@ const HIDDEN = "__";
 
 export module Decoder {
 
-  export const decodeModel: { [typeName: string]: (string: string) => ModelEntity | null } = {};
+  export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
 
   interface FilterPart {
@@ -1984,6 +1984,7 @@ export interface QuerySettings {
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  markRowsColumn?: string;
 }
 
 

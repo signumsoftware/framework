@@ -93,6 +93,9 @@ public static class EmailTemplateLogic
                     t.Model,
                 });
 
+
+                
+
             EmailTemplatesLazy = sb.GlobalLazy(() =>
             Database.Query<EmailTemplateEntity>().ToDictionary(et => et.ToLite())
             , new InvalidateWith(typeof(EmailTemplateEntity)));

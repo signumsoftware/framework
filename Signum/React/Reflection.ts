@@ -1837,7 +1837,7 @@ export class PropertyRoute {
     const type = fullPropertyRoute.after("(").before(")");
     let propertyString = fullPropertyRoute.after(")");
     if (propertyString.startsWith("."))
-      propertyString = propertyString.substr(1);
+      propertyString = propertyString.substring(1);
     return PropertyRoute.root(type).addMembers(propertyString);
   }
 
@@ -1849,7 +1849,7 @@ export class PropertyRoute {
     const type = fullPropertyRoute.after("(").before(")");
     let propertyString = fullPropertyRoute.after(")");
     if (propertyString.startsWith("."))
-      propertyString = propertyString.substr(1);
+      propertyString = propertyString.substring(1);
 
     var ti = tryGetTypeInfo(type);
     if (ti == null)

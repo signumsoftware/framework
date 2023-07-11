@@ -22,12 +22,16 @@ public class MicrosoftGraphQueryConverter
     {
         var field = token.Follow(a => a.Parent).Reverse().ToString(a => a.Key.FirstLower(), "/");
 
+        if (usage == GraphFieldUsage.Select && field.StartsWith("onPremisesExtensionAttributes/"))
+            return "onPremisesExtensionAttributes";
+
         return field;
     }
 
     public virtual string ToStringValue(object? value)
     {
-        return value is string str ? $"'{str}'" :
+        return value is null ? "null" :
+            value is string str ? $"'{str}'" :
             value is DateOnly date ? $"{date.ToIsoString()}" :
             value is DateTime dt ? $"{dt.ToIsoString()}" :
             value is DateTimeOffset dto ? $"{dto.DateTime.ToIsoString()}" :
@@ -45,26 +49,25 @@ public class MicrosoftGraphQueryConverter
     {
         if (f is FilterCondition fc)
         {
-            return fc.Operation switch
+
+            if (fc.Operation == FilterOperation.Contains)
+                return null;
+
+            var field = ToGraphField(fc.Token, GraphFieldUsage.Filter);
+
+            switch (fc.Operation)
             {
-                FilterOperation.EqualTo => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(fc.Value),
-                FilterOperation.DistinctTo => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " ne " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThan => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " gt " + ToStringValue(fc.Value),
-                FilterOperation.GreaterThanOrEqual => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " ge " + ToStringValue(fc.Value),
-                FilterOperation.LessThan => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " lt " + ToStringValue(fc.Value),
-                FilterOperation.LessThanOrEqual => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " le " + ToStringValue(fc.Value),
-                FilterOperation.Contains => null,
-                FilterOperation.NotContains => "NOT (" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + ":" + ToStringValue(fc.Value) + ")",
-                FilterOperation.StartsWith => "startswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.EndsWith => "endswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotStartsWith => "not startswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.NotEndsWith => "not endswith(" + ToGraphField(fc.Token, GraphFieldUsage.Filter) + "," + ToStringValue(fc.Value) + ")",
-                FilterOperation.IsIn => "(" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(a), " OR ") + ")",
-                FilterOperation.IsNotIn => "not (" + ((object[])fc.Value!).ToString(a => ToGraphField(fc.Token, GraphFieldUsage.Filter) + " eq " + ToStringValue(a), " OR ") + ")",
-                FilterOperation.Like or
-                FilterOperation.NotLike or
-                _ => throw new InvalidOperationException(fc.Operation + " is not implemented in Microsoft Graph API")
-            };
+                case FilterOperation.IsIn: return "(" + ((object[])fc.Value!).ToString(a => field + " eq " + ToStringValue(a), " OR ") + ")";
+                case FilterOperation.IsNotIn: return "not (" + ((object[])fc.Value!).ToString(a => field + " eq " + ToStringValue(a), " OR ") + ")";
+                case FilterOperation.Like:
+                case FilterOperation.NotLike:
+                     throw new InvalidOperationException(fc.Operation + " is not implemented in Microsoft Graph API");
+                default: break;
+            }
+
+            var value = ToStringValue(fc.Value);
+
+            return BuildCondition(field, fc.Operation, value);
         }
         else if (f is FilterGroup fg)
         {
@@ -72,6 +75,26 @@ public class MicrosoftGraphQueryConverter
         }
         else
             throw new UnexpectedValueException(f);
+    }
+
+    public virtual string? BuildCondition(string field, FilterOperation operation, string value)
+    {
+        return operation switch
+        {
+            FilterOperation.EqualTo => field + " eq " + value,
+            FilterOperation.DistinctTo => field + " ne " + value,
+            FilterOperation.GreaterThan => field + " gt " + value,
+            FilterOperation.GreaterThanOrEqual => field + " ge " + value,
+            FilterOperation.LessThan => field + " lt " + value,
+            FilterOperation.LessThanOrEqual => field + " le " + value,
+            FilterOperation.Contains => null,
+            FilterOperation.NotContains => "NOT (" + field + ":" + value + ")",
+            FilterOperation.StartsWith => "startswith(" + field + "," + value + ")",
+            FilterOperation.EndsWith => "endswith(" + field + "," + value + ")",
+            FilterOperation.NotStartsWith => "not startswith(" + field + "," + value + ")",
+            FilterOperation.NotEndsWith => "not endswith(" + field + "," + value + ")",
+            _ => throw new UnexpectedValueException(operation)
+        };
     }
 
     public virtual string? GetSearch(List<Filter> filters)
