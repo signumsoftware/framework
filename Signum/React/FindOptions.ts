@@ -95,6 +95,7 @@ export interface PinnedFilter {
   label?: string | (() => string);
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }
@@ -127,6 +128,7 @@ export interface PinnedFilterParsed {
   label?: string;
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }

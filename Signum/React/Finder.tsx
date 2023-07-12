@@ -1728,7 +1728,7 @@ export module Encoder {
       if (fo.pinned) {
         var p = fo.pinned;
         query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
-          "~" + (p.column == null ? "" : p.column) +
+          "~" + (p.column == null ? "" : p.column) + (p.colSpan == null ? "" : (":" + p.colSpan)) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
           "~" + (p.splitValue ? 1 : 0);
@@ -1833,9 +1833,11 @@ export module Decoder {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
+      var col = parts[1];
       return ({
         label: unscapeTildes(parts[0]),
-        column: parts[1].length ? parseInt(parts[1]) : undefined,
+        column: col.length ? (col.contains(":") ? parseInt(col.before(":")) : parseInt(col)) : undefined,
+        colSpan: col.length && col.contains(":") ? parseInt(col.after(":")) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
         active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
         splitValue: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
