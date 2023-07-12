@@ -254,6 +254,12 @@
     <Member Name="InsertMessageContent" Description="Inhalt der Nachricht einfügen" />
     <Member Name="Language" Description="Sprache" />
   </Type>
+  <Type Name="FileTokenAttachmentEntity" Description="File-Token-Anhang" PluralDescription="Datei-Token-Anhänge" Gender="m">
+    <Member Name="ContentId" Description="Inhalts-ID" />
+    <Member Name="FileName" Description="Dateiname" />
+    <Member Name="FileToken" Description="Datei-Token" />
+    <Member Name="Type" Description="Typ" />
+  </Type>
   <Type Name="ImageAttachmentEntity" Description="Bild-Anhang" PluralDescription="Bild-Anhänge" Gender="m">
     <Member Name="ContentId" Description="Content-id" />
     <Member Name="File" Description="Datei" />

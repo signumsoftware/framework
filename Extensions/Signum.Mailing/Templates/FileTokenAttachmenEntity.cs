@@ -27,7 +27,7 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
     }
 
     [StringLengthValidator(Min = 1, Max = 300)]
-    public string ContentId { get; set; }
+    public string? ContentId { get; set; }
 
     public EmailAttachmentType Type { get; set; }
 
@@ -41,7 +41,7 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
     {
         return new XElement("FileTokenAttachment",
             FileName == null ? null : new XAttribute(nameof(FileName), FileName),
-            new XAttribute(nameof(ContentId), ContentId),
+            ContentId == null ? null : new XAttribute(nameof(ContentId), ContentId),
             new XAttribute(nameof(Type), Type),
             new XAttribute(nameof(FileToken), FileToken.Token.FullKey())
         );
@@ -60,7 +60,7 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
     public void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset)
     {
         FileName = element.Attribute(nameof(FileName))?.Value;
-        ContentId = element.Attribute(nameof(ContentId))!.Value;
+        ContentId = element.Attribute(nameof(ContentId))?.Value;
         Type = element.Attribute(nameof(Type))!.Value.ToEnum<EmailAttachmentType>();
         FileToken = element.Attribute(nameof(FileToken))?.Let(t => new QueryTokenEmbedded(t.Value))!;
     }
