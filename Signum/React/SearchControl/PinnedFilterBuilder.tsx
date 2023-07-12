@@ -18,7 +18,6 @@ interface PinnedFilterBuilderProps {
   onSearch?: () => void;
   showSearchButton?: boolean;
   extraSmall?: boolean;
-  colClassName?: string;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
@@ -29,18 +28,53 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   if (allPinned.length == 0)
     return null;
 
+  function getColSpan(fo: FilterOptionParsed) {
+    if (fo.pinned!.colSpan == null || fo.pinned!.colSpan < 0)
+      return 1;
+
+    return fo.pinned!.colSpan;
+  }
+
+  var maxColumns = Math.max(allPinned.max(a => (a.pinned!.column ?? 0) + getColSpan(a))!, 4);
+  var maxRows = allPinned.max(a => (a.pinned!.row ?? 0) + 1 )!;
+
   return (
-    <div onKeyUp={handleFiltersKeyUp }>
-      <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
+    <div onKeyUp={handleFiltersKeyUp}>
+      <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
         {
-          allPinned
-            .groupBy(fo => (fo.pinned!.column ?? 0).toString())
-            .orderBy(gr => parseInt(gr.key))
-            .map(gr => <div key={gr.key} className={p.colClassName ?? (gr.elements.length > 4 ? "col-sm-2" : "col-sm-3")}>
-              {gr.elements.orderBy(a => a.pinned!.row ?? 0).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
-            </div>)
+          Array.range(0, maxRows).map(r => {
+            var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
+            var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
+              .flatMap(a => Array.range(0, a.pinned!.colSpan!).map(i => (a.pinned!.column ?? 0) + i + 1))
+              .distinctBy(a => a.toString());
+            return (
+              <div className="row">
+                {Array.range(0, maxColumns).map(c => {
+                  var cellPinned = rowPinned.filter(a => (a.pinned!.column ?? 0) == c);
+                  if (hiddenColumns.contains(c) && cellPinned.length == 0)
+                    return null;
+
+                  var colSpan = cellPinned.max(a => getColSpan(a)) ?? 1;
+
+                  var bsBase = maxColumns == 4 ? 3 :
+                    maxColumns == 6 ? 2 :
+                      maxColumns == 12 ? 1 : null;
+
+                  var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
+                    || hiddenColumns.contains(c);
+
+                  return <div
+                    className={classes(bsBase == null ? "col-sm" : "col-sm-" + (bsBase * colSpan), error && "bg-danger")}
+                    style={{ flexGrow: bsBase != null ? undefined : colSpan }}>
+                    {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+                  </div>;
+                })}
+              </div>
+            );
+          })
         }
       </div>
+
       {p.showSearchButton &&
         <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
           <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}

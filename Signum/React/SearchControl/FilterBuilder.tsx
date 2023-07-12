@@ -133,6 +133,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
               {showDashboardBehaviour && <th></th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Label.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Column.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.ColSpan.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Row.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.IsActive.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Split.niceToString()}</th>}
@@ -674,11 +675,15 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(pinned, _ => _.column), SearchMessage.Column.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.column), SearchMessage.Column.niceToString(), 0)}
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(pinned, _ => _.row), SearchMessage.Row.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.colSpan), SearchMessage.ColSpan.niceToString(), 1)}
+      </td>
+
+      <td className="sf-pinned-filter-cell">
+        {numericTextBox(Binding.create(pinned, _ => _.row), SearchMessage.Row.niceToString(), 0)}
       </td>
 
       <td className="sf-pinned-filter-cell">
@@ -700,14 +705,17 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     </>
   );
 
-  function numericTextBox(binding: Binding<number | undefined>, title: string) {
+  function numericTextBox(binding: Binding<number | undefined>, title: string, placeholder: number) {
 
     var val = binding.getValue();
     var numberFormat = toNumberFormat("0");
 
     return (
-      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val} format={numberFormat} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
-        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "60px" } }} />
+      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val}
+        format={numberFormat}
+        
+        onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
+        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder, title: title, style: { width: "60px" } }} />
     );
   }
 
