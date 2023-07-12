@@ -2074,7 +2074,7 @@ internal class QueryBinder : ExpressionVisitor
                                     {
                                         "RowId" => mle.RowId.UnNullify(),
                                         "Parent" => mle.Parent,
-                                        "RowOrder" => mle.Order.ThrowIfNull(() => "{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
+                                        "RowOrder" => mle.Order ?? throw new InvalidOperationException("{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
                                         "Element" => mle.Element,
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };
@@ -2606,7 +2606,7 @@ internal class QueryBinder : ExpressionVisitor
         {
             var vn = eee.ViewTable!;
 
-            Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)).ThrowIfNull(() => $"{vn.Name} has no primary name");
+            Expression id = vn.GetIdExpression(aliasGenerator.Table(vn.Name)) ?? throw new InvalidOperationException($"{vn.Name} has no primary name");
 
             commands.Add(new DeleteExpression(vn, false, pr.Select, SmartEqualizer.EqualNullable(id, eee.GetViewId()), returnRowCount: true, alias: null));
         }
@@ -2690,7 +2690,7 @@ internal class QueryBinder : ExpressionVisitor
         }
         else if (entity is EmbeddedEntityExpression eee)
         {
-            Expression id = eee.ViewTable!.GetIdExpression(aliasGenerator.Table(eee.ViewTable!.GetName(isHistory))).ThrowIfNull(() => $"{eee.ViewTable} has not primary key");
+            Expression id = eee.ViewTable!.GetIdExpression(aliasGenerator.Table(eee.ViewTable!.GetName(isHistory))) ?? throw new InvalidOperationException($"{eee.ViewTable} has not primary key");
 
             condition = SmartEqualizer.EqualNullable(id, eee.GetViewId());
             table = eee.ViewTable!;

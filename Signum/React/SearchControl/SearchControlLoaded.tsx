@@ -451,7 +451,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleFiltersChanged = (avoidSearch?: boolean) => {
 
-    if (this.isManualRefreshOrAllPagination() || avoidSearch)
+    //if (this.isManualRefreshOrAllPagination() || avoidSearch)
       this.forceUpdate();
 
     if (this.props.onFiltersChanged)
@@ -974,8 +974,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var showFilter = await rule.execute(token, value, this);
 
-    if (!this.state.showFilters && showFilter)
+    if (!this.state.showFilters && showFilter) {
       this.setState({ showFilters: true });
+      if (rt && cm.rowIndex != null)
+        this.doSearchPage1();
+    }
     else {
       this.doSearchPage1();
     }

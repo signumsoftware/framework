@@ -145,12 +145,13 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
 }) {
 
   const bandwith = x.bandwidth();
-  var orderedKeys = keyValues.orderBy(keyColumn.getKey);
+  var stableKeys = keyValues.orderBy(keyColumn.getKey);
+  var keyInOrder = keyValues.orderBy(v => x(keyColumn.getKey(v)));
   return (
     <>
       {
         showLines && <g className="x-key-line-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.start('content'))}>
-          {orderedKeys.map(t => <line key={keyColumn.getKey(t)} className="x-key-line-group sf-transition"
+          {stableKeys.map(t => <line key={keyColumn.getKey(t)} className="x-key-line-group sf-transition"
             opacity={isActive?.(t) == false ? 0.5 : undefined}
             transform={translate(x(keyColumn.getKey(t))!, 0)}
             y1={yRule.size('content')}
@@ -159,21 +160,21 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
       }
 
       <g className="x-key-tick-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.start('ticks'))}>
-        {orderedKeys.map((t, i) => <line key={keyColumn.getKey(t)} className="x-key-tick sf-transition"
+        {stableKeys.map((t) => <line key={keyColumn.getKey(t)} className="x-key-tick sf-transition"
           opacity={isActive?.(t) == false ? 0.5 : undefined}
           transform={translate(x(keyColumn.getKey(t))!, 0)}
-          y2={(i % 2) * yRule.size('labels') / 2}
+          y2={(keyInOrder.indexOf(t) % 2) * yRule.size('labels') / 2}
           stroke="Black" />)}
       </g>
       {
         (bandwith * 2) > 60 &&
         <g className="x-key-label-group" transform={translate(xRule.start('content') + (bandwith / 2), yRule.middle('ticks'))}>
-            {orderedKeys.map((t, i) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={bandwith * 2} className="x-key-label sf-transition"
+            {stableKeys.map((t) => <TextEllipsis key={keyColumn.getKey(t)} maxWidth={bandwith * 2} className="x-key-label sf-transition"
             onClick={e => onDrillDown?.(t, e)}
             opacity={isActive?.(t) == false ? 0.5 : undefined}
             style={{ fontWeight: isActive?.(t) == true ? "bold" : undefined, cursor: onDrillDown ? "pointer" : undefined }}
             transform={translate(x(keyColumn.getKey(t))!, 0)}
-            y={yRule.size('labels') / 4 + (i % 2) * yRule.size('labels') / 2}
+              y={yRule.size('labels') / 4 + (keyInOrder.indexOf(t) % 2) * yRule.size('labels') / 2}
             dominantBaseline="middle"
             textAnchor="middle">
             {keyColumn.getNiceName(t, x.bandwidth())}

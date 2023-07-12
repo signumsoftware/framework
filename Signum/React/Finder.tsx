@@ -64,12 +64,25 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter(): FilterGroupOption;
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption;
+  export function pinnedSearchFilter<T extends Entity>(type?: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+  if (type == null) {
+    return {
+      groupOperation: "Or",
+      pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
+      filters: [
+        { token: "Entity.Id", operation: "EqualTo" },
+        { token: "Entity.ToString", operation: "Contains" },
+      ]
+    };
+  }
+
   return {
     groupOperation: "Or",
     pinned: { splitValue: true },
     filters: tokens.map(t => {
-      var res = t(type.token());
+      var res = t(type!.token());
 
       if (res instanceof QueryTokenString)
         return { token: res, operation: "Contains" } as FilterConditionOption;
