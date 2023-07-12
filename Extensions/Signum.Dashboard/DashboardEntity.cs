@@ -290,7 +290,19 @@ public enum DashboardMessage
     [Description("The User Query '{0}' has no column with summary header")]
     TheUserQuery0HasNoColumnWithSummaryHeader,
 
-    Edit
+    Edit,
+
+
+    [Description("Click in one chart to filter in the others")]
+    CLickInOneChartToFilterInTheOthers,
+
+
+    [Description("[Ctrl] + Click to filter by multiple elements")]
+    CtrlClickToFilterByMultipleElements,
+
+
+    [Description("[Alt] + Click to open results in a modal window")]
+    AltClickToOpenResultsInAModalWindow,
 }
 
 public enum DashboardEmbedededInEntity
