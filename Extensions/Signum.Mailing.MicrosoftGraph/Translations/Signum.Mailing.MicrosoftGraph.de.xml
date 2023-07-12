@@ -50,7 +50,7 @@
     <Member Name="WebLink" Description="Weblink" />
   </Type>
   <Type Name="RemoteEmailMessagePermission">
-    <Member Name="ViewRemoveEmailMessagesFromOthers" Description="Anzeigen von E-Mail-Nachrichten von anderen" />
+    <Member Name="ViewEmailMessagesFromOtherUsers" Description="E-Mail-Nachrichten von anderen Benutzern anzeigen" />
   </Type>
   <Type Name="RemoteEmailMessageQuery">
     <Member Name="RemoteEmailMessages" Description="Remote-E-Mail-Nachrichten" />
