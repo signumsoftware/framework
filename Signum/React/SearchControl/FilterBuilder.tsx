@@ -108,7 +108,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     <fieldset className="form-xs">
       {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3 border-bottom">
         <h4 className="lead">Preview</h4>
-        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} />
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} showGrid={true} />
       </div>
       }
       {p.title && <legend>{p.title}</legend>}
@@ -715,7 +715,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
         format={numberFormat}
         
         onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
-        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder, title: title, style: { width: "60px" } }} />
+        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder.toString(), title: title, style: { width: "60px" } }} />
     );
   }
 

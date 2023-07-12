@@ -487,6 +487,7 @@
     <Member Name="AddValue" Description="Wert hinzufügen" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
+    <Member Name="ColSpan" Description="ColSpan" />
     <Member Name="Column" Description="Spalte" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
@@ -547,7 +548,6 @@
     <Member Name="Split" Description="Teilen" />
     <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
-    <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />

@@ -10,6 +10,7 @@ import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { renderFilterValue } from '../Finder'
+import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -18,6 +19,7 @@ interface PinnedFilterBuilderProps {
   onSearch?: () => void;
   showSearchButton?: boolean;
   extraSmall?: boolean;
+  showGrid?: boolean;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
@@ -35,12 +37,29 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
     return fo.pinned!.colSpan;
   }
 
-  var maxColumns = Math.max(allPinned.max(a => (a.pinned!.column ?? 0) + getColSpan(a))!, 4);
-  var maxRows = allPinned.max(a => (a.pinned!.row ?? 0) + 1 )!;
+  var maxColumns = allPinned.max(a => (a.pinned!.column ?? 0) + getColSpan(a))!;
+  var maxRows = Math.max(allPinned.max(a => (a.pinned!.row ?? 0) + 1 )!, 1);
+
+  maxColumns =
+    maxColumns <= 4 ? 4 :
+    maxColumns <= 6 ? 6 :
+      12;
+
+  var bsBase =
+    maxColumns == 4 ? 3 :
+    maxColumns == 6 ? 2 :
+      1;
 
   return (
     <div onKeyUp={handleFiltersKeyUp}>
       <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
+        {
+          p.showGrid && <div className="row">
+            {Array.range(0, maxColumns).map(a => <div className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
+              <div className="bg-light px-2"> Col {a}</div>
+            </div>)}
+          </div>
+        }
         {
           Array.range(0, maxRows).map(r => {
             var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
@@ -48,7 +67,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
               .flatMap(a => Array.range(0, a.pinned!.colSpan!).map(i => (a.pinned!.column ?? 0) + i + 1))
               .distinctBy(a => a.toString());
             return (
-              <div className="row">
+              <div className={classes("row", p.showGrid  && "py-2")}>
                 {Array.range(0, maxColumns).map(c => {
                   var cellPinned = rowPinned.filter(a => (a.pinned!.column ?? 0) == c);
                   if (hiddenColumns.contains(c) && cellPinned.length == 0)
@@ -56,18 +75,16 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
                   var colSpan = cellPinned.max(a => getColSpan(a)) ?? 1;
 
-                  var bsBase = maxColumns == 4 ? 3 :
-                    maxColumns == 6 ? 2 :
-                      maxColumns == 12 ? 1 : null;
 
                   var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
                     || hiddenColumns.contains(c);
 
-                  return <div
-                    className={classes(bsBase == null ? "col-sm" : "col-sm-" + (bsBase * colSpan), error && "bg-danger")}
-                    style={{ flexGrow: bsBase != null ? undefined : colSpan }}>
-                    {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
-                  </div>;
+                  return (<div className={classes("col-sm-" + (bsBase * colSpan), error && "bg-danger")}>
+                    <div className={p.showGrid ? "bg-light" : undefined}>
+                      {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+                    </div>
+                  </div>
+                  );
                 })}
               </div>
             );

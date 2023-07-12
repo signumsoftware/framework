@@ -160,6 +160,8 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
 
     public int? Column { get; set; }
 
+    public int? ColSpan { get; set; }
+
     public int? Row { get; set; }
 
     public PinnedFilterActive Active { get; set; }
@@ -170,6 +172,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
     {
         Label = Label,
         Column = Column,
+        ColSpan = ColSpan,
         Row = Row,
         Active = Active,
         SplitValue = SplitValue,
@@ -179,6 +182,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
     {
         Label = p.Attribute("Label")?.Value;
         Column = p.Attribute("Column")?.Value.ToInt();
+        ColSpan = p.Attribute("ColSpan")?.Value.ToInt();
         Row = p.Attribute("Row")?.Value.ToInt();
         Active = ModernizeActive(p.Attribute("Active")?.Value)?.ToEnum<PinnedFilterActive>() ?? PinnedFilterActive.Always;
         SplitValue = p.Attribute("SplitValue")?.Value.ToBool() ?? p.Attribute("SplitText")?.Value.ToBool() ?? false;
@@ -190,6 +194,7 @@ public class PinnedQueryFilterEmbedded : EmbeddedEntity
         return new XElement("Pinned",
             Label.DefaultToNull()?.Let(l => new XAttribute("Label", l))!,
             Column?.Let(l => new XAttribute("Column", l))!,
+            ColSpan?.Let(l => new XAttribute("ColSpan", l))!,
             Row?.Let(l => new XAttribute("Row", l))!,
             Active == PinnedFilterActive.Always ? null! : new XAttribute("Active", Active.ToString())!,
             SplitValue == false ? null! : new XAttribute("SplitValue", SplitValue)
