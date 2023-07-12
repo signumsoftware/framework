@@ -106,7 +106,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
   }
 
   doView(entity: ModifiableEntity | Lite<Entity>) {
-    const pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
+    const pr = this.props.ctx.propertyRoute?.addLambda(a => a[0])!;
     return this.props.onView ?
       this.props.onView(entity, pr) :
       this.defaultView(entity, pr);
@@ -129,7 +129,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
       window.open(toAbsoluteUrl(route));
     }
     else {
-      const pr = ctx.propertyRoute!.addLambda(a => a[0]);
+      const pr = ctx.propertyRoute?.addLambda(a => a[0])!;
 
       const promise = p.onView ?
         p.onView(entity, pr) :
@@ -165,7 +165,7 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     event.preventDefault();
     event.stopPropagation();
-    var pr = this.props.ctx.propertyRoute!.addLambda(a => a[0]);
+    var pr = this.props.ctx.propertyRoute?.addLambda(a => a[0])!;
 
     const promise = this.props.onCreate ? this.props.onCreate(pr) : this.defaultCreate(pr);
 
