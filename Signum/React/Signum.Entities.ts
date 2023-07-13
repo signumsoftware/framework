@@ -603,6 +603,7 @@ export module SearchMessage {
   export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
+  export const ColSpan = new MessageKey("SearchMessage", "ColSpan");
   export const Row = new MessageKey("SearchMessage", "Row");
   export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
   export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");

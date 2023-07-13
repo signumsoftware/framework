@@ -137,6 +137,7 @@ export module Converter {
       return PinnedQueryFilterEmbedded.New({
         label: typeof e.label == "function" ? e.label() : e.label,
         column: e.column,
+        colSpan: e.colSpan,
         row: e.row,
         active: e.active ?? "Always",
         splitValue: e.splitValue ?? false

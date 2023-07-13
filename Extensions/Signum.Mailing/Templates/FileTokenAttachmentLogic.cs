@@ -34,7 +34,7 @@ public static class FileTokenAttachmentLogic
                 return files.Select(f => new EmailAttachmentEmbedded
                 {
                     Type = a.Type,
-                    ContentId = a.ContentId,
+                    ContentId = a.ContentId.DefaultToNull() ??  Guid.NewGuid().ToString(),
                     File = f is FilePathEmbedded fpa ? new FilePathEmbedded(fpa.FileType, fpa).Do(clone => clone.FileName = overridenFileName ?? clone.FileName) :
                     f is FilePathEntity fp ? new FilePathEmbedded(fp.FileType, fp).Do(clone => clone.FileName = overridenFileName ?? clone.FileName) :
                     new FilePathEmbedded(EmailFileType.Attachment, overridenFileName ?? f.FileName, f.BinaryFile) 

@@ -26,7 +26,6 @@
     <Member Name="ConflictMergingTypeConditions" Description="Konflikt durch Verschmelzung von Typbedingungen" />
     <Member Name="Deny" Description="Verweigern" />
     <Member Name="Filter" Description="Filter" />
-
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
@@ -34,6 +33,7 @@
     <Member Name="RepeatedTypeCondition" Description="Wiederholte Typbedingungen" />
     <Member Name="ResetChanges" Description="Zurücksetzen von Änderungen" />
     <Member Name="Role0InheritsFromTrivialMergeRole1" Description="Rolle {0} erbt von der triviale Zusammenführung Rolle {1}" />
+    <Member Name="Role0IsTrivialMerge" Description="Rolle {0} ist triviale Zusammenführung" />
     <Member Name="Save" Description="Speichern" />
     <Member Name="SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime" Description="Wählen Sie mehr als einen aus, um den Zugriff für {0} zu überschreiben, die alle Bedingungen gleichzeitig erfüllen." />
     <Member Name="SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition" Description="Wählen Sie eine Option aus, um den Zugriff für {0} zu überschreiben, die diese Bedingung erfüllen." />
@@ -46,17 +46,16 @@
     <Member Name="Uncheck" Description="Deaktivieren" />
   </Type>
   <Type Name="AuthMessage">
+    <Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
+    <Member Name="Everything" Description="Alles" />
+    <Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
+    <Member Name="MaximumOfThe0" Description="Maximum der {0}" />
+    <Member Name="MinumumOfThe0" Description="Minimum der {0}" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Nicht autorisiert, um die Entität {1} mit der Id {2} zu {0} " />
     <Member Name="NotAuthorizedToRetrieve0" Description="Nicht autorisiert zum Abrufen von '{0}'" />
+    <Member Name="Nothing" Description="Nichts" />
     <Member Name="OnlyActive" Description="Nur aktive" />
-	<Member Name="Role0IsTrivialMerge" Description="Rolle {0} ist eine triviale Zusammenführung" />
-	<Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
-	<Member Name="MaximumOfThe0" Description="Maximum der {0}" />
-	<Member Name="MinumumOfThe0" Description="Minimum der {0}" />
-	<Member Name="Nothing" Description="Nichts" />
-	<Member Name="SameAs0" Description="Wie {0}" />
-	<Member Name="Everything" Description="Alles" />
-	<Member Name="DefaultAuthorization" Description="Standardautorisierung: " />
+    <Member Name="SameAs0" Description="Wie {0}" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth-Miniaturansicht">
     <Member Name="All" Description="Alle" />

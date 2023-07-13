@@ -129,7 +129,7 @@ export const FileTokenAttachmentEntity = new Type<FileTokenAttachmentEntity>("Fi
 export interface FileTokenAttachmentEntity extends Entities.Entity, IAttachmentGeneratorEntity {
   Type: "FileTokenAttachment";
   fileName: string | null;
-  contentId: string;
+  contentId: string | null;
   type: Mailing.EmailAttachmentType;
   fileToken: Queries.QueryTokenEmbedded;
 }
