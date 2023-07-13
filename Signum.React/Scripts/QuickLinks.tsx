@@ -150,7 +150,7 @@ function applyKeyAndOptions(key: string, quickLink?: QuickLink, options?: QuickL
 }
 
 function toManualTokens(qlDic: { [key: string]: QuickLinkGenerator<Entity> }) {
-  return qlDic && Dic.filter(qlDic, (kv) => kv.value.options?.text).map((kv) => ({
+  return qlDic && Dic.filter(qlDic, (kv) => (kv.value.options?.isVisible === undefined || kv.value.options?.isVisible) && kv.value.options?.text).map((kv) => ({
     toStr: kv.value.options!.text!(),
     niceName: kv.value.options!.text!(),
     key: kv.key,
