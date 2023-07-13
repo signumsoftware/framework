@@ -33,6 +33,7 @@ import { SearchControl } from "./Search";
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { clearManualSubTokens } from "./SearchControl/QueryTokenBuilder";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -53,6 +54,7 @@ export function start(options: { routes: JSX.Element[] }) {
   AppContext.clearSettingsActions.push(clearContextualItems);
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
+  AppContext.clearSettingsActions.push(clearManualSubTokens);
   AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
   AppContext.clearSettingsActions.push(resetFormatRules);
   onReloadTypesActions.push(clearQueryDescriptionCache);

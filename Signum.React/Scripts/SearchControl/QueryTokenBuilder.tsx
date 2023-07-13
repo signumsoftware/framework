@@ -127,6 +127,10 @@ interface QueryTokenPartProps{
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
+export function clearManualSubTokens() {
+  Dic.clear(manualSubTokens);
+}
+
 export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
 
 export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
