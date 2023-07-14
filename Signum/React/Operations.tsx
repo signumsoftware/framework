@@ -623,6 +623,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   iconColor?: string;
   isVisible?: boolean;
   inDropdown?: boolean;
+  isDefault?: boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick: (eoc: EntityOperationContext<T>) => void;
   keyboardShortcut?: KeyboardShortcut;
