@@ -976,12 +976,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     if (!this.state.showFilters && showFilter) {
       this.setState({ showFilters: true });
-      if (rt && cm.rowIndex != null)
-        this.doSearchPage1();
     }
-    else {
+
+    if (rt && cm.rowIndex != null)
       this.doSearchPage1();
-    }
 
     this.handleFiltersChanged();
 
