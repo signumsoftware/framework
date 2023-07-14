@@ -12,6 +12,7 @@ import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import * as DashboardClient from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
+import { OverlayTrigger, Popover } from "react-bootstrap";
 
 export default function DashboardPage() {
   const location = useLocation();
@@ -47,7 +48,8 @@ export default function DashboardPage() {
                 DashboardMessage.LasUpdateWasOn0.niceToString(DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toLocaleString(DateTime.DATETIME_MED_WITH_SECONDS))}>
                 <FontAwesomeIcon icon="clock-rotate-left" /> {DateTime.fromISO(dashboardWithQueries.cachedQueries[0].creationDate).toRelative()}
               </span> : null}
-              <Link className="sf-hide " style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}</Link>
+              {dashboard.parts.some(a => a.element.interactionGroup != null) && <HelpIcon />}
+              <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(dashboard)}><FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}</Link>
             </div>
           }
         </div>}
@@ -70,4 +72,26 @@ export default function DashboardPage() {
       {dashboard && (!entityKey || entity) && <DashboardView dashboard={dashboard} cachedQueries={cachedQueries!} entity={entity || undefined} deps={[refreshCounter, entity]} reload={reloadDashboard} />}
     </div>
   );
+}
+
+export function HelpIcon() {
+  const popover = (
+    <Popover id="popover-basic" style={{ "--bs-popover-max-width": "unset" } as React.CSSProperties}>
+      <Popover.Header as="h3">Interactive Dashboard</Popover.Header>
+      <Popover.Body>
+        <ul className="ps-3">
+          <li style={{ whiteSpace: "nowrap" }}>{DashboardMessage.CLickInOneChartToFilterInTheOthers.niceToString()}</li>
+          <li style={{ whiteSpace: "nowrap" }}>{DashboardMessage.CtrlClickToFilterByMultipleElements.niceToString()}</li>
+          <li style={{ whiteSpace: "nowrap" }}>{DashboardMessage.AltClickToOpenResultsInAModalWindow.niceToString()}</li>
+        </ul>
+      </Popover.Body>
+    </Popover>
+  );
+
+  return (
+    <OverlayTrigger trigger="hover" placement="bottom-start" overlay={popover} >
+      <a href="#" className="mx-2"><FontAwesomeIcon icon="gamepad" title="syntax" className="me-1" />Interactive Dashboard</a>
+    </OverlayTrigger>
+  );
+
 }
