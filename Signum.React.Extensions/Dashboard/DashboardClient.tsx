@@ -32,6 +32,7 @@ import type { UserChartPartHandler } from './View/UserChartPart';
 import type { UserQueryPartHandler } from './View/UserQueryPart';
 import { QueryDescription } from '@framework/FindOptions';
 import { Dic } from '../../Signum.React/Scripts/Globals';
+import { UserAssetModel } from '../UserAssets/UserAssetClient';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
@@ -264,16 +265,17 @@ export function start(options: { routes: JSX.Element[] }) {
     return API.forEntityType(entityType)
       .then(das => das.map(d =>
       ({
-        key: liteKey(d),
+        key: liteKey(d.asset),
         generator:
         {
           factory: ctx => new QuickLinks.QuickLinkAction(e => {
-            AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e)
+            AppContext.pushOrOpenInTab(dashboardUrl(d.asset, ctx.lite), e)
           }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
           options:
           {
-            text: () => getToString(d),
+            text: () => getToString(d.asset),
             order: 0,
+            hideInAutos: d.hideQuickLink
           }
         }
       })));
@@ -354,7 +356,7 @@ function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd:
 }
 
 export module API {
-  export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
+  export function forEntityType(type: string): Promise<UserAssetModel<DashboardEntity>[]> {
     return ajaxGet({ url: `~/api/dashboard/forEntityType/${type}` });
   }
 

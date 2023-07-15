@@ -14,6 +14,7 @@ import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../UserAssets/UserAssetClient'
 import { ImportRoute } from "@framework/AsyncImport";
+import { UserAssetModel } from '../../UserAssets/UserAssetClient';
 
 export function start(options: { routes: JSX.Element[] }) {
 
@@ -37,14 +38,15 @@ export function start(options: { routes: JSX.Element[] }) {
     return API.forEntityType(entityType)
       .then(ucs => ucs.map(uc =>
       ({
-        key: liteKey(uc),
+        key: liteKey(uc.asset),
         generator:
         {
           factory: ctx => new QuickLinks.QuickLinkAction(e => {
-            window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.id}/${liteKey(ctx.lite)}`));
+            window.open(AppContext.toAbsoluteUrl(`~/userChart/${uc.asset.id}/${liteKey(ctx.lite)}`));
           }),
           options: {
-            text: () => UserChartEntity.nicePluralName(),
+            text: () => getToString(uc.asset),
+            hideInAutos: uc.hideQuickLink,
             icon: "chart-bar", iconColor: "darkviolet"
           }
         }
@@ -146,7 +148,7 @@ export module Converter {
 
 
 export module API {
-  export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
+  export function forEntityType(type: string): Promise<UserAssetModel<UserChartEntity>[]> {
     return ajaxGet({ url: "~/api/userChart/forEntityType/" + type });
   }
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLite } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption, FilterConditionOption, PinnedFilter, isFilterGroupOption, toPinnedFilterParsed, FindOptions, FindOptionsParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Authorization/AuthClient'
@@ -34,6 +34,11 @@ export function start(options: { routes: JSX.Element[] }) {
 
   AppContext.clearSettingsActions.push(() => started = false);
   started = true;
+}
+
+export interface UserAssetModel<T extends Entity> extends ModelEntity {
+  asset: Lite<T>;
+  hideQuickLink: boolean;
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {

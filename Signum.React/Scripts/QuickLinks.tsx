@@ -119,9 +119,11 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink
   return getCachedOrAdd(ctx.lite.EntityType)
     .then(gs =>
       Dic.map(gs, (k, g) => {
+        if (g.options?.hideInAutos)
+          return;
         const qLink = g.factory(ctx);
         applyKeyAndOptions(k, qLink, g.options);
-
+          
         return qLink;
       }).filter(ql => ql && ql.isVisible).orderBy(ql => ql!.order));
 }
@@ -138,7 +140,9 @@ function getQuickLink(key: string, ctx: QuickLinkContext<Entity>): Promise<Quick
   return getCachedOrAdd(entityType)
     .then(gs => gs && gs[key])
     .then(g => {
-      const qLink = g && g.factory(ctx);
+      if (!g)
+        return
+      const qLink = g.factory(ctx);
       applyKeyAndOptions(key, qLink, g.options);
 
       return qLink;
@@ -344,6 +348,7 @@ export interface QuickLinkOptions {
   key?: string;
   text?: (nothing?: undefined /*TS 4.1 Bug*/) => string; //To delay niceName and avoid exceptions
   isVisible?: boolean;
+  hideInAutos?: boolean;
   order?: number;
   icon?: IconProp;
   iconColor?: string;

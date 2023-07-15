@@ -57,7 +57,7 @@ public static class ChartServer
             if (ep.entity.IsNew || !ChartPermission.ViewCharting.IsAuthorized() || TypeAuthLogic.GetAllowed(typeof(UserChartEntity)).MaxDB() == TypeAllowedBasic.None)
                 return;
 
-            var userCharts = UserChartLogic.GetUserChartsEntity(ep.entity.GetType());
+            var userCharts = UserChartLogic.GetUserCharts(ep.entity.GetType());
             if (userCharts.Any())
                 ep.extension.Add("userCharts", userCharts);
         };

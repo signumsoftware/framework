@@ -30,6 +30,7 @@ import { ChartRequestModel, UserChartEntity } from '../Chart/Signum.Entities.Cha
 import { ChartRow, hasAggregates } from '../Chart/ChartClient';
 import UserQuery from './Templates/UserQuery';
 import { QuickLinkGenerator } from '@framework/QuickLinks';
+import { UserAssetModel } from '../UserAssets/UserAssetClient';
 
 export function start(options: { routes: JSX.Element[] }) {
   UserAssetsClient.start({ routes: options.routes });
@@ -53,17 +54,18 @@ export function start(options: { routes: JSX.Element[] }) {
     return API.forEntityType(entityType)
       .then(uqs => uqs.map(uq =>
       ({
-        key: liteKey(uq),
+        key: liteKey(uq.asset),
         generator:
           {
-            factory: ctx => new QuickLinks.QuickLinkAction(e => {
-              window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
+          factory: ctx => new QuickLinks.QuickLinkAction(e => {
+            window.open(AppContext.toAbsoluteUrl(`~/userQuery/${uq.asset.id}/${liteKey(ctx.lite)}`));
             }),
             options: {
-              text: () => getToString(uq),
+              text: () => getToString(uq.asset),
               icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
+              hideInAutos: uq.hideQuickLink
             }
-          } as QuickLinks.QuickLinkGenerator<Entity>
+          }
       })));
   });
 
@@ -386,7 +388,7 @@ export module Converter {
 }
 
 export module API {
-  export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
+  export function forEntityType(type: string): Promise<UserAssetModel<UserQueryEntity>[]> {
     return ajaxGet({ url: "~/api/userQueries/forEntityType/" + type });
   }
 
