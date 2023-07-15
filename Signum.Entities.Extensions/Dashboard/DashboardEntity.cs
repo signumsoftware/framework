@@ -61,6 +61,8 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     [StringLengthValidator(Max = 200)]
     public string? Key { get; set; }
 
+    public bool HideQuickLink { get; set; }
+
     [AutoExpressionField]
     public bool ContainsContent(IPartEntity content) => 
         As.Expression(() => Parts.Any(p => p.Content.Is(content)));

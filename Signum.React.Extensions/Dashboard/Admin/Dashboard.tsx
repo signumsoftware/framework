@@ -120,30 +120,35 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
   const ctx = p.ctx;
   const ctxBasic = ctx.subCtx({ formGroupStyle: "Basic" });
+  const ctxLabel5 = ctx.subCtx({ labelColumns: 5 });
   return (
     <div>
       <div>
         <div className="row">
+          <div className="col-sm-8">
+            <EntityLine ctx={ctx.subCtx(cp => cp.owner)} create={false} />
+          </div>
           <div className="col-sm-4">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.displayName)}
-              helpText={<ValueLine ctx={ctxBasic.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
-          </div>
-          <div className="col-sm-2">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.dashboardPriority)} />
-          </div>
-          <div className="col-sm-2">
-            <ValueLine ctx={ctxBasic.subCtx(cp => cp.autoRefreshPeriod)} />
+            <ValueLine ctx={ctxLabel5.subCtx(cp => cp.dashboardPriority)} />
           </div>
         </div>
         <div className="row">
-          <div className="col-sm-4">
-            <EntityLine ctx={ctxBasic.subCtx(cp => cp.owner)} create={false} />
+          <div className="col-sm-8">
+            <ValueLine ctx={ctx.subCtx(cp => cp.displayName)}
+              helpText={<ValueLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
           </div>
           <div className="col-sm-4">
-            <EntityLine ctx={ctxBasic.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange} />
+            <ValueLine ctx={ctxLabel5.subCtx(cp => cp.autoRefreshPeriod)} />
           </div>
-          {ctxBasic.value.entityType && <div className="col-sm-4">
-            <ValueLine ctx={ctxBasic.subCtx(f => f.embeddedInEntity)} />
+        </div>
+        <div className="row">
+          <div className="col-sm-8">
+            <EntityLine ctx={ctx.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange}
+              helpText={ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox /> }
+            />
+          </div>
+          {ctx.value.entityType && <div className="col-sm-4">
+            <ValueLine ctx={ctxLabel5.subCtx(f => f.embeddedInEntity)} />
           </div>}
         </div>
       </div>
