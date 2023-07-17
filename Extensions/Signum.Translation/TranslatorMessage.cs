@@ -74,6 +74,14 @@ public enum TranslationMessage
 
     DownloadView,
     DownloadSync,
+
+    AutoTranslate,
+
+    [Description("Are you sure to continue auto translation {0} for {1} without revision?")]
+    AreYouSureToContinueAutoTranslation0For1WithoutRevision,
+
+    [Description("Are you sure to continue auto translation all types for {0} without revision?")]
+    AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision,
 }
 
 public enum TranslationJavascriptMessage
