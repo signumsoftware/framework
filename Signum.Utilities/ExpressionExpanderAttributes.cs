@@ -52,6 +52,12 @@ public class AvoidEagerEvaluationAttribute : Attribute
 
 }
 
+[System.AttributeUsage(AttributeTargets.Constructor, Inherited = false, AllowMultiple = true)]
+public class NewCanBeConstantAttribute : Attribute
+{
+
+}
+
 //The member is polymorphic and should be expanded in a latter stage
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property)]
 public sealed class PolymorphicExpansionAttribute : Attribute
