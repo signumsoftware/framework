@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
-import { API, getOperationInfo } from '../Operations';
+import { API } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
 import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
-import { getTypeInfo, OperationInfo } from '../Reflection';
+import { getOperationInfo, getTypeInfo, OperationInfo } from '../Reflection';
 import { useState } from 'react';
 import { softCast } from '../Globals';
 import { jsonObjectStream } from './jsonObjectStream';

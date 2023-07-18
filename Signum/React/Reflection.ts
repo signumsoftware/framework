@@ -5,7 +5,7 @@ import { ajaxGet, ThrowErrorFilter } from './Services';
 import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
-import { OperationSymbol } from './Signum.Operations';
+import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -552,6 +552,35 @@ export function tryGetTypeInfos(typeReference: TypeReference | string): (TypeInf
     return [];
 
   return name.split(", ").map(tryGetTypeInfo);
+}
+
+
+export function tryGetOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo | undefined {
+  let operationKey = typeof operation == "string" ? operation : operation.key;
+
+  let ti = tryGetTypeInfo(type);
+  if (ti == null)
+    return undefined;
+
+  let oi = ti.operations && ti.operations[operationKey];
+
+  if (oi == undefined)
+    return undefined;
+
+  return oi;
+}
+
+export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
+  let operationKey = typeof operation == "string" ? operation : operation.key;
+
+  let ti = getTypeInfo(type);
+
+  let oi = ti?.operations && ti.operations[operationKey];
+
+  if (oi == undefined)
+    throw new Error(`Operation ${operationKey} not defined for ${ti.name}`);
+
+  return oi;
 }
 
 export function getQueryNiceName(queryName: PseudoType | QueryKey): string {
@@ -1296,6 +1325,32 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
 
     return result;
   }
+
+  tryOperationInfo(op: ExecuteSymbol<T & Entity>
+    | DeleteSymbol<T & Entity>
+    | ConstructSymbol_Simple<T & Entity>
+    | ConstructSymbol_From<any, T & Entity>
+    | ConstructSymbol_FromMany<any, T & Entity>): OperationInfo | undefined {
+
+    const ti = this.tryTypeInfo();
+
+    if (!ti)
+      return undefined;
+
+    return tryGetOperationInfo(op, ti);
+  }
+
+  operationInfo(op: ExecuteSymbol<T & Entity>
+    | DeleteSymbol<T & Entity>
+    | ConstructSymbol_Simple<T & Entity>
+    | ConstructSymbol_From<any, T & Entity>
+    | ConstructSymbol_FromMany<any, T & Entity>): OperationInfo {
+
+    const ti = this.typeInfo();
+
+    return getOperationInfo(op, ti);
+  }
+
 
   memberInfo(lambdaToProperty: (v: T) => any): MemberInfo {
     var pr = this.propertyRouteAssert(lambdaToProperty);

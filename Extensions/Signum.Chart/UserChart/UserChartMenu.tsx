@@ -12,7 +12,6 @@ import * as UserChartClient from './UserChartClient'
 import { ChartRequestViewHandle } from '../Templates/ChartRequestView'
 import * as UserAssetClient from '../../Signum.UserAssets/UserAssetClient'
 import { useForceUpdate } from '@framework/Hooks'
-import { tryGetOperationInfo } from '@framework/Operations'
 import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyCodes } from '@framework/Components'
 import { UserQueryMerger } from '../../Signum.UserQueries/UserQueryMenu'
@@ -161,7 +160,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
   const crView = p.chartRequestView;
   const label = !crView.userChart ? UserChartEntity.nicePluralName() : getToString(crView.userChart)
 
-  var canSave = tryGetOperationInfo(UserChartOperation.Save, UserChartEntity) != null;
+  var canSave = UserChartEntity.tryOperationInfo(UserChartOperation.Save) != null;
 
   return (
     <Dropdown onToggle={() => setIsOpen(!isOpen)} show={isOpen}>
