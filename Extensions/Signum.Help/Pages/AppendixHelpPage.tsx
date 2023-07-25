@@ -11,7 +11,7 @@ import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
-import { getOperationInfo } from '@framework/Operations';
+import { getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
@@ -47,7 +47,7 @@ export default function AppendixHelpHelp() {
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
 
-  const oi = Operations.tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
+  const oi = tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
 
   if (!oi)
     return null;
@@ -65,7 +65,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
-  if (!Operations.tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
+  if (!tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
     return null;
 
   function onClick() {
