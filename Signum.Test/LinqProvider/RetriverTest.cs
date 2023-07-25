@@ -1,4 +1,4 @@
-﻿
+
 namespace Signum.Test.LinqProvider;
 
 /// <summary>
@@ -70,7 +70,7 @@ public class RetrieverTest
             a is Entity && (((Entity)a).IdOrNull == null || ((Entity)a).IsNew));
 
         if (problematic.Any())
-            Assert.True(false, "Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));
+            Assert.Fail("Some non-retrived elements: {0}".FormatWith(problematic.ToString(", ")));
     }
 
 
