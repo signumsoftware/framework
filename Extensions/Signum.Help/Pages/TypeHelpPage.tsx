@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Help';
-import { getTypeInfo, GraphExplorer, getQueryNiceName } from '@framework/Reflection';
+import { getTypeInfo, GraphExplorer, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
 import { EditableComponent, MarkdownText } from './EditableText';
@@ -134,7 +134,7 @@ function OperationLine({ ctx, cleanName, onChange }: { ctx: TypeContext<Operatio
   return (
     <>
       <dt className="col-sm-3 shortcut-container text-end" id={HelpClient.Urls.idOperation(ctx.value.operation)}>
-        {Operations.getOperationInfo(ctx.value.operation, cleanName).niceName}<br />
+        {getOperationInfo(ctx.value.operation, cleanName).niceName}<br />
         <code className='shortcut'>[o:{cleanName}.{ctx.value.operation.key}]</code>
       </dt>
       <dd className="col-sm-9">
@@ -188,7 +188,7 @@ function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryC
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSuccess: () => void }) {
 
-  if (!Operations.tryGetOperationInfo(TypeHelpOperation.Save, TypeHelpEntity))
+  if (!tryGetOperationInfo(TypeHelpOperation.Save, TypeHelpEntity))
     return null;
 
   function onClick() {
@@ -199,5 +199,5 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       }));
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{Operations.getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
