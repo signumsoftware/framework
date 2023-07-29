@@ -11,7 +11,6 @@ import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
-import { getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
