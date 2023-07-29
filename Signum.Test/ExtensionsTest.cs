@@ -94,7 +94,7 @@ public class ExtensionsTest
             return;
 
         if (b == null || a == null || Math.Abs(a.Value - b.Value) > epsilon)
-            Assert.True(false, "Values {0} and {1} are too different".FormatWith(a, b));
+            Assert.Fail("Values {0} and {1} are too different".FormatWith(a, b));
     }
 
     [Fact]
