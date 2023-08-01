@@ -47,13 +47,25 @@ export function start(options: {
     name: "RemoteEmailFolder",
     applicable: (qt: QueryToken, value: unknown, sc: SearchControlLoaded) => qt.filterType == "Model" && qt.type.name == RemoteEmailFolderModel.typeName,
     execute: async (qt: QueryToken, value: unknown, sc: SearchControlLoaded) => {
-      debugger;
       return sc.addQuickFilter(qt, "EqualTo", value);
     }
   });
 
-  Finder.Encoder.encodeModel[RemoteEmailFolderModel.typeName] = (model: RemoteEmailFolderModel) => model.folderId;
-  Finder.Decoder.decodeModel[RemoteEmailFolderModel.typeName] = (folderId: string | null) => !folderId ? null : RemoteEmailFolderModel.New({ folderId: folderId, displayName: folderId });  
+  Finder.Encoder.encodeModel[RemoteEmailFolderModel.typeName] = (model: RemoteEmailFolderModel) => {
+    return model.folderId;
+  };
+  Finder.Decoder.decodeModel[RemoteEmailFolderModel.typeName] = (folderId: string | RemoteEmailFolderModel | null) => {
+    if (!folderId)
+      return null;
+
+    if (typeof folderId == "string")
+      return RemoteEmailFolderModel.New({ folderId: folderId, displayName: folderId });
+
+    if (RemoteEmailFolderModel.isInstance(folderId))
+      return folderId;
+
+    throw new Error("Unexpected " + folderId); 
+  };  
 
   Finder.filterValueFormatRules.push({
     name: "User",
@@ -69,13 +81,13 @@ export function start(options: {
     applicable: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => isFilterCondition(f) && f.token?.type.name == RemoteEmailFolderModel.typeName ,
     renderValue: (f: FilterOptionParsed, ffc: Finder.FilterFormatterContext) => {
       var user = ffc.filterOptions.firstOrNull(a => isFilterCondition(a) && a.token?.fullKey == "User" && a.operation == "EqualTo");
-      debugger;
       return <FolderLine ctx={ffc.ctx} mandatory={ffc.mandatory} label={ffc.label} user={user?.value as Lite<UserEntity>} onChange={()=> ffc.handleValueChange(f)} />
     }
   });
 
   Finder.addSettings({
     queryName: RemoteEmailMessageQuery.RemoteEmailMessages,
+    markRowsColumn: "Id",
     defaultFilters: [
       { token: "User", value: AppContext.currentUser, pinned: { active: "Always" } },
     ],

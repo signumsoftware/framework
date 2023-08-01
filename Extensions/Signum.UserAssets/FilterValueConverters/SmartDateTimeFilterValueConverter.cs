@@ -246,7 +246,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
     {
         var uType = targetType.UnNullify();
 
-        return uType == typeof(DateTime) || uType == typeof(DateOnly);
+        return uType == typeof(DateTime) || uType == typeof(DateOnly) || uType == typeof(DateTimeOffset);
     }
 
     public Result<string?>? TryGetExpression(object? value, Type targetType)
@@ -260,6 +260,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
         DateTime dateTime = 
             value is string s ? DateTime.ParseExact(s, targetType == typeof(DateTime) ? "o" : "yyyy-MM-dd", CultureInfo.InvariantCulture) :
             value is DateOnly d ? d.ToDateTime(): 
+            value is DateTimeOffset dto ? dto.DateTime :
             value is DateTime dt ? dt : throw new UnexpectedValueException(value);
 
         SmartDateTimeSpan ss = SmartDateTimeSpan.Substract(dateTime, Clock.Now);
@@ -280,7 +281,11 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
             return new Result<object?>.Error(e.ErrorText);
 
         if (res is Result<SmartDateTimeSpan>.Success s)
-            return new Result<object?>.Success(targetType.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDateOnly() : (object)s.Value.ToDateTime());
+            return new Result<object?>.Success(
+                targetType.UnNullify() == typeof(DateOnly) ? (object)s.Value.ToDateTime().ToDateOnly() :
+                targetType.UnNullify() == typeof(DateTimeOffset) ? (object)(DateTimeOffset)s.Value.ToDateTime() :
+                targetType.UnNullify() == typeof(DateTime) ? (object)s.Value.ToDateTime() :
+                throw new UnexpectedValueException(targetType));
 
         throw new UnexpectedValueException(res);
     }
@@ -301,6 +306,7 @@ public class SmartDateTimeFilterValueConverter : IFilterValueConverter
             return new Result<Type>.Success(
                 targetType.UnNullify() == typeof(DateOnly) ? typeof(DateOnly) :
                 targetType.UnNullify() == typeof(DateTime) ? typeof(DateTime) :
+                targetType.UnNullify() == typeof(DateTimeOffset) ? typeof(DateTimeOffset) :
                 throw new UnexpectedValueException(targetType.UnNullify()));
 
         throw new UnexpectedValueException(res);

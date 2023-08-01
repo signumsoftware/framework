@@ -64,12 +64,25 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter(): FilterGroupOption;
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption;
+  export function pinnedSearchFilter<T extends Entity>(type?: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+  if (type == null) {
+    return {
+      groupOperation: "Or",
+      pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
+      filters: [
+        { token: "Entity.Id", operation: "EqualTo" },
+        { token: "Entity.ToString", operation: "Contains" },
+      ]
+    };
+  }
+
   return {
     groupOperation: "Or",
     pinned: { splitValue: true },
     filters: tokens.map(t => {
-      var res = t(type.token());
+      var res = t(type!.token());
 
       if (res instanceof QueryTokenString)
         return { token: res, operation: "Contains" } as FilterConditionOption;
@@ -1728,7 +1741,7 @@ export module Encoder {
       if (fo.pinned) {
         var p = fo.pinned;
         query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
-          "~" + (p.column == null ? "" : p.column) +
+          "~" + (p.column == null ? "" : p.column) + (p.colSpan == null ? "" : ("." + p.colSpan)) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
           "~" + (p.splitValue ? 1 : 0);
@@ -1810,7 +1823,7 @@ const HIDDEN = "__";
 
 export module Decoder {
 
-  export const decodeModel: { [typeName: string]: (string: string) => ModelEntity | null } = {};
+  export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
 
   interface FilterPart {
@@ -1833,9 +1846,11 @@ export module Decoder {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
+      var col = parts[1];
       return ({
         label: unscapeTildes(parts[0]),
-        column: parts[1].length ? parseInt(parts[1]) : undefined,
+        column: col.length ? (col.contains(".") ? parseInt(col.before(".")) : parseInt(col)) : undefined,
+        colSpan: col.length && col.contains(".") ? parseInt(col.after(".")) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
         active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
         splitValue: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
@@ -1971,6 +1986,7 @@ export interface QuerySettings {
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  markRowsColumn?: string;
 }
 
 

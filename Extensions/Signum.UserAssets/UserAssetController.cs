@@ -164,8 +164,9 @@ public class UserAssetController : ControllerBase
     public class PinnedFilter
     {
         public string label;
-        public int? row;
         public int? column;
+        public int? colSpan;
+        public int? row;
         public PinnedFilterActive? active;
         public bool? splitValue;
     }

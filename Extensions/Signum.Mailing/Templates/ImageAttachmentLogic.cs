@@ -9,14 +9,7 @@ public static class ImageAttachmentLogic
     {
         sb.Settings.AssertImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(ImageAttachmentEntity));
 
-        sb.Include<ImageAttachmentEntity>()
-            .WithQuery(() => s => new
-            {
-                Entity = s,
-                s.Id,
-                s.FileName,
-                s.ContentId
-            });
+        sb.Include<ImageAttachmentEntity>();
 
         Validator.PropertyValidator((ImageAttachmentEntity e) => e.FileName).StaticPropertyValidation = ImageAttachmentFileName_StaticPropertyValidation;
 

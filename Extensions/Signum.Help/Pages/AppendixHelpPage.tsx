@@ -6,12 +6,11 @@ import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Help';
-import { getTypeInfo, GraphExplorer, symbolNiceName } from '@framework/Reflection';
+import { getOperationInfo, getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
 import { EditableComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
-import { getOperationInfo } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
@@ -47,7 +46,7 @@ export default function AppendixHelpHelp() {
 
 function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
 
-  const oi = Operations.tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
+  const oi = tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
 
   if (!oi)
     return null;
@@ -65,7 +64,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
 
-  if (!Operations.tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
+  if (!tryGetOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity))
     return null;
 
   function onClick() {

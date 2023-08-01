@@ -3,7 +3,7 @@ import { Dic } from './Globals'
 import { ajaxGetRaw, ajaxPost, ajaxPostRaw, ServiceError, WebApiHttpError } from './Services'
 import { Lite, Entity, OperationMessage, EntityPack, JavascriptMessage, EngineMessage, getToString, toLite } from './Signum.Entities';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString } from './Reflection';
+import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString, getOperationInfo } from './Reflection';
 import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
@@ -111,34 +111,6 @@ export function getSettings(operation: OperationSymbol | string): OperationSetti
   const operationKey = (operation as OperationSymbol).key || operation as string;
 
   return operationSettings[operationKey];
-}
-
-export function tryGetOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo | undefined {
-  let operationKey = typeof operation == "string" ? operation : operation.key;
-
-  let ti = tryGetTypeInfo(type);
-  if (ti == null)
-    return undefined;
-
-  let oi = ti.operations && ti.operations[operationKey];
-
-  if (oi == undefined)
-    return undefined;
-
-  return oi;
-}
-
-export function getOperationInfo(operation: OperationSymbol | string, type: PseudoType): OperationInfo {
-  let operationKey = typeof operation == "string" ? operation : operation.key;
-
-  let ti = getTypeInfo(type);
-
-  let oi = ti?.operations && ti.operations[operationKey];
-
-  if (oi == undefined)
-    throw new Error(`Operation ${operationKey} not defined for ${ti.name}`);
-
-  return oi;
 }
 
 export function operationInfos(ti: TypeInfo) {
@@ -651,6 +623,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   iconColor?: string;
   isVisible?: boolean;
   inDropdown?: boolean;
+  isDefault?: boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   onClick: (eoc: EntityOperationContext<T>) => void;
   keyboardShortcut?: KeyboardShortcut;
@@ -771,7 +744,7 @@ export const CreateGroup: EntityOperationGroup = {
 
 export interface EntityOperationGroup {
   key: string;
-  text: () => string;
+  text: () => React.ReactNode;
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;

@@ -533,7 +533,12 @@ public class DirectedGraph<T> : IEnumerable<T>
                 break;
         }
 
-        return to.For(n => previous.ContainsKey(n), n => previous[n]).Reverse().ToList();
+        var result = new List<T>();
+        for (var n = to; previous.ContainsKey(n); n = previous[n])
+        {
+            result.Add(n);
+        }
+        return result;
     }
 }
 

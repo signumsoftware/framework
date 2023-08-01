@@ -46,7 +46,6 @@ export module ITaskMessage {
 
 export module ITaskOperation {
   export const ExecuteSync : Operations.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
-  export const ExecuteAsync : Operations.ExecuteSymbol<ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteAsync");
 }
 
 export const ScheduledTaskEntity = new Type<ScheduledTaskEntity>("ScheduledTask");

@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Signum.Basics;
 using Signum.Mailing.Templates;
@@ -36,7 +35,7 @@ public class RemoteEmailController : ControllerBase
 
             var message = (await graphClient.Users[oid.ToString()].Messages[messageId].GetAsync(req =>
             {
-                req.QueryParameters.Expand = new[] { "attachments" };
+                req.QueryParameters.Expand = new[] { "attachments", "singleValueExtendedProperties($filter=id eq 'String {6A9A7B04-361B-4B89-B270-F2101F00F1D0} Name CommunicationId')" };
                 req.Headers.Add("Prefer", "IdType='ImmutableId'");
             }))!;
 
@@ -70,7 +69,10 @@ public class RemoteEmailController : ControllerBase
                     Size = a.Size!.Value,
                 }).ToMList(),
                 HasAttachments = message.HasAttachments!.Value,
-
+                Extension0 = RemoteEmailsLogic.Converter.GetExtension(message, 0),
+                Extension1 = RemoteEmailsLogic.Converter.GetExtension(message, 0),
+                Extension2 = RemoteEmailsLogic.Converter.GetExtension(message, 0),
+                Extension3 = RemoteEmailsLogic.Converter.GetExtension(message, 0),
             };
         }
         catch (ODataError e)

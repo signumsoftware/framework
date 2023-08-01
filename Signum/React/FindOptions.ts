@@ -95,6 +95,7 @@ export interface PinnedFilter {
   label?: string | (() => string);
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }
@@ -127,6 +128,7 @@ export interface PinnedFilterParsed {
   label?: string;
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }
@@ -134,8 +136,9 @@ export interface PinnedFilterParsed {
 export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
   return {
     label: typeof pf.label == "function" ? pf.label() : pf.label,
-    row: pf.row,
     column: pf.column,
+    colSpan: pf.colSpan,
+    row: pf.row,
     active: pf.active,
     splitValue: pf.splitValue
   };
