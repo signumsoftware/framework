@@ -9,7 +9,7 @@ import {
   EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
 } from '@framework/Signum.Entities'
 import { TypeEntity } from '@framework/Signum.Basics'
-import { Type, PropertyRoute, OperationInfo, toNumberFormat } from '@framework/Reflection'
+import { Type, PropertyRoute, OperationInfo, toNumberFormat, getOperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as Navigator from '@framework/Navigator'
@@ -686,7 +686,7 @@ export function createNewCase(workflowId: number | string, mainEntityStrategy: W
       var coi: OperationInfo;
 
       if (mainEntityStrategy == "Clone") {
-        coi = Operations.getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
+        coi = getOperationInfo(`${wf.mainEntityType!.cleanName}Operation.Clone`, wf.mainEntityType!.cleanName);
       }
 
       const typeName = wf.mainEntityType!.cleanName;
