@@ -1976,6 +1976,7 @@ export interface QuerySettings {
   inPlaceNavigation?: boolean;
   modalSize?: BsSize;
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
+  allowCreate?: boolean;
   allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
