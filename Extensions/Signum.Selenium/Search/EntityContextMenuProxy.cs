@@ -31,7 +31,7 @@ public class EntityContextMenuProxy
     {
         var lites = ResultTable.SelectedEntities();
 
-        Operation(executeSymbol).WaitVisible().Click();
+        Operation(executeSymbol).WaitVisible().SafeClick();
         if (consumeConfirmation)
             this.ResultTable.Selenium.ConsumeAlert();
 
