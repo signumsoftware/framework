@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { getTypeInfo } from '@framework/Reflection'
+import { getTypeInfo, tryGetOperationInfo } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import * as Operations from '@framework/Operations'
@@ -41,7 +41,7 @@ export default function TreePage() {
       <TreeViewer ref={treeViewRef}
         initialShowFilters={true}
         typeName={ti.name}
-        allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
+        allowMove={tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
         showToolbar={true}
         key={ti.name}

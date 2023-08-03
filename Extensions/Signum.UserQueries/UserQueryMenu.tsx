@@ -246,7 +246,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const currentUserQueryToStr = currentUserQuery ? getToString(currentUserQuery) : undefined;
 
-  var canSave = Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) != null;
+  var canSave = UserQueryEntity.tryOperationInfo(UserQueryOperation.Save) != null;
 
   const label = (
     <span title={currentUserQueryToStr}>
