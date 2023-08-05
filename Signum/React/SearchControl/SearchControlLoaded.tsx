@@ -1966,6 +1966,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return;
 
     const m = this.state.markedRows[key];
+    if (m === null)
+        return { status: "Success", message: undefined };
 
     if (typeof m === "string") {
       if (m == "")
