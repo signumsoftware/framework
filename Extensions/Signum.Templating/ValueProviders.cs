@@ -125,11 +125,11 @@ public abstract class ValueProviderBase
                         }
 
                         if (!(vp is TokenValueProvider))
-                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp);
+                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp) { Variable = variable };
                     }
 
                     if (ConstantValueProvider.TryParseConstantValue(token, out var val))
-                        return new ConstantValueProvider(val, tp);
+                        return new ConstantValueProvider(val, tp) { Variable = variable };
 
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
 
