@@ -76,7 +76,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: UserEntity.token(a => a.state),
         value: UserState.value("Active"),
-        pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
+        pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 1, active: "Checkbox_Checked" },
       },
     ],
     entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
@@ -105,7 +105,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 1 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
