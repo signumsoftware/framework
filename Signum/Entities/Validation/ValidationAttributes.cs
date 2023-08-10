@@ -330,8 +330,7 @@ public class URLValidatorAttribute : RegexValidatorAttribute
         + @"([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]" // second level domain
         + @"(\.[a-z]{2,6})?)" // first level domain- .com or .museum
         + "(:[0-9]{1,4})?" // port number- :80
-        + "((/?)|" // a slash isn't required if there is no file name
-        + "(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+/?)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        + "[/0-9a-z_!~*'().;?:@&=+$,%#-|]+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     public static Regex SiteRelativeRegex = new Regex(
         "^/|(/[0-9a-z_!~*'().;?:@&=+$,%#-]+)+$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
