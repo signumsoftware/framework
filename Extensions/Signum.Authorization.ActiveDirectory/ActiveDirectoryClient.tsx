@@ -107,7 +107,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
           ],
         },
         {
-          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_Checked", column: 2, row: 0 },
+          pinned: { label: () => ActiveDirectoryMessage.OnlyActiveUsers.niceToString(), active: "Checkbox_Checked", column: 1, row: 0 },
           token: "AccountEnabled", operation: "EqualTo", value: true
         },
         { token: "CreationType", operation: "DistinctTo", value: "Invitation" }
@@ -170,7 +170,7 @@ export function findActiveDirectoryGroup(): Promise<Lite<ADGroupEntity> | undefi
   return Finder.findRow({
     queryName: AzureADQuery.ActiveDirectoryGroups,
     filterOptions: [
-      { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
+      { token: "HasUser", value: null, pinned: { column: 1, row: 0, active: "WhenHasValue", } },
     ]
   }, { searchControlProps: { allowChangeOrder: false } })
     .then(a => a && API.createADGroup(toADGroupRequest(a.row, a.searchControl)));
@@ -180,7 +180,7 @@ export function findManyActiveDirectoryGroup(): Promise<Lite<ADGroupEntity>[] | 
   return Finder.findManyRows({
     queryName: AzureADQuery.ActiveDirectoryGroups,
     filterOptions: [
-      { token: "HasUser", value: null, pinned: { column: 2, row: 0, active: "WhenHasValue", } },
+      { token: "HasUser", value: null, pinned: { column: 1, row: 0, active: "WhenHasValue", } },
     ]
   }, { searchControlProps: { allowChangeOrder: false } })
     .then(a => a && Promise.all(a.rows.map(r => API.createADGroup(toADGroupRequest(r, a.searchControl)))));
