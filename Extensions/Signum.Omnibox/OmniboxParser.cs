@@ -103,9 +103,9 @@ $@"(?<entity>{ident};(\d+|{guid}))|
 
     public static string ToOmniboxPascal(this string text)
     {
-        var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
+        //var simple = Regex.Replace(text, OmniboxMessage.ComplementWordsRegex.NiceToString(), m => "", RegexOptions.IgnoreCase);
 
-        var result = simple.ToPascal();
+        var result = text.ToPascal();
 
         if (text.StartsWith("[") && text.EndsWith("]"))
             return "[" + result + "]";
