@@ -2964,6 +2964,9 @@ internal class QueryBinder : ExpressionVisitor
 
         var result = currentSource.FirstOrDefault(s => //could be more than one on GroupBy aggregates
         {
+            if (s == null)
+                return false;
+
             if (external.IsEmpty())
                 return true;
 
