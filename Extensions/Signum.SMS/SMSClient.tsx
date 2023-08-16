@@ -21,15 +21,20 @@ export function start(options: { routes: RouteObject[] }) {
 
   API.getAllTypes().then(types => {
     allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkAction("smsMessages",
-      () => SMSMessageEntity.nicePluralName(),
-      e => getSMSMessages(ctx.lite),
-      {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(SMSMessageEntity),
-        icon: "comment-sms",
-        iconColor: "green"
-      }));
-  });
+    QuickLinks.registerGlobalQuickLink(entityType => ({
+      key: "smsMessages",
+      generator: {
+        factory: ctx => new QuickLinks.QuickLinkAction(e => getSMSMessages(ctx.lite)),
+        options:
+        {
+          text: () => SMSMessageEntity.nicePluralName(),
+          isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
+          icon: "comment-sms",
+          iconColor: "green"
+        }
+      }
+    }))
+  })
 }
 
 function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {

@@ -130,9 +130,18 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
-      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null }));
+    QuickLinks.registerQuickLink({
+      type: RoleEntity,
+      key: "types",
+      generator: {
+        factory: ctx => new QuickLinks.QuickLinkAction(e => API.fetchTypeRulePack(ctx.lite.id!)
+          .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined }))),
+        options: {
+          text: () => AuthAdminMessage.TypeRules.niceToString(),
+          isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
+        }
+      }
+    });
   }
 
   if (options.operations) {
@@ -149,9 +158,18 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Rules/PermissionRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
-      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }));
+    QuickLinks.registerQuickLink({
+      type: RoleEntity,
+      key: "permissions",
+      generator: {
+        factory: ctx => new QuickLinks.QuickLinkAction(e => API.fetchPermissionRulePack(ctx.lite.id!)
+          .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined }))),
+        options: {
+          text: () => AuthAdminMessage.PermissionRules.niceToString(),
+          isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
+        }
+      }
+    })
   }
 
   OmniboxSpecialAction.registerSpecialAction({

@@ -23,11 +23,18 @@ export function start(options: { routes: RouteObject[] }) {
   //  hideOnCanExecute: true
   //}));
 
-  QuickLinks.registerQuickLink(WhatsNewEntity, ctx => new QuickLinks.QuickLinkLink("Preview",
-    () => WhatsNewMessage.Preview.niceToString(), "/newspage/" + ctx.lite.id, {
-    icon: "newspaper",
-    iconColor: "purple",
-  }));
+  QuickLinks.registerQuickLink({
+    type: WhatsNewEntity,
+    key: "Preview",
+    generator: {
+      factory: ctx => new QuickLinks.QuickLinkLink("/newspage/" + ctx.lite.id),
+      options: {
+        text: () => WhatsNewMessage.Preview.niceToString(),
+        icon: "newspaper",
+        iconColor: "purple",
+      }
+    }
+  });
 
   const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
   const NumericPlaceholder = /^[ \d]+$/;

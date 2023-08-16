@@ -6,6 +6,11 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
+export const ContainerTokenKey = new EnumType<ContainerTokenKey>("ContainerTokenKey");
+export type ContainerTokenKey =
+  "Operations" |
+  "QuickLinks";
+
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
   export const And = new MessageKey("QueryTokenMessage", "And");

@@ -60,6 +60,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   tokenEquivalencesGroups: Entities.MList<TokenEquivalenceGroupEntity>;
   guid: string /*Guid*/;
   key: string | null;
+  hideQuickLink: boolean;
 }
 
 export module DashboardMessage {

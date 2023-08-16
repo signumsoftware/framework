@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
 using Signum.Chart.UserChart;
+using Signum.UserAssets;
 
 namespace Signum.Chart;
 
@@ -14,8 +15,8 @@ public class UserChartController : ControllerBase
     }
 
     [HttpGet("api/userChart/forEntityType/{typeName}")]
-    public IEnumerable<Lite<UserChartEntity>> FromEntityType(string typeName)
+    public IEnumerable<UserAssetModel<UserChartEntity>> FromEntityType(string typeName)
     {
-        return UserChartLogic.GetUserChartsEntity(TypeLogic.GetType(typeName));
+        return UserChartLogic.GetUserChartsModel(TypeLogic.GetType(typeName));
     }
 }

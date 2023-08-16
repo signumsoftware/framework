@@ -29,53 +29,62 @@ import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine'
 
 export function start(options: { routes: RouteObject[] }) {
 
-    QuickLinks.registerGlobalQuickLink(ctx => getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
-      new QuickLinks.QuickLinkAction(TimeMachineMessage.TimeMachine.niceToString(),
-        () => TimeMachineMessage.TimeMachine.niceToString(),
-        e => {
-          if (e.ctrlKey)
-            window.open(AppContext.toAbsoluteUrl(timeMachineRoute(ctx.lite)));
-          else
-            TimeMachineModal.show(ctx.lite);
-        }, {
-        icon: "clock-rotate-left",
-        color: "info",
-        iconColor: "blue",
-        group: null,
-      }) : undefined);
+  QuickLinks.registerGlobalQuickLink(entityType => getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
+    ({
+      key: "TimeMachine",
+      generator:
+      {
+        factory: ctx => new QuickLinks.QuickLinkLink(timeMachineRoute(ctx.lite)),
+        options: {
+          text: () => OperationLogEntity.nicePluralName(),
+          isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
+          icon: "clock-rotate-left",
+          iconColor: "blue",
+          color: "success",
+        }
+      }
+    }) : undefined);
 
-    QuickLinks.registerGlobalQuickLink(ctx => {
-      if (!getTypeInfo(ctx.lite.EntityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-        return undefined;
+  QuickLinks.registerGlobalQuickLink(entityType => {
+    if (!getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
+      return undefined;
+    return {
+      key: "CompareTimeMachine",
+      generator:
+      {
+        factory: ctx => {
 
-      if (!(ctx.contextualContext?.container instanceof SearchControlLoaded))
-        return undefined;
+          if (!(ctx.contextualContext?.container instanceof SearchControlLoaded))
+            return undefined;
 
-      var sc = ctx.contextualContext?.container;
-      if (sc.props.findOptions.systemTime == null ||
-        sc.state.selectedRows == null ||
-        sc.state.selectedRows.length != 2 ||
-        sc.state.selectedRows.some(a => a.entity == null) ||
-        sc.state.selectedRows.distinctBy(a => a.entity!.id!.toString()).length > 1)
-        return undefined;
+          var sc = ctx.contextualContext?.container;
+          if (sc.props.findOptions.systemTime == null ||
+            sc.state.selectedRows == null ||
+            sc.state.selectedRows.length <= 1 ||
+            sc.state.selectedRows.some(a => a.entity == null) ||
+            sc.state.selectedRows.distinctBy(a => a.entity!.id!.toString()).length > 1)
+            return undefined;
 
-      var systemValidFromKey = QueryTokenString.entity().systemValidFrom().toString();
+          var systemValidFromKey = QueryTokenString.entity().systemValidFrom().toString();
 
-      var index = sc.props.findOptions.columnOptions.findIndex(co => co.token?.fullKey == systemValidFromKey);
+          var index = sc.props.findOptions.columnOptions.findIndex(co => co.token?.fullKey == systemValidFromKey);
 
-      if (index == -1)
-        return undefined;
+          if (index == -1)
+            return undefined;
 
-      var lite = sc.state.selectedRows[0].entity!;
-      var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
+          var lite = sc.state.selectedRows[0].entity!;
+          var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
 
-      return new QuickLinks.QuickLinkAction("CompareTimeMachine",
-        () => TimeMachineMessage.CompareVersions.niceToString(),
-        e => TimeMachineCompareModal.show(lite, versions), {
-        icon: "not-equal",
-        iconColor: "blue",
-      });
-    }, { allowsMultiple: true });
+          return new QuickLinks.QuickLinkAction(e => TimeMachineCompareModal.show(lite, versions))
+        },
+        options: {
+          allowsMultiple: true,
+          icon: "not-equal",
+          iconColor: "blue",
+        }
+      }
+    }
+  });
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 

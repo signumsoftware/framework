@@ -284,9 +284,6 @@ TimeMachineModal.show = (lite: Lite<Entity>): Promise<boolean | undefined> => {
   return openModal<boolean | undefined>(<TimeMachineModal lite={lite} />);
 };
 
-
-
-
 interface TimeMachineModalCompareProps extends IModalProps<boolean | undefined> {
   lite: Lite<Entity>;
   versionDatesUTC: string[];

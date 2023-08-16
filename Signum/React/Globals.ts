@@ -1031,7 +1031,38 @@ export module Dic {
     return result;
   }
 
-  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
+  export function filter<V>(obj: { [key: string]: V }, predicate: (kv: { key: string, value: V }) => any) {
+
+    return Dic.map(obj, (k, v) => ({ key: k, value: v })).filter(predicate);
+  }
+
+  export function toDic<V>(obj: { key: string, value: V }[]) {
+    const result: { [key: string]: V } = {};
+    obj.forEach(o => Dic.addOrThrow(result, o.key, o.value));
+
+    return result;
+  }
+
+  export function concat<V>(dics: ({ [key: string]: V } | undefined)[]) {
+    const result: { [key: string]: V } = {};
+
+    dics.forEach(d => d && Dic.foreach(d, ((k, v) => Dic.addOrThrow(result, k, v))));
+
+    return result;
+  }
+
+  export function join<V>(a: { [key: string]: V }, b: { [key: string]: V }) {
+
+    Dic.foreach(b, ((k, v) => Dic.addOrThrow(a, k, v)));
+
+    return a;
+  }
+
+  export function add<V>(to: { [key: string]: V }, from: { [key: string]: V }): void {
+    Dic.foreach(from, ((k, v) => Dic.addOrThrow(to, k, v)));
+  }
+
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): { [key: string]: R } {
     let index = 0;
     const result: { [key: string]: R } = {};
     for (const name in obj) {

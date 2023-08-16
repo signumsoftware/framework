@@ -6,6 +6,10 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
+export interface UserAssetModel<T extends Entities.Entity> extends Entities.ModelEntity {
+  asset: Entities.Lite<T>;
+  hideQuickLink: boolean;
+}
 
 export const EntityAction = new EnumType<EntityAction>("EntityAction");
 export type EntityAction =
