@@ -1136,6 +1136,8 @@ public enum ValidationMessage
     _0ShouldBeNull,
     [Description("{0} should be a date in the past")]
     _0ShouldBeADateInThePast,
+    [Description("{0} should be a date in the future")]
+    _0ShouldBeADateInTheFuture,
     BeInThePast,
     [Description("{0} should be greater than {1}")]
     _0ShouldBeGreaterThan1,
