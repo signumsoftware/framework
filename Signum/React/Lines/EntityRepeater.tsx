@@ -129,29 +129,30 @@ export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRem
       {getTimeMachineIcon({ ctx: ctx, isContainer: true, translateY:"250%" })}
       <fieldset className="sf-repeater-element"
         {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
-        <legend>
-          <div className="item-group">
-            {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
-              onClick={onRemove}
-              title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-              {EntityListBaseController.getRemoveIcon()}
-            </a>}
-            &nbsp;
-            {move?.renderMoveUp()} 
-            {move?.renderMoveDown()}
-            {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
-              draggable={true}
-              onDragStart={drag.onDragStart}
-              onDragEnd={drag.onDragEnd}
-              onKeyDown={drag.onKeyDown}
-              title={drag.title}>
-              {EntityListBaseController.getMoveIcon()}
-            </a>}
-            {itemExtraButtons && itemExtraButtons()}
-            {title && '\xa0'}
-            {title}
-          </div>
-        </legend>
+        {(onRemove || move || drag || itemExtraButtons || title) &&
+          <legend>
+            <div className="item-group">
+              {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
+                onClick={onRemove}
+                title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+                {EntityListBaseController.getRemoveIcon()}
+              </a>}
+              &nbsp;
+              {move?.renderMoveUp()}
+              {move?.renderMoveDown()}
+              {drag && <a href="#" className={classes("sf-line-button", "sf-move")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
+                draggable={true}
+                onDragStart={drag.onDragStart}
+                onDragEnd={drag.onDragEnd}
+                onKeyDown={drag.onKeyDown}
+                title={drag.title}>
+                {EntityListBaseController.getMoveIcon()}
+              </a>}
+              {itemExtraButtons && itemExtraButtons()}
+              {title && '\xa0'}
+              {title}
+            </div>
+          </legend>}
         <div className="sf-line-entity">
           <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} />
         </div>
