@@ -120,12 +120,13 @@ function getQuickLinkByKey(key: string, ctx: QuickLinkContext<Entity>): Promise<
 
 function toManualTokens(qlDic: { [key: string]: QuickLink<Entity> }) {
 
-  return qlDic && Dic.mapFilter(qlDic, kv => kv.key && kv.value.text && kv.value.text() && (kv.value.isVisible === undefined || kv.value.isVisible))
-    .map(kv => ({
-      key: kv.key,
-      toStr: kv.value.text(),
-      niceName: kv.value.text(),
-      typeColor: kv.value.color,
+  return qlDic && Object.entries(qlDic)
+    .filter(([key, quicklink]) => key && quicklink.text && quicklink.text() && (quicklink.isVisible === undefined || quicklink.isVisible))
+    .map(([key, quicklink]) => ({
+      key: key,
+      toStr: quicklink.text(),
+      niceName: quicklink.text(),
+      typeColor: quicklink.color,
       niceTypeName: "Cell quick link",
     }));
 }

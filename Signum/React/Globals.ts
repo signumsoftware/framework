@@ -1031,7 +1031,7 @@ export module Dic {
     return result;
   }
 
-  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): { [key: string]: R } {
+  export function mapObject<V, R>(obj: { [key: string]: V }, selector: (key: string, value: V, index: number) => R): {[key: string] : R} {
     let index = 0;
     const result: { [key: string]: R } = {};
     for (const name in obj) {
@@ -1040,11 +1040,6 @@ export module Dic {
       }
     }
     return result;
-  }
-
-  export function mapFilter<V>(obj: { [key: string]: V }, predicate: (kv: { key: string, value: V }) => any) {
-
-    return Dic.map(obj, (k, v) => ({ key: k, value: v })).filter(predicate);
   }
 
   export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
