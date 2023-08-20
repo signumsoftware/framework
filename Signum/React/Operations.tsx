@@ -46,22 +46,18 @@ export function start() {
   AppContext.clearSettingsActions.push(clearOperationSettings);
 
   QuickLinks.registerGlobalQuickLink(entityType =>
-    ({
-      key: getQueryKey(OperationLogEntity),
-      generator:
+    new QuickLinks.QuickLinkExplore(entityType, ctx => ({
+      queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
+    }),
       {
-        factory: ctx => new QuickLinks.QuickLinkExplore({ queryName: OperationLogEntity,
-          filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
-        }),
-        options: {
-          text: () => OperationLogEntity.nicePluralName(),
-          isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
-          icon: "clock-rotate-left",
-          iconColor: "green",
-          color: "success",
-        }
+        key: getQueryKey(OperationLogEntity),
+        text: () => OperationLogEntity.nicePluralName(),
+        isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
+        icon: "clock-rotate-left",
+        iconColor: "green",
+        color: "success",
       }
-    }));
+    ));
 
   Finder.formatRules.push({
     name: "CellOperation",

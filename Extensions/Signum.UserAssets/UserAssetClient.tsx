@@ -39,27 +39,17 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  QuickLinks.registerQuickLink({
-    type: type,
-    key: UserAssetMessage.ExportToXml.name,
-    generator: {
-      factory: ctx => {
-        if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-          return undefined;
-
-        return new QuickLinks.QuickLinkAction(() => {
-          API.exportAsset(ctx.lites);
-        }, {
+  if (AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+    QuickLinks.registerQuickLink(type, 
+      new QuickLinks.QuickLinkAction(ctx => API.exportAsset(ctx.lites),
+        {
+          key: UserAssetMessage.ExportToXml.name,
+          allowsMultiple: true,
+          text: () => UserAssetMessage.ExportToXml.niceToString(),
           iconColor: "#FCAE25",
           icon: "file-code"
-        });
-      },
-      options: {
-        allowsMultiple: true,
-        text: () => UserAssetMessage.ExportToXml.niceToString()
-      }
-    }
-  });
+        }
+      ));
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

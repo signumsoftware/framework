@@ -20,20 +20,14 @@ export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeNa
     contextual: { isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(entityType => ({
-    key: getQueryKey(NoteEntity),
-    generator: {
-      factory: ctx => new QuickLinks.QuickLinkExplore({
-        queryName: NoteEntity,
-        filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }]
-      }),
-      options:
+  QuickLinks.registerGlobalQuickLink(entityType =>
+    new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
       {
+        key: getQueryKey(NoteEntity),
         text: () => NoteEntity.nicePluralName(),
         isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(entityType),
         icon: "note-sticky",
         iconColor: "#337ab7",
-      }
-    }
-  }));
+      })
+  );
 }

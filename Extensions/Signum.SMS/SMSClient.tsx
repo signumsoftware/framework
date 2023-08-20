@@ -19,22 +19,16 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(SMSUpdatePackageEntity, e => import('./Templates/SMSUpdatePackage')));
   Navigator.addSettings(new EntitySettings(MultipleSMSModel, e => import('./Templates/MultipleSMS')));
 
-  API.getAllTypes().then(types => {
-    allTypes = types;
-    QuickLinks.registerGlobalQuickLink(entityType => ({
+  API.getAllTypes().then(allTypes =>
+    allTypes.length && QuickLinks.registerGlobalQuickLink(entityType => new QuickLinks.QuickLinkAction(ctx => getSMSMessages(ctx.lite),
+    {
       key: "smsMessages",
-      generator: {
-        factory: ctx => new QuickLinks.QuickLinkAction(e => getSMSMessages(ctx.lite)),
-        options:
-        {
-          text: () => SMSMessageEntity.nicePluralName(),
-          isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
-          icon: "comment-sms",
-          iconColor: "green"
-        }
-      }
-    }))
-  })
+      text: () => SMSMessageEntity.nicePluralName(),
+      isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
+      icon: "comment-sms",
+      iconColor: "green"
+    }
+  )))
 }
 
 function getSMSMessages(referred: Lite<ISMSOwnerEntity>) {

@@ -129,35 +129,22 @@ export function start(options: { routes: RouteObject[] }) {
     });
   });
 
-  QuickLinks.registerGlobalQuickLink(entityType => {
-    if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
-      return Promise.resolve([]);
-
-    return API.forEntityType(entityType)
-      .then(das => das.map(d =>
-      ({
-        key: liteKey(d.asset),
-        generator:
+  if (AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
+    QuickLinks.registerGlobalQuickLink(entityType =>
+      API.forEntityType(entityType)
+        .then(ds => ds.map(d => new QuickLinks.QuickLinkAction((ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d.asset, ctx.lite), e),
         {
-          factory: ctx => new QuickLinks.QuickLinkAction(e => {
-            AppContext.pushOrOpenInTab(dashboardUrl(d.asset, ctx.lite), e)
-          }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
-          options:
-          {
-            text: () => getToString(d.asset),
-            order: 0,
-            hideInAutos: d.hideQuickLink
-          }
+          key: liteKey(d.asset),
+          text: () => getToString(d.asset),
+          order: 0,
+          icon: "gauge", iconColor: "darkslateblue", color: "success",
+          hideInAutos: d.hideQuickLink
         }
-      })));
-  });
+      )))
+    );
 
-  QuickLinks.registerQuickLink({
-    type: DashboardEntity,
-    key: "preview",
-    generator:
-    {
-      factory: ctx => new QuickLinks.QuickLinkAction(e => Navigator.API.fetchAndRemember(ctx.lite)
+  QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction(
+    (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
           AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
@@ -170,15 +157,14 @@ export function start(options: { routes: RouteObject[] }) {
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             });
-          })),
-        options:
-        {
-          text: () => DashboardMessage.Preview.niceToString(),
-          group: null, icon: "eye", iconColor: "blue", color: "info"
-        }
-}
-  })};
-
+      }),
+    {
+      key: "preview",
+      text: () => DashboardMessage.Preview.niceToString(),
+      group: null, icon: "eye", iconColor: "blue", color: "info"
+    }
+  ));
+};
 
 
 export function home(): Promise<Lite<DashboardEntity> | null> {
