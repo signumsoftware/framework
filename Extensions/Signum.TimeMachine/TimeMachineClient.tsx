@@ -31,10 +31,8 @@ export function start(options: { routes: RouteObject[] }) {
 
   if (isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
     QuickLinks.registerGlobalQuickLink(entityType => !getTypeInfo(entityType).isSystemVersioned ? undefined :
-      new QuickLinks.QuickLinkLink(ctx => timeMachineRoute(ctx.lite),
+      new QuickLinks.QuickLinkLink("TimeMachine",  () => OperationLogEntity.nicePluralName(), ctx => timeMachineRoute(ctx.lite),
         {
-          key: "TimeMachine",
-          text: () => OperationLogEntity.nicePluralName(),
           isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
           icon: "clock-rotate-left",
           iconColor: "blue",

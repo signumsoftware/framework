@@ -218,6 +218,15 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     }
 }
 
+public class DashboardLiteModel : ModelEntity
+{
+    public string DisplayName { get; set; }
+    public bool HideQuickLink { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => DisplayName);
+}
+
 public class CacheQueryConfigurationEmbedded : EmbeddedEntity
 {
     [Unit("s")]

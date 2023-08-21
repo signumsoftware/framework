@@ -55,10 +55,8 @@ export function start(options: { routes: RouteObject[] }) {
     alternatives: eoc => [],
   }));
 
-  QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink(() => "/dynamic/panel",
+  QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
     {
-      key: "ViewDynamicPanel",
-      text: () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel),
       isVisible: AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
       iconColor: "purple"

@@ -12,9 +12,7 @@ import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import {
-  UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity,
-} from './Signum.UserQueries'
+import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
 import { UserAssetModel } from '../Signum.UserAssets/Signum.UserAssets'
@@ -54,17 +52,13 @@ export function start(options: { routes: RouteObject[] }) {
   if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
-      .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.asset.id}/${liteKey(ctx.lite)}`)),
-        {
-          key: liteKey(uq.asset),
-          text: () => getToString(uq.asset),
+        .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
           icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
-          hideInAutos: uq.hideQuickLink
-        }
-      )))
+          onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
+        })))
     );
 
-  QuickLinks.registerQuickLink(UserQueryEntity, new QuickLinks.QuickLinkAction(ctx => {
+  QuickLinks.registerQuickLink(UserQueryEntity, new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
     Navigator.API.fetchAndRemember(ctx.lite!)
       .then(uq => {
         if (uq.entityType == undefined)
@@ -81,8 +75,6 @@ export function start(options: { routes: RouteObject[] }) {
       })
   },
     {
-      key: "preview",
-      text: () => UserQueryMessage.Preview.niceToString(),
       isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
     }
   ));
@@ -355,7 +347,7 @@ export module Converter {
 }
 
 export module API {
-  export function forEntityType(type: string): Promise<UserAssetModel<UserQueryEntity>[]> {
+  export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet({ url: "/api/userQueries/forEntityType/" + type });
   }
 

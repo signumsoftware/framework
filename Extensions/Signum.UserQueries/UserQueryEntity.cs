@@ -158,6 +158,16 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     }
 }
 
+public class UserQueryLiteModel : ModelEntity
+{
+    public string DisplayName { get; set; }
+    public QueryEntity Query { get; set; }
+    public bool HideQuickLink { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => DisplayName);
+}
+
 [AutoInit]
 public static class UserQueryPermission
 {

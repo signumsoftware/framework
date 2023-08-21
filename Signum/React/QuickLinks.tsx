@@ -105,7 +105,7 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink
   return getCachedOrAdd(ctx.lite.EntityType)
     .then(gs => 
       Dic.getValues(gs)
-      .filter(ql => ql && ql.isVisible && !ql.hideInAutos)
+      .filter(ql => ql && ql.isVisible && !ql.onlyForToken)
       .orderBy(ql => ql!.order));
 }
 
@@ -295,7 +295,7 @@ export interface QuickLinkOptions {
   key?: string;
   text?: (nothing?: undefined /*TS 4.1 Bug*/) => string; //To delay niceName and avoid exceptions
   isVisible?: boolean;
-  hideInAutos?: boolean;
+  onlyForToken?: boolean;
   order?: number;
   icon?: IconProp;
   iconColor?: string;
@@ -308,7 +308,7 @@ export abstract class QuickLink<T extends Entity> {
   key!: string;
   text!: () => string;
   isVisible!: boolean;
-  hideInAutos?: boolean;
+  onlyForToken?: boolean;
   order!: number;
   icon?: IconProp;
   iconColor?: string;
@@ -356,8 +356,12 @@ export abstract class QuickLink<T extends Entity> {
 export class QuickLinkAction<T extends Entity> extends QuickLink<T> {
   action: (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => void;
 
-  constructor(action: (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
-    super(options);
+  constructor(key: string, text: () => string, action: (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
+    super({
+      key: key,
+      text: text,
+      ...options
+    });
     this.action = action;
   } 
 
@@ -369,8 +373,12 @@ export class QuickLinkAction<T extends Entity> extends QuickLink<T> {
 export class QuickLinkLink<T extends Entity> extends QuickLink<T> {
   url: (ctx: QuickLinkContext<T>) => (string | Promise<string>);
 
-  constructor(url: (ctx: QuickLinkContext<T>) => (string | Promise<string>), options?: QuickLinkOptions) {
-    super(options);
+  constructor(key: string, text : ()=> string, url: (ctx: QuickLinkContext<T>) => (string | Promise<string>), options?: QuickLinkOptions) {
+    super({
+      key: key,
+      text: text,
+      ...options
+    });
     this.url = url;
   }
 

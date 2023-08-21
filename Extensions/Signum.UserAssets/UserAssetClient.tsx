@@ -40,16 +40,12 @@ export function start(options: { routes: RouteObject[] }) {
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
   if (AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-    QuickLinks.registerQuickLink(type, 
-      new QuickLinks.QuickLinkAction(ctx => API.exportAsset(ctx.lites),
-        {
-          key: UserAssetMessage.ExportToXml.name,
-          allowsMultiple: true,
-          text: () => UserAssetMessage.ExportToXml.niceToString(),
-          iconColor: "#FCAE25",
-          icon: "file-code"
-        }
-      ));
+    QuickLinks.registerQuickLink(type,
+      new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
+        allowsMultiple: true,
+        iconColor: "#FCAE25",
+        icon: "file-code"
+      }));
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

@@ -40,6 +40,14 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
 }
 
+export const UserQueryLiteModel = new Type<UserQueryLiteModel>("UserQueryLiteModel");
+export interface UserQueryLiteModel extends Entities.ModelEntity {
+  Type: "UserQueryLiteModel";
+  displayName: string;
+  query: Basics.QueryEntity;
+  hideQuickLink: boolean;
+}
+
 export module UserQueryMessage {
   export const Edit = new MessageKey("UserQueryMessage", "Edit");
   export const CreateNew = new MessageKey("UserQueryMessage", "CreateNew");

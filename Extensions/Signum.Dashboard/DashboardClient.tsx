@@ -15,7 +15,7 @@ import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
-  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity
+  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel
 } from './Signum.Dashboard'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -132,18 +132,18 @@ export function start(options: { routes: RouteObject[] }) {
   if (AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
-        .then(ds => ds.map(d => new QuickLinks.QuickLinkAction((ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d.asset, ctx.lite), e),
+        .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
         {
-          key: liteKey(d.asset),
-          text: () => getToString(d.asset),
           order: 0,
-          icon: "gauge", iconColor: "darkslateblue", color: "success",
-          hideInAutos: d.hideQuickLink
+          icon: "gauge",
+          iconColor: "darkslateblue",
+          color: "success",
+          onlyForToken: (d.model as DashboardLiteModel).hideQuickLink
         }
       )))
     );
 
-  QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction(
+  QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
     (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
@@ -159,9 +159,10 @@ export function start(options: { routes: RouteObject[] }) {
             });
       }),
     {
-      key: "preview",
-      text: () => DashboardMessage.Preview.niceToString(),
-      group: null, icon: "eye", iconColor: "blue", color: "info"
+      group: null,
+      icon: "eye",
+      iconColor: "blue",
+      color: "info"
     }
   ));
 };
@@ -219,7 +220,7 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
 }
 
 export module API {
-  export function forEntityType(type: string): Promise<UserAssetModel<DashboardEntity>[]> {
+  export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
     return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
   }
 

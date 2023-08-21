@@ -20,10 +20,8 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(MultipleSMSModel, e => import('./Templates/MultipleSMS')));
 
   API.getAllTypes().then(allTypes =>
-    allTypes.length && QuickLinks.registerGlobalQuickLink(entityType => new QuickLinks.QuickLinkAction(ctx => getSMSMessages(ctx.lite),
+    allTypes.length && QuickLinks.registerGlobalQuickLink(entityType => new QuickLinks.QuickLinkAction("smsMessages", () => SMSMessageEntity.nicePluralName(),  ctx => getSMSMessages(ctx.lite),
     {
-      key: "smsMessages",
-      text: () => SMSMessageEntity.nicePluralName(),
       isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
       icon: "comment-sms",
       iconColor: "green"
