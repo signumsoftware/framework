@@ -52,4 +52,8 @@
     <Member Name="Save" Description="Speichern" />
     <Member Name="Unpublish" Description="Unveröffentlichen" />
   </Type>
+  <Type Name="WhatsNewState" Description="Neuer Zustand">
+    <Member Name="Draft" Description="Entwurf " />
+    <Member Name="Publish" Description="Veröffentlichen" />
+  </Type>
 </Translations>

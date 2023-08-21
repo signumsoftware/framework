@@ -174,9 +174,10 @@ public static class HtmlToWordConverter
                             new Level(
                                 new StartNumberingValue { Val = 1 },
                                 new NumberingFormat() { Val = htmlNode.Name == "ul" ? NumberFormatValues.Bullet : NumberFormatValues.Decimal },
-                                new LevelText() { Val = htmlNode.Name == "ul" ? "" : "%1." },
+                                new LevelText() { Val = htmlNode.Name == "ul" ? "\x2022" : "%1." },
                                 new PreviousParagraphProperties(new Indentation() { Left = "720", Hanging = "360" }),
-                                htmlNode.Name == "ul" ? new NumberingSymbolRunProperties(new RunFonts() { Hint = FontTypeHintValues.Default, Ascii = "Symbol", HighAnsi = "Symbol" }) : null!
+                                null!
+                                //htmlNode.Name == "ul" ? new NumberingSymbolRunProperties(new RunFonts() { Hint = FontTypeHintValues.Default, Ascii = "Symbol", HighAnsi = "Symbol" }) : null!
                                 )
                             { LevelIndex = 0 })
                         { AbstractNumberId = abstractId },
