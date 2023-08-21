@@ -36,23 +36,16 @@ export function start(options: { routes: RouteObject[], showAlerts?: (typeName: 
   }));
 
   QuickLinks.registerGlobalQuickLink(entityType =>
-  ({
-    key: getQueryKey(AlertEntity),
-    generator:
-    {
-      factory: ctx => new QuickLinks.QuickLinkExplore({
-        queryName: AlertEntity,
-        filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }]
-      }),
-      options: {
+    new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
+      {
+        key: getQueryKey(AlertEntity),
         text: () => AlertEntity.nicePluralName(),
         isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
         icon: "clock-rotate-left",
         iconColor: "green",
         color: "success",
       }
-    }
-  }));
+    ));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],

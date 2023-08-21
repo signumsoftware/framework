@@ -29,23 +29,20 @@ import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine'
 
 export function start(options: { routes: RouteObject[] }) {
 
-  QuickLinks.registerGlobalQuickLink(entityType => getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine) ?
-    ({
-      key: "TimeMachine",
-      generator:
-      {
-        factory: ctx => new QuickLinks.QuickLinkLink(timeMachineRoute(ctx.lite)),
-        options: {
+  if (isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
+    QuickLinks.registerGlobalQuickLink(entityType => !getTypeInfo(entityType).isSystemVersioned ? undefined :
+      new QuickLinks.QuickLinkLink(ctx => timeMachineRoute(ctx.lite),
+        {
+          key: "TimeMachine",
           text: () => OperationLogEntity.nicePluralName(),
           isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
           icon: "clock-rotate-left",
           iconColor: "blue",
           color: "success",
         }
-      }
-    }) : undefined);
+      ));
 
-  QuickLinks.registerGlobalQuickLink(entityType => {
+/*  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
       return undefined;
     return {
@@ -84,7 +81,7 @@ export function start(options: { routes: RouteObject[] }) {
         }
       }
     }
-  });
+  });*/
 
     SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
