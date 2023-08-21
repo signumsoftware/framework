@@ -88,18 +88,21 @@ export function registerQuickLink<T extends Entity>(type: Type<T>, quickLink: Qu
   typeQuickLinks[typeName] = qls;
 }
 
-function getAllRegistered(entityType: string) {
+const quickLinksCache: { [entityType: string]: Promise<{ [key: string]: QuickLink<Entity> }> } = {};
 
-  return Promise.all(globalQuickLinks.map(a => a(entityType)))
-    .then(globalLinks =>
-      globalLinks.concat(typeQuickLinks[entityType] ?? {}))
-    .then(allQuickLinks =>
-      Object.assign({}, ...allQuickLinks) as { [key: string]: QuickLink<Entity> });
+function getCachedOrAdd(entityType: string) {
+
+  return quickLinksCache[entityType] ??=
+    Promise.all(globalQuickLinks.map(a => a(entityType)))
+      .then(globalLinks =>
+        globalLinks.concat(typeQuickLinks[entityType] ?? {}))
+      .then(allLinks =>
+        Object.assign({}, ...allLinks) as { [key: string]: QuickLink<Entity> });
 }
 
 export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink<Entity>> {
 
-  return getAllRegistered(ctx.lite.EntityType)
+  return getCachedOrAdd(ctx.lite.EntityType)
     .then(gs => 
       Dic.getValues(gs)
       .filter(ql => ql && ql.isVisible && !ql.hideInAutos)
@@ -108,13 +111,13 @@ export function getQuickLinks(ctx: QuickLinkContext<Entity>): PromiSeq<QuickLink
 
 function getQuickLinkTokens(entityType: string): Promise<ManualToken[]> {
 
-  return getAllRegistered(entityType)
+  return getCachedOrAdd(entityType)
     .then(ql => toManualTokens(ql))
 }
 
 function getQuickLinkByKey(key: string, ctx: QuickLinkContext<Entity>): Promise<QuickLink<any> | undefined> {
 
-  return getAllRegistered(ctx.lite.EntityType)
+  return getCachedOrAdd(ctx.lite.EntityType)
     .then(qlDic => qlDic && qlDic[key]);
 }
 
