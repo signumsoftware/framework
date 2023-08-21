@@ -1475,7 +1475,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (hasToArray(t))
       return false;
 
-    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
+    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO" || t.type.name == "ManualCellDTO")
       return t.hasOrderAdapter == true;
 
     return true;
