@@ -10,10 +10,7 @@ public static class Statics
 
     public static IThreadVariable? GetVariable(string name)
     {
-        if (threadVariables.ContainsKey(name))
-            return threadVariables[name];
-        else
-            return null;
+        return threadVariables.TryGetC(name);
     }
 
     public static AsyncThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)

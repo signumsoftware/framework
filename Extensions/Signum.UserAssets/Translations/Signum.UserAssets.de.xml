@@ -18,6 +18,7 @@
   </Type>
   <Type Name="PinnedQueryFilterEmbedded" Description="Vorgewahlter Abfragefilter">
     <Member Name="Active" Description="Aktiv" />
+    <Member Name="ColSpan" Description="ColSpan" />
     <Member Name="Column" Description="Spalte" />
     <Member Name="Label" Description="Etikett" />
     <Member Name="Row" Description="Zeile" />

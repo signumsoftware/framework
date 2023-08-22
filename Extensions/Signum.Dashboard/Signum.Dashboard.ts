@@ -63,6 +63,13 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   hideQuickLink: boolean;
 }
 
+export const DashboardLiteModel = new Type<DashboardLiteModel>("DashboardLiteModel");
+export interface DashboardLiteModel extends Entities.ModelEntity {
+  Type: "DashboardLiteModel";
+  displayName: string;
+  hideQuickLink: boolean;
+}
+
 export module DashboardMessage {
   export const CreateNewPart = new MessageKey("DashboardMessage", "CreateNewPart");
   export const DashboardDN_TitleMustBeSpecifiedFor0 = new MessageKey("DashboardMessage", "DashboardDN_TitleMustBeSpecifiedFor0");

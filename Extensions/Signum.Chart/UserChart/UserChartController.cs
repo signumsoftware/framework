@@ -15,7 +15,7 @@ public class UserChartController : ControllerBase
     }
 
     [HttpGet("api/userChart/forEntityType/{typeName}")]
-    public IEnumerable<UserAssetModel<UserChartEntity>> FromEntityType(string typeName)
+    public IEnumerable<Lite<UserChartEntity>> FromEntityType(string typeName)
     {
         return UserChartLogic.GetUserChartsModel(TypeLogic.GetType(typeName));
     }

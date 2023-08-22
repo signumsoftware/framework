@@ -222,7 +222,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showFooter={p.showFooter}
         allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
         allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
-        create={p.create != null ? p.create : tis.some(ti => Navigator.isCreable(ti, { isSearch: true }))}
+        create={p.create != null ? p.create : (qs?.allowCreate ?? true) && tis.some(ti => Navigator.isCreable(ti, {isSearch: true }))}
         createButtonClass={p.createButtonClass}
 
         view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}

@@ -24,7 +24,6 @@ export module OmniboxMessage {
   export const Omnibox_Value = new MessageKey("OmniboxMessage", "Omnibox_Value");
   export const Unknown = new MessageKey("OmniboxMessage", "Unknown");
   export const Yes = new MessageKey("OmniboxMessage", "Yes");
-  export const ComplementWordsRegex = new MessageKey("OmniboxMessage", "ComplementWordsRegex");
   export const Search = new MessageKey("OmniboxMessage", "Search");
 }
 

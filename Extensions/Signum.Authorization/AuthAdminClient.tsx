@@ -76,7 +76,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: UserEntity.token(a => a.state),
         value: UserState.value("Active"),
-        pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 2, active: "Checkbox_Checked" },
+        pinned: { label: () => AuthMessage.OnlyActive.niceToString(), column: 1, active: "Checkbox_Checked" },
       },
     ],
     entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined : <EntityLink lite={row.entity}
@@ -105,7 +105,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
       {
         token: RoleEntity.token(a => a.entity.isTrivialMerge),
         value: false,
-        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 2 }
+        pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 1 }
       }
     ],
     extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
@@ -131,11 +131,9 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
 
     QuickLinks.registerQuickLink(RoleEntity,
-      new QuickLinks.QuickLinkAction((ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
+      new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
           .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
         {
-          key: "types",
-          text: () => AuthAdminMessage.TypeRules.niceToString(),
           isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
         }
     ));
@@ -155,11 +153,9 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Rules/PermissionRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction((ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
+    QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(), (ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
       .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
       {
-        key: "permissions",
-        text: () => AuthAdminMessage.PermissionRules.niceToString(),
         isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
       }
     ));

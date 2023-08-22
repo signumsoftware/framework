@@ -51,10 +51,12 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
           if (types.length == 0)
             return;
 
-          if (types.length == 1)
-            p.findOptions = withAvoidDuplicates(p.findOptions ?? { queryName: types.single().name }, types.single().name);
+          if (types.length == 1) {
+            var tn = types.single().name;
+            p.findOptions = withAvoidDuplicates(p.findOptions ?? Navigator.entitySettings[tn]?.defaultFindOptions ?? { queryName: tn }, tn);
+          }
           else {
-            p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? { queryName: a.name }, a.name));
+            p.findOptionsDictionary = types.toObject(a => a.name, a => withAvoidDuplicates(p.findOptionsDictionary?.[a.name] ?? Navigator.entitySettings[a.name]?.defaultFindOptions ?? { queryName: a.name }, a.name));
           }
         }
 

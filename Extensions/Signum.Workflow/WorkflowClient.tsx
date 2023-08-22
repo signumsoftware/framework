@@ -122,14 +122,12 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   ]);
 
 
-  QuickLinks.registerQuickLink(CaseActivityEntity, new QuickLinks.QuickLinkAction(ctx => {
+  QuickLinks.registerQuickLink(CaseActivityEntity, new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {
     API.fetchCaseFlowPack(ctx.lite)
       .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
       .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
   },
     {
-      key: "caseFlow",
-      text: () => WorkflowActivityMessage.CaseFlow.niceToString(),
       isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
       icon: "shuffle",
       iconColor: "green"
@@ -377,13 +375,10 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
     },
   }));
 
-  QuickLinks.registerQuickLink(WorkflowEntity, new QuickLinks.QuickLinkLink(ctx => workflowActivityMonitorUrl(ctx.lite),
-    {
-      key: "bam",
-      text: () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
-      icon: "gauge", iconColor: "green"
-    }
-  ));
+  QuickLinks.registerQuickLink(WorkflowEntity, new QuickLinks.QuickLinkLink("bam", () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(), ctx => workflowActivityMonitorUrl(ctx.lite), {
+    icon: "gauge", 
+    iconColor: "green"
+  }));
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));

@@ -55,20 +55,20 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
       <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
         {
           p.showGrid && <div className="row">
-            {Array.range(0, maxColumns).map(a => <div className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
+            {Array.range(0, maxColumns).map((a, i) => <div key={i} className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
               <div className="bg-light px-2"> Col {a}</div>
             </div>)}
           </div>
         }
         {
-          Array.range(0, maxRows).map(r => {
+          Array.range(0, maxRows).map((r, i) => {
             var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
             var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
               .flatMap(a => Array.range(0, a.pinned!.colSpan!).map(i => (a.pinned!.column ?? 0) + i + 1))
               .distinctBy(a => a.toString());
             return (
-              <div className={classes("row", p.showGrid  && "py-2")}>
-                {Array.range(0, maxColumns).map(c => {
+              <div key={i} className={classes("row", p.showGrid  && "py-2")}>
+                {Array.range(0, maxColumns).map((c, j) => {
                   var cellPinned = rowPinned.filter(a => (a.pinned!.column ?? 0) == c);
                   if (hiddenColumns.contains(c) && cellPinned.length == 0)
                     return null;
@@ -79,7 +79,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                   var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
                     || hiddenColumns.contains(c);
 
-                  return (<div className={classes("col-sm-" + (bsBase * colSpan), error && "bg-danger")}>
+                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "bg-danger")}>
                     <div className={p.showGrid ? "bg-light" : undefined}>
                       {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
                     </div>

@@ -57,7 +57,7 @@ public static class DeletePart
         return fi;
     }
 
-    public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, Lite<L>>> relatedEntity)
+    public static FluentInclude<T> WithDeletePart<T, L>(this FluentInclude<T> fi, Expression<Func<T, Lite<L>?>> relatedEntity)
         where T : Entity
         where L : Entity
     {

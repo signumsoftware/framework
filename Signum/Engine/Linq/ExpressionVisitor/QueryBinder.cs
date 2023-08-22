@@ -1430,7 +1430,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new UnexpectedValueException(table);
 
         Type resultType = typeof(IQueryable<>).MakeGenericType(query.ElementType);
-        TableExpression tableExpression = new TableExpression(tableAlias, table, table.SystemVersioned != null ? this.systemTime : null, currentTableHint);
+        TableExpression tableExpression = new TableExpression(tableAlias, table, st.SystemTime ?? (table.SystemVersioned != null ? this.systemTime : null), currentTableHint);
         currentTableHint = null;
 
         if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.Current)

@@ -17,7 +17,7 @@ import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
 import { UserAssetModel } from '../../Signum.UserAssets/Signum.UserAssets'
 import { ImportComponent } from '@framework/ImportComponent'
-import { CombinedUserChartPartEntity, UserChartEntity, UserChartPartEntity } from './Signum.Chart.UserChart';
+import { CombinedUserChartPartEntity, UserChartEntity, UserChartLiteModel, UserChartPartEntity } from './Signum.Chart.UserChart';
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries';
 import SelectorModal from '@framework/SelectorModal';
 import { UserChartPartHandler } from '../Dashboard/View/UserChartPart';
@@ -48,17 +48,15 @@ export function start(options: { routes: RouteObject[] }) {
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(ucs => ucs.map(uc =>
-          new QuickLinks.QuickLinkAction((ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.asset.id}/${liteKey(ctx.lite)}`)),
+          new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),
             {
-              key: liteKey(uc.asset),
-              text: () => getToString(uc.asset),
-              hideInAutos: uc.hideQuickLink,
+              onlyForToken: (uc.model as UserChartLiteModel).hideQuickLink,
               icon: "chart-bar", iconColor: "darkviolet"
             }
           ))
         ));
 
-  QuickLinks.registerQuickLink(UserChartEntity, new QuickLinks.QuickLinkAction(
+  QuickLinks.registerQuickLink(UserChartEntity, new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
     ctx => {
       Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
         if (uc.entityType == undefined)
@@ -75,8 +73,6 @@ export function start(options: { routes: RouteObject[] }) {
       })
     },
     {
-      key: "preview",
-      text: () => ChartMessage.Preview.niceToString(),
       isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info"
     }
   ));
@@ -223,7 +219,7 @@ export module Converter {
 
 
 export module API {
-  export function forEntityType(type: string): Promise<UserAssetModel<UserChartEntity>[]> {
+  export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
     return ajaxGet({ url: "/api/userChart/forEntityType/" + type });
   }
 

@@ -1070,11 +1070,15 @@ public class DiffTable
         }
     }
 
-    public DiffColumn AddColumn(DiffColumn col)
+    public DiffColumn AddColumnBefore(string columnName, DiffColumn newColumn)
     {
-        Columns.Add(col.Name, col);
+        var cols = Columns.Values.ToList();
 
-        return col;
+        cols.Insert(cols.FindIndex(c => c.Name == columnName), newColumn);
+
+        Columns = cols.ToDictionary(a => a.Name);
+
+        return newColumn;
     }
 
     public override string ToString()
@@ -1561,6 +1565,8 @@ public class DiffCheckConstraint
     public string Name;
     public string Definition; 
     public string? ColumnName;
+
+    public override string ToString() => Name;
 }
 
 public class DiffForeignKey
@@ -1570,11 +1576,15 @@ public class DiffForeignKey
     public bool IsDisabled;
     public bool IsNotTrusted;
     public List<DiffForeignKeyColumn> Columns;
+
+    public override string ToString() => Name.ToString();
 }
 
 public class DiffForeignKeyColumn
 {
     public string Parent;
     public string Referenced;
+
+    public override string ToString() => $"{Parent} -> {Referenced}";
 }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.

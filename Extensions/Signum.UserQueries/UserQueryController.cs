@@ -6,7 +6,7 @@ namespace Signum.UserQueries;
 public class UserQueryController : ControllerBase
 {
     [HttpGet("api/userQueries/forEntityType/{typeName}")]
-    public IEnumerable<UserAssetModel<UserQueryEntity>> FromEntityType(string typeName)
+    public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
     {
         return UserQueryLogic.GetUserQueriesModel(TypeLogic.GetType(typeName));
     }

@@ -81,6 +81,7 @@ public static class EnumerableUniqueExtensions
     /// <typeparam name="T">Type of the collection</typeparam>
     /// <param name="collection">The collection to search</param>
     /// <returns>The single Element from the collection</returns>
+    [AvoidEagerEvaluation]
     public static T SingleEx<T>(this IEnumerable<T> collection)
     {
         if (collection == null)
@@ -184,6 +185,7 @@ public static class EnumerableUniqueExtensions
         return query.Where(predicate).SingleOrDefaultEx();
     }
 
+    [AvoidEagerEvaluation]
     public static T? SingleOrDefaultEx<T>(this IEnumerable<T> collection)
     {
         if (collection == null)
@@ -246,6 +248,7 @@ public static class EnumerableUniqueExtensions
         return query.Where(predicate).FirstEx();
     }
 
+    [AvoidEagerEvaluation]
     public static T FirstEx<T>(this IEnumerable<T> collection)
     {
         if (collection == null)

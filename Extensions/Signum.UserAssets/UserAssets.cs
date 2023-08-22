@@ -48,15 +48,6 @@ public class LiteConflictEmbedded : EmbeddedEntity
 
 }
 
-[InTypeScript(false)]
-public class UserAssetModel<T> : ModelEntity
-where T : Entity
-{
-    public Lite<T> Asset { get; set; }
-    public bool HideQuickLink { get; set; }
-}
-
-
 public enum EntityAction
 {
     Identical,

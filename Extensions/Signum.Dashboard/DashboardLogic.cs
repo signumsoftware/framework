@@ -58,6 +58,7 @@ public static class DashboardLogic
             OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
 
             sb.Include<DashboardEntity>()
+                .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
                 .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
                 .WithQuery(() => cp => new
                 {
@@ -355,14 +356,14 @@ public static class DashboardLogic
             .ToList();
     }
 
-    public static List<UserAssetModel<DashboardEntity>> GetDashboardsModel(Type entityType)
+    public static List<Lite<DashboardEntity>> GetDashboardsModel(Type entityType)
     {
         return GetDashboardsEntity(entityType)
-            .Select(d => new UserAssetModel<DashboardEntity>() 
-            { 
-                Asset = d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)),
-                HideQuickLink = d.HideQuickLink 
-            })
+            .Select(d => d.ToLite(new DashboardLiteModel
+            {
+                DisplayName = PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName),
+                HideQuickLink = d.HideQuickLink
+            }))
             .ToList();
     }
 
