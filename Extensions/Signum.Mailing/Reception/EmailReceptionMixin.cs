@@ -28,7 +28,7 @@ public class EmailReceptionInfoEmbedded : EmbeddedEntity
     [BindParent]
     public BigStringEmbedded RawContent { get; set; } = new BigStringEmbedded();
 
-    [DbTypeAttribute(DateTimeKind=DateTimeKind.Utc)]
+    [DbTypeAttribute(DateTimeKind = DateTimeKind.Utc)]
     public DateTime SentDate { get; set; }
 
     public DateTime ReceivedDate { get; set; }
