@@ -220,7 +220,7 @@ public static class UserChartLogic
     public static List<Lite<UserChartEntity>> GetUserChartsModel(Type entityType)
     {
         return GetUserChartsEntity(entityType)
-             .Select(uc => uc.ToLite(new UserChartEntity
+             .Select(uc => uc.ToLite(new UserChartLiteModel
              {
                  DisplayName = PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName),
                  Query = uc.Query,
