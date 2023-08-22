@@ -27,8 +27,6 @@ import { QueryEntity } from '@framework/Signum.Basics';
 import { downloadFile } from '../Signum.Files/Components/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { QueryDescription } from '@framework/FindOptions';
-import { UserAssetModel } from '../Signum.UserAssets/Signum.UserAssets';
-
 import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';

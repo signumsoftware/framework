@@ -15,7 +15,6 @@ import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedde
 import UserChartMenu from './UserChartMenu'
 import * as ChartClient from '../ChartClient'
 import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
-import { UserAssetModel } from '../../Signum.UserAssets/Signum.UserAssets'
 import { ImportComponent } from '@framework/ImportComponent'
 import { CombinedUserChartPartEntity, UserChartEntity, UserChartLiteModel, UserChartPartEntity } from './Signum.Chart.UserChart';
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries';
