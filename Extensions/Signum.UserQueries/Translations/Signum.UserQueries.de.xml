@@ -24,6 +24,11 @@
     <Member Name="Query" Description="Abfrage" />
     <Member Name="RefreshMode" Description="Aktualisierungsmodus" />
   </Type>
+  <Type Name="UserQueryLiteModel" Description="Benutzerabfrage lite">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="Query" Description="Abfrage" />
+  </Type>
   <Type Name="UserQueryMessage">
     <Member Name="ApplyChanges" Description="Änderungen anwenden" />
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
