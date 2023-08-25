@@ -355,6 +355,11 @@ export module API {
     return ajaxGet({ url: "/api/userQueries/forQuery/" + queryKey });
   }
 
+
+  export function translated(userQuery: Lite<UserQueryEntity>): Promise<UserQueryLiteModel> {
+    return ajaxPost({ url: "/api/userQueries/translated" }, userQuery);
+  }
+
   export function forQueryAppendFilters(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet({ url: "/api/userQueries/forQueryAppendFilters/" + queryKey });
   }

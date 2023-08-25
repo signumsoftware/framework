@@ -253,12 +253,7 @@ public static class UserQueryLogic
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
             .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
-            .Select(uq => uq.ToLite(new UserQueryLiteModel
-            {
-                DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
-                HideQuickLink = uq.HideQuickLink,
-                Query = uq.Query,
-            }))
+            .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
             .ToList();
     }
 
@@ -286,12 +281,7 @@ public static class UserQueryLogic
     public static List<Lite<UserQueryEntity>> GetUserQueriesModel(Type entityType)
     {
         return GetUserQueriesEntity(entityType)
-             .Select(uq => uq.ToLite(new UserQueryLiteModel
-             {
-                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
-                 HideQuickLink = uq.HideQuickLink,
-                 Query = uq.Query,
-             }))
+             .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
              .ToList();
     }
 
@@ -301,7 +291,7 @@ public static class UserQueryLogic
 
         return UserQueries.Value.Values
             .Where(uq => uq.EntityType == null && isAllowed(uq))
-             .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+             .Select(d => d.ToLite(UserQueryLiteModel.Translated(d)))
              .Autocomplete(subString, limit)
              .ToList();
     }
