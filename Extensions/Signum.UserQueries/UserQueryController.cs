@@ -11,6 +11,15 @@ public class UserQueryController : ControllerBase
         return UserQueryLogic.GetUserQueriesModel(TypeLogic.GetType(typeName));
     }
 
+    [HttpPost("api/userQueries/translated")]
+    public UserQueryLiteModel Translated([FromBody]Lite<UserQueryEntity> lite)
+    {
+        var uq = UserQueryLogic.UserQueries.Value[lite];
+
+        return UserQueryLiteModel.Translated(uq);
+    }
+
+
     [HttpGet("api/userQueries/forQuery/{queryKey}")]
     public IEnumerable<Lite<UserQueryEntity>> FromQuery(string queryKey)
     {
