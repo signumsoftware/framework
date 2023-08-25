@@ -35,17 +35,16 @@ export function start(options: { routes: RouteObject[], showAlerts?: (typeName: 
     contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(entityType =>
-    new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
-      {
-        key: getQueryKey(AlertEntity),
-        text: () => AlertEntity.nicePluralName(),
-        isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
-        icon: "clock-rotate-left",
-        iconColor: "green",
-        color: "success",
-      }
-    ));
+  QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
+    {
+      key: getQueryKey(AlertEntity),
+      text: () => AlertEntity.nicePluralName(),
+      isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
+      icon: "clock-rotate-left",
+      iconColor: "green",
+      color: "success",
+    }
+  )]));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],

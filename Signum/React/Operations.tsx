@@ -45,8 +45,7 @@ export function start() {
 
   AppContext.clearSettingsActions.push(clearOperationSettings);
 
-  QuickLinks.registerGlobalQuickLink(entityType =>
-    new QuickLinks.QuickLinkExplore(entityType, ctx => ({
+  QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(entityType, ctx => ({
       queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
     }),
       {
@@ -57,7 +56,7 @@ export function start() {
         iconColor: "green",
         color: "success",
       }
-    ));
+    )]));
 
   Finder.formatRules.push({
     name: "CellOperation",

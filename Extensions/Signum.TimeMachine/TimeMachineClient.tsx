@@ -30,15 +30,15 @@ import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine'
 export function start(options: { routes: RouteObject[] }) {
 
   if (isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-    QuickLinks.registerGlobalQuickLink(entityType => !getTypeInfo(entityType).isSystemVersioned ? undefined :
-      new QuickLinks.QuickLinkLink("TimeMachine",  () => OperationLogEntity.nicePluralName(), ctx => timeMachineRoute(ctx.lite),
-        {
+    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
+      [
+        new QuickLinks.QuickLinkLink("TimeMachine", () => OperationLogEntity.nicePluralName(), ctx => timeMachineRoute(ctx.lite), {
           isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
           icon: "clock-rotate-left",
           iconColor: "blue",
           color: "success",
-        }
-      ));
+        })
+      ]));
 
 /*  QuickLinks.registerGlobalQuickLink(entityType => {
     if (!getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
