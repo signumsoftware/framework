@@ -28,17 +28,18 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     result.filters.forEach(f => {
       array.push(<span> </span>);
 
-      let last: string | undefined = undefined;
       if (f.queryTokenMatches)
-        f.queryTokenMatches.map(m => {
-          if (last != undefined)
+        f.queryTokenMatches.map((m, i) => {
+          if (i != 0)
             array.push(<span>.</span>);
           this.renderMatch(m, array);
-          last = m.text;
         });
 
-      if (f.queryToken.niceName != last) {
-        if (last != undefined)
+
+      var shown = f.queryTokenMatches?.map(a => a.text).join(".");
+
+      if (shown == null || (shown != f.queryTokenOmniboxPascal && shown != f.queryTokenOmniboxPascal.tryAfterLast("."))) {
+        if (f.queryTokenMatches && f.queryTokenMatches.length > 0)
           array.push(<span>.</span>);
 
         array.push(this.coloredSpan(f.queryTokenOmniboxPascal.tryAfterLast(".") ?? f.queryTokenOmniboxPascal, "gray"));

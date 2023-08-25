@@ -69,7 +69,7 @@ function VersionInfoTooltip(p: { extraInformation?: string}) {
       <br />
       {bt.toFormat("tt")} ({bt.toRelative()})
       {p.extraInformation && <br/>}
-      {p.extraInformation}
+      {p.extraInformation?.split("\n").joinHtml(<br/>)}
     </div>
   );
 }

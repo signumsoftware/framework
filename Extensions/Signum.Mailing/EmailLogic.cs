@@ -45,6 +45,12 @@ public static class EmailLogic
             CultureInfoLogic.AssertStarted(sb);
             EmailLogic.getConfiguration = getConfiguration;
             EmailTemplateLogic.Start(sb, getEmailSenderConfiguration);
+            if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(ImageAttachmentEntity)))
+                ImageAttachmentLogic.Start(sb);
+
+            if (sb.Settings.ImplementedBy((EmailTemplateEntity e) => e.Attachments.First(), typeof(FileTokenAttachmentEntity)))
+                FileTokenAttachmentLogic.Start(sb);
+
             TemplatingLogic.Start(sb);
             EmailSenderConfigurationLogic.Start(sb);
             if (attachment != null)

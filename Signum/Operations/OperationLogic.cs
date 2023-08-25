@@ -239,7 +239,7 @@ public static class OperationLogic
             if (errors.Any())
                 throw new InvalidOperationException(errors.ToString("\r\n") + @"
 Consider the following options:
-* Implement an operation for saving using 'save' snippet or .WithSave() method.
+* Implement a save operation using sb.Include<T>().WithSave(..), or uinsg the 'save' snippet.
 * Change the EntityKind to a more appropiated one.
 * Exceptionally, override the property EntityTypeAttribute.RequiresSaveOperation for your particular entity.");
         }

@@ -5,6 +5,7 @@ import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
 import * as QuickLinks from '@framework/QuickLinks'
+import { getQueryKey } from '@framework/Reflection'
 
 export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }) {
   Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
@@ -19,12 +20,14 @@ export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeNa
     contextual: { isVisible: ctx => couldHaveNotes(ctx.context.lites[0].EntityType), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
-    queryName: NoteEntity,
-    filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite}]
-  }, {
-    isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(ctx.lite.EntityType),
-    icon: "note-sticky",
-    iconColor: "#337ab7",
-  }));
+  QuickLinks.registerGlobalQuickLink(entityType =>
+    new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
+      {
+        key: getQueryKey(NoteEntity),
+        text: () => NoteEntity.nicePluralName(),
+        isVisible: Navigator.isViewable(NoteEntity) && couldHaveNotes(entityType),
+        icon: "note-sticky",
+        iconColor: "#337ab7",
+      })
+  );
 }

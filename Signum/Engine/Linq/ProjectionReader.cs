@@ -112,7 +112,7 @@ internal class ProjectionRowEnumerable<T> : IEnumerable<T>, IEnumerable
 
     public IEnumerator<T> GetEnumerator()
     {
-        return Interlocked.Exchange(ref enumerator, null).ThrowIfNull("Cannot enumerate more than once");
+        return Interlocked.Exchange(ref enumerator, null) ?? throw new InvalidOperationException("Cannot enumerate more than once");
     }
 
     IEnumerator IEnumerable.GetEnumerator()

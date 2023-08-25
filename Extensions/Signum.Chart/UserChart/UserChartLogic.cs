@@ -14,7 +14,7 @@ namespace Signum.Chart.UserChart;
 public static class UserChartLogic
 {
     public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts = null!;
-    public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByTypeForQuickLinks = null!;
+    public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByType = null!;
     public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
 
     [AutoExpressionField]
@@ -31,6 +31,7 @@ public static class UserChartLogic
 
             sb.Include<UserChartEntity>()
                 .WithExpressionTo((UserChartEntity d) => d.CachedQueries())
+                .WithLiteModel(uq => new UserChartLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink })
                 .WithSave(UserChartOperation.Save)
                 .WithDelete(UserChartOperation.Delete)
                 .WithQuery(() => uq => new
@@ -152,7 +153,7 @@ public static class UserChartLogic
             UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KeyValuePair.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
                 new InvalidateWith(typeof(UserChartEntity)));
 
-            UserChartsByTypeForQuickLinks = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink)
+            UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null)
             .SelectCatch(a => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType!.Id), a.ToLite()))
             .GroupToDictionary(),
                 new InvalidateWith(typeof(UserChartEntity)));
@@ -200,15 +201,32 @@ public static class UserChartLogic
             .ToList();
     }
 
-    public static List<Lite<UserChartEntity>> GetUserChartsEntity(Type entityType)
+    public static IEnumerable<UserChartEntity> GetUserChartsEntity(Type entityType)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<UserChartEntity>(userInterface: false);
 
-        return UserChartsByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
+        return UserChartsByType.Value.TryGetC(entityType).EmptyIfNull()
             .Select(lite => UserCharts.Value.GetOrThrow(lite))
-            .Where(uc => isAllowed(uc))
+            .Where(uc => isAllowed(uc));
+    }
+
+    public static List<Lite<UserChartEntity>> GetUserCharts(Type entityType)
+    {
+        return GetUserChartsEntity(entityType)
             .Select(uc => uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)))
             .ToList();
+    }
+
+    public static List<Lite<UserChartEntity>> GetUserChartsModel(Type entityType)
+    {
+        return GetUserChartsEntity(entityType)
+             .Select(uc => uc.ToLite(new UserChartEntity
+             {
+                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName),
+                 Query = uc.Query,
+                 HideQuickLink = uc.HideQuickLink
+             }))
+             .ToList();
     }
 
     public static List<Lite<UserChartEntity>> Autocomplete(string subString, int limit)

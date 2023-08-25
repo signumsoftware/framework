@@ -2,10 +2,10 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { DomUtils, classes, Dic, softCast } from '../Globals'
 import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
+import { CellFormatter, EntityFormatter, isAggregate, toFilterOptions } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, FilterConditionOption, FilterConditionOptionParsed, isFilterCondition
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -451,7 +451,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleFiltersChanged = (avoidSearch?: boolean) => {
 
-    if (this.isManualRefreshOrAllPagination() || avoidSearch)
+    //if (this.isManualRefreshOrAllPagination() || avoidSearch)
       this.forceUpdate();
 
     if (this.props.onFiltersChanged)
@@ -511,7 +511,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
-    const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+    const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
 
     return (
       <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
@@ -548,7 +548,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 columnOption={this.state.editingColumn}
                 onChange={this.handleColumnChanged}
                 queryDescription={qd}
-                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual}
                 close={this.handleColumnClose} />
             }
             <div ref={d => this.containerDiv = d}
@@ -974,11 +974,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var showFilter = await rule.execute(token, value, this);
 
-    if (!this.state.showFilters && showFilter)
+    if (!this.state.showFilters && showFilter) {
       this.setState({ showFilters: true });
-    else {
-      this.doSearchPage1();
     }
+
+    if (rt && cm.rowIndex != null)
+      this.doSearchPage1();
 
     this.handleFiltersChanged();
 
@@ -1474,7 +1475,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (hasToArray(t))
       return false;
 
-    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
+    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO" || t.type.name == "ManualCellDTO")
       return t.hasOrderAdapter == true;
 
     return true;
@@ -1529,7 +1530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token)));
 
     var keyFilters = resFo.columnOptions
       .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
@@ -1708,10 +1709,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return this.props.findOptions.groupResults || this.props.view;
   }
 
-  getRowMarked(row: ResultRow) {
-    return row.entity && this.getMarkedRow(row.entity);
-  }
-
   getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
  
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
@@ -1744,7 +1741,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var anyCombineEquals = columns.some(a => a.column.combineRows != null);
 
     return resultTable.rows.map((row, i, rows) => {
-      const mark = this.getRowMarked(row);
+      const mark = this.getMarkedRow(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
           mark?.status == "Error" ? "table-danger" :
@@ -1829,7 +1826,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   getRowMarketIcon(row: ResultRow, rowIndex: number) {
-    const mark = this.getRowMarked(row);
+    const mark = this.getMarkedRow(row);
     if (!mark)
       return undefined;
 
@@ -1958,12 +1955,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.dataChanged();
   }
 
-  getMarkedRow(entity: Lite<Entity>): MarkedRow | undefined {
+  getMarkedRow(row: ResultRow): MarkedRow | undefined {
 
-    if (!entity || !this.state.markedRows)
+    if (!this.state.markedRows)
       return undefined;
 
-    const m = this.state.markedRows[liteKey(entity)];
+    var key = this.props.querySettings?.markRowsColumn ? row.columns[this.state.resultTable!.columns.indexOf(this.props.querySettings?.markRowsColumn)] : row.entity && liteKey(row.entity);
+
+    if (key == null)
+      return;
+
+    const m = this.state.markedRows[key];
+    if (m === null)
+        return { status: "Success", message: undefined };
 
     if (typeof m === "string") {
       if (m == "")

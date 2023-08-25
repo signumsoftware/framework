@@ -74,6 +74,10 @@
     <Member Name="Compress" Description="Komprimieren" />
     <Member Name="Expand" Description="Erweitern" />
   </Type>
+  <Type Name="ContainerTokenKey" Description="Container-Token-Schlüssel" Gender="m">
+    <Member Name="Operations" Description="[Operation]" />
+    <Member Name="QuickLinks" Description="[QuickLinks]" />
+  </Type>
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
   </Type>
@@ -487,6 +491,7 @@
     <Member Name="AddValue" Description="Wert hinzufügen" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
+    <Member Name="ColSpan" Description="ColSpan" />
     <Member Name="Column" Description="Spalte" />
     <Member Name="Columns" Description="Spalten" />
     <Member Name="CombineRowsWith" Description="Kombinieren von Zeilen mit" />
@@ -547,7 +552,6 @@
     <Member Name="Split" Description="Teilen" />
     <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
-    <Member Name="SplitText" Description="Text aufteilen" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />
@@ -653,6 +657,7 @@
     <Member Name="_0ShouldBe1" Description="{0} sollte {1} sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
+    <Member Name="_0ShouldBeADateInTheFuture" Description="{0} sollte ein Datum in der Zukunft sein" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
     <Member Name="_0ShouldBeEmpty" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />

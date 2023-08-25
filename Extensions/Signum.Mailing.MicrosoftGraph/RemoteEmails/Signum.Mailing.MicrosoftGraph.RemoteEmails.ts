@@ -65,7 +65,7 @@ export interface RemoteEmailMessageModel extends Entities.ModelEntity {
 }
 
 export module RemoteEmailMessagePermission {
-  export const ViewRemoveEmailMessagesFromOthers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewRemoveEmailMessagesFromOthers");
+  export const ViewEmailMessagesFromOtherUsers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers");
 }
 
 export module RemoteEmailMessageQuery {

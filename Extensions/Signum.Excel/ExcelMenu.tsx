@@ -83,8 +83,8 @@ export default function ExcelMenu(p: ExcelMenuProps) {
             <Dropdown.Item key={i}
               onClick={() => handleExcelReport(uq)}>
               {getToString(uq)}
-            </Dropdown.Item>),
-            Operations.tryGetOperationInfo(ExcelReportOperation.Save, ExcelReportEntity) &&
+              </Dropdown.Item>),
+            ExcelReportEntity.tryOperationInfo(ExcelReportOperation.Save) &&
             [
               <Dropdown.Item onClick={handleAdmnister}><FontAwesomeIcon icon={["fas", "magnifying-glass"]} className="me-2" />{ExcelMessage.Administer.niceToString()}</Dropdown.Item>,
               <Dropdown.Item onClick={handleCreate}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{ExcelMessage.CreateNew.niceToString()}</Dropdown.Item>,

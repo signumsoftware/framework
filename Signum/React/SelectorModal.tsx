@@ -48,12 +48,23 @@ export default function SelectorModal(p: SelectorModalProps) {
   }
 
   function handleCheckboxOnChange(e: React.ChangeEvent<HTMLInputElement>, value: unknown) {
-    if (e.currentTarget.checked) {
-      setSelectedItems([...selectedItems, value]);
+    if (p.multiSelect?.maxElements == 1) {
+      if (e.currentTarget.checked) {
+        setSelectedItems([value]);
+      }
+      else {
+        setSelectedItems([]);
+      }
+    } else {
+      if (e.currentTarget.checked) {
+        setSelectedItems([...selectedItems, value]);
+      }
+      else {
+        setSelectedItems(selectedItems.filter(v => v != value));
+      }
     }
-    else {
-      setSelectedItems(selectedItems.filter(v => v != value));
-    }
+
+  
   };
 
   return (
@@ -73,8 +84,8 @@ export default function SelectorModal(p: SelectorModalProps) {
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
           {p.multiSelect ? <div>
             {p.options.map((o, i) =>
-              <label className="m-2" style={{ display: "block", userSelect: "none" }} onDoubleClick={e => { e.preventDefault(); handleDoubleClickClicked(o.value); } } key={i}>
-                <input type="checkbox" onChange={e => handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} />
+              <label className="m-2" style={{ display: "block", userSelect: "none" }} onDoubleClick={e => { e.preventDefault(); handleDoubleClickClicked(o.value); }} key={i}>
+                <input type={p.multiSelect?.maxElements == 1 ? "radio" : "checkbox"} onChange={e => handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} />
                 {" "}{o.displayName}
               </label>)}
           </div> :

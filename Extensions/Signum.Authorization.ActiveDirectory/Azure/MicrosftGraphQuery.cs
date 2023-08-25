@@ -77,7 +77,7 @@ public class MicrosoftGraphQueryConverter
             throw new UnexpectedValueException(f);
     }
 
-    protected virtual string? BuildCondition(string field, FilterOperation operation, string value)
+    public virtual string? BuildCondition(string field, FilterOperation operation, string value)
     {
         return operation switch
         {

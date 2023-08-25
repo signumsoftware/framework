@@ -60,6 +60,14 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   tokenEquivalencesGroups: Entities.MList<TokenEquivalenceGroupEntity>;
   guid: string /*Guid*/;
   key: string | null;
+  hideQuickLink: boolean;
+}
+
+export const DashboardLiteModel = new Type<DashboardLiteModel>("DashboardLiteModel");
+export interface DashboardLiteModel extends Entities.ModelEntity {
+  Type: "DashboardLiteModel";
+  displayName: string;
+  hideQuickLink: boolean;
 }
 
 export module DashboardMessage {
@@ -74,6 +82,9 @@ export module DashboardMessage {
   export const LasUpdateWasOn0 = new MessageKey("DashboardMessage", "LasUpdateWasOn0");
   export const TheUserQuery0HasNoColumnWithSummaryHeader = new MessageKey("DashboardMessage", "TheUserQuery0HasNoColumnWithSummaryHeader");
   export const Edit = new MessageKey("DashboardMessage", "Edit");
+  export const CLickInOneChartToFilterInTheOthers = new MessageKey("DashboardMessage", "CLickInOneChartToFilterInTheOthers");
+  export const CtrlClickToFilterByMultipleElements = new MessageKey("DashboardMessage", "CtrlClickToFilterByMultipleElements");
+  export const AltClickToOpenResultsInAModalWindow = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");
 }
 
 export module DashboardOperation {

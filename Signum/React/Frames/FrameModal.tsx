@@ -235,7 +235,7 @@ export const FrameModal = React.forwardRef(function FrameModal(p: FrameModalProp
 
   const pr = typeInfo ? PropertyRoute.root(typeInfo) : p.propertyRoute;
   if (!pr)
-    throw new Error("propertyRoute is mandatory for embeddedEntities");
+    throw new Error(`No TypeInfo for "${typeName}" found, if is an EmbeddedEntity set the propertyRoute explicitly`);
 
   if (state) {
     frame = {

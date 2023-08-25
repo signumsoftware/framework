@@ -27,34 +27,33 @@ public static class AzureADLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
+            MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserADMixin));
+
+            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+                
+            As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
             {
-                PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+                Owner = u.ToLite(),
+                CultureInfo = u.CultureInfo,
+                DisplayName = u.UserName,
+                Email = u.Email,
+                AzureUserId = u.Mixin<UserADMixin>().OID
+            });
 
-                As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
-                {
-                    Owner = u.ToLite(),
-                    CultureInfo = u.CultureInfo,
-                    DisplayName = u.UserName,
-                    Email = u.Email,
-                    AzureUserId = u.Mixin<UserADMixin>().OID
-                });
+            UserWithClaims.FillClaims += (userWithClaims, user) =>
+            {
+                var mixin = ((UserEntity)user).Mixin<UserADMixin>();
+                userWithClaims.Claims["OID"] = mixin.OID;
+                userWithClaims.Claims["SID"] = mixin.SID;
+            };
 
-                UserWithClaims.FillClaims += (userWithClaims, user) =>
-                {
-                    var mixin = ((UserEntity)user).Mixin<UserADMixin>();
-                    userWithClaims.Claims["OID"] = mixin.OID;
-                    userWithClaims.Claims["SID"] = mixin.SID;
-                };
-
-                Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
-                {
-                    UserName = u.UserName,
-                    ToStringValue = u.ToString(),
-                    OID = u.Mixin<UserADMixin>().OID,
-                    SID = u.Mixin<UserADMixin>().SID,
-                });
-            }
+            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+            {
+                UserName = u.UserName,
+                ToStringValue = u.ToString(),
+                OID = u.Mixin<UserADMixin>().OID,
+                SID = u.Mixin<UserADMixin>().SID,
+            });
 
             if (deactivateUsersTask)
             {

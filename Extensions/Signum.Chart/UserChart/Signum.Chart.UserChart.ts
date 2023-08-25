@@ -52,6 +52,14 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
 }
 
+export const UserChartLiteModel = new Type<UserChartLiteModel>("UserChartLiteModel");
+export interface UserChartLiteModel extends Entities.ModelEntity {
+  Type: "UserChartLiteModel";
+  displayName: string;
+  query: Basics.QueryEntity;
+  hideQuickLink: boolean;
+}
+
 export module UserChartOperation {
   export const Save : Operations.ExecuteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Save");
   export const Delete : Operations.DeleteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Delete");

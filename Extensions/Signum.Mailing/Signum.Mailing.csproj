@@ -38,4 +38,8 @@
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Attachments\" />
+	</ItemGroup>
 </Project>

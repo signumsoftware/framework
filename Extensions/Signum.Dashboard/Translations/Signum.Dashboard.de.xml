@@ -34,14 +34,22 @@
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
     <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
+  <Type Name="DashboardLiteModel" Description="Dashboard lite">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+  </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} ist {1} (statt {2}) in {3}" />
+    <Member Name="AltClickToOpenResultsInAModalWindow" Description="[Alt] + Klicken, um die Ergebnisse in einem modalen Fenster zu öffnen" />
+    <Member Name="CLickInOneChartToFilterInTheOthers" Description="Klicken Sie in ein Diagramm, um in den anderen zu filtern" />
     <Member Name="CreateNewPart" Description="Neues Teil erstellen" />
+    <Member Name="CtrlClickToFilterByMultipleElements" Description="[Strg] + Klicken, um nach mehreren Elementen zu filtern" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Titel muss angegeben werden für {0}" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Aus Leistungsgründen kann dieses Dashboard veraltete Informationen anzeigen" />

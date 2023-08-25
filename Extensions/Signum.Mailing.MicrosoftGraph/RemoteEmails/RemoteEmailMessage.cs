@@ -1,4 +1,3 @@
-using Microsoft.Graph.Models;
 using Signum.Authorization;
 
 namespace Signum.Mailing.MicrosoftGraph.RemoteEmails;
@@ -58,7 +57,7 @@ public enum RemoteEmailMessage
 [AutoInit]
 public static class RemoteEmailMessagePermission
 {
-    public static PermissionSymbol ViewRemoveEmailMessagesFromOthers;
+    public static PermissionSymbol ViewEmailMessagesFromOtherUsers;
 }
 
 public enum RemoteEmailMessageQuery

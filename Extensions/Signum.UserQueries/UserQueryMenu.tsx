@@ -198,7 +198,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
       ...fo.orderOptions?.map(a => a?.token) ?? [],
-    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray));
+    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | SubTokensOptions.CanManual));
 
     await parser.finished();
 
@@ -246,7 +246,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const currentUserQueryToStr = currentUserQuery ? getToString(currentUserQuery) : undefined;
 
-  var canSave = Operations.tryGetOperationInfo(UserQueryOperation.Save, UserQueryEntity) != null;
+  var canSave = UserQueryEntity.tryOperationInfo(UserQueryOperation.Save) != null;
 
   const label = (
     <span title={currentUserQueryToStr}>

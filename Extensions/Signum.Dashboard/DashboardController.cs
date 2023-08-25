@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.Authorization;
+using Signum.UserAssets;
 
 namespace Signum.Dashboard;
 
@@ -8,7 +9,7 @@ public class DashboardController : ControllerBase
     [HttpGet("api/dashboard/forEntityType/{typeName}")]
     public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
     {
-        return DashboardLogic.GetDashboardsEntity(TypeLogic.GetType(typeName));
+        return DashboardLogic.GetDashboardsModel(TypeLogic.GetType(typeName));
     }
 
     [HttpGet("api/dashboard/home")]

@@ -44,6 +44,7 @@ public static class DynamicExpressionLogic
 
             DynamicTypeLogic.GetAlreadyTranslatedExpressions = () =>
             {
+                var cacheOldDisabled = CacheLogic.GloballyDisabled;
                 CacheLogic.GloballyDisabled = true;
                 try
                 {
@@ -57,12 +58,13 @@ public static class DynamicExpressionLogic
                 }
                 finally
                 {
-                    CacheLogic.GloballyDisabled = false;
+                    CacheLogic.GloballyDisabled = cacheOldDisabled;
                 }
             };
 
             DynamicTypeLogic.GetFormattedExpressions = () =>
             {
+                var cacheOldDisabled = CacheLogic.GloballyDisabled;
                 CacheLogic.GloballyDisabled = true;
                 try
                 {
@@ -76,7 +78,7 @@ public static class DynamicExpressionLogic
                 }
                 finally
                 {
-                    CacheLogic.GloballyDisabled = false;
+                    CacheLogic.GloballyDisabled = cacheOldDisabled;
                 }
             };
 
@@ -93,6 +95,7 @@ public static class DynamicExpressionLogic
 
     public static List<CodeFile> GetCodeFiles()
     {
+        var cacheOldDisabled = CacheLogic.GloballyDisabled;
         CacheLogic.GloballyDisabled = true;
         try
         {
@@ -113,7 +116,7 @@ public static class DynamicExpressionLogic
         }
         finally
         {
-            CacheLogic.GloballyDisabled = false;
+            CacheLogic.GloballyDisabled = cacheOldDisabled;
         }
     }
 }

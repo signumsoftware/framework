@@ -9,7 +9,6 @@ using Signum.Mailing.Templates;
 using Signum.Scheduler;
 using Signum.Templating;
 using Signum.Mailing.Package;
-using Signum.Authorization;
 
 namespace Signum.Alerts;
 

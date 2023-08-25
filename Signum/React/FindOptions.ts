@@ -95,6 +95,7 @@ export interface PinnedFilter {
   label?: string | (() => string);
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }
@@ -127,6 +128,7 @@ export interface PinnedFilterParsed {
   label?: string;
   row?: number;
   column?: number;
+  colSpan?: number;
   active?: PinnedFilterActive;
   splitValue?: boolean;
 }
@@ -134,8 +136,9 @@ export interface PinnedFilterParsed {
 export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
   return {
     label: typeof pf.label == "function" ? pf.label() : pf.label,
-    row: pf.row,
     column: pf.column,
+    colSpan: pf.colSpan,
+    row: pf.row,
     active: pf.active,
     splitValue: pf.splitValue
   };
@@ -194,6 +197,7 @@ export enum SubTokensOptions {
   CanOperation = 8,
   CanToArray = 16,
   CanSnippet= 32,
+  CanManual = 64,
 }
 
 export interface QueryToken {
@@ -215,6 +219,20 @@ export interface QueryToken {
   propertyRoute?: string;
 }
 
+export interface ManualToken { 
+  toStr: string;
+  niceName: string;
+  key: string;
+  typeColor?: string;
+  niceTypeName: string;
+  subToken?: Promise<ManualToken[]>;
+}
+export interface ManualCellDto {
+  lite: Lite<Entity>;
+  manualContainerTokenKey: string;
+  manualTokenKey: string;
+}
+
 function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string {
   if (token instanceof QueryTokenString)
     return token.token;
@@ -233,7 +251,7 @@ export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | stri
   return token == tokenStart || token.startsWith(tokenStart + ".");
 }
 
-export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation"  | "ToArray";
+export type QueryTokenType = "Aggregate" | "Element" | "AnyOrAll" | "Operation"  | "ToArray" | "Manual";
 
 export function hasAnyOrAll(token: QueryToken | undefined): boolean {
   if (token == undefined)
@@ -287,6 +305,16 @@ export function hasOperation(token: QueryToken | undefined): boolean {
     return true;
 
   return hasOperation(token.parent);
+}
+
+export function hasManual(token: QueryToken | undefined): boolean {
+  if (token == undefined)
+    return false;
+
+  if (token.queryTokenType == "Manual")
+    return true;
+
+  return hasManual(token.parent);
 }
 
 export function hasToArray(token: QueryToken | undefined): QueryToken | undefined {

@@ -211,11 +211,11 @@ public static class TreeLogic
     public static void RegisterExpressions<T>()
         where T : TreeEntity
     {
-        QueryLogic.Expressions.Register((T c) => c.Children(), TreeMessage.Children);
-        QueryLogic.Expressions.Register((T c) => c.Parent(), TreeMessage.Parent);
-        QueryLogic.Expressions.Register((T c) => c.Descendants(), TreeMessage.Descendants);
-        QueryLogic.Expressions.Register((T c) => c.Ascendants(), TreeMessage.Ascendants);
-        QueryLogic.Expressions.Register((T c) => c.Level(), TreeMessage.Level);
+        QueryLogic.Expressions.Register((T c) => c.Children(), () => TreeMessage.Children.NiceToString(), TreeMessage.Children.ToString());
+        QueryLogic.Expressions.Register((T c) => c.Parent(), () => TreeMessage.Parent.NiceToString(), TreeMessage.Parent.ToString());
+        QueryLogic.Expressions.Register((T c) => c.Descendants(), () => TreeMessage.Descendants.NiceToString(), TreeMessage.Descendants.ToString());
+        QueryLogic.Expressions.Register((T c) => c.Ascendants(), () => TreeMessage.Ascendants.NiceToString(), TreeMessage.Ascendants.ToString());
+        QueryLogic.Expressions.Register((T c) => c.Level(), () => TreeMessage.Level.NiceToString(), TreeMessage.Level.ToString());
     }
 
     public static void RegisterOperations<T>(Func<T, MoveTreeModel, T>? copy) where T : TreeEntity, new()

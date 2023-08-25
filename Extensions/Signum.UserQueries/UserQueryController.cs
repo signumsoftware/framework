@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Signum.UserAssets;
 
 namespace Signum.UserQueries;
 
@@ -7,7 +8,7 @@ public class UserQueryController : ControllerBase
     [HttpGet("api/userQueries/forEntityType/{typeName}")]
     public IEnumerable<Lite<UserQueryEntity>> FromEntityType(string typeName)
     {
-        return UserQueryLogic.GetUserQueriesEntity(TypeLogic.GetType(typeName));
+        return UserQueryLogic.GetUserQueriesModel(TypeLogic.GetType(typeName));
     }
 
     [HttpGet("api/userQueries/forQuery/{queryKey}")]

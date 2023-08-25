@@ -12,11 +12,10 @@ import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import {
-  UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity,
-} from './Signum.UserQueries'
+import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
+import { UserAssetModel } from '../Signum.UserAssets/Signum.UserAssets'
 import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
 import { CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -50,23 +49,18 @@ export function start(options: { routes: RouteObject[] }) {
     return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
   });
 
-  QuickLinks.registerGlobalQuickLink(ctx => {
-    if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      return undefined;
+  if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+    QuickLinks.registerGlobalQuickLink(entityType =>
+      API.forEntityType(entityType)
+        .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
+          icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
+          onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
+        })))
+    );
 
-    var promise = ctx.widgetContext ?
-      Promise.resolve(ctx.widgetContext.frame.pack.userQueries || []) :
-      API.forEntityType(ctx.lite.EntityType);
-
-    return promise.then(uqs =>
-      uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq) ?? "", e => {
-        window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`));
-      }, { icon: ["far", "rectangle-list"], iconColor: "dodgerblue" })));
-  });
-
-  QuickLinks.registerQuickLink(UserQueryEntity, ctx => new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(),
-    e => {
-      Navigator.API.fetchAndRemember(ctx.lite).then(uq => {
+  QuickLinks.registerQuickLink(UserQueryEntity, new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
+    Navigator.API.fetchAndRemember(ctx.lite!)
+      .then(uq => {
         if (uq.entityType == undefined)
           window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}`));
         else
@@ -78,8 +72,12 @@ export function start(options: { routes: RouteObject[] }) {
 
               window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(lite)}`));
             });
-      });
-    }, { isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info" }));
+      })
+  },
+    {
+      isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+    }
+  ));
 
   onContextualItems.push(getGroupUserQueriesContextMenu);
 
@@ -136,7 +134,7 @@ export function start(options: { routes: RouteObject[] }) {
             }));
 
       }} />
-    }
+}
   });
 }
 

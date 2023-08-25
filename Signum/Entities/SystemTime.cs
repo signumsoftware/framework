@@ -2,6 +2,7 @@ using Signum.Utilities.DataStructures;
 
 namespace Signum.Entities;
 
+
 public abstract class SystemTime
 {
     static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
@@ -25,6 +26,7 @@ public abstract class SystemTime
     {
         public DateTimeOffset DateTime { get; private set; }
 
+        [NewCanBeConstant]
         public AsOf(DateTimeOffset dateTime)
         {
             this.DateTime = dateTime;
@@ -37,7 +39,8 @@ public abstract class SystemTime
 
     public abstract class Interval : SystemTime
     {
-        public JoinBehaviour JoinBehaviour; 
+        public JoinBehaviour JoinBehaviour;
+        [NewCanBeConstant]
         public Interval(JoinBehaviour includeJoins)
         {
             this.JoinBehaviour = includeJoins;
@@ -48,7 +51,7 @@ public abstract class SystemTime
     {
         public DateTimeOffset StartDateTime { get; private set; }
         public DateTimeOffset EndtDateTime { get; private set; }
-
+        [NewCanBeConstant]
         public Between(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
         {
             this.StartDateTime = startDateTime;
@@ -62,7 +65,7 @@ public abstract class SystemTime
     {
         public DateTimeOffset StartDateTime { get; private set; }
         public DateTimeOffset EndtDateTime { get; private set; }
-
+        [NewCanBeConstant]
         public ContainedIn(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
         {
             this.StartDateTime = startDateTime;
@@ -74,6 +77,7 @@ public abstract class SystemTime
 
     public class All : Interval
     {
+        [NewCanBeConstant]
         public All(JoinBehaviour joinBehaviour) : base(joinBehaviour)
         {
         }

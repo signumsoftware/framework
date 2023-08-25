@@ -125,6 +125,15 @@ export type EmailTemplateVisibleOn =
   "Multiple" |
   "Query";
 
+export const FileTokenAttachmentEntity = new Type<FileTokenAttachmentEntity>("FileTokenAttachment");
+export interface FileTokenAttachmentEntity extends Entities.Entity, IAttachmentGeneratorEntity {
+  Type: "FileTokenAttachment";
+  fileName: string | null;
+  contentId: string | null;
+  type: Mailing.EmailAttachmentType;
+  fileToken: Queries.QueryTokenEmbedded;
+}
+
 export interface IAttachmentGeneratorEntity extends Entities.Entity {
 }
 

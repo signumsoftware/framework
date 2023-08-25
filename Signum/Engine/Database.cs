@@ -1217,6 +1217,13 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>());
     }
 
+    [DebuggerStepThrough]
+    public static IQueryable<T> Query<T>(SystemTime systemTime)
+    where T : Entity
+    {
+        return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>(), systemTime: systemTime);
+    }
+
     /// <summary>
     /// Example: Database.MListQuery((OrderEntity o) => o.Lines)
     /// </summary>
@@ -1788,18 +1795,21 @@ interface IQuerySignumTable
 {
     ITable Table { get; }
     bool DisableAssertAllowed { get; }
+    SystemTime? SystemTime { get; }
 }
 
 internal class SignumTable<E> : Query<E>, IQuerySignumTable
 {
     public ITable Table { get; }
     public bool DisableAssertAllowed { get; }
+    public SystemTime? SystemTime { get; }
 
-    public SignumTable(QueryProvider provider, ITable table, bool disableAssertAllowed = false)
+    public SignumTable(QueryProvider provider, ITable table, bool disableAssertAllowed = false, SystemTime? systemTime = null)
         : base(provider)
     {
         this.Table = table;
         this.DisableAssertAllowed = disableAssertAllowed;
+        this.SystemTime = systemTime;
     }
 
     public override bool Equals(object? obj)
