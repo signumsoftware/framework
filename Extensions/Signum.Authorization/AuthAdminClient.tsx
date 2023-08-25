@@ -22,7 +22,7 @@ import {
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
-import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
+import ProfilePhoto, { SmallProfilePhoto, urlProviders } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
@@ -41,6 +41,8 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   operations = options.operations;
   queries = options.queries;
   permissions = options.permissions;
+
+  AppContext.clearSettingsActions.push(() => urlProviders.clear());
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
     renderLite: (lite, hl) => {

@@ -117,6 +117,7 @@ export interface UserLiteModel extends Entities.ModelEntity {
   toStringValue: string | null;
   oID: string /*Guid*/ | null;
   sID: string | null;
+  customPhotoHash: string | null;
 }
 
 export module UserOperation {
