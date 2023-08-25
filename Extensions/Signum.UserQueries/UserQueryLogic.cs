@@ -253,7 +253,12 @@ public static class UserQueryLogic
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
             .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(uq => uq.ToLite(new UserQueryLiteModel
+            {
+                DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
+                HideQuickLink = uq.HideQuickLink,
+                Query = uq.Query,
+            }))
             .ToList();
     }
 
@@ -269,7 +274,12 @@ public static class UserQueryLogic
     public static List<Lite<UserQueryEntity>> GetUserQueries(Type entityType)
     {
         return GetUserQueriesEntity(entityType)
-             .Select(uq => uq.ToLite(PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName)))
+             .Select(uq => uq.ToLite(new UserQueryLiteModel
+             {
+                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
+                 HideQuickLink = uq.HideQuickLink,
+                 Query = uq.Query,
+             }))
              .ToList();
     }
 
