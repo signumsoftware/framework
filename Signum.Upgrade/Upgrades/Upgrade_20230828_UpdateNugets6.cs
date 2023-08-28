@@ -20,7 +20,10 @@ class Upgrade_20230828_UpdateNugets6 : CodeUpgradeBase
                     <PackageReference Include="TensorFlow.Keras" Version="0.11.2" />
                     <PackageReference Include="Selenium.Support" Version="4.11.0" />
                     <PackageReference Include="Selenium.WebDriver" Version="4.11.0" />
+                    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="116.0.5845.9600" />
                     <PackageReference Include="HtmlAgilityPack" Version="1.11.52" />
+                    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.1" />
+                    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
                     """);
         });
 
