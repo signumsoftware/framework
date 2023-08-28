@@ -6,9 +6,8 @@
   "keywords": [],
   "author": "Signum Software",
   "license": "MIT",
-  "resolutions": {
-  },
-  "dependencies": {
-
+  "resolutions": {},
+  "devDependencies": {
+    "eslint": "^8.44.0"
   }
 }
