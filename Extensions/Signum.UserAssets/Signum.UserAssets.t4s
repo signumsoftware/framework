@@ -1,4 +1,0 @@
-export interface UserAssetModel<T extends Entities.Entity> extends Entities.ModelEntity {
-  asset: Entities.Lite<T>;
-  hideQuickLink: boolean;
-}
