@@ -22,7 +22,7 @@ import {
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
-import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
+import ProfilePhoto, { SmallProfilePhoto, urlProviders } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink, similarToken } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
@@ -45,6 +45,8 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   operations = options.operations;
   queries = options.queries;
   permissions = options.permissions;
+
+  AppContext.clearSettingsActions.push(() => urlProviders.clear());
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
     renderLite: (lite, hl) => {
@@ -135,9 +137,10 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),
-      e => API.fetchTypeRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null }));
+    QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
+          .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
+          isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
+    }));
 
     getAllTypes().filter(a => a.queryAuditors != null)
       .forEach(t => {
@@ -157,7 +160,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
                   <FontAwesomeIcon icon="hand" /> {SearchMessage.NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst.niceToString().formatHtml(symbols, type)}
                 </span>
               );
-            }
+  }
 
             return undefined;
           } else {
@@ -189,9 +192,12 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
 
     Navigator.addSettings(new EntitySettings(PermissionRulePack, e => import('./Rules/PermissionRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity, ctx => new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(),
-      e => API.fetchPermissionRulePack(ctx.lite.id!).then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-      { isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null }));
+    QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(), (ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
+      .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
+      {
+        isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
+      }
+    ));
   }
 
   OmniboxSpecialAction.registerSpecialAction({

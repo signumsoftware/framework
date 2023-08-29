@@ -58,6 +58,7 @@ public static class DashboardLogic
             OnGetCachedQueryDefinition.Register((LinkListPartEntity uqp, PanelPartEmbedded pp) => Array.Empty<CachedQueryDefinition>());
 
             sb.Include<DashboardEntity>()
+                .WithLiteModel(d => new DashboardLiteModel { DisplayName = d.DisplayName, HideQuickLink = d.HideQuickLink })
                 .WithVirtualMList(a => a.TokenEquivalencesGroups, e => e.Dashboard)
                 .WithQuery(() => cp => new
                 {
@@ -335,18 +336,30 @@ public static class DashboardLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
         return Dashboards.Value.Values
             .Where(d => d.EntityType == null && isAllowed(d))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(DashboardLiteModel.Translated(d)))
             .ToList();
     }
 
-    public static List<Lite<DashboardEntity>> GetDashboardsEntity(Type entityType)
+    public static IEnumerable<DashboardEntity> GetDashboardsEntity(Type entityType)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
         return DashboardsByType.Value.TryGetC(entityType)
             .EmptyIfNull()
             .Select(lite => Dashboards.Value.GetOrThrow(lite))
-            .Where(d => isAllowed(d))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Where(d => isAllowed(d));
+    }
+
+    public static List<Lite<DashboardEntity>> GetDashboards(Type entityType)
+    {
+        return GetDashboardsEntity(entityType)
+            .Select(d => d.ToLite(DashboardLiteModel.Translated(d)))
+            .ToList();
+    }
+
+    public static List<Lite<DashboardEntity>> GetDashboardsModel(Type entityType)
+    {
+        return GetDashboardsEntity(entityType)
+            .Select(d => d.ToLite(DashboardLiteModel.Translated(d)))
             .ToList();
     }
 
@@ -355,7 +368,7 @@ public static class DashboardLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<DashboardEntity>(userInterface: false);
         return Dashboards.Value.Values
             .Where(d => d.EntityType == null && isAllowed(d))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(d => d.ToLite(DashboardLiteModel.Translated(d)))
             .Autocomplete(subString, limit).ToList();
     }
 

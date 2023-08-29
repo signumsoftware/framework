@@ -7,13 +7,19 @@ public static class Statics
 {
     static readonly Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
 
+
+    public static IThreadVariable? GetVariable(string name)
+    {
+        return threadVariables.TryGetC(name);
+    }
+
     public static AsyncThreadVariable<T> ThreadVariable<T>(string name, bool avoidExportImport = false)
     {
         var variable = new AsyncThreadVariable<T>(name) { AvoidExportImport = avoidExportImport };
         threadVariables.AddOrThrow(name, variable, "Thread variable {0} already defined");
         return variable;
     }
-   
+
     public static Dictionary<string, object?> ExportThreadContext(bool force = false)
     {
         return threadVariables.Where(t => !t.Value.IsClean && (!t.Value.AvoidExportImport || force)).ToDictionaryEx(kvp => kvp.Key, kvp => kvp.Value.UntypedValue);
@@ -80,7 +86,7 @@ public interface IUntypedVariable
 {
     string Name { get; }
     object? UntypedValue { get; set; }
-    bool IsClean {get;}
+    bool IsClean { get; }
     void Clean();
 }
 
@@ -128,7 +134,7 @@ public abstract class Variable<T> : IUntypedVariable
     public abstract void Clean();
 }
 
-public interface IThreadVariable: IUntypedVariable
+public interface IThreadVariable : IUntypedVariable
 {
     bool AvoidExportImport { get; }
 }
@@ -152,7 +158,7 @@ public class AsyncThreadVariable<T> : Variable<T>, IThreadVariable
     }
 }
 
-public abstract class SessionVariable<T>: Variable<T>
+public abstract class SessionVariable<T> : Variable<T>
 {
     public abstract Func<T>? ValueFactory { get; set; }
 
@@ -201,7 +207,7 @@ public class VoidSessionFactory : ISessionFactory
         }
 
         public override void Clean()
-        {   
+        {
         }
     }
 }
@@ -243,7 +249,7 @@ public class SingletonSessionFactory : ISessionFactory
 
         public override void Clean()
         {
-            singletonSession.Remove(Name); 
+            singletonSession.Remove(Name);
         }
     }
 }
@@ -272,7 +278,7 @@ public class ScopeSessionFactory : ISessionFactory
     public static IDisposable OverrideSession(Dictionary<string, object?> sessionDictionary)
     {
         if (!(Statics.SessionFactory is ScopeSessionFactory))
-            throw new InvalidOperationException("Impossible to OverrideSession because Statics.SessionFactory is not a ScopeSessionFactory"); 
+            throw new InvalidOperationException("Impossible to OverrideSession because Statics.SessionFactory is not a ScopeSessionFactory");
         var old = overridenSession.Value;
         overridenSession.Value = sessionDictionary;
         return new Disposable(() => overridenSession.Value = old);
@@ -292,7 +298,7 @@ public class ScopeSessionFactory : ISessionFactory
         {
             this.variable = variable;
         }
-        
+
         public override Func<T>? ValueFactory
         {
             get { return variable.ValueFactory; }

@@ -136,6 +136,17 @@ When using a foreach on a query however it does the following:
 * @endforeach
 ```
 
+This also means that you can make some counter-intuitive nested @foreach
+
+```
+* @foreach[Entity.Lines.Element.Product.Category]
+    CATEGORY @[Entity.Lines.Element.Product.Category]
+    * @foreach[Entity.Lines.Element]
+    * ProductName: @[Entity.Lines.Element.Name]
+    * @endforeach
+* @endforeach
+```
+
 
 ### Any
 

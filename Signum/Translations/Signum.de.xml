@@ -74,6 +74,10 @@
     <Member Name="Compress" Description="Komprimieren" />
     <Member Name="Expand" Description="Erweitern" />
   </Type>
+  <Type Name="ContainerTokenKey" Description="Container-Token-Schlüssel" Gender="m">
+    <Member Name="Operations" Description="[Operation]" />
+    <Member Name="QuickLinks" Description="[QuickLinks]" />
+  </Type>
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Korrupt" />
   </Type>
@@ -653,6 +657,7 @@
     <Member Name="_0ShouldBe1" Description="{0} sollte {1} sein" />
     <Member Name="_0ShouldBe12" Description="{0} sollte {1} {2} sein" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} sollte {1} statt {2} sein." />
+    <Member Name="_0ShouldBeADateInTheFuture" Description="{0} sollte ein Datum in der Zukunft sein" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} sollte ein Datum in der Vergangenheit sein" />
     <Member Name="_0ShouldBeEmpty" Description="{0} sollte leer sein" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} sollte größer als {1} sein" />

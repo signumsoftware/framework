@@ -433,7 +433,10 @@ internal static class MultiSetter
         {
             var pr = route.AddMany(setter.Property);
 
-            SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
+            if (pr.Parent!.Type.IsMixinEntity())
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity));
+            else
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
 
             if (pr.Type.IsMList())
             {

@@ -269,7 +269,12 @@ public static class ScheduleTaskRunner
                     using (var tr = Transaction.ForceNew())
                     {
                         stl.ProductEntity = SchedulerLogic.ExecuteTask.Invoke(task, ctx);
+                        tr.Commit();
+                    }
 
+
+                    using (var tr = Transaction.ForceNew())
+                    {
                         using (AuthLogic.Disable())
                         {
                             stl.EndTime = Clock.Now;
@@ -278,7 +283,10 @@ public static class ScheduleTaskRunner
                         }
 
                         tr.Commit();
+
                     }
+                 
+                    
                 }
             }
             catch (Exception ex)

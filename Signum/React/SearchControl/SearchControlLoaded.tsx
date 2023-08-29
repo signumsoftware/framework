@@ -2,10 +2,10 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { DomUtils, classes, Dic, softCast } from '../Globals'
 import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter, toFilterRequests, toFilterOptions, isAggregate } from '../Finder'
+import { CellFormatter, EntityFormatter, isAggregate, toFilterOptions } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, getFilterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, FilterConditionOption, FilterConditionOptionParsed, isFilterCondition
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
@@ -511,7 +511,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       React.cloneElement(this.state.simpleFilterBuilder, { ref: (e: ISimpleFilterBuilder) => { this.simpleFilterBuilderInstance = e } });
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
-    const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+    const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
 
     return (
       <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
@@ -548,7 +548,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 columnOption={this.state.editingColumn}
                 onChange={this.handleColumnChanged}
                 queryDescription={qd}
-                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual}
                 close={this.handleColumnClose} />
             }
             <div ref={d => this.containerDiv = d}
@@ -1475,7 +1475,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (hasToArray(t))
       return false;
 
-    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO")
+    if (t.type.isEmbedded || isTypeModel(t.type.name) || t.type.name == "CellOperationDTO" || t.type.name == "ManualCellDTO")
       return t.hasOrderAdapter == true;
 
     return true;
@@ -1530,7 +1530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate"));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token)));
 
     var keyFilters = resFo.columnOptions
       .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
@@ -1975,6 +1975,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return;
 
     const m = this.state.markedRows[key];
+    if (m === null)
+        return { status: "Success", message: undefined };
 
     if (typeof m === "string") {
       if (m == "")

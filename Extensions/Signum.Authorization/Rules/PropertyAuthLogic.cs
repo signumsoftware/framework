@@ -1,5 +1,8 @@
 using Signum.API;
+using Signum.API.Json;
 using Signum.Authorization;
+using Signum.DynamicQuery.Tokens;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Authorization.Rules;
 
@@ -93,6 +96,46 @@ public static class PropertyAuthLogic
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
+    }
+
+    public static Func<Type, Dictionary<string, PropertyConverter>>? GetPropertyConverters;
+    public static FluentInclude<T> WithSecuredProperty<T>(this FluentInclude<T> fi,
+        Expression<Func<T, object?>> property,
+        Expression<Func<T, PropertyAllowed?>> allowedProperty)
+        where T : Entity
+    {
+        if (GetPropertyConverters == null)
+            throw new ArgumentNullException(nameof(GetPropertyConverters));
+
+        var pcs = GetPropertyConverters!(typeof(T));
+        var piAllowed = ReflectionTools.GetPropertyInfo(allowedProperty);
+
+        var pi = ReflectionTools.GetPropertyInfo(property);
+
+        var allowedCompiled = allowedProperty.Compile();
+        pcs.GetOrThrow(pi!.Name.FirstLower()).AvoidWriteJsonProperty = (ctx) =>
+        {
+            var allowed = allowedCompiled((T)ctx.Entity);
+            return allowed == PropertyAllowed.None;
+        };
+
+        Validator.PropertyValidator(property).IsReadonly += (e, pi) => pi.PropertyEquals(property) ? allowedCompiled(e) <= PropertyAllowed.Read : null;
+
+        EntityPropertyToken.CustomPropertyExpression.Add(PropertyRoute.Construct(property), (ctx, baseExpression) =>
+        {
+            var entityExpression = baseExpression.ExtractEntity(true);
+
+            var allowed = Expression.Property(entityExpression, piAllowed);
+            var allowedIsNone = Expression.Equal(allowed, Expression.Constant(PropertyAllowed.None).Nullify());
+
+            var prop = Expression.Property(entityExpression, pi);
+
+            Expression result = Expression.Condition(allowedIsNone, Expression.Constant(null, prop.Type), prop);
+
+            return result;
+        });
+
+        return fi;
     }
 
     static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)

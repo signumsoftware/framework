@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
-import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo } from './Reflection'
+import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
 import { classes, Dic } from './Globals'
-import { FindOptions } from './FindOptions'
+import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } from './FindOptions'
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
@@ -15,6 +15,8 @@ import { StyleContext } from './Lines'
 import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
 import { BsColor } from './Components'
+import { CellFormatter } from './Finder'
+import { registerManualSubTokens } from './SearchControl/QueryTokenBuilder'
 
 export function start() {
 
@@ -22,6 +24,44 @@ export function start() {
   onContextualItems.push(getQuickLinkContextMenus);
 
   AppContext.clearSettingsActions.push(clearQuickLinks);
+
+  registerManualSubTokens("[QuickLinks]", getQuickLinkTokens);
+
+  Finder.formatRules.push({
+    name: "CellQuickLink",
+    isApplicable: qt => qt.parent?.key == "[QuickLinks]",
+
+    formatter: (c, sc) => new CellFormatter((dto: ManualCellDto, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
+  });
+}
+
+function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
+
+  const [quickLink, setQuickLink] = React.useState<QuickLink<any> | null>(null);
+
+  React.useEffect(() => {
+    getQuickLinkByKey(p.lite.EntityType, p.quickLinkKey)
+      .then(l => l ? setQuickLink(l) : setQuickLink(null));
+  }, [p]);
+
+  if (!quickLink)
+    return null
+  return (<a className={classes("badge badge-pill sf-quicklinks", "bg-" + quickLink.color, quickLink.color == "light" ? undefined : "text-white")}
+    title={StyleContext.default.titleLabels ? quickLink.text() : undefined}
+    role="button"
+    href="#"
+    data-toggle="dropdown"
+    onClick={e => { e.preventDefault(); quickLink.handleClick({ lite: p.lite, lites: [p.lite] }, e); }}>
+    {quickLink.icon && <FontAwesomeIcon icon={quickLink.icon} color={quickLink.color ? undefined : quickLink.iconColor} />}
+    {quickLink.icon && "\u00A0"}
+    {quickLink.text()}
+  </a>)
+}
+
+export function clearQuickLinks() {
+  Dic.clear(globalQuickLinks);
+  Dic.clear(typeQuickLinks);
+  Dic.clear(dynamicQuickLink);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -31,31 +71,91 @@ export interface QuickLinkContext<T extends Entity> {
   contextualContext?: ContextualItemsContext<T>;
 }
 
-type Seq<T> = (T | undefined)[] | T | undefined;
+const globalQuickLinks: Array<(entityType: string) => (Promise<{ [key: string]: QuickLink<Entity> }>)> = [];
+const typeQuickLinks: { [entityType: string]: { [key: string]: QuickLink<Entity> } } = {};
+const dynamicQuickLink: { [entityType: string]: QuickLinkFactory<Entity>[] } = { };
 
-export function clearQuickLinks() {
-  onGlobalQuickLinks.clear();
-  Dic.clear(onQuickLinks);
+type QuickLinkFactory<T extends Entity> = (ctx: QuickLinkContext<T>) => Promise<QuickLink<T>[]>;
+
+export function registerGlobalQuickLink(f: (entityType: string) => Promise<QuickLink<Entity>[]>) {
+
+  globalQuickLinks.push(entityType => f(entityType).then(qls => qls.toObject(ql => ql.key)));
 }
 
-export interface RegisteredQuickLink<T extends Entity> {
-  factory: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>;
-  options?: QuickLinkRegisterOptions;
-}
-
-
-export const onGlobalQuickLinks: Array<RegisteredQuickLink<Entity>> = [];
-export function registerGlobalQuickLink(quickLinkGenerator: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
-  onGlobalQuickLinks.push({ factory: quickLinkGenerator, options: options });
-}
-
-export const onQuickLinks: { [typeName: string]: Array<RegisteredQuickLink<any>> } = {};
-export function registerQuickLink<T extends Entity>(type: Type<T>, quickLinkGenerator: (ctx: QuickLinkContext<T>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, options?: QuickLinkRegisterOptions) {
+export function registerQuickLink<T extends Entity>(type: Type<T>, quickLink: QuickLink<T>) {
   const typeName = getTypeName(type);
+  const qls = typeQuickLinks[typeName] ?? {};
+  Dic.addOrThrow(qls, quickLink.key, quickLink);
+  typeQuickLinks[typeName] = qls;
+}
 
-  const col = onQuickLinks[typeName] || (onQuickLinks[typeName] = []);
+export function registerDynamicQuickLink<T extends Entity>(type: Type<T>, quickLinkFactory: QuickLinkFactory<T>) {
+  const typeName = getTypeName(type);
+  const qls = dynamicQuickLink[typeName] ?? [];
+  qls.push(quickLinkFactory as any);
+  dynamicQuickLink[typeName] = qls;
+}
 
-  col.push({ factory: quickLinkGenerator, options: options });
+const quickLinksCache: { [entityType: string]: Promise<{ [key: string]: QuickLink<Entity> }> } = {};
+
+function getCachedOrAdd(entityType: string): Promise<{ [type: string]: QuickLink<Entity> }> {
+
+  return quickLinksCache[entityType] ??=
+    Promise.all(globalQuickLinks.map(a => a(entityType)))
+      .then(globalLinks =>
+        globalLinks.concat(typeQuickLinks[entityType] ?? {}))
+      .then(allLinks =>
+        Object.assign({}, ...allLinks) as { [key: string]: QuickLink<Entity> });
+}
+
+export async function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink<Entity>[]> {
+
+  var staticProm =  getCachedOrAdd(ctx.lite.EntityType);
+
+  var dynamicProm = Promise.all(dynamicQuickLink[ctx.lite.EntityType]?.map(a => a(ctx)) ?? []);
+
+  var quickLinks = [...Dic.getValues(await staticProm), ...(await dynamicProm).flatMap(a=>a)];
+
+  var quickLinkFiltered = await Promise.all(quickLinks
+    .map(ql => {
+      if (ql.onlyForToken || ql.isVisible == false)
+        return Promise.resolve(null);
+
+      if (ql.isVisible == true || ql.isVisible == undefined)
+        return Promise.resolve(ql);
+
+      if (typeof ql.isVisible == "function")
+        return ql.isVisible(ctx).then(val => val ? ql : null);
+
+      return Promise.resolve(null);
+    }));
+
+  return quickLinkFiltered.notNull().orderBy(ql => ql!.order);
+}
+
+function getQuickLinkTokens(entityType: string): Promise<ManualToken[]> {
+
+  return getCachedOrAdd(entityType)
+    .then(ql => toManualTokens(ql))
+}
+
+function getQuickLinkByKey(entityType: string, key: string): Promise<QuickLink<any> | undefined> {
+
+  return getCachedOrAdd(entityType)
+    .then(qlDic => qlDic && qlDic[key]);
+}
+
+function toManualTokens(qlDic: { [key: string]: QuickLink<Entity> }) {
+
+  return qlDic && Object.entries(qlDic)
+    .filter(([key, quicklink]) => key && quicklink.text && quicklink.text() && (quicklink.isVisible === undefined || quicklink.isVisible == true))
+    .map(([key, quicklink]) => ({
+      key: key,
+      toStr: quicklink.text(),
+      niceName: quicklink.text(),
+      typeColor: quicklink.color,
+      niceTypeName: "Cell quick link",
+    }));
 }
 
 export var ignoreErrors = false;
@@ -64,56 +164,6 @@ export function setIgnoreErrors(value: boolean) {
   ignoreErrors = value;
 }
 
-export function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
-
-  let promises = onGlobalQuickLinks.filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
-
-  if (onQuickLinks[ctx.lite.EntityType]) {
-    const specificPromises = onQuickLinks[ctx.lite.EntityType].filter(a => a.options && a.options.allowsMultiple || ctx.lites.length == 1).map(f => safeCall(f.factory, ctx));
-
-    promises = promises.concat(specificPromises);
-  }
-
-  return Promise.all(promises).then(links => links.flatMap(a => a ?? []).filter(a => a?.isVisible).orderBy(a => a.order));
-}
-
-
-function safeCall(f: (ctx: QuickLinkContext<Entity>) => Seq<QuickLink> | Promise<Seq<QuickLink>>, ctx: QuickLinkContext<Entity>): Promise<QuickLink[]> {
-  if (!ignoreErrors)
-    return asPromiseArray<QuickLink>(f(ctx));
-  else {
-    try {
-      return asPromiseArray<QuickLink>(f(ctx)).catch(e => {
-        console.error(e);
-        return [];
-      })
-    } catch (e) {
-      console.error(e);
-      return Promise.resolve([]);
-    }
-  }
-}
-
-function asPromiseArray<T>(value: Seq<T> | Promise<Seq<T>>): Promise<T[]> {
-
-  if (!value)
-    return Promise.resolve([] as T[]);
-
-  if ((value as Promise<Seq<T>>).then != undefined)
-    return (value as Promise<Seq<T>>).then(a => asArray(a));
-
-  return Promise.resolve(asArray(value as Seq<T>))
-}
-
-function asArray<T>(valueOrArray: Seq<T>): T[] {
-  if (!valueOrArray)
-    return [];
-
-  if (Array.isArray(valueOrArray))
-    return valueOrArray.filter(a => a != null).map(a => a!);
-  else
-    return [valueOrArray];
-}
 
 export function getQuickLinkWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> {
 
@@ -125,18 +175,20 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
   if (ctx.lites.length == 0)
     return Promise.resolve(undefined);
 
-  return getQuickLinks({
+  const qlCtx = {
     lite: ctx.lites[0],
     lites: ctx.lites,
     contextualContext: ctx
-  }).then(links => {
+  };
+
+  return getQuickLinks(qlCtx).then(links => {
 
     if (links.length == 0)
       return undefined;
 
     return {
       header: QuickLinkMessage.Quicklinks.niceToString(),
-      menuItems: links.map(ql => ql.toDropDownItem())
+      menuItems: links.map(ql => ql.toDropDownItem(qlCtx))
     } as MenuItemBlock;
   });
 }
@@ -149,15 +201,17 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
   const entity = p.wc.ctx.value;
 
+  const qlCtx = {
+    lite: toLiteFat(entity as Entity),
+    lites: [toLiteFat(entity as Entity)],
+    widgetContext: p.wc as WidgetContext<Entity>
+  };
+
   const links = useAPI(signal => {
     if (entity.isNew || !tryGetTypeInfo(entity.Type)?.entityKind)
       return Promise.resolve([]);
     else
-      return getQuickLinks({
-        lite: toLiteFat(entity as Entity),
-        lites: [toLiteFat(entity as Entity)],
-        widgetContext: p.wc as WidgetContext<Entity>
-      });
+      return getQuickLinks(qlCtx);
   }, [entity], { avoidReset: true });
 
   if (links == undefined)
@@ -171,7 +225,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
   return (
     <>
       {!links ? [] : links.filter(a => a.group !== undefined).orderBy(a => a.order)
-        .groupBy(a => a.group?.name ?? a.name)
+        .groupBy(a => a.group?.name ?? a.key)
         .map((gr, i) => {
           var first = gr.elements[0];
 
@@ -183,7 +237,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                 role="button"
                 href="#"
                 data-toggle="dropdown"
-                onClick={e => { e.preventDefault(); first.handleClick(e); }}>
+                onClick={e => { e.preventDefault(); first.handleClick(qlCtx, e); }}>
                 {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}
                 {first.text()}
@@ -204,7 +258,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                   {dd.text(gr.elements)}
                 </>} />
                 <Dropdown.Menu align="end">
-                  {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(), { key: i }))}
+                  {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(qlCtx), { key: i }))}
                 </Dropdown.Menu>
               </Dropdown>
             );
@@ -235,32 +289,32 @@ const QuickLinkToggle = React.forwardRef(function CustomToggle(p: { onClick?: Re
 
 export interface QuickLinkGroup {
   name: string;
-  title: (links: QuickLink[]) => string;
-  text: (links: QuickLink[]) => string;
+  title: (links: QuickLink<any>[]) => string;
+  text: (links: QuickLink<any>[]) => string;
   icon: IconProp;
   color: BsColor;
 }
 
-export interface QuickLinkOptions {
-  isVisible?: boolean;
+export interface QuickLinkOptions<T extends Entity> {
+  key?: string;
   text?: (nothing?: undefined /*TS 4.1 Bug*/) => string; //To delay niceName and avoid exceptions
+  isVisible?: boolean | ((ctx: QuickLinkContext<T>) => Promise<boolean>);
+  onlyForToken?: boolean;
   order?: number;
   icon?: IconProp;
   iconColor?: string;
   color?: BsColor;
   group?: QuickLinkGroup | null;
   openInAnotherTab?: boolean;
-
-}
-export interface QuickLinkRegisterOptions {
   allowsMultiple?: boolean;
 }
+export abstract class QuickLink<T extends Entity> {
 
-export abstract class QuickLink {
-  isVisible!: boolean;
+  key!: string;
   text!: () => string;
+  isVisible!: boolean | ((ctx: QuickLinkContext<T>) => Promise<boolean>);
+  onlyForToken?: boolean;
   order!: number;
-  name: string;
   icon?: IconProp;
   iconColor?: string;
   color?: BsColor;
@@ -276,8 +330,7 @@ export abstract class QuickLink {
     color: "light"
   };
 
-  constructor(name: string, options?: QuickLinkOptions) {
-    this.name = name;
+  constructor(options?: QuickLinkOptions<T>) {
 
     Dic.assign(this, { isVisible: true, text: () => "", order: 0, ...options });
 
@@ -285,15 +338,15 @@ export abstract class QuickLink {
       this.group = QuickLink.defaultGroup;
   }
 
-  toDropDownItem() {
+  toDropDownItem(ctx: QuickLinkContext<T>) {
     return (
-      <Dropdown.Item data-name={this.name} className="sf-quick-link" onMouseUp={this.handleClick}>
+      <Dropdown.Item data-key={this.key} className="sf-quick-link" onMouseUp={e => this.handleClick(ctx, e)}>
         {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
   }
 
-  abstract handleClick(e: React.MouseEvent<any>): void;
+  abstract handleClick(ctx: QuickLinkContext<T>, e: React.MouseEvent<any>): void;
 
   renderIcon() {
     if (this.icon == undefined)
@@ -305,31 +358,37 @@ export abstract class QuickLink {
   }
 }
 
-export class QuickLinkAction extends QuickLink {
-  action: (e: React.MouseEvent<any>) => void;
+export class QuickLinkAction<T extends Entity> extends QuickLink<T> {
+  action: (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => void;
 
-  constructor(name: string, text: () => string, action: (e: React.MouseEvent<any>) => void, options?: QuickLinkOptions) {
-    super(name, options);
-    this.text = text;
+  constructor(key: string, text: () => string, action: (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => void, options?: QuickLinkOptions<T>) {
+    super({
+      key: key,
+      text: text,
+      ...options
+    });
     this.action = action;
-  }
+  } 
 
-  handleClick = (e: React.MouseEvent<any>) => {
-    this.action(e);
+  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
+    this.action(ctx, e);
   }
 }
 
-export class QuickLinkLink extends QuickLink {
-  url: string | (() => Promise<string>);
+export class QuickLinkLink<T extends Entity> extends QuickLink<T> {
+  url: (ctx: QuickLinkContext<T>) => (string | Promise<string>);
 
-  constructor(name: string, text: () => string, url: string | (()=> Promise<string>), options?: QuickLinkOptions) {
-    super(name, options);
-    this.text = text;
+  constructor(key: string, text : ()=> string, url: (ctx: QuickLinkContext<T>) => (string | Promise<string>), options?: QuickLinkOptions<T>) {
+    super({
+      key: key,
+      text: text,
+      ...options
+    });
     this.url = url;
   }
 
-  handleClick = async (e: React.MouseEvent<any>) => {
-    var url = typeof this.url === "string" ? this.url : await this.url(); 
+  handleClick = async (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
+    var url = typeof this.url === "string" ? this.url : await this.url(ctx); 
 
     if (this.openInAnotherTab)
       window.open(AppContext.toAbsoluteUrl(url));
@@ -338,35 +397,41 @@ export class QuickLinkLink extends QuickLink {
   }
 }
 
-export class QuickLinkExplore extends QuickLink {
-  findOptions: FindOptions;
+interface findOptionsByCtx<T extends Entity> {
+  (ctx: QuickLinkContext<T>): FindOptions;
+}
 
-  constructor(findOptions: FindOptions, options?: QuickLinkOptions) {
-    super(getQueryKey(findOptions.queryName), {
-      isVisible: Finder.isFindable(findOptions.queryName, false),
-      text: () => getQueryNiceName(findOptions.queryName),
+export class QuickLinkExplore<T extends Entity> extends QuickLink<T> {
+  findOptionsFunc: findOptionsByCtx<T>;
+
+  constructor(queryName: PseudoType | QueryKey, findOptionsFunc: findOptionsByCtx<T>, options?: QuickLinkOptions<T>) {
+    super({
+      key: getQueryKey(queryName),
+      isVisible: Finder.isFindable(queryName, false),
+      text: () => getQueryNiceName(queryName),
       ...options
     });
 
-    this.findOptions = findOptions;
+    this.findOptionsFunc = findOptionsFunc;
   }
 
-  handleClick = (e: React.MouseEvent<any>) => {
+  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
 
     if (e.ctrlKey || e.button == 1)
-      window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(this.findOptions)));
+      window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(this.findOptionsFunc(ctx))));
     else
-      Finder.explore(this.findOptions);
+      Finder.explore(this.findOptionsFunc(ctx));
   }
 }
 
-export class QuickLinkExplorePromise extends QuickLink {
-  findOptionsPromise: Promise<FindOptions>;
+export class QuickLinkExplorePromise<T extends Entity> extends QuickLink<T> {
+  findOptionsPromise: Promise<findOptionsByCtx<T>>;
 
-  constructor(queryName: any, findOptionsPromise: Promise<FindOptions>, options?: QuickLinkOptions) {
-    super(getQueryKey(queryName), {
+  constructor(queryName: PseudoType | QueryKey, findOptionsPromise: Promise<findOptionsByCtx<T>>, options?: QuickLinkOptions<T>) {
+    super({
+      key: getQueryKey(queryName),
       isVisible: Finder.isFindable(queryName, false),
       text: () => getQueryNiceName(queryName),
       ...options
@@ -375,27 +440,27 @@ export class QuickLinkExplorePromise extends QuickLink {
     this.findOptionsPromise = findOptionsPromise;
   }
 
-  handleClick = (e: React.MouseEvent<any>) => {
+  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
 
-
     this.findOptionsPromise.then(fo => {
       if (e.ctrlKey || e.button == 1)
-        window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo)));
+        window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo(ctx))));
       else
-        Finder.explore(fo);
+        Finder.explore(fo(ctx));
     });
   }
 }
 
 
-export class QuickLinkNavigate extends QuickLink {
+export class QuickLinkNavigate<T extends Entity> extends QuickLink<T> {
   lite: Lite<Entity>;
   viewName?: string;
 
-  constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions) {
-    super(lite.EntityType, {
+  constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions<T>) {
+    super({
+      key: lite.EntityType, 
       isVisible: Navigator.isViewable(lite.EntityType),
       text: () => getTypeInfo(lite.EntityType).niceName!,
       ...options
@@ -405,9 +470,7 @@ export class QuickLinkNavigate extends QuickLink {
     this.viewName = viewName;
   }
 
-
-
-  handleClick = (e: React.MouseEvent<any>) => {
+  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
 

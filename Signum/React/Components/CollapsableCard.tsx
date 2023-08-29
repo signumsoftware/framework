@@ -61,10 +61,11 @@ function isControlled(p: CollapsableCardProps): [boolean, (isOpen: boolean) => v
 export default function CollapsableCard(p: CollapsableCardProps) {
 
   const [isOpen, setIsOpen] = isControlled(p);
+  const collapsable = (p.collapsable == undefined || p.collapsable == true);
   return (
     <div className={classes("card", cardStyleClasses(p.cardStyle), p.size && ("card-" + p.size))}>
-      <div className={classes("card-header", cardStyleClasses(p.headerStyle))} style={{ cursor: "pointer" }} onClick={() => setIsOpen(!isOpen)}>
-        {(p.collapsable == undefined || p.collapsable == true) &&
+      <div className={classes("card-header", cardStyleClasses(p.headerStyle))} style={{ cursor: "pointer" }} onClick={collapsable ? () => setIsOpen(!isOpen) : undefined}>
+        {collapsable &&
           <span
             className={"float-end"}
             style={{ cursor: "pointer" }}            

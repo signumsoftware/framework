@@ -23,7 +23,7 @@ public static class AuthServer
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
     
-    public static void Start(IApplicationBuilder app, Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
+    public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
@@ -163,7 +163,6 @@ public static class AuthServer
                 }
                 return mi;
             };
-
         }
 
         if (PropertyAuthLogic.IsStarted)
@@ -191,6 +190,8 @@ public static class AuthServer
 
                 return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
             };
+
+            PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);
         }
 
         if (OperationAuthLogic.IsStarted)

@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
-import { UserQueryEntity, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
+import { UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
@@ -42,30 +42,33 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   const forceUpdate = useForceUpdate();
   const location = useLocation();
 
-  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined) {
+  function setCurrentUserQuery(uq: Lite<UserQueryEntity> | undefined, subTitle: string | undefined) {
     p.searchControl.extraUrlParams.userQuery = uq && liteKey(uq);
 
     p.searchControl.getCurrentUserQuery = () => uq;
     setCurrentUserQueryInternal(uq);
 
-    p.searchControl.pageSubTitle = getToString(uq);
+    p.searchControl.pageSubTitle = subTitle;
     p.searchControl.props.onPageTitleChanged?.();
-    Navigator.API.fillLiteModels(uq).then(() => {
-      if (p.searchControl.getCurrentUserQuery?.() == uq) {
-        p.searchControl.pageSubTitle = getToString(uq);
-        p.searchControl.props.onPageTitleChanged?.();
+    if (uq != null && subTitle == null)
+      UserQueryClient.API.translated(uq).then(model => {
+        uq.model = model;
+        if (p.searchControl.getCurrentUserQuery?.() == uq) {
+          p.searchControl.pageSubTitle = model.displayName;
+          p.searchControl.props.onPageTitleChanged?.();
+        }
         forceUpdate();
-      }
-    });
+      });
   }
   
   React.useEffect(() => {
     const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl(location) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
-      setCurrentUserQuery(uq);
+      if (!is(p.searchControl.getCurrentUserQuery?.(), uq))
+        setCurrentUserQuery(uq, undefined);
     }
     else
-      setCurrentUserQuery(undefined);
+      setCurrentUserQuery(undefined, undefined);
   }, [location, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
 
   function handleSelectedToggle(isOpen: boolean) {
@@ -101,7 +104,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
           sc.setState({ showFilters: false });
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
-        setCurrentUserQuery(undefined);
+        setCurrentUserQuery(undefined, undefined);
         if (ofo.pagination.mode != "All") {
           sc.doSearchPage1();
         }
@@ -118,7 +121,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
             sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
-          setCurrentUserQuery(uq);
+          setCurrentUserQuery(uq, translated(userQuery, a=>a.displayName));
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
           }
@@ -136,7 +139,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(() => reloadList())
       .then(list => {
         if (!list.some(a => is(a, currentUserQuery)))
-          setCurrentUserQuery(undefined);
+          setCurrentUserQuery(undefined, undefined);
         else
           applyUserQuery(currentUserQuery!)
       });
@@ -172,8 +175,8 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uqOld => Navigator.view(uqOld))
       .then(() => reloadList())
       .then(list => {
-        if (!list.some(a => is(a, currentUserQuery))) 
-          setCurrentUserQuery(undefined);
+        if (!list.some(a => is(a, currentUserQuery)))
+          setCurrentUserQuery(undefined, undefined);
         else
           applyUserQuery(currentUserQuery!);
       });
@@ -198,7 +201,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
       ...fo.orderOptions?.map(a => a?.token) ?? [],
-    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray));
+    ].notNull().forEach(a => parser.request(a.toString(), SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | SubTokensOptions.CanManual));
 
     await parser.finished();
 

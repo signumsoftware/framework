@@ -594,7 +594,7 @@ class ColumnOptionsComponent extends BaseOptionsComponent<ColumnOptionExpr> {
         <td>
           <QueryTokenBuilderString label="columnName" parsedToken={item.parsedToken} token={item.token}
             onChange={newToken => this.handleColumnChange(item, newToken)}
-            queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanOperation} hideLabel={true} />
+            queryKey={this.props.queryKey} subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanOperation | SubTokensOptions.CanManual} hideLabel={true} />
         </td>
         <td> {item.parsedToken && <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.displayName)} type="string" defaultValue={null} />}</td>
         <td> <ExpressionOrValueComponent dn={dn} hideLabel={true} refreshView={() => this.forceUpdate()} binding={Binding.create(item, f => f.applicable)} type="boolean" defaultValue={true} /></td>
