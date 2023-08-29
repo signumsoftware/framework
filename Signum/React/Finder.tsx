@@ -1985,6 +1985,7 @@ export interface QuerySettings {
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
+  noResultMessage?: (searchControl: SearchControlLoaded) => React.ReactElement | string | undefined;
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   markRowsColumn?: string;

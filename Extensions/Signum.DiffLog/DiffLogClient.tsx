@@ -4,9 +4,13 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Navigator from '@framework/Navigator'
 import { Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
+import * as AuthAdminClient from '../Signum.Authorization/AuthAdminClient'
+import { OperationLogTypeCondition } from './Signum.DiffLog';
+
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
+  AuthAdminClient.registerQueryAuditorToken(OperationLogEntity, OperationLogEntity.token(a => a.target), OperationLogTypeCondition.FilteringByTarget);
 }
 
 export namespace API {

@@ -262,7 +262,7 @@ public enum SearchMessage
     DoYouWantToSelectTheNew01_G,
     [Description("Edit pinned filters")]
     EditPinnedFilters,
-    
+
     [Description("Pin filter")]
     PinFilter,
     [Description("Unpin filter")]
@@ -281,7 +281,7 @@ public enum SearchMessage
 
     HiddenColumn,
     ShowHiddenColumns,
-    HideHiddenColumns, 
+    HideHiddenColumns,
 
     GroupKey,
     DerivedGroupKey,
@@ -299,6 +299,12 @@ public enum SearchMessage
 
     [Description("Splits the values and searches each one independently in an AND group")]
     SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup,
+
+    [Description("No results found because the rule {0} does not allowed to explore {1} without filtering first")]
+    NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst,
+
+    [Description("No results found because you are not allowed to explore {0} without filtering by {1} first")]
+    NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First,
 }
 
 public enum SelectorMessage

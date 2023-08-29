@@ -1668,13 +1668,22 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }));
   }
 
-  getNoResultsElement() {
+  getNoResultsElement(): React.ReactElement | string | undefined {
     const resultTable = this.state.resultTable!;
     const resFO = this.state.resultFindOptions!;
 
     if (resultTable.rows.length == 0) {
-      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate")
+
+      if (resultTable.totalElements == 0 || this.props.showFooter == false || resFO.pagination.mode != "Paginate") {
+
+        if (this.props.querySettings?.noResultMessage) {
+          var node = this.props.querySettings?.noResultMessage(this);
+          if (node !== undefined)
+            return node;
+        }
+
         return SearchMessage.NoResultsFound.niceToString();
+      }
       else
         return SearchMessage.NoResultsFoundInPage01.niceToString().formatHtml(
           resFO.pagination.currentPage,
