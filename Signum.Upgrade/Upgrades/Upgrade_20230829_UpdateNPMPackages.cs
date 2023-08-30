@@ -9,9 +9,9 @@ class Upgrade_20230829_UpdateNPMPackages : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile(@"*.csproj", file =>
+        uctx.ForeachCodeFile(@"package.json", file =>
         {
-            file.UpdateNugetReferences("""
+            file.UpdateNpmPackages("""
                     "sass": "1.61.0",
                     "sass-loader": "13.3.2",
                     "ts-loader": "9.4.4",
