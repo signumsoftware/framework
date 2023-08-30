@@ -11,8 +11,8 @@ export default function SendNotificationEmailTask(p: { ctx: TypeContext<SendNoti
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
 
-  var maxValue = React.useMemo(() => ctx.value.sendNotificationsOlderThan == null ? null :  DateTime.local().minus({ minutes: ctx.value.sendNotificationsOlderThan }).toISO(), [ctx.value.sendNotificationsOlderThan]);
-  var minValue = React.useMemo(() => ctx.value.ignoreNotificationsOlderThan == null ? null :  DateTime.local().minus({ days: ctx.value.ignoreNotificationsOlderThan }).toISO(), [ctx.value.ignoreNotificationsOlderThan]);
+  var maxValue = React.useMemo(() => ctx.value.sendNotificationsOlderThan == null ? null :  DateTime.local().minus({ minutes: ctx.value.sendNotificationsOlderThan }).toISO()!, [ctx.value.sendNotificationsOlderThan]);
+  var minValue = React.useMemo(() => ctx.value.ignoreNotificationsOlderThan == null ? null :  DateTime.local().minus({ days: ctx.value.ignoreNotificationsOlderThan }).toISO()!, [ctx.value.ignoreNotificationsOlderThan]);
 
   return (
     <div>

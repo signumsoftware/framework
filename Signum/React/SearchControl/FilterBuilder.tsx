@@ -522,7 +522,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
               return val;
 
             const trimmed = trimDateToFormat(date, type, newToken!.format);
-            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO();
+            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO()!;
           }
 
           if (f.operation && isList(f.operation)) {

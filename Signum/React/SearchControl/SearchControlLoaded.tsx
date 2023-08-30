@@ -608,7 +608,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var fo = this.props.findOptions;
 
     if (fo.systemTime == null)
-      fo.systemTime = { mode: "AsOf", startDate: DateTime.local().toISO() };
+      fo.systemTime = { mode: "AsOf", startDate: DateTime.local().toISO()! };
     else
       fo.systemTime = undefined;
 

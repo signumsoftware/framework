@@ -961,7 +961,7 @@ export module API {
     });
 
     var chartTable: ChartTable = {
-      date: DateTime.local().toISO(),
+      date: DateTime.local().toISO()!,
       columns: cols.filter(c => c != null).toObjectDistinct(c => c!.name) as any,
       rows: rows
     };

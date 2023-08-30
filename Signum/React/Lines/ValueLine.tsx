@@ -820,7 +820,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     vl.setValue(m == null || !m.isValid ? null :
       type == "DateOnly" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
-          m.toISO());
+          m.toISO()!);
   };
 
   const htmlAttributes = {
@@ -904,7 +904,7 @@ ValueLineRenderers.renderers.set("DateTimeSplitted", (vl) => {
       newDT = trimDateToFormat(newDT, type, s.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
-    vl.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO());
+    vl.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
   };
 
   return (
@@ -954,10 +954,10 @@ function DateTimePickerSplitted(p: {
       return null;
 
     if (p.initiallyShowOnly == "Date")
-      return ({ type: "Date", date: DateTime.fromJSDate(p.value).toISODate() });
+      return ({ type: "Date", date: DateTime.fromJSDate(p.value).toISODate()! });
 
     if (p.initiallyShowOnly == "Time")
-      return ({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+      return ({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime()! });
 
     return null;
   });
@@ -965,7 +965,7 @@ function DateTimePickerSplitted(p: {
   function handleTimeChange(time: string | null) {
     if (time == null) {
       if (p.value != null && temp == null) {
-        setTemp({ type: "Date", date: DateTime.fromJSDate(p.value).startOf("day").toISODate() });
+        setTemp({ type: "Date", date: DateTime.fromJSDate(p.value).startOf("day").toISODate()! });
       } else if (temp?.type == "Time") {
         setTemp(null);
       }
@@ -986,7 +986,7 @@ function DateTimePickerSplitted(p: {
     if (date == null) {
       if (p.value != null && temp == null) {
         p.onChange(null);
-        setTemp({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+        setTemp({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime()! });
       } else if (temp?.type == "Date") {
         p.onChange(null);
         setTemp(null);
@@ -999,7 +999,7 @@ function DateTimePickerSplitted(p: {
         p.onChange(DateTime.fromJSDate(date).startOf("day").plus(Duration.fromISOTime(temp.time)).toJSDate());
         setTemp(null);
       } else {
-        setTemp({ type: "Date", date: DateTime.fromJSDate(date).toISODate() });
+        setTemp({ type: "Date", date: DateTime.fromJSDate(date).toISODate()! });
       }
     }
   }
