@@ -112,7 +112,14 @@ public static class TypeConditionLogic
                 {  property.Parameters[0], expr.Param }
             });
 
-            if (expr.Filters.Any(f => QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant)))
+            Expression<Func<T, PrimaryKey>> idExpression = a => a.Id;
+
+            var replacedID = ExpressionReplacer.Replace(idExpression.Body, new Dictionary<ParameterExpression, Expression>
+            {
+                {  idExpression.Parameters[0], expr.Param }
+            });
+
+            if (expr.Filters.Any(f => QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant) || QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId)))
                 return e => true;
 
             return e => false;
@@ -136,11 +143,11 @@ public static class TypeConditionLogic
                 {  property.Parameters[0], expr.Param }
             });
 
-            Expression<Func<T, PrimaryKey>> idExpre = a => a.Id; 
+            Expression<Func<T, PrimaryKey>> idExpression = a => a.Id; 
 
-            var replacedID = ExpressionReplacer.Replace(idExpre.Body, new Dictionary<ParameterExpression, Expression>
+            var replacedID = ExpressionReplacer.Replace(idExpression.Body, new Dictionary<ParameterExpression, Expression>
             {
-                {  idExpre.Parameters[0], expr.Param }
+                {  idExpression.Parameters[0], expr.Param }
             });
 
             if (expr.Filters.Any(f =>
