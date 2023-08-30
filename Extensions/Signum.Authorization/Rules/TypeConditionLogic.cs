@@ -136,6 +136,13 @@ public static class TypeConditionLogic
                 {  property.Parameters[0], expr.Param }
             });
 
+            Expression<Func<T, PrimaryKey>> idExpre = a => a.Id; 
+
+            var replacedID = ExpressionReplacer.Replace(idExpre.Body, new Dictionary<ParameterExpression, Expression>
+            {
+                {  idExpre.Parameters[0], expr.Param }
+            });
+
             if (expr.Filters.Any(f =>
             {
                 if (QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant))
@@ -144,6 +151,23 @@ public static class TypeConditionLogic
 
                     if (isConstantAuthorized(val))
                         return true;
+                }
+
+                if (QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId))
+                {
+                    var id = (PrimaryKey?)constantId.Value;
+                    if (id == null)
+                        return false;
+
+                    using (TypeAuthLogic.DisableQueryFilter())
+                    {
+                        var value = Database.Query<T>().Where(a => a.Id == id).Select(property).SingleOrDefaultEx();
+
+                        var val = ConvertValue<P?>(value);
+
+                        if (isConstantAuthorized(val))
+                            return true;
+                    }
                 }
 
                 return false;
