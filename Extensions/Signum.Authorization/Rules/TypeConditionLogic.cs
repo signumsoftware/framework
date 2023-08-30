@@ -119,7 +119,11 @@ public static class TypeConditionLogic
                 {  idExpression.Parameters[0], expr.Param }
             });
 
-            if (expr.Filters.Any(f => QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant) || QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId)))
+            if (expr.Filters.Any(f =>
+                QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant) ||
+                QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId) ||
+                QueryAuditorVisitor.IsEqualsConstant(expr.Param, f, out var constantLite)
+            ))
                 return e => true;
 
             return e => false;
@@ -174,6 +178,43 @@ public static class TypeConditionLogic
 
                         if (isConstantAuthorized(val))
                             return true;
+                    }
+                }
+
+                if (QueryAuditorVisitor.IsEqualsConstant(expr.Param, f, out var constantLite))
+                {
+                    var liteOrEntity = constantLite.Value;
+                    if (liteOrEntity == null)
+                        return false;
+
+                    if (liteOrEntity is Lite<T> lite)
+                    {
+                        using (TypeAuthLogic.DisableQueryFilter())
+                        {
+                            var value = lite.InDB(property);
+
+                            var val = ConvertValue<P?>(value);
+
+                            if (isConstantAuthorized(val))
+                                return true;
+
+                            return false;
+                        }
+                    }
+
+                    if(liteOrEntity is T entity)
+                    {
+                        using (TypeAuthLogic.DisableQueryFilter())
+                        {
+                            var value = useInDBForInMemoryCondition ? Database.InDB(entity, property) : func!(entity);
+
+                            var val = ConvertValue<P?>(value);
+
+                            if (isConstantAuthorized(val))
+                                return true;
+
+                            return false;
+                        }
                     }
                 }
 
