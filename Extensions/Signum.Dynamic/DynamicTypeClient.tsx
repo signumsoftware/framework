@@ -55,12 +55,13 @@ export function start(options: { routes: RouteObject[] }) {
     alternatives: eoc => [],
   }));
 
-  QuickLinks.registerQuickLink(DynamicTypeEntity, ctx => new QuickLinks.QuickLinkLink("ViewDynamicPanel",
-    () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), "/dynamic/panel", {
+  QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
+    {
       isVisible: AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
-      iconColor: "purple",
-    }));
+      iconColor: "purple"
+    }
+  ));
 
   EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicTypeEntity }} />);
   EvalClient.Options.onGetDynamicLineForPanel.push(ctx => <SearchValueLine ctx={ctx} findOptions={{ queryName: DynamicMixinConnectionEntity }} />);

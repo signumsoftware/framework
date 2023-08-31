@@ -260,7 +260,7 @@ const oneDigitCulture = new Set([
 
 export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
 
-  if (!oneDigitCulture.has(dt.locale)) {
+  if (!oneDigitCulture.has(dt.locale!)) {
 
     if (format == "D")
       return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });

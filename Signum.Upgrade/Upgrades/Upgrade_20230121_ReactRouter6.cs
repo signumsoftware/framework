@@ -98,7 +98,7 @@ class Upgrade_20230121_ReactRouter6 : CodeUpgradeBase
             file.RemoveAllLines(a => a.Contains("from \"history\""));
 
             file.Replace(windoOpenFindOptionsPath, m => "window.open(toAbsoluteUrl(Finder.findOptionsPath(" + m.Groups["exp"].Value + ")))");
-            file.Replace(windoOpenFindOptionsPath, m => "window.open(toAbsoluteUrl(Navigator.navigateRoute(" + m.Groups["exp"].Value + ")))");
+            file.Replace(windoOpenNavigateRoute, m => "window.open(toAbsoluteUrl(Navigator.navigateRoute(" + m.Groups["exp"].Value + ")))");
         });
 
         uctx.ChangeCodeFile("Southwind.React/Views/Home/Index.cshtml", file =>

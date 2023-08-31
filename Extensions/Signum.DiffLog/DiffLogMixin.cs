@@ -1,3 +1,5 @@
+using Signum.Authorization.Rules;
+
 namespace Signum.DiffLog;
 
 public class DiffLogMixin : MixinEntity
@@ -32,4 +34,11 @@ public enum DiffLogMessage
     NavigatesToTheNextOperationLog,
     DifferenceBetweenFinalStateAndTheCurrentStateOfTheEntity,
     NavigatesToTheCurrentEntity,
+}
+
+
+[AutoInit]
+public static class OperationLogTypeCondition
+{
+    public static readonly TypeConditionSymbol FilteringByTarget;
 }

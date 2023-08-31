@@ -467,7 +467,7 @@ function isFilterActive(fo: FilterOptionParsed) {
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_Checked" ||
     fo.pinned.active == "NotCheckbox_Unchecked" ||
-    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
+    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value === "");
 }
 
 export interface FilterConditionComponentProps {
@@ -522,7 +522,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
               return val;
 
             const trimmed = trimDateToFormat(date, type, newToken!.format);
-            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO();
+            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO()!;
           }
 
           if (f.operation && isList(f.operation)) {

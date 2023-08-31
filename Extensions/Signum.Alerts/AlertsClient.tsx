@@ -17,7 +17,7 @@ import * as Finder from '@framework/Finder'
 import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
-import { ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
+import { getQueryKey, ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'
 
 export function start(options: { routes: RouteObject[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
@@ -35,14 +35,16 @@ export function start(options: { routes: RouteObject[], showAlerts?: (typeName: 
     contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
   }));
 
-  QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore({
-    queryName: AlertEntity,
-    filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite}]
-  }, {
-    isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(ctx.lite.EntityType, "QuickLink"),
-    icon: "bell",
-    iconColor: "orange",
-  }));
+  QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
+    {
+      key: getQueryKey(AlertEntity),
+      text: () => AlertEntity.nicePluralName(),
+      isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
+      icon: "clock-rotate-left",
+      iconColor: "green",
+      color: "success",
+    }
+  )]));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
     alternatives: eoc => [andClose(eoc)],
@@ -54,9 +56,9 @@ export function start(options: { routes: RouteObject[], showAlerts?: (typeName: 
   }));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Delay, {
-    commonOnClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO())),
+    commonOnClick: (eoc) => chooseDate().then(d => d && eoc.defaultClick(d.toISO()!)),
     hideOnCanExecute: true,
-    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultClick(d.toISO())) },
+    contextualFromMany: { onClick: (coc) => chooseDate().then(d => d && coc.defaultClick(d.toISO()!)) },
   }));
 
   var cellFormatter = new Finder.CellFormatter((cell, ctx) => {
@@ -109,7 +111,7 @@ function chooseDate(): Promise<DateTime | undefined> {
         unit: mi.unit,
         label: mi.niceName,
         initiallyFocused: true,
-        initialValue: result.toISO()
+        initialValue: result.toISO()!
       });
     } else {
       switch (val) {

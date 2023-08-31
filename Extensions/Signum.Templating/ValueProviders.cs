@@ -813,7 +813,7 @@ public class ConstantValueProvider : ValueProviderBase
         var val = Value == null ? "null" :
             Value is int a ? a.ToString(CultureInfo.InvariantCulture) :
             Value is decimal d ? d.ToString(CultureInfo.InvariantCulture) :
-            Value is string str ? @"""{str}""" :
+            Value is string str ? @$"""{str}""" :
             throw new NotImplementedException();
 
         sb.Append(val);

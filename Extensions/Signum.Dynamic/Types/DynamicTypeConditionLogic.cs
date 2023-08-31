@@ -76,6 +76,7 @@ public static class DynamicTypeConditionLogic
 
     public static List<CodeFile> GetCodeFiles()
     {
+        var cacheOldDisabled = CacheLogic.GloballyDisabled;
         CacheLogic.GloballyDisabled = true;
         try
         {
@@ -94,7 +95,7 @@ public static class DynamicTypeConditionLogic
         }
         finally
         {
-            CacheLogic.GloballyDisabled = false;
+            CacheLogic.GloballyDisabled = cacheOldDisabled;
         }
     }
 }

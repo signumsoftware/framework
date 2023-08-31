@@ -5,10 +5,19 @@ namespace Signum.Engine.Linq;
 
 public class QueryFilterer : ExpressionVisitor
 {
-    static GenericInvoker<Func<Schema, LambdaExpression?>> giFilter = new(s => s.GetInDatabaseFilter<TypeEntity>());
+    static GenericInvoker<Func<Schema, FilterQueryArgs, LambdaExpression?>> giFilter = new((s, args) => s.GetInDatabaseFilter<TypeEntity>(args));
     static MethodInfo miWhere = ReflectionTools.GetMethodInfo((IQueryable<object> q) => q.Where(a => true)).GetGenericMethodDefinition();
 
+
+
+    internal static Expression? Filter(Expression? expression, bool filter)
+    {
+        return new QueryFilterer { filter = filter, rootExpression = expression! }.Visit(expression);
+    }
+
+    Expression rootExpression; 
     bool filter;
+
 
     protected override Expression VisitConstant(ConstantExpression c)
     {
@@ -33,7 +42,7 @@ public class QueryFilterer : ExpressionVisitor
                             {
                                 LambdaExpression? rawFilter = null;
                                 using (HeavyProfiler.LogNoStackTrace("rawFilter"))
-                                    rawFilter = giFilter.GetInvoker(queryType)(Schema.Current);
+                                    rawFilter = giFilter.GetInvoker(queryType)(Schema.Current, new FilterQueryArgs(this.rootExpression, (ConstantExpression)query.Expression));
 
                                 if (rawFilter != null)
                                 {
@@ -47,7 +56,7 @@ public class QueryFilterer : ExpressionVisitor
                             {
                                 Type entityType = queryType.GetGenericArguments()[0];
 
-                                LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current);
+                                LambdaExpression? rawFilter = giFilter.GetInvoker(entityType)(Schema.Current, new FilterQueryArgs(this.rootExpression, (ConstantExpression)query.Expression));
                                 if (rawFilter != null)
                                 {
                                     var param = Expression.Parameter(queryType, "mle");
@@ -93,8 +102,5 @@ public class QueryFilterer : ExpressionVisitor
     }
 
 
-    internal static Expression? Filter(Expression? expression, bool filter)
-    {
-        return new QueryFilterer { filter = filter }.Visit(expression);
-    }
+
 }

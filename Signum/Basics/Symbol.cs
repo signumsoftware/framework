@@ -1,7 +1,7 @@
 namespace Signum.Basics;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
-[EntityKind(EntityKind.SystemString, EntityData.Master), TicksColumn(false)]
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = true), TicksColumn(false)]
 public abstract class Symbol : Entity
 {
     static Dictionary<Type, Dictionary<string, Symbol>> Symbols = new Dictionary<Type, Dictionary<string, Symbol>>();

@@ -13,6 +13,8 @@ namespace Signum.API.Controllers;
 [ValidateModelFilter]
 public class QueryController : ControllerBase
 {
+    public static Action<QueryRequest>? AssertQuery;
+
     [HttpGet("api/query/findLiteLike"), ProfilerActionSplitter("types")]
     public async Task<List<Lite<Entity>>> FindLiteLike(string types, string subString, int count, CancellationToken token)
     {
@@ -97,7 +99,9 @@ public class QueryController : ControllerBase
     [HttpPost("api/query/executeQuery"), ProfilerActionSplitter]
     public async Task<ResultTable> ExecuteQuery([Required, FromBody]QueryRequestTS request, CancellationToken token)
     {
-        var result = await QueryLogic.Queries.ExecuteQueryAsync(request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer), token);
+        var qr = request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+        AssertQuery?.Invoke(qr);
+        var result = await QueryLogic.Queries.ExecuteQueryAsync(qr, token);
         return result;
     }
 
@@ -240,8 +244,11 @@ public class QueryTokenTS
         if (qt is CollectionToArrayToken)
             return QueryTokenType.ToArray;
 
-        if (qt is OperationsToken ot)
+        if (qt is OperationsToken)
             return QueryTokenType.Operation;
+        
+        if (qt is ManualContainerToken or ManualToken)
+            return QueryTokenType.Manual;
         
         return null;
     }
@@ -272,5 +279,6 @@ public enum QueryTokenType
     Element,
     AnyOrAll,
     Operation,
-    ToArray
+    ToArray,
+    Manual
 }

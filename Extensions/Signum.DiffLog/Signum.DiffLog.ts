@@ -4,6 +4,7 @@
 
 import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Signum/React/Reflection'
 import * as Entities from '../../Signum/React/Signum.Entities'
+import * as Rules from '../Signum.Authorization/Rules/Signum.Authorization.Rules'
 
 
 export module DiffLogMessage {
@@ -27,5 +28,9 @@ export interface DiffLogMixin extends Entities.MixinEntity {
   initialState: Entities.BigStringEmbedded;
   finalState: Entities.BigStringEmbedded;
   cleaned: boolean;
+}
+
+export module OperationLogTypeCondition {
+  export const FilteringByTarget : Rules.TypeConditionSymbol = registerSymbol("TypeCondition", "OperationLogTypeCondition.FilteringByTarget");
 }
 

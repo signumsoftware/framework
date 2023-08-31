@@ -472,7 +472,7 @@ public static class AuthLogic
         PermissionAuthLogic.Start(sb);
 
         if (sb.WebServerBuilder != null && tokenConfig != null)
-            AuthServer.Start(sb.WebServerBuilder.WebApplication, tokenConfig, sb.WebServerBuilder.AuthTokenEncryptionKey);
+            AuthServer.Start(tokenConfig, sb.WebServerBuilder.AuthTokenEncryptionKey);
     }
 
     public static HashSet<Lite<RoleEntity>> CurrentRoles()
