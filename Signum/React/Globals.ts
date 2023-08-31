@@ -1247,3 +1247,11 @@ export function getColorContrasColorBWByHex (hexcolor: string) {
   var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
   return (yiq >= 128) ? 'black' : 'white';
 }
+
+export function isPromise(value: any): value is Promise<any> {
+  return value.then != null;
+}
+
+export function toPromise<T>(value: T | Promise<T>): Promise<T> {
+  return isPromise(value) ? value : Promise.resolve(value);
+}
