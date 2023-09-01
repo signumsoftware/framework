@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Files;
 using Signum.Utilities.Reflection;
 using System.IO;
@@ -122,7 +123,7 @@ public static class IsolationLogic
             giRegisterFilterQuery.GetInvoker(item.Key)(item.Value);
         }
 
-        Schema.Current.EntityEvents<IsolationEntity>().FilterQuery += () =>
+        Schema.Current.EntityEvents<IsolationEntity>().FilterQuery += (FilterQueryArgs args) =>
         {
             if (IsolationEntity.Current == null || ExecutionMode.InGlobal)
                 return null;
@@ -141,7 +142,7 @@ public static class IsolationLogic
     static readonly GenericInvoker<Action<IsolationStrategy>> giRegisterFilterQuery = new(strategy => Register_FilterQuery<Entity>(strategy));
     static void Register_FilterQuery<T>(IsolationStrategy stragegy) where T : Entity
     {
-        Schema.Current.EntityEvents<T>().FilterQuery += () =>
+        Schema.Current.EntityEvents<T>().FilterQuery += (FilterQueryArgs args) =>
         {
             if (ExecutionMode.InGlobal || IsolationEntity.Current == null)
                 return null;
