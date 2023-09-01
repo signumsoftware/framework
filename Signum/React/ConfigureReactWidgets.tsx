@@ -90,6 +90,22 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
         return t.toJSDate();
       }
 
+      t = DateTime.fromFormat(value, "dd.MM.yy")
+      if (t.isValid) {
+        if (value.length == 8) {
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
+        }
+        return t.toJSDate();
+      }
+
+      t = DateTime.fromFormat(value, "dd/MM/yy")
+      if (t.isValid) {
+        if (value.length == 8) {
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
+        }
+        return t.toJSDate();
+      }
+
       return null;
     }
   };
