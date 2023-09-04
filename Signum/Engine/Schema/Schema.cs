@@ -454,7 +454,7 @@ public class Schema : IImplementationsFinder
         var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
 
         if (tn != null)
-            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+            return Views.GetOrCreate(viewType, () => ViewBuilder.NewView(viewType));
 
         return ViewBuilder.NewView(viewType);
     }
