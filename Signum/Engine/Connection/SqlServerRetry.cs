@@ -217,7 +217,7 @@ public static class SqlServerRetry
             return false;
         }
 
-        return ex is TimeoutException;
+        return false; // ex is TimeoutException;
     }
 }
 

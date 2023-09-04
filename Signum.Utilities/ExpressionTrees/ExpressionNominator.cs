@@ -33,7 +33,12 @@ public class ExpressionNominator : ExpressionVisitor
         //Query<UserEntity>().Select(u => new ComboBox()) expects N different ComboBoxes
         //also solves problems with MemberInitExpression and CollectionInitExpressions
         if (expression.NodeType == ExpressionType.New)
+        {
+            if (((NewExpression)expression).Constructor?.HasAttribute<NewCanBeConstantAttribute>() == true)
+                return false;
+
             return true;
+        }
 
         return expression.NodeType == ExpressionType.Parameter ||
             expression.NodeType == ExpressionType.Lambda || // why?

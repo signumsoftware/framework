@@ -125,11 +125,11 @@ public abstract class ValueProviderBase
                         }
 
                         if (!(vp is TokenValueProvider))
-                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp);
+                            return new ContinueValueProvider(token.TryAfter('.'), vp, tp) { Variable = variable };
                     }
 
                     if (ConstantValueProvider.TryParseConstantValue(token, out var val))
-                        return new ConstantValueProvider(val, tp);
+                        return new ConstantValueProvider(val, tp) { Variable = variable };
 
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
 
@@ -813,7 +813,7 @@ public class ConstantValueProvider : ValueProviderBase
         var val = Value == null ? "null" :
             Value is int a ? a.ToString(CultureInfo.InvariantCulture) :
             Value is decimal d ? d.ToString(CultureInfo.InvariantCulture) :
-            Value is string str ? @"""{str}""" :
+            Value is string str ? @$"""{str}""" :
             throw new NotImplementedException();
 
         sb.Append(val);

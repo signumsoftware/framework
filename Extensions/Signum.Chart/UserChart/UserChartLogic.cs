@@ -31,6 +31,7 @@ public static class UserChartLogic
 
             sb.Include<UserChartEntity>()
                 .WithExpressionTo((UserChartEntity d) => d.CachedQueries())
+                .WithLiteModel(uq => new UserChartLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink })
                 .WithSave(UserChartOperation.Save)
                 .WithDelete(UserChartOperation.Delete)
                 .WithQuery(() => uq => new
@@ -216,14 +217,15 @@ public static class UserChartLogic
             .ToList();
     }
 
-    public static List<UserAssetModel<UserChartEntity>> GetUserChartsModel(Type entityType)
+    public static List<Lite<UserChartEntity>> GetUserChartsModel(Type entityType)
     {
         return GetUserChartsEntity(entityType)
-             .Select(uc => new UserAssetModel<UserChartEntity>()
+             .Select(uc => uc.ToLite(new UserChartLiteModel
              {
-                 Asset = uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)),
+                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName),
+                 Query = uc.Query,
                  HideQuickLink = uc.HideQuickLink
-             })
+             }))
              .ToList();
     }
 

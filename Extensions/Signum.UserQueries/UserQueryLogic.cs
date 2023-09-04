@@ -35,13 +35,14 @@ public static class UserQueryLogic
 
             CurrentUserConverter.GetCurrentUserEntity = () => UserEntity.Current.Retrieve();
 
-            UserAssetsImporter.Register<UserQueryEntity>("UserQuery", UserQueryOperation.Save);
+            UserAssetsImporter.Register("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
+                .WithLiteModel(uq => new UserQueryLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink})
                 .WithExpressionTo((UserQueryEntity d) => d.CachedQueries())
                 .WithSave(UserQueryOperation.Save)
                 .WithDelete(UserQueryOperation.Delete)
@@ -272,14 +273,15 @@ public static class UserQueryLogic
              .ToList();
     }
 
-    public static List<UserAssetModel<UserQueryEntity>> GetUserQueriesModel(Type entityType)
+    public static List<Lite<UserQueryEntity>> GetUserQueriesModel(Type entityType)
     {
         return GetUserQueriesEntity(entityType)
-             .Select(uq => new UserAssetModel<UserQueryEntity>()
+             .Select(uq => uq.ToLite(new UserQueryLiteModel
              {
-                 Asset = uq.ToLite(PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName)),
-                 HideQuickLink = uq.HideQuickLink
-             })
+                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
+                 HideQuickLink = uq.HideQuickLink,
+                 Query = uq.Query,
+             }))
              .ToList();
     }
 

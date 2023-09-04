@@ -114,17 +114,11 @@ export function start(options: {
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
 
-  API.getAllTypes().then(types => {
-    allTypes = types;
-    QuickLinks.registerGlobalQuickLink(entityType => ({
-      key: getQueryKey(EmailMessageEntity),
-      generator:
-      {
-        factory: ctx => new QuickLinks.QuickLinkExplore({
-          queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }]
-        }),
-        options:
+  API.getAllTypes().then(allTypes =>
+    allTypes.length && QuickLinks.registerGlobalQuickLink(entityType =>
+      new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
         {
+          key: getQueryKey(EmailMessageEntity),
           text: () => EmailMessageEntity.nicePluralName(),
           isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(EmailMessageEntity),
           icon: "envelope",
@@ -132,9 +126,7 @@ export function start(options: {
           color: "warning",
           group: options.quickLinkInDefaultGroup ? undefined : null,
         }
-      }
-    }))
-  });
+      )));
 
   UserAssetClient.registerExportAssertLink(EmailTemplateEntity);
   UserAssetClient.registerExportAssertLink(EmailMasterTemplateEntity);

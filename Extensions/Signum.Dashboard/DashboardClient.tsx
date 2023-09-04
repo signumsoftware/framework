@@ -15,7 +15,7 @@ import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
-  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity
+  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel
 } from './Signum.Dashboard'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -27,8 +27,6 @@ import { QueryEntity } from '@framework/Signum.Basics';
 import { downloadFile } from '../Signum.Files/Components/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { QueryDescription } from '@framework/FindOptions';
-import { UserAssetModel } from '../Signum.UserAssets/Signum.UserAssets';
-
 import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
@@ -129,35 +127,22 @@ export function start(options: { routes: RouteObject[] }) {
     });
   });
 
-  QuickLinks.registerGlobalQuickLink(entityType => {
-    if (!AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
-      return Promise.resolve([]);
-
-    return API.forEntityType(entityType)
-      .then(das => das.map(d =>
-      ({
-        key: liteKey(d.asset),
-        generator:
+  if (AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
+    QuickLinks.registerGlobalQuickLink(entityType =>
+      API.forEntityType(entityType)
+        .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
         {
-          factory: ctx => new QuickLinks.QuickLinkAction(e => {
-            AppContext.pushOrOpenInTab(dashboardUrl(d.asset, ctx.lite), e)
-          }, { icon: "gauge", iconColor: "darkslateblue", color: "success" }),
-          options:
-          {
-            text: () => getToString(d.asset),
-            order: 0,
-            hideInAutos: d.hideQuickLink
-          }
+          order: 0,
+          icon: "gauge",
+          iconColor: "darkslateblue",
+          color: "success",
+          onlyForToken: (d.model as DashboardLiteModel).hideQuickLink
         }
-      })));
-  });
+      )))
+    );
 
-  QuickLinks.registerQuickLink({
-    type: DashboardEntity,
-    key: "preview",
-    generator:
-    {
-      factory: ctx => new QuickLinks.QuickLinkAction(e => Navigator.API.fetchAndRemember(ctx.lite)
+  QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
+    (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
       .then(db => {
         if (db.entityType == undefined)
           AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
@@ -170,15 +155,15 @@ export function start(options: { routes: RouteObject[] }) {
 
               AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
             });
-          })),
-        options:
-        {
-          text: () => DashboardMessage.Preview.niceToString(),
-          group: null, icon: "eye", iconColor: "blue", color: "info"
-        }
-}
-  })};
-
+      }),
+    {
+      group: null,
+      icon: "eye",
+      iconColor: "blue",
+      color: "info"
+    }
+  ));
+};
 
 
 export function home(): Promise<Lite<DashboardEntity> | null> {
@@ -233,7 +218,7 @@ export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo
 }
 
 export module API {
-  export function forEntityType(type: string): Promise<UserAssetModel<DashboardEntity>[]> {
+  export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
     return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
   }
 

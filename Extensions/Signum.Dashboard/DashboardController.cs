@@ -7,7 +7,7 @@ namespace Signum.Dashboard;
 public class DashboardController : ControllerBase
 {
     [HttpGet("api/dashboard/forEntityType/{typeName}")]
-    public IEnumerable<UserAssetModel<DashboardEntity>> FromEntityType(string typeName)
+    public IEnumerable<Lite<DashboardEntity>> FromEntityType(string typeName)
     {
         return DashboardLogic.GetDashboardsModel(TypeLogic.GetType(typeName));
     }

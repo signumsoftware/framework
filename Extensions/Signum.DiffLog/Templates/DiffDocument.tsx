@@ -25,7 +25,7 @@ export function DiffDocument(p: { first: string, second: string }) {
             validateKey={isNumber} /> lines arround each change</label>
       </div>
       <div>
-        {(p.first.length * p.second.length > DiffDocument.maxSize * DiffDocument.maxSize) && !force ?
+        {(p.first.length > DiffDocument.maxSize || p.second.length >  DiffDocument.maxSize) && !force ?
           <div className="alert alert-warning mt-2" role="alert">
             The two strings are too big ({formatter.format(p.first.length)} ch. and {formatter.format(p.second.length)} ch.) and could freeze your browser...
             <br />

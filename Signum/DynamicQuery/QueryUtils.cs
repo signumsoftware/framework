@@ -624,5 +624,5 @@ public enum SubTokensOptions
     CanOperation = 8,
     CanToArray = 16,
     CanSnippet= 32,
-    CanManual = 32,
+    CanManual = 64,
 }

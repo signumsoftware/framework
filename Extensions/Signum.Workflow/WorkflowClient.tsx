@@ -122,23 +122,17 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   ]);
 
 
-  QuickLinks.registerQuickLink({
-    type: CaseActivityEntity,
-    key: "caseFlow",
-    generator: {
-      factory: ctx => new QuickLinks.QuickLinkAction(e => {
-        API.fetchCaseFlowPack(ctx.lite)
-          .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
-          .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
-      }),
-      options: {
-        text: () => WorkflowActivityMessage.CaseFlow.niceToString(),
-        isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
-        icon: "shuffle",
-        iconColor: "green"
-      }
+  QuickLinks.registerQuickLink(CaseActivityEntity, new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {
+    API.fetchCaseFlowPack(ctx.lite)
+      .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
+      .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
+  },
+    {
+      isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
+      icon: "shuffle",
+      iconColor: "green"
     }
-  });
+  ));
 
   Finder.addSettings({
     queryName: CaseActivityEntity,
@@ -150,7 +144,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
     ]
   })
 
-  QuickLinks.registerQuickLink({
+/*  QuickLinks.registerQuickLink({
     type: WorkflowEntity,
     key: getQueryKey(CaseEntity),
     generator: {
@@ -160,7 +154,10 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
         icon: "list-check", iconColor: "blue"
       }
     }
-  });
+  });*/
+
+/*  QuickLinks.registerQuickLink_New(WorkflowEntity,
+    new QuickLinks.QuickLinkExplore(CaseEntity, ctx => ({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] })));*/
 
   OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
@@ -378,17 +375,10 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
     },
   }));
 
-  QuickLinks.registerQuickLink({
-    type: WorkflowEntity,
-    key: "bam",
-    generator: {
-      factory: ctx => new QuickLinks.QuickLinkLink(workflowActivityMonitorUrl(ctx.lite)),
-      options: {
-        text: () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(),
-        icon: "gauge", iconColor: "green"
-      }
-    }
-  });
+  QuickLinks.registerQuickLink(WorkflowEntity, new QuickLinks.QuickLinkLink("bam", () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(), ctx => workflowActivityMonitorUrl(ctx.lite), {
+    icon: "gauge", 
+    iconColor: "green"
+  }));
 
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Save, { color: "primary", onClick: executeWorkflowSave, alternatives: eoc => [] }));
   Operations.addSettings(new EntityOperationSettings(WorkflowOperation.Delete, { contextualFromMany: { isVisible: ctx => false } }));
