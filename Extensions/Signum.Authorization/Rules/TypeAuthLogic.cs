@@ -36,7 +36,7 @@ public static partial class TypeAuthLogic
 
             sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
             {
-                return TypeAuthLogic.OnIsDelete(query.ElementType);
+                return TypeAuthLogic.OnIsWriting(query.ElementType);
             };
 
             cache = new TypeAuthCache(sb, merger: TypeAllowedMerger.Instance);

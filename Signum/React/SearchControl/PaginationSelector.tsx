@@ -3,8 +3,8 @@ import * as Finder from '../Finder'
 import { classes } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'
-import "./PaginationSelector.css"
 import { toNumberFormat } from '../Reflection'
+import "./PaginationSelector.css"
 
 interface PaginationSelectorProps {
   resultTable?: ResultTable;
@@ -12,7 +12,7 @@ interface PaginationSelectorProps {
   onPagination: (pag: Pagination) => void;
 }
 
-export default function PaginationSelector(p: PaginationSelectorProps) {
+export function PaginationSelector(p: PaginationSelectorProps) {
   if (!p.pagination)
     return null;
 
@@ -114,15 +114,13 @@ export default function PaginationSelector(p: PaginationSelectorProps) {
             .niceToString().formatHtml(
 
               <select value={p.pagination.mode} onChange={handleMode} className="form-select form-select-xs w-auto sf-pagination-mode mx-1">
-                  {["Paginate" as PaginationMode,
-                  "Firsts" as PaginationMode,
-                  "All" as PaginationMode].map(mode =>
+                {PaginationSelector.onGetPaginationModes().map(mode =>
                     <option key={mode} value={mode.toString()}>{PaginationMode.niceToString(mode)}</option>)}
                 </select>,
 
                 p.pagination.mode != "All" &&
                 <select value={p.pagination.elementsPerPage!.toString()} onChange={handleElementsPerPage} className="form-select form-select-xs w-auto sf-elements-per-page mx-1">
-                  {[5, 10, 20, 50, 100, 200].map(elem =>
+                  {PaginationSelector.onGetPaginationSizes().map(elem =>
                     <option key={elem} value={elem.toString()}>{elem}</option>)}
                 </select>
               )
@@ -215,3 +213,15 @@ export function PaginationComponent(p: PaginationComponentProps) {
     );
   }
 }
+
+export namespace PaginationSelector {
+  export let onGetPaginationModes = (): PaginationMode[] => {
+    return ["Paginate", "Firsts", "All"];
+  }
+
+  export let onGetPaginationSizes = (): number[] => {
+    return [5, 10, 20, 50, 100, 200];
+  }
+}
+
+export default PaginationSelector;

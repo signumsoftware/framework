@@ -204,6 +204,22 @@ public static class UserChartOperation
     public static DeleteSymbol<UserChartEntity> Delete;
 }
 
+public class UserChartLiteModel : ModelEntity
+{
+    public string DisplayName { get; set; }
+    public QueryEntity Query { get; set; }
+    public bool HideQuickLink { get; set; }
+
+    internal static UserChartLiteModel Translated(UserChartEntity uc) => new UserChartLiteModel
+    {
+        DisplayName = PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName),
+        HideQuickLink = uc.HideQuickLink,
+        Query = uc.Query
+    };
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => DisplayName);
+}
 
 
 [EntityKind(EntityKind.Part, EntityData.Master)]

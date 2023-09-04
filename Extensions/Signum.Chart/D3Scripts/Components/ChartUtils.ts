@@ -280,7 +280,7 @@ export function completeValues(column: ChartColumn<unknown>, values: unknown[], 
       if (limit != null && allValues.length > limit)
         return values;
 
-      allValues.push(column.token!.type.name == "DateOnly" ? date.toISODate() : date.toISO(({ suppressMilliseconds: true })));
+      allValues.push(column.token!.type.name == "DateOnly" ? date.toISODate()! : date.toISO(({ suppressMilliseconds: true }))!);
       date = date.plus({ [unit]: 1 });
     }
 

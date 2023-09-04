@@ -397,7 +397,7 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
 }
 
 function parseDate(str: string) {
-  const parsed = DateTime.fromFormat(str, serverDateTimeFormat).toISO();
+  const parsed = DateTime.fromFormat(str, serverDateTimeFormat).toISO()!;
 
   return parsed ?? undefined;
 }

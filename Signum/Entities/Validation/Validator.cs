@@ -152,6 +152,7 @@ public class PropertyValidator<T> : IPropertyValidator
 
     public Func<T, PropertyInfo, string?>? StaticPropertyValidation { get; set; }
 
+    public Func<T, PropertyInfo, bool?>? IsReadonly { get; set; }
 
     internal PropertyValidator(PropertyInfo pi)
     {
@@ -255,8 +256,18 @@ public class PropertyValidator<T> : IPropertyValidator
     }
 
 
-    public bool IsPropertyReadonly(ModifiableEntity modifiableEntity)
+    public bool IsPropertyReadonly(T modifiableEntity)
     {
+        if (IsReadonly != null)
+        {
+            foreach (var item in IsReadonly.GetInvocationListTyped())
+            {
+                var result = item(modifiableEntity, PropertyInfo);
+                if (result == true)
+                    return true;
+            }
+        }
+
         if (modifiableEntity.IsPropertyReadonly(PropertyInfo))
             return true;
 
@@ -274,4 +285,10 @@ public class PropertyValidator<T> : IPropertyValidator
 
         return false;
     }
+
+    public bool IsPropertyReadonly(ModifiableEntity modifiableEntity)
+    {
+        return IsPropertyReadonly((T)modifiableEntity);
+    }
+
 }

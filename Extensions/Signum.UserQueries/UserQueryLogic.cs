@@ -16,7 +16,7 @@ namespace Signum.UserQueries;
 public static class UserQueryLogic
 {
     public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
-    public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByTypeForQuickLinks = null!;
+    public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByType = null!;
     public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
 
     [AutoExpressionField]
@@ -35,13 +35,14 @@ public static class UserQueryLogic
 
             CurrentUserConverter.GetCurrentUserEntity = () => UserEntity.Current.Retrieve();
 
-            UserAssetsImporter.Register<UserQueryEntity>("UserQuery", UserQueryOperation.Save);
+            UserAssetsImporter.Register("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
+                .WithLiteModel(uq => new UserQueryLiteModel { DisplayName = uq.DisplayName, Query = uq.Query, HideQuickLink = uq.HideQuickLink})
                 .WithExpressionTo((UserQueryEntity d) => d.CachedQueries())
                 .WithSave(UserQueryOperation.Save)
                 .WithDelete(UserQueryOperation.Delete)
@@ -135,10 +136,11 @@ public static class UserQueryLogic
             UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
                 new InvalidateWith(typeof(UserQueryEntity)));
 
-            UserQueriesByTypeForQuickLinks = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null && !a.HideQuickLink).SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite())).GroupToDictionary(),
-                new InvalidateWith(typeof(UserQueryEntity)));
+            UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null)
+            .SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite()))
+            .GroupToDictionary(), new InvalidateWith(typeof(UserQueryEntity)));
 
-            if (sb.WebServerBuilder != null)
+         		if (sb.WebServerBuilder != null)
             {
                 UserQueryServer.Start(sb.WebServerBuilder.WebApplication);
                 OmniboxParser.Generators.Add(new UserQueryOmniboxResultGenerator(UserQueryLogic.Autocomplete));
@@ -251,18 +253,35 @@ public static class UserQueryLogic
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
             .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
             .ToList();
     }
 
-    public static List<Lite<UserQueryEntity>> GetUserQueriesEntity(Type entityType)
+    private static IEnumerable<UserQueryEntity> GetUserQueriesEntity(Type entityType)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
-        return UserQueriesByTypeForQuickLinks.Value.TryGetC(entityType).EmptyIfNull()
+        return UserQueriesByType.Value.TryGetC(entityType).EmptyIfNull()
              .Select(lite => UserQueries.Value.GetOrThrow(lite))
-             .Where(uq => isAllowed(uq))
-             .Select(uq => uq.ToLite(PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName)))
+             .Where(uq => isAllowed(uq));
+    }
+
+    public static List<Lite<UserQueryEntity>> GetUserQueries(Type entityType)
+    {
+        return GetUserQueriesEntity(entityType)
+             .Select(uq => uq.ToLite(new UserQueryLiteModel
+             {
+                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
+                 HideQuickLink = uq.HideQuickLink,
+                 Query = uq.Query,
+             }))
+             .ToList();
+    }
+
+    public static List<Lite<UserQueryEntity>> GetUserQueriesModel(Type entityType)
+    {
+        return GetUserQueriesEntity(entityType)
+             .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
              .ToList();
     }
 
@@ -272,7 +291,7 @@ public static class UserQueryLogic
 
         return UserQueries.Value.Values
             .Where(uq => uq.EntityType == null && isAllowed(uq))
-             .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+             .Select(d => d.ToLite(UserQueryLiteModel.Translated(d)))
              .Autocomplete(subString, limit)
              .ToList();
     }

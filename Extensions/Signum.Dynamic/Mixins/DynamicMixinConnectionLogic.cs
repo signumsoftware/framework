@@ -38,6 +38,7 @@ public static class DynamicMixinConnectionLogic
     {
         var result = new List<CodeFile>();
 
+        var cacheOldDisabled = CacheLogic.GloballyDisabled;
         CacheLogic.GloballyDisabled = true;
         try
         {
@@ -48,7 +49,7 @@ public static class DynamicMixinConnectionLogic
         }
         finally
         {
-            CacheLogic.GloballyDisabled = false;
+            CacheLogic.GloballyDisabled = cacheOldDisabled;
         }
 
         return result;

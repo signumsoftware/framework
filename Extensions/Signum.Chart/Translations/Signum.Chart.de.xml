@@ -159,6 +159,11 @@
     <Member Name="Parameters" Description="Parameter" />
     <Member Name="Query" Description="Abfrage" />
   </Type>
+  <Type Name="UserChartLiteModel" Description="Benutzerdiagramm lite">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="Query" Description="Abfrage" />
+  </Type>
   <Type Name="UserChartOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />

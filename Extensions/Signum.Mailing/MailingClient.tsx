@@ -8,7 +8,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailMessageOperation, EmailRecipientEmbedded, EmailConfigurationEmbedded, AsyncEmailSenderPermission, EmailModelEntity, EmailFromEmbedded, SmtpEmailServiceEntity } from './Signum.Mailing'
 import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.Mailing'
@@ -114,21 +114,22 @@ export function start(options: {
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
 
-  API.getAllTypes().then(types => {
-    allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
-      {
-        queryName: EmailMessageEntity,
-        filterOptions: [{ token: "Target", value: ctx.lite}],
-      },
-      {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),
-        icon: "envelope",
-        iconColor: "orange",
-        color: "warning",
-        group: options.quickLinkInDefaultGroup ? undefined : null,
-      }));
-  });
+
+  if (Navigator.isViewable(EmailMessageEntity)) {
+    var cachedAllTypes: Promise<string[]>;
+    QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      .then(types => !types.contains(entityType) ? [] :
+        [new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          {
+            key: getQueryKey(EmailMessageEntity),
+            text: () => EmailMessageEntity.nicePluralName(),
+            icon: "envelope",
+            iconColor: "orange",
+            color: "warning",
+            group: options.quickLinkInDefaultGroup ? undefined : null,
+          }
+        )]));
+  }
 
   UserAssetClient.registerExportAssertLink(EmailTemplateEntity);
   UserAssetClient.registerExportAssertLink(EmailMasterTemplateEntity);

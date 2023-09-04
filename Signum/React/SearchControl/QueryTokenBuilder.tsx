@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { areEqual, classes } from '../Globals'
+import { areEqual, classes, Dic } from '../Globals'
 import * as Finder from '../Finder'
-import { QueryToken, SubTokensOptions, getTokenParents, isPrefix } from '../FindOptions'
+import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets'
@@ -127,11 +127,48 @@ interface QueryTokenPartProps{
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
+export function clearManualSubTokens() {
+  Dic.clear(manualSubTokens);
+}
+
+export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
+
+export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
+  Dic.addOrThrow(manualSubTokens, key, func);
+}
+
+function getManualSubTokens(token?: QueryToken) {
+
+  //if (token?.type.name == "ManualCellDTO")
+  if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
+    return Promise.resolve([]); //prevents sending to server
+
+  const container = token?.parent && manualSubTokens[token.key] && token;
+  if (container) {
+    const entityType = container.parent!.type.name;
+    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](entityType);
+    const tokens = manuals.then(ms => ms.map(m =>
+    ({
+      ...m, parent: container,
+      fullKey: (container.fullKey + "." + m.key),
+      type: { name: "ManualCellDTO" },
+      queryTokenType: "Manual",
+      isGroupable: false
+    } as QueryToken)));
+
+    return tokens;
+  }
+}
+
 export function QueryTokenPart(p: QueryTokenPartProps) {
 
   const subTokens = useAPI(() => {
     if (p.readOnly)
       return Promise.resolve(undefined);
+
+    const manuals = getManualSubTokens(p.parentToken);
+    if (manuals)
+      return manuals.then(tokens => tokens.length == 0 ? tokens : [null, ...tokens]);
 
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])

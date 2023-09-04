@@ -638,6 +638,8 @@ export module SearchMessage {
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
+  export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
+  export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
 }
 
 export module SelectorMessage {

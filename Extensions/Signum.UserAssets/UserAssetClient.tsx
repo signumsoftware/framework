@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
-import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, translated } from '@framework/Signum.Entities'
+import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLite, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import {
   FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
@@ -39,17 +39,13 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  QuickLinks.registerQuickLink(type, ctx => {
-    if (!AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-      return undefined;
-
-    return new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), () => {
-      API.exportAsset(ctx.lites);
-    }, {
+  if (AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+    QuickLinks.registerQuickLink(type,
+      new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
+        allowsMultiple: true,
         iconColor: "#FCAE25",
         icon: "file-code"
-      });
-  }, { allowsMultiple : true });
+      }));
 }
 
 export function toQueryTokenEmbedded(token: QueryToken): QueryTokenEmbedded {

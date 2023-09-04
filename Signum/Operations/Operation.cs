@@ -1,5 +1,6 @@
 namespace Signum.Operations;
 
+[EntityKind(EntityKind.SystemString, EntityData.Master, IsLowPopulation = false), TicksColumn(false)]
 public class OperationSymbol : Symbol
 {
     private OperationSymbol() { }

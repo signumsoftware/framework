@@ -56,6 +56,7 @@ export type ValueLineType =
   "Number" |
   "Decimal" |
   "Color" |
+  "Guid" |
   "Time" |
   "RadioGroup" |
   "Password";
@@ -95,12 +96,12 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   }
 
-  static autoFixString(str: string, autoTrim: boolean): string {
+  static autoFixString(str: string | null | undefined, autoTrim: boolean, autoNull : boolean): string | null | undefined {
 
     if (autoTrim)
-      return str?.trim();
+      str = str?.trim();
 
-    return str;
+    return str == "" && autoNull ? null : str;
   }
 
   getDefaultProps(state: ValueLineProps) {
@@ -465,6 +466,10 @@ function internalComboBoxText(vl: ValueLineController) {
   );
 }
 
+ValueLineRenderers.renderers.set("Guid", (vl) => {
+  return internalTextBox(vl, "guid");
+});
+
 ValueLineRenderers.renderers.set("TextBox", (vl) => {
   return internalTextBox(vl, "text");
 });
@@ -477,7 +482,7 @@ ValueLineRenderers.renderers.set("Color", (vl) => {
   return internalTextBox(vl, "color");
 });
 
-function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text") {
+function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text" | "guid") {
 
   const s = vl.props;
 
@@ -501,7 +506,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
   if (s.autoFixString != false) {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
+      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true, type == "guid");
       if (fixed != input.value)
         vl.setValue(fixed, e);
 
@@ -514,7 +519,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => <>
         {vl.withItemGroup(
-          <input type={type == "color" ? "text" : type}
+          <input type={type == "color" || type == "guid" ? "text" : type}
             id={inputId}
             autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
             {...vl.props.valueHtmlAttributes}
@@ -571,7 +576,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   if (s.autoFixString != false) {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false);
+      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
       if (fixed != input.value)
         vl.setValue(fixed, e);
 
@@ -732,7 +737,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   function handleOnBlur(e: React.FocusEvent<any>) {
     if (!p.readonly) {
       if (text != null) {
-        let value = ValueLineController.autoFixString(text, false);
+        let value = ValueLineController.autoFixString(text, false, false);
 
         const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
         setText(undefined);
@@ -815,7 +820,7 @@ ValueLineRenderers.renderers.set("DateTime", (vl) => {
     vl.setValue(m == null || !m.isValid ? null :
       type == "DateOnly" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
-          m.toISO());
+          m.toISO()!);
   };
 
   const htmlAttributes = {
@@ -899,7 +904,7 @@ ValueLineRenderers.renderers.set("DateTimeSplitted", (vl) => {
       newDT = trimDateToFormat(newDT, type, s.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
-    vl.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO());
+    vl.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
   };
 
   return (
@@ -949,10 +954,10 @@ function DateTimePickerSplitted(p: {
       return null;
 
     if (p.initiallyShowOnly == "Date")
-      return ({ type: "Date", date: DateTime.fromJSDate(p.value).toISODate() });
+      return ({ type: "Date", date: DateTime.fromJSDate(p.value).toISODate()! });
 
     if (p.initiallyShowOnly == "Time")
-      return ({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+      return ({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime()! });
 
     return null;
   });
@@ -960,7 +965,7 @@ function DateTimePickerSplitted(p: {
   function handleTimeChange(time: string | null) {
     if (time == null) {
       if (p.value != null && temp == null) {
-        setTemp({ type: "Date", date: DateTime.fromJSDate(p.value).startOf("day").toISODate() });
+        setTemp({ type: "Date", date: DateTime.fromJSDate(p.value).startOf("day").toISODate()! });
       } else if (temp?.type == "Time") {
         setTemp(null);
       }
@@ -981,7 +986,7 @@ function DateTimePickerSplitted(p: {
     if (date == null) {
       if (p.value != null && temp == null) {
         p.onChange(null);
-        setTemp({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime() });
+        setTemp({ type: "Time", time: getTimeOfDay(DateTime.fromJSDate(p.value)).toISOTime()! });
       } else if (temp?.type == "Date") {
         p.onChange(null);
         setTemp(null);
@@ -994,7 +999,7 @@ function DateTimePickerSplitted(p: {
         p.onChange(DateTime.fromJSDate(date).startOf("day").plus(Duration.fromISOTime(temp.time)).toJSDate());
         setTemp(null);
       } else {
-        setTemp({ type: "Date", date: DateTime.fromJSDate(date).toISODate() });
+        setTemp({ type: "Date", date: DateTime.fromJSDate(date).toISODate()! });
       }
     }
   }

@@ -290,7 +290,7 @@ public class Schema : IImplementationsFinder
         return ee.CacheController;
     }
 
-    internal FilterQueryResult<T>? OnFilterQuery<T>()
+    internal FilterQueryResult<T>? OnFilterQuery<T>(FilterQueryArgs args)
         where T : Entity
     {
         AssertAllowed(typeof(T), inUserInterface: false);
@@ -300,7 +300,7 @@ public class Schema : IImplementationsFinder
             return null;
 
         FilterQueryResult<T>? result = null;
-        foreach (var item in ee.OnFilterQuery())
+        foreach (var item in ee.OnFilterQuery(args))
             result = CombineFilterResult(result, item);
 
         return result;
@@ -334,8 +334,10 @@ public class Schema : IImplementationsFinder
             if (ee == null)
                 return a => true;
 
+            var args = FilterQueryArgs.FromQuery(Database.Query<T>());
+
             Func<T, bool>? result = null;
-            foreach (var item in ee.OnFilterQuery().NotNull())
+            foreach (var item in ee.OnFilterQuery(args).NotNull())
             {
                 if (item.InMemoryFunction == null)
                     throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
@@ -362,7 +364,7 @@ public class Schema : IImplementationsFinder
         return a => one!(a) && two!(a);
     }
 
-    public Expression<Func<T, bool>>? GetInDatabaseFilter<T>()
+    public Expression<Func<T, bool>>? GetInDatabaseFilter<T>(FilterQueryArgs args)
        where T : Entity
     {
         EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
@@ -370,7 +372,7 @@ public class Schema : IImplementationsFinder
             return null;
 
         Expression<Func<T, bool>>? result = null;
-        foreach (var item in ee.OnFilterQuery().NotNull())
+        foreach (var item in ee.OnFilterQuery(args).NotNull())
         {
             result = CombineExpr(result, item.InDatabaseExpresson);
         }

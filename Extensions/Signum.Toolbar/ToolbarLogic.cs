@@ -62,11 +62,19 @@ public static class ToolbarLogic
     
 
             RegisterContentConfig<ToolbarMenuEntity>(
-                lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
+                lite =>
+                {
+                    var entity = ToolbarMenus.Value.GetOrCreate(lite);
+                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+                },
                 lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<ToolbarEntity>(
-                lite => Toolbars.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
+                lite =>
+                {
+                    ToolbarEntity entity = Toolbars.Value.GetOrCreate(lite);
+                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+                },
                 lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
             
             RegisterContentConfig<QueryEntity>(

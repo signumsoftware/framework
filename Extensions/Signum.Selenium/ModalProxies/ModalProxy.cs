@@ -78,7 +78,7 @@ public class ModalProxy : IDisposable
     public bool OkPressed;
     public void OkWaitClosed(bool consumeAlert = false)
     {
-        this.OkButton.Find().Click();
+        this.OkButton.Find().SafeClick();
 
         if (consumeAlert)
             MessageModalProxyExtensions.CloseMessageModal(this.Selenium, MessageModalButton.Ok);
