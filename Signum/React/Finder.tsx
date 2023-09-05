@@ -1363,7 +1363,7 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
         const dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
-          return dt.toISO();
+          return dt.toISO()!;
 
         if (val.length > 10 && token.type.name == "DateOnly") //DateTime -> Date
           return dt.toISODate();
@@ -1374,13 +1374,13 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
       if (val instanceof DateTime) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return val.toISODate();
-        return val.toISO();
+        return val.toISO()!;
       }
 
       if (val instanceof Date) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return DateTime.fromJSDate(val).toISODate();
-        return DateTime.fromJSDate(val).toISO();
+        return DateTime.fromJSDate(val).toISO()!;
       }
 
       return val;

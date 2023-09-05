@@ -134,6 +134,24 @@ public class QueryAuditorVisitor : ExpressionVisitor
             }
         }
 
+        if(condition is MethodCallExpression mce && mce.Method.Name == nameof(Lite.Is) && mce.Method.DeclaringType == typeof(Lite))
+        {
+            var left = mce.Arguments[0];
+            var right = mce.Arguments[1];
+
+            if (left is ConstantExpression ceLeft && CleanEquals(right, replaced))
+            {
+                constant = ceLeft;
+                return true;
+            }
+
+            if (left is ConstantExpression ceRight && CleanEquals(right, replaced))
+            {
+                constant = ceRight;
+                return true;
+            }
+        }
+
         return false;
     }
 

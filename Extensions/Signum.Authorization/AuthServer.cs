@@ -122,7 +122,7 @@ public static class AuthServer
                     if (ta.Max(inUserInterface: true) <= TypeAllowedBasic.Read)
                         return true;
 
-                    return giCountReadonly.GetInvoker(gr.Key)(gr.ToArray()) > 0;
+                    return giCountReadonly.GetInvoker(gr.Key)(gr) > 0;
                 });
             };
         }
@@ -297,13 +297,14 @@ Consider calling ReflectionServer.RegisterLike(typeof({type.Name}), ()=> yourCon
 
 
 
-    static GenericInvoker<Func<Lite<Entity>[], int>> giCountReadonly = new(lites => CountReadonly<Entity>(lites));
-    public static int CountReadonly<T>(Lite<T>[] lites) where T : Entity
+    static GenericInvoker<Func<IEnumerable<Lite<Entity>>, int>> giCountReadonly = new(lites => CountReadonly<UserEntity>(lites));
+    public static int CountReadonly<T>(IEnumerable<Lite<Entity>> lites) where T : Entity
     {
-        var args = FilterQueryArgs.FromFilter<T>(e => lites.Contains(e.ToLite()));
+        var array = lites.Cast<Lite<T>>().ToArray();
+        var args = FilterQueryArgs.FromFilter<T>(e => array.Contains(e.ToLite()));
 
         using (TypeAuthLogic.DisableQueryFilter())
-            return Database.Query<T>().Where(a => lites.Contains(a.ToLite())).Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true, args));
+            return Database.Query<T>().Where(a => array.Contains(a.ToLite())).Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true, args));
     }
 
     public static void OnUserPreLogin(ActionContext ac, UserEntity user)

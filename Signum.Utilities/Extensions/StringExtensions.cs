@@ -734,18 +734,6 @@ public static class StringExtensions
         return new string(arr);
     }
 
-    public static bool Wildcards(this string fileName, IEnumerable<string> wildcards)
-    {
-        return wildcards.Any(wc => fileName.Wildcards(wc));
-    }
-
-    static readonly Dictionary<string, string> wildcardsPatterns = new Dictionary<string, string>();
-    public static bool Wildcards(this string fileName, string wildcard)
-    {
-        var pattern = wildcardsPatterns.GetOrCreate(wildcard, wildcard.Replace(".", "[.]").Replace("*", ".*").Replace("?", "."));
-        return Regex.IsMatch(fileName, pattern);
-    }
-
     // like has an optional ESCAPE not available
     public static bool Like(this string str, string pattern)
     {

@@ -112,7 +112,18 @@ public static class TypeConditionLogic
                 {  property.Parameters[0], expr.Param }
             });
 
-            if (expr.Filters.Any(f => QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant)))
+            Expression<Func<T, PrimaryKey>> idExpression = a => a.Id;
+
+            var replacedID = ExpressionReplacer.Replace(idExpression.Body, new Dictionary<ParameterExpression, Expression>
+            {
+                {  idExpression.Parameters[0], expr.Param }
+            });
+
+            if (expr.Filters.Any(f =>
+                QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant) ||
+                QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId) ||
+                QueryAuditorVisitor.IsEqualsConstant(expr.Param, f, out var constantLite)
+            ))
                 return e => true;
 
             return e => false;
@@ -136,6 +147,13 @@ public static class TypeConditionLogic
                 {  property.Parameters[0], expr.Param }
             });
 
+            Expression<Func<T, PrimaryKey>> idExpression = a => a.Id; 
+
+            var replacedID = ExpressionReplacer.Replace(idExpression.Body, new Dictionary<ParameterExpression, Expression>
+            {
+                {  idExpression.Parameters[0], expr.Param }
+            });
+
             if (expr.Filters.Any(f =>
             {
                 if (QueryAuditorVisitor.IsEqualsConstant(replaced, f, out var constant))
@@ -144,6 +162,60 @@ public static class TypeConditionLogic
 
                     if (isConstantAuthorized(val))
                         return true;
+                }
+
+                if (QueryAuditorVisitor.IsEqualsConstant(replacedID, f, out var constantId))
+                {
+                    var id = (PrimaryKey?)constantId.Value;
+                    if (id == null)
+                        return false;
+
+                    using (TypeAuthLogic.DisableQueryFilter())
+                    {
+                        var value = Database.Query<T>().Where(a => a.Id == id).Select(property).SingleOrDefaultEx();
+
+                        var val = ConvertValue<P?>(value);
+
+                        if (isConstantAuthorized(val))
+                            return true;
+                    }
+                }
+
+                if (QueryAuditorVisitor.IsEqualsConstant(expr.Param, f, out var constantLite))
+                {
+                    var liteOrEntity = constantLite.Value;
+                    if (liteOrEntity == null)
+                        return false;
+
+                    if (liteOrEntity is Lite<T> lite)
+                    {
+                        using (TypeAuthLogic.DisableQueryFilter())
+                        {
+                            var value = lite.InDB(property);
+
+                            var val = ConvertValue<P?>(value);
+
+                            if (isConstantAuthorized(val))
+                                return true;
+
+                            return false;
+                        }
+                    }
+
+                    if(liteOrEntity is T entity)
+                    {
+                        using (TypeAuthLogic.DisableQueryFilter())
+                        {
+                            var value = useInDBForInMemoryCondition ? Database.InDB(entity, property) : func!(entity);
+
+                            var val = ConvertValue<P?>(value);
+
+                            if (isConstantAuthorized(val))
+                                return true;
+
+                            return false;
+                        }
+                    }
                 }
 
                 return false;

@@ -19,4 +19,7 @@
     <Member Name="FinalState" Description="Endstatus" />
     <Member Name="InitialState" Description="Ausgangsstatus" />
   </Type>
+  <Type Name="OperationLogTypeCondition">
+    <Member Name="FilteringByTarget" Description="Filtern nach Ziel" />
+  </Type>
 </Translations>
