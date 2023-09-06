@@ -13,7 +13,7 @@ import {
   ResultTable, ResultRow, OrderOption, SubTokensOptions, toQueryToken, isList, ColumnOptionsMode, FilterRequest, ModalFindOptions, OrderRequest,
   FilterGroupOptionParsed, FilterConditionOptionParsed, FilterGroupOption,
   FilterConditionOption, FilterGroupRequest, FilterConditionRequest, PinnedFilter, SystemTime, hasAnyOrAll, hasAggregate, hasElement,
-  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup
+  toPinnedFilterParsed, isActive, hasOperation, hasToArray, ModalFindOptionsMany, canSplitValue, getFilterOperations, isFilterGroup, hasManual
 } from './FindOptions';
 
 import { FilterOperation, FilterGroupOperation, PinnedFilterActive } from './Signum.DynamicQuery';
@@ -34,6 +34,7 @@ import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController, TypeContext } from "./Lines";
 import { clearContextualItems } from "./SearchControl/ContextualItems";
+import { clearManualSubTokens } from "./SearchControl/QueryTokenBuilder";
 import { APIHookOptions, useAPI } from "./Hooks";
 import { QueryString } from "./QueryString";
 import { similarToken } from "./Search";
@@ -55,6 +56,7 @@ export function start(options: { routes: RouteObject[] }) {
   AppContext.clearSettingsActions.push(clearContextualItems);
   AppContext.clearSettingsActions.push(clearQuerySettings);
   AppContext.clearSettingsActions.push(clearQueryDescriptionCache);
+  AppContext.clearSettingsActions.push(clearManualSubTokens);
   AppContext.clearSettingsActions.push(ButtonBarQuery.clearButtonBarElements);
   AppContext.clearSettingsActions.push(resetFormatRules);
   onReloadTypesActions.push(clearQueryDescriptionCache);
@@ -64,12 +66,25 @@ export function addSettings(...settings: QuerySettings[]) {
   settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
 }
 
-export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+export function pinnedSearchFilter(): FilterGroupOption;
+export function pinnedSearchFilter<T extends Entity>(type: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption;
+  export function pinnedSearchFilter<T extends Entity>(type?: Type<T>, ...tokens: ((t: QueryTokenString<Anonymous<T>>) => (QueryTokenString<any> | FilterConditionOption))[]): FilterGroupOption {
+  if (type == null) {
+    return {
+      groupOperation: "Or",
+      pinned: { label: SearchMessage.Search.niceToString(), splitValue: true, active: "WhenHasValue" },
+      filters: [
+        { token: "Entity.Id", operation: "EqualTo" },
+        { token: "Entity.ToString", operation: "Contains" },
+      ]
+    };
+  }
+
   return {
     groupOperation: "Or",
     pinned: { splitValue: true },
     filters: tokens.map(t => {
-      var res = t(type.token());
+      var res = t(type!.token());
 
       if (res instanceof QueryTokenString)
         return { token: res, operation: "Contains" } as FilterConditionOption;
@@ -461,7 +476,7 @@ export function parseOrderOptions(orderOptions: (OrderOption | null | undefined)
 export function parseColumnOptions(columnOptions: ColumnOption[], groupResults: boolean, qd: QueryDescription): Promise<ColumnOptionParsed[]> {
 
   const completer = new TokenCompleter(qd);
-  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation);
+  var sto = SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (groupResults ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
   columnOptions.forEach(a => completer.request(a.token.toString(), sto));
 
   return completer.finished()
@@ -769,7 +784,7 @@ export function parseFindOptions(findOptions: FindOptions, qd: QueryDescription,
     fo.filterOptions = simplifyPinnedFilters(fo.filterOptions.notNull());
 
   const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
-  const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation);
+  const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
 
   const completer = new TokenCompleter(qd);
 
@@ -984,7 +999,7 @@ export function toFilterRequest(fop: FilterOptionParsed, overridenValue?: Overri
     }
     else if (isFilterGroup(fop)) {
 
-      if (fop.pinned.active == "WhenHasValue" && fop.value == null) {
+      if (fop.pinned.active == "WhenHasValue" && (fop.value == null || fop.value == "")) {
         return undefined;
       }
 
@@ -1218,6 +1233,9 @@ export class TokenCompleter {
       if (hasToArray(token) && (options & SubTokensOptions.CanToArray) == 0)
         throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (ToArray not allowed)`);
 
+      if (hasManual(token) && (options & SubTokensOptions.CanManual) == 0)
+        throw new Error(`Token with key '${fullKey}' not found on query '${this.queryDescription.queryKey} (Manual not allowed)`);
+
       return;
     }
 
@@ -1345,7 +1363,7 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
         const dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
-          return dt.toISO();
+          return dt.toISO()!;
 
         if (val.length > 10 && token.type.name == "DateOnly") //DateTime -> Date
           return dt.toISODate();
@@ -1356,13 +1374,13 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
       if (val instanceof DateTime) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return val.toISODate();
-        return val.toISO();
+        return val.toISO()!;
       }
 
       if (val instanceof Date) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return DateTime.fromJSDate(val).toISODate();
-        return DateTime.fromJSDate(val).toISO();
+        return DateTime.fromJSDate(val).toISO()!;
       }
 
       return val;
@@ -1716,7 +1734,7 @@ export module Encoder {
 
 
 
-  export function encodeFilters(query: any, filterOptions?: FilterOption[]) {
+  export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string) {
 
     var i: number = 0;
 
@@ -1727,8 +1745,8 @@ export module Encoder {
 
       if (fo.pinned) {
         var p = fo.pinned;
-        query["filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
-          "~" + (p.column == null ? "" : p.column) +
+        query[(prefix ?? "") + "filterPinned" + index + identSuffix] = scapeTilde(typeof p.label == "function" ? p.label() : p.label ?? "") +
+          "~" + (p.column == null ? "" : p.column) + (p.colSpan == null ? "" : ("." + p.colSpan)) +
           "~" + (p.row == null ? "" : p.row) +
           "~" + PinnedFilterActive.values().indexOf(p.active ?? "Always") +
           "~" + (p.splitValue ? 1 : 0);
@@ -1736,11 +1754,11 @@ export module Encoder {
 
 
       if (isFilterGroup(fo)) {
-        query["filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query[(prefix ?? "") + "filter" + index + identSuffix] = (fo.token ?? "") + "~" + (fo.groupOperation) + "~" + (ignoreValues ? "" : stringValue(fo.value));
 
         fo.filters.notNull().forEach(f => encodeFilter(f, identation + 1, ignoreValues || shouldIgnoreValues(fo.pinned)));
       } else {
-        query["filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
+        query[(prefix ?? "") + "filter" + index + identSuffix] = fo.token + "~" + (fo.operation ?? "EqualTo") + "~" + (ignoreValues ? "" : stringValue(fo.value));
       }
 
     }
@@ -1749,12 +1767,12 @@ export module Encoder {
       filterOptions.forEach(fo => encodeFilter(fo, 0, false));
   }
 
-  export function encodeOrders(query: any, orderOptions?: OrderOption[]) {
+  export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string) {
     if (orderOptions)
-      orderOptions.forEach((oo, i) => query["order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
+      orderOptions.forEach((oo, i) => query[(prefix ?? "") + "order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
   }
 
-  export function encodeColumns(query: any, columnOptions?: ColumnOption[]) {
+  export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string) {
     if (columnOptions) {
       columnOptions.forEach((co, i) => {
 
@@ -1762,12 +1780,11 @@ export module Encoder {
           co.displayName ? scapeTilde(typeof co.displayName == "function" ? co.displayName() : co.displayName) :
             undefined;
 
-        query["column" + i] = co.token + (displayName ? ("~" + displayName) : "");
+        query[(prefix ?? "") + "column" + i] = co.token + (displayName ? ("~" + displayName) : "");
         if (co.summaryToken)
-          query["summary" + i] = co.summaryToken.toString();
+          query[(prefix ?? "") + "summary" + i] = co.summaryToken.toString();
         if (co.combineRows)
-          query["combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
-
+          query[(prefix ?? "") + "combine" + i] = co.combineRows == "EqualValue" ? "V" : "E";
       });
     }
   }
@@ -1810,7 +1827,7 @@ const HIDDEN = "__";
 
 export module Decoder {
 
-  export const decodeModel: { [typeName: string]: (string: string) => ModelEntity | null } = {};
+  export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
 
   interface FilterPart {
@@ -1829,13 +1846,15 @@ export module Decoder {
       .orderBy(a => a.order);
   }
 
-  export function decodeFilters(query: any): FilterOption[] {
+  export function decodeFilters(query: any, prefix?: string): FilterOption[] {
 
     function parsePinnedFilter(str: string): PinnedFilter {
       var parts = str.split("~");
+      var col = parts[1];
       return ({
         label: unscapeTildes(parts[0]),
-        column: parts[1].length ? parseInt(parts[1]) : undefined,
+        column: col.length ? (col.contains(".") ? parseInt(col.before(".")) : parseInt(col)) : undefined,
+        colSpan: col.length && col.contains(".") ? parseInt(col.after(".")) : undefined,
         row: parts[2].length ? parseInt(parts[2]) : undefined,
         active: parseInt(parts[3]) == 0 ? undefined : PinnedFilterActive.values()[parseInt(parts[3])],
         splitValue: parseInt(parts[4]) == 0 ? undefined : Boolean(parseInt(parts[4])),
@@ -1849,7 +1868,7 @@ export module Decoder {
 
         var identSuffix = identation == 0 ? "" : ("_" + identation);
 
-        var pinnedText = query["filterPinned" + gr.key.order + identSuffix] as string;
+        var pinnedText = query[(prefix ?? "") + "filterPinned" + gr.key.order + identSuffix] as string;
 
         var pinned = pinnedText == undefined ? null : parsePinnedFilter(pinnedText);
 
@@ -1877,7 +1896,7 @@ export module Decoder {
       });
     }
 
-    return toFilterList(filterInOrder(query, "filter"), 0, false)
+    return toFilterList(filterInOrder(query, (prefix ?? "") + "filter"), 0, false)
   }
 
   export function unscapeTildes(str: string | undefined): string | undefined {
@@ -1896,19 +1915,19 @@ export module Decoder {
       .orderBy(a => a.index);
   }
 
-  export function decodeOrders(query: any): OrderOption[] {
-    return valuesInOrder(query, "order").map(p => ({
+  export function decodeOrders(query: any, prefix?: string): OrderOption[] {
+    return valuesInOrder(query, (prefix ?? "") + "order").map(p => ({
       orderType: p.value[0] == "-" ? "Descending" : "Ascending",
       token: p.value[0] == "-" ? p.value.tryAfter("-") : p.value
     } as OrderOption));
   }
 
 
-  export function decodeColumns(query: any): ColumnOption[] {
-    var summary = valuesInOrder(query, "summary");
-    var combine = valuesInOrder(query, "combine");
+  export function decodeColumns(query: any, prefix?: string): ColumnOption[] {
+    var summary = valuesInOrder(query, (prefix ?? "") + "summary");
+    var combine = valuesInOrder(query, (prefix ?? "") + "combine");
 
-    return valuesInOrder(query, "column").map(p => {
+    return valuesInOrder(query, (prefix ?? "") + "column").map(p => {
 
       var displayName = unscapeTildes(p.value.tryAfter("~"));
 
@@ -1961,6 +1980,7 @@ export interface QuerySettings {
   inPlaceNavigation?: boolean;
   modalSize?: BsSize;
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
+  allowCreate?: boolean;
   allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
@@ -1969,8 +1989,10 @@ export interface QuerySettings {
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
+  noResultMessage?: (searchControl: SearchControlLoaded) => React.ReactElement | string | undefined;
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
+  markRowsColumn?: string;
 }
 
 

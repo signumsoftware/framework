@@ -182,8 +182,8 @@ public enum OmniboxMessage
     Unknown,
     [Description("yes")]
     Yes,
-    [Description(@"\b(the|of) ")]
-    ComplementWordsRegex,
+    //[Description(@"\b(the|of) ")]
+    //ComplementWordsRegex,
     [Description("Search...")]
     Search,
 }

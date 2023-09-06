@@ -159,7 +159,7 @@ public class MailKitPop3Client : Mailing.Pop3.IPop3Client
             var receptionInfo = new EmailReceptionInfoEmbedded
             {
                 RawContent = new BigStringEmbedded { Text = Encoding.ASCII.GetString(stream.ToArray()) },
-                SentDate = message.Date.UtcDateTime == DateTime.MinValue ? Clock.Now : message.Date.UtcDateTime,
+                SentDate = message.Date.UtcDateTime == DateTime.MinValue ? Clock.Now.ToUniversalTime() : message.Date.UtcDateTime,
                 ReceivedDate = Clock.Now,
             };
 

@@ -74,9 +74,19 @@ public class LogicCodeGenerator
 
     protected virtual IEnumerable<Module> GetModules()
     {
+        //return GetAllModules();
+
         Dictionary<Type, bool> types = CandidateTypes().ToDictionary(a => a, Schema.Current.Tables.ContainsKey);
 
         return CodeGenerator.GetModules(types, this.SolutionName);
+    }
+
+    protected virtual IEnumerable<Signum.CodeGeneration.Module> GetAllModules()
+    {
+        return CandidateTypes()
+            .Where(t => !Schema.Current.Tables.ContainsKey(t))
+            .GroupBy(a => a.Namespace!.AfterLast("."))
+            .Select(gr => new Signum.CodeGeneration.Module(gr.Key, gr.ToList()));
     }
 
     protected virtual List<Type> CandidateTypes()
@@ -133,7 +143,7 @@ public class LogicCodeGenerator
 
     protected virtual string GetNamespace(Module mod)
     {
-        return SolutionName + mod.ModuleName;
+        return SolutionName + "." + mod.ModuleName;
     }
 
     protected virtual List<string> GetUsingNamespaces(Module mod, List<ExpressionInfo> expressions)

@@ -149,11 +149,6 @@ public static class SchedulerLogic
                 Construct = (task, _) => ScheduleTaskRunner.ExecuteSync(task, null, UserHolder.Current.User.Retrieve())
             }.Register();
 
-            new Graph<ITaskEntity>.Execute(ITaskOperation.ExecuteAsync)
-            {
-                Execute = (task, _) => ScheduleTaskRunner.ExecuteAsync(task, null, UserHolder.Current.User.Retrieve())
-            }.Register();
-
             ScheduledTasksLazy = sb.GlobalLazy(() =>
                 Database.Query<ScheduledTaskEntity>().Where(a => !a.Suspended &&
                     (a.MachineName == ScheduledTaskEntity.None || a.MachineName == Schema.Current.MachineName && a.ApplicationName == Schema.Current.ApplicationName)).ToList(),

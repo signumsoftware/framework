@@ -108,7 +108,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     <fieldset className="form-xs">
       {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3 border-bottom">
         <h4 className="lead">Preview</h4>
-        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} />
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} showGrid={true} />
       </div>
       }
       {p.title && <legend>{p.title}</legend>}
@@ -133,6 +133,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
               {showDashboardBehaviour && <th></th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Label.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Column.niceToString()}</th>}
+              {showPinnedFiltersOptions && <th>{SearchMessage.ColSpan.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Row.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.IsActive.niceToString()}</th>}
               {showPinnedFiltersOptions && <th>{SearchMessage.Split.niceToString()}</th>}
@@ -466,7 +467,7 @@ function isFilterActive(fo: FilterOptionParsed) {
     fo.pinned.active == "Always" ||
     fo.pinned.active == "Checkbox_Checked" ||
     fo.pinned.active == "NotCheckbox_Unchecked" ||
-    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value == "");
+    fo.pinned.active == "WhenHasValue" && !(fo.value == null || fo.value === "");
 }
 
 export interface FilterConditionComponentProps {
@@ -521,7 +522,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
               return val;
 
             const trimmed = trimDateToFormat(date, type, newToken!.format);
-            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO();
+            return type == "DateOnly" ? trimmed.toISODate() : trimmed.toISO()!;
           }
 
           if (f.operation && isList(f.operation)) {
@@ -674,11 +675,15 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(pinned, _ => _.column), SearchMessage.Column.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.column), SearchMessage.Column.niceToString(), 0)}
       </td>
 
       <td className="sf-pinned-filter-cell">
-        {numericTextBox(Binding.create(pinned, _ => _.row), SearchMessage.Row.niceToString())}
+        {numericTextBox(Binding.create(pinned, _ => _.colSpan), SearchMessage.ColSpan.niceToString(), 1)}
+      </td>
+
+      <td className="sf-pinned-filter-cell">
+        {numericTextBox(Binding.create(pinned, _ => _.row), SearchMessage.Row.niceToString(), 0)}
       </td>
 
       <td className="sf-pinned-filter-cell">
@@ -700,14 +705,17 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     </>
   );
 
-  function numericTextBox(binding: Binding<number | undefined>, title: string) {
+  function numericTextBox(binding: Binding<number | undefined>, title: string, placeholder: number) {
 
     var val = binding.getValue();
     var numberFormat = toNumberFormat("0");
 
     return (
-      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val} format={numberFormat} onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
-        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: title, style: { width: "60px" } }} />
+      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val}
+        format={numberFormat}
+        
+        onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
+        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder.toString(), title: title, style: { width: "60px" } }} />
     );
   }
 

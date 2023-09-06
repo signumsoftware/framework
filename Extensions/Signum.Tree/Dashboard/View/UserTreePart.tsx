@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import * as Finder from '@framework/Finder'
-import { getTypeInfos } from '@framework/Reflection'
+import { getTypeInfos, tryGetOperationInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserQueryClient from '../../../Signum.UserQueries/UserQueryClient'
 import { useAPI } from '@framework/Hooks'
@@ -27,7 +27,7 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
     <TreeViewer ref={treeViewRef}
       initialShowFilters={false}
       typeName={ti.name}
-      allowMove={Operations.tryGetOperationInfo(TreeOperation.Move, ti) !== null}
+      allowMove={tryGetOperationInfo(TreeOperation.Move, ti) !== null}
       filterOptions={fo.filterOptions}
       key={ti.name}
     />

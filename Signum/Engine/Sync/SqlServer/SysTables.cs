@@ -118,6 +118,10 @@ public class SysTables : IView
     public IQueryable<SysKeyConstraints> KeyConstraints() =>
         As.Expression(() => Database.View<SysKeyConstraints>().Where(fk => fk.parent_object_id == object_id));
 
+    [AutoExpressionField]
+    public IQueryable<SysCheckConstraints> CheckConstraints() =>
+    As.Expression(() => Database.View<SysCheckConstraints>().Where(fk => fk.parent_object_id == object_id));
+
 
     [AutoExpressionField]
     public IQueryable<SysIndexes> Indices() =>
@@ -201,6 +205,17 @@ public class SysDefaultConstraints : IView
     public string definition;
     public bool is_system_named;
 }
+
+[TableName("sys.check_constraints")]
+public class SysCheckConstraints : IView
+{
+    public string name;
+    public int object_id;
+    public int parent_object_id;
+    public int parent_column_id;
+    public string definition;
+}
+
 
 [TableName("sys.types")]
 public class SysTypes : IView

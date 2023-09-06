@@ -390,7 +390,7 @@ public static class QueryUtils
         if (token.Type != typeof(string) && token.Type.ElementType() != null)
             return "You can not filter by collections, continue the sequence";
 
-        if (token is OperationsToken or OperationToken)
+        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
             return $"{token} is not a valid filter";
 
         return null;
@@ -411,7 +411,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NoOne.NiceToString(),
                 CollectionAnyAllType.AnyNo.NiceToString());
 
-        if (token is OperationsToken)
+        if (token is OperationsToken or ManualContainerToken)
             return $"{token} is not a valid column";
 
         return null;
@@ -457,7 +457,7 @@ public static class QueryUtils
                 CollectionAnyAllType.NoOne.NiceToString(),
                 CollectionAnyAllType.AnyNo.NiceToString());
 
-        if (token is OperationsToken or OperationToken)
+        if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
             return $"{token} is not a valid order";
 
         return null;
@@ -624,4 +624,5 @@ public enum SubTokensOptions
     CanOperation = 8,
     CanToArray = 16,
     CanSnippet= 32,
+    CanManual = 64,
 }

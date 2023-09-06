@@ -10,6 +10,7 @@ import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { renderFilterValue } from '../Finder'
+import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -18,7 +19,7 @@ interface PinnedFilterBuilderProps {
   onSearch?: () => void;
   showSearchButton?: boolean;
   extraSmall?: boolean;
-  colClassName?: string;
+  showGrid?: boolean;
 }
 export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
@@ -29,18 +30,68 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   if (allPinned.length == 0)
     return null;
 
+  function getColSpan(fo: FilterOptionParsed) {
+    if (fo.pinned!.colSpan == null || fo.pinned!.colSpan < 0)
+      return 1;
+
+    return fo.pinned!.colSpan;
+  }
+
+  var maxColumns = allPinned.max(a => (a.pinned!.column ?? 0) + getColSpan(a))!;
+  var maxRows = Math.max(allPinned.max(a => (a.pinned!.row ?? 0) + 1 )!, 1);
+
+  maxColumns =
+    maxColumns <= 4 ? 4 :
+    maxColumns <= 6 ? 6 :
+      12;
+
+  var bsBase =
+    maxColumns == 4 ? 3 :
+    maxColumns == 6 ? 2 :
+      1;
+
   return (
-    <div onKeyUp={handleFiltersKeyUp }>
-      <div className={classes("row", p.extraSmall ? "" : "mt-3 mb-3")}>
+    <div onKeyUp={handleFiltersKeyUp}>
+      <div className={p.extraSmall ? "" : "mt-3 mb-3"}>
         {
-          allPinned
-            .groupBy(fo => (fo.pinned!.column ?? 0).toString())
-            .orderBy(gr => parseInt(gr.key))
-            .map(gr => <div key={gr.key} className={p.colClassName ?? (gr.elements.length > 4 ? "col-sm-2" : "col-sm-3")}>
-              {gr.elements.orderBy(a => a.pinned!.row ?? 0).map((f, i) => <div key={i}>{renderValue(f)}</div>)}
-            </div>)
+          p.showGrid && <div className="row">
+            {Array.range(0, maxColumns).map((a, i) => <div key={i} className={classes(bsBase == null ? "col-sm" : "col-sm-" + bsBase)}>
+              <div className="bg-light px-2"> Col {a}</div>
+            </div>)}
+          </div>
+        }
+        {
+          Array.range(0, maxRows).map((r, i) => {
+            var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
+            var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
+              .flatMap(a => Array.range(0, a.pinned!.colSpan!).map(i => (a.pinned!.column ?? 0) + i + 1))
+              .distinctBy(a => a.toString());
+            return (
+              <div key={i} className={classes("row", p.showGrid  && "py-2")}>
+                {Array.range(0, maxColumns).map((c, j) => {
+                  var cellPinned = rowPinned.filter(a => (a.pinned!.column ?? 0) == c);
+                  if (hiddenColumns.contains(c) && cellPinned.length == 0)
+                    return null;
+
+                  var colSpan = cellPinned.max(a => getColSpan(a)) ?? 1;
+
+
+                  var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
+                    || hiddenColumns.contains(c);
+
+                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "bg-danger")}>
+                    <div className={p.showGrid ? "bg-light" : undefined}>
+                      {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+                    </div>
+                  </div>
+                  );
+                })}
+              </div>
+            );
+          })
         }
       </div>
+
       {p.showSearchButton &&
         <button className={classes("sf-query-button sf-search btn btn-primary")} onClick={() => p.onSearch && p.onSearch()} title="Enter">
           <FontAwesomeIcon icon={"magnifying-glass"} />&nbsp;{SearchMessage.Search.niceToString()}

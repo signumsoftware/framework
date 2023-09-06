@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.1.3">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -37,5 +37,9 @@
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Attachments\" />
 	</ItemGroup>
 </Project>

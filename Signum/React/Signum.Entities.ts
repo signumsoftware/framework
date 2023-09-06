@@ -603,8 +603,8 @@ export module SearchMessage {
   export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
+  export const ColSpan = new MessageKey("SearchMessage", "ColSpan");
   export const Row = new MessageKey("SearchMessage", "Row");
-  export const SplitText = new MessageKey("SearchMessage", "SplitText");
   export const WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull = new MessageKey("SearchMessage", "WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull");
   export const WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound = new MessageKey("SearchMessage", "WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound");
   export const ParentValue = new MessageKey("SearchMessage", "ParentValue");
@@ -638,6 +638,8 @@ export module SearchMessage {
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
+  export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
+  export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
 }
 
 export module SelectorMessage {

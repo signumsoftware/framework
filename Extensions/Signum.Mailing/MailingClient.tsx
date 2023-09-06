@@ -8,7 +8,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
-import { PseudoType, Type, getTypeName, isTypeEntity } from '@framework/Reflection'
+import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import { EmailMessageEntity, EmailMessageOperation, EmailRecipientEmbedded, EmailConfigurationEmbedded, AsyncEmailSenderPermission, EmailModelEntity, EmailFromEmbedded, SmtpEmailServiceEntity } from './Signum.Mailing'
 import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.Mailing'
@@ -27,7 +27,7 @@ import MailingMenu from "./MailingMenu";
 import { Dropdown } from 'react-bootstrap';
 import "./Mailing.css";
 import { SearchControlLoaded } from '@framework/Search';
-import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn } from './Signum.Mailing.Templates';
+import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn, FileTokenAttachmentEntity, ImageAttachmentEntity } from './Signum.Mailing.Templates';
 import { CultureInfoEntity } from '@framework/Signum.Basics';
 
 
@@ -57,6 +57,8 @@ export function start(options: {
 
   Navigator.addSettings(new EntitySettings(EmailMessageEntity, e => import('./Templates/EmailMessage')));
   Navigator.addSettings(new EntitySettings(EmailTemplateEntity, e => import('./Templates/EmailTemplate')));
+  Navigator.addSettings(new EntitySettings(ImageAttachmentEntity, e => import('./Templates/ImageAttachment')));
+  Navigator.addSettings(new EntitySettings(FileTokenAttachmentEntity, e => import('./Templates/FileTokenAttachment')));
   Navigator.addSettings(new EntitySettings(EmailMasterTemplateEntity, e => import('./Templates/EmailMasterTemplate')));
   Navigator.addSettings(new EntitySettings(EmailRecipientEmbedded, e => import('./Templates/EmailRecipient')));
   Navigator.addSettings(new EntitySettings(EmailFromEmbedded, e => import('./Templates/EmailFrom')));
@@ -112,21 +114,22 @@ export function start(options: {
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
 
-  API.getAllTypes().then(types => {
-    allTypes = types;
-    QuickLinks.registerGlobalQuickLink(ctx => new QuickLinks.QuickLinkExplore(
-      {
-        queryName: EmailMessageEntity,
-        filterOptions: [{ token: "Target", value: ctx.lite}],
-      },
-      {
-        isVisible: allTypes.contains(ctx.lite.EntityType) && !Navigator.isReadOnly(EmailMessageEntity),
-        icon: "envelope",
-        iconColor: "orange",
-        color: "warning",
-        group: options.quickLinkInDefaultGroup ? undefined : null,
-      }));
-  });
+
+  if (Navigator.isViewable(EmailMessageEntity)) {
+    var cachedAllTypes: Promise<string[]>;
+    QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      .then(types => !types.contains(entityType) ? [] :
+        [new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          {
+            key: getQueryKey(EmailMessageEntity),
+            text: () => EmailMessageEntity.nicePluralName(),
+            icon: "envelope",
+            iconColor: "orange",
+            color: "warning",
+            group: options.quickLinkInDefaultGroup ? undefined : null,
+          }
+        )]));
+  }
 
   UserAssetClient.registerExportAssertLink(EmailTemplateEntity);
   UserAssetClient.registerExportAssertLink(EmailMasterTemplateEntity);

@@ -30,7 +30,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
             position: "absolute"
           }} />
         </div>
-        <div className="col-sm-4">
+        <div className="col-sm-4 custom-placeholder">
         </div>
         <div className="col-sm-6">
           <EntityLine ctx={ctx.subCtx(f => f.user)} labelColumns={3}

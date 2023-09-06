@@ -68,7 +68,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
   return result;
 }
 
-export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean): AlternativeOperationSetting<T> {
+export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDropdown?: boolean, isDefault?: boolean): AlternativeOperationSetting<T> {
 
   return ({
     name: "andClose",
@@ -77,6 +77,7 @@ export function andClose<T extends Entity>(eoc: EntityOperationContext<T>, inDro
     keyboardShortcut: eoc.keyboardShortcut && { shiftKey: true, ...eoc.keyboardShortcut },
     isVisible: true,
     inDropdown: inDropdown,
+    isDefault: isDefault,
     onClick: () => {
       eoc.onExecuteSuccess = pack => {
         notifySuccess();
@@ -129,7 +130,7 @@ interface OperationButtonProps extends ButtonProps {
   outline?: boolean;
   color?: BsColor;
   avoidAlternatives?: boolean;
-  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>, event: React.MouseEvent) => void;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
   children?: React.ReactNode;
   hideOnCanExecute?: boolean;
 }
@@ -149,7 +150,34 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (hideOnCanExecute && disabled)
     return null;
 
-  var alternatives = avoidAlternatives ? undefined : eoc.alternatives && eoc.alternatives.filter(a => a.isVisible != false);
+  var alternatives = avoidAlternatives ? undefined : eoc.alternatives?.filter(a => a.isVisible != false); //Clone
+
+  var main: AlternativeOperationSetting<any> = {
+    name: "main",
+    onClick: eoc => {
+      if (onOperationClick)
+        onOperationClick(eoc);
+      else
+        eoc.click();
+    },
+    text: eoc.settings?.text ? eoc.settings.text(eoc) :
+      group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
+        eoc.operationInfo.niceName,
+    keyboardShortcut: eoc.keyboardShortcut,
+    color: color ?? eoc.color,
+    classes: classes(props.className, eoc.settings?.classes),
+    icon: eoc.icon,
+    iconColor: eoc.settings?.iconColor,
+    iconAlign: eoc.settings?.iconAlign,
+  };
+
+  if (alternatives && alternatives.some(a => a.isDefault)) {
+    const newMain = alternatives.single(a => a.isDefault == true);
+    main.inDropdown = newMain.inDropdown;
+    alternatives.remove(newMain);
+    alternatives.insertAt(0, main);
+    main = newMain;
+  }
 
   if (group) {
 
@@ -157,11 +185,11 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       <Dropdown.Item
         {...props as any}
         disabled={disabled}
-        title={eoc?.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-        className={classes(disabled ? "disabled sf-pointer-events" : undefined, props?.className)}
-        onClick={disabled ? undefined : handleOnClick}
+        title={main?.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
+        className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
+        onClick={disabled ? undefined : e => { eoc.event = e;  main.onClick(eoc); }}
         data-operation={eoc.operationInfo.key}>
-        {renderChildren()}
+        {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
       </Dropdown.Item>;
 
     if (canExecute)
@@ -182,17 +210,14 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   if (outline == null)
     outline = eoc.outline;
 
-  if (color == null)
-    color = eoc.color;
-
-  var button = <Button variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+  var button = <Button variant={(outline ? ("outline-" + main.color) as OutlineBsColor : main.color)}
     {...props}
     key="button"
-    title={eoc.keyboardShortcut && getShortcutToString(eoc.keyboardShortcut)}
-    className={classes(disabled ? "disabled" : undefined, props?.className, eoc.settings && eoc.settings.classes)}
-    onClick={disabled ? undefined : handleOnClick}
+    title={main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
+    className={classes(disabled ? "disabled" : undefined, main.classes)}
+    onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
     data-operation={eoc.operationInfo.key}>
-    {renderChildren()}
+    {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
   </Button>;
 
   if (canExecute) {
@@ -235,7 +260,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     <Dropdown as={ButtonGroup}>
       {button}
       <Dropdown.Toggle split color={eoc.color} id={eoc.operationInfo.key + "_split"} />
-      <Dropdown.Menu align="end">
+      <Dropdown.Menu align="start">
         {dropdownAlternatives.map(a => renderAlternative(a))}
       </Dropdown.Menu>
     </Dropdown>
@@ -255,25 +280,6 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         {withIcon(aos.text, aos.icon, aos.iconColor, aos.iconAlign)}
       </Dropdown.Item>
     );
-  }
-
-  function renderChildren() {
-    if (props.children)
-      return props.children;
-
-    let text: string = eoc.settings?.text ? eoc.settings.text(eoc) :
-      group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
-        eoc.operationInfo.niceName;
-
-    return withIcon(text, eoc?.icon, eoc?.settings?.iconColor, eoc?.settings?.iconAlign);
-  }
-
-  function handleOnClick(event: React.MouseEvent<any>) {
-    eoc.event = event;
-    if (onOperationClick)
-      onOperationClick(eoc, event);
-    else
-      eoc.click();
   }
 }
 

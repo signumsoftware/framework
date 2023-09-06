@@ -18,6 +18,9 @@
     <Member Name="_0OutdatedTranslationsFor1HaveBeenDeleted" Description="{0} veraltete Übersetzungen für {1} wurden gelöscht" />
     <Member Name="All" Description="Alle" />
     <Member Name="AllLanguages" Description="Alle Sprachen" />
+    <Member Name="AreYouSureToContinueAutoTranslation0For1WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung {0} für {1} ohne Revision fortsetzen wollen?" />
+    <Member Name="AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung aller Typen für {0} ohne Revision fortsetzen wollen?" />
+    <Member Name="AutoTranslate" Description="Automatisch übersetzen" />
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />

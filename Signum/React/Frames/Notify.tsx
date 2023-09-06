@@ -9,7 +9,7 @@ import { useForceUpdate } from '../Hooks';
 
 type NotifyType = "warning" | "error" | "success" | "loading";
 
-interface NotifyOptions {
+export interface NotifyOptions {
   text: React.ReactChild;
   type: NotifyType;
   priority?: number; 

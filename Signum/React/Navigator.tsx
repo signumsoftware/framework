@@ -1199,7 +1199,7 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
 
-    const replacer = new ViewReplacer<T>(view!, props.ctx);
+    const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };

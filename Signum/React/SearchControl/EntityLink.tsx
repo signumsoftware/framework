@@ -12,6 +12,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
+  stopPropagation?: boolean;
   extraProps?: any;
 }
 
@@ -40,7 +41,8 @@ export default function EntityLink(p: EntityLinkProps) {
   );
 
   function handleClick(event: React.MouseEvent<any>) {
-
+    if (p.stopPropagation)
+      event.stopPropagation();
     event.preventDefault();
     p.onClick?.call(event.currentTarget, event);
 

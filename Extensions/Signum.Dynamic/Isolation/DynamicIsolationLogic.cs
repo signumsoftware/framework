@@ -26,6 +26,7 @@ public static class DynamicIsolationLogic
     {
         var result = new List<CodeFile>();
 
+        var cacheOldDisabled = CacheLogic.GloballyDisabled;
         CacheLogic.GloballyDisabled = true;
         try
         {
@@ -37,7 +38,7 @@ public static class DynamicIsolationLogic
         }
         finally
         {
-            CacheLogic.GloballyDisabled = false;
+            CacheLogic.GloballyDisabled = cacheOldDisabled;
         }
 
         return result;

@@ -47,8 +47,10 @@
     <Member Name="In0" Description="(in {0})" />
     <Member Name="Integer" Description="ganze Zahl " />
     <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
+    <Member Name="Next" Description="Nächster" />
     <Member Name="OfThe0" Description="der {0}" />
     <Member Name="OrNull" Description="oder null" />
+    <Member Name="Previous" Description="Vorherige" />
     <Member Name="Property0NotExistsInType1" Description="Die Eigenschaft {0} ist in Typ {1} nicht vorhanden" />
     <Member Name="QueryOf0" Description="Abfrage von {0} " />
     <Member Name="RemovesThe0FromTheDatabase" Description="Entfernt {0} aus der Datenbank" />

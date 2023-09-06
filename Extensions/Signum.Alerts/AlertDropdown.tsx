@@ -8,7 +8,6 @@ import { useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@f
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
@@ -19,6 +18,7 @@ import { useSignalRCallback, useSignalRConnection, useSignalRGroup } from '@fram
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
 import { useRootClose } from '@restart/ui'
+import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 
 const MaxNumberOfAlerts = 3;
 const MaxNumberOfGroups = 3;

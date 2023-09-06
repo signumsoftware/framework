@@ -50,6 +50,10 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="AzureADQuery">
+    <Member Name="ActiveDirectoryGroups" Description="Active Directory-Gruppen" />
+    <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
+  </Type>
   <Type Name="OnPremisesExtensionAttributesModel" Description="On premises extension attributes">
     <Member Name="ExtensionAttribute1" Description="Extension attribute 1" />
     <Member Name="ExtensionAttribute10" Description="Extension attribute 10" />
@@ -82,10 +86,6 @@
   <Type Name="UserADMixin">
     <Member Name="OID" Description="OID" />
     <Member Name="SID" Description="SID" />
-  </Type>
-  <Type Name="UserADQuery">
-    <Member Name="ActiveDirectoryGroups" Description="Active-Directory-Gruppen" />
-    <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
   </Type>
   <Type Name="UserOIDMessage">
     <Member Name="TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet" Description="Der Benutzer {0} ist mit Active Directory verbunden und kann kein lokales Kennwort festgelegt haben" />

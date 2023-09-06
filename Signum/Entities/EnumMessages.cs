@@ -230,9 +230,9 @@ public enum SearchMessage
     PinnedFilter,
     Label,
     Column,
+    ColSpan,
     Row,
-    SplitText,
-    [Description("When pressed, the filter wil take no effect if the value is null")]
+    [Description("When pressed, the filter will take no effect if the value is null")]
     WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull,
     [Description("When pressed, the filter value will be splited and all the words have to be found")]
     WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound,
@@ -262,7 +262,7 @@ public enum SearchMessage
     DoYouWantToSelectTheNew01_G,
     [Description("Edit pinned filters")]
     EditPinnedFilters,
-    
+
     [Description("Pin filter")]
     PinFilter,
     [Description("Unpin filter")]
@@ -281,7 +281,7 @@ public enum SearchMessage
 
     HiddenColumn,
     ShowHiddenColumns,
-    HideHiddenColumns, 
+    HideHiddenColumns,
 
     GroupKey,
     DerivedGroupKey,
@@ -299,6 +299,12 @@ public enum SearchMessage
 
     [Description("Splits the values and searches each one independently in an AND group")]
     SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup,
+
+    [Description("No results found because the rule {0} does not allowed to explore {1} without filtering first")]
+    NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst,
+
+    [Description("No results found because you are not allowed to explore {0} without filtering by {1} first")]
+    NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First,
 }
 
 public enum SelectorMessage

@@ -135,6 +135,7 @@ public static class DynamicTypeLogic
 
     internal static List<DynamicTypeEntity> GetTypes()
     {
+        var cacheOldDisabled = CacheLogic.GloballyDisabled;
         CacheLogic.GloballyDisabled = true;
         try
         {
@@ -145,7 +146,7 @@ public static class DynamicTypeLogic
         }
         finally
         {
-            CacheLogic.GloballyDisabled = false;
+            CacheLogic.GloballyDisabled = cacheOldDisabled;
         }
     }
 

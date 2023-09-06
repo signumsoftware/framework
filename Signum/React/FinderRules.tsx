@@ -218,7 +218,7 @@ export function initFormatRules(): FormatRule[] {
         var values = getKeywordsSC(qt, sc)?.map(a => a.toLowerCase());
         const numberFormat = toNumberFormat(qt.format);
         return new CellFormatter((cell: number | undefined) => {
-          if (!cell)
+          if (cell == null)
             return cell;
 
           var str = numberFormat.format(cell);
@@ -315,11 +315,11 @@ export function initFormatRules(): FormatRule[] {
   ];
 }
 
-function getKeywordsSC(token: QueryToken, sc?: SearchControlLoaded): string[] | undefined {
+export function getKeywordsSC(token: QueryToken, sc?: SearchControlLoaded): string[] | undefined {
   return getKeywords(token, sc?.state.resultFindOptions?.filterOptions);
 }
 
-function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[] | undefined {
+export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[] | undefined {
   if (filters == null)
     return undefined;
 
@@ -340,8 +340,8 @@ function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): string[
     return result;
   }
 
-  function splitTokens(value: unknown, splitText: boolean | undefined, operation: FilterOperation): string[] {
-    if (typeof value == "string" && (splitText || operation == "FreeText"))
+  function splitTokens(value: unknown, splitValue: boolean | undefined, operation: FilterOperation): string[] {
+    if (typeof value == "string" && (splitValue || operation == "FreeText"))
       return (value as string).split(/\s+/);
 
     if (operation == "ComplexCondition")
@@ -394,7 +394,7 @@ export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
   if (similarToken(tokenA.fullKey, tokenB.fullKey))
     return true;
 
-  if (tokenA.propertyRoute == tokenB.propertyRoute)
+  if (tokenA.propertyRoute != null && tokenA.propertyRoute == tokenB.propertyRoute)
     return true;
 
   if (tokenA && tokenA.key == "ToString") {
@@ -627,7 +627,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
         return (
           <FormGroup ctx={ffc.ctx} label={ffc.label}>
             {inputId => <MultiValue values={f.value} readOnly={f.frozen} onChange={() => ffc.handleValueChange(f)}
-              onRenderItem={ctx => rule.renderValue(f, { ...ffc, mandatory: true, })} />}
+              onRenderItem={ctx => rule.renderValue(f, { ...ffc, ctx, mandatory: true, })} />}
           </FormGroup>
         );
       }

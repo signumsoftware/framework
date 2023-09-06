@@ -150,7 +150,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null)
             {
-                var filter = GetFilterQuery<T>();
+                var filter = GetFilterQuery<T>(a=>a.Id == id);
                 if (filter == null || filter.InMemoryFunction != null)
                 {
                     T result;
@@ -198,7 +198,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null)
             {
-                var filter = GetFilterQuery<T>();
+                var filter = GetFilterQuery<T>(withFilter: a => a.Id == id);
                 if (filter == null || filter.InMemoryFunction != null)
                 {
                     T result;
@@ -238,12 +238,16 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return cc;
     }
 
-    static FilterQueryResult<T>? GetFilterQuery<T>() where T : Entity
+
+    /// <param name="similarQuery">This query won't be executed, is there only for TypeConditions that require FilterQueryArgs</param>
+    static FilterQueryResult<T>? GetFilterQuery<T>(Expression<Func<T, bool>>? withFilter) where T : Entity
     {
         if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA?
             return null;
 
-        return Schema.Current.OnFilterQuery<T>();
+        var args = FilterQueryArgs.FromQuery(withFilter == null ? Database.Query<T>() : Database.Query<T>().Where(withFilter));
+
+        return Schema.Current.OnFilterQuery<T>(args);
     }
 
     public static Entity Retrieve(Type type, PrimaryKey id)
@@ -280,7 +284,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     if (!cc.Exists(id))
                         return null;
@@ -322,7 +326,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -361,7 +365,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -415,7 +419,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -455,7 +459,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -561,7 +565,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
-                    var filter = GetFilterQuery<T>();
+                    var filter = GetFilterQuery<T>(withFilter: null);
                     if (filter == null || filter.InMemoryFunction != null)
                     {
                         List<T> result;
@@ -600,7 +604,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
-                    var filter = GetFilterQuery<T>();
+                    var filter = GetFilterQuery<T>(withFilter: null);
                     if (filter == null || filter.InMemoryFunction != null)
                     {
                         List<T> result;
@@ -663,7 +667,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: null) == null)
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -699,7 +703,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: null) == null)
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -796,7 +800,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         var cc = GetCacheController<T>();
         if (cc != null)
         {
-            var filter = GetFilterQuery<T>();
+            var filter = GetFilterQuery<T>(withFilter: null);
             if (filter == null || filter.InMemoryFunction != null)
             {
                 List<T> result;
@@ -890,7 +894,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         var cc = GetCacheController<T>();
         if (cc != null)
         {
-            var filter = GetFilterQuery<T>();
+            var filter = GetFilterQuery<T>(withFilter: null);
             if (filter == null || filter.InMemoryFunction != null)
             {
                 List<T> result;
@@ -948,7 +952,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ids));
 
             var cc = GetCacheController<T>();
-            if (cc != null && GetFilterQuery<T>() == null)
+            if (cc != null && GetFilterQuery<T>(withFilter: e => ids.Contains(e.Id)) == null)
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -986,7 +990,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ids));
 
             var cc = GetCacheController<T>();
-            if (cc != null && GetFilterQuery<T>() == null)
+            if (cc != null && GetFilterQuery<T>(withFilter: e => ids.Contains(e.Id)) == null)
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -1215,6 +1219,13 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         where T : Entity
     {
         return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>());
+    }
+
+    [DebuggerStepThrough]
+    public static IQueryable<T> Query<T>(SystemTime systemTime)
+    where T : Entity
+    {
+        return new SignumTable<T>(DbQueryProvider.Single, Schema.Current.Table<T>(), systemTime: systemTime);
     }
 
     /// <summary>
@@ -1788,18 +1799,21 @@ interface IQuerySignumTable
 {
     ITable Table { get; }
     bool DisableAssertAllowed { get; }
+    SystemTime? SystemTime { get; }
 }
 
 internal class SignumTable<E> : Query<E>, IQuerySignumTable
 {
     public ITable Table { get; }
     public bool DisableAssertAllowed { get; }
+    public SystemTime? SystemTime { get; }
 
-    public SignumTable(QueryProvider provider, ITable table, bool disableAssertAllowed = false)
+    public SignumTable(QueryProvider provider, ITable table, bool disableAssertAllowed = false, SystemTime? systemTime = null)
         : base(provider)
     {
         this.Table = table;
         this.DisableAssertAllowed = disableAssertAllowed;
+        this.SystemTime = systemTime;
     }
 
     public override bool Equals(object? obj)

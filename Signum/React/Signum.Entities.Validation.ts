@@ -75,6 +75,7 @@ export module ValidationMessage {
   export const _0ShouldBeNullWhen1IsSetTo2 = new MessageKey("ValidationMessage", "_0ShouldBeNullWhen1IsSetTo2");
   export const _0ShouldBeNull = new MessageKey("ValidationMessage", "_0ShouldBeNull");
   export const _0ShouldBeADateInThePast = new MessageKey("ValidationMessage", "_0ShouldBeADateInThePast");
+  export const _0ShouldBeADateInTheFuture = new MessageKey("ValidationMessage", "_0ShouldBeADateInTheFuture");
   export const BeInThePast = new MessageKey("ValidationMessage", "BeInThePast");
   export const _0ShouldBeGreaterThan1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThan1");
   export const _0ShouldBeGreaterThanOrEqual1 = new MessageKey("ValidationMessage", "_0ShouldBeGreaterThanOrEqual1");

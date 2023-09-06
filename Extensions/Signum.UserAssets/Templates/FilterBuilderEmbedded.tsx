@@ -81,6 +81,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         return PinnedQueryFilterEmbedded.New({
           label: typeof p.label == "function" ? p.label() : p.label,
           column: p.column,
+          colSpan: p.colSpan,
           row: p.row,
           active: p.active,
           splitValue: p.splitValue,
@@ -222,6 +223,7 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
       return {
         label: pinned.label ||  undefined,
         column: pinned.column ?? undefined,
+        colSpan: pinned.colSpan ?? undefined,
         row: pinned.row ?? undefined,
         active: pinned.active || undefined,
         splitValue: pinned.splitValue || undefined,
@@ -395,7 +397,7 @@ function parseValue(str: string | null | undefined, filterType: FilterType | und
 }
 
 function parseDate(str: string) {
-  const parsed = DateTime.fromFormat(str, serverDateTimeFormat).toISO();
+  const parsed = DateTime.fromFormat(str, serverDateTimeFormat).toISO()!;
 
   return parsed ?? undefined;
 }

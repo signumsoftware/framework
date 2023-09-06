@@ -70,4 +70,8 @@ public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
         UserQuery = (Lite<UserQueryEntity>)ctx.GetEntity(Guid.Parse(element.Attribute(nameof(UserQuery))!.Value)).ToLiteFat();
         Related = element.Attribute(nameof(Related))?.Let(a => a == null ? null : ctx.ParseLite(a.Value, userAsset, PropertyRoute.Construct((ExcelAttachmentEntity a) => a.Related)));
     }
+
+    public void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description)
+    {
+    }
 }

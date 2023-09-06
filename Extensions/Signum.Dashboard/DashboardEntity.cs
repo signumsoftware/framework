@@ -58,6 +58,8 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     [StringLengthValidator(Max = 200)]
     public string? Key { get; set; }
 
+    public bool HideQuickLink { get; set; }
+
     [AutoExpressionField]
     public bool ContainsContent(IPartEntity content) => 
         As.Expression(() => Parts.Any(p => p.Content.Is(content)));
@@ -216,6 +218,21 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     }
 }
 
+public class DashboardLiteModel : ModelEntity
+{
+    public string DisplayName { get; set; }
+    public bool HideQuickLink { get; set; }
+
+    internal static DashboardLiteModel Translated(DashboardEntity d) => new DashboardLiteModel
+    {
+        DisplayName = PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName),
+        HideQuickLink = d.HideQuickLink,
+    };
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => DisplayName);
+}
+
 public class CacheQueryConfigurationEmbedded : EmbeddedEntity
 {
     [Unit("s")]
@@ -290,7 +307,19 @@ public enum DashboardMessage
     [Description("The User Query '{0}' has no column with summary header")]
     TheUserQuery0HasNoColumnWithSummaryHeader,
 
-    Edit
+    Edit,
+
+
+    [Description("Click in one chart to filter in the others")]
+    CLickInOneChartToFilterInTheOthers,
+
+
+    [Description("[Ctrl] + Click to filter by multiple elements")]
+    CtrlClickToFilterByMultipleElements,
+
+
+    [Description("[Alt] + Click to open results in a modal window")]
+    AltClickToOpenResultsInAModalWindow,
 }
 
 public enum DashboardEmbedededInEntity

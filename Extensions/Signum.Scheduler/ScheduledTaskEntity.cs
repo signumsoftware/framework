@@ -54,7 +54,6 @@ public enum ITaskMessage
 public static class ITaskOperation
 {
     public static ConstructSymbol<ScheduledTaskLogEntity>.From<ITaskEntity> ExecuteSync;
-    public static ExecuteSymbol<ITaskEntity> ExecuteAsync;
 }
 
 

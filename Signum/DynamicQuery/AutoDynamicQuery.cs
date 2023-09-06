@@ -15,7 +15,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
     {
         this.Query = query;
 
-        metas = DynamicQueryCore.QueryMetadata(Query).ThrowIfNull("Query should be an anoynmous type");
+        metas = DynamicQueryCore.QueryMetadata(Query) ?? throw new InvalidOperationException("Query should be an anoynmous type");
 
         StaticColumns = MemberEntryFactory.GenerateList<T>(MemberOptions.Properties | MemberOptions.Fields)
           .Select((e, i) => new ColumnDescriptionFactory(i, e.MemberInfo, metas[e.MemberInfo.Name])).ToArray();

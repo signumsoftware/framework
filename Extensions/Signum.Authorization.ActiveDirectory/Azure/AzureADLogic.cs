@@ -23,122 +23,37 @@ public static class AzureADLogic
 {
     public static Func<TokenCredential> GetTokenCredential = () => SignumTokenCredentials.GetAuthorizerTokenCredential();
 
-    public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
-    {
-        var tokenCredential = GetTokenCredential();
-        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-
-        subStr = subStr.Replace("'", "''");
-
-        var query = subStr.Contains("@") ? $"mail eq '{subStr}'" :
-            subStr.Contains(",") ? $"startswith(givenName, '{subStr.After(",").Trim()}') AND startswith(surname, '{subStr.Before(",").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
-            subStr.Contains(" ") ? $"startswith(givenName, '{subStr.Before(" ").Trim()}') AND startswith(surname, '{subStr.After(" ").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
-             $"startswith(givenName, '{subStr}') OR startswith(surname, '{subStr}') OR startswith(displayname, '{subStr.Trim()}') OR startswith(mail, '{subStr.Trim()}')";
-
-        var result = await graphClient.Users.GetAsync(req =>
-        {
-            req.QueryParameters.Top = top;
-            req.QueryParameters.Filter = query;
-        }, token);
-
-        return result!.Value!.Select(a => new ActiveDirectoryUser
-        {
-            UPN = a.UserPrincipalName!,
-            DisplayName = a.DisplayName!,
-            JobTitle = a.JobTitle!,
-            ObjectID = Guid.Parse(a.Id!),
-            SID = null,
-        }).ToList();
-    }
-
-    public static async Task<ActiveDirectoryUser> GetActiveDirectoryUser(Guid oid, CancellationToken token)
-    {
-        var tokenCredential = GetTokenCredential();
-        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-
-        var u = await graphClient.Users[oid.ToString()].GetAsync(cancellationToken: token);
-
-        if (u == null)
-            throw new Exception("User with OID '" + oid.ToString() + "' not found in Active Directory");
-        else
-        {
-            return new ActiveDirectoryUser
-            {
-                UPN = u.UserPrincipalName!,
-                DisplayName = u.DisplayName!,
-                JobTitle = u.JobTitle!,
-                ObjectID = Guid.Parse(u.Id!),
-                SID = null,
-            };
-        }
-    }
-
-    public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);
-
-    static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)> ADGroupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)>();
-
-    public static List<SimpleGroup> CurrentADGroups()
-    {
-        var oid = UserADMixin.CurrentOID;
-        if (oid == null)
-            return new List<SimpleGroup>();
-
-        var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current,
-            addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
-            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid.Value)));
-
-        return tuple.groups;
-    }
-
-    public static List<SimpleGroup> CurrentADGroupsInternal(Guid oid)
-    {
-        using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
-        {
-            var tokenCredential = GetTokenCredential();
-            GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
-            {
-                req.QueryParameters.Top = 999;
-                req.QueryParameters.Select = new[] { "id", "displayName", "ODataType" };
-            }).Result;
-
-            return result!.Value!.Select(di => new SimpleGroup(Guid.Parse(di.Id!), di.DisplayName)).ToList();
-        }
-    }
-
-
-    public static void Start(SchemaBuilder sb, bool adGroups, bool deactivateUsersTask)
+    public static void Start(SchemaBuilder sb, bool adGroupsAndQueries, bool deactivateUsersTask)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            if (MixinDeclarations.IsDeclared(typeof(UserEntity), typeof(UserADMixin)))
+            MixinDeclarations.AssertDeclared(typeof(UserEntity), typeof(UserADMixin));
+
+            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+                
+            As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
             {
-                PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+                Owner = u.ToLite(),
+                CultureInfo = u.CultureInfo,
+                DisplayName = u.UserName,
+                Email = u.Email,
+                AzureUserId = u.Mixin<UserADMixin>().OID
+            });
 
-                As.ReplaceExpression((UserEntity u) => u.EmailOwnerData, u => new EmailOwnerData
-                {
-                    Owner = u.ToLite(),
-                    CultureInfo = u.CultureInfo,
-                    DisplayName = u.UserName,
-                    Email = u.Email,
-                    AzureUserId = u.Mixin<UserADMixin>().OID
-                });
+            UserWithClaims.FillClaims += (userWithClaims, user) =>
+            {
+                var mixin = ((UserEntity)user).Mixin<UserADMixin>();
+                userWithClaims.Claims["OID"] = mixin.OID;
+                userWithClaims.Claims["SID"] = mixin.SID;
+            };
 
-                UserWithClaims.FillClaims += (userWithClaims, user) =>
-                {
-                    var mixin = ((UserEntity)user).Mixin<UserADMixin>();
-                    userWithClaims.Claims["OID"] = mixin.OID;
-                    userWithClaims.Claims["SID"] = mixin.SID;
-                };
-
-                Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
-                {
-                    UserName = u.UserName,
-                    ToStringValue = u.ToString(),
-                    OID = u.Mixin<UserADMixin>().OID,
-                    SID = u.Mixin<UserADMixin>().SID,
-                });
-            }
+            Lite.RegisterLiteModelConstructor((UserEntity u) => new UserLiteModel
+            {
+                UserName = u.UserName,
+                ToStringValue = u.ToString(),
+                OID = u.Mixin<UserADMixin>().OID,
+                SID = u.Mixin<UserADMixin>().SID,
+            });
 
             if (deactivateUsersTask)
             {
@@ -172,7 +87,7 @@ public static class AzureADLogic
                 });
             }
 
-            if (adGroups)
+            if (adGroupsAndQueries)
             {
 
                 sb.Include<ADGroupEntity>()
@@ -378,18 +293,112 @@ public static class AzureADLogic
                 Implementations.By());
 
                 if (sb.WebServerBuilder != null)
-                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false));
+                {
+                    ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
+                    ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () =>  
+						QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryGroups, false) ||
+                    	QueryLogic.Queries.QueryAllowed(AzureADQuery.ActiveDirectoryUsers, false));
+                }
             }
             else
             {
                 if (sb.WebServerBuilder != null)
+                {
+                    ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
                     ReflectionServer.RegisterLike(typeof(OnPremisesExtensionAttributesModel), () => false);
+                }
             }
 
         }
     }
 
 
+
+    public static async Task<List<ActiveDirectoryUser>> FindActiveDirectoryUsers(string subStr, int top, CancellationToken token)
+    {
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+        subStr = subStr.Replace("'", "''");
+
+        var query = subStr.Contains("@") ? $"mail eq '{subStr}'" :
+            subStr.Contains(",") ? $"startswith(givenName, '{subStr.After(",").Trim()}') AND startswith(surname, '{subStr.Before(",").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
+            subStr.Contains(" ") ? $"startswith(givenName, '{subStr.Before(" ").Trim()}') AND startswith(surname, '{subStr.After(" ").Trim()}') OR startswith(displayname, '{subStr.Trim()}')" :
+             $"startswith(givenName, '{subStr}') OR startswith(surname, '{subStr}') OR startswith(displayname, '{subStr.Trim()}') OR startswith(mail, '{subStr.Trim()}')";
+
+        var result = await graphClient.Users.GetAsync(req =>
+        {
+            req.QueryParameters.Top = top;
+            req.QueryParameters.Filter = query;
+        }, token);
+
+        return result!.Value!.Select(a => new ActiveDirectoryUser
+        {
+            UPN = a.UserPrincipalName!,
+            DisplayName = a.DisplayName!,
+            JobTitle = a.JobTitle!,
+            ObjectID = Guid.Parse(a.Id!),
+            SID = null,
+        }).ToList();
+    }
+
+    public static async Task<ActiveDirectoryUser> GetActiveDirectoryUser(Guid oid, CancellationToken token)
+    {
+        var tokenCredential = GetTokenCredential();
+        GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+
+        var u = await graphClient.Users[oid.ToString()].GetAsync(cancellationToken: token);
+
+        if (u == null)
+            throw new Exception("User with OID '" + oid.ToString() + "' not found in Active Directory");
+        else
+        {
+            return new ActiveDirectoryUser
+            {
+                UPN = u.UserPrincipalName!,
+                DisplayName = u.DisplayName!,
+                JobTitle = u.JobTitle!,
+                ObjectID = Guid.Parse(u.Id!),
+                SID = null,
+            };
+        }
+    }
+
+    public static TimeSpan CacheADGroupsFor = new TimeSpan(0, minutes: 30, 0);
+
+    static ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)> ADGroupsCache = new ConcurrentDictionary<Lite<UserEntity>, (DateTime date, List<SimpleGroup> groups)>();
+
+    public static List<SimpleGroup> CurrentADGroups()
+    {
+        var oid = UserADMixin.CurrentOID;
+        if (oid == null)
+            return new List<SimpleGroup>();
+
+        var tuple = ADGroupsCache.AddOrUpdate(UserEntity.Current,
+            addValueFactory: user => (Clock.Now, CurrentADGroupsInternal(oid.Value)),
+            updateValueFactory: (user, old) => old.date.Add(CacheADGroupsFor) > Clock.Now ? old : (Clock.Now, CurrentADGroupsInternal(oid.Value)));
+
+        return tuple.groups;
+    }
+
+    public static List<SimpleGroup> CurrentADGroupsInternal(Guid oid)
+    {
+        using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
+        {
+            var tokenCredential = GetTokenCredential();
+            GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+            var result = graphClient.Users[oid.ToString()].TransitiveMemberOf.GraphGroup.GetAsync(req =>
+            {
+                req.QueryParameters.Top = 999;
+                req.QueryParameters.Select = new[] { "id", "displayName", "ODataType" };
+            }).Result;
+
+            return result!.Value!.Select(di => new SimpleGroup(Guid.Parse(di.Id!), di.DisplayName)).ToList();
+        }
+    }
+
+
+  
 
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
     {

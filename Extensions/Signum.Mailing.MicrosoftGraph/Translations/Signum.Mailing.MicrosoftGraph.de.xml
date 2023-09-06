@@ -11,11 +11,19 @@
     <Member Name="Name" Description="Name" />
   </Type>
   <Type Name="RemoteAttachmentEmbedded" Description="Remote-Anhang">
+    <Member Name="ContentId" Description="Content-id" />
     <Member Name="Id" Description="Id" />
     <Member Name="IsInline" Description="Ist inline" />
     <Member Name="LastModifiedDateTime" Description="Letzten-Änderung-Datum" />
     <Member Name="Name" Description="Name" />
     <Member Name="Size" Description="Größe" />
+  </Type>
+  <Type Name="RemoteEmailFolderModel" Description="Remote-E-Mail-Ordner">
+    <Member Name="DisplayName" Description="Anzeigename" />
+    <Member Name="FolderId" Description="Ordner-ID" />
+  </Type>
+  <Type Name="RemoteEmailMessage">
+    <Member Name="NotAuthorizedToViewEmailsFromOtherUsers" Description="Nicht berechtigt, E-Mails von anderen Benutzern anzuzeigen" />
   </Type>
   <Type Name="RemoteEmailMessageModel" Description="Remote-E-Mail-Nachricht">
     <Member Name="Attachments" Description="Anhänge" />
@@ -23,6 +31,10 @@
     <Member Name="Body" Description="Körper" />
     <Member Name="CcRecipients" Description="Cc-Empfänger" />
     <Member Name="CreatedDateTime" Description="Erstellungsdatum" />
+    <Member Name="Extension0" Description="Erweiterung0" />
+    <Member Name="Extension1" Description="Erweiterung1" />
+    <Member Name="Extension2" Description="Erweiterung2" />
+    <Member Name="Extension3" Description="Erweiterung3" />
     <Member Name="From" Description="Von" />
     <Member Name="HasAttachments" Description="Hat Anhänge" />
     <Member Name="Id" Description="Id" />
@@ -36,6 +48,9 @@
     <Member Name="ToRecipients" Description="An-Empfänger" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="WebLink" Description="Weblink" />
+  </Type>
+  <Type Name="RemoteEmailMessagePermission">
+    <Member Name="ViewEmailMessagesFromOtherUsers" Description="E-Mail-Nachrichten von anderen Benutzern anzeigen" />
   </Type>
   <Type Name="RemoteEmailMessageQuery">
     <Member Name="RemoteEmailMessages" Description="Remote-E-Mail-Nachrichten" />

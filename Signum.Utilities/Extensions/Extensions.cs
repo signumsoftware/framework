@@ -258,39 +258,6 @@ styles ?? DateTimeStyles.None, out DateTime result))
         return value == -1 ? defaultValue : value;
     }
 
-    public static T ThrowIfNull<T>([NotNull]this T? t, string message)
-     where T : struct
-    {
-        if (t == null)
-            throw new NullReferenceException(message);
-        return t.Value;
-    }
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, string message)
-        where T : class
-    {
-        if (t == null)
-            throw new NullReferenceException(message);
-        return t;
-    }
-
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
-     where T : struct
-    {
-        if (t == null)
-            throw new NullReferenceException(message());
-        return t.Value;
-    }
-
-    public static T ThrowIfNull<T>([NotNull]this T? t, Func<string> message)
-        where T : class
-    {
-        if (t == null)
-            throw new NullReferenceException(message());
-        return t;
-    }
-
     public static R Let<T, R>(this T t, Func<T, R> func)
     {
         return func(t);
@@ -393,12 +360,6 @@ styles ?? DateTimeStyles.None, out DateTime result))
     public static IEnumerable<int> DownTo(this int startNotIncluded, int end, int step)
     {
         for (int i = startNotIncluded - 1; i >= end; i -= step)
-            yield return i;
-    }
-
-    public static IEnumerable<T> For<T>(this T start, Func<T, bool> condition, Func<T, T> increment)
-    {
-        for (T i = start; condition(i); i = increment(i))
             yield return i;
     }
 

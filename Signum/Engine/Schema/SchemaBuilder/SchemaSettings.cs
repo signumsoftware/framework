@@ -479,13 +479,12 @@ public class AttributeCollection : Collection<Attribute>
         base.InsertItem(index, item);
     }
 
-    static readonly Dictionary<Type, AttributeUsageAttribute> AttributeUssageCache = new Dictionary<Type, AttributeUsageAttribute>();
 
     public static bool IsCompatibleWith(Attribute a, AttributeTargets targets)
     {
         using (HeavyProfiler.LogNoStackTrace("IsCompatibleWith"))
         {
-            var au = AttributeUssageCache.GetOrCreate(a.GetType(), t => t.GetCustomAttribute<AttributeUsageAttribute>()!);
+            var au = a.GetType().GetCustomAttribute<AttributeUsageAttribute>()!;
 
             return au != null && (au.ValidOn & targets) != 0;
         }
