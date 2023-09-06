@@ -123,7 +123,7 @@ public static class EmailTemplateLogic
             GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
             GlobalValueProvider.RegisterGlobalVariable("Now", _ => Clock.Now);
             GlobalValueProvider.RegisterGlobalVariable("Today", _ => Clock.Now.Date, "d");
-            GlobalValueProvider.RegisterGlobalVariable("User", _ => UserEntity.Current.Retrieve(), "d");
+            GlobalValueProvider.RegisterGlobalVariable("CurrentUser", _ => UserEntity.Current.Retrieve(), "d");
 
             sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
             sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
