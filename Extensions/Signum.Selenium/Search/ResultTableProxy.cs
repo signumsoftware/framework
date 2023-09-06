@@ -241,7 +241,7 @@ public class ResultTableProxy
 
     public EntityContextMenuProxy EntityContextMenu(int rowIndex, string columnToken = "Entity")
     {
-        CellElement(rowIndex, columnToken).Find().ContextClick();
+        CellElement(rowIndex, columnToken).Find().ScrollTo().ContextClick();
 
         var element = this.SearchControl.WaitContextMenu();
 
@@ -250,7 +250,7 @@ public class ResultTableProxy
 
     public EntityContextMenuProxy EntityContextMenu(Lite<Entity> lite, string columnToken = "Entity")
     {
-        CellElement(lite, columnToken).Find().ContextClick();
+        CellElement(lite, columnToken).Find().ScrollTo().ContextClick();
 
         var element = this.SearchControl.WaitContextMenu();
 
