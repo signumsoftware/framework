@@ -164,6 +164,13 @@ public class UserQueryLiteModel : ModelEntity
     public QueryEntity Query { get; set; }
     public bool HideQuickLink { get; set; }
 
+    internal static UserQueryLiteModel Translated(UserQueryEntity uq) => new UserQueryLiteModel
+    {
+        DisplayName = uq.TranslatedField(a => a.DisplayName),
+        Query = uq.Query,
+        HideQuickLink = uq.HideQuickLink,
+    };
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => DisplayName);
 }

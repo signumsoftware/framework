@@ -98,8 +98,8 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
     let st = p.findOptions.systemTime!;
     st.mode = e.currentTarget.value as SystemTimeMode;
 
-    st.startDate = st.mode == "All" ? undefined : (st.startDate || DateTime.local().toISO());
-    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || DateTime.local().toISO());
+    st.startDate = st.mode == "All" ? undefined : (st.startDate || DateTime.local().toISO()!);
+    st.endDate = st.mode == "All" || st.mode == "AsOf" ? undefined : (st.endDate || DateTime.local().toISO()!);
     st.joinMode = isInterval(st.mode)  ? "FirstCompatible" : undefined;
 
     p.onChanged();
@@ -140,7 +140,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
 
     const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
       const m = date && DateTime.fromJSDate(date);
-      systemTime[field] = m ? m.toISO() : undefined;
+      systemTime[field] = m ? m.toISO()! : undefined;
       p.onChanged();
     };
 

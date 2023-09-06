@@ -197,7 +197,7 @@ public static class UserChartLogic
         return UserChartsByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserCharts.Value.GetOrThrow(lite))
             .Where(uc => isAllowed(uc))
-            .Select(uc => uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)))
+            .Select(uc => uc.ToLite(UserChartLiteModel.Translated(uc)))
             .ToList();
     }
 
@@ -213,19 +213,14 @@ public static class UserChartLogic
     public static List<Lite<UserChartEntity>> GetUserCharts(Type entityType)
     {
         return GetUserChartsEntity(entityType)
-            .Select(uc => uc.ToLite(PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName)))
-            .ToList();
+              .Select(uc => uc.ToLite(UserChartLiteModel.Translated(uc)))
+              .ToList();
     }
 
     public static List<Lite<UserChartEntity>> GetUserChartsModel(Type entityType)
     {
         return GetUserChartsEntity(entityType)
-             .Select(uc => uc.ToLite(new UserChartEntity
-             {
-                 DisplayName = PropertyRouteTranslationLogic.TranslatedField(uc, d => d.DisplayName),
-                 Query = uc.Query,
-                 HideQuickLink = uc.HideQuickLink
-             }))
+             .Select(uc => uc.ToLite(UserChartLiteModel.Translated(uc)))
              .ToList();
     }
 

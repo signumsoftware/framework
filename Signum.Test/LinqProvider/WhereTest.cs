@@ -506,7 +506,7 @@ public class WhereTest
 
     }
 
-    private FilterQueryResult<ArtistEntity>? WhereTest_FilterQuery()
+    private FilterQueryResult<ArtistEntity>? WhereTest_FilterQuery(FilterQueryArgs args)
     {
         return new FilterQueryResult<ArtistEntity>(a => ArtistsInBands().Contains(a), null);
     }

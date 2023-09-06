@@ -253,7 +253,7 @@ public static class UserQueryLogic
         return UserQueriesByQuery.Value.TryGetC(queryName).EmptyIfNull()
             .Select(lite => UserQueries.Value.GetOrThrow(lite))
             .Where(uq => isAllowed(uq) && (uq.AppendFilters == appendFilters))
-            .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+            .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
             .ToList();
     }
 
@@ -269,13 +269,6 @@ public static class UserQueryLogic
     public static List<Lite<UserQueryEntity>> GetUserQueries(Type entityType)
     {
         return GetUserQueriesEntity(entityType)
-             .Select(uq => uq.ToLite(PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName)))
-             .ToList();
-    }
-
-    public static List<Lite<UserQueryEntity>> GetUserQueriesModel(Type entityType)
-    {
-        return GetUserQueriesEntity(entityType)
              .Select(uq => uq.ToLite(new UserQueryLiteModel
              {
                  DisplayName = PropertyRouteTranslationLogic.TranslatedField(uq, d => d.DisplayName),
@@ -285,13 +278,20 @@ public static class UserQueryLogic
              .ToList();
     }
 
+    public static List<Lite<UserQueryEntity>> GetUserQueriesModel(Type entityType)
+    {
+        return GetUserQueriesEntity(entityType)
+             .Select(uq => uq.ToLite(UserQueryLiteModel.Translated(uq)))
+             .ToList();
+    }
+
     public static List<Lite<UserQueryEntity>> Autocomplete(string subString, int limit)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<UserQueryEntity>(userInterface: false);
 
         return UserQueries.Value.Values
             .Where(uq => uq.EntityType == null && isAllowed(uq))
-             .Select(d => d.ToLite(PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName)))
+             .Select(d => d.ToLite(UserQueryLiteModel.Translated(d)))
              .Autocomplete(subString, limit)
              .ToList();
     }

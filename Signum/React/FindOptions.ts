@@ -92,7 +92,7 @@ export interface FilterGroupOption {
 }
 
 export interface PinnedFilter {
-  label?: string | (() => string);
+  label?: (() => string) | string;
   row?: number;
   column?: number;
   colSpan?: number;

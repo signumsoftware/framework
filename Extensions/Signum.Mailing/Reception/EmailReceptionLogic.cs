@@ -4,6 +4,13 @@ namespace Signum.Mailing.Reception;
 
 public static class EmailReceptionLogic
 {
+
+
+    [AutoExpressionField]
+    public static TimeSpan? Duration(this EmailReceptionEntity e) =>
+    As.Expression(() => (TimeSpan?)(e!.EndDate - e.StartDate));
+
+
     [AutoExpressionField]
     public static IQueryable<EmailReceptionEntity> Receptions(this EmailReceptionConfigurationEntity c) =>
         As.Expression(() => Database.Query<EmailReceptionEntity>().Where(r => r.EmailReceptionConfiguration.Is(c)));
@@ -80,6 +87,7 @@ public static class EmailReceptionLogic
             QueryLogic.Expressions.Register((EmailReceptionConfigurationEntity c) => c.Receptions(), () => typeof(EmailReceptionEntity).NicePluralName());
             QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.EmailMessages(), () => typeof(EmailMessageEntity).NicePluralName());
             QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Exceptions(), () => typeof(ExceptionEntity).NicePluralName());
+            QueryLogic.Expressions.Register((EmailReceptionEntity r) => r.Duration(), () => typeof(TimeSpan).NiceName());
             QueryLogic.Expressions.Register((ExceptionEntity r) => r.Pop3Reception(), () => typeof(EmailReceptionEntity).NiceName());
 
             new Graph<EmailReceptionConfigurationEntity>.Execute(EmailReceptionConfigurationOperation.Save)

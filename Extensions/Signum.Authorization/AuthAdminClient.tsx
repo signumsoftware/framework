@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong } from '@framework/Signum.Entities';
-import { ifError } from '@framework/Globals';
+import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, EntityControlMessage, liteKeyLong, Entity } from '@framework/Signum.Entities';
+import { ifError, softCast } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
@@ -13,20 +13,24 @@ import * as Finder from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
-import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo } from '@framework/Reflection'
+import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
-  PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed
+  PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed, TypeConditionSymbol
 } from './Rules/Signum.Authorization.Rules'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isPermissionAuthorized } from './AuthClient';
-import ProfilePhoto, { SmallProfilePhoto } from './Templates/ProfilePhoto';
+import ProfilePhoto, { SmallProfilePhoto, urlProviders } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '@framework/Components/Typeahead';
-import { EntityLink } from '@framework/Search';
+import { EntityLink, similarToken } from '@framework/Search';
 import UserCircle from './Templates/UserCircle';
 import { AuthMessage, RoleEntity, UserEntity, UserLiteModel, UserOperation, UserState } from './Signum.Authorization';
+import { QueryDescription, SubTokensOptions, getTokenParents, isFilterCondition } from '@framework/FindOptions';
+import { similarTokenToStr } from '@framework/FinderRules';
+import { CollectionMessage } from '@framework/Signum.External';
+import { useAPI } from '@framework/Hooks';
 
 export let types: boolean;
 export let properties: boolean;
@@ -41,6 +45,8 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   operations = options.operations;
   queries = options.queries;
   permissions = options.permissions;
+
+  AppContext.clearSettingsActions.push(() => urlProviders.clear());
 
   Navigator.addSettings(new EntitySettings(UserEntity, e => import('./Templates/User'), {
     renderLite: (lite, hl) => {
@@ -60,6 +66,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
   Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
 
+  AppContext.clearSettingsActions.push(() => queryAuditorTokens.clear());
 
   Finder.addSettings({
     queryName: UserEntity,
@@ -130,13 +137,45 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     Operations.Options.maybeReadonly = ti => ti.maxTypeAllowed == "Write" && ti.minTypeAllowed != "Write";
     Navigator.addSettings(new EntitySettings(TypeRulePack, e => import('./Rules/TypeRulePackControl')));
 
-    QuickLinks.registerQuickLink(RoleEntity,
-      new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
-          .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
-        {
+    QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
+          .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
           isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
+    }));
+
+    getAllTypes().filter(a => a.queryAuditors != null)
+      .forEach(t => {
+        Finder.getOrAddSettings(t).noResultMessage = sc => {
+
+          var fo = sc.state.resultFindOptions!;
+
+          var tokens = queryAuditorTokens.filter(a => fo.queryKey == a.queryKey && t.queryAuditors.contains(a.typeCondition.key));
+
+          var type = getTypeInfos(sc.props.queryDescription.columns["Entity"].type).map(ti => <strong>{ti.nicePluralName}</strong>).joinCommaHtml(CollectionMessage.Or.niceToString());
+          
+          if (tokens.length == 0) {
+            if (!fo.filterOptions.some(f => isFilterCondition(f) && f.operation == "EqualTo")) {
+              var symbols = t.queryAuditors.map(a => <strong>{a}</strong>).joinCommaHtml(CollectionMessage.And.niceToString());
+              return (
+                <span className="text-warning">
+                  <FontAwesomeIcon icon="hand" /> {SearchMessage.NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst.niceToString().formatHtml(symbols, type)}
+                </span>
+              );
+  }
+
+            return undefined;
+          } else {
+            if (!fo.filterOptions.some(f => isFilterCondition(f) && f.operation == "EqualTo" && tokens.some(t => similarToken(f.token?.fullKey, t.token)))) {
+              var tokenCode = tokens.map(a => <strong><QuerytokenRenderer token={a.token} queryKey={fo.queryKey} /></strong>).joinCommaHtml(CollectionMessage.Or.niceToString());
+              return (
+                <span className="text-warning">
+                  <FontAwesomeIcon icon="hand" /> {SearchMessage.NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First.niceToString().formatHtml(type, tokenCode)}
+                </span>
+              );
+            }
+            return undefined;
+          }
         }
-    ));
+      });
   }
 
   if (options.operations) {
@@ -170,6 +209,12 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
   PropertyRoute.prototype.canModify = function () {
     return this.member != null && this.member.propertyAllowed == "Write"
   }
+}
+
+const queryAuditorTokens: { queryKey: string; token: string; typeCondition: TypeConditionSymbol }[] = []; 
+
+export function registerQueryAuditorToken<T extends Entity>(queryName: Type<T> | QueryKey, token: QueryTokenString<any> | string, typeCondition: TypeConditionSymbol) {
+  queryAuditorTokens.push({ queryKey: getQueryKey(queryName), token: token.toString(), typeCondition: typeCondition });
 }
 
 export function queryIsFindable(queryKey: string, fullScreen: boolean) {
@@ -303,6 +348,7 @@ declare module '@framework/Reflection' {
   export interface TypeInfo {
     minTypeAllowed: TypeAllowedBasic;
     maxTypeAllowed: TypeAllowedBasic;
+    queryAuditors: string[];
     queryAllowed: QueryAllowed;
   }
 
@@ -321,5 +367,11 @@ declare module '@framework/Signum.Entities' {
   export interface EntityPack<T extends ModifiableEntity> {
     typeAllowed?: TypeAllowedBasic;
   }
+}
+
+export function QuerytokenRenderer(p: { queryKey: string, token: string, subTokenOptions?: SubTokensOptions }) {
+  var token = useAPI(() => Finder.parseSingleToken(p.queryKey, p.token, p.subTokenOptions ?? (SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)), [p.queryKey, p.token, p.subTokenOptions]);
+
+  return getTokenParents(token).map(a => <strong>[{a.niceName}]</strong>).joinCommaHtml(".");
 }
 

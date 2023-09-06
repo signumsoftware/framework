@@ -15,7 +15,6 @@ import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
 import UserQueryMenu from './UserQueryMenu'
 import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
-import { UserAssetModel } from '../Signum.UserAssets/Signum.UserAssets'
 import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
 import { CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -353,6 +352,11 @@ export module API {
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet({ url: "/api/userQueries/forQuery/" + queryKey });
+  }
+
+
+  export function translated(userQuery: Lite<UserQueryEntity>): Promise<UserQueryLiteModel> {
+    return ajaxPost({ url: "/api/userQueries/translated" }, userQuery);
   }
 
   export function forQueryAppendFilters(queryKey: string): Promise<Lite<UserQueryEntity>[]> {

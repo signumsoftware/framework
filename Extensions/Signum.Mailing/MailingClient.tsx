@@ -114,19 +114,22 @@ export function start(options: {
       return { button: <MailingMenu searchControl={ctx.searchControl} /> };
     });
 
-  API.getAllTypes().then(allTypes =>
-    allTypes.length && QuickLinks.registerGlobalQuickLink(entityType =>
-      new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
-        {
-          key: getQueryKey(EmailMessageEntity),
-          text: () => EmailMessageEntity.nicePluralName(),
-          isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(EmailMessageEntity),
-          icon: "envelope",
-          iconColor: "orange",
-          color: "warning",
-          group: options.quickLinkInDefaultGroup ? undefined : null,
-        }
-      )));
+
+  if (Navigator.isViewable(EmailMessageEntity)) {
+    var cachedAllTypes: Promise<string[]>;
+    QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      .then(types => !types.contains(entityType) ? [] :
+        [new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          {
+            key: getQueryKey(EmailMessageEntity),
+            text: () => EmailMessageEntity.nicePluralName(),
+            icon: "envelope",
+            iconColor: "orange",
+            color: "warning",
+            group: options.quickLinkInDefaultGroup ? undefined : null,
+          }
+        )]));
+  }
 
   UserAssetClient.registerExportAssertLink(EmailTemplateEntity);
   UserAssetClient.registerExportAssertLink(EmailMasterTemplateEntity);

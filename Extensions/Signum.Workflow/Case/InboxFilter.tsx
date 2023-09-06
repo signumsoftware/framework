@@ -71,18 +71,16 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
           break;
 
         case "LastWeek":
-          fromDate = DateTime.local().plus({ day: -7 }).toISO();
+          fromDate = DateTime.local().plus({ day: -7 }).toISO()!;
           break;
 
         case "LastMonth":
-          fromDate = DateTime.local().plus({ day: -30 }).toISO();
+          fromDate = DateTime.local().plus({ day: -30 }).toISO()!;
           break;
 
         case "CurrentYear":
-          {
-            fromDate = DateTime.local().startOf("year").toISO();
-            break;
-          }
+          fromDate = DateTime.local().startOf("year").toISO()!;
+          break;
       }
 
       if (fromDate && fromDate.length > 0)

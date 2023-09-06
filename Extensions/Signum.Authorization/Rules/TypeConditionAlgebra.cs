@@ -179,7 +179,7 @@ public static class TypeConditionNodeExtensions
     }
 
 
-    public static Expression ToExpression(this TypeConditionNode node, Expression entity)
+    public static Expression ToExpression(this TypeConditionNode node, Expression entity, FilterQueryArgs args)
     {
         if (node.ConstantValue == true)
             return Expression.Constant(true);
@@ -189,18 +189,18 @@ public static class TypeConditionNodeExtensions
 
         if (node is SymbolNode sn)
         {
-            var lambda = TypeConditionLogic.GetCondition(entity.Type, sn.Symbol);
+            var lambda = TypeConditionLogic.GetCondition(entity.Type, sn.Symbol, args);
             return Expression.Invoke(lambda, entity);
         }
 
         if (node is NotNode nn)
-            return Expression.Not(nn.Operand.ToExpression(entity));
+            return Expression.Not(nn.Operand.ToExpression(entity, args));
 
         if (node is AndNode and)
-            return and.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.And);
+            return and.Nodes.Select(n => n.ToExpression(entity, args)).Aggregate(Expression.And);
 
         if (node is OrNode or)
-            return or.Nodes.Select(n => n.ToExpression(entity)).Aggregate(Expression.Or);
+            return or.Nodes.Select(n => n.ToExpression(entity, args)).Aggregate(Expression.Or);
 
         throw new UnexpectedValueException(node);
     }
