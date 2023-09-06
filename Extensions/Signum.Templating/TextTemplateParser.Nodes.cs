@@ -70,6 +70,12 @@ public static partial class TextTemplateParser
 
         public override void PrintList(TextTemplateParameters p)
         {
+            if (ValueProvider != null && ValueProvider is not TokenValueProvider && ValueProvider.Variable != null)
+            {
+                var obj = ValueProvider!.GetValue(p);
+
+                p.RuntimeVariables.Add(ValueProvider.Variable, obj);
+            }
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
