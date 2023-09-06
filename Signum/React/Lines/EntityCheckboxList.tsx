@@ -112,7 +112,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   function renderCheckboxList() {
     return (
-      <EntityCheckboxListSelect ctx={p.ctx} controller={c} />
+      <EntityCheckboxListSelect ctx={p.ctx} controller={c} filterRows={p.filterRows} />
     );
   }
 });
@@ -120,6 +120,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
 interface EntityCheckboxListSelectProps {
   ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
+  filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
   controller: EntityCheckboxListController;
 }
 
@@ -194,18 +195,19 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       typeof data == "object" ? data.rows :
         [];
 
-    const list = p.ctx.value!;
+    var listCtx = mlistItemContext(p.ctx);
 
-    list.forEach(mle => {
-      var lite = c.getKeyEntity(mle.element);
+    if (p.filterRows)
+      listCtx = p.filterRows(listCtx);
+
+    listCtx.forEach(ctx => {
+      var lite = c.getKeyEntity(ctx.value);
       if (!fixedData.some(d => is(d.entity, lite)))
         fixedData.insertAt(0, { entity: maybeToLite(lite) } as ResultRow)
     });
 
     const resultTable = Array.isArray(data) ? undefined : data;
 
-    var listCtx = mlistItemContext(p.ctx);
-    
     return fixedData.map((row, i) => {
       var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
       var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :

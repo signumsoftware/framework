@@ -168,7 +168,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
 
     const manuals = getManualSubTokens(p.parentToken);
     if (manuals)
-      return manuals;
+      return manuals.then(tokens => tokens.length == 0 ? tokens : [null, ...tokens]);
 
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
