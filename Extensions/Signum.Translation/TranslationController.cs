@@ -6,16 +6,23 @@ using System.ComponentModel.DataAnnotations;
 using static Signum.Translation.TranslationController;
 using Signum.Translation.Instances;
 using Signum.API.Filters;
+using System.IO;
 
 namespace Signum.Translation;
 
 [ValidateModelFilter]
 public class TranslationController : ControllerBase
 {
-    public static IEnumerable<Assembly> AssembliesToLocalize()
+    static IEnumerable<Assembly> AssembliesToLocalize()
     {
         return AppDomain.CurrentDomain.GetAssemblies().Where(a => a.HasAttribute<DefaultAssemblyCultureAttribute>());
     }
+
+    static Assembly GetAssembly(string assembly)
+    {
+        return AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+    }
+
 
     [HttpGet("api/translation/state")]
     public List<TranslationFileStatus> GetState()
@@ -67,11 +74,26 @@ public class TranslationController : ControllerBase
         public TranslatedSummaryState status;
     }
 
+    [HttpGet("api/translation/download")]
+    public PhysicalFileResult Download(string assembly, string culture)
+    {
+        Assembly ass = GetAssembly(assembly);
 
-    [HttpPost("api/translation/retrieve")]
+        CultureInfo ci = CultureInfo.GetCultureInfo(culture);
+
+        var file = LocalizedAssembly.TranslationFileName(ass, ci);
+
+        var mime = MimeMapping.GetMimeType(file);
+        return new PhysicalFileResult(file, mime)
+        {
+            FileDownloadName = Path.GetFileName(file)
+        };
+    }
+
+    [HttpGet("api/translation/retrieve")]
     public AssemblyResultTS Retrieve(string assembly, string culture, string filter)
     {
-        Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+        Assembly ass = GetAssembly(assembly);
 
         CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
         CultureInfo? targetCulture = culture == null ? null : CultureInfo.GetCultureInfo(culture);
@@ -145,7 +167,7 @@ public class TranslationController : ControllerBase
     [HttpPost("api/translation/sync")]
     public AssemblyResultTS Sync(string assembly, string culture, string? @namespace = null)
     {
-        Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+        Assembly ass = GetAssembly(assembly);
         CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
 
         CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
@@ -170,10 +192,11 @@ public class TranslationController : ControllerBase
         };
     }
 
+
     [HttpGet("api/translation/syncStats")]
     public List<NamespaceSyncStats> SyncStats(string assembly, string culture)
     {
-        Assembly ass = AssembliesToLocalize().Where(a => a.GetName().Name == assembly).SingleEx(() => "Assembly {0}".FormatWith(assembly));
+        Assembly ass = GetAssembly(assembly);
         CultureInfo targetCulture = CultureInfo.GetCultureInfo(culture);
         CultureInfo defaultCulture = CultureInfo.GetCultureInfo(ass.GetCustomAttribute<DefaultAssemblyCultureAttribute>()!.DefaultCulture);
 
@@ -279,7 +302,7 @@ public class TranslationController : ControllerBase
     [HttpPost("api/translation/save")]
     public void SaveTypes(string assembly, string? culture, [Required, FromBody] AssemblyResultTS result)
     {
-        var currentAssembly = AssembliesToLocalize().Single(a => a.GetName().Name == assembly);
+        var currentAssembly = GetAssembly(assembly);
 
         foreach (var cult in result.cultures.Keys.Where(ci => culture == null  || culture == ci))
         {

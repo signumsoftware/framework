@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { ajaxPost, ajaxGet } from '@framework/Services';
+import { ajaxPost, ajaxGet, ajaxGetRaw } from '@framework/Services';
 import { TranslationPermission } from './Signum.Translation'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
@@ -30,7 +30,11 @@ export module API {
   }
 
   export function retrieve(assembly: string, culture: string, filter: string): Promise<AssemblyResult> {
-    return ajaxPost({ url: `/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` }, undefined);
+    return ajaxGet({ url: `/api/translation/retrieve?assembly=${assembly}&culture=${culture}&filter=${filter}` });
+  }
+
+  export function download(assembly: string, culture: string): Promise<Response> {
+    return ajaxGetRaw({ url: `/api/translation/download?assembly=${assembly}&culture=${culture}` });
   }
 
   export function namespaceStatus(assembly: string, culture: string): Promise<Array<NamespaceSyncStats>> {
