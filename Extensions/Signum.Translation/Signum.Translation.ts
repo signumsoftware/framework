@@ -46,6 +46,7 @@ export module TranslationMessage {
   export const _0OutdatedTranslationsFor1HaveBeenDeleted = new MessageKey("TranslationMessage", "_0OutdatedTranslationsFor1HaveBeenDeleted");
   export const DownloadView = new MessageKey("TranslationMessage", "DownloadView");
   export const DownloadSync = new MessageKey("TranslationMessage", "DownloadSync");
+  export const Download = new MessageKey("TranslationMessage", "Download");
   export const AutoTranslate = new MessageKey("TranslationMessage", "AutoTranslate");
   export const AreYouSureToContinueAutoTranslation0For1WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslation0For1WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision");
