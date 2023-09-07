@@ -68,18 +68,6 @@ public static class DictionaryExtensions
     {
         return dictionary.GetOrAdd(key, k => new V());
     }
-
-    public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
-        where K : notnull
-    {
-        if (!dictionary.TryGetValue(key, out V? result))
-        {
-            result = value;
-            dictionary.Add(key, result);
-        }
-        return result;
-    }
-
     public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<V> generator)
         where K : notnull
     {

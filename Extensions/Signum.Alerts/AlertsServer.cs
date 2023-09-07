@@ -95,7 +95,7 @@ public static class AlertsServer
     }
     private static void NotifyOnCommit(params Lite<IUserEntity>[] recipients)
     {
-        var hs = (HashSet<Lite<IUserEntity>>)Transaction.UserData.GetOrCreate("AlertRecipients", new HashSet<Lite<IUserEntity>>());
+        var hs = (HashSet<Lite<IUserEntity>>)Transaction.UserData.GetOrCreate("AlertRecipients", () => new HashSet<Lite<IUserEntity>>());
         hs.AddRange(recipients);
 
         Transaction.PostRealCommit -= Transaction_PostRealCommit;

@@ -32,6 +32,8 @@ public static class RemoteEmailsLogic
 
     public static MessageMicrosoftGraphQueryConverter Converter = new MessageMicrosoftGraphQueryConverter();
 
+    public static Func<Lite<UserEntity>, bool> HasMailbox = user => user.Model is UserLiteModel um && um.OID is Guid oid;
+
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
@@ -61,8 +63,9 @@ public static class RemoteEmailsLogic
 
                         if (user != null)
                         {
-                            if (user.Model is UserLiteModel um && um.OID is Guid oid)
+                            if (HasMailbox(user))
                             {
+                                var oid = ((UserLiteModel)user.Model).OID;
                                 response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
                                 {
                                     req.QueryParameters.Filter = Converter.GetFilters(filters);
