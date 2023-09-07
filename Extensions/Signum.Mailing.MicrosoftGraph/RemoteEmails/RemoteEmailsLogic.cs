@@ -65,7 +65,7 @@ public static class RemoteEmailsLogic
                         {
                             if (HasMailbox(user))
                             {
-                                var oid = ((UserLiteModel)user.Model).OID;
+                                var oid = ((UserLiteModel)user.Model!).OID;
                                 response = (await graphClient.Users[oid.ToString()].Messages.GetAsync(req =>
                                 {
                                     req.QueryParameters.Filter = Converter.GetFilters(filters);
