@@ -6,6 +6,7 @@ import { IFile, IFilePath, FileMessage, FileTypeSymbol } from '../Signum.Files'
 
 import "./Files.css"
 import { New, PseudoType } from '@framework/Reflection';
+import { ServiceError } from '@framework/Services'
 
 export { FileTypeSymbol };
 
@@ -33,7 +34,7 @@ export function FileUploader(p: FileUploaderProps) {
 
   const [isLoading, setIsLodaing] = React.useState<boolean>(false);
   const [isOver, setIsOver] = React.useState<boolean>(false);
-  const [errors, setErrors] = React.useState<string[]>([]);
+  const [errors, setErrors] = React.useState<any[]>([]);
 
 
 
@@ -73,13 +74,13 @@ export function FileUploader(p: FileUploaderProps) {
     for (let i = 0; i < files!.length; i++) {
       promises.push(toFileEntity(files![i], { accept: p.accept, type: p.typeName, fileType: p.fileType, maxSizeInBytes: p.maxSizeInBytes })
         .then(fileEntity => p.onFileLoaded(fileEntity, i, files!.length, files[i]))
-        .catch(error => setNewError((error as Error).message)));
+        .catch(error => setNewError(error)));
     }
 
     Promise.all(promises).then(() => { setIsLodaing(false); setIsOver(false); });
   }
 
-  function setNewError(newError: string) {
+  function setNewError(newError: any) {
     setErrors(errors => [...errors, newError]);
   }
 
@@ -106,7 +107,13 @@ export function FileUploader(p: FileUploaderProps) {
           </div>
         )
       }
-      {errors.map((e, i) => <p key={i} className="text-danger">{e}</p>)}
+      {errors.map((e, i) => <p key={i} className="text-danger">{
+        e instanceof ServiceError ? `${e.httpError.exceptionType} (${e.httpError.exceptionId}): ${e.httpError.exceptionMessage}` :
+          e instanceof Error ? e.message :
+            e instanceof String ? e :
+              JSON.stringify(e)
+      }</p>)
+      }
     </div>
   );
 }

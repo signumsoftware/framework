@@ -24,36 +24,33 @@ public class ImageSharpConverter : IImageConverter<Image>
 
     public Image Resize(Image image, int maxWidth, int maxHeight, ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
-        AnchorPositionMode setPosition ()
+        var position = (verticalPosition, horizontalPosition) switch
         {
-            switch (verticalPosition)
-            {
-                case ImageVerticalPosition.Top:
-                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.TopLeft :
-                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.TopRight :
-                        AnchorPositionMode.Top;
+            (ImageVerticalPosition.Top, ImageHorizontalPosition.Left) => AnchorPositionMode.TopLeft,
+            (ImageVerticalPosition.Top, ImageHorizontalPosition.Right) => AnchorPositionMode.TopRight,
+            (ImageVerticalPosition.Top, ImageHorizontalPosition.Center) => AnchorPositionMode.Top,
 
-                case ImageVerticalPosition.Center:
-                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.Left :
-                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.Right :
-                        AnchorPositionMode.Center;
+            (ImageVerticalPosition.Center, ImageHorizontalPosition.Left) => AnchorPositionMode.Left,
+            (ImageVerticalPosition.Center, ImageHorizontalPosition.Right) => AnchorPositionMode.Right,
+            (ImageVerticalPosition.Center, ImageHorizontalPosition.Center) => AnchorPositionMode.Center,
 
-                case ImageVerticalPosition.Bottom:
-                    return horizontalPosition == ImageHorizontalPosition.Left ? AnchorPositionMode.BottomLeft :
-                        horizontalPosition == ImageHorizontalPosition.Right ? AnchorPositionMode.BottomRight :
-                        AnchorPositionMode.Bottom;
-                default: throw new NotImplementedException("unknown image position values");                        
-            }
-        }
+            (ImageVerticalPosition.Bottom, ImageHorizontalPosition.Left) => AnchorPositionMode.BottomLeft,
+            (ImageVerticalPosition.Bottom, ImageHorizontalPosition.Right) => AnchorPositionMode.BottomRight,
+            (ImageVerticalPosition.Bottom, ImageHorizontalPosition.Center) => AnchorPositionMode.Bottom,
+
+            _ => throw new UnexpectedValueException((verticalPosition, horizontalPosition))
+        };
+
         return image.Clone(x =>
         {
-            x.Resize(new ResizeOptions
+            x
+            .Resize(new ResizeOptions
             {
+                PadColor = Color.White,
                 Size = new Size(maxWidth, maxHeight),
                 Mode = ResizeMode.Pad,
-                Position = setPosition()
-            })
-            .BackgroundColor(Color.White);
+                Position = position
+            });
         });
     }
 

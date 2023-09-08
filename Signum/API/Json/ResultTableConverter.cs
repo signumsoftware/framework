@@ -127,7 +127,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
         Dictionary<T, int> uniqueDic = new Dictionary<T, int>();
         foreach (var item in list)
         {
-            int? idx = item == null ? null : uniqueDic.GetOrCreate(item, uniqueDic.Count);
+            int? idx = item == null ? null : uniqueDic.GetOrCreate(item, () => uniqueDic.Count);
 
             indexes.Add(idx);
         }

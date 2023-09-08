@@ -277,7 +277,9 @@ public static class ParsedModel
                 var info =
                     (type.GetField(part, Flags) is { } fi ? new MemberWithArguments(fi) : null) ??
                     (type.GetProperty(part, Flags) is { } pi ? new MemberWithArguments(pi) : null) ??
-                    (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null);
+                    (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null) ??
+                    (type.IsEntity() && MixinDeclarations.GetMixinDeclarations(type).Any(a => a.Name == part) ? new MemberWithArguments(MixinDeclarations.GetMixinDeclarations(type).SingleEx(a => a.Name == part)) : null);
+
 
                 if (info == null)
                 {
@@ -298,7 +300,7 @@ public static class ParsedModel
 
                 members.Add(info);
 
-                type = info.Member.ReturningType();
+                type = info.Member as Type ?? info.Member.ReturningType();
             }
 
         }

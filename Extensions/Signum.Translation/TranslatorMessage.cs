@@ -74,6 +74,7 @@ public enum TranslationMessage
 
     DownloadView,
     DownloadSync,
+    Download,
 
     AutoTranslate,
 

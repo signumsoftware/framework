@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
@@ -6,6 +7,7 @@ import { API, TranslationFileStatus } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { useAPI } from '@framework/Hooks'
+import { saveFile } from '@framework/Services'
 
 export default function TranslationCodeStatus() {
 
@@ -53,6 +55,7 @@ function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
             {cultures.map(culture =>
               <td key={culture}>
                 <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                {tree[assembly][culture].status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon icon="download" />}</a>}
                 <br />
                 {
                   !tree[assembly][culture].isDefault &&
