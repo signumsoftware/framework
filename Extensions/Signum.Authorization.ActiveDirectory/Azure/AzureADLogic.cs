@@ -381,6 +381,7 @@ public static class AzureADLogic
         return tuple.groups;
     }
 
+    //Uses application permissions
     public static List<SimpleGroup> CurrentADGroupsInternal(Guid oid)
     {
         using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
@@ -397,8 +398,25 @@ public static class AzureADLogic
         }
     }
 
+    //Uses delegated permissions
+    public static List<SimpleGroup> CurrentADGroupsInternal(string accessToken)
+    {
+        using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
+        {
+            var tokenCredential = new AccessTokenCredential(accessToken);
+            GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
+            var result = graphClient.Me.TransitiveMemberOf.GraphGroup.GetAsync(req =>
+            {
+                req.QueryParameters.Top = 999;
+                req.QueryParameters.Select = new[] { "id", "displayName", "ODataType" };
+            }).Result;
 
-  
+            return result!.Value!.Select(di => new SimpleGroup(Guid.Parse(di.Id!), di.DisplayName)).ToList();
+        }
+    }
+
+
+
 
     public static UserEntity CreateUserFromAD(ActiveDirectoryUser adUser)
     {
