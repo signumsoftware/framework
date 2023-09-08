@@ -25,7 +25,9 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     //Only for Microsoft Graph / Sending Emails 
     //Your App Registration -> Certificates & secrets -> + New client secret
     [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
-    public string? Azure_ClientSecret { get; set; } 
+    public string? Azure_ClientSecret { get; set; }
+
+    public bool UseDelegatedPermission { get; set; }
 
     public bool LoginWithWindowsAuthenticator { get; set; }
     public bool LoginWithActiveDirectoryRegistry { get; set; }

@@ -401,7 +401,7 @@ public static class AzureADLogic
     //Uses delegated permissions
     public static List<SimpleGroup> CurrentADGroupsInternal(string accessToken)
     {
-        using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + oid))
+        using (HeavyProfiler.Log("Microsoft Graph", () => "CurrentADGroups for OID: " + accessToken))
         {
             var tokenCredential = new AccessTokenCredential(accessToken);
             GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
