@@ -15,7 +15,7 @@ public class RestLogController : ControllerBase
         }
         var oldCredentials = Database.Query<RestApiKeyEntity>().Single(r => r.User.Is(oldRequest.User));
 
-        var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod!), url, oldCredentials.ApiKey, oldRequest.RequestBody);
+        var result = await RestLogLogic.GetRestDiffResult(new HttpMethod(oldRequest.HttpMethod!), url, oldCredentials.ApiKey, oldRequest.RequestBody.Text);
 
         return result;
     }

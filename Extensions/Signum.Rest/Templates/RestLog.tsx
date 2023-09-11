@@ -81,13 +81,13 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }) {
         </div>
       }
 
-      {renderCode(ctx.subCtx(f => f.requestBody))}
+      {renderCode(ctx.subCtx(f => f.requestBody.text))}
 
       <fieldset>
         <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
         <Tabs defaultActiveKey="prev" id="restLogs">
-          <Tab title="prev" eventKey="prev" className="linkTab"><FormatJson code={ctx.value.responseBody} /></Tab>
-          {replayResult && <Tab title="diff" eventKey="diff" className="linkTab">{<DiffDocument first={ctx.value.responseBody ?? ""} second={replayResult} />}</Tab>}
+          <Tab title="prev" eventKey="prev" className="linkTab"><FormatJson code={ctx.value.responseBody.text} /></Tab>
+          {replayResult && <Tab title="diff" eventKey="diff" className="linkTab">{<DiffDocument first={ctx.value.responseBody.text ?? ""} second={replayResult} />}</Tab>}
           {replayResult && <Tab title="curr" eventKey="curr" className="linkTab"><FormatJson code={replayResult} /></Tab>}
         </Tabs>
       </fieldset>

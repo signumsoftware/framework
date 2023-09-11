@@ -23,6 +23,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   azure_ApplicationID: string /*Guid*/ | null;
   azure_DirectoryID: string /*Guid*/ | null;
   azure_ClientSecret: string | null;
+  useDelegatedPermission: boolean;
   loginWithWindowsAuthenticator: boolean;
   loginWithActiveDirectoryRegistry: boolean;
   loginWithAzureAD: boolean;
