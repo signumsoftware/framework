@@ -40,12 +40,12 @@ export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    if (!ctx.searchControl.props.showBarExtension ||
-      !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
-      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons))
-      return undefined;
 
-    return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
+    const isHidden = !ctx.searchControl.props.showBarExtension ||
+      !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
+      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons);
+
+    return { button: <UserQueryMenu searchControl={ctx.searchControl} isHidden={isHidden} /> };
   });
 
   if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
