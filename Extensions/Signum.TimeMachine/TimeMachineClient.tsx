@@ -130,11 +130,11 @@ export function start(options: { routes: RouteObject[] }) {
           );
         }
 
-        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }))
+        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }))
           return icon;
 
         return (
-          <TimeMachineLink lite={row.entity} inSearch={true} style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
+          <TimeMachineLink lite={row.entity} inSearch="main" style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
             {EntityControlMessage.View.niceToString()}
             {icon}
           </TimeMachineLink >
@@ -168,7 +168,7 @@ export interface EntityDump {
 
 export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
-  inSearch?: boolean;
+  inSearch?: "main" | "related";
 }
 
 export default function TimeMachineLink(p: TimeMachineLinkProps) {

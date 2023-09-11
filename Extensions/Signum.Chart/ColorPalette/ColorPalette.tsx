@@ -64,9 +64,9 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
       var chooseEntities = await Finder.findMany({ queryName: ti.name }, {
         message: ColorPaletteMessage.Select0OnlyIfYouWantToOverrideTheAutomaticColor.niceToString().formatHtml(<strong>{ti.nicePluralName}</strong>),
         searchControlProps: {
-          entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+          entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
             <EntityLink lite={row.entity}
-              inSearch={true}
+              inSearch="main"
               onNavigated={sc?.handleOnNavigated}
               getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
               inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">

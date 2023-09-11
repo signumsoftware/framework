@@ -86,7 +86,7 @@ export default function ProcessPanelPage() {
             </tr>
             {s.executing.map((item, i) =>
               <tr key={i}>
-                <td> <EntityLink lite={item.process} inSearch={true} /> </td>
+                <td> <EntityLink lite={item.process} inSearch="main" /> </td>
                 <td> {item.state} </td>
                 <td style={{ verticalAlign: "middle" }}>  <ProcessProgressBar state={item.state} progress={item.progress} /></td>
                 <td> {item.machineName} </td>

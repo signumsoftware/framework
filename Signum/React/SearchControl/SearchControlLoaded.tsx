@@ -1602,7 +1602,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.props.view) {
       var lite = row.entity!;
 
-      if (!Navigator.isViewable(lite.EntityType, { isSearch: true }))
+      if (!Navigator.isViewable(lite.EntityType, { isSearch: "main" }))
         return;
 
       e.preventDefault();
