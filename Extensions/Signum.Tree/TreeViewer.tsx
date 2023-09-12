@@ -257,7 +257,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isViewable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Navigator.isViewable(type, { isSearch: "main" }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
       tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="square-caret-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="square-caret-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
       <Dropdown.Item onClick={this.handleCopyClick}><FontAwesomeIcon icon="copy" />&nbsp;{SearchMessage.Copy.niceToString()}</Dropdown.Item>,

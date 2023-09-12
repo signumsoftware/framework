@@ -2,9 +2,10 @@ import * as React from "react";
 import { To, NavigateOptions } from "react-router";
 import type { Router } from "@remix-run/router";
 import { IUserEntity } from "./Signum.Security";
+import { PermissionSymbol } from "./Signum.Basics";
 import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
-import { PseudoType, Type, getTypeName } from "./Reflection";
+import { PseudoType, Type, getTypeName, tryGetTypeInfo } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 import { navigateRoute } from "./Navigator";
 
@@ -43,6 +44,27 @@ export function location(): typeof _internalRouter.state.location {
     pathname: toRelativeUrl(loc.pathname)
   };
 }
+
+export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
+  var key = (permission as PermissionSymbol).key ?? permission as string;
+  if (!isPermissionAuthorized(key))
+    throw new Error(`Permission ${key} is denied`);
+}
+
+export function isPermissionAuthorized(permission: PermissionSymbol | string) {
+  var key = (permission as PermissionSymbol).key ?? permission as string;
+  const type = tryGetTypeInfo(key.before("."));
+
+  if (!type)
+    return false;
+
+  const member = type.members[key.after(".")];
+  if (!member)
+    return false;
+
+  return true;
+}
+
 
 export function navigate(to: To | number, options?: NavigateOptions): void
 export function navigate(to: To | number, options?: NavigateOptions): void

@@ -9,5 +9,6 @@
   "resolutions": {
   },
   "dependencies": {
+    "marked": "8.0.1"
   }
 }

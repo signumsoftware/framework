@@ -6,6 +6,7 @@ import { TypeContext, ValueLine } from '@framework/Lines';
 import { classes } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
 import { EntityControlMessage } from '@framework/Signum.Entities';
+import { HelpMessage } from '../Signum.Help';
 
 export function EditableComponent({ ctx, markdown, defaultText, inline, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, markdown?: boolean, defaultText?: string, inline?: boolean, onChange?: () => void, defaultEditable?: boolean }) {
 
@@ -26,7 +27,10 @@ export function EditableComponent({ ctx, markdown, defaultText, inline, onChange
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)
       }
-      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", markdown && ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}><FontAwesomeIcon icon="pen-to-square" className="ms-2" title={EntityControlMessage.Edit.niceToString()} /></a>}
+      {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", markdown && ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
+        <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
+
+      </a>}
       {editable && <ValueLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} />}
     </Tag>
   );
