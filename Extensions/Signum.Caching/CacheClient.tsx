@@ -6,13 +6,14 @@ import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { getColorProviders } from '../Signum.Map/Schema/ClientColorProvider';
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/cache/statistics", element: <ImportComponent onImport={() => import("./CacheStatisticsPage")} /> });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(CachePermission.InvalidateCache),
+    allowed: () => isPermissionAuthorized(CachePermission.InvalidateCache),
     key: "ViewCache",
     onClick: () => Promise.resolve("/cache/statistics")
   });

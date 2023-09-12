@@ -127,7 +127,7 @@ export function start(options: { routes: RouteObject[] }) {
     });
   });
 
-  if (AuthClient.isPermissionAuthorized(DashboardPermission.ViewDashboard))
+  if (AppContext.isPermissionAuthorized(DashboardPermission.ViewDashboard))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),

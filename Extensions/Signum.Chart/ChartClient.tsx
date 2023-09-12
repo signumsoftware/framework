@@ -49,7 +49,7 @@ export function start(options: { routes: RouteObject[], googleMapsApiKey?: strin
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
     if (!ctx.searchControl.props.showBarExtension ||
-      !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ||
+      !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ||
       !(ctx.searchControl.props.showBarExtensionOption?.showChartButton ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 

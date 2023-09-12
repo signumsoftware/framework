@@ -37,13 +37,13 @@ export function start(options: { routes: RouteObject[] }) {
 
 
   ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-    if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
+    if (!AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) || !Navigator.isViewable(UserChartEntity))
       return undefined;
 
     return <UserChartMenu chartRequestView={ctx.chartRequestView} />;
   });
 
-  if (AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) && Navigator.isViewable(UserChartEntity))
+  if (AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) && Navigator.isViewable(UserChartEntity))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(ucs => ucs.map(uc =>
@@ -72,7 +72,7 @@ export function start(options: { routes: RouteObject[] }) {
       })
     },
     {
-      isVisible: AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info"
+      isVisible: AppContext.isPermissionAuthorized(ChartPermission.ViewCharting), group: null, icon: "eye", iconColor: "blue", color: "info"
     }
   ));
 
@@ -93,7 +93,7 @@ export function start(options: { routes: RouteObject[] }) {
         ev.preventDefault();
         return Navigator.view(c.userChart!).then(e => Boolean(e));
       },
-    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+    handleTitleClick: !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (p, e, cdRef, ev) => {
         ev.preventDefault();
         ev.persist();
@@ -132,7 +132,7 @@ export function start(options: { routes: RouteObject[] }) {
           .then(lite => lite && Navigator.view(lite!))
           .then(entity => Boolean(entity));
       },
-    handleTitleClick: !AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
+    handleTitleClick: !AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) ? undefined :
       (c, e, cdRef, ev) => {
         ev.preventDefault();
         ev.persist();
