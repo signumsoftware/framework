@@ -184,7 +184,7 @@ export function format(text: string, alert: Partial<AlertEntity>, onNavigated?: 
   return React.createElement(React.Fragment, {}, ...nodes);
 }
 
-const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
+const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/g
 const NumericPlaceholder = /^[ \d]+$/;
 
 function replacePlaceHolders(value: string | null | undefined, alert: Partial<AlertEntity>) {
