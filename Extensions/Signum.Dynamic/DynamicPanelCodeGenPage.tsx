@@ -7,7 +7,6 @@ import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
 import { API, CompilationError, DynamicPanelInformation } from './DynamicClient'
 import CSharpCodeMirror from '../Signum.CodeMirror/CSharpCodeMirror'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
@@ -42,7 +41,7 @@ export default function DynamicPanelPage() {
     handleSelect("restartServerApp");
   }
 
-  AuthClient.assertPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel);
+  AppContext.assertPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel);
 
   let step = QueryString.parse(location.search).step as DynamicPanelTab | undefined;
 
@@ -306,7 +305,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
   return (
     <div>
       {
-        AuthClient.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
+        AppContext.isPermissionAuthorized(DynamicPanelPermission.RestartApplication) &&
         <a href="#" className="sf-button btn btn-danger" onClick={handleRestartApplication}>Restart Server Application</a>
       }
       {p.startErrors && p.startErrors.map((e, i) => <ErrorBlock key={i} error={e} />)}

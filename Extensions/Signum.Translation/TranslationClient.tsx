@@ -6,11 +6,12 @@ import * as AuthClient from '../Signum.Authorization/AuthClient'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
 import { TranslatedSummaryState } from './Signum.Translation.Instances';
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export function start(options: { routes: RouteObject[] }) {
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateCode),
+    allowed: () => isPermissionAuthorized(TranslationPermission.TranslateCode),
     key: "TranslateCode",
     onClick: () => Promise.resolve("/translation/status")
   });

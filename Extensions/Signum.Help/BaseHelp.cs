@@ -21,7 +21,7 @@ public abstract class BaseHelp
 public class NamespaceHelp : BaseHelp
 {
     public readonly string Namespace;
-    public readonly string? Before;
+    public readonly string? Module;
     public readonly string Title;
     public readonly string? Description;
     [JsonIgnore]
@@ -43,7 +43,7 @@ public class NamespaceHelp : BaseHelp
 
         Title = entity?.Let(a => a.Title.DefaultToNull()) ?? clean.TryAfterLast('.') ?? clean;
 
-        Before = clean.TryBeforeLast('.');
+        Module = clean.TryBefore('.');
 
         Description = entity?.Description;
         DBEntity = entity;

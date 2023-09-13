@@ -13,6 +13,7 @@ import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Signum.Authorization/AuthClient'
 import { useAPI } from '@framework/Hooks'
+import { isPermissionAuthorized } from '@framework/AppContext'
 
 type CaseTab = "CaseFlow" | "CaseActivities" | "InprogressCaseActivities";
 
@@ -28,13 +29,13 @@ export default function CaseComponent(p: CaseComponentProps) {
   const caseFlowViewerComponentRef = React.useRef<CaseFlowViewerComponent>(null);
 
   const model = useAPI(() =>
-    !AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) :
+    !isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) :
       API.getWorkflowModel(toLite(p.ctx.value.workflow)).then(pair => ({
         initialXmlDiagram: pair.model.diagramXml,
         entities: pair.model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model!)
       })), [p.ctx.value.workflow]);
 
-  const caseFlow = useAPI(() => !AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) : API.caseFlow(toLite(p.ctx.value)), [p.ctx.value]);
+  const caseFlow = useAPI(() => !isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) : API.caseFlow(toLite(p.ctx.value)), [p.ctx.value]);
 
   function handleToggle(eventKey: unknown) {
     if (activeEventKey !== eventKey)
@@ -63,7 +64,7 @@ export default function CaseComponent(p: CaseComponentProps) {
         </div>
       </div>
 
-      {AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
+      {isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) &&
         <Tabs id="caseTabs" unmountOnExit={false} activeKey={activeEventKey} onSelect={handleToggle}>
           <Tab eventKey={"CaseFlow" as CaseTab} title={WorkflowActivityMessage.CaseFlow.niceToString()}>
             {model && caseFlow ?

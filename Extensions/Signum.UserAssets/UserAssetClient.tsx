@@ -29,7 +29,7 @@ export function start(options: { routes: RouteObject[] }) {
 
   options.routes.push({ path: "/userAssets/import", element: <ImportComponent onImport={() => import("./ImportAssetsPage")} /> });
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
+    allowed: () => AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
     key: "ImportUserAssets",
     onClick: () => Promise.resolve("/userAssets/import")
   });
@@ -39,7 +39,7 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  if (AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+  if (AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
     QuickLinks.registerQuickLink(type,
       new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
         allowsMultiple: true,

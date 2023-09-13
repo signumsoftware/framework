@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import * as Navigator from '@framework/Navigator'
+import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
@@ -17,10 +18,10 @@ import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
+import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
 export default function TypeHelpPage() {
   const params = useParams() as { cleanName: string };
-
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
@@ -63,14 +64,14 @@ export default function TypeHelpPage() {
       </div>
       <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
 
-      <h2 className="display-7">{ctx.niceName(a => a.properties)}</h2>
+      <h2 className="display-6">{ctx.niceName(a => a.properties)}</h2>
       <dl className="row">
         {propertyTree.map(node => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={forceUpdate} />)}
       </dl>
 
       {
         ctx.value.operations.length > 0 && (<>
-          <h2 className="display-7">{ctx.niceName(a => a.operations)}</h2>
+          <h2 className="display-6">{ctx.niceName(a => a.operations)}</h2>
           <dl className="row">
             {mlistItemContext(ctx.subCtx(th => th.operations)).map(octx => <OperationLine key={octx.value.operation.key} ctx={octx} cleanName={cleanName} onChange={forceUpdate} />)}
           </dl>
@@ -105,25 +106,26 @@ function PropertyLine({ node, cleanName, onChange }: { node: TreeNode<{ ctx: Typ
           <EditableComponent ctx={node.value.ctx.subCtx(a => a.description)} markdown onChange={onChange} />
         </span>
       </dd>
-      {node.children.length > 0 && <div className="col-sm-12">
+      { node.children.length > 0 && <div className="col-sm-12">
         <SubPropertiesCollapse node={node} cleanName={cleanName} onChange={onChange} />
-      </div>}
+      </div> }
     </>
   );
 }
 
 function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, cleanName: string, onChange: () => void }) {
   var [open, setOpen] = React.useState(false);
+  const pr = node.value.pr;
   return (
     <>
-      <div className="row ms-4 mb-2">
+      <div className="row mb-2">
         <span className="col-sm-9 offset-sm-3 lead" style={{ cursor: "pointer" }} onClick={() => setOpen(!open)}>
-          <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {node.value.pr.member!.niceName}
+          <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {pr.member!.niceName} ({getNiceTypeName(pr.member!.type)})
         </span>
       </div>
       <Collapse in={open}>
         <dl className="row ms-4">
-          {node.children.map(n => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={onChange} />)}
+          {open && node.children.map(n => <PropertyLine key={pr.propertyPath()} node={n} cleanName={cleanName} onChange={onChange} />)}
         </dl>
       </Collapse>
     </>
@@ -156,7 +158,10 @@ function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEn
           <span className="lead " style={{ cursor: "pointer" }} onClick={() => setOpen(!open)} id={HelpClient.Urls.idQuery(ctx.value.query.key)}>
             <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)} 
           </span>
-          {" "}<code className='shortcut'>[q:{cleanName}.{ctx.value.query.key}]</code>
+          {" "}
+          {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon icon="arrow-up-right-from-square" /></a>}
+          {" "}
+          <code className='shortcut'>[q:{cleanName}.{ctx.value.query.key}]</code>
           <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={onChange} />
         </div>
       </div>

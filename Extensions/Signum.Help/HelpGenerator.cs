@@ -94,11 +94,10 @@ public static class HelpGenerator
 
     private static bool? IsNullable(PropertyRoute pr)
     {
-        if (pr.PropertyInfo == null)
+        if (pr.PropertyRouteType != PropertyRouteType.FieldOrProperty)
             return null;
 
-        return (Validator.TryGetPropertyValidator(pr)?.Validators.Any(a => a is NotNullValidatorAttribute) ?? false) ? false :
-                        pr.PropertyInfo!.IsNullable() == true ? true : (bool?)null;
+        return pr.PropertyInfo!.IsNullable();
     }
 
     private static string ValueType(Type type, bool? nullable, string? format, string? unit)
