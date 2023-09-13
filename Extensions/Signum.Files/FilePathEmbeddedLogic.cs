@@ -1,4 +1,5 @@
 using Signum.Utilities.Reflection;
+using Signum.Utilities.Synchronization;
 using System.Collections;
 using System.IO;
 
@@ -44,7 +45,7 @@ public static class FilePathEmbeddedLogic
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                             var a = fpe; //For debugging
 
-                            task.Wait();
+                            task.WaitSafe();
                         };
                     }
                 }

@@ -22,7 +22,7 @@ import { TranslateableRouteType } from '@framework/Signum.Basics';
 export function start(options: { routes: RouteObject[] }) {
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances),
+    allowed: () => AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances),
     key: "TranslateInstances",
     onClick: () => Promise.resolve("/translatedInstance/status")
   });
@@ -43,7 +43,7 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field" &&
       state.ctx.propertyRoute.member!.translatable && 
-      AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
+      AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
       if (!vProps.extraButtons)
         vProps.extraButtons = vlc => <TranslateButton controller={lineBase} />;
 

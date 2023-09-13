@@ -50,7 +50,7 @@ export function initFormatRules(): FormatRule[] {
     },
     {
       name: "Entity",
-      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite" || qt.filterType == "Model",
+      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Model",
       formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined, true)
     },
     {
@@ -122,14 +122,14 @@ export function initFormatRules(): FormatRule[] {
     {
       name: "Lite",
       isApplicable: qt => qt.filterType == "Lite",
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, true)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, true)
     },
     {
       name: "LiteNoFill",
       isApplicable: qt => {
         return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, false)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, false)
     },
     {
       name: "Guid",
@@ -446,9 +446,9 @@ export function initEntityFormatRules(): EntityFormatRule[] {
     {
       name: "View",
       isApplicable: sc => true,
-      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
         <EntityLink lite={row.entity}
-          inSearch={true}
+          inSearch="main"
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">

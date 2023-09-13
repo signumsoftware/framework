@@ -14,6 +14,7 @@ import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/scheduler/view", element: <ImportComponent onImport={() => import("./SchedulerPanelPage")} /> });
@@ -36,7 +37,7 @@ export function start(options: { routes: RouteObject[] }) {
   }));
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
+    allowed: () => isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
     key: "SchedulerPanel",
     onClick: () => Promise.resolve("/scheduler/view")
   });

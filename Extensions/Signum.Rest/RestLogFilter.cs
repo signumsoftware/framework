@@ -53,7 +53,7 @@ public class RestLogFilter : ActionFilterAttribute
                 UserHostAddress = connection.RemoteIpAddress!.ToString(),
                 UserHostName = request.Host.Value,
                 Referrer = request.Headers["Referrer"].ToString(),
-                RequestBody = IgnoreRequestBody ? null : await GetRequestBody(context.HttpContext.Request)
+                RequestBody = { Text = IgnoreRequestBody ? null : await GetRequestBody(context.HttpContext.Request) },
             };
 
             context.HttpContext.Items.Add(typeof(RestLogEntity).FullName!, restLog);
@@ -119,7 +119,7 @@ public class RestLogFilter : ActionFilterAttribute
                 if (resultContext.Exception == null)
                 {
                     memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
-                    restLog.ResponseBody = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
+                    restLog.ResponseBody.Text = Encoding.UTF8.GetString(memoryStream.ReadAllBytes());
                 }
             }
 

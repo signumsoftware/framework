@@ -135,13 +135,7 @@ public static class WordImageReplacer
     {
         var query = GetDrawings(doc);
 
-        var drawing = query.Single(r =>
-        {
-            var prop = r.Descendants<DocProperties>().SingleOrDefault();
-            var match = prop != null && (prop.Title == titleOrDescription || prop.Description == titleOrDescription);
-
-            return match;
-        });
+        var drawing = query.Single(r => r.GetTitle() == titleOrDescription);
 
         return drawing.Descendants<Blip>().SingleEx();
     }
@@ -152,7 +146,7 @@ public static class WordImageReplacer
 
         var drawing = query.Where(r =>
         {
-            var prop = r.Descendants<DocProperties>().SingleOrDefault();
+            var prop = r.Descendants<DocProperties>().FirstOrDefault();
             var match = prop != null && predicate(prop);
 
             return match;

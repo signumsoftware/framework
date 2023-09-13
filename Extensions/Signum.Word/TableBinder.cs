@@ -27,8 +27,7 @@ public static class TableBinder
         var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
         foreach (var item in graphicFrames)
         {
-            var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleOrDefaultEx();
-            var title = GetTitle(nonVisualProps);
+            var title = item.GetTitle();
 
             if (title != null)
             {
@@ -40,8 +39,7 @@ public static class TableBinder
         var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
         foreach (var item in drawings)
         {
-            var docProps = item.Descendants<WPDrawing.DocProperties>().SingleOrDefaultEx();
-            var title = GetTitle(docProps);
+            var title = item.GetTitle();
 
             if (title != null)
             {
@@ -80,8 +78,7 @@ public static class TableBinder
         var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
         foreach (var item in graphicFrames)
         {
-            var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleEx();
-            var title = GetTitle(nonVisualProps);
+            var title = item.GetTitle();
 
             Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
             if (dataTable != null)
@@ -93,8 +90,7 @@ public static class TableBinder
         var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
         foreach (var item in drawings)
         {
-            var docProps = item.Descendants< WPDrawing.DocProperties>().SingleEx();
-            var title = GetTitle(docProps);
+            var title = item.GetTitle();
 
             Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
             if (dataTable != null)
@@ -123,18 +119,25 @@ public static class TableBinder
         }
     }
 
-    static string? GetTitle(OpenXmlElement? nonVisualProps)
+    public static string? GetTitle(this Presentation.GraphicFrame frame)
     {
-        //if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
-        //    return draw.Description?.Value ?? draw.Title?.Value;
+        var nvdp = frame.Descendants<Presentation.NonVisualDrawingProperties>().FirstOrDefault();
 
-        if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
-            return pres.Description?.Value ?? pres.Title?.Value;
+        if(nvdp != null)
+            return nvdp.Description?.Value ?? nvdp.Title?.Value;
 
-        if (nonVisualProps is WPDrawing.DocProperties prop)
+        throw new NotImplementedException("Imposible to get the Title from " + frame?.GetType().FullName);
+       
+    }
+
+    public static string? GetTitle(this Wordprocessing.Drawing drawing)
+    {
+        var prop = drawing.Descendants<WPDrawing.DocProperties>().FirstOrDefault();
+
+        if (prop != null)
             return prop.Description?.Value ?? prop.Title?.Value;
 
-        throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps?.GetType().FullName);
+        throw new NotImplementedException("Imposible to get the Title from " + drawing?.GetType().FullName);
     }
 
     static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)

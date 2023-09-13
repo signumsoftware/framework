@@ -39,12 +39,14 @@ export function start(options: { routes: RouteObject[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-  AppContext.clearSettingsActions.push(cleanEntityChanged);
+  AppContext.clearSettingsActions.push(clearEntityChanged);
   AppContext.clearSettingsActions.push(clearSpecialActions);
+  AppContext.clearSettingsActions.push(clearEvents);
 
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
+
 
 export namespace NavigatorManager {
   export function getFramePage() {
@@ -90,7 +92,7 @@ export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | stri
   }, [types.join(","), ...deps]);
 }
 
-function cleanEntityChanged() {
+function clearEntityChanged() {
   Dic.clear(entityChanged);
 }
 
@@ -232,6 +234,14 @@ export function renderEntity(entity: ModifiableEntity): React.ReactChild {
 
 export function clearEntitySettings() {
   Dic.clear(entitySettings);
+}
+
+export function clearEvents() {
+
+  isCreableEvent.clear();
+  isReadonlyEvent.clear();
+  isViewableEvent.clear();
+  Finder.isFindableEvent.clear();
 }
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
@@ -532,7 +542,7 @@ export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<Mo
 
 export interface IsViewableOptions {
   customComponent?: boolean;
-  isSearch?: boolean;
+  isSearch?: "main" | "related";
   isEmbedded?: boolean;
   buttons?: ViewButtons;
 }
@@ -561,7 +571,7 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch);
+  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
 
   const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
@@ -1214,9 +1224,9 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   return result;
 }
 
-export function checkFlag(entityWhen: EntityWhen, isSearch: boolean | undefined) {
+export function checkFlag(entityWhen: EntityWhen, isSearchMainEntity: boolean | undefined) {
   return entityWhen == "Always" ||
-    entityWhen == (isSearch ? "IsSearch" : "IsLine");
+    entityWhen == (isSearchMainEntity ? "IsSearch" : "IsLine");
 }
 
 export type EntityWhen = "Always" | "IsSearch" | "IsLine" | "Never";

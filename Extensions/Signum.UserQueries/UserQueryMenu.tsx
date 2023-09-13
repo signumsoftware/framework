@@ -26,6 +26,7 @@ import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, Qu
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
+  isHidden: boolean;
 }
 
 function decodeUserQueryFromUrl(location: Location) {
@@ -70,6 +71,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     else
       setCurrentUserQuery(undefined, undefined);
   }, [location, p.searchControl.props.extraOptions?.userQuery && liteKey(p.searchControl.props.extraOptions.userQuery)]);
+
+
+  if (p.isHidden)
+    return null;
 
   function handleSelectedToggle(isOpen: boolean) {
     if (isOpen && userQueries == undefined)

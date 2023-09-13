@@ -3,6 +3,7 @@ import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { EntitySettings } from '@framework/Navigator'
+import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
@@ -47,7 +48,7 @@ export function start(options: {
   options.routes.push({ path: "/asyncEmailSender/view", element: <ImportComponent onImport={() => import("./AsyncEmailSenderPage")} /> });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
+    allowed: () => AppContext.isPermissionAuthorized(AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel),
     key: "AsyncEmailSenderPanel",
     onClick: () => Promise.resolve("/asyncEmailSender/view")
   });

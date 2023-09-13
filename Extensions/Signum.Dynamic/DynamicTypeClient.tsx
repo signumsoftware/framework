@@ -36,7 +36,7 @@ export function start(options: { routes: RouteObject[] }) {
       return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key)
         .then(pack => { eoc.frame.onReload(pack); Operations.notifySuccess(); })
         .then(() => {
-          if (AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel)) {
+          if (AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel)) {
             return MessageModal.show({
               title: DynamicTypeMessage.TypeSaved.niceToString(),
               message: DynamicTypeMessage.DynamicType0SucessfullySavedGoToDynamicPanelNow.niceToString(eoc.entity.typeName),
@@ -57,7 +57,7 @@ export function start(options: { routes: RouteObject[] }) {
 
   QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
     {
-      isVisible: AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
+      isVisible: AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
       icon: "up-down-left-right",
       iconColor: "purple"
     }

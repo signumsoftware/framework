@@ -124,7 +124,7 @@ public abstract class ValueProviderBase
                             return null;
                         }
 
-                        if (!(vp is TokenValueProvider))
+                        if (vp is not TokenValueProvider )
                             return new ContinueValueProvider(token.TryAfter('.'), vp, tp) { Variable = variable };
                     }
 
@@ -189,7 +189,7 @@ public abstract class TemplateParameters
     public readonly Dictionary<QueryToken, ResultColumn> Columns;
     public IEnumerable<ResultRow> Rows { get; private set; }
 
-    public ScopedDictionary<string, object> RuntimeVariables = new ScopedDictionary<string, object>(null);
+    public ScopedDictionary<string, object?> RuntimeVariables = new ScopedDictionary<string, object?>(null);
 
     public abstract object GetModel();
 
@@ -203,7 +203,7 @@ public abstract class TemplateParameters
     internal IDisposable Scope()
     {
         var old = RuntimeVariables;
-        RuntimeVariables = new ScopedDictionary<string, object>(RuntimeVariables);
+        RuntimeVariables = new ScopedDictionary<string, object?>(RuntimeVariables);
         return new Disposable(() => RuntimeVariables = old);
     }
 }
@@ -515,6 +515,9 @@ public class ModelValueProvider : ValueProviderBase
             if (mwa.Member is PropertyInfo pi)
                 return pi.GetValue(model, null);
 
+            if (mwa.Member is FieldInfo fi)
+                return fi.GetValue(model);
+
             if (mwa.Member is MethodInfo mi)
             {
                 var arguments = mwa.Arguments == null ? 
@@ -524,7 +527,12 @@ public class ModelValueProvider : ValueProviderBase
                 return mi.Invoke(model, arguments);
             }
 
-            return ((FieldInfo)mwa.Member).GetValue(model);
+            if(mwa.Member is Type t)
+            {
+                return ((Entity)model).GetMixin(t);
+            }
+
+            throw new UnexpectedValueException(mwa.Member);
         }
         catch (TargetInvocationException e)
         {
@@ -869,7 +877,7 @@ public class ContinueValueProvider : ValueProviderBase
 
         foreach (var m in Members!)
         {
-            value = Getter(m.Member, value, p);
+            value = value == null ? null : Getter(m.Member, value, p);
             if (value == null)
                 break;
         }
@@ -884,10 +892,16 @@ public class ContinueValueProvider : ValueProviderBase
             if (member is PropertyInfo pi)
                 return pi.GetValue(value, null);
 
+            if (member is FieldInfo fi)
+                return fi.GetValue(value);
+
             if (member is MethodInfo mi)
                 return mi.Invoke(value, new object[] { p });
 
-            return ((FieldInfo)member).GetValue(value);
+            if (member is TypeInfo ti)
+                return ((Entity)value).GetMixin(ti);
+
+            throw new UnexpectedValueException(member);
         }
         catch (TargetInvocationException e)
         {
@@ -904,7 +918,7 @@ public class ContinueValueProvider : ValueProviderBase
 
     public override Type? Type
     {
-        get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
+        get { return Members.IsNullOrEmpty() ? ParentType() : Members.Let(ms => ms.Last().Member.ReturningType()); }
     }
 
     public override void FillQueryTokens(List<QueryToken> list, bool forForeach)
