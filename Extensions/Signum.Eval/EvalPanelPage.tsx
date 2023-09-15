@@ -20,6 +20,7 @@ import "./EvalPanelPage.css"
 import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
+import { assertPermissionAuthorized } from '@framework/AppContext'
 import { EvalPanelMessage, EvalPanelPermission } from './Signum.Eval'
 
 
@@ -32,7 +33,7 @@ export default function DynamicPanelSimplePage() {
     AppContext.navigate("/dynamic/panel?step=" + key);
   }
 
-  AuthClient.assertPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel);
+  assertPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel);
 
   let step = QueryString.parse(location.search).step as DynamicPanelTab | undefined;
 

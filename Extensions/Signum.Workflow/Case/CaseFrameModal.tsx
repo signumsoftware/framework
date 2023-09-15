@@ -306,7 +306,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
       <div className="case-activity-widgets mt-2 me-2">
         {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
-        {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
+        {!pack.activity.case.isNew && AppContext.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
       </div>
       <CaseFromSenderInfo current={pack.activity} />
       <div className="modal-body">

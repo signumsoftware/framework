@@ -10,22 +10,22 @@ import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signu
 import { QueryString } from '@framework/QueryString';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
+import { marked } from 'marked';
 
-export function start(options: { routes: RouteObject[], markdownToHtml: (txt: string) => string }) {
+export function start(options: { routes: RouteObject[] }) {
   OmniboxClient.registerProvider(new HelpOmniboxProvider());
-  Options.markdownToHml = options.markdownToHtml;
+
+
+
   options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
   options.routes.push({ path: "/help/namespace/:namespace*", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
   options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
   options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
 }
 
-export namespace Options {
-  export let markdownToHml = (txt: string) => txt;
-}
 
 var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|]*)\]/gi;
-var helpAppRelativeUrl = /\(/;
+var helpAppRelativeUrl = /\(\//gi;
 
 export function toHtml(txt: string  | null) {
   if (txt == null)
@@ -64,9 +64,9 @@ export function toHtml(txt: string  | null) {
     }
   });
 
-  var txt3 = txt2.replace(helpAppRelativeUrl, "[" + AppContext.toAbsoluteUrl("~"));
-
-  return Options.markdownToHml(txt3);
+  var txt3 = txt2.replace(helpAppRelativeUrl, "(" + AppContext.toAbsoluteUrl("~/"));
+  
+  return marked.parse(txt3);
 }
 
 export module API {
@@ -103,7 +103,7 @@ export interface HelpIndexTS {
 
 export interface NamespaceItemTS {
   namespace: string;
-  before?: string;
+  module?: string;
   title: string;
   allowedTypes: EntityItem[];
 }

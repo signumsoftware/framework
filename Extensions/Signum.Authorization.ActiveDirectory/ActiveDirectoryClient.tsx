@@ -12,7 +12,6 @@ import MessageModal from '@framework/Modals/MessageModal';
 import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
-import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
 import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
@@ -53,14 +52,14 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
   });
 
 
-  Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
+  Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
     type: UserEntity,
     customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
     onClick: () => importADUser(str),
   }) : null;
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    if (ctx.findOptions.queryKey != UserEntity.typeName || !isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD))
+    if (ctx.findOptions.queryKey != UserEntity.typeName || !AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD))
       return undefined;
 
     var search = getSearch(ctx.findOptions);

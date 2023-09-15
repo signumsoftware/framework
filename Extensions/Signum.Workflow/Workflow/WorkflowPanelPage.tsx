@@ -6,7 +6,6 @@ import * as Navigator from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, WorkflowScriptRunnerState } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Workflow'
-import * as AuthClient from '../../Signum.Authorization/AuthClient'
 import { Tabs, Tab } from 'react-bootstrap';
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -35,7 +34,7 @@ export default function WorkflowPanelPage(){
 export function WorkflowScriptRunnerTab(p: {}) {
 
   const [state, reloadState] = useAPIWithReload(() => {
-    AuthClient.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
+    AppContext.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);
     return API.view();
   }, [], { avoidReset: true });
 

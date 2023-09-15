@@ -21,7 +21,6 @@ import {
 } from './Rules/Signum.Authorization.Rules'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { isPermissionAuthorized } from './AuthClient';
 import ProfilePhoto, { SmallProfilePhoto, urlProviders } from './Templates/ProfilePhoto';
 import { TypeaheadOptions } from '@framework/Components/Typeahead';
 import { EntityLink, similarToken } from '@framework/Search';
@@ -115,7 +114,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
         pinned: { active: "NotCheckbox_Unchecked", label: () => AuthMessage.IncludeTrivialMerges.niceToString(), column: 1 }
       }
     ],
-    extraButtons: scl => [isPermissionAuthorized(BasicPermission.AdminRules) && {
+    extraButtons: scl => [AppContext.isPermissionAuthorized(BasicPermission.AdminRules) && {
       order: -1,
       button: <button className="btn btn-info"
         onClick={e => { e.preventDefault(); API.downloadAuthRules(); }}>
@@ -139,7 +138,7 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
 
     QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("types", () => AuthAdminMessage.TypeRules.niceToString(),  (ctx, e) => API.fetchTypeRulePack(ctx.lite.id!)
           .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
-          isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
+      isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
     }));
 
     getAllTypes().filter(a => a.queryAuditors != null)
@@ -195,13 +194,13 @@ export function start(options: { routes: RouteObject[], types: boolean; properti
     QuickLinks.registerQuickLink(RoleEntity, new QuickLinks.QuickLinkAction("permissions", () => AuthAdminMessage.PermissionRules.niceToString(), (ctx, e) => API.fetchPermissionRulePack(ctx.lite.id!)
       .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })),
       {
-        isVisible: isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
+        isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "orange", color: "warning", group: null
       }
     ));
   }
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => isPermissionAuthorized(BasicPermission.AdminRules),
+    allowed: () => AppContext.isPermissionAuthorized(BasicPermission.AdminRules),
     key: "DownloadAuthRules",
     onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
   });

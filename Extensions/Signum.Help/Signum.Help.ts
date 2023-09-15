@@ -76,10 +76,13 @@ export module HelpMessage {
   export const SearchText = new MessageKey("HelpMessage", "SearchText");
   export const Previous = new MessageKey("HelpMessage", "Previous");
   export const Next = new MessageKey("HelpMessage", "Next");
+  export const Edit = new MessageKey("HelpMessage", "Edit");
+  export const Close = new MessageKey("HelpMessage", "Close");
 }
 
 export module HelpPermissions {
   export const ViewHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
+  export const DownloadHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.DownloadHelp");
 }
 
 export module HelpSearchMessage {

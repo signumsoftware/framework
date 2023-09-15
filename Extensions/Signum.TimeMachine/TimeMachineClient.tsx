@@ -18,7 +18,6 @@ import { EntityControlMessage } from '@framework/Signum.Entities';
 import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
-import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineCompareModal, TimeMachineModal } from './TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
@@ -29,7 +28,7 @@ import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine'
 
 export function start(options: { routes: RouteObject[] }) {
 
-  if (isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
+  if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
     QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
       [
         new QuickLinks.QuickLinkLink("TimeMachine", () => OperationLogEntity.nicePluralName(), ctx => timeMachineRoute(ctx.lite), {
@@ -81,7 +80,7 @@ export function start(options: { routes: RouteObject[] }) {
     }
   });*/
 
-    SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
+    SearchControlOptions.showSystemTimeButton = sc => AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push({ path: "/timeMachine/:type/:id", element: <ImportComponent onImport={() => import("./TimeMachinePage")} /> });
 

@@ -61,6 +61,7 @@ import { IUserEntity } from '@framework/Signum.Security';
 import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import WorkflowToolbarConfig from './WorkflowToolbarConfig';
 import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
 
@@ -128,7 +129,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
       .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
   },
     {
-      isVisible: AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
+      isVisible: isPermissionAuthorized(WorkflowPermission.ViewCaseFlow),
       icon: "shuffle",
       iconColor: "green"
     }
@@ -160,7 +161,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
     new QuickLinks.QuickLinkExplore(CaseEntity, ctx => ({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] })));*/
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
+    allowed: () => isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
     key: "WorkflowPanel",
     onClick: () => Promise.resolve("/workflow/panel")
   });
