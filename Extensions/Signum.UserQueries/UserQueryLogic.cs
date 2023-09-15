@@ -484,7 +484,7 @@ public static class UserQueryLogic
                     uq.ElementsPerPage = 20;
 
                 using (replacements.WithReplacedDatabaseName())
-                    return table.UpdateSqlSync(uq, u => u.Guid == uq.Guid, includeCollections: true);
+                    return table.UpdateSqlSync(uq, u => u.Guid == uq.Guid && u.Ticks == uq.Ticks, includeCollections: true)?.TransactionBlock($"UserQuery Guid = {uq.Guid} Ticks = {uq.Ticks} ({uq})");
             }
         }
         catch (Exception e)
