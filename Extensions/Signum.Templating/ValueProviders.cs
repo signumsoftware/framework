@@ -853,6 +853,7 @@ public class ContinueValueProvider : ValueProviderBase
 
     public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent,  ITemplateParser tp)
     {
+        this.fieldOrPropertyChain = fieldOrPropertyChain;
         this.Parent = parent;
 
         var pt = ParentType();

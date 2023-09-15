@@ -278,7 +278,7 @@ public static class ParsedModel
                     (type.GetField(part, Flags) is { } fi ? new MemberWithArguments(fi) : null) ??
                     (type.GetProperty(part, Flags) is { } pi ? new MemberWithArguments(pi) : null) ??
                     (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null) ??
-                    (type.IsEntity() && MixinDeclarations.GetMixinDeclarations(type).Any(a => a.Name == part) ? new MemberWithArguments(MixinDeclarations.GetMixinDeclarations(type).SingleEx(a => a.Name == part)) : null);
+                    (type.IsModifiableEntity() && MixinDeclarations.GetMixinDeclarations(type).Any(a => a.Name == part) ? new MemberWithArguments(MixinDeclarations.GetMixinDeclarations(type).SingleEx(a => a.Name == part)) : null);
 
 
                 if (info == null)
@@ -405,6 +405,7 @@ public class TemplateSynchronizationContext
         {
             var allMembers = type.GetFields(ParsedModel.Flags).Where(f => !f.IsBackingField()).Cast<MemberInfo>()
                 .Concat(type.GetProperties(ParsedModel.Flags))
+                .Concat(type.IsModifiableEntity() && !type.IsAbstract ? MixinDeclarations.GetMixinDeclarations(type) : new HashSet<Type>())
                 .ToDictionary(a => a.Name);
 
             string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
@@ -416,7 +417,7 @@ public class TemplateSynchronizationContext
 
             fields.Add(new MemberWithArguments(member));
 
-            type = member.ReturningType();
+            type = member as Type ?? member.ReturningType();
         }
 
         return fields;
