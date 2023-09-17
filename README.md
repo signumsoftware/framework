@@ -55,7 +55,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
 * [2023.09.02 Presenting QueryAuditors (aka TypeConditionLogic.RegisterWhenAlreadyFilteringBy)](https://github.com/signumsoftware/framework/commit/b93dea738b259640790a470b25357eedad022dd4#comments)
-* [2023.08.30 QuickLinks in SearchControl Columns]([https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments])
+* [2023.08.30 QuickLinks in SearchControl Columns](https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments)
 * [2023.05.09 Modular Revolution 🔥🔥🔥](https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments)
 * [2023.04.18 Full-Text-Search 🔎](https://github.com/signumsoftware/framework/commit/fbba1e4e124a610bdf7b90afd81f681cb00566a0#commitcomment-111853358)
 * [2023.04.14 Simple Pinned Filters, Split Values and EntityStrip in SearchControl](https://github.com/signumsoftware/framework/commit/e9705497df53fbfd6965bd7e0ba448c2726a2e96#commitcomment-111858344)
