@@ -36,25 +36,6 @@ export function startPublic(options: { routes: RouteObject[], userTicket: boolea
   }
 }
 
-export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key ?? permission as string;
-  if (!isPermissionAuthorized(key))
-    throw new Error(`Permission ${key} is denied`);
-}
-
-export function isPermissionAuthorized(permission: PermissionSymbol | string) {
-  var key = (permission as PermissionSymbol).key ?? permission as string;
-  const type = tryGetTypeInfo(key.before("."));
-
-  if (!type)
-    return false;
-
-  const member = type.members[key.after(".")];
-  if (!member)
-    return false;
-
-  return true;
-}
 
 export namespace Options {
   export let AuthHeader = "Authorization";

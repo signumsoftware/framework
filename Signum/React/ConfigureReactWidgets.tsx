@@ -44,7 +44,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
   }
 
   return {
-    date: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "D"),
+    date: (date, format) => toFormatWithFixes(DateTime.fromJSDate(date), format ?? "D"),
     time: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "t"),
     datetime: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "FF"),
     header: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMMM yyyy"),

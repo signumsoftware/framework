@@ -27,6 +27,7 @@ export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<Activ
             <ValueLine ctx={ctxb.subCtx(n => n.azure_ApplicationID)} />
             <ValueLine ctx={ctxb.subCtx(n => n.azure_DirectoryID)} />
             <ValueLine ctx={ctxb.subCtx(n => n.azure_ClientSecret)} helpText="Required for Microsoft Graph, not for Azure Log-in" />
+            <ValueLine ctx={ctxb.subCtx(n => n.useDelegatedPermission)} helpText="Request current user groups from Azure using the accessToken" />
             <ValueLine ctx={ctxb.subCtx(n => n.loginWithAzureAD)} inlineCheckbox formGroupHtmlAttributes={{ style: { display: "block" } }} />
           </fieldset>
         </div>

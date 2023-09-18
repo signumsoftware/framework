@@ -5,6 +5,11 @@ namespace Signum.Rest;
 [EntityKind(EntityKind.System, EntityData.Transactional)]
 public class RestLogEntity : Entity
 {
+    public RestLogEntity()
+    {
+        this.BindParent();
+    }
+
     [StringLengthValidator(Max = 100)]
     public string? HttpMethod { get; set; }
 
@@ -17,8 +22,8 @@ public class RestLogEntity : Entity
 
     public DateTime? ReplayDate { get; set; }
 
-    [DbType(Size = MaxValue)]
-    public string? RequestBody { get; set; }
+    [BindParent]
+    public BigStringEmbedded RequestBody { get; set; } = new BigStringEmbedded();
 
     [PreserveOrder]
     public MList<QueryStringValueEmbedded> QueryString { get; set; } = new MList<QueryStringValueEmbedded>();
@@ -51,8 +56,8 @@ public class RestLogEntity : Entity
 
     public Lite<ExceptionEntity>? Exception { get; set; }
 
-    [DbType(Size = MaxValue)]
-    public string? ResponseBody { get; set; }
+    [BindParent]
+    public BigStringEmbedded ResponseBody { get; set; } = new BigStringEmbedded();
 
     public RestLogReplayState? ReplayState { get; set; }
 

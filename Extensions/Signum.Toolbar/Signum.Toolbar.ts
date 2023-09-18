@@ -35,7 +35,8 @@ export const ToolbarElementType = new EnumType<ToolbarElementType>("ToolbarEleme
 export type ToolbarElementType =
   "Header" |
   "Divider" |
-  "Item";
+  "Item" |
+  "ExtraIcon";
 
 export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");
 export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
@@ -71,6 +72,8 @@ export module ToolbarMenuOperation {
 export module ToolbarMessage {
   export const RecursionDetected = new MessageKey("ToolbarMessage", "RecursionDetected");
   export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
+  export const FirstElementCanNotBeExtraIcon = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
+  export const ExtraIconCanNotComeAfterDivider = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
 }
 
 export module ToolbarOperation {

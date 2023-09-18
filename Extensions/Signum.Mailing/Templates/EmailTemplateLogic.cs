@@ -7,6 +7,7 @@ using Signum.Templating;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 using Signum.API;
+using Signum.Authorization;
 
 namespace Signum.Mailing.Templates;
 
@@ -122,6 +123,7 @@ public static class EmailTemplateLogic
             GlobalValueProvider.RegisterGlobalVariable("UrlLeft", _ => EmailLogic.Configuration.UrlLeft);
             GlobalValueProvider.RegisterGlobalVariable("Now", _ => Clock.Now);
             GlobalValueProvider.RegisterGlobalVariable("Today", _ => Clock.Now.Date, "d");
+            GlobalValueProvider.RegisterGlobalVariable("CurrentUser", _ => UserEntity.Current.Retrieve(), "d");
 
             sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
             sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
@@ -474,7 +476,7 @@ public static class EmailTemplateLogic
                     }
 
                     using (replacements.WithReplacedDatabaseName())
-                        return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
+                        return table.UpdateSqlSync(et, e => e.Guid == et.Guid && e.Ticks == et.Ticks, includeCollections: true, comment: "EmailTemplate: " + et.Name)?.TransactionBlock($"EmailTemplate Guid = {et.Guid} Ticks = {et.Ticks} ({et})");
                 }
                 catch (TemplateSyncException ex)
                 {

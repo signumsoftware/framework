@@ -63,7 +63,7 @@ export function signIn(ctx: LoginContext) {
   (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
   msalClient.loginPopup(userRequest)
     .then(a => {
-      return API.loginWithAzureAD(a.idToken, true)
+      return API.loginWithAzureAD(a.idToken, a.accessToken, true)
         .then(r => {
           if (r == null)
             throw new Error("User " + a.account?.username + " not found in the database");
@@ -103,9 +103,7 @@ export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undef
 
   return msalClient.acquireTokenSilent(userRequest)
     .then(res => {
-      const rawIdToken = res.idToken;
-
-      return API.loginWithAzureAD(rawIdToken, false);
+      return API.loginWithAzureAD(res.idToken, res.accessToken, false);
     }, e => {
       if (e instanceof msal.InteractionRequiredAuthError ||
         e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode =="user_cancelled"))
@@ -186,7 +184,7 @@ MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
 export module API {
 
 
-  export function loginWithAzureAD(jwt: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
-    return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, jwt);
+  export function loginWithAzureAD(jwt: string, accessToken: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
+    return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });
   }
 }

@@ -193,11 +193,11 @@ public static class HelpLogic
 
         var ci = CultureInfo.CurrentCulture;
 
+        if (!ci.IsNeutralCulture)
+            ci = ci.Parent;
+
         if (dic.ContainsKey(ci.Name))
             return ci;
-
-        if (dic.ContainsKey(ci.Parent.Name))
-            return ci.Parent;
 
         if (Schema.Current.ForceCultureInfo != null && dic.ContainsKey(Schema.Current.ForceCultureInfo!.Name))
             return Schema.Current.ForceCultureInfo!;

@@ -196,7 +196,7 @@ public static class AlertLogic
             if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
                 return null;
 
-            var alert = (AlertEntity)alertObject;
+            var alert = (AlertEntity)alertObject!;
             var text = alert.Text ?? "";
 
             var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
