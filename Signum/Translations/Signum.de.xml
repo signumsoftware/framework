@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="AggregateFunction">
     <Member Name="Average" Description="Durchschnitt" />
@@ -40,9 +40,9 @@
   </Type>
   <Type Name="CollectionToArrayType">
     <Member Name="SeparatedByComma" Description="Getrennt durch Komma" />
-    <Member Name="SeparatedByCommaDistict" Description="Getrennt durch Komma (Distinct)" />
+    <Member Name="SeparatedByCommaDistinct" Description="Getrennt durch Komma (Distinct)" />
     <Member Name="SeparatedByNewLine" Description="Getrennt durch neue Zeile" />
-    <Member Name="SeparatedByNewLineDistict" Description="Getrennt durch neue Zeile (Distinct)" />
+    <Member Name="SeparatedByNewLineDistinct" Description="Getrennt durch neue Linie (Distinct)" />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
