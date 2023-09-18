@@ -497,9 +497,9 @@ public static class WordTemplateLogic
                     using (replacements?.WithReplacedDatabaseName())
                     {
                         return SqlPreCommand.Combine(Spacing.Simple,
-                            Schema.Current.Table<WordTemplateEntity>().UpdateSqlSync(newTemplate, f => f.Name == wt.Name, comment: "WordTemplate File Regenerated: " + wt.Name),
+                            Schema.Current.Table<WordTemplateEntity>().UpdateSqlSync(newTemplate, f => f.Guid == wt.Guid && f.Ticks == wt.Ticks, comment: "WordTemplate File Regenerated: " + wt.Name),
                             Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == file.Hash, comment: "WordTemplate File Regenerated: " + wt.Name)
-                        );
+                        )?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})");
                     }
 
                 }
@@ -625,8 +625,7 @@ public static class WordTemplateLogic
                     wt.FileName = TextTemplateParser.Synchronize(wt.FileName, sc);
 
                     using (replacements.WithReplacedDatabaseName())
-
-                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Name == wt.Name, includeCollections: true, comment: "WordTempalte: " + wt.Name);
+                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Guid == wt.Guid && e.Ticks == wt.Ticks, includeCollections: true, comment: "WordTempalte: " + wt.Name)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})");
                 }
                 catch (TemplateSyncException ex)
                 {

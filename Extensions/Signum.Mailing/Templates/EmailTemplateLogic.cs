@@ -476,7 +476,7 @@ public static class EmailTemplateLogic
                     }
 
                     using (replacements.WithReplacedDatabaseName())
-                        return table.UpdateSqlSync(et, e => e.Name == et.Name, includeCollections: true, comment: "EmailTemplate: " + et.Name);
+                        return table.UpdateSqlSync(et, e => e.Guid == et.Guid && e.Ticks == et.Ticks, includeCollections: true, comment: "EmailTemplate: " + et.Name)?.TransactionBlock($"EmailTemplate Guid = {et.Guid} Ticks = {et.Ticks} ({et})");
                 }
                 catch (TemplateSyncException ex)
                 {
