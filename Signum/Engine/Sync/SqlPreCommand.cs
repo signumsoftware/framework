@@ -71,6 +71,15 @@ public static class SqlPreCommandExtensions
         return SqlPreCommand.Combine(spacing, preCommands.ToArray());
     }
 
+    public static SqlPreCommand TransactionBlock(this SqlPreCommand command, string name)
+    {
+        return SqlPreCommand.Combine(Spacing.Double,
+            new SqlPreCommandSimple("GO--BEGIN " + name),
+            command,
+            new SqlPreCommandSimple("GO--END " + name)
+            )!;
+    }
+
     public static SqlPreCommand PlainSqlCommand(this SqlPreCommand command)
     {
         return command.PlainSql().SplitNoEmpty("GO\r\n")
@@ -146,27 +155,76 @@ public static class SqlPreCommandExtensions
 
     public static int Timeout = 20 * 60;
 
+    public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+    static Dictionary<string, string> ExtractBeginEndParts(ref string script)
+    {
+        var matches = regexBeginEnd.Matches(script);
+
+        var result = new Dictionary<string, string>();
+        
+        if ((matches.Count % 2) != 0)
+            throw new InvalidOperationException($"Un-even number of GO--BEGIN/END blocks ({matches.Count}):\n{matches.ToString(a => a.Value, "\n")}");
+
+        StringBuilder sb = new StringBuilder();
+        var lastIndex = 0;
+
+        foreach (var pair in matches.Chunk(2).ToList())
+        {
+            var begin = pair[0];
+            var end = pair[1];
+            if (begin.Groups["type"].Value != "BEGIN")
+                throw new InvalidOperationException($"Unexpected {begin.Groups["type"].Value} in: {begin}");
+
+            if (end.Groups["type"].Value != "END")
+                throw new InvalidOperationException($"Unexpected {end.Groups["type"].Value} in: {end}");
+
+            var beginKey = begin.Groups["key"].Value.Trim();
+            var endKey= begin.Groups["key"].Value.Trim();
+
+            if (beginKey != endKey)
+                throw new InvalidOperationException($"GO--END key does not match with GO--BEGIN:\n{begin}\n{end}");
+
+            if(begin.Index != lastIndex)
+            {
+                sb.Append(script.Substring(lastIndex, begin.Index - lastIndex));
+            }
+
+            result.Add(beginKey, script.Substring(begin.EndIndex(), end.Index - begin.EndIndex()));
+
+            lastIndex = end.EndIndex();
+        }
+
+        if(lastIndex != script.Length)
+        {
+            sb.Append(script.Substring(lastIndex));
+        }
+
+        script = sb.ToString();
+
+        return result;
+    }
+
+    public static Regex regex = new Regex(@"^ *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
     public static void ExecuteScript(string title, string script)
     {
         using (Connector.CommandTimeoutScope(Timeout))
         {
-            var regex = new Regex(@"^ *(GO|USE \w+|USE \[[^\]]+\]) *(\r?\n|$)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 
             var parts = regex.Split(script);
 
             var realParts = parts.Where(a => !string.IsNullOrWhiteSpace(a) && !regex.IsMatch(a)).ToArray();
 
-            int pos = 0;
-            for (pos = 0; pos < realParts.Length; pos++)
+            for (int pos = 0; pos < realParts.Length; pos++)
             {
                 var currentPart = realParts[pos];
 
                 try
                 {
-
                     SafeConsole.WaitExecute("Executing {0} [{1}/{2}]".FormatWith(title, pos + 1, realParts.Length),
                         () => Executor.ExecuteNonQuery(currentPart));
-
                 }
                 catch (Exception ex)
                 {
@@ -175,48 +233,98 @@ public static class SqlPreCommandExtensions
                     if (sqlE == null && pgE == null)
                         throw;
 
-                    Console.WriteLine();
-                    Console.WriteLine();
-
-                    var list = currentPart.Lines();
-
-                    var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
-
-                    SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
-
-                    var min = Math.Max(0, lineNumer - 20);
-                    var max = Math.Min(list.Length - 1, lineNumer + 20);
-
-                    if (min > 0)
-                        Console.WriteLine("...");
-
-                    for (int i = min; i <= max; i++)
-                    {
-                        Console.Write(i + ": ");
-                        SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
-                    }
-
-                    if (max < list.Length - 1)
-                        Console.WriteLine("...");
-
-                    Console.WriteLine();
-
-                    ex.Follow(a => a.InnerException).ToList().ForEach(e =>
-                    {
-                        var sql = e as SqlException;
-                        var pg = e as PostgresException;
-
-                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, (e == ex ? "" : "InnerException: ") + e.GetType().Name + " (Number {0}): ".FormatWith(pg?.SqlState ?? sql?.Number.ToString()));
-                        SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
-                        Console.WriteLine();
-                        Console.WriteLine();
-                    });
+                    PrintExceptionLine(currentPart, ex, sqlE, pgE);
 
                     Console.WriteLine();
                     throw new ExecuteSqlScriptException(ex.Message, ex);
                 }
             }
+
+            bool allYes = false;
+            for (int i = 0; i < beginEndParts.Count; i++)
+            {
+                using (var tr = Transaction.NamedSavePoint("SavePoint" + i))
+                {
+                    var kvp = beginEndParts[i];
+                    try
+                    {
+                        SafeConsole.WaitExecute("Executing UserAssets [{1}/{2}]".FormatWith(title, i + 1, beginEndParts.Count),
+                                () => Executor.ExecuteNonQuery(kvp.Value));
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine();
+                        SafeConsole.WriteLineColor(ConsoleColor.Red, "Error in UserAsset " + kvp.Key);
+                        SafeConsole.WriteLineColor(ConsoleColor.DarkRed, ex.GetType().Name + ":" + ex.Message);
+
+                        var sqlE = ex as SqlException ?? ex.InnerException as SqlException;
+                        var pgE = ex as PostgresException ?? ex.InnerException as PostgresException;
+
+
+                        var answer = allYes ? "yes" : SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes", sqlE != null || pgE != null ? "+ exception details" : null }.NotNull().ToArray());
+                        if(answer == "+ exception details")
+                        {
+                            PrintExceptionLine(kvp.Value, ex, sqlE, pgE);
+                            answer = SafeConsole.Ask("Continue anyway?", new[] { "yes", "no", "all yes" });
+                        }
+                        
+                        switch (answer)
+                        {
+                            case "no": throw new ExecuteSqlScriptException(ex.Message, ex);
+                            case "yes": continue;
+                            case "all yes":
+                                {
+                                    allYes = true;
+                                    continue;
+                                }
+                        }
+                    }
+
+                    tr.Commit();
+                }
+
+            }
         }
+    }
+
+    private static void PrintExceptionLine(string currentPart, Exception ex, SqlException? sqlE, PostgresException? pgE)
+    {
+        Console.WriteLine();
+        Console.WriteLine();
+
+        var list = currentPart.Lines();
+
+        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+
+        SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
+
+        var min = Math.Max(0, lineNumer - 20);
+        var max = Math.Min(list.Length - 1, lineNumer + 20);
+
+        if (min > 0)
+            Console.WriteLine("...");
+
+        for (int i = min; i <= max; i++)
+        {
+            Console.Write(i + ": ");
+            SafeConsole.WriteLineColor(i == (lineNumer - 1) ? ConsoleColor.Red : ConsoleColor.DarkRed, list[i]);
+        }
+
+        if (max < list.Length - 1)
+            Console.WriteLine("...");
+
+        Console.WriteLine();
+
+        ex.Follow(a => a.InnerException).ToList().ForEach(e =>
+        {
+            var sql = e as SqlException;
+            var pg = e as PostgresException;
+
+            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, (e == ex ? "" : "InnerException: ") + e.GetType().Name + " (Number {0}): ".FormatWith(pg?.SqlState ?? sql?.Number.ToString()));
+            SafeConsole.WriteLineColor(ConsoleColor.Red, e.Message);
+            Console.WriteLine();
+            Console.WriteLine();
+        });
     }
 
     private static void Open(string fileName)

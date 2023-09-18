@@ -78,7 +78,7 @@ public class ModalProxy : IDisposable
     public bool OkPressed;
     public void OkWaitClosed(bool consumeAlert = false)
     {
-        this.OkButton.Find().Click();
+        this.OkButton.Find().SafeClick();
 
         if (consumeAlert)
             MessageModalProxyExtensions.CloseMessageModal(this.Selenium, MessageModalButton.Ok);
@@ -89,7 +89,21 @@ public class ModalProxy : IDisposable
 
     public void WaitNotVisible()
     {
-        this.Element.GetDriver().Wait(() => this.Element.IsStale());
+        this.Element.GetDriver().Wait(() =>
+        {
+            try
+            {
+                return this.Element == null || !this.Element.Displayed;
+            }
+            catch (NoSuchElementException)
+            {
+                return true;
+            }
+            catch (StaleElementReferenceException)
+            {
+                return true;
+            }
+        });
     }
 
     public void Close()

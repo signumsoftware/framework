@@ -4,7 +4,7 @@
     <Member Name="ExecutionDate" Description="Ausführungsdatum" />
     <Member Name="UniqueName" Description="Einzigartiger Name" />
   </Type>
-  <Type Name="LoadMethodLogEntity" Description="Log für Load-Methode" PluralDescription="Logs für Load-Methoden" Gender="n">
+  <Type Name="LoadMethodLogEntity" Description="Load-Methode Protokoll" Gender="n">
     <Member Name="ClassName" Description="Klassen Name" />
     <Member Name="Description" Description="Beschreibung" />
     <Member Name="Duration" Description="Dauer" />

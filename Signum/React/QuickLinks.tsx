@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
-import { classes, Dic } from './Globals'
+import { classes, Dic, toPromise } from './Globals'
 import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } from './FindOptions'
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
@@ -397,14 +397,11 @@ export class QuickLinkLink<T extends Entity> extends QuickLink<T> {
   }
 }
 
-interface findOptionsByCtx<T extends Entity> {
-  (ctx: QuickLinkContext<T>): FindOptions;
-}
 
 export class QuickLinkExplore<T extends Entity> extends QuickLink<T> {
-  findOptionsFunc: findOptionsByCtx<T>;
+  findOptionsFunc: (ctx: QuickLinkContext<T>) => FindOptions | Promise<FindOptions>;
 
-  constructor(queryName: PseudoType | QueryKey, findOptionsFunc: findOptionsByCtx<T>, options?: QuickLinkOptions<T>) {
+  constructor(queryName: PseudoType | QueryKey, findOptionsFunc: (ctx: QuickLinkContext<T>) => FindOptions | Promise<FindOptions>, options?: QuickLinkOptions<T>) {
     super({
       key: getQueryKey(queryName),
       isVisible: Finder.isFindable(queryName, false),
@@ -415,43 +412,21 @@ export class QuickLinkExplore<T extends Entity> extends QuickLink<T> {
     this.findOptionsFunc = findOptionsFunc;
   }
 
-  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
+  handleClick = async (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
     if (e.button == 2)
       return;
+
+    var foPromise = this.findOptionsFunc(ctx);
+
+    var fo = await toPromise(foPromise);
 
     if (e.ctrlKey || e.button == 1)
-      window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(this.findOptionsFunc(ctx))));
+      window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo)));
     else
-      Finder.explore(this.findOptionsFunc(ctx));
+      Finder.explore(fo);
   }
 }
 
-export class QuickLinkExplorePromise<T extends Entity> extends QuickLink<T> {
-  findOptionsPromise: Promise<findOptionsByCtx<T>>;
-
-  constructor(queryName: PseudoType | QueryKey, findOptionsPromise: Promise<findOptionsByCtx<T>>, options?: QuickLinkOptions<T>) {
-    super({
-      key: getQueryKey(queryName),
-      isVisible: Finder.isFindable(queryName, false),
-      text: () => getQueryNiceName(queryName),
-      ...options
-    });
-
-    this.findOptionsPromise = findOptionsPromise;
-  }
-
-  handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>) => {
-    if (e.button == 2)
-      return;
-
-    this.findOptionsPromise.then(fo => {
-      if (e.ctrlKey || e.button == 1)
-        window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo(ctx))));
-      else
-        Finder.explore(fo(ctx));
-    });
-  }
-}
 
 
 export class QuickLinkNavigate<T extends Entity> extends QuickLink<T> {

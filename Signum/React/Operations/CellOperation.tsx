@@ -76,7 +76,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
     key="button"
     size="sm"
     title={coc.operationInfo.niceName}
-    className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes)}
+    className={classes(disabled ? "disabled" : undefined, props?.className, coc.settings && coc.settings.classes, "text-nowrap")}
     onClick={disabled ? undefined : onlySingleClick}
     data-operation={coc.operationInfo.key}>
     {renderChildren()}

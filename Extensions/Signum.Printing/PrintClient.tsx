@@ -21,7 +21,7 @@ export function start(options: { routes: RouteObject[], }) {
   Operations.addSettings(new EntityOperationSettings(PrintLineOperation.SaveTest, { hideOnCanExecute: true }));
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(PrintPermission.ViewPrintPanel),
+    allowed: () => isPermissionAuthorized(PrintPermission.ViewPrintPanel),
     key: "PrintPanel",
     onClick: () => Promise.resolve("/printing/view")
   });

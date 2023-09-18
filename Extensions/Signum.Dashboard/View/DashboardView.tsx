@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
 import { Entity, getToString, toLite, translated } from '@framework/Signum.Entities'
@@ -12,8 +13,9 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
+import * as Navigator from '@framework/Navigator'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }) {
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
@@ -22,7 +24,7 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
   function renderBasic() {
     const db = p.dashboard;
     const ctx = TypeContext.root(db);
-
+  
     return (
       <div>
         <div className="sf-dashboard-view">
@@ -91,14 +93,22 @@ export default function DashboardView(p: { dashboard: DashboardEntity, cachedQue
 
   return (
     <div>
-      {dashboardController.pinnedFilters.size > 0 && <PinnedFilterBuilder
-        filterOptions={Array.from(dashboardController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
-        onFiltersChanged={forceUpdate} />}
-      {
-        p.dashboard.combineSimilarRows ?
-          renderCombinedRows() :
-          renderBasic()
-      }
+      {p.hideEditButton != true && !Navigator.isReadOnly(DashboardEntity) &&
+        <div className="d-flex flex-row-reverse m-1">
+          <Link className="sf-hide" style={{ textDecoration: "none" }} to={Navigator.navigateRoute(p.dashboard)}>
+            <FontAwesomeIcon icon="pen-to-square" />&nbsp;{DashboardMessage.Edit.niceToString()}
+          </Link>
+        </div>}
+      <div>
+        {dashboardController.pinnedFilters.size > 0 && <PinnedFilterBuilder
+          filterOptions={Array.from(dashboardController.pinnedFilters.values()).flatMap(a => a.pinnedFilters)}
+          onFiltersChanged={forceUpdate} />}
+        {
+          p.dashboard.combineSimilarRows ?
+            renderCombinedRows() :
+            renderBasic()
+        }
+      </div>
     </div>
   );
 }

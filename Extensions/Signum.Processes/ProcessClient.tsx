@@ -38,7 +38,7 @@ export function start(options: { routes: RouteObject[], packages: boolean, packa
   options.routes.push({ path: "/processes/view", element: <ImportComponent onImport={() => import("./ProcessPanelPage")} /> });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
+    allowed: () => AppContext.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
     key: "ProcessPanel",
     onClick: () => Promise.resolve("/processes/view")
   });

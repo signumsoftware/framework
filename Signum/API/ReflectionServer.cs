@@ -262,7 +262,7 @@ public static class ReflectionServer
             HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
             Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
-            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
+            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute == true),
         };
 
         return OnTypeExtension(result, type);

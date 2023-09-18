@@ -44,7 +44,7 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
   }
 
   return {
-    date: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "D"),
+    date: (date, format) => toFormatWithFixes(DateTime.fromJSDate(date), format ?? "D"),
     time: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "t"),
     datetime: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "FF"),
     header: (date, format) => DateTime.fromJSDate(date).toFormat(format ?? "MMMM yyyy"),
@@ -85,6 +85,22 @@ export function getDateLocalizer(maxTwoDigitYear?: number): ReactWidgets.DateLoc
       t = DateTime.fromFormat(value, "ddMMyy")
       if (t.isValid) {
         if (value.length == 6) {
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
+        }
+        return t.toJSDate();
+      }
+
+      t = DateTime.fromFormat(value, "dd.MM.yy")
+      if (t.isValid) {
+        if (value.length == 8) {
+          t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
+        }
+        return t.toJSDate();
+      }
+
+      t = DateTime.fromFormat(value, "dd/MM/yy")
+      if (t.isValid) {
+        if (value.length == 8) {
           t = t.set({ year: t.year > maxTwoDigitYearDefault ? t.year - 100 : t.year });
         }
         return t.toJSDate();

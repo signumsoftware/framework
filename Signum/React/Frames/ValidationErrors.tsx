@@ -24,7 +24,7 @@ export const ValidationErrors = React.forwardRef(function ValidationErrors(p: { 
     <ul className="validaton-summary alert alert-danger">
       {Dic.map(modelState, (key, value) => <li
         key={key}
-        style={{ cursor: "pointer", whiteSpace: "pre" }}
+        style={{ cursor: "pointer", whiteSpace: "pre-wrap" }}
         onClick={() => handleOnClick(key)}
         title={key.after(p.prefix + ".")}>
         {value.join("\n")}

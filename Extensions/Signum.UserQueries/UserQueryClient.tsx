@@ -40,15 +40,15 @@ export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    if (!ctx.searchControl.props.showBarExtension ||
-      !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
-      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons))
-      return undefined;
 
-    return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
+    const isHidden = !ctx.searchControl.props.showBarExtension ||
+      !AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
+      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons);
+
+    return { button: <UserQueryMenu searchControl={ctx.searchControl} isHidden={isHidden} /> };
   });
 
-  if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+  if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
@@ -74,7 +74,7 @@ export function start(options: { routes: RouteObject[] }) {
       })
   },
     {
-      isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+      isVisible: AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
     }
   ));
 
@@ -148,7 +148,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
   if (cic.container.state.resultFindOptions?.systemTime)
     return undefined;
 
-  if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+  if (!AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     return undefined;
 
   const resFO = cic.container.state.resultFindOptions;

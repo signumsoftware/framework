@@ -5,6 +5,7 @@ import { ProfilerPermission } from './Signum.Profiler'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push(
@@ -15,19 +16,19 @@ export function start(options: { routes: RouteObject[] }) {
 
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
     key: "ProfilerHeavy",
     onClick: () => Promise.resolve("/profiler/heavy")
   });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
     key: "ProfilerTimes",
     onClick: () => Promise.resolve("/profiler/times")
   });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
     key: "OverrideSessionTimeout",
     onClick: () => Promise.resolve("/profiler/overrideSessionTimeout")
   });

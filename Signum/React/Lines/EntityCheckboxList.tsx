@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { mlistItemContext, TypeContext } from '../TypeContext'
-import { TypeReference } from '../Reflection'
+import { ReadonlyBinding, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString, MListElement } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
@@ -37,6 +37,10 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
 
 export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
 
+
+
+  refresh: number = 0;
+
   getDefaultProps(state: EntityCheckboxListProps) {
     super.getDefaultProps(state);
 
@@ -57,6 +61,11 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
       return element as Lite<Entity> | Entity;
   }
 
+  createElementContext<T>(embedded: T): TypeContext<T> {
+    var pr = this.props.ctx.propertyRoute!.addMember("Indexer", "", true);
+    return new TypeContext(this.props.ctx, undefined, pr, new ReadonlyBinding(embedded, ""));
+  }
+
   handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
     const list = this.props.ctx.value!;
     const toRemove = list.filter(mle => is(this.getKeyEntity(mle.element), lite))
@@ -71,6 +80,30 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
       });
     }
   }
+
+  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+
+    event.preventDefault();
+
+    var pr = this.props.ctx.propertyRoute!.addMember("Indexer", "", true);
+
+    if (this.props.getLiteFromElement)
+      pr = pr.addLambda(this.props.getLiteFromElement);
+
+    const promise = this.props.onCreate ?
+      this.props.onCreate(pr) : this.defaultCreate(pr);
+
+    if (!promise)
+      return;
+
+    promise.then(e => {
+      if (e) {
+        this.refresh++;
+        this.forceUpdate();
+      }
+    });
+
+  };
 
 }
 
@@ -112,7 +145,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   function renderCheckboxList() {
     return (
-      <EntityCheckboxListSelect ctx={p.ctx} controller={c} />
+      <EntityCheckboxListSelect ctx={p.ctx} controller={c}  />
     );
   }
 });
@@ -150,7 +183,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
           .then(data => setData(data.orderBy(a => getToString(a))));
       } 
     }
-  }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions), c.refresh]);
 
   return (
     <div className="sf-checkbox-elements" style={getColumnStyle()}>
@@ -194,18 +227,19 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
       typeof data == "object" ? data.rows :
         [];
 
-    const list = p.ctx.value!;
+    var listCtx = mlistItemContext(p.ctx);
 
-    list.forEach(mle => {
-      var lite = c.getKeyEntity(mle.element);
+    if (p.filterRows)
+      listCtx = p.filterRows(listCtx);
+
+    listCtx.forEach(ctx => {
+      var lite = c.getKeyEntity(ctx.value);
       if (!fixedData.some(d => is(d.entity, lite)))
         fixedData.insertAt(0, { entity: maybeToLite(lite) } as ResultRow)
     });
 
     const resultTable = Array.isArray(data) ? undefined : data;
 
-    var listCtx = mlistItemContext(p.ctx);
-    
     return fixedData.map((row, i) => {
       var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
       var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :

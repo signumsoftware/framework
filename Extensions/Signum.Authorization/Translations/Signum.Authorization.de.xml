@@ -246,6 +246,7 @@
     <Member Name="UserName" Description="Benutzername" />
   </Type>
   <Type Name="UserLiteModel" Description="Benutzer-Lite">
+    <Member Name="CustomPhotoHash" Description="Benutzerdefinierter Foto-Hash" />
     <Member Name="OID" Description="OID" />
     <Member Name="SID" Description="SID" />
     <Member Name="ToStringValue" Description="Zum Zeichenfolgenwert" />
