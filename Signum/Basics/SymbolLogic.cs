@@ -54,6 +54,7 @@ public static class SymbolLogic<T>
             sb.Schema.Initializing += () => lazy.Load();
             sb.Schema.Synchronizing += Schema_Synchronizing;
             sb.Schema.Generating += Schema_Generating;
+            sb.Schema.EntityEvents<T>().Saved += SymbolLogic_Saved;
 
             SymbolLogic<T>.getSymbols = getSymbols;
             lazy = sb.GlobalLazy(() =>
@@ -85,6 +86,12 @@ public static class SymbolLogic<T>
                         SymbolLogic_Retrieved(t, new PostRetrievingContext());
             };
         }
+    }
+
+    private static void SymbolLogic_Saved(T ident, SavedEventArgs args)
+    {
+        if (args.WasSelfModified || args.WasNew)
+            throw new InvalidOperationException($"Attempt to save symbol {ident} of type {ident.GetType()}");
     }
 
     static void SymbolLogic_Retrieved(T ident, PostRetrievingContext ctx)

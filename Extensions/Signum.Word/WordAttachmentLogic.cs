@@ -49,7 +49,7 @@ public class WordAttachmentLogic
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName ?? fileContent.FileName, fileContent.Bytes)),
+                        File = new FilePathEmbedded(EmailFileType.Attachment, fileName ?? fileContent.FileName, fileContent.Bytes),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };

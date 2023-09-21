@@ -51,7 +51,7 @@ public class ExcelAttachmentLogic
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = Files.FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
+                        File = new FilePathEmbedded(EmailFileType.Attachment, fileName, bytes),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };

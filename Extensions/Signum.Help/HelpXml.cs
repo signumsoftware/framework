@@ -427,7 +427,7 @@ public static class HelpXml
         SafeConsole.WriteLineColor(ConsoleColor.Gray, "Exporting to " + folder);
         Synchronizer.Synchronize(
             newDictionary: should.ToDictionary(fileName),
-            oldDictionary: Directory.GetFiles(folder).ToDictionary(a => Path.GetFileName(a)),
+            oldDictionary: !Directory.Exists(folder) ? new() : Directory.GetFiles(folder).ToDictionary(a => Path.GetFileName(a)),
             createNew: (fileName, entity) => {
                 toXML(entity).Save(Path.Combine(folder, fileName));
                 SafeConsole.WriteLineColor(ConsoleColor.Green, " Created " + fileName);
@@ -458,7 +458,7 @@ public static class HelpXml
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, " Identical " + fileName);
                 }
-            });
+            }); ;
 
         delete = deleteLocal;
         replace = replaceLocal;

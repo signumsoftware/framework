@@ -16,6 +16,7 @@ import { ImportExcelProgressModal } from './ImportExcelProgressModal';
 import { TypeInfo } from '@framework/Reflection';
 import { softCast } from '@framework/Globals';
 import { QueryString } from '@framework/QueryString';
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
 
@@ -33,7 +34,7 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
       !(ctx.searchControl.props.showBarExtensionOption?.showExcelMenu ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 
-    if (!(options.plainExcel && AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
+    if (!(options.plainExcel && isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
       !(options.excelReport && Navigator.isViewable(ExcelReportEntity)))
       return undefined;
 
@@ -47,7 +48,7 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
 
   if (options.plainExcel) {
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel))
+      if (!isPermissionAuthorized(ChartPermission.ViewCharting) || !isPermissionAuthorized(ExcelPermission.PlainExcel))
         return undefined;
 
       return (

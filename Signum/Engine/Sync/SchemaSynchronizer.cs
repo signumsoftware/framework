@@ -259,7 +259,9 @@ public static class SchemaSynchronizer
                         var modelPK = modelIndices[tab].Values.OfType<PrimaryKeyIndex>().SingleOrDefaultEx();
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
-                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) : null;
+                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(dif.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                        null;
 
                         var columns = Synchronizer.SynchronizeScript(
                                 Spacing.Simple,

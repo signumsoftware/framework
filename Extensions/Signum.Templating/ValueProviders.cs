@@ -124,7 +124,7 @@ public abstract class ValueProviderBase
                             return null;
                         }
 
-                        if (!(vp is TokenValueProvider))
+                        if (vp is not TokenValueProvider )
                             return new ContinueValueProvider(token.TryAfter('.'), vp, tp) { Variable = variable };
                     }
 
@@ -853,6 +853,7 @@ public class ContinueValueProvider : ValueProviderBase
 
     public ContinueValueProvider(string? fieldOrPropertyChain, ValueProviderBase parent,  ITemplateParser tp)
     {
+        this.fieldOrPropertyChain = fieldOrPropertyChain;
         this.Parent = parent;
 
         var pt = ParentType();
@@ -918,7 +919,7 @@ public class ContinueValueProvider : ValueProviderBase
 
     public override Type? Type
     {
-        get { return Members?.Let(ms => ms.Last().Member.ReturningType().Nullify()); }
+        get { return Members.IsNullOrEmpty() ? ParentType() : Members.Let(ms => ms.Last().Member.ReturningType()); }
     }
 
     public override void FillQueryTokens(List<QueryToken> list, bool forForeach)

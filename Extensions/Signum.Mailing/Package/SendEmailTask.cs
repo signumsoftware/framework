@@ -55,6 +55,6 @@ public static class SendEmailTaskOperation
 public static class EmailMessageProcess
 {
     public static readonly ProcessAlgorithmSymbol CreateEmailsSendAsync;
-    public static ProcessAlgorithmSymbol SendEmails;
+    public static readonly ProcessAlgorithmSymbol SendEmails;
 }
 
