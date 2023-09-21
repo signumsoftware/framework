@@ -142,6 +142,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             { ToolbarElementType.Divider,   false,          false,     false,          false  },
             { ToolbarElementType.Header,    null,           null,       null,           null  },
             { ToolbarElementType.Item,      null,           null,      null,           null },
+            { ToolbarElementType.ExtraIcon, null,           true,      true,           null },
         };
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -180,6 +181,7 @@ public enum ToolbarElementType
     Header = 2,
     Divider,
     Item,
+    ExtraIcon
 }
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
@@ -232,4 +234,6 @@ public enum ToolbarMessage
     RecursionDetected,
     [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
     _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships,
+    FirstElementCanNotBeExtraIcon,
+    ExtraIconCanNotComeAfterDivider
 }
