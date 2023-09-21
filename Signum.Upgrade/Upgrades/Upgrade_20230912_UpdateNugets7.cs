@@ -18,11 +18,13 @@ class Upgrade_20230912_UpdateNugets7 : CodeUpgradeBase
                     <PackageReference Include="Microsoft.Graph" Version="5.28.0" />
                     <PackageReference Include="Selenium.Support" Version="4.12.4" />
                     <PackageReference Include="Selenium.WebDriver" Version="4.12.4" />
+                    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="117.0.5938.8800" />
                     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2"/>
                     <PackageReference Include="HtmlAgilityPack" Version="1.11.53" />
                     <PackageReference Include="xunit" Version="2.5.1" /> 
                     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.1">
                     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+                    <PackageReference Include="Npgsql" Version="7.0.6" />
                     """);
         });
 
