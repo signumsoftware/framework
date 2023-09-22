@@ -130,8 +130,8 @@ public class Transaction : IDisposableException
         {
             if (!Started)
             {
+                //var a = System.Security.Principal.WindowsIdentity.GetCurrent();
                 Connection = Connector.Current.CreateConnection();
-
                 Connection.Open();
                 Transaction = Connection.BeginTransaction(IsolationLevel ?? Connector.Current.IsolationLevel);
                 Started = true;
