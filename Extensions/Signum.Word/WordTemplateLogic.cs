@@ -450,7 +450,9 @@ public static class WordTemplateLogic
 
         WordModelLogic.WordModelTypeToEntity.Load(); //To avoid N exceptions
 
-        SqlPreCommand? cmd = wordTemplates.Select(wt => SynchronizeWordTemplateFile(replacements, wt, sd, table)).Combine(Spacing.Double);
+        SqlPreCommand? cmd = wordTemplates
+            .Select(wt => SynchronizeWordTemplateFile(replacements, wt, sd, table)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})"))
+            .Combine(Spacing.Double);
 
         return cmd;
     }
@@ -625,7 +627,7 @@ public static class WordTemplateLogic
                     wt.FileName = TextTemplateParser.Synchronize(wt.FileName, sc);
 
                     using (replacements.WithReplacedDatabaseName())
-                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Guid == wt.Guid && e.Ticks == wt.Ticks, includeCollections: true, comment: "WordTempalte: " + wt.Name)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})");
+                        wordTemplateSync = table.UpdateSqlSync(wt, e => e.Guid == wt.Guid && e.Ticks == wt.Ticks, includeCollections: true, comment: "WordTempalte: " + wt.Name);
                 }
                 catch (TemplateSyncException ex)
                 {
