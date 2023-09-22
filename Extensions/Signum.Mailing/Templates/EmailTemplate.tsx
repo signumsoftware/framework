@@ -130,7 +130,6 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
   const forceUpdate = useForceUpdate();
-
   return (
     <div>
       <div className="row">
@@ -139,33 +138,35 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
             {() => <span className={sc.formControlClass}>{EmailTemplateEntity.nicePropertyName(a => a.from)} </span>}
           </FormGroup>
         </div>
-        <div className="col-sm-10">
-          {p.query && !p.ctx.value.emailAddress &&
-            <QueryTokenEmbeddedBuilder
-              ctx={sc.subCtx(a => a.token)}
-              queryKey={p.query.key}
-              subTokenOptions={SubTokensOptions.CanElement}
-              onTokenChanged={forceUpdate}
-              helpText="Expression pointing to an EmailOwnerData (recommended)" />
+        <div className="col-sm-2" >
+          <ValueLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
+        </div>
+        <div className="col-sm-8">
+          {p.query && sc.value.addressSource == "QueryToken" &&
+            <div>
+              <QueryTokenEmbeddedBuilder
+                ctx={sc.subCtx(a => a.token)}
+                queryKey={p.query.key}
+                subTokenOptions={SubTokensOptions.CanElement}
+                onTokenChanged={forceUpdate} />
+              <div className="row">
+                <div className="col-sm-6">
+                  <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
+                </div>
+                <div className="col-sm-6">
+                  <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+                </div>
+              </div>
+            </div>
           }
 
-          {Boolean(p.ctx.value.token) && <div className="row">
+          {sc.value.addressSource == "HardcodedAddress" && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
-            </div>
-            <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
-            </div>
-          </div>
-          }
-
-          {!p.ctx.value.token && <div className="row">
-            <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" onChange={forceUpdate} />
+              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
               <ValueLine ctx={sc.subCtx(c => c.azureUserId)} onChange={forceUpdate} />
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" onChange={forceUpdate} />
+              <ValueLine ctx={sc.subCtx(c => c.displayName)}  onChange={forceUpdate} />
             </div>
           </div>
           }
@@ -186,32 +187,34 @@ function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbe
         <div className="col-sm-2" >
           <ValueLine ctx={sc.subCtx(a => a.kind)} />
         </div>
-        <div className="col-sm-10">
-          {p.query && !p.ctx.value.emailAddress &&
-            <QueryTokenEmbeddedBuilder
-              ctx={sc.subCtx(a => a.token)}
-              queryKey={p.query.key}
-              subTokenOptions={SubTokensOptions.CanElement}
-              onTokenChanged={forceUpdate}
-              helpText="Expression pointing to an EmailOwnerData (recommended)" />
+        <div className="col-sm-2" >
+          <ValueLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
+        </div>
+        <div className="col-sm-8">
+          {p.query && sc.value.addressSource == "QueryToken" &&
+            <div>
+              <QueryTokenEmbeddedBuilder
+                ctx={sc.subCtx(a => a.token)}
+                queryKey={p.query.key}
+                subTokenOptions={SubTokensOptions.CanElement}
+                onTokenChanged={forceUpdate} />
+              <div className="row">
+                <div className="col-sm-6">
+                  <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
+                </div>
+                <div className="col-sm-6">
+                  <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+                </div>
+              </div>
+            </div>
           }
 
-          {Boolean(p.ctx.value.token) && <div className="row">
+          {sc.value.addressSource == "HardcodedAddress" && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
+              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
-            </div>
-          </div>
-          }
-
-          {!p.ctx.value.token && <div className="row">
-            <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} helpText="Hardcoded E-Mail address" onChange={forceUpdate} />
-            </div>
-            <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.displayName)} helpText="Hardcoded display name" onChange={forceUpdate} />
+              <ValueLine ctx={sc.subCtx(c => c.displayName)} onChange={forceUpdate} />
             </div>
           </div>
           }
