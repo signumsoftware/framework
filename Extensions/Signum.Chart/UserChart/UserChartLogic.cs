@@ -420,7 +420,7 @@ public static class UserChartLogic
 
                 try
                 {
-                    return table.UpdateSqlSync(uc, u => u.Guid == uc.Guid, includeCollections: true);
+                    return table.UpdateSqlSync(uc, u => u.Guid == uc.Guid && u.Ticks == uc.Ticks, includeCollections: true)?.TransactionBlock($"UserChart Guid = {uc.Guid} Ticks = {uc.Ticks} ({uc})"); ;
                 }
                 catch (Exception e)
                 {

@@ -18,6 +18,7 @@
     <Member Name="LoginWithAzureAD" Description="Login mit Azure AD" />
     <Member Name="LoginWithWindowsAuthenticator" Description="Login mit Windows-Authentifikator" />
     <Member Name="RoleMapping" Description="Rollenzuordnung" />
+    <Member Name="UseDelegatedPermission" Description="Delegierte Erlaubnis verwenden" />
   </Type>
   <Type Name="ActiveDirectoryMessage">
     <Member Name="AccountEnabled" Description="Konto aktiviert" />

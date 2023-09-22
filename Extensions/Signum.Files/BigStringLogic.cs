@@ -171,10 +171,37 @@ public static class BigStringLogic
 
             if (config.FileTypeSymbol == null)
                 throw new InvalidOperationException($"{config.Mode} requires a FileTypeSymbol");
+
+            giRegisterPreUnsafeDelete.GetInvoker(route.RootType)(sb, route);
         }
 
         Configurations.Add(route, config);
     }
+
+    static readonly GenericInvoker<Action<SchemaBuilder, PropertyRoute>> giRegisterPreUnsafeDelete = 
+        new GenericInvoker<Action<SchemaBuilder, PropertyRoute>>((sb, pr) => RegisterPreUnsafeDelete<Entity>(sb, pr));
+
+    static void RegisterPreUnsafeDelete<T>(SchemaBuilder sb, PropertyRoute route)
+        where T : Entity
+    {
+        sb.Schema.EntityEvents<T>().PreUnsafeDelete += query =>
+        {
+            var lambda = route.GetLambdaExpression<T, BigStringEmbedded>(false, null);
+
+            var files = query.Select(e => lambda.Evaluate(e).Mixin<BigStringMixin>().File).ToList().NotNull().ToList();
+
+            Transaction.PostRealCommit += dic =>
+            {
+                foreach (var gr in files.GroupBy(a => a.FileType))
+                {
+                    gr.Key.GetAlgorithm().DeleteFiles(gr.ToList<IFilePath>());
+                }
+            };
+
+            return null;
+        };
+    }
+
 
     private static void Schema_SchemaCompleted()
     {

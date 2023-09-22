@@ -88,7 +88,7 @@ public static class VirtualMList
 
         var nn = Validator.TryGetPropertyValidator(backReferenceRoute)?.Validators.OfType<NotNullValidatorAttribute>().SingleOrDefaultEx();
         if (nn != null && !nn.Disabled)
-            throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference or a VirtualMList");
+            throw new InvalidOperationException($"The property {backReferenceRoute} should have an [NotNullValidator(Disabled = true)] to be used as back reference in a VirtualMList");
 
         Func<T, MList<L>> getMList = GetAccessor(mListField);
 

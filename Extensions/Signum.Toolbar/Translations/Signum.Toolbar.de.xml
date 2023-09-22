@@ -20,6 +20,7 @@
   </Type>
   <Type Name="ToolbarElementType" Description="Toolbar-Elementtyp">
     <Member Name="Divider" Description="Teiler" />
+    <Member Name="ExtraIcon" Description="Zusätzliches Symbol" />
     <Member Name="Header" Description="Kopfzeile" />
     <Member Name="Item" Description="Element" />
   </Type>
@@ -48,6 +49,8 @@
   </Type>
   <Type Name="ToolbarMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships" Description="{0} Zyklen wurden aufgrund der Beziehungen in der Toolbar gefunden:" />
+    <Member Name="ExtraIconCanNotComeAfterDivider" Description="Zusätzliches Symbol kann nicht nach der Trennwand kommen" />
+    <Member Name="FirstElementCanNotBeExtraIcon" Description="Das erste Element kann kein zusätzliches Symbol sein" />
     <Member Name="RecursionDetected" Description="Rekursion erkannt" />
   </Type>
   <Type Name="ToolbarOperation">
