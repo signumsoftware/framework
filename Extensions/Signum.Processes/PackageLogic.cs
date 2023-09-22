@@ -1,8 +1,10 @@
+using Signum.API.Controllers;
 using Signum.API.Json;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
+using System.Text.Json;
 
 namespace Signum.Processes;
 
@@ -225,8 +227,9 @@ public static class PackageLogic
 
     public static object?[]? GetOperationArgs(this PackageEntity package)
     {
-        return package.OperationArguments == null ? null : 
-            (object?[])JsonExtensions.FromJsonBytes<object[]>(package.OperationArguments, EntityJsonContext.FullJsonSerializerOptions);
+        return package.OperationArguments == null ? null :
+            JsonExtensions.FromJsonBytes<object[]>(package.OperationArguments, EntityJsonContext.FullJsonSerializerOptions)
+            .Select(a => a is JsonElement jse ? OperationController.BaseOperationRequest.ConvertObject(jse, null) : (object?)a).ToArray();
     }
 
     public static PackageEntity SetOperationArgs(this PackageEntity package, object?[]? args)
