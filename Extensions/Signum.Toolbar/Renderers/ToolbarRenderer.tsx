@@ -181,7 +181,7 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons: ToolbarClient.ToolbarResponse<any>[] | undefined, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: ToolbarClient.ToolbarResponse<any>[] | undefined, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
   return (
     <li className="nav-item" style={{ listStyleType: 'none' }}>
       <Nav.Item >
