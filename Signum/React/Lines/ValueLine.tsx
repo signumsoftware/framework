@@ -173,8 +173,8 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
   getPlaceholder(): string | undefined {
     const p = this.props;
     return p.valueHtmlAttributes?.placeholder ??
-      (p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
-      undefined;
+      ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
+      undefined);
   }
 }
 

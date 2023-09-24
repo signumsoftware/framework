@@ -20,6 +20,7 @@ public class HelpController : ControllerBase
                 Namespace = s.Namespace,
                 Module = s.Module,
                 Title = s.Title,
+                HasEntity = s.DBEntity != null,
                 AllowedTypes = s.AllowedTypes
             }).ToList(),
 
@@ -135,6 +136,7 @@ public class NamespaceItemTS
     public string Namespace;
     public string? Module;
     public string Title;
+    public bool HasEntity;
     public EntityItem[] AllowedTypes;
 }
 

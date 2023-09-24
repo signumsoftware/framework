@@ -29,11 +29,11 @@ export default function HelpIndexPage() {
               {gr.elements.orderBy(a => a.namespace).map(nh =>
                 <li className="mb-4" key={nh.namespace}>
                   <h4 className="display-7">
-                    <Link to={Urls.namespaceUrl(nh.namespace)}>{nh.title}</Link>
+                    <Link to={Urls.namespaceUrl(nh.namespace)} className={nh.hasEntity ? "fw-bold" : undefined}>{nh.title}</Link>
                     {nh.namespace.after(".").tryBeforeLast(".") && <small> {HelpMessage.In0.niceToString(nh.namespace.after(".").tryBeforeLast("."))}</small>}
                   </h4>
                   <ul>
-                    {nh.allowedTypes.map(ei => <li key={ei.cleanName}><Link to={Urls.typeUrl(ei.cleanName)} >{getTypeInfo(ei.cleanName).niceName}</Link></li>)}
+                    {nh.allowedTypes.map(ei => <li key={ei.cleanName}><Link to={Urls.typeUrl(ei.cleanName)} className={ei.hasEntity ? "fw-bold" : undefined}>{getTypeInfo(ei.cleanName).niceName}</Link></li>)}
                   </ul>
                 </li>
               )}
@@ -41,12 +41,12 @@ export default function HelpIndexPage() {
           </div>
           )}
 
-        <h3 className="display-5">
+        <h2 className="display-6">
           {HelpMessage.Appendices.niceToString()}
-          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }} ><FontAwesomeIcon icon="plus" className="ms-2" title={HelpMessage.Appendices.niceToString()} /></Link>}
-        </h3>
+          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)}  style={{ fontSize: "20px" }} ><FontAwesomeIcon icon="plus" className="ms-2" title={HelpMessage.Appendices.niceToString()} /></Link>}
+        </h2>
         <ul className="responsive-columns">
-          {index.appendices.map(ap => <li key={ap.uniqueName}><Link to={Urls.appendixUrl(ap.uniqueName)} >{ap.title}</Link></li>)}
+          {index.appendices.map(ap => <li key={ap.uniqueName}><h4 className="display-7"><Link to={Urls.appendixUrl(ap.uniqueName)} className={"fw-bold"}>{ap.title}</Link></h4></li>)}
         </ul>
       </div>
       }

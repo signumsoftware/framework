@@ -9,7 +9,7 @@ import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpE
 import { getOperationInfo, getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
-import { EditableComponent } from './EditableText';
+import { EditableTextComponent, EditableHtmlComponent } from './EditableText';
 import { notifySuccess } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
@@ -32,11 +32,11 @@ export default function AppendixHelpHelp() {
       <h1 className="display-6"><Link to={Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
-        <EditableComponent ctx={ctx.subCtx(a => a.title)} inline onChange={forceUpdate} defaultEditable={appendix.isNew} />
+        <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       </h1>
-      <EditableComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
-      <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={forceUpdate} defaultEditable={appendix.isNew} />
-      <div className={classes("btn-toolbar", "sf-button-bar")}>
+      <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+      <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
         {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
         <DeleteButton ctx={ctx} />
       </div>

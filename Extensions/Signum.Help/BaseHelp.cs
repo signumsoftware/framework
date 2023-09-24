@@ -99,12 +99,12 @@ public class NamespaceHelp : BaseHelp
 public class EntityItem
 {
     public string CleanName;
-    public bool HasDescription;
+    public bool HasEntity;
 
     public EntityItem(Type t)
     {
         CleanName = TypeLogic.GetCleanName(t);
-        HasDescription = HelpLogic.GetTypeHelp(t).HasEntity;
+        HasEntity = HelpLogic.GetTypeHelp(t).DBEntity != null;
     }
 }
 
@@ -112,8 +112,6 @@ public class TypeHelp : BaseHelp
 {
     public readonly Type Type;
     public readonly CultureInfo Culture;
-
-    public readonly bool HasEntity; 
 
     public TypeHelpEntity? DBEntity; 
 

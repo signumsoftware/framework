@@ -105,6 +105,7 @@ public enum FrameMessage
     [Description("New {0}")]
     New0_G,
     Copied,
+    CopyToClipboard,
     Fullscreen,
     ThereAreErrors,
     Main,

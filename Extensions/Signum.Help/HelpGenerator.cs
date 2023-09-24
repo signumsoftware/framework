@@ -185,15 +185,12 @@ operationInfo.CanBeModified!.Value ? HelpMessage.YourVersion.NiceToString() : He
 type.NiceName());
             case OperationType.Delete: return HelpMessage.RemovesThe0FromTheDatabase.NiceToString(type.NiceName());
             case OperationType.Constructor:
-                return
-HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NiceName());
+                return HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.TypeLink());
             case OperationType.ConstructorFrom:
-                return
-HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
+                return HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.TypeLink()) + " " +
 HelpMessage.From0OfThe1.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(operationInfo.CanBeModified!.Value ? HelpMessage.YourVersion.NiceToString() : HelpMessage.TheDatabaseVersion.NiceToString(), type.NiceName());
             case OperationType.ConstructorFromMany:
-                return
-HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.NiceName()) + " " +
+                return HelpMessage.ConstructsANew0.NiceToString().ForGenderAndNumber(operationInfo.ReturnType!.GetGender()).FormatWith(operationInfo.ReturnType!.TypeLink()) + " " +
 HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).FormatWith(type.NicePluralName());
         }
 
