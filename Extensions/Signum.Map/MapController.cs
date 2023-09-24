@@ -18,6 +18,6 @@ public class MapController : ControllerBase
     {
         MapPermission.ViewMap.AssertAuthorized();
 
-        return OperationMap2.GetOperationMapInfo(TypeLogic.GetType(typeName));
+        return OperationMap.GetOperationMapInfo(TypeLogic.GetType(typeName));
     }
 }
