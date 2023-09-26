@@ -67,13 +67,13 @@ function WorkflowDropdownImp() {
         <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()}
           active={location.href.contains("/find/Inbox")}
           onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(Options.getInboxUrl()!, e); }}
-          icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
+          icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} extraIcons={undefined} />
       }
 
       {starts.length > 0 &&
         <>
           <ToolbarNavItem
-            title={WorkflowEntity.nicePluralName()}
+          title={WorkflowEntity.nicePluralName()} extraIcons={undefined}
             onClick={() => setShow(!show)}
             icon={
               <div style={{ display: 'inline-block', position: 'relative' }}>
@@ -86,7 +86,7 @@ function WorkflowDropdownImp() {
 
           <div style={{ display: show ? "block" : "none" }}>
 
-            <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()}
+          <ToolbarNavItem title={CaseActivityQuery.Inbox.niceName()} extraIcons={undefined}
               active={location.href.contains("/find/Inbox")}
               onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(Options.getInboxUrl()!, e); }}
               icon={ToolbarConfig.coloredIcon("inbox", "steelblue")} />
@@ -94,7 +94,7 @@ function WorkflowDropdownImp() {
             {getStarts(starts).flatMap((kvp, i) => kvp.elements.map((val, j) =>
               <ToolbarNavItem key={i + "-" + j} title={getToString(val.workflow) + (val.mainEntityStrategy == "CreateNew" ? "" : ` (${WorkflowMainEntityStrategy.niceToString(val.mainEntityStrategy)})`)}
                 onClick={(e: React.MouseEvent<any>) => { AppContext.pushOrOpenInTab(`/workflow/new/${val.workflow.id}/${val.mainEntityStrategy}`, e); }}
-                active={false}
+                active={false} extraIcons={undefined}
                 icon={ToolbarConfig.coloredIcon("square-plus", "seagreen")}
               />)
             )}
