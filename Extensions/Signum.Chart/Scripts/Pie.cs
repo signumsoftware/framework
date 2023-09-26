@@ -23,12 +23,11 @@ public class PieChartScript : ChartScript
             new ChartScriptParameterGroup("Color Category")
             {
                 new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
-           },
-            new ChartScriptParameterGroup("ShowPercent")
-            {
-                new ChartScriptParameter("ValueAsPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
             },
-
+            new ChartScriptParameterGroup("ShowValue")
+            {
+                new ChartScriptParameter("ValueAsNumberOrPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Number|Percent") },
+            }
         };
     }
 }

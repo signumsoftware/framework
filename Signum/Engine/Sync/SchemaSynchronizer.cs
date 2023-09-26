@@ -635,6 +635,32 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
     private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, bool avoidDefault, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
     {
+        if (table.Name.Name == "EmailTemplate" && column.Name == "From_SourceID") // Delete this if after 1.4.2024
+        {
+            return  SqlPreCommand.Combine(Spacing.Simple,
+                sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = CASE WHEN From_Token_HasValue = 1 THEN 0 ELSE 1 END
+WHERE From_HasValue = 1"))!;
+        }
+
+        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "SourceID") // Delete this if after 1.4.2024
+        {
+            var tempDefault = new SqlBuilder.DefaultConstraint(
+                columnName: column.Name,
+                name: "DF_TEMP_" + column.Name,
+                quotedDefinition: sqlBuilder.Quote(column.DbType, "0"));
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name).Do(a => a.GoAfter = true),
+                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = CASE WHEN Token_HasValue = 1 THEN 0 ELSE 1 END")
+
+                )!;
+        }
+
+
         if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
