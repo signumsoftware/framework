@@ -17,19 +17,24 @@ public static class HelpGenerator
         {
             Implementations imp = Schema.Current.FindImplementations(pr);
 
-            return EntityProperty(pr, pr.Type, imp.TypeLinks(pr.Type)) + validations;
+            var orNull = IsNullable(pr) == true ? HelpMessage.Optional.NiceToString() : null;
+
+            return HelpMessage.AReference1ToA2_G.NiceToString().ForGenderAndNumber(pr.Type.GetGender()).FormatWith(pr.PropertyInfo!.NiceName(), HelpMessage.full.NiceToString(), imp.TypeLinks(pr.Type)).Add(" ", orNull);
         }
         else if (pr.Type.IsLite())
         {
-            Type cleanType = Lite.Extract(pr.Type)!;
-
             Implementations imp = Schema.Current.FindImplementations(pr);
 
-            return EntityProperty(pr, cleanType, imp.TypeLinks(cleanType)) + validations;
+            Type cleanType = Lite.Extract(pr.Type)!;
+
+            var orNull = IsNullable(pr) == true ? HelpMessage.Optional.NiceToString() : null;
+
+            return HelpMessage.AReference1ToA2_G.NiceToString().ForGenderAndNumber(pr.Type.GetGender()).FormatWith(pr.PropertyInfo!.NiceName(), HelpMessage.lite.NiceToString(), imp.TypeLinks(pr.Type)).Add(" ", orNull);
         }
         else if (Reflector.IsEmbeddedEntity(pr.Type))
         {
-            return EntityProperty(pr, pr.Type, pr.Type.NiceName());
+            var orNull = IsNullable(pr) == true ? HelpMessage.Optional.NiceToString() : null;
+            return HelpMessage.AnEmbeddedEntityOfType0.NiceToString(pr.Type.NiceName());
         }
         else if (Reflector.IsMList(pr.Type))
         {
@@ -66,22 +71,10 @@ public static class HelpGenerator
         {
             string valueType = ValueType(pr);
 
-            return HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).FormatWith(pr.PropertyInfo!.NiceName(), valueType) + validations;
+            return HelpMessage._0IsA1_G.NiceToString().ForGenderAndNumber(NaturalLanguageTools.GetGender(valueType)).FormatWith(pr.PropertyInfo!.NiceName(), valueType) + validations;
         }
     }
 
-    static string EntityProperty(PropertyRoute pr, Type propertyType, string typeName)
-    {
-        var orNull = IsNullable(pr) == true ? HelpMessage.OrNull.NiceToString() : null;
-
-        if (pr.PropertyInfo!.IsDefaultName())
-            return
-                HelpMessage.The0.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(typeName) + " " +
-                HelpMessage.OfThe0.NiceToString().ForGenderAndNumber(pr.Parent!.Type.GetGender()).FormatWith(pr.Parent.Type.NiceName()).Add(" ", orNull);
-        else
-            return
-                HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(propertyType.GetGender()).FormatWith(pr.PropertyInfo!.NiceName(), typeName).Add(" ", orNull);
-    }
 
     static string ValueType(PropertyRoute pr)
     {
@@ -110,7 +103,7 @@ public static class HelpGenerator
                 cleanType == typeof(DateTime) && format == "d" ? HelpMessage.Date.NiceToString() :
                 NaturalTypeDescription(cleanType);
 
-        string? orNull = nullable ?? (Nullable.GetUnderlyingType(type) != null) ? HelpMessage.OrNull.NiceToString() : null;
+        string? orNull = nullable ?? (Nullable.GetUnderlyingType(type) != null) ? HelpMessage.Optional.NiceToString() : null;
 
         return typeName.Add(" ", unit != null ? HelpMessage.ExpressedIn.NiceToString() + unit : null).Add(" ", orNull);
     }
@@ -237,7 +230,7 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
 
     internal static string GetEntityHelp(Type type)
     {
-        string typeIs = HelpMessage._0IsA1.NiceToString().ForGenderAndNumber(type.BaseType!.GetGender()).FormatWith(type.NiceName(), type.BaseType!.NiceName());
+        string typeIs = HelpMessage._0IsA1_G.NiceToString().ForGenderAndNumber(type.BaseType!.GetGender()).FormatWith(type.NiceName(), type.BaseType!.NiceName());
 
         string kind = HelpKindMessage.HisMainFunctionIsTo0.NiceToString(GetEntityKindMessage(EntityKindCache.GetEntityKind(type), EntityKindCache.GetEntityData(type), type.GetGender()));
 
@@ -247,13 +240,13 @@ HelpMessage.FromMany0.NiceToString().ForGenderAndNumber(type.GetGender()).Format
     private static string GetEntityKindMessage(EntityKind entityKind, EntityData entityData, char? gender)
     {
         var data =
-            entityData == EntityData.Master ? HelpKindMessage.AndIsRarelyCreatedOrModified.NiceToString().ForGenderAndNumber(gender) :
-            HelpKindMessage.AndAreFrequentlyCreatedOrModified.NiceToString().ForGenderAndNumber(gender);
+            entityData == EntityData.Master ? HelpKindMessage.AndIsMasterDataRarelyChanges.NiceToString().ForGenderAndNumber(gender) :
+            HelpKindMessage.andIsTransactionalDataCreatedRegularly.NiceToString().ForGenderAndNumber(gender);
 
         switch (entityKind)
         {
-            case EntityKind.SystemString: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + data + HelpKindMessage.AutomaticallyByTheSystem.NiceToString();
-            case EntityKind.System: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + data + HelpKindMessage.AutomaticallyByTheSystem.NiceToString();
+            case EntityKind.SystemString: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + HelpKindMessage.AutomaticallyByTheSystem.NiceToString()+ data;
+            case EntityKind.System: return HelpKindMessage.StoreInformationOnItsOwn.NiceToString() + HelpKindMessage.AutomaticallyByTheSystem.NiceToString() + data;
             case EntityKind.Relational: return HelpKindMessage.RelateOtherEntities.NiceToString() + data;
             case EntityKind.String: return HelpKindMessage.ClassifyOtherEntities.NiceToString() + data;
             case EntityKind.Shared: return HelpKindMessage.StoreInformationSharedByOtherEntities.NiceToString() + data;

@@ -471,8 +471,8 @@ public class TypeReferenceTS
         this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
-        if (this.IsEmbedded && !this.IsCollection)
-            this.TypeNiceName = type.NiceName();
+        if (this.IsEmbedded)
+            this.TypeNiceName = this.IsCollection ? type.ElementType()!.NiceName() :  type.NiceName();
         if (implementations != null)
         {
             try

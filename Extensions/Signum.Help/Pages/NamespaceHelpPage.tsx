@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 import * as Navigator from '@framework/Navigator'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, Urls } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Help';
@@ -22,12 +23,12 @@ export default function NamespaceHelpPage() {
   useTitle(HelpMessage.Help.niceToString() + (namespace && (" > " + namespace.title)));
   var forceUpdate = useForceUpdate();
   if (namespace == null)
-    return <h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1>;
+    return <div className="container"><h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1></div>;
 
   var ctx = TypeContext.root(namespace.entity, { readOnly: Navigator.isReadOnly(NamespaceHelpEntity) });
 
   return (
-    <div>
+    <div className="container">
       <h1 className="display-6"><Link to={Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
@@ -60,5 +61,5 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
       }));
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {oi.niceName}</button>;
 }

@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
 using Signum.Basics;
 using Signum.Omnibox;
+using Signum.Files;
 
 namespace Signum.Help;
 
@@ -32,7 +33,7 @@ public static class HelpLogic
 
     });
 
-    public static void Start(SchemaBuilder sb)
+    public static void Start(SchemaBuilder sb, IFileTypeAlgorithm helpImagesAlgorithm)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
@@ -49,6 +50,8 @@ public static class HelpLogic
                     e.Type,
                     Description = e.Description.Try(d => d.Etc(100))
                 });
+
+
 
             sb.Include<NamespaceHelpEntity>()
                 .WithUniqueIndex(e => new { e.Name, e.Culture })
@@ -90,6 +93,13 @@ public static class HelpLogic
                     q.Culture,
                     Description = q.Description.Try(d => d.Etc(100))
                 });
+
+            sb.Include<HelpImageEntity>();
+            sb.Schema.EntityEvents<AppendixHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<NamespaceHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<TypeHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<QueryHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
+            FileTypeLogic.Register(HelpImageFileType.Image, helpImagesAlgorithm);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
 

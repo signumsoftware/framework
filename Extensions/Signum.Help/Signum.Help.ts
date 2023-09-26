@@ -6,10 +6,11 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
+import * as Files from '../Signum.Files/Signum.Files'
 
 
 export const AppendixHelpEntity = new Type<AppendixHelpEntity>("AppendixHelp");
-export interface AppendixHelpEntity extends Entities.Entity {
+export interface AppendixHelpEntity extends Entities.Entity, IHelpImageTarget {
   Type: "AppendixHelp";
   uniqueName: string;
   culture: Basics.CultureInfoEntity;
@@ -22,6 +23,18 @@ export module AppendixHelpOperation {
   export const Delete : Operations.DeleteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Delete");
 }
 
+export const HelpImageEntity = new Type<HelpImageEntity>("HelpImage");
+export interface HelpImageEntity extends Entities.Entity {
+  Type: "HelpImage";
+  target: Entities.Lite<IHelpImageTarget>;
+  creationDate: string /*DateTime*/;
+  file: Files.FilePathEmbedded;
+}
+
+export module HelpImageFileType {
+  export const Image : Files.FileTypeSymbol = registerSymbol("FileType", "HelpImageFileType.Image");
+}
+
 export module HelpKindMessage {
   export const HisMainFunctionIsTo0 = new MessageKey("HelpKindMessage", "HisMainFunctionIsTo0");
   export const RelateOtherEntities = new MessageKey("HelpKindMessage", "RelateOtherEntities");
@@ -31,12 +44,16 @@ export module HelpKindMessage {
   export const StorePartOfTheInformationOfAnotherEntity = new MessageKey("HelpKindMessage", "StorePartOfTheInformationOfAnotherEntity");
   export const StorePartsOfInformationSharedByDifferentEntities = new MessageKey("HelpKindMessage", "StorePartsOfInformationSharedByDifferentEntities");
   export const AutomaticallyByTheSystem = new MessageKey("HelpKindMessage", "AutomaticallyByTheSystem");
-  export const AndIsRarelyCreatedOrModified = new MessageKey("HelpKindMessage", "AndIsRarelyCreatedOrModified");
-  export const AndAreFrequentlyCreatedOrModified = new MessageKey("HelpKindMessage", "AndAreFrequentlyCreatedOrModified");
+  export const AndIsMasterDataRarelyChanges = new MessageKey("HelpKindMessage", "AndIsMasterDataRarelyChanges");
+  export const andIsTransactionalDataCreatedRegularly = new MessageKey("HelpKindMessage", "andIsTransactionalDataCreatedRegularly");
 }
 
 export module HelpMessage {
-  export const _0IsA1 = new MessageKey("HelpMessage", "_0IsA1");
+  export const _0IsA1_G = new MessageKey("HelpMessage", "_0IsA1_G");
+  export const AnEmbeddedEntityOfType0 = new MessageKey("HelpMessage", "AnEmbeddedEntityOfType0");
+  export const AReference1ToA2_G = new MessageKey("HelpMessage", "AReference1ToA2_G");
+  export const lite = new MessageKey("HelpMessage", "lite");
+  export const full = new MessageKey("HelpMessage", "full");
   export const _0IsA1AndShows2 = new MessageKey("HelpMessage", "_0IsA1AndShows2");
   export const _0IsACalculated1 = new MessageKey("HelpMessage", "_0IsACalculated1");
   export const _0IsACollectionOfElements1 = new MessageKey("HelpMessage", "_0IsACollectionOfElements1");
@@ -57,14 +74,12 @@ export module HelpMessage {
   export const HelpNotLoaded = new MessageKey("HelpMessage", "HelpNotLoaded");
   export const Integer = new MessageKey("HelpMessage", "Integer");
   export const Key0NotFound = new MessageKey("HelpMessage", "Key0NotFound");
-  export const OfThe0 = new MessageKey("HelpMessage", "OfThe0");
-  export const OrNull = new MessageKey("HelpMessage", "OrNull");
+  export const Optional = new MessageKey("HelpMessage", "Optional");
   export const Property0NotExistsInType1 = new MessageKey("HelpMessage", "Property0NotExistsInType1");
   export const QueryOf0 = new MessageKey("HelpMessage", "QueryOf0");
   export const RemovesThe0FromTheDatabase = new MessageKey("HelpMessage", "RemovesThe0FromTheDatabase");
   export const Should = new MessageKey("HelpMessage", "Should");
   export const String = new MessageKey("HelpMessage", "String");
-  export const The0 = new MessageKey("HelpMessage", "The0");
   export const TheDatabaseVersion = new MessageKey("HelpMessage", "TheDatabaseVersion");
   export const TheProperty0 = new MessageKey("HelpMessage", "TheProperty0");
   export const Value = new MessageKey("HelpMessage", "Value");
@@ -121,8 +136,11 @@ export module HelpSyntaxMessage {
   export const TranslateFrom = new MessageKey("HelpSyntaxMessage", "TranslateFrom");
 }
 
+export interface IHelpImageTarget extends Entities.Entity {
+}
+
 export const NamespaceHelpEntity = new Type<NamespaceHelpEntity>("NamespaceHelp");
-export interface NamespaceHelpEntity extends Entities.Entity {
+export interface NamespaceHelpEntity extends Entities.Entity, IHelpImageTarget {
   Type: "NamespaceHelp";
   name: string;
   culture: Basics.CultureInfoEntity;
@@ -161,7 +179,7 @@ export interface QueryColumnHelpEmbedded extends Entities.EmbeddedEntity {
 }
 
 export const QueryHelpEntity = new Type<QueryHelpEntity>("QueryHelp");
-export interface QueryHelpEntity extends Entities.Entity {
+export interface QueryHelpEntity extends Entities.Entity, IHelpImageTarget {
   Type: "QueryHelp";
   query: Basics.QueryEntity;
   culture: Basics.CultureInfoEntity;
@@ -177,7 +195,7 @@ export module QueryHelpOperation {
 }
 
 export const TypeHelpEntity = new Type<TypeHelpEntity>("TypeHelp");
-export interface TypeHelpEntity extends Entities.Entity {
+export interface TypeHelpEntity extends Entities.Entity, IHelpImageTarget {
   Type: "TypeHelp";
   type: Basics.TypeEntity;
   culture: Basics.CultureInfoEntity;

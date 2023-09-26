@@ -14,6 +14,7 @@ export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeNa
 
   Operations.addSettings(new EntityOperationSettings(NoteOperation.CreateNoteFromEntity, {
     isVisible: eoc => couldHaveNotes!(eoc.entity.Type),
+    isVisibleOnlyType: type => couldHaveNotes!(type),
     icon: "note-sticky",
     iconColor: "#0e4f8c",
     color: "info",

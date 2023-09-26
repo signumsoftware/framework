@@ -3,6 +3,7 @@ import { useParams, Link, useLocation } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
+import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
 import { Overlay, Tooltip } from "react-bootstrap";
@@ -11,42 +12,42 @@ import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, Pro
 import { getTypeInfo, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
-import { EditableHtmlComponent } from './EditableText';
+import { EditableHtmlComponent, HtmlViewer } from './EditableText';
 import { classes } from '@framework/Globals';
-import { notifySuccess } from '@framework/Operations';
+import { EntityOperationSettings, notifySuccess } from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
-import HtmlViewer from './HtmlViewer'
 
 export default function TypeHelpPage() {
   const params = useParams() as { cleanName: string };
 
   var hash = useHash();
 
-  React.useEffect(()=> {
 
-    var elem = hash && document.getElementById(hash);
-
-    if (elem)
-      elem.scrollIntoView();
-
-  }, [hash]);
 
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
-  
+
+  React.useEffect(() => {
+    var elem = hash && document.getElementById(hash);
+
+    if (elem)
+      elem.scrollIntoView();
+
+  }, [hash, typeHelp]);
+
 
   useTitle(HelpMessage.Help.niceToString() +
     (namespaceHelp && (" > " + namespaceHelp.title)) +
     (" > " + getTypeInfo(cleanName).niceName));
 
   if (typeHelp == null || typeHelp.type.cleanName != cleanName)
-    return <h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1>;
+    return <div className="container"><h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1></div>;
 
   var ctx = TypeContext.root(typeHelp, { readOnly: Navigator.isReadOnly(AppendixHelpEntity) });
 
@@ -63,8 +64,17 @@ export default function TypeHelpPage() {
       return parent.propertyPath();
     });
 
+  var filteredOperations = mlistItemContext(ctx.subCtx(th => th.operations)).filter(ectx => {
+    var os = Operations.getSettings(ectx.value.operation);
+
+    if (os instanceof EntityOperationSettings && os.isVisibleOnlyType && !os.isVisibleOnlyType(ctx.value.type.cleanName))
+      return false;
+
+    return true;
+  });
+
   return (
-    <div>
+    <div className="container">
       <h1 className="display-6">
         <Link to={Urls.indexUrl()}>{HelpMessage.Help.niceToString()}</Link>
         {" > "}
@@ -84,10 +94,10 @@ export default function TypeHelpPage() {
       </dl>
 
       {
-        ctx.value.operations.length > 0 && (<>
+        filteredOperations.length > 0 && (<>
           <h2 className="display-6">{ctx.niceName(a => a.operations)}</h2>
           <dl className="row">
-            {mlistItemContext(ctx.subCtx(th => th.operations)).map(octx => <OperationLine key={octx.value.operation.key} ctx={octx} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
+            {filteredOperations.map(octx => <OperationLine key={octx.value.operation.key} ctx={octx} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
           </dl>
         </>)
       }
@@ -156,7 +166,7 @@ function OperationLine({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Op
     <>
       <dt className={classes("col-sm-3 shortcut-container text-end", id == hash && "sf-target")} id={id}>
         {getOperationInfo(ctx.value.operation, cleanName).niceName}<br />
-        <Shortcut text={`[o:${cleanName}.${ctx.value.operation.key}]`} />
+        <Shortcut text={`[o:${ctx.value.operation.key}]`} />
       </dt>
       <dd className="col-sm-9">
         <span className="info">
@@ -173,15 +183,15 @@ function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<Query
   const id = HelpClient.Urls.idQuery(ctx.value.query.key);
   return (
     <>
-      <div className="row mb-2 shortcut-container">
+      <div className={classes("row mb-2 shortcut-container", id == hash && "sf-target")} id={id}>
         <div className="col-sm-9 offset-sm-3">
-          <span className={classes("lead", id == hash && "sf-target")} style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} id={id}>
+          <span className="lead" style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} >
             <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
           </span>
           {" "}
           {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon icon="arrow-up-right-from-square" /></a>}
           {" "}
-          <Shortcut text={`[o:${cleanName}.${ctx.value.query.key}]`} />
+          <Shortcut text={`[q:${ctx.value.query.key}]`} />
           <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </div>
       </div>
@@ -224,7 +234,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       }));
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
 export function Shortcut(p: { text: string; }) {

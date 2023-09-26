@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
 import * as Navigator from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
@@ -23,12 +24,12 @@ export default function AppendixHelpHelp() {
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)
-    return <h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1>;
+    return <div className="container"><h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1></div>;
 
   var ctx = TypeContext.root(appendix, { readOnly: Navigator.isReadOnly(AppendixHelpEntity) });
 
   return (
-    <div>
+    <div className="container">
       <h1 className="display-6"><Link to={Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
@@ -37,14 +38,14 @@ export default function AppendixHelpHelp() {
       <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
-        {ctx.value.modified && <SaveButton ctx={ctx} onSuccess={a => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(a.uniqueName)) : reloadAppendix()} />}
+        <SaveButton ctx={ctx} onSuccess={() => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(ctx.value.uniqueName)) : reloadAppendix()} />
         <DeleteButton ctx={ctx} />
       </div>
     </div>
   );
 }
 
-function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: (a: AppendixHelpEntity) => void }) {
+function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, onSuccess: () => void }) {
 
   const oi = tryGetOperationInfo(AppendixHelpOperation.Save, AppendixHelpEntity)
 
@@ -52,14 +53,14 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
     return null;
 
   function onClick() {
-    Operations.API.executeEntity(ctx.value, AppendixHelpOperation.Save)
-      .then(p => {
-        onSuccess(p.entity);
+    API.saveAppendix(ctx.value)
+      .then(() => {
+        onSuccess();
         notifySuccess();
       });
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{oi.niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {oi.niceName}</button>;
 }
 
 function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
@@ -86,5 +87,5 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
     });
   }
 
-  return <button className="btn btn-danger" onClick={onClick}>{getOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity).niceName}</button>;
+  return <button className="btn btn-danger ms-4" onClick={onClick}><FontAwesomeIcon icon="trash" /> {getOperationInfo(AppendixHelpOperation.Delete, AppendixHelpEntity).niceName}</button>;
 }

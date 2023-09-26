@@ -2,13 +2,19 @@ import * as React from 'react'
 import { useForceUpdate, useWindowEvent } from '@framework/Hooks';
 import * as HelpClient from '../HelpClient';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ReadonlyBinding, TypeContext, ValueLine } from '@framework/Lines';
+import { Binding, PropertyRoute, ReadonlyBinding, TypeContext, ValueLine } from '@framework/Lines';
 import { classes } from '@framework/Globals';
-import * as AppContext from '@framework/AppContext';
-import { EntityControlMessage } from '@framework/Signum.Entities';
-import { HelpMessage } from '../Signum.Help';
+import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
-import HtmlViewer from './HtmlViewer';
+import { ErrorBoundary } from '@framework/Components';
+import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
+import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
+import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
+import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
+import * as FilesClient from '../../Signum.Files/FilesClient';
+import { IBinding, getSymbol } from '@framework/Reflection';
+import { FileImage } from '../../Signum.Files/Components/FileImage';
+import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 
 export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
   var [editable, setEditable] = React.useState(defaultEditable || false);
@@ -43,7 +49,7 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
       {/*      <span className="sf-no-text">[{ctx.niceName()}]</span>) */}
       {/*}*/}
 
-      {editable ? <HtmlEditor binding={ctx.binding} /> :<HtmlViewer text={ctx.value} />
+      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} />
       }
 
       {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
@@ -54,32 +60,107 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
   );
 }
 
-//export function HtmlViewer({ text, className }: { text: string | null | undefined, className?: string }) {
-//  var htmlText = React.useMemo(() => HelpClient.replaceHtmlLinks(text ?? ""), [text]);
-//  //const divRef = React.useRef<HTMLDivElement>(null);
-//  //function handleOnClick(e: MouseEvent) {
-//  //  debugger;
-//  //  var a = e.target as HTMLAnchorElement;
-//  //  if (a?.nodeName == "A" && !e.ctrlKey && e.button == 0) {
-//  //    var href = a.getAttribute("href");
-//  //    if (href != null && href.startsWith(AppContext.toAbsoluteUrl("/"))) {
-//  //      e.preventDefault();
-//  //      e.stopPropagation();
-//  //      AppContext.navigate(href);
-//  //    }
-//  //  }
-//  //}
+export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }) {
 
-//  //React.useEffect(() => {
-//  //  if (divRef.current) {
-//  //    divRef.current.addEventListener('click', handleOnClick);
-//  //    return () => {
-//  //      divRef.current?.removeEventListener('click', handleOnClick);
-//  //    }
-//  //  }
+  return (
+    <ErrorBoundary>
+      <HtmlEditor
+        binding={p.binding} plugins={[
+          new LinksPlugin(),
+          new BasicCommandsPlugin(),
+          new ImagePlugin(new InlineImageConverter())
+        ]} />
+    </ErrorBoundary>
+  );
+}
 
-//  //}, []);
 
-//  return <HtmlEditor binding={new ReadonlyBinding(htmlText, "")} /*innerRef={divRef} className={className}*/  />;
-//}
+export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }) {
 
+  var htmlText = React.useMemo(() => HelpClient.replaceHtmlLinks(p.text ?? ""), [p.text]);
+  if (!htmlText)
+    return null;
+
+  var binding = new ReadonlyBinding(htmlText, "");
+
+  return (
+    <div className="html-viewer">
+      <ErrorBoundary>
+        <HtmlEditor readOnly
+          binding={binding}
+          htmlAttributes={p.htmlAttributes}
+          toolbarButtons={c => null} plugins={[
+            new LinksPlugin(),
+            new BasicCommandsPlugin(),
+            new ImagePlugin(new InlineImageConverter())
+          ]} />
+      </ErrorBoundary>
+    </div>
+  );
+}
+
+export interface ImageInfo {
+  inlineImageId?: string;
+  binaryFile?: string;
+  fileName?: string;
+}
+
+export class InlineImageConverter implements ImageConverter<ImageInfo>{
+
+  pr: PropertyRoute;
+  constructor() {
+    this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
+  }
+
+  uploadData(blob: Blob): Promise<ImageInfo> {
+    var file = blob instanceof File ? blob :
+      new File([blob], "pastedImage." + blob.type.after("/"));
+
+    return toFileEntity(file, {
+      type: FilePathEmbedded, accept: "image/*",
+      maxSizeInBytes: this.pr.member!.defaultFileTypeInfo!.maxSizeInBytes ?? undefined
+    })
+      .then(att => ({
+        binaryFile: att.binaryFile ?? undefined,
+        fileName: att.fileName ?? undefined
+      }));
+  }
+
+  renderImage(info: ImageInfo): React.ReactElement<any, string | ((props: any) => React.ReactElement<any, string | any | (new (props: any) => React.Component<any, any, any>)> | null) | (new (props: any) => React.Component<any, any, any>)> {
+    var fp = FilePathEmbedded.New({
+      binaryFile: info.binaryFile,
+      entityId: info.inlineImageId,
+      mListRowId: null,
+      fileType: getSymbol(FileTypeSymbol, this.pr.member!.defaultFileTypeInfo!.key),
+      rootType: this.pr.findRootType().name,
+      propertyRoute: this.pr.propertyPath()
+    });
+
+    if (fp.entityId == null && fp.binaryFile == null)
+      return <div className="alert alert-danger">{JSON.stringify(info)}</div>;
+
+    return <FileImage file={fp} />;
+  }
+
+  toHtml(val: ImageInfo): string | undefined {
+    if (val.binaryFile)
+      return `<img data-binary-file="${val.binaryFile}" data-file-name="${val.fileName}" />`;
+
+    if (val.inlineImageId)
+      return `<img data-help-image-id="${val.inlineImageId}" />`;
+
+    return undefined;
+  }
+
+  fromElement(element: HTMLDivElement): ImageInfo | undefined {
+    if (element.tagName == "IMG") {
+      return {
+        binaryFile: element.dataset["binaryFile"],
+        fileName: element.dataset["fileName"],
+        inlineImageId: element.dataset["helpImageId"],
+      };
+    }
+
+    return undefined;
+  }
+}

@@ -45,7 +45,9 @@ public class HelpController : ControllerBase
     public void SaveNamespace([Required][FromBody]NamespaceHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
-      
+
+        InlineImagesLogic.SynchronizeInlineImages(entity);
+
         if (!entity.Title.HasText() && !entity.Description.HasText())
         {
             if (!entity.IsNew)
@@ -67,6 +69,16 @@ public class HelpController : ControllerBase
 
         var help = HelpLogic.GetAppendixHelp(uniqueName);
         return help;
+    }
+
+    [HttpPost("api/help/saveAppendix")]
+    public void SaveNamespace([Required][FromBody] AppendixHelpEntity entity)
+    {
+        HelpPermissions.ViewHelp.AssertAuthorized();
+
+        InlineImagesLogic.SynchronizeInlineImages(entity);
+
+        entity.Execute(AppendixHelpOperation.Save);
     }
 
     [HttpGet("api/help/type/{cleanName}")]
@@ -111,6 +123,8 @@ public class HelpController : ControllerBase
                 .ToList();
             entity.Operations.AddRange(hiddenOperations);
             entity.Operations.RemoveAll(a => !a.Description.HasText());
+
+            InlineImagesLogic.SynchronizeInlineImages(entity);
 
             if (entity.Properties.IsEmpty() && entity.Operations.IsEmpty() && !entity.Description.HasText())
             {

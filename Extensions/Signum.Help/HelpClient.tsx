@@ -21,7 +21,7 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 
-var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|]*)\]/gi;
+var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|/]*)\]/gi;
 var helpAppRelativeUrl = /href="\//gi;
 
 export function replaceHtmlLinks(txt: string  | null) {
@@ -90,6 +90,10 @@ export module API {
 
   export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
     return ajaxGet({ url: "/api/help/appendix/" + (uniqueName ?? "") });
+  }
+
+  export function saveAppendix(appendix: AppendixHelpEntity): Promise<void> {
+    return ajaxPost({ url: "/api/help/saveAppendix" }, appendix);
   }
 }
 
