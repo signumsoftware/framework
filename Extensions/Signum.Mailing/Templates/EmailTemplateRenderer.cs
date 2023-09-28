@@ -3,6 +3,7 @@ using Signum.DynamicQuery.Tokens;
 using Signum.Basics;
 using Signum.Templating;
 using Signum.UserAssets.Queries;
+using Signum.Authorization;
 
 namespace Signum.Mailing.Templates;
 
@@ -13,7 +14,7 @@ class EmailMessageBuilder
     IEmailModel? model;
     object queryName;
     QueryDescription qd;
-    EmailSenderConfigurationEntity? smtpConfig;
+    EmailSenderConfigurationEntity? emailSenderConfig;
     CultureInfo? cultureInfo;
 
     public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, IEmailModel? systemEmail, CultureInfo? cultureInfo)
@@ -24,7 +25,7 @@ class EmailMessageBuilder
 
         this.queryName = QueryLogic.ToQueryName(template.Query.Key);
         this.qd = QueryLogic.Queries.QueryDescription(queryName);
-        this.smtpConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (systemEmail?.UntypedEntity as Entity)?.ToLiteFat(), null);
+        this.emailSenderConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (systemEmail?.UntypedEntity as Entity)?.ToLiteFat(), null);
         this.cultureInfo = cultureInfo;
     }
 
@@ -151,9 +152,9 @@ class EmailMessageBuilder
     {
         if (template.From != null)
         {
-            if (template.From.Token != null)
+            if (template.From.AddressSource == EmailAddressSource.QueryToken)
             {
-                ResultColumn owner = dicTokenColumn.GetOrThrow(template.From.Token.Token);
+                ResultColumn owner = dicTokenColumn.GetOrThrow(template.From.Token!.Token);
                 var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
                 var groupsWithEmail = groups.Where(a => a.Key.Email.HasText()).ToList();
@@ -171,8 +172,8 @@ class EmailMessageBuilder
                         case WhenNoneFromBehaviour.NoMessage:
                             yield break;
                         case WhenNoneFromBehaviour.DefaultFrom:
-                            if (smtpConfig != null && smtpConfig.DefaultFrom != null)
-                                yield return smtpConfig.DefaultFrom.Clone();
+                            if (emailSenderConfig != null && emailSenderConfig.DefaultFrom != null)
+                                yield return emailSenderConfig.DefaultFrom.Clone();
                             else
                                 throw new InvalidOperationException("Not Default From found");
                             break;
@@ -196,7 +197,7 @@ class EmailMessageBuilder
                     }
                 }
             }
-            else
+            else if (template.From.AddressSource == EmailAddressSource.HardcodedAddress)
             {
                 yield return new EmailFromEmbedded
                 {
@@ -204,6 +205,18 @@ class EmailMessageBuilder
                     EmailAddress = template.From.EmailAddress!,
                     DisplayName = template.From.DisplayName,
                     AzureUserId = template.From.AzureUserId,
+                };
+            }
+            else if (template.From.AddressSource == EmailAddressSource.CurrentUser)
+            {
+                var user = UserEntity.Current.InDB(a => a.EmailOwnerData);
+
+                yield return new EmailFromEmbedded
+                {
+                    EmailOwner = null,
+                    EmailAddress = user.Email!,
+                    DisplayName = user.DisplayName,
+                    AzureUserId = user.AzureUserId,
                 };
             }
         }
@@ -219,9 +232,9 @@ class EmailMessageBuilder
         }
         else
         {
-            if (smtpConfig != null && smtpConfig.DefaultFrom != null)
+            if (emailSenderConfig != null && emailSenderConfig.DefaultFrom != null)
             {
-                yield return smtpConfig.DefaultFrom.Clone();
+                yield return emailSenderConfig.DefaultFrom.Clone();
             }
             else
             {
@@ -232,22 +245,24 @@ class EmailMessageBuilder
 
     IEnumerable<List<EmailOwnerRecipientData>> GetRecipients()
     {
-        foreach (List<EmailOwnerRecipientData> recipients in TokenRecipientsCrossProduct(template.Recipients.Where(a => a.Token != null).ToList(), 0))
+        foreach (List<EmailOwnerRecipientData> recipients in TokenRecipientsCrossProduct(template.Recipients.Where(a => a.AddressSource == EmailAddressSource.QueryToken).ToList(), 0))
         {
-            recipients.AddRange(template.Recipients.Where(a => a.Token == null).Select(tr => new EmailOwnerRecipientData(new EmailOwnerData
+            recipients.AddRange(template.Recipients.Where(a => a.AddressSource != EmailAddressSource.QueryToken).Select(tr =>
             {
-                CultureInfo = null,
-                Email = tr.EmailAddress!,
-                DisplayName = tr.DisplayName
-            })
-            { Kind = tr.Kind }));
+                var eod = 
+                tr.AddressSource == EmailAddressSource.CurrentUser ? UserEntity.Current.InDB(a => a.EmailOwnerData) :
+                tr.AddressSource == EmailAddressSource.HardcodedAddress ? new EmailOwnerData { Email = tr.EmailAddress!, DisplayName = tr.DisplayName } :
+                throw new UnexpectedValueException(tr.AddressSource);
+
+                return new EmailOwnerRecipientData(eod) { Kind = tr.Kind };
+            }));
 
             if (model != null)
                 recipients.AddRange(model.GetRecipients());
 
-            if (smtpConfig != null)
+            if (emailSenderConfig != null)
             {
-                recipients.AddRange(smtpConfig.AdditionalRecipients.Where(a => a.EmailOwner == null).Select(r =>
+                recipients.AddRange(emailSenderConfig.AdditionalRecipients.Where(a => a.EmailOwner == null).Select(r =>
                     new EmailOwnerRecipientData(new EmailOwnerData { CultureInfo = null, DisplayName = r.DisplayName, Email = r.EmailAddress, Owner = r.EmailOwner }) { Kind = r.Kind }));
             }
 

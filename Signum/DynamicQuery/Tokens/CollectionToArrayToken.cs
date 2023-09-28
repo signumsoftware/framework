@@ -194,8 +194,8 @@ public class CollectionToArrayToken : QueryToken
         if (body != subCtx.Parameter)
             query = Expression.Call(miSelect.MakeGenericMethod(query.Type.ElementType()!, body.Type), query, Expression.Lambda(body, subCtx.Parameter));
 
-        if (cta.ToArrayType == CollectionToArrayType.SeparatedByCommaDistict ||
-            cta.ToArrayType == CollectionToArrayType.SeparatedByNewLineDistict)
+        if (cta.ToArrayType == CollectionToArrayType.SeparatedByCommaDistinct ||
+            cta.ToArrayType == CollectionToArrayType.SeparatedByNewLineDistinct)
             query = Expression.Call(miToDistict.MakeGenericMethod(token.Type), query);
 
         query = Expression.Call(miTake.MakeGenericMethod(token.Type), query, Expression.Constant(MaxToArrayValues));
@@ -210,9 +210,9 @@ public enum CollectionToArrayType
     [Description("Separated by Comma")]
     SeparatedByComma,
     [Description("Separated by Comma (Distinct)")]
-    SeparatedByCommaDistict,
+    SeparatedByCommaDistinct,
     [Description("Separated by New Line")]
     SeparatedByNewLine,
     [Description("Separated by New Line (Distinct)")]
-    SeparatedByNewLineDistict,
+    SeparatedByNewLineDistinct,
 }

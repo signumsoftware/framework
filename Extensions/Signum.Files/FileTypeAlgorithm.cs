@@ -8,6 +8,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     public Func<IFilePath, string> CalculateSuffix { get; set; }
 
     public bool WeakFileReference { get; set; }
+    public bool DeleteEmptyFolderOnDelete { get; set; }
 
     public Func<string, int, string>? RenameAlgorithm { get; set; }
 
@@ -17,6 +18,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
         WeakFileReference = false;
         CalculateSuffix = SuffixGenerators.Safe.YearMonth_Guid_Filename;
+        DeleteEmptyFolderOnDelete = true;
 
         //Avoids potentially slow File.Exists, consider using CalculateSuffix using GUID
         RenameAlgorithm = null; // DefaultRenameAlgorithm;
@@ -164,7 +166,11 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         {
             string fullPhysicalPath = f.FullPhysicalPath();
             using (HeavyProfiler.Log("DeleteFile", () => fullPhysicalPath))
+            {
                 File.Delete(fullPhysicalPath);
+                if (DeleteEmptyFolderOnDelete)
+                    Directory.Delete(Path.GetDirectoryName(fullPhysicalPath)!);
+            }
         }
     }
 
@@ -179,7 +185,12 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 
             using (HeavyProfiler.Log("DeleteFileIfExists", () => fullPhysicalPath))
                 if (File.Exists(fullPhysicalPath))
+                {
                     File.Delete(fullPhysicalPath);
+
+                    if (DeleteEmptyFolderOnDelete)
+                        Directory.Delete(Path.GetDirectoryName(fullPhysicalPath)!);
+                }
         }
     }
 

@@ -54,13 +54,14 @@ export namespace API {
 
 export interface ToolbarResponse<T extends Entity> {
   type: ToolbarElementType;
-  iconName?: string;
-  iconColor?: string;
-  showCount?: ShowCount;
   label?: string;
   content?: Lite<T>;
   url?: string;
-  elements?: Array<ToolbarResponse<any>>;
-  openInPopup?: boolean;
+  iconName?: string;
+  iconColor?: string;
+  showCount?: ShowCount;
   autoRefreshPeriod?: number;
+  openInPopup?: boolean;
+  elements?: Array<ToolbarResponse<any>>;
+  extraIcons?: Array<ToolbarResponse<any>>;
 }

@@ -106,7 +106,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
         var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (
-          <ToolbarDropdown parentTitle={title} icon={icon} key={key}>
+          <ToolbarDropdown parentTitle={title} icon={icon} key={key} extraIcons={res.extraIcons}>
             {res.elements && res.elements.map((sr, i) => renderNavItem(sr, active, i, onRefresh, onAutoClose))}
           </ToolbarDropdown>
         );
@@ -116,7 +116,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
         var url = res.url!;
         var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
         return (
-          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} onClick={(e: React.MouseEvent<any>) => {
+          <ToolbarNavItem key={key} title={res.label} isExternalLink={isExternalLink} extraIcons={res.extraIcons} onClick={(e: React.MouseEvent<any>) => {
 
             Dic.getKeys(urlVariables).forEach(v => {
               url = url.replaceAll(v, urlVariables[v]());
@@ -159,12 +159,12 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
   }
 }
 
-function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, children: any }) {
+function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, children: any, extraIcons: ToolbarClient.ToolbarResponse<any>[] | undefined }) {
   var [show, setShow] = React.useState(false);
 
   return (
     <div>
-      <ToolbarNavItem title={props.parentTitle} onClick={() => setShow(!show)}
+      <ToolbarNavItem title={props.parentTitle} extraIcons={props.extraIcons} onClick={() => setShow(!show)}
         icon={
           <div style={{ display: 'inline-block', position: 'relative' }}>
             <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
@@ -181,13 +181,23 @@ function ToolbarDropdown(props: { parentTitle: string | undefined, icon: any, ch
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: ToolbarClient.ToolbarResponse<any>[], onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode }) {
   return (
     <li className="nav-item" style={{ listStyleType: 'none' }}>
       <Nav.Item >
         <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active}>
           {p.icon}
-          <span className={"nav-item-text"}>{p.title}{p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}</span>
+          <span className={"nav-item-text"}>
+            {p.title}
+            {/*p.extraIcons?.map((ei, i) => <a key={i} href="#" onClick={e => { e.preventDefault(); AppContext.pushOrOpenInTab(ei.url!, e); }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</a>)*/}
+            {p.extraIcons?.map((ei, i) => <button className="btn btn-sm border-0" style={{ float: 'right' }} key={i} onClick={e => {
+              e.preventDefault();
+              if (p.active)
+                e.stopPropagation();
+              AppContext.pushOrOpenInTab(ei.url!, e);
+            }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>)}
+            {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
+          </span>
         <div className={"nav-item-float"}>{p.title}</div>
         </Nav.Link>
       </Nav.Item >

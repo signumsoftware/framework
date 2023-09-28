@@ -25,6 +25,27 @@ public static class TimeMachineLogic
         }
     }
 
+    public static void RestoreOlderVersion<T>(PrimaryKey id, DateTime lastVersion)
+        where T : Entity
+    {
+        using (var tr = new Transaction())
+        {
+            T entity;
+            using (SystemTime.Override(new SystemTime.AsOf(lastVersion)))
+            {
+                entity = Database.Retrieve<T>(id);
+            }
+
+            var ticks = Database.Query<T>().Where(a => a.Id == id).Select(a => a.Ticks).Single();
+
+            entity.Ticks = ticks;
+            entity.SetSelfModified();
+            entity.Save();
+
+            tr.Commit();
+        }
+    }
+
     public static void RestoreDeletedEntity<T>(PrimaryKey id)
         where T : Entity
     {
