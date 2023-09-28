@@ -1296,7 +1296,7 @@ export class TokenCompleter {
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
         filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f)),
-        frozen: false,
+        frozen: fo.frozen || false,
         expanded: false,
       } as FilterGroupOptionParsed);
     }
@@ -1309,6 +1309,7 @@ export class TokenCompleter {
         operation: fo.operation ?? "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
+        removeElementWarning: fo.removeElementWarning,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
       } as FilterConditionOptionParsed);

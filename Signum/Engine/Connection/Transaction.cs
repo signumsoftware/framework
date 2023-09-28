@@ -130,7 +130,7 @@ public class Transaction : IDisposableException
         {
             if (!Started)
             {
-                //var a = System.Security.Principal.WindowsIdentity.GetCurrent();
+                //Add this identity to SSMS?: System.Security.Principal.WindowsIdentity.GetCurrent().Name;
                 Connection = Connector.Current.CreateConnection();
                 Connection.Open();
                 Transaction = Connection.BeginTransaction(IsolationLevel ?? Connector.Current.IsolationLevel);

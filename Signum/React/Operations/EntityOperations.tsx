@@ -129,13 +129,15 @@ interface OperationButtonProps extends ButtonProps {
   className?: string;
   outline?: boolean;
   color?: BsColor;
+  textInTitle?: boolean;
   avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
   children?: React.ReactNode;
   hideOnCanExecute?: boolean;
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, hideOnCanExecute,  ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color,
+  avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement<any> | null {
 
   if (eocOrNull == null)
     return null;
@@ -187,7 +189,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         disabled={disabled}
         title={main?.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
-        onClick={disabled ? undefined : e => { eoc.event = e;  main.onClick(eoc); }}
+        onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
         data-operation={eoc.operationInfo.key}>
         {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
       </Dropdown.Item>;
@@ -213,7 +215,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   var button = <Button variant={(outline ? ("outline-" + main.color) as OutlineBsColor : main.color)}
     {...props}
     key="button"
-    title={main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
+    title={[(textInTitle ? main.text : undefined), main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)].notNull().join(" ")}
     className={classes(disabled ? "disabled" : undefined, main.classes)}
     onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
     data-operation={eoc.operationInfo.key}>

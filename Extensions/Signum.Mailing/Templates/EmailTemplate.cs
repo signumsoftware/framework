@@ -217,6 +217,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
 public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
 {
+    public EmailAddressSource AddressSource { get; set; }
+
     public string? EmailAddress { get; set; }
 
     public string? DisplayName { get; set; }
@@ -232,20 +234,13 @@ public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(Token))
-        {
-            if (Token == null && EmailAddress.IsNullOrEmpty())
-                return EmailTemplateMessage.TokenOrEmailAddressMustBeSet.NiceToString();
+            return (pi, Token).IsSetOnlyWhen(AddressSource == EmailAddressSource.QueryToken);
 
-            if (Token != null && !EmailAddress.IsNullOrEmpty())
-                return EmailTemplateMessage.TokenAndEmailAddressCanNotBeSetAtTheSameTime.NiceToString();
-
-            if (Token != null && Token.Token.Type != typeof(EmailOwnerData))
-                return EmailTemplateMessage.TokenMustBeA0.NiceToString(typeof(EmailOwnerData).NiceName());
-        }
+        if (pi.Name == nameof(EmailAddress))
+            return (pi, EmailAddress).IsSetOnlyWhen(AddressSource == EmailAddressSource.HardcodedAddress);
 
         return null;
     }
-
 }
 
 
@@ -299,6 +294,13 @@ public class EmailTemplateFromEmbedded : EmailTemplateAddressEmbedded
     public WhenManyFromBehaviour WhenMany { get; set; }
 
     public Guid? AzureUserId { get; set; }
+}
+
+public enum EmailAddressSource
+{
+    QueryToken,
+    HardcodedAddress, 
+    CurrentUser,
 }
 
 
