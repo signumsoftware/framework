@@ -45,7 +45,7 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
       state.ctx.propertyRoute.member!.translatable && 
       AuthClient.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
       if (!vProps.extraButtons)
-        vProps.extraButtons = vlc => <TranslateButton controller={lineBase} />;
+        vProps.extraButtons = vlc => <TranslateButton controller={vlc} />;
 
       if (!vProps.helpText) {
         var binding = (vProps.ctx.binding as Binding<string>);
@@ -57,12 +57,12 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
   }
 }
 
-function TranslateButton(p: { controller: ValueLineController }) {
+export function TranslateButton(p: { controller: ValueLineController }) {
 
   var ctx = p.controller.props.ctx.tryFindRootEntity();
 
   return (
-    <a href="#" className={classes("sf-line-button sf-view", "btn input-group-text")}
+    <a href="#" className={classes("sf-line-button sf-view", "btn input-group-text", "sf-translate-button")}
       onClick={e => {
         e.preventDefault();
 
