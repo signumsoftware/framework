@@ -201,7 +201,7 @@ public static class Lite
         if (!match.Success)
             return ValidationMessage.InvalidFormat.NiceToString();
 
-        Type? type = TypeEntity.TryGetType(match.Groups["type"].Value);
+        Type? type = TypeLogic.TryGetType(match.Groups["type"].Value);
         if (type == null)
             return LiteMessage.Type0NotFound.NiceToString().FormatWith(match.Groups["type"].Value);
 

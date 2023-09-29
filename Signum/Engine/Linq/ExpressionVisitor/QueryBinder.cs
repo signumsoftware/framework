@@ -1739,7 +1739,7 @@ internal class QueryBinder : ExpressionVisitor
             return tablePeriod;
         }
 
-        if (m.Method.DeclaringType == typeof(TypeEntityExtensions) && m.Method.Name == nameof(TypeEntityExtensions.ToTypeEntity))
+        if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))
         {
             var arg = m.Arguments[0];
 
