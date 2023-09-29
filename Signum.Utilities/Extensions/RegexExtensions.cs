@@ -34,7 +34,27 @@ public static class RegexExtensions
     public static T? MostSimilar<T>(this IEnumerable<T> collection, Func<T, string> stringSelector, string pattern)
     {
         StringDistance sd = new StringDistance();
-        return collection.MinBy(item => sd.LevenshteinDistance(stringSelector(item), pattern));
+
+        var bestMatch = pattern.Length;
+        var bestMatchItem = default(T);
+
+        foreach (var item in collection.OrderBy(item => Math.Abs(stringSelector(item).Length - pattern.Length))) 
+        {
+            var str = stringSelector(item);
+            if (pattern == str)
+                return item;
+
+            if (Math.Abs(str.Length - pattern.Length) > bestMatch)
+                return bestMatchItem;
+
+            var match = sd.LevenshteinDistance(pattern, str);
+            if(match < bestMatch)
+            {
+                bestMatch = match;
+                bestMatchItem = item;
+            }
+        }
+        return default;
     }
 
     public static IEnumerable<R> JoinSimilar<T, S, R>(this List<T> outer, List<S> inner,
