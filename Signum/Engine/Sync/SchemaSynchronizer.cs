@@ -35,8 +35,6 @@ public static class SchemaSynchronizer
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
 
-
-
         SimplifyDiffTables?.Invoke(databaseTables);
 
         replacements.AskForReplacements(databaseTables.Keys.ToHashSet(), modelTables.Keys.ToHashSet(), Replacements.KeyTables);
@@ -260,7 +258,7 @@ public static class SchemaSynchronizer
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
                         var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) :
-                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(dif.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
                         null;
 
                         var columns = Synchronizer.SynchronizeScript(
@@ -426,6 +424,30 @@ public static class SchemaSynchronizer
                 removeOld: (tn, dif) => sqlBuilder.DropTable(dif.Name),
                 mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? sqlBuilder.RenameOrMove(dif, tab, tab.SystemVersioned!.TableName, forHistoryTable: true) : null);
 
+            SqlPreCommand? versioningTriggers = !sqlBuilder.IsPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
+                 createNew: null,
+                 removeOld: null,
+                   mergeBoth: (tn, tab, dif) =>
+                   {
+                       if(tab.SystemVersioned == null)
+                       {
+                           if (dif.VersionningTrigger == null)
+                               return null;
+
+                           return sqlBuilder.DropVersionningTrigger(tab.Name, dif.VersionningTrigger.tgname);
+                       }
+                       else
+                       {
+                           if (dif.VersionningTrigger == null)
+                               return sqlBuilder.CreateVersioningTrigger(tab);
+
+                           if (!Equals(PostgresCatalogSchema.ParseVersionFunctionParam(dif.VersionningTrigger.tgargs), tab.SystemVersioned.TableName))
+                               return sqlBuilder.CreateVersioningTrigger(tab, replace: true);
+
+                           return null;
+                       }
+                   });
+
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
             SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
@@ -534,6 +556,7 @@ public static class SchemaSynchronizer
                 dropForeignKeys,
 
                 tables, historyTables,
+                versioningTriggers,
                 delayedUpdates.Combine(Spacing.Double), delayedDrops.Combine(Spacing.Double), delayedAddSystemVersioning.Combine(Spacing.Double),
                 syncEnums,
                 addForeingKeys,
@@ -1040,6 +1063,15 @@ public class DiffPeriod
     }
 }
 
+public class DiffPostgresVersioningTrigger
+{
+    public int? tgrelid;
+    public string tgname;
+    public string proname;
+    public byte[] tgargs;
+    public int tgfoid;
+}
+
 public class DiffTable
 {
     public ObjectName Name;
@@ -1071,6 +1103,8 @@ public class DiffTable
                 Indices.Remove(FullTextTableIndex.FULL_TEXT);
         }
     }
+
+    public DiffPostgresVersioningTrigger? VersionningTrigger { get; internal set; }
 
     public SysTableTemporalType TemporalType;
     public ObjectName? TemporalTableName;

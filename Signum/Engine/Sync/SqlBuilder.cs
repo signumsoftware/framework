@@ -72,14 +72,28 @@ public class SqlBuilder
         {
                 result,
                 new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
-                new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
-BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
-FOR EACH ROW EXECUTE PROCEDURE versioning(
-  'sys_period', '{t.SystemVersioned.TableName}', true
-);")
+                CreateVersioningTrigger(t)
             }.Combine(Spacing.Simple)!;
 
     }
+
+    public SqlPreCommand CreateVersioningTrigger(ITable t, bool replace = false)
+    {
+        return new SqlPreCommandSimple(@$"{(replace ? "CREATE OR REPLACE" : "CREATE")} TRIGGER versioning_trigger
+BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
+FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersioned!)});");
+    }
+
+    public string VersioningTriggerArgs(SystemVersionedInfo si)
+    {
+        return $"'{si.PostgresSysPeriodColumnName}', '{si.TableName}', true";
+    }
+
+    public SqlPreCommandSimple DropVersionningTrigger(ObjectName tableName, string triggerName)
+    {
+        return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName}");
+    }
+
 
     public SqlPreCommand DropTable(DiffTable diffTable)
     {
