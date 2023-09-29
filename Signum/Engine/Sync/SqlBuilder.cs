@@ -258,7 +258,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         string fullType = GetColumnType(c);
 
         var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion ?
-            $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
+            $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? "START" : "END")} HIDDEN" :
             null;
 
         var defaultConstraint = defaultConst != null ? $"CONSTRAINT {defaultConst.Name} DEFAULT " + defaultConst.QuotedDefinition : null;

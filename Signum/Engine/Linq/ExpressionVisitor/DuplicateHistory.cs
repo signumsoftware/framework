@@ -38,7 +38,7 @@ internal class DuplicateHistory : DbExpressionVisitor
             {
                 var tableExp = new TableExpression(aliasGenerator.NextTableAlias(tableNameForAlias), table.Table, systemTime, null);
 
-                ColumnExpression GetTablePeriod() => new ColumnExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), tableExp.Alias, table.Table.SystemVersioned!.PostgreeSysPeriodColumnName);
+                ColumnExpression GetTablePeriod() => new ColumnExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), tableExp.Alias, table.Table.SystemVersioned!.PostgresSysPeriodColumnName);
                 
                 SqlFunctionExpression tstzrange(DateTimeOffset start, DateTimeOffset end) => new SqlFunctionExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), null, PostgresFunction.tstzrange.ToString(),
                     new[] { Expression.Constant(start), Expression.Constant(end) });

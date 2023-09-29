@@ -733,7 +733,7 @@ WHERE {where}"))!;
     {
         if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
         {
-            var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
+            var date = svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
 
             return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
         }

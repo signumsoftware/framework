@@ -341,7 +341,7 @@ public class SchemaBuilder
                 new ObjectName(tableName.Schema, tableName.Name + "_History", isPostgres);
 
         if (isPostgres)
-            return new SystemVersionedInfo(tn, att.PostgreeSysPeriodColumname);
+            return new SystemVersionedInfo(tn, att.PostgresSysPeriodColumname);
 
         return new SystemVersionedInfo(tn, att.StartDateColumnName, att.EndDateColumnName);
     }
