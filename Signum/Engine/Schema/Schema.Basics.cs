@@ -115,6 +115,11 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+        public override string ToString()
+        {
+            return Name;
+        }
+
     }
 
     public class PostgresPeriodColumn : IColumn
@@ -128,7 +133,7 @@ public class SystemVersionedInfo
 
         public IsNullable Nullable => IsNullable.No;
         public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
-        public Type Type => typeof(DateTime);
+        public Type Type => typeof(NpgsqlTypes.NpgsqlRange<DateTime>);
         public string? UserDefinedTypeName => null;
         public bool PrimaryKey => false;
         public bool IdentityBehaviour => false;
@@ -143,6 +148,11 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 }
