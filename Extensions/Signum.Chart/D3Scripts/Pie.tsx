@@ -22,7 +22,8 @@ export default function renderPie({ data, width, height, parameters, loading, on
 
   var pInnerRadius = parameters.InnerRadious || "0";
   var pSort = parameters.Sort;
-  var pValueAsPercent = parameters.ValueAsPercent;
+  var pValueAsPercent = parameters.ValueAsNumberOrPercent;
+  var pValueAsNumber = parameters.ValueAsNumberOrPercent;
   var dataTotal = data.rows.sum(r => valueColumn.getValue(r));
 
   var size = d3.scaleLinear()
@@ -42,7 +43,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     .outerRadius(outerRadious)
     .innerRadius(rInner);
 
-  var legendRadius = 1.2;
+  var legendRadius = 1.1;
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
@@ -56,6 +57,11 @@ export default function renderPie({ data, width, height, parameters, loading, on
           var m = (slice.endAngle + slice.startAngle) / 2;
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
           var active = detector?.(slice.data);
+
+          var isLeftHalf = m < Math.PI;
+
+          var textAnchor = isLeftHalf ? 'start' : 'end';
+
           return (
             <g key={slice.index} className="slice hover-group">
               <path className="shape sf-transition hover-target" d={arc(slice)!}
@@ -66,25 +72,24 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                 shapeRendering="initial"
                 onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-                <div className="bg-success ">
-                  {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
-                </div>
               </path>
               <g key={slice.index} className="color-legend">
                 <TextRectangle className="color-legend sf-chart-strong sf-transition"
-                  rectangleAtts={{fill: "transparent"}}
+                  rectangleAtts={{ fill: "transparent" }}
                   transform={translate(
                     Math.sin(m) * outerRadious * legendRadius,
                     -Math.cos(m) * outerRadious * legendRadius)}
                   opacity={active == false ? .5 : undefined}
-                  textAnchor='middle'
-                  dominantBaseline="middle"
+                  textAnchor={textAnchor}
+                  dominantBaseline="central"
                   fontWeight={active == true ? "bold" : undefined}
                   fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                   onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-                  {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Yes" ?
+                  {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Percent" ?
                     `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data) / dataTotal).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}` :
-                    keyColumn.getValueNiceName(slice.data)}
+                    pValueAsNumber == "Number" ?
+                      `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data)).toLocaleString(undefined, { style: 'decimal' })}` :
+                      keyColumn.getValueNiceName(slice.data)}
                 </TextRectangle>
               </g>
             </g>
@@ -95,4 +100,3 @@ export default function renderPie({ data, width, height, parameters, loading, on
     </svg>
   );
 }
-

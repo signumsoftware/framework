@@ -36,8 +36,6 @@ export var allTypes: string[] = [];
 
 export function start(options: {
   routes: RouteObject[],
-  pop3Config: boolean,
-  sendEmailTask: boolean,
   contextual: boolean,
   queryButton: boolean,
   quickLinkInDefaultGroup?: boolean
@@ -97,10 +95,6 @@ export function start(options: {
   }));
 
   Navigator.addSettings(new EntitySettings(EmailSenderConfigurationEntity, e => import('./Templates/EmailSenderConfiguration')));
-
-  if (options.pop3Config) {
-
-  }
 
   if (options.contextual)
     ContexualItems.onContextualItems.push(getEmailTemplates);
