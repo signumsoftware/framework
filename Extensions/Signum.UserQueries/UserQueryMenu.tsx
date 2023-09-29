@@ -107,7 +107,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         ofo.pagination = nfo.pagination;
         ofo.systemTime = nfo.systemTime;
         if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-          sc.setState({ showFilters: false });
+          sc.handleChangeFiltermode('Simple');
         sc.setState({ refreshMode: sc.props.defaultRefreshMode });
         setCurrentUserQuery(undefined, undefined);
         if (ofo.pagination.mode != "All") {
@@ -125,7 +125,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-            sc.setState({ showFilters: false, simpleFilterBuilder: undefined });
+            sc.handleChangeFiltermode('Simple');
           setCurrentUserQuery(uq, translated(userQuery, a=>a.displayName));
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();

@@ -8,7 +8,7 @@ import {
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
-import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
@@ -34,9 +34,9 @@ import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
-import { getBreakpoint, Breakpoints } from '../Hooks'
+import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faFilter } from '@fortawesome/free-solid-svg-icons'
+import { faEllipsis, faFilter } from '@fortawesome/free-solid-svg-icons'
 import { similarToken } from '../Search'
 
 interface ColumnParsed {
@@ -145,13 +145,15 @@ export interface SearchControlLoadedState {
     rowIndex: number | null;
   };
 
-  showFilters: boolean;
   refreshMode?: RefreshMode;
   editingColumn?: ColumnOptionParsed;
   lastToken?: QueryToken;
   isMobile?: boolean;
   viewMode?: SearchControlViewMode;
+  filterMode: SearchControlFilterMode;
 }
+
+type SearchControlFilterMode = "Simple" | "Advanced" | "Pinned";
 
 export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
 
@@ -159,8 +161,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     super(props);
     this.state = {
       isSelectOpen: false,
-      showFilters: props.showFilters,
       refreshMode: props.defaultRefreshMode,
+      filterMode: props.showFilters ? "Advanced" : "Simple",
     };
   }
 
@@ -191,22 +193,25 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       }, () => this.fixScroll());
   }
 
+  getSimpleFilterBuilderElement() {
+    const fo = this.props.findOptions;
+    const qd = this.props.queryDescription;
+    var qs = this.props.querySettings;
+    return this.props.showSimpleFilterBuilder == false ? undefined :
+      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
+        qs?.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
+          undefined;
+  }
+
   componentDidMount() {
     window.addEventListener('resize', this.onResize);
     this.onResize();
 
-    const fo = this.props.findOptions;
-    const qs = Finder.getSettings(fo.queryKey);
-    const qd = this.props.queryDescription;
-
-    const sfb = this.props.showSimpleFilterBuilder == false ? undefined :
-      this.props.simpleFilterBuilder ? this.props.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
-        qs?.simpleFilterBuilder ? qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: fo.filterOptions, search: () => this.doSearchPage1(), searchControl: this }) :
-          undefined;
+    const sfb = this.getSimpleFilterBuilderElement();
 
     if (sfb) {
       this.setState({
-        showFilters: false,
+        filterMode: "Simple",
         simpleFilterBuilder: sfb
       });
     }
@@ -520,7 +525,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true &&
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
-              this.state.showFilters ? <FilterBuilder
+              this.state.filterMode != 'Simple' ? <FilterBuilder
                 queryDescription={qd}
                 filterOptions={fo.filterOptions}
                 lastToken={this.state.lastToken}
@@ -528,14 +533,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 onTokenChanged={this.handleFilterTokenChanged}
                 onFiltersChanged={()=> this.handleFiltersChanged()}
                 onHeightChanged={this.handleHeightChanged}
-                showPinnedFiltersOptions={false}
-                showPinnedFiltersOptionsButton={true}
+                showPinnedFiltersOptions={this.state.filterMode == 'Pinned'}
+                showPinnedFiltersOptionsButton={false}
                 showDashboardBehaviour={false}
               /> :
               sfb && <div className="simple-filter-builder">{sfb}</div>}
           </div>
         }
-        {p.showHeader == true && !this.state.showFilters && !sfb && this.renderPinnedFilters(true)}
+        {p.showHeader == true && this.state.filterMode == "Simple" && !sfb && this.renderPinnedFilters(true)}
         {p.showHeader == "PinnedFilters" && (sfb ?? this.renderPinnedFilters(true))}
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
@@ -594,12 +599,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleToggleFilters = () => {
+  handleChangeFiltermode = (mode: SearchControlFilterMode) => {
+    if (this.state.filterMode == mode)
+      return;
+
     this.getFindOptionsWithSFB().then(() => {
       this.simpleFilterBuilderInstance = undefined;
       this.setState({
-        simpleFilterBuilder: undefined,
-        showFilters: !this.state.showFilters
+        simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
+        filterMode: mode
       }, () => this.handleHeightChanged());
     });
   }
@@ -615,43 +623,6 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     this.forceUpdate();
   }
 
-  handleToggleGroupBy = () => {
-    var fo = this.props.findOptions;
-    var qd = this.props.queryDescription;
-    this.resetResults(() => {
-      if (fo.groupResults) {
-
-        fo.groupResults = false;
-        removeAggregates(fo.filterOptions, qd);
-        removeAggregates(fo.orderOptions, qd);
-        removeAggregates(fo.columnOptions, qd);
-        this.forceUpdate();
-
-        this.doSearchPage1();
-
-      } else {
-        fo.groupResults = true;
-        if (this.state.simpleFilterBuilder) {
-          this.simpleFilterBuilderInstance = undefined;
-          this.setState({ simpleFilterBuilder: undefined, showFilters: true });
-        }
-
-        var tc = new Finder.TokenCompleter(qd);
-        //addAggregates(fo.filterOptions, qd, "request");
-        withAggregates(fo.orderOptions, tc, "request");
-        withAggregates(fo.columnOptions, tc, "request");
-
-        tc.finished().then(() => {
-          //addAggregates(fo.filterOptions, qd, "get");
-          withAggregates(fo.orderOptions, tc, "get");
-          withAggregates(fo.columnOptions, tc, "get");
-          this.forceUpdate();
-          this.doSearchPage1();
-        });
-      }
-    });
-  }
-
   renderToolBar() {
 
     const p = this.props;
@@ -665,7 +636,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     const isManualOrAll = this.isManualRefreshOrAllPagination();
-    var changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions);
+    var changesExpected = s.dataChanged || s.resultFindOptions == null || toFindOptionsPath(s.resultFindOptions) != toFindOptionsPath(p.findOptions) || this.state.filterMode != 'Simple';
 
     var buttonBarElements = [
       ...Finder.ButtonBarQuery.getButtonBarElements({ findOptions: p.findOptions, searchControl: this }),
@@ -679,43 +650,16 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const titleLabels = StyleContext.default.titleLabels;
 
     var leftButtons = ([
-
       p.showFilterButton && {
         order: -5,
-        button: <button
-          className={classes("sf-query-button sf-filters-header btn", s.showFilters && "active", "btn-light")}
-          style={!s.showFilters && p.findOptions.filterOptions.filter(a => !a.pinned).length > 0 ? { border: "1px solid #6c757d" } : undefined}
-          onClick={this.handleToggleFilters}
-          title={titleLabels ? s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString() : undefined}>
-          <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={s.showFilters ? "60px" : "40px"} stroke="currentColor" fill="transparent" />
-        </button>
-      },
-
-      p.showGroupButton && {
-        order: -4,
-        button: <button
-          className={"sf-query-button btn " + (p.findOptions.groupResults ? "btn-info active" : "btn-light")}
-          onClick={this.handleToggleGroupBy}
-          title={titleLabels ? p.findOptions.groupResults ? JavascriptMessage.ungroupResults.niceToString() : JavascriptMessage.groupResults.niceToString() : undefined}>
-          Ʃ
-            </button>
-      },
-
-      p.showSystemTimeButton && {
-        order: -3.5,
-        button: < button
-          className={"sf-query-button btn " + (p.findOptions.systemTime ? "alert-primary" : "btn-light")}
-          style={{  color: "var(--bs-alert-color)", backgroundColor: "var(--bs-alert-bg)" }}
-          onClick={this.handleSystemTimeClick}
-          title={titleLabels ? p.findOptions.systemTime ? JavascriptMessage.deactivateTimeMachine.niceToString() : JavascriptMessage.activateTimeMachine.niceToString() : undefined}>
-          <FontAwesomeIcon icon="clock-rotate-left" />
-        </button>
+        button: <SearchControlEllipsisMenu sc={this} isHidden={!p.showFilterButton} />
       },
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))} onClick={this.handleSearchClick} >
-          <FontAwesomeIcon icon={"magnifying-glass"} /><span className="d-none d-sm-inline">&nbsp;{changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()}</span>
+        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))}
+          onClick={this.handleSearchClick} title={changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()} >
+          <FontAwesomeIcon icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
         </button>
       },
 
@@ -723,8 +667,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       p.create && !this.props.ctx?.frame?.currentDate && {
         order: -2,
-        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title = { titleLabels? this.createTitle() : undefined } onClick = { this.handleCreate }>
-          <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline">&nbsp;{SearchMessage.Create.niceToString()}</span>
+        button: <button className={classes("sf-query-button btn ", p.createButtonClass ?? "btn-light", "sf-create ms-2")} title={titleLabels ? this.createTitle() : undefined} onClick={this.handleCreate}>
+          <FontAwesomeIcon icon="plus" className="sf-create" /><span className="d-none d-sm-inline ms-1">{this.createTitle()}</span>
         </button>
       },
 
@@ -974,8 +918,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var showFilter = await rule.execute(token, value, this);
 
-    if (!this.state.showFilters && showFilter) {
-      this.setState({ showFilters: true });
+    if (this.state.filterMode == "Simple" && showFilter) {
+      this.handleChangeFiltermode("Advanced");
     }
 
     if (rt && cm.rowIndex != null)
@@ -2178,5 +2122,45 @@ function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: stri
     </svg>
   );
 }
+
+
+
+function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boolean }) {
+
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
+  if (p.isHidden)
+    return null;
+
+  function handleSelectedToggle(isOpen: boolean) {
+    setIsOpen(isOpen);
+  }
+  var props = p.sc.props;
+  var filterMode = p.sc.state.filterMode;
+  return (
+    <Dropdown onToggle={handleSelectedToggle} show={isOpen}>
+      <Dropdown.Toggle as={EllipseToggle} id="ellipsisMenuDropDown" variant={"light"} >  
+      </Dropdown.Toggle>
+      <Dropdown.Menu>
+        <Dropdown.Item active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.CustomizeSimpleFilters.niceToString()}</Dropdown.Item>
+        {props.showSystemTimeButton && <Dropdown.Divider />}
+        {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+}
+
+const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: React.ReactNode, onClick?: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
+  return (
+    <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
+      href=""
+      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
+      <FontAwesomeIcon icon="ellipsis" title={SearchMessage.Options.niceToString()} />
+      {p.children}
+    </a>
+  );
+});
 
 export default SearchControlLoaded;
