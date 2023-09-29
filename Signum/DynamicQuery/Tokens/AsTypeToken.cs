@@ -28,7 +28,7 @@ public class AsTypeToken : QueryToken
 
     public override string Key
     {
-        get { return "({0})".FormatWith(TypeEntity.GetCleanName(entityType)); }
+        get { return "({0})".FormatWith(TypeLogic.GetCleanName(entityType)); }
     }
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)

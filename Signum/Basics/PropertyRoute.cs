@@ -270,7 +270,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
         switch (PropertyRouteType)
         {
             case PropertyRouteType.Root:
-                return "({0})".FormatWith(typeof(Entity).IsAssignableFrom(type!) ? TypeEntity.GetCleanName(type!) : type!.Name);
+                return "({0})".FormatWith(typeof(Entity).IsAssignableFrom(type!) ? TypeLogic.GetCleanName(type!) : type!.Name);
             case PropertyRouteType.FieldOrProperty:
                 return Parent!.ToString() + (Parent!.PropertyRouteType == PropertyRouteType.MListItems ? "" : ".") + (PropertyInfo != null ? PropertyInfo.Name : FieldInfo!.Name);
             case PropertyRouteType.Mixin:
@@ -320,7 +320,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
         var startType = typeParentheses.IndexOf('(') + 1;
         var cleanType = typeParentheses.Substring(startType, typeParentheses.IndexOf(')') - startType);
 
-        var type = TypeEntity.TryGetType(cleanType);
+        var type = TypeLogic.TryGetType(cleanType);
 
         if (type == null)
             throw new FormatException("Type {0} is not recognized".FormatWith(typeParentheses));

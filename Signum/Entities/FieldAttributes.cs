@@ -149,7 +149,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         if (IsByAll)
             return "[ALL]";
 
-        return Types.ToString(TypeEntity.GetCleanName, ", ");
+        return Types.ToString(TypeLogic.GetCleanName, ", ");
     }
 
 
