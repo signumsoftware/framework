@@ -194,8 +194,7 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
 
   return ValueLineRenderers.renderers.get(c.props.valueLineType!)!(c);
 }), (prev, next) => {
-  if (
-    next.extraButtons || prev.extraButtons)
+  if (next.extraButtons || prev.extraButtons)
     return false;
 
   return LineBaseController.propEquals(prev, next);
