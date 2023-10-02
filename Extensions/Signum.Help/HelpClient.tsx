@@ -10,6 +10,7 @@ import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signu
 import { QueryString } from '@framework/QueryString';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
+import { CultureInfoEntity } from '@framework/Signum.Basics';
 
 export function start(options: { routes: RouteObject[] }) {
   OmniboxClient.registerProvider(new HelpOmniboxProvider());
@@ -18,6 +19,8 @@ export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/help/namespace/:namespace*", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
   options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
   options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
+
+  
 }
 
 
@@ -98,6 +101,7 @@ export module API {
 }
 
 export interface HelpIndexTS {
+  culture: CultureInfoEntity;
   namespaces: Array<NamespaceItemTS>;
   appendices: Array<AppendiceItemTS>;
 }

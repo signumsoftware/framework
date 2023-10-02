@@ -43,19 +43,12 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
 
   return (
     <div className="sf-edit-container">
-      {/*{*/}
-      {/*  (ctx.value ? <MarkdownText text={ctx.value} /> :*/}
-      {/*    defaultText ? <span>{defaultText}</span> :*/}
-      {/*      <span className="sf-no-text">[{ctx.niceName()}]</span>) */}
-      {/*}*/}
 
-      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} />
-      }
+      {editable ? <HelpHtmlEditor binding={ctx.binding} /> : <HtmlViewer text={ctx.value} /> }
 
       {!ctx.readOnly && <a href="#" className={classes("sf-edit-button", editable && "active", ctx.value && "block")} onClick={e => { e.preventDefault(); setEditable(!editable); }}>
         <FontAwesomeIcon icon={editable ? "close" : "pen-to-square"} className="ms-2" title={(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()} /> {(editable ? HelpMessage.Close : HelpMessage.Edit).niceToString()}
       </a>}
-{/*      {editable && <ValueLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} />}*/}
     </div>
   );
 }

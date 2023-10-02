@@ -34,6 +34,7 @@ export default function AppendixHelpHelp() {
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
         <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+        <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
       <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />

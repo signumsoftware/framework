@@ -81,6 +81,7 @@ export default function TypeHelpPage() {
         {namespaceHelp && <Link to={Urls.namespaceUrl(namespaceHelp.namespace)}>{namespaceHelp.title}</Link>}
         {" > "}
         {getTypeInfo(typeHelp.type.cleanName).niceName}
+        <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
       <div className="shortcut-container">
         <Shortcut text={`[t:${cleanName}]`} />

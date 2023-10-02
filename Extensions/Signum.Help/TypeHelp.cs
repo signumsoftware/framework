@@ -30,7 +30,7 @@ public class TypeHelpEntity : Entity, IHelpImageTarget
     }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     protected override string? PropertyValidation(System.Reflection.PropertyInfo pi)
     {
@@ -92,7 +92,7 @@ public class PropertyRouteHelpEmbedded : EmbeddedEntity
     public PropertyRouteEntity Property { get; set; }
 
     [Ignore]
-    public string Info { get; set; }
+    public string? Info { get; set; }
 
     [StringLengthValidator(MultiLine = true), ForceNotNullable]
     public string? Description { get; set; }

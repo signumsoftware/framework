@@ -33,6 +33,7 @@ export default function NamespaceHelpPage() {
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
         <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} defaultText={namespace.title} onChange={forceUpdate} />
+        <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
       <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-2")}>

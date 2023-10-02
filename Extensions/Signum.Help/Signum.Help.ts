@@ -165,7 +165,7 @@ export const PropertyRouteHelpEmbedded = new Type<PropertyRouteHelpEmbedded>("Pr
 export interface PropertyRouteHelpEmbedded extends Entities.EmbeddedEntity {
   Type: "PropertyRouteHelpEmbedded";
   property: Basics.PropertyRouteEntity;
-  info: string;
+  info: string | null;
   description: string | null;
 }
 
@@ -204,7 +204,7 @@ export interface TypeHelpEntity extends Entities.Entity, IHelpImageTarget {
   operations: Entities.MList<OperationHelpEmbedded>;
   queries: Entities.MList<QueryHelpEntity>;
   isEmpty: boolean;
-  info: string;
+  info: string | null;
 }
 
 export module TypeHelpOperation {

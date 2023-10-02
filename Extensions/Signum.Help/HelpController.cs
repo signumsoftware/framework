@@ -15,6 +15,8 @@ public class HelpController : ControllerBase
         HelpPermissions.ViewHelp.AssertAuthorized();
         return new HelpIndexTS
         {
+            Culture = HelpLogic.GetCulture().ToCultureInfoEntity(),
+
             Namespaces = HelpLogic.GetNamespaceHelps().Select(s => new NamespaceItemTS
             {
                 Namespace = s.Namespace,
@@ -141,8 +143,10 @@ public class HelpController : ControllerBase
 
 public class HelpIndexTS
 {
+    public CultureInfoEntity Culture;
     public List<NamespaceItemTS> Namespaces;
     public List<AppendiceItemTS> Appendices;
+
 }
 
 public class NamespaceItemTS

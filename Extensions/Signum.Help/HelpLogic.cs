@@ -94,7 +94,16 @@ public static class HelpLogic
                     Description = q.Description.Try(d => d.Etc(100))
                 });
 
-            sb.Include<HelpImageEntity>();
+            sb.Include<HelpImageEntity>()
+                .WithQuery(() => q => new
+                {
+                    Entity = q,
+                    q.Id,
+                    q.CreationDate,
+                    q.File,
+                    q.Target,
+                });
+
             sb.Schema.EntityEvents<AppendixHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
             sb.Schema.EntityEvents<NamespaceHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };
             sb.Schema.EntityEvents<TypeHelpEntity>().PreUnsafeDelete += query => { query.SelectMany(a => a.Images()).UnsafeDelete(); return null; };

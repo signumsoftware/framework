@@ -1,5 +1,6 @@
 using Signum.Basics;
 using Signum.Engine.Sync;
+using Signum.Files;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -395,28 +396,36 @@ public static class HelpXml
         bool? replace = null;
         bool? delete = null;
 
+        var cie = ci.ToCultureInfoEntity();
+
+        var group = Database.Query<HelpImageEntity>().GroupToDictionary(a => a.Target);
+
         SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, AppendicesDirectory),
-            Database.Query<AppendixHelpEntity>().Where(ah => ah.Culture.Name == ci.Name).ToList(),
-            ah => "{0}.{1}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name),
-            ah => AppendixXml.ToXDocument(ah));
+            Database.Query<AppendixHelpEntity>().Where(ah => ah.Culture.Is(cie)).ToList(),
+            ah => "{0}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name),
+            ah => AppendixXml.ToXDocument(ah),
+            ah => group.TryGetC(ah.ToLite()));
 
         SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, NamespacesDirectory),
-            Database.Query<NamespaceHelpEntity>().Where(nh => nh.Culture.Name == ci.Name).ToList(),
-            nh => "{0}.{1}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name),
-            nh => NamespaceXml.ToXDocument(nh));
+            Database.Query<NamespaceHelpEntity>().Where(nh => nh.Culture.Is(cie)).ToList(),
+            nh => "{0}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name),
+            nh => NamespaceXml.ToXDocument(nh),
+            ah => group.TryGetC(ah.ToLite()));
 
         SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, TypesDirectory),
-            Database.Query<TypeHelpEntity>().Where(th => th.Culture.Name == ci.Name).ToList(),
-            th => "{0}.{1}.help".FormatWith(RemoveInvalid(th.Type.CleanName), th.Culture.Name),
-            th => EntityXml.ToXDocument(th));
+            Database.Query<TypeHelpEntity>().Where(th => th.Culture.Is(cie)).ToList(),
+            th => "{0}.help".FormatWith(RemoveInvalid(th.Type.CleanName), th.Culture.Name),
+            th => EntityXml.ToXDocument(th),
+            ah => group.TryGetC(ah.ToLite()));
 
         SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, QueriesDirectory),
-            Database.Query<QueryHelpEntity>().Where(qh => qh.Culture.Name == ci.Name).ToList(),
-            qh => "{0}.{1}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name),
-            qh => QueryXml.ToXDocument(qh));
+            Database.Query<QueryHelpEntity>().Where(qh => qh.Culture.Is(cie)).ToList(),
+            qh => "{0}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name),
+            qh => QueryXml.ToXDocument(qh),
+            ah => group.TryGetC(ah.ToLite()));
     }
 
-    public static void SyncFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML)
+    public static void SyncFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML, Func<T, List<HelpImageEntity>?> getImages)
     {
         if (should.Any() && !Directory.Exists(folder))
             Directory.CreateDirectory(folder);
@@ -428,9 +437,23 @@ public static class HelpXml
         Synchronizer.Synchronize(
             newDictionary: should.ToDictionary(fileName),
             oldDictionary: !Directory.Exists(folder) ? new() : Directory.GetFiles(folder).ToDictionary(a => Path.GetFileName(a)),
-            createNew: (fileName, entity) => {
+            createNew: (fileName, entity) =>
+            {
                 toXML(entity).Save(Path.Combine(folder, fileName));
                 SafeConsole.WriteLineColor(ConsoleColor.Green, " Created " + fileName);
+
+                var images = getImages(entity);
+                if (images != null)
+                {
+                    var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                    Directory.CreateDirectory(imgDirectory);
+
+                    foreach (var img in images)
+                    {
+                        var bla = Path.Combine(imgDirectory, img.File.Hash + "." + img.File.FileName);
+                        File.WriteAllBytes(bla, img.File.GetByteArray());
+                    }
+                }
             },
             removeOld: (fileName, fullName) =>
             {
@@ -438,8 +461,13 @@ public static class HelpXml
                 {
                     File.Delete(fullName);
                     SafeConsole.WriteLineColor(ConsoleColor.Red, " Deleted " + fileName);
+
+                    var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                    if (Directory.Exists(imgDirectory))
+                        Directory.Delete(imgDirectory, true);
                 }
-            }, merge: (fileName, entity, fullName) =>
+            },
+            merge: (fileName, entity, fullName) =>
             {
                 var xml = toXML(entity);
 
@@ -458,7 +486,39 @@ public static class HelpXml
                 {
                     SafeConsole.WriteLineColor(ConsoleColor.DarkGray, " Identical " + fileName);
                 }
-            }); ;
+
+                var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                var images = getImages(entity);
+                if (images != null)
+                {
+                    var currImages = Directory.GetFiles(imgDirectory).ToDictionary(a => Path.GetFileName(a));
+
+                    var shouldImages = images.ToDictionaryEx(a => a.File.Hash + "." + a.File.FileName);
+
+                    var newEntities = new List<T>();
+                    Synchronizer.Synchronize(
+                          newDictionary: shouldImages,
+                          oldDictionary: currImages,
+                          createNew: (k, n) =>
+                          {
+                              File.WriteAllBytes(Path.Combine(imgDirectory, k), n.File.GetByteArray());
+                              SafeConsole.WriteColor(ConsoleColor.DarkGreen, '.');
+                          },
+                          removeOld: (k, o) =>
+                          {
+                              File.Delete(Path.Combine(imgDirectory, k));
+                              SafeConsole.WriteColor(ConsoleColor.DarkRed, '.');
+                          },
+                          merge: (k, n, o) =>
+                          {
+                          });
+                }
+                else
+                {
+                    if (Directory.Exists(imgDirectory))
+                        Directory.Delete(imgDirectory, true);
+                }
+            });
 
         delete = deleteLocal;
         replace = replaceLocal;

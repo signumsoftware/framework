@@ -19,10 +19,7 @@ export default function HelpIndexPage() {
 
   return (
     <div className="container">
-      <h1 className="display-5">{HelpMessage.Help.niceToString()}</h1>
-
-
-
+      <h1 className="display-5">{HelpMessage.Help.niceToString()} {index && <small className="ms-5 text-muted display-7">({index.culture.englishName})</small>}</h1>
 
       {index && <div>
 
