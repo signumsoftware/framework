@@ -17,25 +17,11 @@ public class SchemaBuilder
 
     public WebServerBuilder? WebServerBuilder { get; init; }
 
-    public SchemaBuilder(bool isDefault)
+    public SchemaBuilder()
     {
         schema = new Schema(new SchemaSettings());
 
-        if (isDefault)
-        {
-            if (TypeEntity.AlreadySet)
-                throw new InvalidOperationException("Only one default SchemaBuilder per application allowed");
-
-            TypeEntity.SetTypeNameCallbacks(
-                t => schema.TypeToName.GetOrThrow(t, "Type {0} not found in the schema"),
-                cleanName => schema.NameToType.TryGetC(cleanName));
-
-            FromEnumMethodExpander.miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition();
-            MListElementPropertyToken.miMListElementsLite = ReflectionTools.GetMethodInfo(() => Database.MListElementsLite<Entity, Entity>(null!, null!)).GetGenericMethodDefinition();
-            MListElementPropertyToken.HasAttribute = (pr, type) => this.Settings.FieldAttributes(pr)?.Any(a => a.GetType() == type) ?? false;
-        }
-
-        Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
+        schema.Settings.AssertNotIncluded = MixinDeclarations.AssertNotIncluded = t =>
         {
             if (schema.Tables.ContainsKey(t))
                 throw new InvalidOperationException("{0} is already included in the Schema".FormatWith(t.TypeName()));
@@ -341,7 +327,7 @@ public class SchemaBuilder
                 new ObjectName(tableName.Schema, tableName.Name + "_History", isPostgres);
 
         if (isPostgres)
-            return new SystemVersionedInfo(tn, att.PostgreeSysPeriodColumname);
+            return new SystemVersionedInfo(tn, att.PostgresSysPeriodColumname);
 
         return new SystemVersionedInfo(tn, att.StartDateColumnName, att.EndDateColumnName);
     }

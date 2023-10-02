@@ -7,7 +7,6 @@ import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
 import { KeyCodes } from '@framework/Components';
 import { TextRectangle } from './StackedLines';
-import TextEllipsis from './Components/TextEllipsis';
 
 export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
 
@@ -44,8 +43,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     .outerRadius(outerRadious)
     .innerRadius(rInner);
 
-  var legendRadius = 1.2;
-
+  var legendRadius = 1.1;
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
 
@@ -59,8 +57,14 @@ export default function renderPie({ data, width, height, parameters, loading, on
           var m = (slice.endAngle + slice.startAngle) / 2;
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
           var active = detector?.(slice.data);
+
+          var isRight = m < Math.PI;
+
+          var textAnchor = isRight ? 'start' : 'end';
+
           return (
             <g key={slice.index} className="slice hover-group">
+              <title>{`${keyColumn.getValueNiceName(slice.data)}: ${valueColumn.getValue(slice.data)}`}</title>
               <path className="shape sf-transition hover-target" d={arc(slice)!}
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "black" : undefined}
@@ -69,27 +73,24 @@ export default function renderPie({ data, width, height, parameters, loading, on
                 fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                 shapeRendering="initial"
                 onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
-                <div className="bg-success ">
-                  {keyColumn.getValueNiceName(slice.data) + ': ' + valueColumn.getValueNiceName(slice.data)}
-                </div>
               </path>
               <g key={slice.index} className="color-legend">
                 <TextRectangle className="color-legend sf-chart-strong sf-transition"
-                  rectangleAtts={{fill: "transparent"}}
+                  rectangleAtts={{ fill: "transparent" }}
                   transform={translate(
                     Math.sin(m) * outerRadious * legendRadius,
                     -Math.cos(m) * outerRadious * legendRadius)}
                   opacity={active == false ? .5 : undefined}
-                  textAnchor='middle'
-                  dominantBaseline="middle"
+                  textAnchor={textAnchor}
+                  dominantBaseline="central"
                   fontWeight={active == true ? "bold" : undefined}
                   fill={keyColumn.getValueColor(slice.data) ?? color(keyColumn.getValueKey(slice.data))}
                   onClick={e => onDrillDown(slice.data, e)} cursor="pointer">
                   {((slice.endAngle - slice.startAngle) < (Math.PI / 16)) ? '' : pValueAsPercent == "Percent" ?
                     `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data) / dataTotal).toLocaleString(undefined, { style: 'percent', minimumFractionDigits: 1 })}` :
                     pValueAsNumber == "Number" ?
-                    `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data)).toLocaleString(undefined, { style: 'decimal' })}` :
-                    keyColumn.getValueNiceName(slice.data)}
+                      `${keyColumn.getValueNiceName(slice.data)} : ${Number(valueColumn.getValue(slice.data)).toLocaleString(undefined, { style: 'decimal' })}` :
+                      keyColumn.getValueNiceName(slice.data)}
                 </TextRectangle>
               </g>
             </g>
@@ -100,4 +101,3 @@ export default function renderPie({ data, width, height, parameters, loading, on
     </svg>
   );
 }
-

@@ -564,7 +564,10 @@ export module SearchMessage {
   export const CollectionsCanNotBeAddedAsColumns = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
   export const InvalidColumnExpression = new MessageKey("SearchMessage", "InvalidColumnExpression");
   export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
-  export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
+  export const AddOrGroup = new MessageKey("SearchMessage", "AddOrGroup");
+  export const AddAndGroup = new MessageKey("SearchMessage", "AddAndGroup");
+  export const OrGroup = new MessageKey("SearchMessage", "OrGroup");
+  export const AndGroup = new MessageKey("SearchMessage", "AndGroup");
   export const GroupPrefix = new MessageKey("SearchMessage", "GroupPrefix");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
@@ -641,6 +644,11 @@ export module SearchMessage {
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
   export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
   export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
+  export const SimpleFilters = new MessageKey("SearchMessage", "SimpleFilters");
+  export const AdvancedFilters = new MessageKey("SearchMessage", "AdvancedFilters");
+  export const CustomizeSimpleFilters = new MessageKey("SearchMessage", "CustomizeSimpleFilters");
+  export const TimeMachine = new MessageKey("SearchMessage", "TimeMachine");
+  export const Options = new MessageKey("SearchMessage", "Options");
 }
 
 export module SelectorMessage {

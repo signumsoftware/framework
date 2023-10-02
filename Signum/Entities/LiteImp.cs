@@ -176,12 +176,12 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
     public string Key()
     {
-        return "{0};{1}".FormatWith(TypeEntity.GetCleanName(this.EntityType), this.Id);
+        return "{0};{1}".FormatWith(TypeLogic.GetCleanName(this.EntityType), this.Id);
     }
 
     public string KeyLong()
     {
-        return "{0};{1};{2}".FormatWith(TypeEntity.GetCleanName(this.EntityType), this.Id, this.ToString());
+        return "{0};{1};{2}".FormatWith(TypeLogic.GetCleanName(this.EntityType), this.Id, this.ToString());
     }
 
     public int CompareTo(Lite<Entity>? other)
