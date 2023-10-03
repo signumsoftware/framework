@@ -23,6 +23,7 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
 		<ProjectReference Include="..\Signum.Eval\Signum.Eval.csproj" />
+		<ProjectReference Include="..\Signum.Tree\Signum.Tree.csproj" />
 		<ProjectReference Include="..\Signum.Isolation\Signum.Isolation.csproj" />
 		<ProjectReference Include="..\Signum.Migrations\Signum.Migrations.csproj" />
 	</ItemGroup>

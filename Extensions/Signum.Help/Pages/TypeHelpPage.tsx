@@ -105,7 +105,7 @@ export default function TypeHelpPage() {
 
       {
         ctx.value.queries.length > 0 && (<>
-          <h2 className="display-7">{ctx.niceName(a => a.queries)}</h2>
+          <h2 className="display-6">{ctx.niceName(a => a.queries)}</h2>
           {mlistItemContext(ctx.subCtx(th => th.queries)).map(qctx => <QueryBlock key={qctx.value.query.key} ctx={qctx} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
         </>)
       }

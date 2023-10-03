@@ -3,6 +3,7 @@ using Signum.Files;
 namespace Signum.Help;
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
+[PrimaryKey(typeof(Guid))]
 public class HelpImageEntity : Entity
 {
     [ImplementedBy(typeof(AppendixHelpEntity), typeof(NamespaceHelpEntity), typeof(QueryHelpEntity), typeof(TypeHelpEntity))]
