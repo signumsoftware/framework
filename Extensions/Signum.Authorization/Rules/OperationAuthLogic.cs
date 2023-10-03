@@ -13,7 +13,6 @@ public static class OperationAuthLogic
 
     public static bool IsStarted { get { return cache != null; } }
 
-    public static readonly Dictionary<OperationSymbol, MinimumTypeAllowed> MinimumTypeAllowed = new Dictionary<OperationSymbol, MinimumTypeAllowed>();
     public static readonly Dictionary<OperationSymbol, OperationAllowed> MaxAutomaticUpgrade = new Dictionary<OperationSymbol, OperationAllowed>();
 
     internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
@@ -188,12 +187,6 @@ public static class OperationAuthLogic
         return ta.Contains(operationKey);
     }
 
-    public static T SetMinimumTypeAllowed<T>(this T operation, TypeAllowedBasic? overridenType, TypeAllowedBasic? returnType = null) where T : IOperation
-    {
-        MinimumTypeAllowed.Add(operation.OperationSymbol, new MinimumTypeAllowed { OverridenType = overridenType, ReturnType = returnType });
-        return operation;
-    }
-
     public static OperationAllowed InferredOperationAllowed((OperationSymbol operation, Type type) operationType, Func<Type, TypeAllowedAndConditions> allowed)
     {
         Func<Type, TypeAllowedBasic, OperationAllowed> operationAllowed = (t, checkFor) =>
@@ -210,21 +203,23 @@ public static class OperationAuthLogic
 
         var operation = OperationLogic.FindOperation(operationType.type ?? /*Temp*/  OperationLogic.FindTypes(operationType.operation).First(), operationType.operation);
 
-        var mta = OperationAuthLogic.MinimumTypeAllowed.TryGetC(operationType.operation);
         switch (operation.OperationType)
         {
             case OperationType.Execute:
+                var defaultAllowed = ((IExecuteOperation)operation).ForReadonlyEntity ? TypeAllowedBasic.Read : TypeAllowedBasic.Write;
+                return operationAllowed(operation.OverridenType, defaultAllowed);
+
             case OperationType.Delete:
-                return operationAllowed(operation.OverridenType, mta?.OverridenType ?? TypeAllowedBasic.Write);
+                return operationAllowed(operation.OverridenType, TypeAllowedBasic.Write);
 
             case OperationType.Constructor:
-                return operationAllowed(operation.ReturnType!, mta?.ReturnType ?? TypeAllowedBasic.Write);
+                return operationAllowed(operation.ReturnType!, TypeAllowedBasic.Write);
 
             case OperationType.ConstructorFrom:
             case OperationType.ConstructorFromMany:
                 {
-                    var fromTypeAllowed = operationAllowed(operation.OverridenType, mta?.OverridenType ?? TypeAllowedBasic.Read);
-                    var returnTypeAllowed = operationAllowed(operation.ReturnType!, mta?.ReturnType ?? TypeAllowedBasic.Write);
+                    var fromTypeAllowed = operationAllowed(operation.OverridenType, TypeAllowedBasic.Read);
+                    var returnTypeAllowed = operationAllowed(operation.ReturnType!, TypeAllowedBasic.Write);
 
                     return returnTypeAllowed < fromTypeAllowed ? returnTypeAllowed : fromTypeAllowed;
                 }

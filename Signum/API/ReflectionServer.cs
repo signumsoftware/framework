@@ -433,6 +433,7 @@ public class OperationInfoTS
     public OperationType OperationType;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeNew;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeModified;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? ForReadonlyEntity;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecute;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecuteExpression;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasStates;
@@ -443,6 +444,7 @@ public class OperationInfoTS
     public OperationInfoTS(OperationInfo oper)
     {
         this.CanBeNew = oper.CanBeNew;
+        this.ForReadonlyEntity = oper.ForReadonlyEntity;
         this.CanBeModified = oper.CanBeModified;
         this.HasCanExecute = oper.HasCanExecute;
         this.HasCanExecuteExpression = oper.HasCanExecuteExpression;
