@@ -80,9 +80,9 @@ public static class HelpXml
                           Description = element.Element(_Description)?.Value
                       }.Save();
 
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + a.UniqueName);
                       ImportImages(a, n, null);
-
-                      SafeConsole.WriteLineColor(ConsoleColor.Green, "  " + a.UniqueName);
+                      Console.WriteLine();
                   },
                   removeOld: (k, o) =>
                   {
@@ -102,14 +102,15 @@ public static class HelpXml
                       if (GraphExplorer.IsGraphModified(o))
                       {
                           o.Save();
-                          SafeConsole.WriteLineColor(ConsoleColor.Yellow, "  " + o.UniqueName);
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.UniqueName);
                       }
                       else
                       {
-                          SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  " + o.UniqueName);
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.UniqueName);
                       }
 
                       ImportImages(o, n, images.TryGetC(o.ToLite()));
+                      Console.WriteLine();
                   });
 
             deleteAll = deleteTemp;
@@ -193,9 +194,10 @@ public static class HelpXml
                           Description = element.Element(_Description)?.Value
                       }.Save();
 
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + a.Name);
                       ImportImages(a, n, null);
 
-                      SafeConsole.WriteLineColor(ConsoleColor.Green, "  " + a.Name);
+                      Console.WriteLine();
                   },
                   removeOld: (k, o) =>
                   {
@@ -215,14 +217,16 @@ public static class HelpXml
                       if (GraphExplorer.IsGraphModified(o))
                       {
                           o.Save();
-                          SafeConsole.WriteLineColor(ConsoleColor.Yellow, "  " + o.Name);
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.Name);
                       }
                       else
                       {
-                          SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  " + o.Name);
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Name);
                       }
 
                       ImportImages(o, n, images.TryGetC(o.ToLite()));
+
+                      Console.WriteLine();
                   });
 
             deleteAll = deleteTemp;
@@ -299,9 +303,11 @@ public static class HelpXml
                       ImportXml(queryHelp, element);
                       queryHelp.Save();
 
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + queryHelp.Query.Key);
+
                       ImportImages(queryHelp, n, null);
 
-                      SafeConsole.WriteLineColor(ConsoleColor.Green, "  " + queryHelp.Query.Key);
+                      Console.WriteLine();
                   },
                   removeOld: (k, o) =>
                   {
@@ -322,14 +328,16 @@ public static class HelpXml
                       if (GraphExplorer.IsGraphModified(queryHelp))
                       {
                           queryHelp.Save();
-                          SafeConsole.WriteLineColor(ConsoleColor.Yellow, "  " + queryHelp.Query.Key);
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + queryHelp.Query.Key);
                       }
                       else
                       {
-                          SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  " + queryHelp.Query.Key);
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + queryHelp.Query.Key);
                       }
 
                       ImportImages(queryHelp, n, images.TryGetC(queryHelp.ToLite()));
+
+                      Console.WriteLine();
                   });
 
             deleteAll = deleteTemp;
@@ -533,12 +541,11 @@ public static class HelpXml
                       };
 
                       ImportType(typeHelp, element);
-
-                      ImportImages(typeHelp, path, null);
-
                       typeHelp.Save();
 
-                      SafeConsole.WriteLineColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
+                      ImportImages(typeHelp, path, null);
+                      Console.WriteLine();
                   },
                   removeOld: (k, o) =>
                   {
@@ -557,14 +564,16 @@ public static class HelpXml
                       if (GraphExplorer.IsGraphModified(typeEntity))
                       {
                           typeEntity.Save();
-                          SafeConsole.WriteLineColor(ConsoleColor.Yellow, "  " + typeEntity.Type.CleanName);
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + typeEntity.Type.CleanName);
                       }
                       else
                       {
-                          SafeConsole.WriteLineColor(ConsoleColor.DarkGray, "  " + typeEntity.Type.CleanName);
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + typeEntity.Type.CleanName);
                       }
 
                       ImportImages(typeEntity, path, images.TryGetC(typeEntity.ToLite()));
+
+                      Console.WriteLine();
                   });
 
             deleteAll = deleteTemp;
@@ -584,7 +593,7 @@ public static class HelpXml
                   new HelpImageEntity
                   {
                       Target = ((IHelpImageTarget)entity).ToLite(),
-                      File = new FilePathEmbedded(HelpImageFileType.Image, n)
+                      File = new FilePathEmbedded(HelpImageFileType.Image, Path.GetFileName(n).After("."), File.ReadAllBytes(n))
                   }.Save();
                   SafeConsole.WriteColor(ConsoleColor.Green, '.');
               },
