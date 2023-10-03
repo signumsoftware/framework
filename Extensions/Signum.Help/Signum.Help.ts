@@ -93,6 +93,7 @@ export module HelpMessage {
   export const Next = new MessageKey("HelpMessage", "Next");
   export const Edit = new MessageKey("HelpMessage", "Edit");
   export const Close = new MessageKey("HelpMessage", "Close");
+  export const ViewMore = new MessageKey("HelpMessage", "ViewMore");
 }
 
 export module HelpPermissions {

@@ -81,7 +81,8 @@ public enum HelpMessage
     Previous,
     Next,
     Edit,
-    Close
+    Close,
+    ViewMore,
 }
 
 public enum HelpKindMessage

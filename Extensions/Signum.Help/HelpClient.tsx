@@ -3,14 +3,19 @@ import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Operations'
-import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo} from '@framework/Reflection'
+import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo, tryGetTypeInfo} from '@framework/Reflection'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
-import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity } from './Signum.Help';
+import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, HelpPermissions } from './Signum.Help';
 import { QueryString } from '@framework/QueryString';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import HelpOmniboxProvider from './HelpOmniboxProvider';
 import { CultureInfoEntity } from '@framework/Signum.Basics';
+import { WidgetContext, onWidgets } from '@framework/Frames/Widgets';
+import { HelpIcon, HelpWidget } from './HelpWidget';
+import { Entity, isEntity } from '@framework/Signum.Entities';
+import { tasks } from '@framework/Lines';
+import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 
 export function start(options: { routes: RouteObject[] }) {
   OmniboxClient.registerProvider(new HelpOmniboxProvider());
@@ -20,9 +25,20 @@ export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
   options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
 
-  
+  onWidgets.push(wc => AppContext.isPermissionAuthorized(HelpPermissions.ViewHelp) && isEntity(wc.ctx.value) ? <HelpWidget wc={wc as WidgetContext<Entity>} /> : undefined);
+
+  tasks.push(taskHelpIcon);
+
 }
 
+export function taskHelpIcon(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (state.labelIcon === undefined &&
+    state.ctx.propertyRoute &&
+    state.ctx.frame?.pack.typeHelp
+  ) {
+    state.labelIcon = <HelpIcon ctx={state.ctx} />;
+  }
+}
 
 var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|/]*)\]/gi;
 var helpAppRelativeUrl = /href="\//gi;
@@ -181,4 +197,11 @@ export module Urls {
     return "q-" + getQueryKey(query).replaceAll(".", "_");
   }
 
+}
+
+declare module '@framework/Signum.Entities' {
+
+  export interface EntityPack<T extends ModifiableEntity> {
+    typeHelp?: TypeHelpEntity;
+  }
 }
