@@ -19,9 +19,13 @@ export function GroupHeader(p: {
       p.avoidFieldSet.contains("display-") ? ("h" + p.avoidFieldSet.after("display-")) as "h1" :
         p.avoidFieldSet as "h1";
 
+
+    const className = typeof p.avoidFieldSet == "boolean" ? undefined :
+      p.avoidFieldSet.contains("display-") ? p.avoidFieldSet : undefined;
+
     return (
       <div className={p.className} {...p.htmlAttributes}>
-        {HeaderType && <HeaderType className={p.avoidFieldSet.contains("display-") ? p.avoidFieldSet : undefined}>{p.label}{p.labelIcon} {p.buttons}</HeaderType>}
+        {HeaderType && <HeaderType className={className}>{p.label}{p.labelIcon} {p.buttons}</HeaderType>}
         {p.children}
       </div>
     );
