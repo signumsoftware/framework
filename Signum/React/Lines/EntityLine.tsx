@@ -147,7 +147,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
   );
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label} helpText={p.helpText}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-line">

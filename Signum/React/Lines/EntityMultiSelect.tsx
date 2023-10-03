@@ -112,7 +112,7 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
   //TODO add TimeMachineIcon
   return (
     <FormGroup ctx={p.ctx!}
-      label={p.label}
+      label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>

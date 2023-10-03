@@ -97,7 +97,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   const readOnly = p.ctx.readOnly;
   return (
     <FormGroup ctx={p.ctx!}
-      label={p.label}
+      label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>

@@ -6,13 +6,14 @@ import { LineBaseController, LineBaseProps, useController } from '../Lines/LineB
 import { MList, newMListElement } from '../Signum.Entities'
 import { EntityCheckboxList } from './EntityCheckboxList'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 export interface EnumCheckboxListProps extends LineBaseProps {
   data?: string[];
   ctx: TypeContext<MList<string>>;
   columnCount?: number;
   columnWidth?: number;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
 }
 
 export class EnumCheckboxListController extends LineBaseController<EnumCheckboxListProps> {
@@ -51,9 +52,20 @@ export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props
   if (c.isHidden)
     return null;
 
+  return (
+    <GroupHeader className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} 
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={undefined}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }} >
+      {renderContent()}
+    </GroupHeader >
+  );
+
   if (p.avoidFieldSet == true)
     return (
-      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
+      <div{...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
         {renderContent()}
       </div>
     );

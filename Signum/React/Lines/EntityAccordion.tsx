@@ -14,11 +14,11 @@ import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
 import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
-import { KeyCodes } from '../Components'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 export interface EntityAccordionProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityAccordionController) => React.ReactElement<any>);
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   createMessage?: string;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
@@ -86,28 +86,16 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
 
   let ctx = p.ctx;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-accordion-field sf-control-container", ctx.errorClassBorder)}
-        {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-        {renderButtons()}
-        {renderAccordion()}
-      </div>
-    );
-
   return (
-    <fieldset className={classes("sf-accordion-field sf-control-container", ctx.errorClass)}
-      {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
+    <GroupHeader className={classes("sf-accordion-field sf-control-container", ctx.errorClassBorder)}
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
       {renderAccordion()}
-    </fieldset>
+    </GroupHeader >
   );
-
 
   function renderButtons() {
     const buttons = (
