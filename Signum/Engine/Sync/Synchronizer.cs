@@ -158,7 +158,7 @@ public static class Synchronizer
         set.UnionWith(newDictionary.Keys);
         set.UnionWith(oldDictionary.Keys);
 
-        return set.Select(key =>
+        var list = set.Select(key =>
         {
             var newVal = newDictionary.TryGetC(key);
             var oldVal = oldDictionary.TryGetC(key);
@@ -170,7 +170,9 @@ public static class Synchronizer
                 return createNew == null ? null : createNew(key, newVal);
 
             return mergeBoth == null ? null : mergeBoth(key, newVal, oldVal);
-        }).Combine(spacing);
+        }).ToList();
+
+        return list.Combine(spacing);
     }
 
 

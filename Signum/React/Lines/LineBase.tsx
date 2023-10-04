@@ -15,6 +15,7 @@ export interface LineBaseProps extends StyleOptions {
   ctx: TypeContext<any>;
   type?: TypeReference;
   label?: React.ReactNode;
+  labelIcon?: React.ReactNode;
   visible?: boolean;
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;

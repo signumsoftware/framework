@@ -12,6 +12,10 @@ import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
 import { renderLite } from '../Navigator'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
+import { getEntityOperationButtons } from '../Operations/EntityOperations'
+import { GroupHeader, HeaderType } from './GroupHeader'
+
+
 
 export interface RenderCheckboxItemContext<T> {
   row: ResultRow;
@@ -26,7 +30,7 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
   columnCount?: number | null;
   columnWidth?: number | null;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   onRenderCheckbox?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
   onRenderItem?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
@@ -36,8 +40,6 @@ export interface EntityCheckboxListProps extends EntityListBaseProps {
 }
 
 export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
-
-
 
   refresh: number = 0;
 
@@ -114,24 +116,15 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
   if (c.isHidden)
     return null;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-checkbox-list", p.ctx.errorClassBorder)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-        {renderButtons()}
-        {renderCheckboxList()}
-      </div>
-    );
-
   return (
-    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
+    <GroupHeader className={classes("sf-checkbox-list", p.ctx.errorClassBorder)}
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
       {renderCheckboxList()}
-    </fieldset>
+    </GroupHeader >
   );
 
   function renderButtons() {

@@ -35,8 +35,6 @@ public static class SchemaSynchronizer
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
 
-
-
         SimplifyDiffTables?.Invoke(databaseTables);
 
         replacements.AskForReplacements(databaseTables.Keys.ToHashSet(), modelTables.Keys.ToHashSet(), Replacements.KeyTables);
@@ -260,7 +258,7 @@ public static class SchemaSynchronizer
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
                         var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.DropIndex(tab.Name, diffPK) :
-                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(dif.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
                         null;
 
                         var columns = Synchronizer.SynchronizeScript(
@@ -426,6 +424,30 @@ public static class SchemaSynchronizer
                 removeOld: (tn, dif) => sqlBuilder.DropTable(dif.Name),
                 mergeBoth: (tn, tab, dif) => !object.Equals(dif.Name, tab.SystemVersioned!.TableName) ? sqlBuilder.RenameOrMove(dif, tab, tab.SystemVersioned!.TableName, forHistoryTable: true) : null);
 
+            SqlPreCommand? versioningTriggers = !sqlBuilder.IsPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double, modelTables, databaseTables,
+                 createNew: null,
+                 removeOld: null,
+                   mergeBoth: (tn, tab, dif) =>
+                   {
+                       if(tab.SystemVersioned == null)
+                       {
+                           if (dif.VersionningTrigger == null)
+                               return null;
+
+                           return sqlBuilder.DropVersionningTrigger(tab.Name, dif.VersionningTrigger.tgname);
+                       }
+                       else
+                       {
+                           if (dif.VersionningTrigger == null)
+                               return sqlBuilder.CreateVersioningTrigger(tab);
+
+                           if (!Equals(PostgresCatalogSchema.ParseVersionFunctionParam(dif.VersionningTrigger.tgargs), tab.SystemVersioned.TableName))
+                               return sqlBuilder.CreateVersioningTrigger(tab, replace: true);
+
+                           return null;
+                       }
+                   });
+
             SqlPreCommand? syncEnums = SynchronizeEnumsScript(replacements);
 
             SqlPreCommand? addForeingKeys = Synchronizer.SynchronizeScript(
@@ -534,6 +556,7 @@ public static class SchemaSynchronizer
                 dropForeignKeys,
 
                 tables, historyTables,
+                versioningTriggers,
                 delayedUpdates.Combine(Spacing.Double), delayedDrops.Combine(Spacing.Double), delayedAddSystemVersioning.Combine(Spacing.Double),
                 syncEnums,
                 addForeingKeys,
@@ -635,6 +658,32 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
     private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, bool avoidDefault, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
     {
+        if (table.Name.Name == "EmailTemplate" && column.Name == "From_AddressSourceID") // Delete this if after 1.4.2024
+        {
+            return  SqlPreCommand.Combine(Spacing.Simple,
+                sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
+                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = CASE WHEN From_Token_HasValue = 1 THEN 0 ELSE 1 END
+WHERE From_HasValue = 1"))!;
+        }
+
+        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "AddressSourceID") // Delete this if after 1.4.2024
+        {
+            var tempDefault = new SqlBuilder.DefaultConstraint(
+                columnName: column.Name,
+                name: "DF_TEMP_" + column.Name,
+                quotedDefinition: sqlBuilder.Quote(column.DbType, "0"));
+
+            return SqlPreCommand.Combine(Spacing.Simple,
+                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name).Do(a => a.GoAfter = true),
+                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
+    {column.Name} = CASE WHEN Token_HasValue = 1 THEN 0 ELSE 1 END")
+
+                )!;
+        }
+
+
         if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
@@ -707,7 +756,7 @@ WHERE {where}"))!;
     {
         if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
         {
-            var date = svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
+            var date = svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? DateTime.MinValue : DateTime.MaxValue;
 
             return $"CONVERT(datetime2, '{date:yyyy-MM-dd HH:mm:ss.fffffff}')";
         }
@@ -1014,6 +1063,15 @@ public class DiffPeriod
     }
 }
 
+public class DiffPostgresVersioningTrigger
+{
+    public int? tgrelid;
+    public string tgname;
+    public string proname;
+    public byte[] tgargs;
+    public int tgfoid;
+}
+
 public class DiffTable
 {
     public ObjectName Name;
@@ -1045,6 +1103,8 @@ public class DiffTable
                 Indices.Remove(FullTextTableIndex.FULL_TEXT);
         }
     }
+
+    public DiffPostgresVersioningTrigger? VersionningTrigger { get; internal set; }
 
     public SysTableTemporalType TemporalType;
     public ObjectName? TemporalTableName;

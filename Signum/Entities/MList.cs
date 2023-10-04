@@ -774,11 +774,6 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
         this.AssignMList((MList<T>)newList);
         this.PostRetrieving(ctx);
     }
-
-    public void Insert(int? index, object? value)
-    {
-        throw new NotImplementedException();
-    }
 }
 
 

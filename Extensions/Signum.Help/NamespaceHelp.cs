@@ -3,7 +3,7 @@ using Signum.Basics;
 namespace Signum.Help;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class NamespaceHelpEntity : Entity
+public class NamespaceHelpEntity : Entity, IHelpImageTarget
 {
     [StringLengthValidator(Max = 300)]
     public string Name { get; set; }
@@ -18,6 +18,21 @@ public class NamespaceHelpEntity : Entity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
+
+    bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
+    {
+        bool changed = false;
+        if (Description != null)
+        {
+            var newDesc = processHtml(Description);
+            if (newDesc != Description)
+            {
+                changed = true;
+                Description = newDesc;
+            }
+        }
+        return changed;
+    }
 }
 
 [AutoInit]

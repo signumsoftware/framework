@@ -190,7 +190,7 @@ public class ResultColumn : ISerializable
     {
         var lite = ((Lite<Entity>)obj);
 
-        return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeEntity.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
+        return lite.Id + ";" + (lite.EntityType == defaultEntityType ? null : TypeLogic.GetCleanName(lite.EntityType)) + ";" + lite.ToString();
     }
 
     static object DeserializeLite(string str, Type defaultEntityType)
@@ -203,7 +203,7 @@ public class ResultColumn : ISerializable
 
         string toStr = tmp.After(';');
 
-        Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeEntity.TryGetType(typeStr)!;
+        Type type = string.IsNullOrEmpty(typeStr) ? defaultEntityType : TypeLogic.TryGetType(typeStr)!;
 
         return Lite.Create(type, PrimaryKey.Parse(idStr, type), toStr);
     }

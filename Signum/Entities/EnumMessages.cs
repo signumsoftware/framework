@@ -105,6 +105,7 @@ public enum FrameMessage
     [Description("New {0}")]
     New0_G,
     Copied,
+    CopyToClipboard,
     Fullscreen,
     ThereAreErrors,
     Main,
@@ -169,8 +170,16 @@ public enum SearchMessage
     InvalidColumnExpression,
     [Description("Add filter")]
     AddFilter,
-    [Description("Add group")]
-    AddGroup,
+
+    [Description("Add OR group")]
+    AddOrGroup,
+    [Description("Add AND group")]
+    AddAndGroup,
+
+    [Description("OR group")]
+    OrGroup,
+    [Description("AND group")]
+    AndGroup,
 
     [Description("Group Prefix")]
     GroupPrefix,
@@ -305,6 +314,12 @@ public enum SearchMessage
 
     [Description("No results found because you are not allowed to explore {0} without filtering by {1} first")]
     NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First,
+
+    SimpleFilters,
+    AdvancedFilters,
+    FilterDesigner,
+    TimeMachine,
+    Options
 }
 
 public enum SelectorMessage

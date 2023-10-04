@@ -1110,6 +1110,8 @@ public enum ValidationMessage
     TheNumberOf0IsBeingMultipliedBy1,
     [Description("The rows are being grouped by {0}")]
     TheRowsAreBeingGroupedBy0,
+    [Description("Each row represents a group of {0} with same {1}")]
+    EachRowRepresentsAGroupOf0WithSame1,
     [Description("The number of elements of {0} has to be {1} {2}")]
     TheNumberOfElementsOf0HasToBe12,
     [Description("Type {0} not allowed")]

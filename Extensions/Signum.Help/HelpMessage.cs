@@ -5,7 +5,15 @@ namespace Signum.Help;
 public enum HelpMessage
 {
     [Description("{0} is a {1}")]
-    _0IsA1,
+    _0IsA1_G,
+    [Description("An embedded entity of type {0}")]
+    AnEmbeddedEntityOfType0,
+    [Description("A reference ({1}) to a {2}")]
+    AReference1ToA2_G,
+    [Description("lite")]
+    lite,
+    [Description("full")]
+    full,
     [Description("{0} is a {1} and shows {2}")]
     _0IsA1AndShows2,
     [Description("{0} is a calculated {1}")]
@@ -42,10 +50,8 @@ public enum HelpMessage
     Integer,
     [Description("Key {0} not found")]
     Key0NotFound,
-    [Description("of the {0}")]
-    OfThe0,
-    [Description("or null")]
-    OrNull,
+    [Description(" (optional)")]
+    Optional,
     [Description("Property {0} does not exist in type {1}")]
     Property0NotExistsInType1,
     [Description("Query of {0}")]
@@ -56,8 +62,6 @@ public enum HelpMessage
     Should,
     [Description("string")]
     String,
-    [Description("The {0}")]
-    The0,
     [Description("the database version")]
     TheDatabaseVersion,
     [Description("the property {0}")]
@@ -77,7 +81,8 @@ public enum HelpMessage
     Previous,
     Next,
     Edit,
-    Close
+    Close,
+    ViewMore,
 }
 
 public enum HelpKindMessage
@@ -99,10 +104,10 @@ public enum HelpKindMessage
 
     [Description(" automatically by the system")]
     AutomaticallyByTheSystem,
-    [Description(" and are rarely created or modified")]
-    AndIsRarelyCreatedOrModified,
-    [Description(" and are frequently created or modified")]
-    AndAreFrequentlyCreatedOrModified,
+    [Description(" and is Master Data (rarely changes{0})")]
+    AndIsMasterDataRarelyChanges,
+    [Description(" and is Transactional Data (created regularly)")]
+    andIsTransactionalDataCreatedRegularly,
 
 }
 

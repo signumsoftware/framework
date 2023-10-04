@@ -640,6 +640,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
 
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
+  isVisibleOnlyType?: (typeName: string) => boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
@@ -677,6 +678,7 @@ export interface EntityOperationOptions<T extends Entity> {
 
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
+  isVisibleOnlyType?: (typeName: string) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;

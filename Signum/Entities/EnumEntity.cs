@@ -123,7 +123,7 @@ public static class EnumEntity
 
 class FromEnumMethodExpander : IMethodExpander
 {
-    internal static MethodInfo miQuery = null!; /*Initialized in Logic*/
+    internal static MethodInfo miQuery = ReflectionTools.GetMethodInfo(() => Database.Query<Entity>()).GetGenericMethodDefinition(); 
     static readonly MethodInfo miSingleOrDefault = ReflectionTools.GetMethodInfo(() => Enumerable.SingleOrDefault<int>(null!, i => true)).GetGenericMethodDefinition();
 
     public Expression Expand(Expression? instance, Expression[] arguments, System.Reflection.MethodInfo mi)

@@ -6,15 +6,15 @@ import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   createMessage?: string;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
@@ -39,28 +39,16 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
 
   let ctx = p.ctx;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
-        {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-        {renderButtons()}
-        {renderElements()}
-      </div>
-    );
-
   return (
-    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
-      {...{ ...c.baseHtmlAttributes(), ...c.props.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
+    <GroupHeader className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
       {renderElements()}
-    </fieldset>
+    </GroupHeader >
   );
-
 
   function renderButtons() {
     const buttons = (

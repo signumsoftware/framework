@@ -5,6 +5,7 @@ import "./Lines.css"
 
 export interface FormGroupProps {
   label?: React.ReactNode;
+  labelIcon?: React.ReactNode;
   ctx: StyleContext;
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
@@ -40,7 +41,7 @@ export function FormGroup(p: FormGroupProps) {
   var labelText = p.label ?? (pr?.member?.niceName);
   const label = (
     <label htmlFor={controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
-      {labelText}
+      {labelText} {p.labelIcon}
     </label>
   );
 
