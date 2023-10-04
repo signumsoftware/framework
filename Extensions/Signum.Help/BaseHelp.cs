@@ -99,12 +99,12 @@ public class NamespaceHelp : BaseHelp
 public class EntityItem
 {
     public string CleanName;
-    public bool HasDescription;
+    public bool HasEntity;
 
     public EntityItem(Type t)
     {
         CleanName = TypeLogic.GetCleanName(t);
-        HasDescription = HelpLogic.GetTypeHelp(t).HasEntity;
+        HasEntity = HelpLogic.GetTypeHelp(t).DBEntity != null;
     }
 }
 
@@ -112,8 +112,6 @@ public class TypeHelp : BaseHelp
 {
     public readonly Type Type;
     public readonly CultureInfo Culture;
-
-    public readonly bool HasEntity; 
 
     public TypeHelpEntity? DBEntity; 
 
@@ -129,21 +127,22 @@ public class TypeHelp : BaseHelp
         Culture = culture;
         Info = HelpGenerator.GetEntityHelp(type);
 
-        var props = DBEntity?.Properties.ToDictionaryEx(a => a.Property.ToPropertyRoute(), a => a.Info);
-        var opers = DBEntity?.Operations.ToDictionaryEx(a => a.Operation, a => a.Info);
+        DBEntity = entity;
+
+        var props = DBEntity?.Properties.ToDictionaryEx(a => a.Property.ToPropertyRoute(), a => a.Description);
+        var opers = DBEntity?.Operations.ToDictionaryEx(a => a.Operation, a => a.Description);
 
         Properties = PropertyRoute.GenerateRoutes(type)
-                    .ToDictionary(pp => pp, pp => new PropertyHelp(pp, props?.TryGetC(pp)));
+                    .ToDictionary(pp => pp, pp => new PropertyHelp(pp, props?.TryGetCN(pp)));
 
         Operations = OperationLogic.TypeOperations(type)
-                    .ToDictionary(op => op.OperationSymbol, op => new OperationHelp(op.OperationSymbol, type, opers?.TryGetC(op.OperationSymbol)));
+                    .ToDictionary(op => op.OperationSymbol, op => new OperationHelp(op.OperationSymbol, type, opers?.TryGetCN(op.OperationSymbol)));
 
      
         var allQueries = HelpLogic.CachedQueriesHelp();
 
         Queries = HelpLogic.TypeToQuery.Value.TryGetC(this.Type).EmptyIfNull().Select(a => allQueries.GetOrThrow(a)).ToDictionary(qh => qh.QueryName);
 
-        DBEntity = entity;
     }
 
     public TypeHelpEntity GetEntity()

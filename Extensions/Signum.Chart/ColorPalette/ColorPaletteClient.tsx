@@ -54,7 +54,7 @@ export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> 
     pal.palette = ColorUtils.colorSchemes[pal.categoryName];
 
     if (pal.palette == null)
-      throw new Error("Inavlid ColorPaletter categoryName: " + pal.categoryName);
+      throw new Error("Invalid ColorPalette categoryName: " + pal.categoryName);
 
     pal.getColor = getColor;
     return pal;

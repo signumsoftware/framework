@@ -1,9 +1,10 @@
-﻿
+
 namespace Signum.Test.LinqProvider;
 
 /// <summary>
 /// Summary description for SelectManyTest
 /// </summary>
+#pragma warning disable xUnit1031 // Do not use blocking task operations in test method
 public class AsyncTest
 {
     public AsyncTest()
@@ -37,3 +38,4 @@ public class AsyncTest
         var artistsInBands = Database.Query<BandEntity>().MinAsync(a => a.Members.Count).Result;
     }
 }
+#pragma warning restore xUnit1031 // Do not use blocking task operations in test method

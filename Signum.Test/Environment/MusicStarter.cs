@@ -40,7 +40,7 @@ public static class MusicStarter
 
     public static void Start(string connectionString)
     {
-        SchemaBuilder sb = new SchemaBuilder(true);
+        SchemaBuilder sb = new SchemaBuilder();
 
         if (connectionString.Contains("Data Source"))
         {

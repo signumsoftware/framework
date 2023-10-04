@@ -417,6 +417,7 @@ export module EntityControlMessage {
 export module FrameMessage {
   export const New0_G = new MessageKey("FrameMessage", "New0_G");
   export const Copied = new MessageKey("FrameMessage", "Copied");
+  export const CopyToClipboard = new MessageKey("FrameMessage", "CopyToClipboard");
   export const Fullscreen = new MessageKey("FrameMessage", "Fullscreen");
   export const ThereAreErrors = new MessageKey("FrameMessage", "ThereAreErrors");
   export const Main = new MessageKey("FrameMessage", "Main");

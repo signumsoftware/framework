@@ -139,13 +139,13 @@ public class SchemaName : IEquatable<SchemaName>
     }
 
     static readonly SchemaName defaultSqlServer = new SchemaName(null, "dbo", isPostgres: false);
-    static readonly SchemaName defaultPostgreeSql = new SchemaName(null, "public", isPostgres: true);
+    static readonly SchemaName defaultPostgreSql = new SchemaName(null, "public", isPostgres: true);
 
-    public static SchemaName Default(bool isPostgres) => isPostgres ? defaultPostgreeSql : defaultSqlServer;
+    public static SchemaName Default(bool isPostgres) => isPostgres ? defaultPostgreSql : defaultSqlServer;
 
     public bool IsDefault()
     {
-        return Database == null && (IsPostgres ? defaultPostgreeSql : defaultSqlServer).Name == Name;
+        return Database == null && (IsPostgres ? defaultPostgreSql : defaultSqlServer).Name == Name;
     }
 
     public SchemaName(DatabaseName? database, string name, bool isPostgres)
@@ -202,7 +202,7 @@ public class SchemaName : IEquatable<SchemaName>
 
 public class ObjectName : IEquatable<ObjectName>
 {
-    public static int MaxPostgreeSize = 63; 
+    public static int MaxPostgresSize = 63; 
 
     public string Name { get; private set; }
     public bool IsPostgres { get; private set; }
@@ -212,7 +212,7 @@ public class ObjectName : IEquatable<ObjectName>
     public ObjectName(SchemaName schema, string name, bool isPostgres)
     {
         this.Name = name.HasText() ? name : throw new ArgumentNullException(nameof(name));
-        if (isPostgres && this.Name.Length > MaxPostgreeSize)
+        if (isPostgres && this.Name.Length > MaxPostgresSize)
             throw new InvalidOperationException($"The name '{name}' is too long, consider using TableNameAttribute/ColumnNameAttribute");
 
         this.Schema = schema ?? (isPostgres && name.StartsWith("#") ? (SchemaName)null! : throw new ArgumentNullException(nameof(schema)));

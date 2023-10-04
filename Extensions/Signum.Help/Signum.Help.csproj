@@ -21,6 +21,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
+		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.HtmlEditor\Signum.HtmlEditor.csproj" />
 		<ProjectReference Include="..\Signum.Omnibox\Signum.Omnibox.csproj" />
 	</ItemGroup>
 

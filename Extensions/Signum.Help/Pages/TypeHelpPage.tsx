@@ -1,19 +1,20 @@
 import * as React from 'react'
-import { useLocation, useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
+import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
-import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
-import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Help';
-import { getTypeInfo, GraphExplorer, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
-import { JavascriptMessage } from '@framework/Signum.Entities';
+import { Overlay, Tooltip } from "react-bootstrap";
+import { useAPI, useForceUpdate, useAPIWithReload, useInterval } from '@framework/Hooks';
+import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Help';
+import { getTypeInfo, getQueryNiceName, getOperationInfo, tryGetOperationInfo } from '@framework/Reflection';
+import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
-import { EditableComponent, MarkdownText } from './EditableText';
+import { EditableHtmlComponent, HtmlViewer } from './EditableText';
 import { classes } from '@framework/Globals';
-import { notifySuccess } from '@framework/Operations';
-import * as Operations from '@framework/Operations';
+import { EntityOperationSettings, notifySuccess } from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,17 +23,31 @@ import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
 export default function TypeHelpPage() {
   const params = useParams() as { cleanName: string };
+
+  var hash = useHash();
+
+
+
   var cleanName = params.cleanName;
   var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
   var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
+
+  React.useEffect(() => {
+    var elem = hash && document.getElementById(hash);
+
+    if (elem)
+      elem.scrollIntoView();
+
+  }, [hash, typeHelp]);
+
 
   useTitle(HelpMessage.Help.niceToString() +
     (namespaceHelp && (" > " + namespaceHelp.title)) +
     (" > " + getTypeInfo(cleanName).niceName));
 
   if (typeHelp == null || typeHelp.type.cleanName != cleanName)
-    return <h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1>;
+    return <div className="container"><h1 className="display-6">{JavascriptMessage.loading.niceToString()}</h1></div>;
 
   var ctx = TypeContext.root(typeHelp, { readOnly: Navigator.isReadOnly(AppendixHelpEntity) });
 
@@ -49,39 +64,49 @@ export default function TypeHelpPage() {
       return parent.propertyPath();
     });
 
+  var filteredOperations = mlistItemContext(ctx.subCtx(th => th.operations)).filter(ectx => {
+    var os = Operations.getSettings(ectx.value.operation);
+
+    if (os instanceof EntityOperationSettings && os.isVisibleOnlyType && !os.isVisibleOnlyType(ctx.value.type.cleanName))
+      return false;
+
+    return true;
+  });
+
   return (
-    <div>
+    <div className="container">
       <h1 className="display-6">
         <Link to={Urls.indexUrl()}>{HelpMessage.Help.niceToString()}</Link>
         {" > "}
         {namespaceHelp && <Link to={Urls.namespaceUrl(namespaceHelp.namespace)}>{namespaceHelp.title}</Link>}
         {" > "}
         {getTypeInfo(typeHelp.type.cleanName).niceName}
+        <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
       <div className="shortcut-container">
-        <code className='shortcut'>[e:{cleanName}]</code>
-        <MarkdownText className="sf-info" text={typeHelp.info} />
+        <Shortcut text={`[t:${cleanName}]`} />
+        <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={typeHelp.info} />
       </div>
-      <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
+      <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} defaultEditable={typeHelp.isNew} onChange={forceUpdate} />
 
       <h2 className="display-6">{ctx.niceName(a => a.properties)}</h2>
       <dl className="row">
-        {propertyTree.map(node => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={forceUpdate} />)}
+        {propertyTree.map(node => <PropertyLine key={node.value.pr.propertyPath()} node={node} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
       </dl>
 
       {
-        ctx.value.operations.length > 0 && (<>
+        filteredOperations.length > 0 && (<>
           <h2 className="display-6">{ctx.niceName(a => a.operations)}</h2>
           <dl className="row">
-            {mlistItemContext(ctx.subCtx(th => th.operations)).map(octx => <OperationLine key={octx.value.operation.key} ctx={octx} cleanName={cleanName} onChange={forceUpdate} />)}
+            {filteredOperations.map(octx => <OperationLine key={octx.value.operation.key} ctx={octx} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
           </dl>
         </>)
       }
 
       {
         ctx.value.queries.length > 0 && (<>
-          <h2 className="display-7">{ctx.niceName(a => a.queries)}</h2>
-          {mlistItemContext(ctx.subCtx(th => th.queries)).map(qctx => <QueryBlock key={qctx.value.query.key} ctx={qctx} cleanName={cleanName} onChange={forceUpdate} />)}
+          <h2 className="display-6">{ctx.niceName(a => a.queries)}</h2>
+          {mlistItemContext(ctx.subCtx(th => th.queries)).map(qctx => <QueryBlock key={qctx.value.query.key} ctx={qctx} cleanName={cleanName} onChange={forceUpdate} hash={hash} />)}
         </>)
       }
 
@@ -93,27 +118,29 @@ export default function TypeHelpPage() {
   );
 }
 
-function PropertyLine({ node, cleanName, onChange }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, cleanName: string, onChange: () => void }) {
+function PropertyLine({ node, cleanName, onChange, hash }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, cleanName: string, onChange: () => void, hash: string | undefined }) {
+
+  var id = HelpClient.Urls.idProperty(node.value.pr);
   return (
     <>
-      <dt className="col-sm-3 shortcut-container text-end" id={HelpClient.Urls.idProperty(node.value.pr)}>
+      <dt className={classes("col-sm-3 shortcut-container text-end", hash == id && "sf-target")} id={id}>
         {node.value.pr.member!.niceName}<br />
-        <code className='shortcut'>[p:{cleanName}.{node.value.pr.propertyPath()}]</code>
+        <Shortcut text={`[p:${cleanName}.${node.value.pr.propertyPath()}]`}/>
       </dt>
       <dd className="col-sm-9">
         <span className="info">
-          <MarkdownText className="sf-info" text={node.value.ctx.value.info} />
-          <EditableComponent ctx={node.value.ctx.subCtx(a => a.description)} markdown onChange={onChange} />
+          <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={node.value.ctx.value.info} />
+          <EditableHtmlComponent ctx={node.value.ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
-      { node.children.length > 0 && <div className="col-sm-12">
-        <SubPropertiesCollapse node={node} cleanName={cleanName} onChange={onChange} />
-      </div> }
+      {node.children.length > 0 && <div className="col-sm-12">
+        <SubPropertiesCollapse node={node} cleanName={cleanName} onChange={onChange} hash={hash} />
+      </div>}
     </>
   );
 }
 
-function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, cleanName: string, onChange: () => void }) {
+function SubPropertiesCollapse({ node, cleanName, onChange, hash }: { node: TreeNode<{ ctx: TypeContext<PropertyRouteHelpEmbedded>, pr: PropertyRoute }>, hash: string | undefined, cleanName: string, onChange: () => void }) {
   var [open, setOpen] = React.useState(false);
   const pr = node.value.pr;
   return (
@@ -125,44 +152,48 @@ function SubPropertiesCollapse({ node, cleanName, onChange }: { node: TreeNode<{
       </div>
       <Collapse in={open}>
         <dl className="row ms-4">
-          {open && node.children.map(n => <PropertyLine key={pr.propertyPath()} node={n} cleanName={cleanName} onChange={onChange} />)}
+          {open && node.children.map(n => <PropertyLine key={n.value.pr.propertyPath()} node={n} cleanName={cleanName} onChange={onChange} hash={hash} />)}
         </dl>
       </Collapse>
     </>
   );
 }
 
-function OperationLine({ ctx, cleanName, onChange }: { ctx: TypeContext<OperationHelpEmbedded>, cleanName: string, onChange: () => void }) {
+function OperationLine({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<OperationHelpEmbedded>, cleanName: string, onChange: () => void, hash: string | undefined }) {
+
+  const id = HelpClient.Urls.idOperation(ctx.value.operation);
+
   return (
     <>
-      <dt className="col-sm-3 shortcut-container text-end" id={HelpClient.Urls.idOperation(ctx.value.operation)}>
+      <dt className={classes("col-sm-3 shortcut-container text-end", id == hash && "sf-target")} id={id}>
         {getOperationInfo(ctx.value.operation, cleanName).niceName}<br />
-        <code className='shortcut'>[o:{cleanName}.{ctx.value.operation.key}]</code>
+        <Shortcut text={`[o:${ctx.value.operation.key}]`} />
       </dt>
       <dd className="col-sm-9">
         <span className="info">
-          <MarkdownText className="sf-info" text={ctx.value.info} />
-          <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={onChange} />
+          <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
+          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>
   );
 }
 
-function QueryBlock({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryHelpEntity>, cleanName: string, onChange: () => void }) {
+function QueryBlock({ ctx, cleanName, onChange, hash }: { ctx: TypeContext<QueryHelpEntity>, cleanName: string, onChange: () => void, hash: string | undefined }) {
   var [open, setOpen] = React.useState(!ctx.value.isNew);
+  const id = HelpClient.Urls.idQuery(ctx.value.query.key);
   return (
     <>
-      <div className="row mb-2 shortcut-container">
+      <div className={classes("row mb-2 shortcut-container", id == hash && "sf-target")} id={id}>
         <div className="col-sm-9 offset-sm-3">
-          <span className="lead " style={{ cursor: "pointer" }} onClick={() => setOpen(!open)} id={HelpClient.Urls.idQuery(ctx.value.query.key)}>
-            <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)} 
+          <span className="lead" style={{ cursor: "pointer" }}  onClick={() => setOpen(!open)} >
+            <FontAwesomeIcon icon={open ? "chevron-down" : "chevron-right"} /> {getQueryNiceName(ctx.value.query.key)}
           </span>
           {" "}
           {Finder.isFindable(ctx.value.query.key, true) && <a href={AppContext.toAbsoluteUrl(Finder.findOptionsPath({ queryName: ctx.value.query.key }))} target="_blank"><FontAwesomeIcon icon="arrow-up-right-from-square" /></a>}
           {" "}
-          <code className='shortcut'>[q:{cleanName}.{ctx.value.query.key}]</code>
-          <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={onChange} />
+          <Shortcut text={`[q:${ctx.value.query.key}]`} />
+          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </div>
       </div>
       <Collapse in={open}>
@@ -182,8 +213,8 @@ function QueryColumnLine({ ctx, cleanName, onChange }: { ctx: TypeContext<QueryC
       </dt>
       <dd className="col-sm-9">
         <span className="info">
-          <MarkdownText className="sf-info" text={ctx.value.info} />
-          <EditableComponent ctx={ctx.subCtx(a => a.description)} markdown onChange={onChange} />
+          <HtmlViewer htmlAttributes={{ className: "sf-info" }} text={ctx.value.info} />
+          <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={onChange} />
         </span>
       </dd>
     </>
@@ -204,5 +235,53 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
       }));
   }
 
-  return <button className="btn btn-primary" onClick={onClick}>{getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
+  return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
+
+export function Shortcut(p: { text: string; }) {
+
+  const supportsClipboard = (navigator.clipboard && window.isSecureContext);
+  if (!supportsClipboard)
+    return <code className='shortcut'>{p.text}</code>;
+
+  const link = React.useRef<HTMLAnchorElement>(null);
+  const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
+  const elapsed = useInterval(showTooltip ? 1000 : null, 0, d => d + 1);
+
+  React.useEffect(() => {
+    setShowTooltip(false);
+  }, [elapsed]);
+
+  return (
+    <span>
+      <code className='shortcut' ref={link} onClick={handleCopyLiteButton} title={FrameMessage.CopyToClipboard.niceToString()} >
+        {p.text}
+      </code>
+      <Overlay target={link.current} show={showTooltip} placement="bottom">
+        <Tooltip>
+          {FrameMessage.Copied.niceToString()}
+        </Tooltip>
+      </Overlay>
+    </span>
+  );
+
+  function handleCopyLiteButton(e: React.MouseEvent<any>) {
+    e.preventDefault();
+    navigator.clipboard.writeText(p.text)
+      .then(() => setShowTooltip(true));
+  }
+}
+
+function useHash(): string | undefined {
+  const forceUpdate = useForceUpdate();
+
+  React.useEffect(() => {
+    window.addEventListener('hashchange', forceUpdate);
+    return () => {
+      window.removeEventListener('hashchange', forceUpdate);
+    };
+  }, []);
+
+  return window.location.hash.tryAfter("#");
+};
+
