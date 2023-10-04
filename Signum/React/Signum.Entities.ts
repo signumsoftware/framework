@@ -645,7 +645,7 @@ export module SearchMessage {
   export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
   export const SimpleFilters = new MessageKey("SearchMessage", "SimpleFilters");
   export const AdvancedFilters = new MessageKey("SearchMessage", "AdvancedFilters");
-  export const CustomizeSimpleFilters = new MessageKey("SearchMessage", "CustomizeSimpleFilters");
+  export const FilterDesigner = new MessageKey("SearchMessage", "FilterDesigner");
   export const TimeMachine = new MessageKey("SearchMessage", "TimeMachine");
   export const Options = new MessageKey("SearchMessage", "Options");
 }

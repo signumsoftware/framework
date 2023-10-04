@@ -21,6 +21,11 @@
     <Member Name="EmailOwner" Description="E-Mail-Besitzer" />
     <Member Name="InvalidEmail" Description="Ungültige e-Mail" />
   </Type>
+  <Type Name="EmailAddressSource" Description="E-Mail-Adresse Quelle">
+    <Member Name="CurrentUser" Description="Aktueller Benutzer" />
+    <Member Name="HardcodedAddress" Description="Festgelegte Adresse" />
+    <Member Name="QueryToken" Description="Abfrage-Token" />
+  </Type>
   <Type Name="EmailAttachmentEmbedded" Description="E-Mail-Anhang">
     <Member Name="ContentId" Description="Content-id" />
     <Member Name="File" Description="Datei" />
@@ -193,6 +198,7 @@
   </Type>
   <Type Name="EmailServiceEntity" Description="E-Mail-Dienst" PluralDescription="E-Mail-Dienste" Gender="m" />
   <Type Name="EmailTemplateAddressEmbedded" Description="E-Mail-Vorlagenadresse">
+    <Member Name="AddressSource" Description="Adressquelle" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="Token" Description="Token" />

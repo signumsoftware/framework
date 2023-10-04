@@ -316,7 +316,7 @@ public enum SearchMessage
 
     SimpleFilters,
     AdvancedFilters,
-    CustomizeSimpleFilters,
+    FilterDesigner,
     TimeMachine,
     Options
 }
