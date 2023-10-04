@@ -24,8 +24,8 @@ export interface RenderCheckboxItemContext<T> {
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
-  columnCount?: number;
-  columnWidth?: number;
+  columnCount?: number | null;
+  columnWidth?: number | null;
   avoidFieldSet?: boolean;
   deps?: React.DependencyList;
   onRenderCheckbox?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
