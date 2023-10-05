@@ -148,14 +148,16 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
 public class HttpError
 {
-    public HttpError(Exception e, bool includeErrorDetails = true)
+    public HttpError(Exception e, bool includeErrorDetails = true, bool includeId = true)
     {
         this.ExceptionMessage = e.Message;
         this.ExceptionType = e.GetType().FullName!;
         this.Model = e is ModelRequestedException mre ? mre.Model : null;
         if (includeErrorDetails)
         {
-            this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+            if (includeId)
+                this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+
             this.StackTrace = e.StackTrace;
             this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
         }

@@ -62,7 +62,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         }
         {
           Array.range(0, maxRows).map((r, i) => {
-            debugger;
+            //debugger;
             var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
             var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
               .flatMap(a => Array.range(0, a.pinned!.colSpan! - 1).map(i => (a.pinned!.column ?? 0) + i + 1))
