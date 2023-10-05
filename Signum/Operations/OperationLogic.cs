@@ -387,13 +387,14 @@ Consider the following options:
     {
         return new OperationInfo(oper.OperationSymbol, oper.OperationType)
         {
-            CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             Returns = oper.Returns,
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
             HasCanExecuteExpression = (oper as IEntityOperation)?.CanExecuteExpression() != null,
+            CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
+            ForReadonlyEntity = (oper as IExecuteOperation)?.ForReadonlyEntity,
             BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
         };
     }

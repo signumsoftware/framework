@@ -79,7 +79,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                   var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
                     || hiddenColumns.contains(c);
 
-                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid  && "border border-1")}>
+                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
                       {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
                   </div>
                   );

@@ -23,12 +23,23 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     //ExistBlob is too slow, consider using CalculateSuffix with a GUID!
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
-    public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => { return BlobAction.Download; };
+    public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => BlobAction.Download;
 
     public AzureBlobStoragebFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
     {
         this.GetClient = getClient;
 
+    }
+
+    public override bool OnlyImages
+    {
+        get { return base.OnlyImages; }
+        set
+        {
+            base.OnlyImages = value;
+            if (value)
+                GetBlobAction = fp => BlobAction.Open;
+        }
     }
 
     public PrefixPair GetPrefixPair(IFilePath efp)

@@ -12,6 +12,7 @@ import { Breakpoints, getBreakpoint, useAPI, useBreakpoint, useForceUpdate } fro
 import { useController } from './LineBase'
 import { KeyCodes } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 
 export interface EntityTableProps extends EntityListBaseProps {
@@ -21,7 +22,7 @@ export interface EntityTableProps extends EntityListBaseProps {
   columns?: EntityTableColumn<any /*T*/, any /*RS*/>[],
   rowHooks?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle) => any /*RS*/;
   onRowHtmlAttributes?: (ctx: TypeContext<any /*T*/>, row: EntityTableRowHandle, rowState: any) => React.HTMLAttributes<any> | null | undefined;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   avoidEmptyTable?: boolean;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   scrollable?: boolean;
@@ -204,24 +205,15 @@ export const EntityTable: React.ForwardRefExoticComponent<EntityTableProps & Rea
 
     let ctx = (p.ctx as TypeContext<MList<ModifiableEntity>>).subCtx({ formGroupStyle: "SrOnly" });
 
-    if (p.avoidFieldSet == true)
-      return (
-        <div className={classes("sf-table-field sf-control-container", ctx.errorClassBorder)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-          {renderButtons()}
-          {renderTable()}
-        </div>
-      );
-
     return (
-      <fieldset className={classes("sf-table-field sf-control-container", ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-        <legend>
-          <div>
-            <span>{p.label}</span>
-            {renderButtons()}
-          </div>
-        </legend>
+      <GroupHeader className={classes("sf-table-field sf-control-container", ctx.errorClassBorder)}
+        label={p.label}
+        labelIcon={p.labelIcon}
+        avoidFieldSet={p.avoidFieldSet}
+        buttons={renderButtons()}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }}>
         {renderTable()}
-      </fieldset>
+      </GroupHeader >
     );
 
     function renderButtons() {

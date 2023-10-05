@@ -3,7 +3,7 @@ using Signum.Basics;
 namespace Signum.Help;
 
 [EntityKind(EntityKind.SharedPart, EntityData.Master)]
-public class QueryHelpEntity : Entity
+public class QueryHelpEntity : Entity, IHelpImageTarget
 {
     public QueryEntity Query { get; set; }
 
@@ -34,6 +34,33 @@ public class QueryHelpEntity : Entity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Query.ToString());
+
+    bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
+    {
+        bool changed = false;
+        if (Description != null)
+        {
+            var newDesc = processHtml(Description);
+            if (newDesc != Description)
+            {
+                changed = true;
+                Description = newDesc;
+            }
+        }
+        foreach (var col in Columns)
+        {
+            if (col.Description != null)
+            {
+                var newDesc = processHtml(col.Description);
+                if (newDesc != col.Description)
+                {
+                    changed = true;
+                    col.Description = newDesc;
+                }
+            }
+        }
+        return changed;
+    }
 }
 
 public class QueryColumnHelpEmbedded : EmbeddedEntity

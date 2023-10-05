@@ -485,10 +485,13 @@
     <Member Name="_01of2Results_N" Description="{0} - {1} von {2} Ergebnis[sen]." />
     <Member Name="_0FiltersCollapsed" Description="{0} filter zusammengeklappt" />
     <Member Name="_0Results_N" Description="{0} Ergebnis[se]." />
+    <Member Name="AddAndGroup" Description="AND-Gruppe hinzufügen" />
     <Member Name="AddColumn" Description="Spalte hinzufügen" />
     <Member Name="AddFilter" Description="Filter hinzufügen" />
-    <Member Name="AddGroup" Description="Gruppe hinzufügen" />
+    <Member Name="AddOrGroup" Description="OR-Gruppe hinzufügen" />
     <Member Name="AddValue" Description="Wert hinzufügen" />
+    <Member Name="AdvancedFilters" Description="Erweiterte Filter" />
+    <Member Name="AndGroup" Description="AND-Gruppe" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Wählen Sie den Anzeigenamen der neuen Spalte" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Collections können nicht als Spalten hinzugefügt werden" />
     <Member Name="ColSpan" Description="ColSpan" />
@@ -506,6 +509,7 @@
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
     <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
+    <Member Name="FilterDesigner" Description="Filter-Designer" />
     <Member Name="Filters" Description="Filter" />
     <Member Name="Find" Description="Finden" />
     <Member Name="FinderOf0" Description="Finder von {0}" />
@@ -532,6 +536,8 @@
     <Member Name="Of" Description="von" />
     <Member Name="Operation" Description="Operation" />
     <Member Name="Operations" Description="Operationen" />
+    <Member Name="Options" Description="Optionen" />
+    <Member Name="OrGroup" Description="OR-Gruppe" />
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} Elemente" />
     <Member Name="PaginationPages_0Of01lements" Description="{0} mit {1} Elemente" />
@@ -551,6 +557,7 @@
     <Member Name="Row" Description="Zeile" />
     <Member Name="Search" Description="Suche" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
+    <Member Name="SimpleFilters" Description="Einfache Filter" />
     <Member Name="Split" Description="Teilen" />
     <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
@@ -558,6 +565,7 @@
     <Member Name="SummaryHeaderMustBeAnAggregate" Description="Die Zusammenfassungskopfzeile muss ein Aggregat sein (wie Summe, Anzahl, etc.)" />
     <Member Name="SwitchViewMode" Description="Ansichtsmodus wechseln" />
     <Member Name="ThereIsNo0" Description="Es gibt keine {0}" />
+    <Member Name="TimeMachine" Description="Zeitmaschine" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Um Leistungsprobleme zu vermeiden, ist die automatische Suche deaktiviert. Überprüfen Sie zuerst Ihre Filter und klicken Sie dann auf die [Suchen] Taste." />
     <Member Name="UnpinFilter" Description="Unpin-Filter" />
     <Member Name="Value" Description="Wert" />
@@ -684,6 +692,7 @@
     <Member Name="BeBetween0And1" Description="zwischen {0} und {1} sein" />
     <Member Name="BeInThePast" Description="in der Vergangenheit sein" />
     <Member Name="BeNotNull" Description="nicht null sein" />
+    <Member Name="EachRowRepresentsAGroupOf0WithSame1" Description="Jede Zeile steht für eine Gruppe von {0} mit demselben {1}" />
     <Member Name="FileName" Description="Dateiname" />
     <Member Name="Have0Decimals" Description="{0} Dezimalstellen haben" />
     <Member Name="HaveANumberOfElements01" Description="eine Nummer von Elementen {0} {1} haben" />

@@ -65,7 +65,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={c.props.helpText}>

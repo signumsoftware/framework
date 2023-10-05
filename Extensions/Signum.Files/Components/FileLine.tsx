@@ -65,7 +65,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
   const hasValue = !!p.ctx.value;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}>

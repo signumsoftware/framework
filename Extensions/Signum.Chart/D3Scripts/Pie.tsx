@@ -58,12 +58,13 @@ export default function renderPie({ data, width, height, parameters, loading, on
           var cuadr = Math.floor(12 * m / (2 * Math.PI));
           var active = detector?.(slice.data);
 
-          var isLeftHalf = m < Math.PI;
+          var isRight = m < Math.PI;
 
-          var textAnchor = isLeftHalf ? 'start' : 'end';
+          var textAnchor = isRight ? 'start' : 'end';
 
           return (
             <g key={slice.index} className="slice hover-group">
+              <title>{`${keyColumn.getValueNiceName(slice.data)}: ${valueColumn.getValue(slice.data)}`}</title>
               <path className="shape sf-transition hover-target" d={arc(slice)!}
                 opacity={active == false ? .5 : undefined}
                 stroke={active == true ? "black" : undefined}

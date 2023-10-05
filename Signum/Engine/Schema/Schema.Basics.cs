@@ -40,7 +40,7 @@ public class SystemVersionedInfo
     public ObjectName TableName;
     public string? StartColumnName;
     public string? EndColumnName;
-    public string? PostgreeSysPeriodColumnName;
+    public string? PostgresSysPeriodColumnName;
 
     public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
     {
@@ -52,21 +52,21 @@ public class SystemVersionedInfo
     public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
     {
         TableName = tableName;
-        PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
+        PostgresSysPeriodColumnName = postgreeSysPeriodColumnName;
     }
 
     internal IEnumerable<IColumn> Columns()
     {
-        if (PostgreeSysPeriodColumnName != null)
+        if (PostgresSysPeriodColumnName != null)
             return new[]
             {
-                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+                    new PostgresPeriodColumn(this.PostgresSysPeriodColumnName!),
                 };
         else
             return new[]
             {
-                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
-                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+                    new SqlServerPeriodColumn(this.StartColumnName!, SystemVersionColumnType.Start),
+                    new SqlServerPeriodColumn(this.EndColumnName!, SystemVersionColumnType.End)
                 };
     }
 
@@ -76,11 +76,11 @@ public class SystemVersionedInfo
         return new IntervalExpression(typeof(NullableInterval<DateTime>),
             StartColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName).SetMetadata(ExpressionMetadata.UTC),
             EndColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName).SetMetadata(ExpressionMetadata.UTC),
-            PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, PostgreeSysPeriodColumnName).SetMetadata(ExpressionMetadata.UTC)
+            PostgresSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, PostgresSysPeriodColumnName).SetMetadata(ExpressionMetadata.UTC)
         );
     }
 
-    public enum ColumnType
+    public enum SystemVersionColumnType
     {
         Start,
         End,
@@ -88,14 +88,14 @@ public class SystemVersionedInfo
 
     public class SqlServerPeriodColumn : IColumn
     {
-        public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
+        public SqlServerPeriodColumn(string name, SystemVersionColumnType systemVersionColumnType)
         {
             this.Name = name;
             this.SystemVersionColumnType = systemVersionColumnType;
         }
 
         public string Name { get; private set; }
-        public ColumnType SystemVersionColumnType { get; private set; }
+        public SystemVersionColumnType SystemVersionColumnType { get; private set; }
 
         public IsNullable Nullable => IsNullable.No;
         
@@ -115,11 +115,16 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+        public override string ToString()
+        {
+            return Name;
+        }
+
     }
 
-    public class PostgreePeriodColumn : IColumn
+    public class PostgresPeriodColumn : IColumn
     {
-        public PostgreePeriodColumn(string name)
+        public PostgresPeriodColumn(string name)
         {
             this.Name = name;
         }
@@ -128,7 +133,7 @@ public class SystemVersionedInfo
 
         public IsNullable Nullable => IsNullable.No;
         public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
-        public Type Type => typeof(DateTime);
+        public Type Type => typeof(NpgsqlTypes.NpgsqlRange<DateTime>);
         public string? UserDefinedTypeName => null;
         public bool PrimaryKey => false;
         public bool IdentityBehaviour => false;
@@ -143,6 +148,11 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 }
@@ -503,7 +513,7 @@ public static partial class ColumnExtensions
     public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
     {
         if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
-            return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
+            return svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
 
         return GeneratedAlwaysType.None;
     }

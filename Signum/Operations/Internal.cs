@@ -19,6 +19,8 @@ public interface IConstructorFromManyOperation : IOperation
 
 public interface IExecuteOperation : IEntityOperation
 {
+    bool ForReadonlyEntity { get; set; }
+
     void Execute(IEntity entity, params object?[]? parameters);
 }
 

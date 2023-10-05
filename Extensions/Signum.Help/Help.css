@@ -29,7 +29,6 @@
 
 .sf-info {
     opacity: .6;
-    margin-bottom: -10px;
 }
 
 .sf-no-text{
@@ -43,4 +42,19 @@
 
 .shortcut-container:hover .shortcut {
     opacity: 1;
+    cursor: pointer;
+}
+
+.sf-target {
+    animation: target-fade 1s;
+}
+
+@keyframes target-fade {
+    from {
+        background-color: red;
+    }
+    /* [1] */
+    to {
+        background-color: transparent;
+    }
 }

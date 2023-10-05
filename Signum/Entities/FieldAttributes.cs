@@ -149,7 +149,7 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
         if (IsByAll)
             return "[ALL]";
 
-        return Types.ToString(TypeEntity.GetCleanName, ", ");
+        return Types.ToString(TypeLogic.GetCleanName, ", ");
     }
 
 
@@ -444,7 +444,7 @@ public sealed class SystemVersionedAttribute : Attribute
     public string? TemporalTableName { get; set; }
     public string StartDateColumnName { get; set; } = "SysStartDate";
     public string EndDateColumnName { get; set; } = "SysEndDate";
-    public string PostgreeSysPeriodColumname { get; set; } = "sys_period";
+    public string PostgresSysPeriodColumname { get; set; } = "sys_period";
 }
 
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]

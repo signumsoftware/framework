@@ -81,7 +81,7 @@ public static class SimpleMemberEvaluator
             {
                 var typeName = part.Between("(", ")");
 
-                var asType = TypeEntity.TryGetType(typeName);
+                var asType = TypeLogic.TryGetType(typeName);
 
                 if (asType == null)
                     return new Result<object?>.Error("Type {0} not found on {1}".FormatWith(typeName, result.GetType().FullName));
@@ -133,7 +133,7 @@ public static class SimpleMemberEvaluator
             {
                 var typeName = part.Between("(", ")");
 
-                var asType = TypeEntity.TryGetType(typeName);
+                var asType = TypeLogic.TryGetType(typeName);
 
                 if (asType == null)
                     return new Result<Type>.Error("Type {0} not found on {1}".FormatWith(typeName, currentType));

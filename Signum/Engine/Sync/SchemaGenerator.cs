@@ -88,7 +88,7 @@ public static class SchemaGenerator
         return Schema.Current.PostgresExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
     }
 
-    public static SqlPreCommand? PostgreeTemporalTableScript()
+    public static SqlPreCommand? PostgresTemporalTableScript()
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
