@@ -7,26 +7,26 @@ public class PieChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("doughnut.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Sections", ChartColumnType.Groupable),
-            new ChartScriptColumn("Angle", ChartColumnType.Magnitude)
+            new ChartScriptColumn(ChartColumnMessage.Sections, ChartColumnType.Groupable),
+            new ChartScriptColumn(ChartColumnMessage.Angle, ChartColumnType.Magnitude)
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
-            new ChartScriptParameterGroup("Form")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Shape)
             {
-                new ChartScriptParameter("InnerRadious", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0m } },
+                new ChartScriptParameter(ChartParameterMessage.InnerRadious, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0m } },
             },
-            new ChartScriptParameterGroup("Arrange")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Arrange)
             {
-                new ChartScriptParameter("Sort", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Ascending|Descending") },
+                new ChartScriptParameter(ChartParameterMessage.Sort, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Ascending|Descending") },
             },
-            new ChartScriptParameterGroup("Color Category")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorCategory)
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             },
-            new ChartScriptParameterGroup("ShowValue")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ShowValue)
             {
-                new ChartScriptParameter("ValueAsNumberOrPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Number|Percent") },
+                new ChartScriptParameter(ChartParameterMessage.ValueAsNumberOrPercent, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Number|Percent") },
             }
         };
     }

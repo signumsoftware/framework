@@ -7,43 +7,43 @@ public class StackedLinesChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("stackedareas.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
-            new ChartScriptColumn("Areas", ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn("Height", ChartColumnType.Magnitude) ,
-            new ChartScriptColumn("Height 2", ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn("Height 3", ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn("Height 4", ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn("Height 5", ChartColumnType.Magnitude) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Any),
+            new ChartScriptColumn(ChartColumnMessage.Areas, ChartColumnType.Groupable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Height, ChartColumnType.Magnitude) ,
+            new ChartScriptColumn(ChartColumnMessage.Height2, ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Height3, ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Height4, ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Height5, ChartColumnType.Magnitude) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
-                new ChartScriptParameter("HorizontalScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
+                new ChartScriptParameter(ChartParameterMessage.CompleteValues, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter(ChartParameterMessage.HorizontalScale, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
             },
-            new ChartScriptParameterGroup("Margin")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
-                new ChartScriptParameter("Horizontal Margin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
+                new ChartScriptParameter(ChartParameterMessage.HorizontalMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20m } },
             },
-            new ChartScriptParameterGroup("Number")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
-                new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
+                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameterMessage.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
             },
-            new ChartScriptParameterGroup("Color Category")
+            new ChartScriptParameterGroup(ChartParameterMessage.ColorCategory)
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             },
-            new ChartScriptParameterGroup("Form")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Shape)
             {
-                new ChartScriptParameter("Order", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("none|ascending|descending|insideOut|reverse") },
-                new ChartScriptParameter("Stack", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("zero|expand|wiggle|silhouette") },
-                new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis") },
+                new ChartScriptParameter(ChartParameterMessage.Order, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("none|ascending|descending|insideOut|reverse") },
+                new ChartScriptParameter(ChartParameterMessage.Stack, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("zero|expand|wiggle|silhouette") },
+                new ChartScriptParameter(ChartParameterMessage.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis") },
             },
-            new ChartScriptParameterGroup("ShowPercent")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ShowPercent)
             {
-                new ChartScriptParameter("ValueAsPercent", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
+                new ChartScriptParameter(ChartParameterMessage.ValueAsPercent, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
             },
         };
     }

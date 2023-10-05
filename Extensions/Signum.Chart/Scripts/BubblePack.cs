@@ -7,41 +7,41 @@ public class BubblePackChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("bubblepack.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Bubble", ChartColumnType.Groupable),
-            new ChartScriptColumn("Size", ChartColumnType.Magnitude) ,
-            new ChartScriptColumn("Parent", ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn("Color Scale", ChartColumnType.Magnitude) { IsOptional = true },
-            new ChartScriptColumn("Color Category", ChartColumnType.Groupable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Bubble, ChartColumnType.Groupable),
+            new ChartScriptColumn(ChartColumnMessage.Size, ChartColumnType.Magnitude) ,
+            new ChartScriptColumn(ChartColumnMessage.Parent, ChartColumnType.Groupable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorScale, ChartColumnType.Magnitude) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.ColorCategory, ChartColumnType.Groupable) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
+                new ChartScriptParameter(ChartParameterMessage.Scale, ChartParameterType.Enum) { ColumnIndex = 1, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Log") },
             },
-            new ChartScriptParameterGroup("Stroke")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Stroke)
             {
-                new ChartScriptParameter("StrokeColor", ChartParameterType.String) {  ValueDefinition = new StringValue("") },
-                new ChartScriptParameter("StrokeWidth", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
+                new ChartScriptParameter(ChartParameterMessage.StrokeColor, ChartParameterType.String) {  ValueDefinition = new StringValue("") },
+                new ChartScriptParameter(ChartParameterMessage.StrokeWidth, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
             },
-            new ChartScriptParameterGroup("Number")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
-                new ChartScriptParameter("NumberSizeLimit", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 18m } },
-                new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") }
+                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameterMessage.NumberSizeLimit, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 18m } },
+                new ChartScriptParameter(ChartParameterMessage.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") }
             },
-            new ChartScriptParameterGroup("Opacity")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Opacity)
             {
-                new ChartScriptParameter("FillOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameterMessage.FillOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
             },
-            new ChartScriptParameterGroup("Color Scale")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorScale)
             {
-                new ChartScriptParameter("ColorScale", ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameterMessage.ColorScale, ChartParameterType.Enum) { ColumnIndex = 3, ValueDefinition = EnumValueList.Parse("ZeroMax|MinMax|Sqrt|Log") },
+                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ColumnIndex = 3, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             },
-            new ChartScriptParameterGroup("Color Category")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorCategory)
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) { ColumnIndex = 4, ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             },
         };
     }
