@@ -153,11 +153,12 @@ public class HttpError
         this.ExceptionMessage = e.Message;
         this.ExceptionType = e.GetType().FullName!;
         this.Model = e is ModelRequestedException mre ? mre.Model : null;
+
+        if (includeId)
+            this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+
         if (includeErrorDetails)
         {
-            if (includeId)
-                this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
-
             this.StackTrace = e.StackTrace;
             this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
         }
