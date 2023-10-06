@@ -229,6 +229,7 @@
   </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />
+    <Member Name="CopyToClipboard" Description="In Zwischenablage kopieren" />
     <Member Name="Fullscreen" Description="Vollbild" />
     <Member Name="Main" Description="Haupt" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
