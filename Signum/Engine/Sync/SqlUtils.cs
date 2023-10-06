@@ -841,7 +841,7 @@ ZONE".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
     {
         if (isPostgres)
         {
-            if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-zA-Z]"))
+            if (ident.ToLowerInvariant() != ident || KeywordsSqlServer.Contains(ident.ToUpperInvariant()) || Regex.IsMatch(ident, @"[^a-z_]"))
                 return "\"" + ident + "\"";
 
             return ident;

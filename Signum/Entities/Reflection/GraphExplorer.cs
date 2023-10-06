@@ -147,6 +147,12 @@ public static class GraphExplorer
         return graph.Any(a => a.IsGraphModified);
     }
 
+    public static bool IsGraphModifiedVirtual(Modifiable modifiable)
+    {
+        var graph = FromRootVirtual(modifiable);
+        return graph.Any(a => a.IsGraphModified);
+    }
+
     public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
     {
         return PreSaving(recreate, (Modifiable m, PreSavingContext ctx) =>

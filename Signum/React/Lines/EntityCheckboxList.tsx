@@ -28,8 +28,8 @@ export interface RenderCheckboxItemContext<T> {
 
 export interface EntityCheckboxListProps extends EntityListBaseProps {
   data?: Lite<Entity>[];
-  columnCount?: number;
-  columnWidth?: number;
+  columnCount?: number | null;
+  columnWidth?: number | null;
   avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   onRenderCheckbox?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
@@ -129,7 +129,7 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 
   function renderButtons() {
     return (
-      <span className="float-end">
+      <span>
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
       </span>
