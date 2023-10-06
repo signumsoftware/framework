@@ -165,7 +165,7 @@ public class ForeignKeyException : ApplicationException
 
     public bool IsInsert { get; private set; }
 
-    static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
+    static Regex indexRegex = new Regex(@"['""»]FK_(?<parts>.+?)['""«]");
 
     static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
