@@ -20,7 +20,7 @@ import Alert from './Templates/Alert'
 import { getQueryKey, ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'
 
-export function start(options: { routes: RouteObject[], showAlerts?: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
+export function start(options: { routes: RouteObject[], showAlerts: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
   Navigator.addSettings(new EntitySettings(SendNotificationEmailTaskEntity, e => import('./Templates/SendNotificationEmailTask')));
@@ -29,6 +29,7 @@ export function start(options: { routes: RouteObject[], showAlerts?: (typeName: 
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.CreateAlertFromEntity, {
     isVisible: ctx => couldHaveAlerts(ctx.entity.Type, "CreateAlert"),
+    isVisibleOnlyType: type => couldHaveAlerts(type, "CreateAlert"),
     icon: "bell",
     iconColor: "darkorange",
     color: "warning",

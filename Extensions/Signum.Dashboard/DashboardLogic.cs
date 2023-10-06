@@ -203,7 +203,7 @@ public static class DashboardLogic
             new Execute(DashboardOperation.RegenerateCachedQueries)
             {
                 CanExecute = c => c.CacheQueryConfiguration == null ? ValidationMessage._0IsNotSet.NiceToString(ReflectionTools.GetPropertyInfo(() => c.CacheQueryConfiguration)) : null,
-                AvoidImplicitSave = true,
+                ForReadonlyEntity = true,
                 Execute = (db, _) =>
                 {
                     var cq = db.CacheQueryConfiguration!;
@@ -234,7 +234,7 @@ public static class DashboardLogic
 
                         var queryDuration = sw.ElapsedMilliseconds;
 
-                        if(c.QueryRequest.Pagination is Pagination.All)
+                        if (c.QueryRequest.Pagination is Pagination.All)
                         {
                             if (rt.Rows.Length == cq.MaxRows)
                                 throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
@@ -253,7 +253,7 @@ public static class DashboardLogic
                             ResultTable = rt,
                         };
 
-                        var bytes =  JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
+                        var bytes = JsonSerializer.SerializeToUtf8Bytes(json, EntityJsonContext.FullJsonSerializerOptions);
 
                         var file = new FilePathEmbedded(CachedQueryFileType.CachedQuery, "CachedQuery.json", bytes).SaveFile();
 
@@ -273,7 +273,7 @@ public static class DashboardLogic
                     }
 
                 }
-            }.SetMinimumTypeAllowed(TypeAllowedBasic.Read).Register();
+            }.Register();
         }
     }
 

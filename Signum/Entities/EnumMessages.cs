@@ -105,6 +105,7 @@ public enum FrameMessage
     [Description("New {0}")]
     New0_G,
     Copied,
+    CopyToClipboard,
     Fullscreen,
     ThereAreErrors,
     Main,
@@ -316,7 +317,7 @@ public enum SearchMessage
 
     SimpleFilters,
     AdvancedFilters,
-    CustomizeSimpleFilters,
+    FilterDesigner,
     TimeMachine,
     Options
 }

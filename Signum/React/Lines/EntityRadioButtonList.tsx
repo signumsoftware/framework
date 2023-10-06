@@ -8,13 +8,14 @@ import { useController } from './LineBase'
 import { ResultTable } from '../Search'
 import { ResultRow } from '../FindOptions'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 
 export interface EntityRadioButtonListProps extends EntityBaseProps {
   data?: Lite<Entity>[];
   columnCount?: number;
   columnWidth?: number;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   nullPlaceHolder?: string;
   onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
@@ -53,28 +54,15 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
   if (c.isHidden)
     return null;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-        {getTimeMachineIcon({ ctx: p.ctx})}
-        {renderButtons()}
-        {renderRadioList()}
-      </div>
-    );
-
   return (
-    <>
-      {getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}
-      <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-        <legend>
-          <div>
-            <span>{p.label}</span>
-            {renderButtons()}
-          </div>
-        </legend>
-        {renderRadioList()}
-      </fieldset>
-    </>
+    <GroupHeader className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)}
+      label={<>{getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}{p.label}</>}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
+      {renderRadioList()}
+    </GroupHeader >
   );
 
   function renderButtons() {

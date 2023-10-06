@@ -8,6 +8,8 @@
   },
   "references": [
     { "path": "../../Signum" },
+    { "path": "../Signum.Files" },
+    { "path": "../Signum.HtmlEditor" },
     { "path": "../Signum.Omnibox" }
   ]
 }

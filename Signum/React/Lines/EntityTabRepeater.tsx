@@ -12,11 +12,12 @@ import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
 import { useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 export interface EntityTabRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
   createMessage?: string;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   extraTabs?: (c: EntityTabRepeaterController) => React.ReactNode;
   selectedIndex?: number;
@@ -91,26 +92,15 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   if (c.isHidden)
     return null;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
-        {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-        {renderButtons()}
-        {renderTabs()}
-      </div>
-    );
-
   return (
-    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
-      {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
+    <GroupHeader className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
       {renderTabs()}
-    </fieldset>
+    </GroupHeader >
   );
 
   function renderButtons() {
