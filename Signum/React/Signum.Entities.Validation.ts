@@ -63,6 +63,7 @@ export module ValidationMessage {
   export const TheLengthOf0HasToBeLesserOrEqualTo1 = new MessageKey("ValidationMessage", "TheLengthOf0HasToBeLesserOrEqualTo1");
   export const TheNumberOf0IsBeingMultipliedBy1 = new MessageKey("ValidationMessage", "TheNumberOf0IsBeingMultipliedBy1");
   export const TheRowsAreBeingGroupedBy0 = new MessageKey("ValidationMessage", "TheRowsAreBeingGroupedBy0");
+  export const EachRowRepresentsAGroupOf0WithSame1 = new MessageKey("ValidationMessage", "EachRowRepresentsAGroupOf0WithSame1");
   export const TheNumberOfElementsOf0HasToBe12 = new MessageKey("ValidationMessage", "TheNumberOfElementsOf0HasToBe12");
   export const Type0NotAllowed = new MessageKey("ValidationMessage", "Type0NotAllowed");
   export const _0IsMandatoryWhen1IsNotSet = new MessageKey("ValidationMessage", "_0IsMandatoryWhen1IsNotSet");

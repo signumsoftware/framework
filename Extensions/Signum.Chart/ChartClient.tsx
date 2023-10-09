@@ -294,6 +294,7 @@ export interface ChartScriptParameterGroup {
 
 export interface ChartScriptParameter {
   name: string;
+  displayName: string;
   columnIndex?: number;
   type: ChartParameterType;
   valueDefinition: NumberInterval | EnumValueList | StringValue | SpecialParameter | null;

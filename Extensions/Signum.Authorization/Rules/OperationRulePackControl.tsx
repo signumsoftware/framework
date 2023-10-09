@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { notifySuccess } from '@framework/Operations'
+import { notifySuccess, getSettings, EntityOperationSettings } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, ValueLine } from '@framework/Lines'
 import { getToString } from '@framework/Signum.Entities'
@@ -74,7 +74,14 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
           </tr>
         </thead>
         <tbody>
-          {ctx.mlistItemCtxs(a => a.rules).map((c, i) =>
+          {ctx.mlistItemCtxs(a => a.rules).filter(c => {
+            var os = getSettings(c.value.resource!.operation);
+
+            if (os instanceof EntityOperationSettings && os.isVisibleOnlyType && !os.isVisibleOnlyType(ctx.value.type.cleanName))
+              return false;
+
+            return true;
+          }).map((c, i) =>
             <tr key={i}>
               <td>
                 {getToString(c.value.resource!.operation)}

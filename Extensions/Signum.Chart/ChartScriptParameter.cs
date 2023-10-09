@@ -11,11 +11,15 @@ namespace Signum.Chart;
 [JsonConverter(typeof(ChartScriptParameterGroupJsonConverter))]
 public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
 {
-    public string? Name { get; }
+    public Func<string>? DisplayName { get; }
 
-    public ChartScriptParameterGroup(string? name = null)
+    public ChartScriptParameterGroup(Enum displayName)
     {
-        Name = name;
+        DisplayName = displayName.NiceToString;
+    }
+    public ChartScriptParameterGroup(Func<string>? dispalyName = null)
+    {
+        DisplayName = dispalyName;
     }
 
     public void Add(ChartScriptParameter p)
@@ -40,7 +44,7 @@ public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
             var group = value!;
             writer.WriteStartObject();
             writer.WritePropertyName("name");
-            writer.WriteStringValue(group.Name);
+            writer.WriteStringValue(group.DisplayName?.Invoke());
             writer.WritePropertyName("parameters");
             JsonSerializer.Serialize(writer, group.Parameters, options);
             writer.WriteEndObject();
@@ -52,13 +56,29 @@ public class ChartScriptParameterGroup : IEnumerable<ChartScriptParameter>
 
 public class ChartScriptParameter
 {
-    public ChartScriptParameter(string name, ChartParameterType type)
+    public ChartScriptParameter(Enum prefix, Enum suffix, ChartParameterType type) :
+        this(prefix.ToString() + suffix.ToString(), () => prefix.NiceToString() + " " + suffix.NiceToString(), type)
+    {
+    }
+
+    public ChartScriptParameter(Enum displayName, ChartParameterType type): 
+        this(displayName.ToString(), displayName.NiceToString, type)
+    {
+    }
+
+    public ChartScriptParameter(string name, Func<string> displayName, ChartParameterType type)
     {
         Name = name;
+        GetDisplayName = displayName;
         Type = type;
     }
 
     public string Name { get; set; }
+    [JsonIgnore]
+    public Func<string> GetDisplayName { get; set; }
+
+    public string DisplayName => GetDisplayName();
+
     public int? ColumnIndex { get; set; }
     public ChartParameterType Type { get; set; }
 

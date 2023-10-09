@@ -1,10 +1,11 @@
 ﻿
 .sf-query-token-builder {
-
+    display: flex;
+    flex-wrap: wrap;
 }
 
 .sf-query-token-part {
-    display: inline-block;
+    display: flex;
     margin-right: 1px;
 }
 
@@ -12,14 +13,23 @@
         min-width: 400px;
     }
 
+.sf-query-token-plus {
+    border: 1px solid rgb(204, 204, 204);
+    padding: 0px 5px;
+}
+    .sf-query-token-plus:hover {
+        border: 1px solid #808080;
+    }
+
 .has-error .sf-query-token-part .rw-dropdownlist {
     border: 1px solid #a94442;
 }
 
 .sf-prefix-btn {
-    border: 1px solid #bbb;
-    padding: 3px 5px;
-    vertical-align: super;
-    display: inline;
-    margin-right: 2px;
+    border: 1px solid rgb(204, 204, 204);
+    padding: 0px 5px;
 }
+
+    .sf-prefix-btn:hover {
+        border: 1px solid #808080;
+    }

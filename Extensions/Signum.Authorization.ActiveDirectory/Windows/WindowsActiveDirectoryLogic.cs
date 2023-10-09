@@ -14,6 +14,8 @@ public static class WindowsActiveDirectoryLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
+            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+
             if (sb.WebServerBuilder != null)
             {
                 ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());

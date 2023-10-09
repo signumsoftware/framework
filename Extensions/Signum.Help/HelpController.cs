@@ -15,11 +15,14 @@ public class HelpController : ControllerBase
         HelpPermissions.ViewHelp.AssertAuthorized();
         return new HelpIndexTS
         {
+            Culture = HelpLogic.GetCulture().ToCultureInfoEntity(),
+
             Namespaces = HelpLogic.GetNamespaceHelps().Select(s => new NamespaceItemTS
             {
                 Namespace = s.Namespace,
                 Module = s.Module,
                 Title = s.Title,
+                HasEntity = s.DBEntity != null,
                 AllowedTypes = s.AllowedTypes
             }).ToList(),
 
@@ -44,7 +47,9 @@ public class HelpController : ControllerBase
     public void SaveNamespace([Required][FromBody]NamespaceHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
-      
+
+        InlineImagesLogic.SynchronizeInlineImages(entity);
+
         if (!entity.Title.HasText() && !entity.Description.HasText())
         {
             if (!entity.IsNew)
@@ -66,6 +71,16 @@ public class HelpController : ControllerBase
 
         var help = HelpLogic.GetAppendixHelp(uniqueName);
         return help;
+    }
+
+    [HttpPost("api/help/saveAppendix")]
+    public void SaveNamespace([Required][FromBody] AppendixHelpEntity entity)
+    {
+        HelpPermissions.ViewHelp.AssertAuthorized();
+
+        InlineImagesLogic.SynchronizeInlineImages(entity);
+
+        entity.Execute(AppendixHelpOperation.Save);
     }
 
     [HttpGet("api/help/type/{cleanName}")]
@@ -111,6 +126,8 @@ public class HelpController : ControllerBase
             entity.Operations.AddRange(hiddenOperations);
             entity.Operations.RemoveAll(a => !a.Description.HasText());
 
+            InlineImagesLogic.SynchronizeInlineImages(entity);
+
             if (entity.Properties.IsEmpty() && entity.Operations.IsEmpty() && !entity.Description.HasText())
             {
                 if (!entity.IsNew)
@@ -126,8 +143,10 @@ public class HelpController : ControllerBase
 
 public class HelpIndexTS
 {
+    public CultureInfoEntity Culture;
     public List<NamespaceItemTS> Namespaces;
     public List<AppendiceItemTS> Appendices;
+
 }
 
 public class NamespaceItemTS
@@ -135,6 +154,7 @@ public class NamespaceItemTS
     public string Namespace;
     public string? Module;
     public string Title;
+    public bool HasEntity;
     public EntityItem[] AllowedTypes;
 }
 

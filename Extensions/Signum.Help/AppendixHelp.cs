@@ -1,9 +1,10 @@
 using Signum.Basics;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Help;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class AppendixHelpEntity : Entity
+public class AppendixHelpEntity : Entity, IHelpImageTarget
 {
     [StringLengthValidator(Min = 3, Max = 100)]
     public string UniqueName { get; set; }
@@ -15,6 +16,21 @@ public class AppendixHelpEntity : Entity
 
     [StringLengthValidator(Min = 3, MultiLine = true)]
     public string? Description { get; set; }
+
+    bool IHelpImageTarget.ForeachHtmlField(Func<string, string> processHtml)
+    {
+        bool changed = false;
+        if(Description != null)
+        {
+            var newDesc = processHtml(Description);
+            if(newDesc != Description)
+            {
+                changed = true;
+                Description = newDesc;
+            }
+        }
+        return changed;
+    }
 
     public override string ToString()
     {

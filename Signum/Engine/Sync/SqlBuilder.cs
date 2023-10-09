@@ -65,21 +65,33 @@ public class SqlBuilder
 
         var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
 
-        if (!(IsPostgres && t.SystemVersioned != null))
-            return result;
 
-        return new[]
-        {
-                result,
-                new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
-                new SqlPreCommandSimple(@$"CREATE TRIGGER versioning_trigger
-BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
-FOR EACH ROW EXECUTE PROCEDURE versioning(
-  'sys_period', '{t.SystemVersioned.TableName}', true
-);")
-            }.Combine(Spacing.Simple)!;
+        return result;
 
     }
+
+    public SqlPreCommandSimple CreateSystemTableVersionLike(ITable t)
+    {
+        return new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned!.TableName}(LIKE {t.Name});");
+    }
+
+    public SqlPreCommand CreateVersioningTrigger(ITable t, bool replace = false)
+    {
+        return new SqlPreCommandSimple(@$"{(replace ? "CREATE OR REPLACE" : "CREATE")} TRIGGER versioning_trigger
+BEFORE INSERT OR UPDATE OR DELETE ON {t.Name}
+FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersioned!)});");
+    }
+
+    public string VersioningTriggerArgs(SystemVersionedInfo si)
+    {
+        return $"'{si.PostgresSysPeriodColumnName}', '{si.TableName}', true";
+    }
+
+    public SqlPreCommandSimple DropVersionningTrigger(ObjectName tableName, string triggerName)
+    {
+        return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName};");
+    }
+
 
     public SqlPreCommand DropTable(DiffTable diffTable)
     {
@@ -258,7 +270,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning(
         string fullType = GetColumnType(c);
 
         var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion ?
-            $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? "START" : "END")} HIDDEN" :
+            $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? "START" : "END")} HIDDEN" :
             null;
 
         var defaultConstraint = defaultConst != null ? $"CONSTRAINT {defaultConst.Name} DEFAULT " + defaultConst.QuotedDefinition : null;

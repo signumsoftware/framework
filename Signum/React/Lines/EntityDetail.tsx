@@ -9,11 +9,12 @@ import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
 
 export interface EntityDetailProps extends EntityBaseProps {
   ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
   showType?: boolean;

@@ -40,7 +40,9 @@ interface FilterBuilderProps {
 
 export default function FilterBuilder(p: FilterBuilderProps) {
 
-  const [showPinnedFiltersOptions, setShowPinnedFiltersOptions] = React.useState<boolean>(p.showPinnedFiltersOptions ?? false)
+  const [showPinnedFiltersOptionsState, setShowPinnedFiltersOptions] = React.useState<boolean>(p.showPinnedFiltersOptions ?? false)
+
+  const showPinnedFiltersOptions = p.showPinnedFiltersOptionsButton ? showPinnedFiltersOptionsState : (p.showPinnedFiltersOptions ?? false);
 
   const forceUpdate = useForceUpdatePromise();
 
@@ -170,10 +172,10 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     onClick={e => handlerNewFilter(e, false)}>
                     <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
                   </a>
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
+                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
                     className="sf-line-button sf-create sf-create-group ms-3"
                     onClick={e => handlerNewFilter(e, true)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddGroup.niceToString()}
+                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
                   </a>
 
                   {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
@@ -308,7 +310,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   return (
     <>
       <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
-        <td style={{ paddingLeft: paddingLeft }}>
+        <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
           <div className="d-flex">
             {!readOnly &&
               <a href="#"
@@ -325,8 +327,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                 <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2"
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
+              <strong className="me-2">{p.filterGroup.groupOperation == "Or" ? SearchMessage.OrGroup.niceToString() : SearchMessage.AndGroup.niceToString()} </strong>
               <small style={{ whiteSpace: "nowrap" }}>
-                Group Prefix:
+                Prefix:
               </small>
               <div className={classes("rw-widget-xs mx-2", fg.token == null ? "hidden" : undefined)}>
                 <QueryTokenBuilder
@@ -340,11 +343,6 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
             </div>
           </div>
 
-        </td>
-        <td>
-          <select className="form-select form-select-xs sf-group-selector fw-bold" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
-            {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{FilterGroupOperation.niceToString(ft)}</option>)}
-          </select>
         </td>
         <td>
           {fg.pinned &&
@@ -410,10 +408,10 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                     <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddFilter.niceToString()}
                   </a>
 
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddGroup.niceToString() : undefined}
+                  <a href="#" title={StyleContext.default.titleLabels ? (p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()) : undefined}
                     className="sf-line-button sf-create ms-3"
                     onClick={e => handlerNewFilter(e, true)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{SearchMessage.AddGroup.niceToString()}
+                    <FontAwesomeIcon icon="plus" className="sf-create" />&nbsp;{p.filterGroup.groupOperation == "And" ? SearchMessage.AddOrGroup.niceToString() : SearchMessage.AddAndGroup.niceToString()}
                   </a>
                 </td>
               </tr>

@@ -1,14 +1,24 @@
+using System.Text.Json.Serialization;
+
 namespace Signum.Chart;
 
 public class ChartScriptColumn
 {
-    public ChartScriptColumn(string displayName, ChartColumnType columnType)
+    public ChartScriptColumn(Enum displayName, ChartColumnType columnType)
     {
-        DisplayName = displayName;
+        GetDisplayName = displayName.NiceToString;
         ColumnType = columnType;
     }
 
-    public string DisplayName { get; set; }
+    public ChartScriptColumn(Func<string> displayName, ChartColumnType columnType)
+    {
+        GetDisplayName = displayName;
+        ColumnType = columnType;
+    }
+
+    [JsonIgnore]
+    public Func<string> GetDisplayName { get; set; }
+    public string DisplayName => GetDisplayName();
     public bool IsOptional { get; set; }
     public ChartColumnType ColumnType { get; set; }
 }

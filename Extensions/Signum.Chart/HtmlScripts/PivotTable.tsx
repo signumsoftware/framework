@@ -264,32 +264,32 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function getDimParameters(columnName: string): DimParameters {
     return ({
-      complete: parameters["Complete " + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
-      createButton: parameters["Show Create Button " + columnName] as "No" | "Yes",
-      aggegrateValues: parameters["Show Aggregate Values " + columnName] as "No" | "Yes",
-      order: parameters["Order " + columnName],
-      gradient: parameters["Gradient " + columnName],
-      scale: parameters["Scale " + columnName],
-      placeholder: parameters["Placeholder " + columnName] as "no" | "empty" | "filled",
-      subTotal: parameters["SubTotal " + columnName] as "no" | "yes",
-      cssStyle: parameters["CSS Style " + columnName],
-      cssStyleDiv: parameters["CSS Style (div) " + columnName],
-      maxTextLength: parseInt(parameters["Max Text Length " + columnName]) || undefined,
+      complete: parameters["Complete" + columnName] as "No" | "Yes" | "Consistent" | "FromFilters",
+      createButton: parameters["ShowCreateButton" + columnName] as "No" | "Yes",
+      aggegrateValues: parameters["ShowAggregateValues" + columnName] as "No" | "Yes",
+      order: parameters["Order" + columnName],
+      gradient: parameters["Gradient" + columnName],
+      scale: parameters["Scale" + columnName],
+      placeholder: parameters["Placeholder" + columnName] as "no" | "empty" | "filled",
+      subTotal: parameters["SubTotal" + columnName] as "no" | "yes",
+      cssStyle: parameters["CSSStyle" + columnName],
+      cssStyleDiv: parameters["CSSStyleDiv " + columnName],
+      maxTextLength: parseInt(parameters["MaxTextLength" + columnName]) || undefined,
     });
   }
 
   const horColsWitParams = [
-    { col: data.columns.c0!, params: getDimParameters("Horizontal Axis") },
-    { col: data.columns.c1!, params: getDimParameters("Horizontal Axis (2)") },
-    { col: data.columns.c2!, params: getDimParameters("Horizontal Axis (3)") },
-    { col: data.columns.c3!, params: getDimParameters("Horizontal Axis (4)") },
+    { col: data.columns.c0!, params: getDimParameters("HorizontalAxis") },
+    { col: data.columns.c1!, params: getDimParameters("HorizontalAxis2") },
+    { col: data.columns.c2!, params: getDimParameters("HorizontalAxis3") },
+    { col: data.columns.c3!, params: getDimParameters("HorizontalAxis4") },
   ].filter(p => p.col != null);
 
   const vertColsWitParams = [
-    { col: data.columns.c4!, params: getDimParameters("Vertical Axis") },
-    { col: data.columns.c5!, params: getDimParameters("Vertical Axis (2)") },
-    { col: data.columns.c6!, params: getDimParameters("Vertical Axis (3)") },
-    { col: data.columns.c7!, params: getDimParameters("Vertical Axis (4)") },
+    { col: data.columns.c4!, params: getDimParameters("VerticalAxis") },
+    { col: data.columns.c5!, params: getDimParameters("VerticalAxis2") },
+    { col: data.columns.c6!, params: getDimParameters("VerticalAxis3") },
+    { col: data.columns.c7!, params: getDimParameters("VerticalAxis4") },
   ].filter(p => p.col != null);
 
   const valueColumns = [
@@ -299,7 +299,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
     data.columns.c11! as ChartColumn<number>,
   ].notNull();
 
-  var multiValueFormat = parameters["Multi-Value Format"] ||
+  var multiValueFormat = parameters["MultiValueFormat"] ||
       valueColumns.map((c, i) => "{" + i + "}").join(" - ");
 
   const horCols = horColsWitParams.map(a => a.col);

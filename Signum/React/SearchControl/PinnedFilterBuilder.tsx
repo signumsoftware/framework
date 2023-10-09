@@ -64,7 +64,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
           Array.range(0, maxRows).map((r, i) => {
             var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
             var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
-              .flatMap(a => Array.range(0, a.pinned!.colSpan!).map(i => (a.pinned!.column ?? 0) + i + 1))
+              .flatMap(a => Array.range(0, a.pinned!.colSpan! - 1).map(i => (a.pinned!.column ?? 0) + i + 1))
               .distinctBy(a => a.toString());
             return (
               <div key={i} className={classes("row", p.showGrid  && "py-2")}>
@@ -79,10 +79,8 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                   var error = cellPinned.some(a => a.pinned?.colSpan != null && a.pinned?.colSpan <= 0)
                     || hiddenColumns.contains(c);
 
-                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "bg-danger")}>
-                    <div className={p.showGrid ? "bg-light" : undefined}>
+                  return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
                       {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
-                    </div>
                   </div>
                   );
                 })}

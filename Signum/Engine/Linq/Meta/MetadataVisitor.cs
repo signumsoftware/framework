@@ -445,6 +445,9 @@ internal class MetadataVisitor : ExpressionVisitor
             if (member.Name == "Element")
                 return new MetaExpression(ga[1], mme.Element);
 
+            if (member.Name == "RowOrder")
+                return MakeVoidMeta(member.ReturningType());
+
             throw new InvalidOperationException("Property {0} not found on {1}".FormatWith(member.Name, mme.Type.TypeName()));
         }
 

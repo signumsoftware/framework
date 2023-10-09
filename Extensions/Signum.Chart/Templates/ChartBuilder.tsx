@@ -150,7 +150,7 @@ export function Parameters(props: {
           .filter(sp => sp.columnIndex == props.columnIndex)
           .map((sp, j) => props.parameterDic[sp.name] ?
             <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
-            <p key={sp.name} className="text-danger">{sp.name}</p>)}
+            <p key={sp.name} className="text-danger">{sp.name} ({sp.displayName})</p>)}
       </div>
     );
 
@@ -182,7 +182,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
 
     if (sp.specialParameterType == "ColorCategory") {
-      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
         valueLineType="DropDownList"
         optionItems={Dic.getKeys(colorSchemes)}
         onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
@@ -192,7 +192,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     }
 
     if (sp.specialParameterType == "ColorInterpolate") {
-      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
+      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
         valueLineType="DropDownList"
         optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
         onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
@@ -221,7 +221,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
 
   const vl: ValueLineProps = {
     ctx: ctx.subCtx(a => a.value),
-    label: scriptParameter.name!,
+    label: scriptParameter.displayName!,
   };
 
   if (scriptParameter.type == "Number" || scriptParameter.type == "String") {

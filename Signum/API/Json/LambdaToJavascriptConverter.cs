@@ -281,7 +281,17 @@ public class LambdaToJavascriptConverter
             mie.Bindings.All(b => b is MemberAssignment))
         {
             var fields = mie.Bindings.Cast<MemberAssignment>()
-                .ToString(ma => ma.Member.Name.FirstLower() + ": " + ToJavascript(param, ma.Expression) + ",", "\n");
+                .Select(ma =>
+                {
+                    var value = ToJavascript(param, ma.Expression);
+
+                    if (value == null)
+                        return null;
+
+                    return ma.Member.Name.FirstLower() + ": " + value + ",";
+                })
+                .NotNull()
+                .ToString("\n");
 
             var t = mie.Type;
 

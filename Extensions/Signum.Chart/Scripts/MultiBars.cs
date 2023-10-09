@@ -7,33 +7,33 @@ public class MultiBarsChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("multibars.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Vertical Axis", ChartColumnType.Groupable),
-            new ChartScriptColumn("Split Bars", ChartColumnType.Groupable) { IsOptional = true },
-            new ChartScriptColumn("Width", ChartColumnType.Positionable) ,
-            new ChartScriptColumn("Width 2", ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn("Width 3", ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn("Width 4", ChartColumnType.Positionable) { IsOptional = true },
-            new ChartScriptColumn("Width 5", ChartColumnType.Positionable) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.VerticalAxis, ChartColumnType.Groupable),
+            new ChartScriptColumn(ChartColumnMessage.SplitBars, ChartColumnType.Groupable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width, ChartColumnType.Positionable) ,
+            new ChartScriptColumn(ChartColumnMessage.Width2, ChartColumnType.Positionable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width3, ChartColumnType.Positionable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width4, ChartColumnType.Positionable) { IsOptional = true },
+            new ChartScriptColumn(ChartColumnMessage.Width5, ChartColumnType.Positionable) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
-                new ChartScriptParameter("Scale", ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
+                new ChartScriptParameter(ChartParameterMessage.CompleteValues, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter(ChartParameterMessage.Scale, ChartParameterType.Enum) { ColumnIndex = 2,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
             },
-            new ChartScriptParameterGroup("Margin")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
-                new ChartScriptParameter("LabelMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 140m } },
+                new ChartScriptParameter(ChartParameterMessage.LabelMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 140m } },
             },
-            new ChartScriptParameterGroup("Number")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
-                new ChartScriptParameter("NumberColor", ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
+                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameterMessage.NumberColor, ChartParameterType.String) {  ValueDefinition = new StringValue("#fff") },
             },
-            new ChartScriptParameterGroup("Color")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Color)
             {
-                new ChartScriptParameter("ColorCategory", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
+                new ChartScriptParameter(ChartParameterMessage.ColorCategory, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorCategory) },
             }
         };
     }

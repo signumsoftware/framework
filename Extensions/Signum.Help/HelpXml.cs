@@ -1,5 +1,11 @@
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Vml.Office;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Signum.Basics;
 using Signum.Engine.Sync;
+using Signum.Engine.Sync.Postgres;
+using Signum.Entities;
+using Signum.Files;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -30,25 +36,87 @@ public static class HelpXml
                 );
         }
 
-        public static ImportAction Load(XDocument document)
+
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+            Replacements rep, ref bool? deleteAll)
         {
-            XElement element = document.Element(_Appendix)!;
+            SafeConsole.WriteLineColor(ConsoleColor.White, $" Appendix");
 
-            var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
-            var name = element.Attribute(_Name)!.Value;
+            var current = Database.Query<AppendixHelpEntity>().Where(a => a.Culture.Is(ci)).ToList();
 
-            var entity = Database.Query<AppendixHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.UniqueName == name) ??
-                new AppendixHelpEntity
-                {
-                     Culture = ci,
-                     UniqueName = name,
-                }; 
-         
-            entity.Title = element.Attribute(_Title)!.Value;
-            element.Element(_Description)?.Do(d => entity.Description = d.Value);
+            var files = Directory.Exists(directory) ? Directory.GetFiles(directory, "*.help") : null;
 
-            return Save(entity);
+            XElement ParseXML(string path)
+            {
+                XDocument doc = XDocument.Load(path);
+                XElement element = doc.Element(_Appendix)!;
+
+                var uniqueName = element.Attribute(_Name)!.Value;
+                if (uniqueName != Path.GetFileNameWithoutExtension(path))
+                    throw new InvalidOperationException($"UniqueName attribute ({uniqueName}) does not match with file name ({path})");
+
+                var culture = element.Attribute(_Culture)!.Value;
+                if (culture != ci.Name)
+                    throw new InvalidOperationException($"Culture attribute ({culture}) does not match with folder ({path})");
+
+                return element;
+            }
+
+
+            bool? deleteTemp = deleteAll;
+
+            Synchronizer.SynchronizeReplacing(rep, "Appendix",
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => Path.GetFileNameWithoutExtension(o)),
+                  oldDictionary: current.ToDictionaryEx(n => n.UniqueName),
+                  createNew: (k, n) =>
+                  {
+                      XElement element = ParseXML(n);
+
+                      var a = new AppendixHelpEntity
+                      {
+                          Culture = ci,
+                          UniqueName = element.Attribute(_Name)!.Value,
+                          Title = element.Attribute(_Title)!.Value,
+                          Description = element.Element(_Description)?.Value
+                      }.Save();
+
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + a.UniqueName);
+                      ImportImages(a, n, null);
+                      Console.WriteLine();
+                  },
+                  removeOld: (k, o) =>
+                  {
+                      if (SafeConsole.Ask(ref deleteTemp, $"Delete Appendix {o.UniqueName} in {o.Culture}?"))
+                      {
+                          o.Delete();
+                          SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.UniqueName);
+                      }
+                  },
+                  merge: (k, n, o) =>
+                  {
+                      XElement element = ParseXML(n);
+
+                      o.Title = element.Attribute(_Title)!.Value;
+                      o.Description = element.Element(_Description)?.Value;
+
+                      if (GraphExplorer.IsGraphModified(o))
+                      {
+                          o.Save();
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.UniqueName);
+                      }
+                      else
+                      {
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.UniqueName);
+                      }
+
+                      ImportImages(o, n, images.TryGetC(o.ToLite()));
+                      Console.WriteLine();
+                  });
+
+            deleteAll = deleteTemp;
         }
+
+
     }
 
     public static class NamespaceXml
@@ -81,30 +149,87 @@ public static class HelpXml
 
             if (!result.HasText())
                 throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _Name));
-
             return result;
         }
 
-        public static ImportAction Load(XDocument document, Dictionary<string, string> namespaces)
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+            Replacements rep, ref bool? deleteAll)
         {
-            XElement element = document.Element(_Namespace)!;
+            SafeConsole.WriteLineColor(ConsoleColor.White, $" Namespace");
 
-            var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
-            var name = SelectInteractive(element.Attribute(_Name)!.Value, namespaces, "namespaces");
+            var current = Database.Query<NamespaceHelpEntity>().Where(a => a.Culture.Is(ci)).ToList();
 
-            if (name == null)
-                return ImportAction.Skipped;
+            var files = Directory.Exists(directory) ? Directory.GetFiles(directory, "*.help") : null;
 
-            var entity = Database.Query<NamespaceHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Name == name) ?? new NamespaceHelpEntity
+            XElement ParseXML(string path)
             {
-                Culture = ci,
-                Name = name,
-            };
+                XDocument doc = XDocument.Load(path);
+                XElement element = doc.Element(_Namespace)!;
 
-            entity.Title = element.Attribute(_Title)?.Value;
-            entity.Description = element.Element(_Description)?.Value;
+                var uniqueName = element.Attribute(_Name)!.Value;
+                if (uniqueName != Path.GetFileNameWithoutExtension(path))
+                    throw new InvalidOperationException($"UniqueName attribute ({uniqueName}) does not match with file name ({path})");
 
-            return Save(entity);
+                var culture = element.Attribute(_Culture)!.Value;
+                if (culture != ci.Name)
+                    throw new InvalidOperationException($"Culture attribute ({culture}) does not match with folder ({path})");
+
+                return element;
+            }
+
+            bool? deleteTemp = deleteAll;
+
+            Synchronizer.SynchronizeReplacing(rep, "Namespace", 
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => Path.GetFileName(o)),
+                  oldDictionary: current.ToDictionaryEx(n => n.Name),
+                  createNew: (k, n) =>
+                  {
+                      XElement element = ParseXML(n);
+
+                      var a = new NamespaceHelpEntity
+                      {
+                          Culture = ci,
+                          Name = element.Attribute(_Name)!.Value,
+                          Title = element.Attribute(_Title)!.Value,
+                          Description = element.Element(_Description)?.Value
+                      }.Save();
+
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + a.Name);
+                      ImportImages(a, n, null);
+
+                      Console.WriteLine();
+                  },
+                  removeOld: (k, o) =>
+                  {
+                      if (SafeConsole.Ask(ref deleteTemp, $"Delete Namespace {o.Name} in {o.Culture}?"))
+                      {
+                          o.Delete();
+                          SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Name);
+                      }
+                  },
+                  merge: (k, n, o) =>
+                  {
+                      XElement element = ParseXML(n);
+
+                      o.Title = element.Attribute(_Title)!.Value;
+                      o.Description = element.Element(_Description)?.Value;
+
+                      if (GraphExplorer.IsGraphModified(o))
+                      {
+                          o.Save();
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + o.Name);
+                      }
+                      else
+                      {
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + o.Name);
+                      }
+
+                      ImportImages(o, n, images.TryGetC(o.ToLite()));
+
+                      Console.WriteLine();
+                  });
+
+            deleteAll = deleteTemp;
         }
     }
 
@@ -136,36 +261,101 @@ public static class HelpXml
                    );
         }
 
-
-        public static ImportAction Load(XDocument document)
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+            Replacements rep, ref bool? deleteAll)
         {
-            XElement element = document.Element(_Query)!;
-            var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
-            var queryName = SelectInteractive(element.Attribute(_Key)!.Value, QueryLogic.QueryNames, "queries");
+            SafeConsole.WriteLineColor(ConsoleColor.White, $" Query");
 
-            if (queryName == null)
-                return ImportAction.Skipped;
+            var current = Database.Query<QueryHelpEntity>().Where(a => a.Culture.Is(ci)).ToList();
 
-            var query = QueryLogic.GetQueryEntity(queryName);
+            var files = Directory.Exists(directory) ? Directory.GetFiles(directory, "*.help") : null;
 
-            var entity = Database.Query<QueryHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Query.Is(query)) ??
-                new QueryHelpEntity
-                {
-                    Culture = ci,
-                    Query = query,
-                };
+            XElement ParseXML(string path)
+            {
+                XDocument doc = XDocument.Load(path);
+                XElement element = doc.Element(_Query)!;
 
+                var queryKey = element.Attribute(_Key)!.Value;
+                if (queryKey != Path.GetFileNameWithoutExtension(path))
+                    throw new InvalidOperationException($"Key attribute ({queryKey}) does not match with file name ({path})");
+
+                var culture = element.Attribute(_Culture)!.Value;
+                if (culture != ci.Name)
+                    throw new InvalidOperationException($"Culture attribute ({culture}) does not match with folder ({path})");
+
+                return element;
+            }
+
+            bool? deleteTemp = deleteAll;
+
+            Synchronizer.SynchronizeReplacing(rep, "Queries",
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => Path.GetFileName(o)),
+                  oldDictionary: current.ToDictionaryEx(n => n.Query.Key),
+                  createNew: (k, n) =>
+                  {
+                      XElement element = ParseXML(n);
+                      var queryHelp = new QueryHelpEntity
+                      {
+                          Culture = ci,
+                          Query = QueryLogic.GetQueryEntity(k),
+                      };
+
+                      ImportXml(queryHelp, element);
+                      queryHelp.Save();
+
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + queryHelp.Query.Key);
+
+                      ImportImages(queryHelp, n, null);
+
+                      Console.WriteLine();
+                  },
+                  removeOld: (k, o) =>
+                  {
+                      if (SafeConsole.Ask(ref deleteTemp, $"Delete Query {o.Query.Key} in {o.Culture}?"))
+                      {
+                          o.Delete();
+                          SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Query.Key);
+                      }
+                  },
+                  merge: (k, n, queryHelp) =>
+                  {
+                      XElement element = ParseXML(n);
+
+                      queryHelp.Culture = ci;
+                      queryHelp.Description = element.Element(_Description)?.Value;
+                      ImportXml(queryHelp, element);
+
+                      if (GraphExplorer.IsGraphModified(queryHelp))
+                      {
+                          queryHelp.Save();
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + queryHelp.Query.Key);
+                      }
+                      else
+                      {
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + queryHelp.Query.Key);
+                      }
+
+                      ImportImages(queryHelp, n, images.TryGetC(queryHelp.ToLite()));
+
+                      Console.WriteLine();
+                  });
+
+            deleteAll = deleteTemp;
+        }
+
+        private static void ImportXml(QueryHelpEntity entity, XElement element)
+        {
             entity.Description = element.Element(_Description)?.Value;
 
             var cols = element.Element(_Columns);
             if (cols != null)
             {
-                var queryColumns = QueryLogic.Queries.GetQuery(queryName).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
+                var queryColumns = QueryLogic.Queries.GetQuery(entity.Query.ToQueryName()).Core.Value.StaticColumns.Select(a => a.Name).ToDictionary(a => a);
 
                 foreach (var item in cols.Elements(_Column))
                 {
                     string? name = item.Attribute(_Name)!.Value;
-                    name = SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(queryName));
+                    name = SelectInteractive(name, queryColumns, "columns of {0}".FormatWith(entity.Query));
 
                     if (name == null)
                         continue;
@@ -185,14 +375,12 @@ public static class HelpXml
                     }
                 }
             }
-
-            return Save(entity);
         }
     }
 
     public static class EntityXml
     {
-        static readonly XName _FullName = "FullName";
+        static readonly XName _CleanName = "CleanName";
         static readonly XName _Name = "Name";
         static readonly XName _Key = "Key";
         static readonly XName _Culture = "Culture";
@@ -213,7 +401,7 @@ public static class HelpXml
             return new XDocument(
                 new XDeclaration("1.0", "utf-8", "yes"),
                 new XElement(_Entity,
-                       new XAttribute(_FullName, entity.Type.FullClassName),
+                       new XAttribute(_CleanName, entity.Type.CleanName),
                        new XAttribute(_Culture, entity.Culture.Name),
                        entity.Description.HasText() ? new XElement(_Description, entity.Description) : null!,
                        entity.Properties.Any() ? new XElement(_Properties,
@@ -230,27 +418,11 @@ public static class HelpXml
                );
         }
 
-        public static ImportAction Load(XDocument document, Dictionary<string, Type> typesByFullName)
+        private static void ImportType(TypeHelpEntity entity, XElement element)
         {
-            XElement element = document.Element(_Entity)!;
-            var ci = CultureInfoLogic.CultureInfoToEntity.Value.GetOrThrow(element.Attribute(_Culture)!.Value);
-            var fullName = element.Attribute(_FullName)!.Value;
-            var type = SelectInteractive(fullName, typesByFullName, "types");
+            entity.Description = element.Element(_Description)?.Value;
 
-            if(type == null)
-                return ImportAction.Skipped;
-
-            var typeEntity = type.ToTypeEntity();
-
-            var entity = Database.Query<TypeHelpEntity>().SingleOrDefaultEx(a => a.Culture.Is(ci) && a.Type.Is(typeEntity)) ??
-                new TypeHelpEntity
-                {
-                    Culture = ci,
-                    Type = typeEntity,
-                };
-
-            element.Element(_Description)?.Do(d => entity.Description = d.Value);
-
+            TypeEntity typeEntity = entity.Type;
             var props = element.Element(_Properties);
             if (props != null)
             {
@@ -260,7 +432,7 @@ public static class HelpXml
                 {
                     string name = item.Attribute(_Name)!.Value;
 
-                    var property = SelectInteractive(name, properties, "properties for {0}".FormatWith(type.Name));
+                    var property = SelectInteractive(name, properties, "properties for {0}".FormatWith(typeEntity.ClassName));
                     if (property == null)
                         continue;
 
@@ -288,7 +460,7 @@ public static class HelpXml
                 foreach (var item in opers.Elements(_Operation))
                 {
                     string name = item.Attribute(_Name)!.Value;
-                    var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(type.Name));
+                    var operation = SelectInteractive(name, operations, "operations for {0}".FormatWith(typeEntity.ClassName));
 
                     if (operation == null)
                         continue;
@@ -308,37 +480,131 @@ public static class HelpXml
                     }
                 }
             }
-
-
-            return Save(entity);
         }
-
 
         public static string GetEntityFullName(XDocument document, string fileName)
         {
             if (document.Root!.Name != _Entity)
                 throw new InvalidOperationException("{0} does not have a {1} root".FormatWith(fileName, _Entity));
 
-            var result = document.Root.Attribute(_FullName)?.Value;
+            var result = document.Root.Attribute(_CleanName)?.Value;
 
             if (!result.HasText())
-                throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _FullName));
+                throw new InvalidOperationException("{0} does not have a {1} attribute".FormatWith(fileName, _CleanName));
 
             return result;
         }
+
+
+        internal static void LoadDirectory(string directory, CultureInfoEntity ci, Dictionary<Lite<IHelpImageTarget>, List<HelpImageEntity>> images, 
+            Replacements rep, ref bool? deleteAll)
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.White, $" Entity");
+
+            var typesByFullName = HelpLogic.AllTypes().ToDictionary(a => TypeLogic.GetCleanName(a)!);
+
+            var current = Database.Query<TypeHelpEntity>().Where(a => a.Culture.Is(ci)).ToList();
+
+            var files = Directory.Exists(directory) ? Directory.GetFiles(directory, "*.help") : null;
+
+            XElement ParseXML(string path)
+            {
+                XDocument doc = XDocument.Load(path);
+                XElement element = doc.Element(_Entity)!;
+
+                var uniqueName = element.Attribute(_CleanName)!.Value;
+                if (uniqueName != Path.GetFileNameWithoutExtension(path))
+                    throw new InvalidOperationException($"UniqueName attribute ({uniqueName}) does not match with file name ({path})");
+
+                var culture = element.Attribute(_Culture)!.Value;
+                if (culture != ci.Name)
+                    throw new InvalidOperationException($"Culture attribute ({culture}) does not match with folder ({path})");
+
+                return element;
+            }
+
+            bool? deleteTemp = null;
+
+            Synchronizer.SynchronizeReplacing(rep, "Types",
+                  newDictionary: files.EmptyIfNull().ToDictionaryEx(o => Path.GetFileNameWithoutExtension(o)),
+                  oldDictionary: current.ToDictionaryEx(n => n.Type.CleanName),
+                  createNew: (k, path) =>
+                  {
+                      XElement element = ParseXML(path);
+                      var cleanName = element.Attribute(_CleanName)!.Value;
+                      var typeEntity = typesByFullName.GetOrThrow(cleanName);
+
+                      var typeHelp = new TypeHelpEntity
+                      {
+                          Culture = ci,
+                          Type = typeEntity.ToTypeEntity(),
+                      };
+
+                      ImportType(typeHelp, element);
+                      typeHelp.Save();
+
+                      SafeConsole.WriteColor(ConsoleColor.Green, "  " + typeHelp.Type.CleanName);
+                      ImportImages(typeHelp, path, null);
+                      Console.WriteLine();
+                  },
+                  removeOld: (k, o) =>
+                  {
+                      if (SafeConsole.Ask(ref deleteTemp, $"Delete Type {o.Type.CleanName} in {o.Culture}?"))
+                      {
+                          o.Delete();
+                          SafeConsole.WriteLineColor(ConsoleColor.Red, "  " + o.Type.CleanName);
+                      }
+                  },
+                  merge: (k, path, typeEntity) =>
+                  {
+                      XElement element = ParseXML(path);
+                      
+                      ImportType(typeEntity, element);
+
+                      if (GraphExplorer.IsGraphModified(typeEntity))
+                      {
+                          typeEntity.Save();
+                          SafeConsole.WriteColor(ConsoleColor.Yellow, "  " + typeEntity.Type.CleanName);
+                      }
+                      else
+                      {
+                          SafeConsole.WriteColor(ConsoleColor.DarkGray, "  " + typeEntity.Type.CleanName);
+                      }
+
+                      ImportImages(typeEntity, path, images.TryGetC(typeEntity.ToLite()));
+
+                      Console.WriteLine();
+                  });
+
+            deleteAll = deleteTemp;
+        }
     }
 
-    public static ImportAction Save(Entity entity)
+    private static void ImportImages(Entity entity, string filePath, List<HelpImageEntity>? images)
     {
-        if (!GraphExplorer.HasChanges(entity))
-            return ImportAction.NoChanges;
+        var imageDir = Path.Combine(Path.GetDirectoryName(filePath)!, Path.GetFileNameWithoutExtension(filePath));
+        var newImages = Directory.Exists(imageDir) ? Directory.GetFiles(imageDir) : null;
 
-        var result = entity.IsNew ? ImportAction.Inserted : ImportAction.Updated;
-
-        using (OperationLogic.AllowSave(entity.GetType()))
-            entity.Save();
-
-        return result;
+        Synchronizer.Synchronize(
+              newDictionary: newImages.EmptyIfNull().ToDictionaryEx(n => Path.GetFileName(n)),
+              oldDictionary: images.EmptyIfNull().ToDictionaryEx(o => o.Id + "." + o.File.FileName),
+              createNew: (k, n) =>
+              {
+                  Administrator.SaveDisableIdentity(new HelpImageEntity
+                  {
+                      Target = ((IHelpImageTarget)entity).ToLite(),
+                      File = new FilePathEmbedded(HelpImageFileType.Image, Path.GetFileName(n).After("."), File.ReadAllBytes(n))
+                  }.SetId(Guid.Parse(Path.GetFileName(n).Before("."))));
+                  SafeConsole.WriteColor(ConsoleColor.Green, '.');
+              },
+              removeOld: (k, o) =>
+              {
+                  o.Delete();
+                  SafeConsole.WriteColor(ConsoleColor.Red, '.');
+              },
+              merge: (k, n, o) =>
+              {
+              });
     }
 
     public static string TypesDirectory = "Types";
@@ -376,6 +642,16 @@ public static class HelpXml
 
     public static void ExportAll(string directoryName)
     {
+        HashSet<CultureInfo> cultures = GetAllCultures(directoryName);
+
+        foreach (var ci in cultures)
+        {
+            ExportCulture(directoryName, ci);
+        }
+    }
+
+    private static HashSet<CultureInfo> GetAllCultures(string directoryName)
+    {
         HashSet<CultureInfo> cultures = new HashSet<CultureInfo>();
         cultures.AddRange(Database.Query<AppendixHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
         cultures.AddRange(Database.Query<NamespaceHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
@@ -383,11 +659,7 @@ public static class HelpXml
         cultures.AddRange(Database.Query<QueryHelpEntity>().Select(a => a.Culture).Distinct().ToList().Select(c => c.ToCultureInfo()));
         if (Directory.Exists(directoryName))
             cultures.AddRange(new DirectoryInfo(directoryName).GetDirectories().Select(c => CultureInfo.GetCultureInfo(c.Name)));
-
-        foreach (var ci in cultures)
-        {
-            ExportCulture(directoryName, ci);
-        }       
+        return cultures;
     }
 
     public static void ExportCulture(string directoryName, CultureInfo ci)
@@ -395,28 +667,36 @@ public static class HelpXml
         bool? replace = null;
         bool? delete = null;
 
-        SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, AppendicesDirectory),
-            Database.Query<AppendixHelpEntity>().Where(ah => ah.Culture.Name == ci.Name).ToList(),
-            ah => "{0}.{1}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name),
-            ah => AppendixXml.ToXDocument(ah));
+        var cie = ci.ToCultureInfoEntity();
 
-        SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, NamespacesDirectory),
-            Database.Query<NamespaceHelpEntity>().Where(nh => nh.Culture.Name == ci.Name).ToList(),
-            nh => "{0}.{1}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name),
-            nh => NamespaceXml.ToXDocument(nh));
+        var group = Database.Query<HelpImageEntity>().GroupToDictionary(a => a.Target);
 
-        SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, TypesDirectory),
-            Database.Query<TypeHelpEntity>().Where(th => th.Culture.Name == ci.Name).ToList(),
-            th => "{0}.{1}.help".FormatWith(RemoveInvalid(th.Type.CleanName), th.Culture.Name),
-            th => EntityXml.ToXDocument(th));
+        ExportFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, AppendicesDirectory),
+            Database.Query<AppendixHelpEntity>().Where(ah => ah.Culture.Is(cie)).ToList(),
+            ah => "{0}.help".FormatWith(RemoveInvalid(ah.UniqueName), ah.Culture.Name),
+            ah => AppendixXml.ToXDocument(ah),
+            ah => group.TryGetC(ah.ToLite()));
 
-        SyncFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, QueriesDirectory),
-            Database.Query<QueryHelpEntity>().Where(qh => qh.Culture.Name == ci.Name).ToList(),
-            qh => "{0}.{1}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name),
-            qh => QueryXml.ToXDocument(qh));
+        ExportFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, NamespacesDirectory),
+            Database.Query<NamespaceHelpEntity>().Where(nh => nh.Culture.Is(cie)).ToList(),
+            nh => "{0}.help".FormatWith(RemoveInvalid(nh.Name), nh.Culture.Name),
+            nh => NamespaceXml.ToXDocument(nh),
+            ah => group.TryGetC(ah.ToLite()));
+
+        ExportFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, TypesDirectory),
+            Database.Query<TypeHelpEntity>().Where(th => th.Culture.Is(cie)).ToList(),
+            th => "{0}.help".FormatWith(RemoveInvalid(th.Type.CleanName), th.Culture.Name),
+            th => EntityXml.ToXDocument(th),
+            ah => group.TryGetC(ah.ToLite()));
+
+        ExportFolder(ref replace, ref delete, Path.Combine(directoryName, ci.Name, QueriesDirectory),
+            Database.Query<QueryHelpEntity>().Where(qh => qh.Culture.Is(cie)).ToList(),
+            qh => "{0}.help".FormatWith(RemoveInvalid(qh.Query.Key), qh.Culture.Name),
+            qh => QueryXml.ToXDocument(qh),
+            ah => group.TryGetC(ah.ToLite()));
     }
 
-    public static void SyncFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML)
+    public static void ExportFolder<T>(ref bool? replace, ref bool? delete, string folder, List<T> should,  Func<T, string> fileName, Func<T, XDocument> toXML, Func<T, List<HelpImageEntity>?> getImages)
     {
         if (should.Any() && !Directory.Exists(folder))
             Directory.CreateDirectory(folder);
@@ -428,9 +708,25 @@ public static class HelpXml
         Synchronizer.Synchronize(
             newDictionary: should.ToDictionary(fileName),
             oldDictionary: !Directory.Exists(folder) ? new() : Directory.GetFiles(folder).ToDictionary(a => Path.GetFileName(a)),
-            createNew: (fileName, entity) => {
+            createNew: (fileName, entity) =>
+            {
                 toXML(entity).Save(Path.Combine(folder, fileName));
-                SafeConsole.WriteLineColor(ConsoleColor.Green, " Created " + fileName);
+                SafeConsole.WriteColor(ConsoleColor.Green, " Created " + fileName);
+
+                var images = getImages(entity);
+                if (images != null)
+                {
+                    var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                    Directory.CreateDirectory(imgDirectory);
+
+                    foreach (var img in images)
+                    {
+                        var bla = Path.Combine(imgDirectory, img.Id + "." + img.File.FileName);
+                        File.WriteAllBytes(bla, img.File.GetByteArray());
+                    }
+                }
+
+                Console.WriteLine();
             },
             removeOld: (fileName, fullName) =>
             {
@@ -438,8 +734,13 @@ public static class HelpXml
                 {
                     File.Delete(fullName);
                     SafeConsole.WriteLineColor(ConsoleColor.Red, " Deleted " + fileName);
+
+                    var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                    if (Directory.Exists(imgDirectory))
+                        Directory.Delete(imgDirectory, true);
                 }
-            }, merge: (fileName, entity, fullName) =>
+            },
+            merge: (fileName, entity, fullName) =>
             {
                 var xml = toXML(entity);
 
@@ -451,14 +752,48 @@ public static class HelpXml
                     if (SafeConsole.Ask(ref replaceLocal, " Override {0}?".FormatWith(fileName)))
                     {
                         xml.Save(Path.Combine(folder, fileName));
-                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, " Overriden " + fileName);
+                        SafeConsole.WriteColor(ConsoleColor.Yellow, " Overriden " + fileName);
                     }
                 }
                 else
                 {
-                    SafeConsole.WriteLineColor(ConsoleColor.DarkGray, " Identical " + fileName);
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, " Identical " + fileName);
                 }
-            }); ;
+
+                var imgDirectory = Path.Combine(folder, Path.GetFileNameWithoutExtension(fileName));
+                var images = getImages(entity);
+                if (images != null)
+                {
+                    var currImages = Directory.GetFiles(imgDirectory).ToDictionary(a => Path.GetFileName(a));
+
+                    var shouldImages = images.ToDictionaryEx(a => a.Id + "." + a.File.FileName);
+
+                    var newEntities = new List<T>();
+                    Synchronizer.Synchronize(
+                          newDictionary: shouldImages,
+                          oldDictionary: currImages,
+                          createNew: (k, n) =>
+                          {
+                              File.WriteAllBytes(Path.Combine(imgDirectory, k), n.File.GetByteArray());
+                              SafeConsole.WriteColor(ConsoleColor.DarkGreen, '.');
+                          },
+                          removeOld: (k, o) =>
+                          {
+                              File.Delete(Path.Combine(imgDirectory, k));
+                              SafeConsole.WriteColor(ConsoleColor.DarkRed, '.');
+                          },
+                          merge: (k, n, o) =>
+                          {
+                          });
+                }
+                else
+                {
+                    if (Directory.Exists(imgDirectory))
+                        Directory.Delete(imgDirectory, true);
+                }
+
+                Console.WriteLine();
+            });
 
         delete = deleteLocal;
         replace = replaceLocal;
@@ -466,36 +801,23 @@ public static class HelpXml
 
     public static void ImportAll(string directoryName)
     {
-        var namespaces = HelpLogic.AllTypes().Select(a => a.Namespace!).Distinct().ToDictionary(a => a);
+        var images = Database.Query<HelpImageEntity>().GroupToDictionary(a => a.Target);
 
-        var types = HelpLogic.AllTypes().ToDictionary(a => a.FullName!);
-
-        foreach (var path in Directory.GetFiles(directoryName, "*.help", SearchOption.AllDirectories))
+        Replacements rep = new Replacements();
+        bool? deleteAll = null;
+        foreach (var ci in GetAllCultures(directoryName))
         {
-            try
-            {
-                XDocument doc = XDocument.Load(path);
+            var ciEntity = ci.ToCultureInfoEntity();
+            var dirCulture = Path.Combine(directoryName, ci.Name);
 
-                ImportAction action = 
-                    doc.Root!.Name == AppendixXml._Appendix ? AppendixXml.Load(doc):
-                    doc.Root!.Name == NamespaceXml._Namespace ? NamespaceXml.Load(doc, namespaces):
-                    doc.Root!.Name == EntityXml._Entity ? EntityXml.Load(doc, types):
-                    doc.Root!.Name == QueryXml._Query ? QueryXml.Load(doc) :
-                    throw new InvalidOperationException("Unknown Xml root: " + doc.Root.Name);
+            SafeConsole.WriteLineColor(ConsoleColor.White, $"{ciEntity.Name} ({ciEntity.EnglishName})");
 
-                ConsoleColor color =
-                    action == ImportAction.Inserted ? ConsoleColor.Green :
-                    action == ImportAction.Updated ? ConsoleColor.DarkGreen :
-                    action == ImportAction.Skipped ? ConsoleColor.Yellow :
-                    action == ImportAction.NoChanges ? ConsoleColor.DarkGray :
-                    throw new InvalidOperationException("Unexpected action");
+            AppendixXml.LoadDirectory(Path.Combine(dirCulture, AppendicesDirectory), ciEntity, images, rep, ref deleteAll);
+            NamespaceXml.LoadDirectory(Path.Combine(dirCulture, NamespacesDirectory), ciEntity, images, rep, ref deleteAll);
+            EntityXml.LoadDirectory(Path.Combine(dirCulture, TypesDirectory), ciEntity, images, rep, ref deleteAll);
+            QueryXml.LoadDirectory(Path.Combine(dirCulture, QueriesDirectory), ciEntity, images, rep, ref deleteAll);
 
-                SafeConsole.WriteLineColor(color, " {0} {1}".FormatWith(action, path));
-            }
-            catch (Exception e)
-            {
-                SafeConsole.WriteLineColor(ConsoleColor.Red, " Error {0}:\r\n\t".FormatWith(path) + e.Message);
-            }
+            Console.WriteLine();
         }
     }
 

@@ -1,0 +1,14 @@
+﻿
+
+.sf-help-button {
+    color: #ddd;
+    font-size: 16px;
+}
+
+    .sf-help-button.active {
+        color: #9954bb;
+    }
+
+    .sf-help-button:hover {
+        filter: brightness(85%);
+    }

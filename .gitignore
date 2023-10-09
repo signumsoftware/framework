@@ -39,3 +39,4 @@ Signum.Analyzer/packages/*
 /Signum.TSGenerator/Binaries/*
 /Utils/CheckUrl/.vs/**
 **/ts_out/**
+/Extensions/Signum.Help/node_modules/.bin/marked

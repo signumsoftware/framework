@@ -2,11 +2,11 @@
 import * as React from 'react'
 import { Dic } from '../Globals'
 import { FindOptionsParsed } from '../FindOptions'
-import { TypeReference } from '../Reflection'
+import { TypeReference, getQueryNiceName } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities.Validation';
 import { CollectionMessage } from '../Signum.External';
 
-export default function GroupByMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference }) {
+export default function GroupByMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference}) {
   const fo = p.findOptions;
 
   const tokensObj = fo.columnOptions.map(a => a.token)
@@ -16,7 +16,7 @@ export default function GroupByMessage(p: { findOptions: FindOptionsParsed, main
 
   const tokens = Dic.getValues(tokensObj);
 
-  const message = ValidationMessage.TheRowsAreBeingGroupedBy0.niceToString().formatHtml(
+  const message = ValidationMessage.EachRowRepresentsAGroupOf0WithSame1.niceToString().formatHtml(getQueryNiceName(fo.queryKey),
     tokens.map(a => <strong>{a.niceName}</strong>).joinCommaHtml(CollectionMessage.And.niceToString()));
   return (
     <div className="sf-search-message alert alert-info">
