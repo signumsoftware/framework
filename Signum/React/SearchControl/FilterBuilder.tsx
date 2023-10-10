@@ -6,7 +6,7 @@ import {
   hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType, FilterOption, isFilterGroup, isFilterCondition
 } from '../FindOptions'
 import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
-import { isNumber, trimDateToFormat, ValueLineController } from '../Lines/ValueLine'
+import { isNumber, ValueLineController } from '../Lines/ValueLine'
 import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly, EntityStrip } from '../Lines'
 import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat, PropertyRoute } from '../Reflection'
 import { TypeContext } from '../TypeContext'
@@ -20,6 +20,7 @@ import { Button, Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import { TypeEntity } from '../Signum.Basics'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
+import { trimDateToFormat } from '../Lines/DateTimeLine'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];

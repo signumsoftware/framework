@@ -12,8 +12,7 @@ import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
-export interface ValueLineProps extends LineBaseProps {
-  valueLineType?: ValueLineType;
+export interface TextAreaLineProps extends LineBaseProps {
   unit?: React.ReactChild;
   format?: string;
   autoTrimString?: boolean;
@@ -21,7 +20,7 @@ export interface ValueLineProps extends LineBaseProps {
   optionItems?: (OptionItem | MemberInfo | string)[];
   datalist?: string[];
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: ValueLineController) => React.ReactNode;
+  extraButtons?: (vl: TextAreaLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
 
   incrementWithArrow?: boolean | number;
@@ -37,17 +36,10 @@ export interface OptionItem {
   label: string;
 }
 
-export type ValueLineType =
-  "TextArea" |
-  "Number" |
-  "Decimal" |
-  "RadioGroup"
-  ;
-
-export class ValueLineController extends LineBaseController<ValueLineProps>{
+export class TextAreaLineController extends LineBaseController<TextAreaLineProps>{
 
   inputElement!: React.RefObject<HTMLElement>;
-  init(p: ValueLineProps) {
+  init(p: TextAreaLineProps) {
     super.init(p);
 
     this.inputElement = React.useRef<HTMLElement>(null);
@@ -87,17 +79,17 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return str == "" && autoNull ? null : str;
   }
 
-  getDefaultProps(state: ValueLineProps) {
+  getDefaultProps(state: TextAreaLineProps) {
     super.getDefaultProps(state);
     if (state.type) {
-      state.valueLineType = ValueLineController.getValueLineType(state.type);
+      state.valueLineType = TextAreaLineController.getValueLineType(state.type);
 
       if (state.valueLineType == undefined)
         throw new Error(`No ValueLineType found for type '${state.type!.name}' (property route = ${state.ctx.propertyRoute ? state.ctx.propertyRoute.propertyPath() : "??"})`);
     }
   }
 
-  overrideProps(state: ValueLineProps, overridenProps: ValueLineProps) {
+  overrideProps(state: TextAreaLineProps, overridenProps: TextAreaLineProps) {
 
     const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
     super.overrideProps(state, overridenProps);
@@ -168,9 +160,9 @@ function asString(reactChild: React.ReactNode | undefined): string | undefined {
   return undefined;
 }
 
-export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: ValueLineProps, ref: React.Ref<ValueLineController>) {
+export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {
 
-  const c = useController(ValueLineController, props, ref);
+  const c = useController(TextAreaLineController, props, ref);
 
   if (c.isHidden)
     return null;
@@ -184,7 +176,7 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
 });
 
 export namespace ValueLineRenderers {
-  export const renderers: Map<ValueLineType, (vl: ValueLineController) => JSX.Element> = new Map();
+  export const renderers: Map<ValueLineType, (vl: TextAreaLineController) => JSX.Element> = new Map();
 }
 
 export function isNumber(e: React.KeyboardEvent<any>) {
@@ -218,7 +210,7 @@ export function isDecimal(e: React.KeyboardEvent<any>): boolean {
     (c == 188) /*,*/);
 }
 
-function getOptionsItems(vl: ValueLineController): OptionItem[] {
+function getOptionsItems(vl: TextAreaLineController): OptionItem[] {
 
   var ti = tryGetTypeInfo(vl.props.type!.name);
 
@@ -284,7 +276,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   if (s.autoFixString != false) {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
+      var fixed = TextAreaLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
       if (fixed != input.value)
         vl.setValue(fixed, e);
 
@@ -326,7 +318,7 @@ ValueLineRenderers.renderers.set("Decimal", (vl) => {
   return numericTextBox(vl, isDecimal);
 });
 
-function numericTextBox(vl: ValueLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+function numericTextBox(vl: TextAreaLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
 
   const numberFormat = toNumberFormat(s.format);
@@ -445,7 +437,7 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   function handleOnBlur(e: React.FocusEvent<any>) {
     if (!p.readonly) {
       if (text != null) {
-        let value = ValueLineController.autoFixString(text, false, false);
+        let value = TextAreaLineController.autoFixString(text, false, false);
 
         const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
         setText(undefined);
@@ -567,7 +559,7 @@ ValueLineRenderers.renderers.set("RadioGroup", (vl) => {
   return internalRadioGroup(vl);
 });
 
-function internalRadioGroup(vl: ValueLineController) {
+function internalRadioGroup(vl: TextAreaLineController) {
 
   var optionItems = getOptionsItems(vl);
 
@@ -619,8 +611,8 @@ function internalRadioGroup(vl: ValueLineController) {
 
 tasks.push(taskSetUnit);
 export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLineController) {
-    const vProps = state as ValueLineProps;
+  if (lineBase instanceof TextAreaLineController) {
+    const vProps = state as TextAreaLineProps;
 
     if (vProps.unit === undefined &&
       state.ctx.propertyRoute &&
@@ -632,8 +624,8 @@ export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBasePr
 
 tasks.push(taskSetFormat);
 export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLineController) {
-    const vProps = state as ValueLineProps;
+  if (lineBase instanceof TextAreaLineController) {
+    const vProps = state as TextAreaLineProps;
 
     if (!vProps.format &&
       state.ctx.propertyRoute &&
@@ -652,9 +644,9 @@ export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
 export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  const vl = lineBase instanceof ValueLineController ? lineBase : undefined;
+  const vl = lineBase instanceof TextAreaLineController ? lineBase : undefined;
   const pr = state.ctx.propertyRoute;
-  const s = state as ValueLineProps;
+  const s = state as TextAreaLineProps;
   if (vl && pr?.propertyRouteType == "Field" && (s.valueLineType == "TextBox" || s.valueLineType == "TextArea")) {
 
     var member = pr.member!;
