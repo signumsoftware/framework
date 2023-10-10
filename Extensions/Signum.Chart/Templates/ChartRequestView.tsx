@@ -217,7 +217,7 @@ export default function ChartRequestView(p: ChartRequestViewProps) {
           chartRequest: cr,
           chartRequestView: { chartRequest: cr, userChart: p.userChart, onChange: p.onChange, hideFiltersAndSettings: handleHideFiltersAndSettings }
         }).map((a, i) => React.cloneElement(a, { key: i }))}
-        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onMouseUp={handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {ChartMessage.ListView.niceToString()}</button>
       </div>
       <div className="sf-chart-tab-container">
         <Tabs id="chartResultTabs" key={showChartSettings + ""}>
