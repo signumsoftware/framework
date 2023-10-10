@@ -1,5 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Signum.Chart;
 
@@ -109,14 +110,16 @@ public static class ChartUtils
             }
             else
             {
-                var byName = chart.Parameters.ToDictionary(a => a.Name);
+                var byName = chart.Parameters.ToDictionary(a => a.Name.RemoveChars(' ', '(', ')', '-').ToLowerInvariant());
                 chart.Parameters.Clear();
                 foreach (var sp in chartScriptParameters)
                 {
-                    var cp = byName.TryGetC(sp.Name);
+                    var cp = byName.TryGetC(sp.Name.ToLowerInvariant());
 
                     if (cp != null)
                     {
+                        byName.Remove(sp.Name.ToLowerInvariant());
+                        cp.Name = sp.Name;
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
                         ctx?.ForceModifiedState.Add(cp, ModifiedState.SelfModified);
@@ -135,6 +138,11 @@ public static class ChartUtils
                     }
 
                     chart.Parameters.Add(cp);
+                }
+
+                if(byName.Any() && Debugger.IsAttached)
+                {
+                    Debugger.Break(); //Loosing parameters
                 }
             }
         }
