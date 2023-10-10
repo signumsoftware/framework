@@ -288,7 +288,7 @@ public class LambdaToJavascriptConverter
                     if (value == null)
                         return null;
 
-                    return ma.Member.Name.FirstLower() + ": " + value + ", ";
+                    return ma.Member.Name.FirstLower() + ": " + value + ",";
                 })
                 .NotNull()
                 .ToString("\n");

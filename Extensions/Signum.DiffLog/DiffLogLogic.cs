@@ -40,7 +40,7 @@ public static class DiffLogLogic
     {
         if (entity != null && ShouldLog.Invoke(entity, operation))
         {
-            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModified(entity))
+            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModifiedVirtual(entity))
                 entity = RetrieveFresh(entity);
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))

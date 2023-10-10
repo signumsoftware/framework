@@ -328,16 +328,16 @@ public class PostgreSqlConnector : Connector
 
     Exception ReplaceException(Exception ex, SqlPreCommandSimple command)
     {
-        //if (ex is Npgsql.PostgresException se)
-        //{
-        //    switch (se.Number)
-        //    {
-        //        case -2: return new TimeoutException(ex.Message, ex);
-        //        case 2601: return new UniqueKeyException(ex);
-        //        case 547: return new ForeignKeyException(ex);
-        //        default: return ex;
-        //    }
-        //}
+        if (ex is Npgsql.PostgresException se)
+        {
+            switch (se.SqlState)
+            {
+                //case "-2": return new TimeoutException(ex.Message, ex);
+                case "23505": return new UniqueKeyException(ex);
+                case "23503": return new ForeignKeyException(ex);
+                default: return ex;
+            }
+        }
 
         //if (ex is SqlTypeException ste && ex.Message.Contains("DateTime"))
         //{

@@ -151,10 +151,12 @@ public static class BulkInserter
             var t = Schema.Current.Table<T>();
             bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+
             DataTable dt = new DataTable();
             var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
+                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
 
             using (disableIdentityBehaviour ? Administrator.DisableIdentity(t, behaviourOnly: true) : null)
             {
@@ -182,15 +184,18 @@ public static class BulkInserter
         }
     }
 
-    private static Type ConvertType(Type type)
+    private static Type ConvertType(Type type, bool isPostgres)
     {
         var result = type.UnNullify();
 
-        if (result == typeof(DateOnly))
-            return typeof(DateTime); 
+        if (!isPostgres)
+        {
+            if (result == typeof(DateOnly))
+                return typeof(DateTime);
 
-        if (result == typeof(TimeOnly))
-            return typeof(TimeSpan); 
+            if (result == typeof(TimeOnly))
+                return typeof(TimeSpan);
+        }
 
         return result;
     }
@@ -303,10 +308,12 @@ public static class BulkInserter
 
             bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+
             var dt = new DataTable();
             var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (!c.IdentityBehaviour || disableIdentityBehaviour)).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
+                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
 
             var list = mlistElements.ToList();
 
@@ -362,10 +369,12 @@ public static class BulkInserter
 
             bool disableIdentityBehaviour = copyOptions.HasFlag(SqlBulkCopyOptions.KeepIdentity);
 
+            var isPostgres = Schema.Current.Settings.IsPostgres;
+
             var columns = t.Columns.Values.ToList();
             DataTable dt = new DataTable();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type)));
+                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
 
             foreach (var e in entities)
             {

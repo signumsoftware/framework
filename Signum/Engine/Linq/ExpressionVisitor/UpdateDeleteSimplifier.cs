@@ -4,23 +4,28 @@ namespace Signum.Engine.Linq;
 class CommandSimplifier : DbExpressionVisitor
 {
     AliasGenerator aliasGenerator;
+    bool isPostgres; 
 
-    public CommandSimplifier(AliasGenerator aliasGenerator)
+    public CommandSimplifier(AliasGenerator aliasGenerator, bool isPostgres)
     {
         this.aliasGenerator = aliasGenerator;
+        this.isPostgres = isPostgres;
     }
 
-    public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator)
+    public static CommandExpression Simplify(CommandExpression ce, bool removeSelectRowCount, AliasGenerator aliasGenerator, bool isPostgres)
     {
         if (removeSelectRowCount)
             ce = (CommandExpression)new SelectRowRemover().Visit(ce);
 
-        return (CommandExpression)new CommandSimplifier(aliasGenerator).Visit(ce);
+        return (CommandExpression)new CommandSimplifier(aliasGenerator, isPostgres).Visit(ce);
     }
 
     protected internal override Expression VisitDelete(DeleteExpression delete)
     {
         var select = (SelectExpression)delete.Source;
+
+        if (isPostgres)
+            return delete;
 
         if (select.From is not TableExpression table || delete.Table != table.Table)
             return delete;
