@@ -48,8 +48,6 @@ public class HelpController : ControllerBase
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
 
-        InlineImagesLogic.SynchronizeInlineImages(entity);
-
         if (!entity.Title.HasText() && !entity.Description.HasText())
         {
             if (!entity.IsNew)
@@ -77,8 +75,6 @@ public class HelpController : ControllerBase
     public void SaveNamespace([Required][FromBody] AppendixHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
-
-        InlineImagesLogic.SynchronizeInlineImages(entity);
 
         entity.Execute(AppendixHelpOperation.Save);
     }
@@ -126,7 +122,7 @@ public class HelpController : ControllerBase
             entity.Operations.AddRange(hiddenOperations);
             entity.Operations.RemoveAll(a => !a.Description.HasText());
 
-            InlineImagesLogic.SynchronizeInlineImages(entity);
+            
 
             if (entity.Properties.IsEmpty() && entity.Operations.IsEmpty() && !entity.Description.HasText())
             {
