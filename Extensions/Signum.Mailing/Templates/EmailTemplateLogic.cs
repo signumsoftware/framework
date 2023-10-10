@@ -345,6 +345,8 @@ public static class EmailTemplateLogic
         if (AvoidSynchronizeTokens)
             return null;
 
+        var dc = EmailLogic.Configuration.DefaultCulture; // To avoid many exceptions
+
         StringDistance sd = new StringDistance();
 
         var emailTemplates = Database.Query<EmailTemplateEntity>().ToList();
@@ -503,6 +505,8 @@ public static class EmailTemplateLogic
     {
         if (AvoidSynchronizeDefaultTemplates)
             return null;
+
+        var dc = EmailLogic.Configuration.DefaultCulture; // To avoid many exceptions
 
         var table = Schema.Current.Table(typeof(EmailTemplateEntity));
 

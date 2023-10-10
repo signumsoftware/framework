@@ -1,5 +1,4 @@
 using Signum.Authorization;
-using Signum.Dynamic.Types;
 using Signum.Processes;
 using Signum.Scheduler;
 using System.ComponentModel;
@@ -114,7 +113,7 @@ public static class CaseActivityOperation
     public static readonly ExecuteSymbol<CaseActivityEntity> ScriptScheduleRetry;
     public static readonly ExecuteSymbol<CaseActivityEntity> ScriptFailureJump;
 
-    public static readonly ExecuteSymbol<DynamicTypeEntity> FixCaseDescriptions;
+    //FixCaseDescriptions in Signum.WorkflowDynamic
 }
 
 [AutoInit]

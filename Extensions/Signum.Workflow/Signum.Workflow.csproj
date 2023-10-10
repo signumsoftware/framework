@@ -23,7 +23,6 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Alerts\Signum.Alerts.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
-		<ProjectReference Include="..\Signum.Dynamic\Signum.Dynamic.csproj" />
 		<ProjectReference Include="..\Signum.Eval\Signum.Eval.csproj" />
 		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />

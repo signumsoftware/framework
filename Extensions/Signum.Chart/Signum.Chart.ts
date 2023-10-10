@@ -155,6 +155,7 @@ export module ChartMessage {
   export const ShowChartSettings = new MessageKey("ChartMessage", "ShowChartSettings");
   export const HideChartSettings = new MessageKey("ChartMessage", "HideChartSettings");
   export const QueryResultReachedMaxRows0 = new MessageKey("ChartMessage", "QueryResultReachedMaxRows0");
+  export const ListView = new MessageKey("ChartMessage", "ListView");
 }
 
 export const ChartParameterEmbedded = new Type<ChartParameterEmbedded>("ChartParameterEmbedded");
