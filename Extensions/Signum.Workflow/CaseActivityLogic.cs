@@ -1,7 +1,6 @@
 using Signum.Alerts;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.Dynamic.Types;
 using Signum.Mailing;
 using Signum.Mailing.Package;
 using Signum.Processes;
@@ -409,18 +408,7 @@ public static class CaseActivityLogic
                     .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
                     );
 
-            sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
-            {
-                new Graph<DynamicTypeEntity>.Execute(CaseActivityOperation.FixCaseDescriptions)
-                {
-                    Execute = (e, _) =>
-                    {
-                        var type = TypeLogic.GetType(e.TypeName);
-                        giFixCaseDescriptions.GetInvoker(type)();
-                    },
-                }.Register();
-            });
-
+          
             CaseActivityGraph.Register();
             OverrideCaseActivityMixin(sb);
         }
@@ -449,16 +437,6 @@ public static class CaseActivityLogic
         return caseActivity.Execute(CaseActivityOperation.Register);
     }
 
-    static readonly GenericInvoker<Action> giFixCaseDescriptions = new(() => FixCaseDescriptions<Entity>());
-
-    public static void FixCaseDescriptions<T>() where T : Entity
-    {
-        Database.Query<CaseEntity>()
-                      .Where(a => a.MainEntity.GetType() == typeof(T))
-                      .UnsafeUpdate()
-                      .Set(a => a.Description, a => ((T)a.MainEntity).ToString())
-                      .Execute();
-    }
 
     public static Dictionary<Type, WorkflowOptions> Options = new Dictionary<Type, WorkflowOptions>();
 

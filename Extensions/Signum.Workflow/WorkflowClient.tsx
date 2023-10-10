@@ -17,8 +17,6 @@ import * as Finder from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
-import * as DynamicViewClient from '../Signum.Dynamic/DynamicViewClient'
-import { CodeContext } from '../Signum.Dynamic/View/NodeUtils'
 import TypeHelpButtonBarComponent from '../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
@@ -443,8 +441,6 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   Constructor.registerConstructor(WorkflowScriptEntity, props => WorkflowScriptEntity.New({ eval: WorkflowScriptEval.New(), ...props }));
   Constructor.registerConstructor(WorkflowTimerEmbedded, props => Constructor.construct(TimeSpanEmbedded).then(ts => ts && WorkflowTimerEmbedded.New({ duration: ts, ...props })));
 
-  registerCustomContexts();
-
   TypeHelpButtonBarComponent.getTypeHelpButtons.push(props => [({
     element: <WorkflowHelpComponent typeName={props.typeName} mode={props.mode} />,
     order: 0,
@@ -477,55 +473,6 @@ export function workflowActivityMonitorUrl
 
 export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
   return "/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
-}
-
-function registerCustomContexts() {
-
-  function addActx(cc: CodeContext) {
-    if (!cc.assignments["actx"]) {
-      cc.assignments["actx"] = "getCaseActivityContext(ctx)";
-      cc.imports.push("import { getCaseActivityContext } as WorkflowClient from '../../Workflow/WorkflowClient'");
-    }
-  }
-
-  DynamicViewClient.registeredCustomContexts["caseActivity"] = {
-    getTypeContext: ctx => {
-      var actx = getCaseActivityContext(ctx);
-      return actx;
-    },
-    getCodeContext: cc => {
-      addActx(cc);
-      return cc.createNewContext("actx");
-    },
-    getPropertyRoute: dn => PropertyRoute.root(CaseActivityEntity)
-  };
-
-  DynamicViewClient.registeredCustomContexts["case"] = {
-    getTypeContext: ctx => {
-      var actx = getCaseActivityContext(ctx);
-      return actx?.subCtx(a => a.case);
-    },
-    getCodeContext: cc => {
-      addActx(cc);
-      cc.assignments["cctx"] = "actx?.subCtx(a => a.case)";
-      return cc.createNewContext("cctx");
-    },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case)
-  };
-
-
-  DynamicViewClient.registeredCustomContexts["parentCase"] = {
-    getTypeContext: ctx => {
-      var actx = getCaseActivityContext(ctx);
-      return actx?.value.case.parentCase ? actx.subCtx(a => a.case.parentCase) : undefined;
-    },
-    getCodeContext: cc => {
-      addActx(cc);
-      cc.assignments["pcctx"] = "actx?.value.case.parentCase && actx.subCtx(a => a.case.parentCase)";
-      return cc.createNewContext("pcctx");
-    },
-    getPropertyRoute: dn => CaseActivityEntity.propertyRouteAssert(a => a.case.parentCase)
-  };
 }
 
 export function getCaseActivityContext(ctx: TypeContext<any>): TypeContext<CaseActivityEntity> | undefined {
