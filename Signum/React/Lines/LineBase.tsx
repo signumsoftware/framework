@@ -4,6 +4,7 @@ import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities.Validation'
 import { useForceUpdate } from '../Hooks'
+import { KeyCodes } from '../Components'
 
 export interface ChangeEvent {
   newValue: any;
@@ -160,6 +161,41 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
   }, []);
 }
 
+export function isNumber(e: React.KeyboardEvent<any>) {
+  const c = e.keyCode;
+  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
+    (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+    (c == KeyCodes.enter) ||
+    (c == KeyCodes.backspace) ||
+    (c == KeyCodes.tab) ||
+    (c == KeyCodes.clear) ||
+    (c == KeyCodes.esc) ||
+    (c == KeyCodes.left) ||
+    (c == KeyCodes.right) ||
+    (c == KeyCodes.up) ||
+    (c == KeyCodes.down) ||
+    (c == KeyCodes.delete) ||
+    (c == KeyCodes.home) ||
+    (c == KeyCodes.end) ||
+    (c == KeyCodes.numpadMinus) /*NumPad -*/ ||
+    (c == KeyCodes.minus) /*-*/ ||
+    (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
+    (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
+    (e.ctrlKey && c == 67) /*Ctrl + c*/);
+}
+
+export function isDecimal(e: React.KeyboardEvent<any>): boolean {
+  const c = e.keyCode;
+  return (isNumber(e) ||
+    (c == 110) /*NumPad Decimal*/ ||
+    (c == 190) /*.*/ ||
+    (c == 188) /*,*/);
+}
+
+export function isDuration(e: React.KeyboardEvent<any>): boolean {
+  const c = e.keyCode;
+  return isNumber(e) || e.key == ":";
+}
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 

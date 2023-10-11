@@ -3,13 +3,12 @@ import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
 import { TypeReference, Binding } from './Reflection'
 import { TypeContext } from './TypeContext'
-import { ValueLineType, ValueLine } from './Lines/ValueLine'
-import { ValueLineProps } from "./Lines";
 import { MemberInfo } from './Reflection';
 import { BsSize } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
+import { AutoLine } from './Lines/AutoLine';
 
 interface ValueLineModalProps extends IModalProps<any> {
   options: ValueLineModalOptions;
@@ -48,13 +47,12 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
-  var vlp: ValueLineProps = {
+  var vlp = {
     ctx: ctx,
     format: props.format !== undefined ? props.format : props.member?.format,
     unit: props.unit !== undefined ? props.unit : props.member?.unit,
     label: props.label !== undefined ? props.label : props.member?.niceName,
     type: props.type ?? props.member?.type,
-    valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
     valueHtmlAttributes: props.valueHtmlAttributes,
     initiallyFocused: props.initiallyFocused,
     initiallyShowOnly: props.initiallyShowOnly,
@@ -75,8 +73,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
         <AutoFocus>
-          <ValueLine
-            formGroupStyle={vlp.label ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
+          <AutoLine formGroupStyle={vlp.label ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
         </AutoFocus>
         {p.options.validateValue && <p className="text-danger">
           {error}
@@ -102,7 +99,6 @@ ValueLineModal.show = (options: ValueLineModalOptions): Promise<any> => {
 export interface ValueLineModalOptions {
   member?: MemberInfo;
   type?: TypeReference;
-  valueLineType?: ValueLineType;
   initialValue?: any;
   title?: React.ReactChild;
   message?: React.ReactChild;

@@ -12,9 +12,6 @@ export type { FormGroupProps } from './Lines/FormGroup'
 export { FormControlReadonly } from './Lines/FormControlReadonly'
 export type { FormControlReadonlyProps } from './Lines/FormControlReadonly'
 
-export { ValueLine, ValueLineController } from './Lines/ValueLine'
-export type { ValueLineType, ValueLineProps, OptionItem } from './Lines/ValueLine'
-
 export { RenderEntity } from './Lines/RenderEntity'
 
 export { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './Lines/AutoCompleteConfig'

@@ -2,23 +2,27 @@ import * as React from 'react'
 import { DropdownList, Combobox } from 'react-widgets'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EnumLineProps extends LineBaseProps {
+  format?: string;
+  unit?: React.ReactChild;
   optionItems?: (OptionItem | MemberInfo | string)[];
-  datalist?: string[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: EnumLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
+  valueRef?: React.Ref<HTMLElement>;
+  lineType?:
+    "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
+    "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
+    "RadioGroup";
   columnCount?: number;
   columnWidth?: number;
-  valueRef?: React.Ref<HTMLElement>;
-  isComboBoxText?: boolean;
 }
 
 export interface OptionItem {
@@ -34,35 +38,14 @@ export class EnumLineController extends LineBaseController<EnumLineProps>{
 
     this.inputElement = React.useRef<HTMLElement>(null);
 
-    React.useEffect(() => {
-      if (this.props.initiallyFocused) {
-        window.setTimeout(() => {
-          let element = this.inputElement.current;
-          if (element) {
-            if (element instanceof HTMLInputElement)
-              element.setSelectionRange(0, element.value.length);
-            else if (element instanceof HTMLTextAreaElement)
-              element.setSelectionRange(0, element.value.length);
-            element.focus();
-          }
-        }, this.props.initiallyFocused == true ? 0 : this.props.initiallyFocused as number);
-      }
-
-    }, []);
+    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);    
   }
 
   setRefs = (node: HTMLElement | null) => {
-    if (this.props?.valueRef) {
-      if (typeof this.props.valueRef == "function")
-        this.props.valueRef(node);
-      else
-        (this.props.valueRef as React.MutableRefObject<HTMLElement | null>).current = node;
-    }
-    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
 
-  getDefaultProps(state: EnumLineProps) {
-    super.getDefaultProps(state);
+    setRefProp(this.props.valueRef, node);
+
+    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   }
 
   overrideProps(state: EnumLineProps, overridenProps: EnumLineProps) {
@@ -74,7 +57,7 @@ export class EnumLineController extends LineBaseController<EnumLineProps>{
 
   withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
 
-    if (!this.props.extraButtons && !preExtraButton) {
+    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
       return <>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
@@ -85,25 +68,12 @@ export class EnumLineController extends LineBaseController<EnumLineProps>{
       <div className={this.props.ctx.inputGroupClass}>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
+        {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
         {preExtraButton}
         {this.props.extraButtons && this.props.extraButtons(this)}
       </div>
     );
   }
-
-  getPlaceholder(): string | undefined {
-    const p = this.props;
-    return p.valueHtmlAttributes?.placeholder ??
-      ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
-      undefined);
-  }
-}
-
-function asString(reactChild: React.ReactNode | undefined): string | undefined {
-  if (typeof reactChild == "string")
-    return reactChild as string;
-
-  return undefined;
 }
 
 export const EnumLine = React.memo(React.forwardRef(function EnumLine(props: EnumLineProps, ref: React.Ref<EnumLineController>) {
@@ -113,7 +83,7 @@ export const EnumLine = React.memo(React.forwardRef(function EnumLine(props: Enu
   if (c.isHidden)
     return null;
 
-  return props.isComboBoxText ? internalComboBoxText(c) : internalDropDownList(c);
+  return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) : props.lineType == 'RadioGroup' ? internalRadioGroup(c) : internalDropDownList(c);
 }), (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
@@ -260,6 +230,57 @@ function internalComboBoxText(el: EnumLineController) {
     </FormGroup>
   );
 }
+
+function internalRadioGroup(elc: EnumLineController) {
+
+  var optionItems = getOptionsItems(elc);
+
+  const s = elc.props;
+
+  const handleEnumOnChange = (e: React.SyntheticEvent<any>) => {
+    const input = e.currentTarget as HTMLInputElement;
+    const option = optionItems.filter(a => a.value == input.value).single();
+    elc.setValue(option.value, e);
+  };
+
+  return (
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...elc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {inputId => <>
+        {getTimeMachineIcon({ ctx: s.ctx })}
+        <div style={getColumnStyle()}>
+          {optionItems.map((oi, i) =>
+            <label {...elc.props.valueHtmlAttributes} className={classes("sf-radio-element", elc.props.ctx.errorClass)}>
+              <input type="radio" key={i} value={oi.value} checked={s.ctx.value == oi.value} onChange={handleEnumOnChange} disabled={s.ctx.readOnly} />
+              {" " + oi.label}
+            </label>)}
+        </div>
+      </>}
+    </FormGroup>
+  );
+
+  function getColumnStyle(): React.CSSProperties | undefined {
+
+    const p = elc.props;
+
+    if (p.columnCount && p.columnWidth)
+      return {
+        columns: `${p.columnCount} ${p.columnWidth}px`,
+      };
+
+    if (p.columnCount)
+      return {
+        columnCount: p.columnCount,
+      };
+
+    if (p.columnWidth)
+      return {
+        columnWidth: p.columnWidth,
+      };
+
+    return undefined;
+  }
+}
+
 
 function getOptionsItems(el: EnumLineController): OptionItem[] {
 

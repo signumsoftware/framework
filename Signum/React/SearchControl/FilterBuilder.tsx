@@ -1,26 +1,24 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
+import { areEqual, classes, isNumber, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType, FilterOption, isFilterGroup, isFilterCondition
+  hasAnyOrAll, getTokenParents, isPrefix, isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
 } from '../FindOptions'
-import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
-import { isNumber, ValueLineController } from '../Lines/ValueLine'
-import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly, EntityStrip } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat, PropertyRoute } from '../Reflection'
+import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
+import { StyleContext } from '../Lines'
+import { Binding, IsByAll, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
-import { NumericTextBox } from '../Lines/ValueLine';
-import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
-import { Button, Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
-import { TypeEntity } from '../Signum.Basics'
+import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
+import { Dropdown } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
+import { NumericTextBox } from '../Lines/NumberLine'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];

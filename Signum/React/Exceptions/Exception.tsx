@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { ExceptionEntity } from '../Signum.Basics'
 import { BigStringEmbedded } from '../Signum.Entities'
-import { ValueLine, EntityLine, TypeContext } from '../Lines'
+import { AutoLine, EntityLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '../Globals';
@@ -14,25 +14,25 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
     <div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={sc.subCtx(f => f.environment)} />
-          <ValueLine ctx={sc.subCtx(f => f.creationDate)} unit={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
+          <AutoLine ctx={sc.subCtx(f => f.environment)} />
+          <AutoLine ctx={sc.subCtx(f => f.creationDate)} unit={DateTime.fromISO(sc.value.creationDate!).toRelative() ?? undefined} />
           <EntityLine ctx={sc.subCtx(f => f.user)} />
-          <ValueLine ctx={sc.subCtx(f => f.version)} />
-          <ValueLine ctx={sc.subCtx(f => f.threadId)} />
-          <ValueLine ctx={sc.subCtx(f => f.machineName)} />
-          <ValueLine ctx={sc.subCtx(f => f.applicationName)} />
+          <AutoLine ctx={sc.subCtx(f => f.version)} />
+          <AutoLine ctx={sc.subCtx(f => f.threadId)} />
+          <AutoLine ctx={sc.subCtx(f => f.machineName)} />
+          <AutoLine ctx={sc.subCtx(f => f.applicationName)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={sc.subCtx(f => f.actionName)} />
-          <ValueLine ctx={sc.subCtx(f => f.controllerName)} />
-          <ValueLine ctx={sc.subCtx(f => f.userHostAddress)} />
-          <ValueLine ctx={sc.subCtx(f => f.userHostName)} />
-          <ValueLine ctx={sc.subCtx(f => f.userAgent)} valueLineType="TextArea" />
-          <ValueLine ctx={sc.subCtx(f => f.origin)}  />
+          <AutoLine ctx={sc.subCtx(f => f.actionName)} />
+          <AutoLine ctx={sc.subCtx(f => f.controllerName)} />
+          <AutoLine ctx={sc.subCtx(f => f.userHostAddress)} />
+          <AutoLine ctx={sc.subCtx(f => f.userHostName)} />
+          <AutoLine ctx={sc.subCtx(f => f.userAgent)} valueLineType="TextArea" />
+          <AutoLine ctx={sc.subCtx(f => f.origin)}  />
         </div>
       </div>
-      <ValueLine ctx={ctx.subCtx(f => f.requestUrl)} />
-      <ValueLine ctx={ctx.subCtx(f => f.urlReferer)} />
+      <AutoLine ctx={ctx.subCtx(f => f.requestUrl)} />
+      <AutoLine ctx={ctx.subCtx(f => f.urlReferer)} />
       <h3 style={{ color: "rgb(139, 0, 0)" }}>{ctx.value.exceptionType} <small>(HResult = {ctx.value.hResult})</small></h3>
 
       <pre style={{ whiteSpace: "pre-wrap" }}><code>{ctx.value.exceptionMessage}</code></pre>

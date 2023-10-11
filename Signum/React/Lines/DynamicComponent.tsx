@@ -4,11 +4,12 @@ import { tryGetTypeInfos, TypeReference, TypeInfo, IsByAll, isTypeModel } from '
 import { ModifiableEntity } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute } from '../Lines'
+import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute } from '../Lines'
 import { Type } from '../Reflection';
 import { EntityRepeater } from './EntityRepeater';
 import { MultiValueLine } from './MultiValueLine';
-import { ValueLineController } from './ValueLine';
+import { AutoLine } from './AutoLine'
+import { EnumLine } from './EnumLine'
 
 export default function DynamicComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }) {
   const subContexts = subContext(ctx);
@@ -116,7 +117,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
 
     if (tis.length) {
       if (tis.length == 1 && tis.first().kind == "Enum")
-        return ctx => <ValueLine ctx={ctx} />;
+        return ctx => <EnumLine ctx={ctx} />;
 
       if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart") && !tr.isLite)
         return ctx => <EntityDetail ctx={ctx} />;
@@ -130,10 +131,7 @@ export function getAppropiateComponentFactoryBasic(tr: TypeReference): (ctx: Typ
     if (tr.isEmbedded)
       return ctx => <EntityDetail ctx={ctx} />;
 
-    if (ValueLineController.getValueLineType(tr) != undefined)
-      return ctx => <ValueLine ctx={ctx} />;
-
-    return ctx => undefined;
+    return ctx => <AutoLine ctx={ctx} />;
   }
 }
 

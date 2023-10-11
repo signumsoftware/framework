@@ -4,7 +4,7 @@ import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, isDuration, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -17,12 +17,6 @@ export interface DateTimeLineProps extends LineBaseProps {
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: DateTimeLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
-
-  incrementWithArrow?: boolean | number;
-
-  columnCount?: number;
-  columnWidth?: number;
-
   showTimeBox?: boolean;
   minDate?: Date;
   maxDate?: Date;
@@ -32,11 +26,6 @@ export interface DateTimeLineProps extends LineBaseProps {
   valueRef?: React.Ref<HTMLElement>;
 }
 
-export interface OptionItem {
-  value: any;
-  label: string;
-}
-
 export class DateTimeLineController extends LineBaseController<DateTimeLineProps>{
 
   inputElement!: React.RefObject<HTMLElement>;
@@ -44,36 +33,12 @@ export class DateTimeLineController extends LineBaseController<DateTimeLineProps
     super.init(p);
 
     this.inputElement = React.useRef<HTMLElement>(null);
-
-    React.useEffect(() => {
-      if (this.props.initiallyFocused) {
-        window.setTimeout(() => {
-          let element = this.inputElement.current;
-          if (element) {
-            if (element instanceof HTMLInputElement)
-              element.setSelectionRange(0, element.value.length);
-            else if (element instanceof HTMLTextAreaElement)
-              element.setSelectionRange(0, element.value.length);
-            element.focus();
-          }
-        }, this.props.initiallyFocused == true ? 0 : this.props.initiallyFocused as number);
-      }
-
-    }, []);
+    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
   }
 
   setRefs = (node: HTMLElement | null) => {
-    if (this.props?.valueRef) {
-      if (typeof this.props.valueRef == "function")
-        this.props.valueRef(node);
-      else
-        (this.props.valueRef as React.MutableRefObject<HTMLElement | null>).current = node;
-    }
+    setRefProp(this.props.valueRef, node);
     (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
-
-  getDefaultProps(state: DateTimeLineProps) {
-    super.getDefaultProps(state);
   }
 
   overrideProps(state: DateTimeLineProps, overridenProps: DateTimeLineProps) {
@@ -125,18 +90,8 @@ export const DateTimeLine = React.memo(React.forwardRef(function DateTimeLine(pr
   if (c.isHidden)
     return null;
 
-  return internalDateTime(c);
-}), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
-  return LineBaseController.propEquals(prev, next);
-});
-
-function internalDateTime(dtlc: DateTimeLineController) {
-
-  const s = dtlc.props;
-  const type = dtlc.props.type!.name as "DateOnly" | "DateTime";
+  const s = c.props;
+  const type = c.props.type!.name as "DateOnly" | "DateTime";
   const luxonFormat = toLuxonFormat(s.format, type);
 
   const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
@@ -145,8 +100,8 @@ function internalDateTime(dtlc: DateTimeLineController) {
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...dtlc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => dtlc.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={dtlc.props.valueHtmlAttributes} className={addClass(dtlc.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={dtlc.setRefs}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={addClass(c.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
           {m && toFormatWithFixes(m, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
@@ -160,27 +115,27 @@ function internalDateTime(dtlc: DateTimeLineController) {
       m = trimDateToFormat(m, type, s.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
-    dtlc.setValue(m == null || !m.isValid ? null :
+    c.setValue(m == null || !m.isValid ? null :
       type == "DateOnly" ? m.toISODate() :
         !showTime ? m.startOf("day").toFormat("yyyy-MM-dd'T'HH:mm:ss", { locale: 'en-GB' }/*No Z*/) :
           m.toISO()!);
   };
 
   const htmlAttributes = {
-    placeholder: dtlc.getPlaceholder(),
-    ...dtlc.props.valueHtmlAttributes,
+    placeholder: c.getPlaceholder(),
+    ...c.props.valueHtmlAttributes,
   } as React.AllHTMLAttributes<any>;
 
   if (htmlAttributes.placeholder === undefined)
     htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...dtlc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => dtlc.withItemGroup(
-        <div className={classes(s.ctx.rwWidgetClass, dtlc.mandatoryClass ? dtlc.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
+        <div className={classes(s.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
           <DatePicker
             id={inputId}
-            value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(dtlc.props.initiallyFocused)}
+            value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(c.props.initiallyFocused)}
             valueEditFormat={luxonFormat}
             valueDisplayFormat={luxonFormat}
             includeTime={showTime}
@@ -199,7 +154,12 @@ function internalDateTime(dtlc: DateTimeLineController) {
       )}
     </FormGroup>
   );
-}
+}), (prev, next) => {
+  if (next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 function defaultRenderDay({ date, label }: { date: Date; label: string }) {
   var dateStr = DateTime.fromJSDate(date).toISODate();
@@ -221,19 +181,23 @@ export function trimDateToFormat(date: DateTime, type: "DateOnly" | "DateTime", 
   return DateTime.fromFormat(formatted, luxonFormat, { locale: 'en-GB' });
 }
 
+export const DateTimeSplittedLine = React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
 
-function internalDateTimeSplitted(dtlc: DateTimeLineController) {
+  const c = useController(DateTimeLineController, props, ref);
 
-  const s = dtlc.props;
-  const type = dtlc.props.type!.name as "DateOnly" | "DateTime";
+  if (c.isHidden)
+    return null;
+
+  const s = c.props;
+  const type = c.props.type!.name as "DateOnly" | "DateTime";
   const luxonFormat = toLuxonFormat(s.format, type);
 
   const dt = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...dtlc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => dtlc.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={dtlc.props.valueHtmlAttributes} className={addClass(dtlc.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={dtlc.setRefs}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={addClass(c.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
           {dt && toFormatWithFixes(dt, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>
@@ -247,20 +211,20 @@ function internalDateTimeSplitted(dtlc: DateTimeLineController) {
       newDT = trimDateToFormat(newDT, type, s.format);
 
     // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
-    dtlc.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
+    c.setValue(newDT == null || !newDT.isValid ? null : newDT.toISO()!);
   };
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...dtlc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => dtlc.withItemGroup(
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
         <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
           id={inputId}
-          initiallyFocused={Boolean(dtlc.props.initiallyFocused)}
-          initiallyShowOnly={dtlc.props.initiallyShowOnly}
+          initiallyFocused={Boolean(c.props.initiallyFocused)}
+          initiallyShowOnly={c.props.initiallyShowOnly}
           luxonFormat={luxonFormat}
           minDate={s.minDate}
           maxDate={s.maxDate}
-          mandatoryClass={dtlc.mandatoryClass}
+          mandatoryClass={c.mandatoryClass}
           timeTextBoxClass={s.ctx.formControlClass}
           htmlAttributes={s.valueHtmlAttributes}
           widgetClass={s.ctx.rwWidgetClass}
@@ -272,7 +236,12 @@ function internalDateTimeSplitted(dtlc: DateTimeLineController) {
       )}
     </FormGroup>
   );
-}
+}), (prev, next) => {
+  if (next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 function DateTimePickerSplitted(p: {
   value: Date | null | undefined;
@@ -394,43 +363,20 @@ function DateTimePickerSplitted(p: {
   );
 }
 
-export function isNumber(e: React.KeyboardEvent<any>) {
-  const c = e.keyCode;
-  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
-    (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
-    (c == KeyCodes.enter) ||
-    (c == KeyCodes.backspace) ||
-    (c == KeyCodes.tab) ||
-    (c == KeyCodes.clear) ||
-    (c == KeyCodes.esc) ||
-    (c == KeyCodes.left) ||
-    (c == KeyCodes.right) ||
-    (c == KeyCodes.up) ||
-    (c == KeyCodes.down) ||
-    (c == KeyCodes.delete) ||
-    (c == KeyCodes.home) ||
-    (c == KeyCodes.end) ||
-    (c == KeyCodes.numpadMinus) /*NumPad -*/ ||
-    (c == KeyCodes.minus) /*-*/ ||
-    (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
-    (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
-    (e.ctrlKey && c == 67) /*Ctrl + c*/);
-}
+export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
 
-function isDuration(e: React.KeyboardEvent<any>): boolean {
-  const c = e.keyCode;
-  return isNumber(e) || e.key == ":";
-}
+  const c = useController(DateTimeLineController, props, ref);
 
-function timeTextBox(vl: DateTimeLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+  if (c.isHidden)
+    return null;
 
-  const s = vl.props;
+  const s = c.props;
 
   if (s.ctx.readOnly) {
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => vl.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(vl.props.valueHtmlAttributes, "numeric")} innerRef={vl.setRefs}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(
+          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(c.props.valueHtmlAttributes, "numeric")} innerRef={c.setRefs}>
             {timeToString(s.ctx.value, s.format)}
           </FormControlReadonly>
         )}
@@ -439,12 +385,12 @@ function timeTextBox(vl: DateTimeLineController, validateKey: (e: React.Keyboard
   }
 
   const handleOnChange = (newValue: string | null) => {
-    vl.setValue(newValue);
+    c.setValue(newValue);
   };
 
   const htmlAttributes = {
-    placeholder: vl.getPlaceholder(),
-    ...vl.props.valueHtmlAttributes
+    placeholder: c.getPlaceholder(),
+    ...c.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
 
   const durationFormat = toLuxonDurationFormat(s.format) ?? "hh:mm:ss"
@@ -453,20 +399,25 @@ function timeTextBox(vl: DateTimeLineController, validateKey: (e: React.Keyboard
     htmlAttributes.placeholder = timePlaceholder(durationFormat);
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => vl.withItemGroup(
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
         <TimeTextBox htmlAttributes={htmlAttributes}
           id={inputId}
           value={s.ctx.value}
           onChange={handleOnChange}
-          validateKey={validateKey}
-          formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
+          validateKey={isDuration}
+          formControlClass={classes(s.ctx.formControlClass, c.mandatoryClass)}
           durationFormat={durationFormat}
-          innerRef={vl.setRefs} />
+          innerRef={c.setRefs} />
       )}
     </FormGroup>
   );
-}
+}), (prev, next) => {
+  if (next.extraButtons || prev.extraButtons)
+    return false;
+
+  return LineBaseController.propEquals(prev, next);
+});
 
 export interface TimeTextBoxProps {
   value: string | null;

@@ -1,36 +1,19 @@
 import * as React from 'react'
-import { DateTime, Duration } from 'luxon'
-import { DatePicker, DropdownList, Combobox } from 'react-widgets'
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
-import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
-import TextArea from '../Components/TextArea';
-import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface TextBoxLineProps extends LineBaseProps {
   unit?: React.ReactChild;
-  format?: string;
   autoTrimString?: boolean;
   autoFixString?: boolean;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
   extraButtons?: (vl: TextBoxLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
   datalist?: string[];
-
-  columnCount?: number;
-  columnWidth?: number;
-
   valueRef?: React.Ref<HTMLElement>;
-}
-
-export interface OptionItem {
-  value: any;
-  label: string;
 }
 
 export class TextBoxLineController extends LineBaseController<TextBoxLineProps>{
@@ -41,30 +24,11 @@ export class TextBoxLineController extends LineBaseController<TextBoxLineProps>{
 
     this.inputElement = React.useRef<HTMLElement>(null);
 
-    React.useEffect(() => {
-      if (this.props.initiallyFocused) {
-        window.setTimeout(() => {
-          let element = this.inputElement.current;
-          if (element) {
-            if (element instanceof HTMLInputElement)
-              element.setSelectionRange(0, element.value.length);
-            else if (element instanceof HTMLTextAreaElement)
-              element.setSelectionRange(0, element.value.length);
-            element.focus();
-          }
-        }, this.props.initiallyFocused == true ? 0 : this.props.initiallyFocused as number);
-      }
-
-    }, []);
+    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
   }
 
   setRefs = (node: HTMLElement | null) => {
-    if (this.props?.valueRef) {
-      if (typeof this.props.valueRef == "function")
-        this.props.valueRef(node);
-      else
-        (this.props.valueRef as React.MutableRefObject<HTMLElement | null>).current = node;
-    }
+    setRefProp(this.props.valueRef, node);
     (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   }
 
@@ -74,10 +38,6 @@ export class TextBoxLineController extends LineBaseController<TextBoxLineProps>{
       str = str?.trim();
 
     return str == "" && autoNull ? null : str;
-  }
-
-  getDefaultProps(state: TextBoxLineProps) {
-    super.getDefaultProps(state);
   }
 
   overrideProps(state: TextBoxLineProps, overridenProps: TextBoxLineProps) {
@@ -251,3 +211,67 @@ function internalTextBox(vl: TextBoxLineController, type: "password" | "color" |
   );
 }
 
+export interface ColorTextBoxProps {
+  value: string | null;
+  onChange: (newValue: string | null) => void;
+  formControlClass?: string;
+  groupClass?: string;
+  textValueHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  groupHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  innerRef?: React.Ref<HTMLInputElement>;
+}
+
+export function ColorTextBox(p: ColorTextBoxProps) {
+
+  const [text, setText] = React.useState<string | undefined>(undefined);
+
+  const value = text != undefined ? text : p.value != undefined ? p.value : "";
+
+  return (
+    <span {...p.groupHtmlAttributes} className={addClass(p.groupHtmlAttributes, classes(p.groupClass))}>
+      <input type="text"
+        autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+        {...p.textValueHtmlAttributes}
+        className={addClass(p.textValueHtmlAttributes, classes(p.formControlClass))}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+        onFocus={handleOnFocus}
+        ref={p.innerRef} />
+      <input type="color"
+        className={classes(p.formControlClass, "sf-color")}
+        value={value}
+        onBlur={handleOnBlur}
+        onChange={handleOnChange}
+      />
+    </span>);
+
+  function handleOnFocus(e: React.FocusEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+
+    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
+
+    if (p.textValueHtmlAttributes?.onFocus)
+      p.textValueHtmlAttributes.onFocus(e);
+  };
+
+  function handleOnBlur(e: React.FocusEvent<any>) {
+
+    const input = e.currentTarget as HTMLInputElement;
+
+    var result = input.value == undefined || input.value.length == 0 ? null : input.value;
+
+    setText(undefined);
+    if (p.value != result)
+      p.onChange(result);
+    if (p.textValueHtmlAttributes?.onBlur)
+      p.textValueHtmlAttributes.onBlur(e);
+  }
+
+  function handleOnChange(e: React.SyntheticEvent<any>) {
+    const input = e.currentTarget as HTMLInputElement;
+    setText(input.value);
+    if (p.onChange)
+      p.onChange(input.value);
+  }
+}
