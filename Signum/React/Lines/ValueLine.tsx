@@ -23,6 +23,7 @@ export interface ValueLineProps extends LineBaseProps {
   datalist?: string[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
+  extraButtonsBefore?: (vl: ValueLineController) => React.ReactNode;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
 
@@ -152,7 +153,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
 
   withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
 
-    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
+    if (!this.props.unit && !this.props.extraButtons && !this.props.extraButtonsBefore && !preExtraButton) {
       return <>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
         {input}
@@ -162,6 +163,7 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return (
       <div className={this.props.ctx.inputGroupClass}>
         {getTimeMachineIcon({ ctx: this.props.ctx })}
+        {this.props.extraButtonsBefore && this.props.extraButtonsBefore(this)}
         {input}
         {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
         {preExtraButton}
@@ -194,7 +196,7 @@ export const ValueLine = React.memo(React.forwardRef(function ValueLine(props: V
 
   return ValueLineRenderers.renderers.get(c.props.valueLineType!)!(c);
 }), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
+  if (next.extraButtons || prev.extraButtons || next.extraButtonsBefore || prev.extraButtonsBefore)
     return false;
 
   return LineBaseController.propEquals(prev, next);
