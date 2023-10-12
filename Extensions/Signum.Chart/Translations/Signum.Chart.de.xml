@@ -111,6 +111,7 @@
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Group" Description="Gruppe" />
     <Member Name="HideChartSettings" Description="Diagrammeinstellungen ausblenden" />
+    <Member Name="ListView" Description="Listenansicht" />
     <Member Name="Maximize" Description="Maximieren" />
     <Member Name="Minimize" Description="Minimieren" />
     <Member Name="MyCharts" Description="Meine Charts" />
