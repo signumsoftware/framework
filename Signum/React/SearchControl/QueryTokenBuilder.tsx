@@ -55,7 +55,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
           <QueryTokenPart key={i == 0 ? "__first__" : parentToken!.fullKey}
             queryKey={p.queryKey}
             readOnly={p.readOnly}
-            setDefaultIsOpen={() => { setLastTokenChanged(parentToken!.fullKey); }}
+            setLastTokenChange={(fullKey) => { setLastTokenChanged(fullKey); }}
             onTokenSelected={async (qt, keyboard) => {
               var nqt = (await tryApplyToken(p.queryToken, qt)) ?? qt;
               setLastTokenChanged(keyboard ? nqt?.fullKey : undefined);
@@ -128,7 +128,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
 }
 
 
-interface QueryTokenPartProps{
+interface QueryTokenPartProps {
   parentToken: QueryToken | undefined;
   selectedToken: QueryToken | undefined;
   onTokenSelected: (newToken: QueryToken | undefined, keyboard: boolean) => void;
@@ -136,7 +136,7 @@ interface QueryTokenPartProps{
   subTokenOptions: SubTokensOptions;
   readOnly: boolean;
   defaultOpen: boolean;
-  setDefaultIsOpen: () => void;
+  setLastTokenChange: (fullKey: string | undefined) => void;
 }
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
@@ -174,18 +174,19 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
             onChange={(value, metadata) => p.onTokenSelected(value ?? p.parentToken, metadata.originalEvent?.nativeEvent instanceof KeyboardEvent)}
             dataKey="fullKey"
             textField="toStr"
+            onBlur={() => { p.setLastTokenChange(undefined); }}
             renderValue={a => <QueryTokenItem item={a.item} />}
             renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
             defaultOpen={p.defaultOpen}
             busy={!p.readOnly && subTokens == undefined}
-          /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setDefaultIsOpen(); }}>
+          /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
             <FontAwesomeIcon icon="plus" />
           </button>}
       </div>
     </ParentTokenContext.Provider>
   );
 
-  function handleKeyUp (e: React.KeyboardEvent<any>) {
+  function handleKeyUp(e: React.KeyboardEvent<any>) {
     if (e.key == "Enter") {
       e.preventDefault();
       e.stopPropagation();
