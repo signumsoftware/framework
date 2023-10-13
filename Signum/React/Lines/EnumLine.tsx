@@ -9,7 +9,6 @@ import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 export interface EnumLineProps extends LineBaseProps {
-  format?: string;
   unit?: React.ReactChild;
   optionItems?: (OptionItem | MemberInfo | string)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;

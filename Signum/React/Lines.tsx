@@ -27,16 +27,19 @@ export type { AutoLineProps } from './Lines/AutoLine'
 export { CheckBoxLine, CheckBoxLineController } from './Lines/CheckBoxLine'
 export type { CheckBoxLineProps } from './Lines/CheckBoxLine'
 
+export { EnumLine, EnumLineController } from './Lines/EnumLine'
+export type { EnumLineProps, OptionItem } from './Lines/EnumLine'
+
 export { DateTimeLine, DateTimeSplittedLine, TimeLine, DateTimeLineController,  } from './Lines/DateTimeLine'
 export type { DateTimeLineProps } from './Lines/DateTimeLine'
 
-export { NumberLine, DecimalLine } from './Lines/NumberLine'
+export { NumberLine, DecimalLine, NumberLineController, } from './Lines/NumberLine'
+export type { NumberLineProps } from './Lines/NumberLine'
 
-export { TextAreaLine } from './Lines/TextAreaLine'
+export { TextAreaLine, TextAreaLineController } from './Lines/TextAreaLine'
 
-export { TextBoxLine, PasswordLine, ColorLine } from './Lines/TextBoxLine'
-
-export { EnumLine } from './Lines/EnumLine'
+export { TextBoxLine, PasswordLine, ColorLine, GuidLine, TextBoxLineController } from './Lines/TextBoxLine'
+export type { TextBoxLineProps } from './Lines/TextBoxLine'
 
 export { EntityLine } from './Lines/EntityLine'
 

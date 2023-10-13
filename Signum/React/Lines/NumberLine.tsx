@@ -292,3 +292,16 @@ export function NumericTextBox(p: NumericTextBoxProps) {
     }
   }
 }
+
+tasks.push(taskSetUnit);
+export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof NumericTextBox) {
+    const vProps = state as NumberLineProps;
+
+    if (vProps.unit === undefined &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.unit = state.ctx.propertyRoute.member!.unit;
+    }
+  }
+}

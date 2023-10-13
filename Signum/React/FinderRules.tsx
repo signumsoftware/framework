@@ -571,7 +571,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
         if (!ti)
           throw new Error(`EnumType ${tokenType.name} not found`);
         const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-        return <EnumLine ctx={ffc.ctx} type={tokenType} format={f.token!.format} unit={f.token!.unit} optionItems={members} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        return <EnumLine ctx={ffc.ctx} type={tokenType} unit={f.token!.unit} optionItems={members} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     },
     {

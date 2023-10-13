@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { ExceptionEntity } from '../Signum.Basics'
 import { BigStringEmbedded } from '../Signum.Entities'
-import { AutoLine, EntityLine, TypeContext } from '../Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '../Lines'
 import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '../Globals';
@@ -27,7 +27,7 @@ export default function Exception(p: { ctx: TypeContext<ExceptionEntity> }) {
           <AutoLine ctx={sc.subCtx(f => f.controllerName)} />
           <AutoLine ctx={sc.subCtx(f => f.userHostAddress)} />
           <AutoLine ctx={sc.subCtx(f => f.userHostName)} />
-          <AutoLine ctx={sc.subCtx(f => f.userAgent)} valueLineType="TextArea" />
+          <TextAreaLine ctx={sc.subCtx(f => f.userAgent)} />
           <AutoLine ctx={sc.subCtx(f => f.origin)}  />
         </div>
       </div>
