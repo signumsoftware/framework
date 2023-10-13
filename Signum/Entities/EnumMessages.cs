@@ -235,7 +235,6 @@ public enum SearchMessage
     NoResultsFoundInPage01,
     [Description("go back to page one")]
     GoBackToPageOne,
-    Explore,
     PinnedFilter,
     Label,
     Column,

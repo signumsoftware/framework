@@ -309,7 +309,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   return (
     <>
       <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
-        <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
+        <td style={{ paddingLeft: paddingLeft }} colSpan={3}>
           <div className="d-flex">
             {!readOnly &&
               <a href="#"
@@ -326,7 +326,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                 <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2"
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
-              <strong className="me-2">{p.filterGroup.groupOperation == "Or" ? SearchMessage.OrGroup.niceToString() : SearchMessage.AndGroup.niceToString()} </strong>
+              <select className="form-select form-select-xs sf-group-selector fw-bold me-2 w-auto" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{ft == "Or" ? SearchMessage.OrGroup.niceToString() : SearchMessage.AndGroup.niceToString()}</option>)}
+              </select>
               <small style={{ whiteSpace: "nowrap" }}>
                 Prefix:
               </small>

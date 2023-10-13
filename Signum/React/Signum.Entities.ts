@@ -603,7 +603,6 @@ export module SearchMessage {
   export const NoResultsInThisPage = new MessageKey("SearchMessage", "NoResultsInThisPage");
   export const NoResultsFoundInPage01 = new MessageKey("SearchMessage", "NoResultsFoundInPage01");
   export const GoBackToPageOne = new MessageKey("SearchMessage", "GoBackToPageOne");
-  export const Explore = new MessageKey("SearchMessage", "Explore");
   export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");

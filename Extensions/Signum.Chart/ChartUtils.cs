@@ -224,7 +224,8 @@ public enum ChartMessage
     ShowChartSettings,
     HideChartSettings,
     [Description("Query result reached max rows ({0})")]
-    QueryResultReachedMaxRows0
+    QueryResultReachedMaxRows0,
+    ListView, 
 }
 
 
