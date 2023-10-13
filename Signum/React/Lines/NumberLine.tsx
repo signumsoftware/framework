@@ -2,9 +2,9 @@ import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes, isNumber } from '../Globals'
+import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
-import { LineBaseController, LineBaseProps, isDecimal, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -27,7 +27,7 @@ export const NumberLine = React.memo(React.forwardRef(function NumberLine(props:
   if (c.isHidden)
     return null;
 
-  return numericTextBox(c, isNumber);
+  return numericTextBox(c, c.props.type!.name == "decimal" ? isDecimalKey :  isNumberKey);
 }), (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
@@ -35,20 +35,6 @@ export const NumberLine = React.memo(React.forwardRef(function NumberLine(props:
   return LineBaseController.propEquals(prev, next);
 });
 
-export const DecimalLine = React.memo(React.forwardRef(function DecimalLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {
-
-  const c = useController(NumberLineController, props, ref);
-
-  if (c.isHidden)
-    return null;
-
-  return numericTextBox(c, isDecimal);
-}), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
-  return LineBaseController.propEquals(prev, next);
-});
 
 function numericTextBox(vl: NumberLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
   const s = vl.props
@@ -222,15 +208,36 @@ export function NumericTextBox(p: NumericTextBoxProps) {
   }
 }
 
-tasks.push(taskSetUnit);
-export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof NumericTextBox) {
-    const vProps = state as NumberLineProps;
-
-    if (vProps.unit === undefined &&
-      state.ctx.propertyRoute &&
-      state.ctx.propertyRoute.propertyRouteType == "Field") {
-      vProps.unit = state.ctx.propertyRoute.member!.unit;
-    }
-  }
+export function isNumberKey(e: React.KeyboardEvent<any>) {
+  const c = e.keyCode;
+  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
+    (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
+    (c == KeyCodes.enter) ||
+    (c == KeyCodes.backspace) ||
+    (c == KeyCodes.tab) ||
+    (c == KeyCodes.clear) ||
+    (c == KeyCodes.esc) ||
+    (c == KeyCodes.left) ||
+    (c == KeyCodes.right) ||
+    (c == KeyCodes.up) ||
+    (c == KeyCodes.down) ||
+    (c == KeyCodes.delete) ||
+    (c == KeyCodes.home) ||
+    (c == KeyCodes.end) ||
+    (c == KeyCodes.numpadMinus) /*NumPad -*/ ||
+    (c == KeyCodes.minus) /*-*/ ||
+    (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
+    (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
+    (e.ctrlKey && c == 67) /*Ctrl + c*/);
 }
+
+export function isDecimalKey(e: React.KeyboardEvent<any>): boolean {
+  const c = e.keyCode;
+  return (isNumberKey(e) ||
+    (c == 110) /*NumPad Decimal*/ ||
+    (c == 190) /*.*/ ||
+    (c == 188) /*,*/);
+}
+
+
+

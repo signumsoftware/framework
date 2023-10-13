@@ -1,7 +1,7 @@
 import * as React from 'react';
-import { addClass, classes } from '../Globals';
+import { addClass, classes, isNumber } from '../Globals';
 import { timeToString, timePlaceholder, toLuxonDurationFormat } from '../Reflection';
-import { LineBaseController, isDuration, useController } from '../Lines/LineBase';
+import { LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
@@ -161,3 +161,8 @@ export function TimeTextBox(p: TimeTextBoxProps) {
 TimeTextBox.defaultProps = {
   durationFormat: "hh:mm:ss"
 };
+
+export function isDuration(e: React.KeyboardEvent<any>): boolean {
+  const c = e.keyCode;
+  return isNumber(e) || e.key == ":";
+}

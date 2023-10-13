@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
-import { CheckboxLine, DateTimeLine, DateTimeLineController, DecimalLine, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
+import { CheckboxLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
 export interface AutoLineProps extends LineBaseProps {
@@ -23,27 +23,13 @@ export interface AutoLineFactoryRule {
   factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any> | undefined);
 }
 
-export type AutoProps<T> = Omit<AutoLineProps, "ctx"> & { ctx: TypeContext<T> };
-
 export namespace AutoLine {
   const customTypeComponent: {
     [typeName: string]: AutoLineFactoryRule[];
   } = {};
 
-  export function registerCustomTypeComponent(type: PseudoType, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any> | undefined), name?: string) {
-    (customTypeComponent[type.toString()] ??= []).push({ name: name ?? type.toString(), factory });
-  }
-
-  export function registerCustomEntityComponent<T extends ModifiableEntity>(type: Type<T>, factory: (props: AutoProps<T>) => React.ReactElement | undefined, name?: string) {
-  }
-
-  export function registerCustomLiteComponent<T extends Entity>(type: Type<T>, factory: (props: AutoProps<T>) => React.ReactElement | undefined, name?: string) {
-  }
-
-  export function registerCustomMListEntityComponent<T extends ModifiableEntity>(type: Type<T>, factory: (props: AutoProps<T>) => React.ReactElement | undefined, name?: string) {
-  }
-
-  export function registerCustomMListLiteComponent<T extends Entity>(type: Type<T>, factory: (props: AutoProps<T>) => React.ReactElement | undefined, name?: string) {
+  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any> | undefined), name?: string) {
+    (customTypeComponent[type] ??= []).push({ name: name ?? type, factory });
   }
 
   export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement<any> | undefined {
@@ -125,11 +111,8 @@ export namespace AutoLine {
       if (tr.name == "Guid")
         return p => <GuidLine {...p} />;
 
-      if (tr.name == "number")
+      if (tr.name == "number" || tr.name == "decimal")
         return p => <NumberLine {...p} />;
-
-      if (tr.name == "decimal")
-        return p => <DecimalLine {...p} />;
 
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")
         return p => <TimeLine {...p} />;
@@ -140,15 +123,4 @@ export namespace AutoLine {
 
 }
 
-tasks.push(taskSetFormat);
-export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof DateTimeLineController || lineBase instanceof NumberLineController) {
-    const vProps = state as AutoLineProps;
 
-    if (!vProps.format &&
-      state.ctx.propertyRoute &&
-      state.ctx.propertyRoute.propertyRouteType == "Field") {
-      vProps.format = state.ctx.propertyRoute.member!.format;
-    }
-  }
-}

@@ -9,7 +9,10 @@ import { AutoLine, TextAreaLine } from '../Lines';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ExceptionEntity, e => import('./Exception'), { allowWrapEntityLink: true }));
-  AutoLine.registerCustomTypeComponent(BigStringEmbedded, (tr, pr) => {
-      return ({ ctx, ...rest }) => <TextAreaLine ctx={ctx.subCtx(a => a.text)}  {...rest} readOnly />;    
+  AutoLine.registerComponent(BigStringEmbedded.typeName, (tr, pr) => {
+    if (tr.isCollection)
+      return undefined;
+
+    return ({ ctx, ...rest }) => <TextAreaLine ctx={(ctx as TypeContext<BigStringEmbedded>).subCtx(a => a.text)}  {...rest} readOnly />;
   });
 }

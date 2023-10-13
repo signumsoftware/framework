@@ -39,7 +39,7 @@ export type { TimeLineProps } from './Lines/TimeLine'
 export { DateTimeSplittedLine, DateTimeSplittedLineController } from './Lines/DateTimeSplittedLine'
 export type { DateTimeSplittedLineProps } from './Lines/DateTimeSplittedLine'
 
-export { NumberLine, DecimalLine, NumberLineController, } from './Lines/NumberLine'
+export { NumberLine, NumberLineController, } from './Lines/NumberLine'
 export type { NumberLineProps } from './Lines/NumberLine'
 
 export { TextAreaLine, TextAreaLineController } from './Lines/TextAreaLine'

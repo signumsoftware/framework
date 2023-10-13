@@ -4,7 +4,7 @@ import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { addClass, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder } from '../Reflection'
-import { LineBaseController, LineBaseProps, isDuration, tasks, useController } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
@@ -12,7 +12,7 @@ import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { defaultRenderDay, trimDateToFormat } from './DateTimeLine'
-import { TimeTextBox } from './TimeLine'
+import { TimeTextBox, isDuration } from './TimeLine'
 
 export interface DateTimeSplittedLineProps extends ValueBaseProps<DateTimeSplittedLineController> {
   minDate?: Date;

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Dic } from '../Globals';
-import { LineBaseController, LineBaseProps, setRefProp, useInitiallyFocused } from '../Lines/LineBase';
+import { LineBaseController, LineBaseProps, setRefProp, tasks, useInitiallyFocused } from '../Lines/LineBase';
 import { getTimeMachineIcon } from './TimeMachineIcon';
 
 export interface ValueBaseProps<C> extends LineBaseProps {
@@ -77,4 +77,30 @@ export function asString(reactChild: React.ReactNode | undefined): string | unde
     return reactChild as string;
 
   return undefined;
+}
+
+tasks.push(taskSetFormat);
+export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueBaseController) {
+    const vProps = state as ValueBaseProps<any>;
+
+    if (!vProps.format &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.format = state.ctx.propertyRoute.member!.format;
+    }
+  }
+}
+
+tasks.push(taskSetUnit);
+export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+  if (lineBase instanceof ValueBaseController) {
+    const vProps = state as ValueBaseProps<any>;
+
+    if (vProps.unit === undefined &&
+      state.ctx.propertyRoute &&
+      state.ctx.propertyRoute.propertyRouteType == "Field") {
+      vProps.unit = state.ctx.propertyRoute.member!.unit;
+    }
+  }
 }
