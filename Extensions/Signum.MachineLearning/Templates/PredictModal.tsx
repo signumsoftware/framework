@@ -252,7 +252,7 @@ export function PredictValue(p : PredictValueProps){
       if (!ti)
         throw new Error(`EnumType ${token.type.name} not found`);
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <AutoLine ctx={ctx} type={token.type} format={token.format} unit={token.unit} labelHtmlAttributes={lha} label={label} onChange={handleValueChange} optionItems={members} />;
+      return <EnumLine ctx={ctx} type={token.type} format={token.format} unit={token.unit} labelHtmlAttributes={lha} label={label} onChange={handleValueChange} optionItems={members} />;
     default:
       return <AutoLine ctx={ctx} type={token.type} format={token.format} unit={token.unit} labelHtmlAttributes={lha} label={label} onChange={handleValueChange} />;
   }
