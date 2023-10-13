@@ -4,7 +4,7 @@ import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext, StyleContext } from '@framework/TypeContext'
 import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
-import { ValueLine, FormGroup } from '@framework/Lines'
+import { AutoLine, FormGroup } from '@framework/Lines'
 import { ChartColumnEmbedded, ChartMessage, ChartColumnType, ChartParameterEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScriptColumn, ChartScript } from '../ChartClient'
@@ -159,10 +159,10 @@ export function ChartColumn(p: ChartColumnProps) {
           <div>
             <div className="row">
               <div className="col-sm-3">
-                <ValueLine ctx={ctxBasic.subCtx(a => a.displayName)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.niceName }} />
+                <AutoLine ctx={ctxBasic.subCtx(a => a.displayName)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.niceName }} />
               </div>
               <div className="col-sm-3">
-                <ValueLine ctx={ctxBasic.subCtx(a => a.format)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.format }} />
+                <AutoLine ctx={ctxBasic.subCtx(a => a.format)} valueHtmlAttributes={{ onBlur: p.onRedraw, placeholder: ctx.value.token?.token?.format }} />
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-3" key={i}>

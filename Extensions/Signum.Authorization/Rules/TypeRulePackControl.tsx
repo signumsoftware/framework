@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
@@ -138,7 +138,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
-        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
 
       <table className="table table-sm sf-auth-rules">

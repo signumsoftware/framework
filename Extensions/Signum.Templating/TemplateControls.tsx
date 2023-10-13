@@ -2,7 +2,7 @@ import * as React from 'react'
 import { SubTokensOptions, QueryToken, hasAnyOrAll, FindOptions } from '@framework/FindOptions'
 import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI } from '@framework/Hooks'
 import * as Finder from '@framework/Finder'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
@@ -22,7 +22,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
     return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
       title={canClick} value={text}
-      onClick={() => ValueLineModal.show({
+      onClick={() => AutoLineModal.show({
         type: { name: "string" },
         initialValue: buildPattern(
           currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),

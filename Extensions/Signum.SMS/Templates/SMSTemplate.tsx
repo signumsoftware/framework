@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { ValueLine, EntityTabRepeater, EntityCombo, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityTabRepeater, EntityCombo, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SMSTemplateEntity, SMSCharactersMessage, SMSTemplateMessageEmbedded, SMSTemplateMessage } from '../Signum.SMS'
 import { useForceUpdate, useAPI, useThrottle } from '@framework/Hooks';
-import ValueLineModal from '@framework/ValueLineModal';
+import AutoLineModal from '@framework/AutoLineModal';
 import TemplateControls from '../../Signum.Templating/TemplateControls';
 import * as SMSClient from '../SMSClient';
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
@@ -15,13 +15,13 @@ export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) 
   var ctx8 = p.ctx.subCtx({ labelColumns: 8 });
   return (
     <div>
-      <ValueLine ctx={p.ctx.subCtx(a => a.name)} />
+      <AutoLine ctx={p.ctx.subCtx(a => a.name)} />
       <div className="row">
         <div className="col-sm-8">
-          <ValueLine ctx={ctx.subCtx(a => a.isActive)} />
+          <AutoLine ctx={ctx.subCtx(a => a.isActive)} />
           <EntityLine ctx={ctx.subCtx(a => a.query)} onChange={forceUpdate} remove={ctx.value.messages.length > 0 || ctx.value.to != null} />
           <EntityCombo ctx={ctx.subCtx(a => a.model)} />
-          <ValueLine ctx={ctx.subCtx(a => a.from)} />
+          <AutoLine ctx={ctx.subCtx(a => a.from)} />
           {ctx.value.query &&
             <QueryTokenEmbeddedBuilder
               ctx={ctx.subCtx(a => a.to)}
@@ -31,10 +31,10 @@ export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) 
           }
         </div>
         <div className="col-sm-4">
-          <ValueLine ctx={ctx8.subCtx(a => a.messageLengthExceeded)} />
-          <ValueLine ctx={ctx8.subCtx(a => a.certified)} />
-          <ValueLine ctx={ctx8.subCtx(a => a.editableMessage)} />
-          <ValueLine ctx={ctx8.subCtx(a => a.removeNoSMSCharacters)} onChange={forceUpdate} />
+          <AutoLine ctx={ctx8.subCtx(a => a.messageLengthExceeded)} />
+          <AutoLine ctx={ctx8.subCtx(a => a.certified)} />
+          <AutoLine ctx={ctx8.subCtx(a => a.editableMessage)} />
+          <AutoLine ctx={ctx8.subCtx(a => a.removeNoSMSCharacters)} onChange={forceUpdate} />
         </div>
       </div>
 
@@ -67,7 +67,7 @@ export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps)
       <EntityCombo ctx={ec.subCtx(e => e.cultureInfo)} onChange={p.invalidate} valueColumns={3} />
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />
-        <ValueLine ctx={ec.subCtx(a => a.message)} onChange={forceUpdate} formGroupStyle="SrOnly" formGroupHtmlAttributes={{ className: "pt-2" }} helpText={
+        <AutoLine ctx={ec.subCtx(a => a.message)} onChange={forceUpdate} formGroupStyle="SrOnly" formGroupHtmlAttributes={{ className: "pt-2" }} helpText={
             <span className={remaining == null ? "" : remaining < 0 ? "text-danger" : remaining < 20 ? "text-warning" : "text-success"}>
               {SMSTemplateMessage._0CharactersRemainingBeforeReplacements.niceToString(remaining == null ? "…" : remaining)}
             </span>

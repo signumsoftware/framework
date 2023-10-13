@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TypeContext, ValueLine } from '@framework/Lines';
+import { TypeContext, AutoLine } from '@framework/Lines';
 import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead';
 import { PanelPartEmbedded } from '../Signum.Dashboard';
 import { useForceUpdate } from '@framework/Hooks'
@@ -18,8 +18,8 @@ export default function PanelPart(p: { ctx: TypeContext<PanelPartEmbedded> }) {
       </div>
       <div className="col-sm-9">
         <IconTypeaheadLine ctx={ctx.subCtx(t => t.iconName)}  onChange={() => forceUpdate()} />
-        <ValueLine ctx={ctx.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
-        <ValueLine ctx={ctx.subCtx(t => t.useIconColorForTitle)} onChange={() => forceUpdate()} inlineCheckbox="block" />
+        <AutoLine ctx={ctx.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+        <AutoLine ctx={ctx.subCtx(t => t.useIconColorForTitle)} onChange={() => forceUpdate()} inlineCheckbox="block" />
       </div>
     </div>
   );

@@ -10,11 +10,11 @@ import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
 import { AutoLine } from './Lines/AutoLine';
 
-interface ValueLineModalProps extends IModalProps<any> {
-  options: ValueLineModalOptions;
+interface AutoLineModalProps extends IModalProps<any> {
+  options: AutoLineModalOptions;
 }
 
-export default function ValueLineModal(p: ValueLineModalProps) {
+export default function AutoLineModal(p: AutoLineModalProps) {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -92,11 +92,11 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
 }
 
-ValueLineModal.show = (options: ValueLineModalOptions): Promise<any> => {
-  return openModal<any>(<ValueLineModal options={options} />);
+AutoLineModal.show = (options: AutoLineModalOptions): Promise<any> => {
+  return openModal<any>(<AutoLineModal options={options} />);
 }
 
-export interface ValueLineModalOptions {
+export interface AutoLineModalOptions {
   member?: MemberInfo;
   type?: TypeReference;
   initialValue?: any;

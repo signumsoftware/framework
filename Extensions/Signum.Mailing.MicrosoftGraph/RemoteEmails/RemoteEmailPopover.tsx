@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Popover, OverlayTrigger } from 'react-bootstrap'
-import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup, MultiValueLine, ChangeEvent } from '@framework/Lines'
+import { TypeContext, AutoLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup, MultiValueLine, ChangeEvent } from '@framework/Lines'
 import { SearchControl, SearchValue, FilterOperation, OrderType, PaginationMode } from '@framework/Search'
 import { toLite, Lite, JavascriptMessage } from '@framework/Signum.Entities';
 import { DateTime } from 'luxon'

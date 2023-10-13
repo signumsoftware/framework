@@ -5,7 +5,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import { getMixin } from '@framework/Signum.Entities'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import { Tab } from 'react-bootstrap';
 import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3'
 

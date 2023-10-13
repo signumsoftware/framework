@@ -7,7 +7,7 @@ import { FindOptions } from '@framework/Search'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'
 import { useAPI } from '@framework/Hooks'
@@ -64,7 +64,7 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
   function handleRemarksClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       valueLineType: "TextArea",
       title: CaseNotificationEntity.nicePropertyName(a => a.remarks),

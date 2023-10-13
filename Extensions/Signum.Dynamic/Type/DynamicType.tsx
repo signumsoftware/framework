@@ -4,7 +4,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { IHasChanges } from '@framework/TypeContext'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
@@ -78,8 +78,8 @@ export default class DynamicTypeComponent extends React.Component<DynamicTypeCom
       <div>
         <div className="row">
           <div className="col-sm-8">
-            <ValueLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
-            <ValueLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unit={suffix} />
+            <AutoLine ctx={ctx.subCtx(dt => dt.baseType)} labelColumns={3} onChange={() => this.forceUpdate()} readOnly={!ctx.value.isNew} />
+            <AutoLine ctx={ctx.subCtx(dt => dt.typeName)} labelColumns={3} onChange={() => this.forceUpdate()} unit={suffix} />
           </div>
           <div className="col-sm-4">
             <button className={classes("btn btn-sm btn-success float-end", this.state.showDatabaseMapping && "active")}

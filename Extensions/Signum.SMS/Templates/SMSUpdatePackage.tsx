@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SearchControl } from '@framework/Search';
 import { SMSUpdatePackageEntity, SMSMessageEntity } from '../Signum.SMS'
@@ -8,7 +8,7 @@ export default function SMSSendPackage(p: { ctx: TypeContext<SMSUpdatePackageEnt
 
   return (
     <div>
-      <ValueLine ctx={p.ctx.subCtx(a => a.name)} />
+      <AutoLine ctx={p.ctx.subCtx(a => a.name)} />
       <SearchControl
         searchOnLoad={true}
         findOptions={{

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, FormGroup } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, FormGroup } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import * as AlertsClient from '../AlertsClient'
@@ -18,7 +18,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
       {!ctx.value.isNew &&
         <div>
           <EntityLine ctx={ctx.subCtx(e => e.createdBy)} readOnly={true} />
-          <ValueLine ctx={ctx.subCtx(e => e.creationDate)} readOnly={true} />
+          <AutoLine ctx={ctx.subCtx(e => e.creationDate)} readOnly={true} />
         </div>
       }
 
@@ -37,8 +37,8 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
       <hr />
 
       <EntityCombo ctx={ctx.subCtx(n => n.alertType)} onChange={forceUpdate} />
-      <ValueLine ctx={ctx.subCtx(n => n.alertDate)} />
-      <ValueLine ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
+      <AutoLine ctx={ctx.subCtx(n => n.alertDate)} />
+      <AutoLine ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
       {
         !ctx.value.isNew && !edit ?
           <FormGroup ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Text.niceToString()} >
@@ -50,12 +50,12 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
           </FormGroup>
           
           :
-          <ValueLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
+          <AutoLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }
       {ctx.value.state == "Attended" &&
         <div>
           <hr />
-          <ValueLine ctx={ctx.subCtx(e => e.attendedDate)} readOnly={true} />
+          <AutoLine ctx={ctx.subCtx(e => e.attendedDate)} readOnly={true} />
           <EntityLine ctx={ctx.subCtx(e => e.attendedBy)} readOnly={true} />
         </div>
       }

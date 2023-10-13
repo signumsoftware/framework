@@ -1,6 +1,6 @@
 import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { FormGroup, ValueLine, EntityLine, EntityStrip } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -40,7 +40,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
   return (
     <div>
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
-      <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
+      <AutoLine ctx={ctx.subCtx(e => e.displayName)} />
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {() =>
           Finder.isFindable(queryKey, true) ?
@@ -55,10 +55,10 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
             {p.ctx.value.entityType && <br />}
             {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
             {p.ctx.value.entityType && <br/>}
-            {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+            {p.ctx.value.entityType && <AutoLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
           </div>
         }/>
-      <ValueLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
+      <AutoLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
         subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
         showPinnedFilterOptions={true}

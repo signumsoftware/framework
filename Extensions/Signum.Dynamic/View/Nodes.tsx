@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
+import { AutoLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
   EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
@@ -33,7 +33,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ColorTextBox, ValueLineController } from '@framework/Lines/ValueLine'
+import { ColorTextBox, ValueLineController } from '@framework/Lines/AutoLine'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
 
@@ -481,7 +481,7 @@ export interface LineBaseNode extends BaseNode {
 }
 
 export interface ValueLineNode extends LineBaseNode {
-  kind: "ValueLine",
+  kind: "AutoLine",
   textArea?: ExpressionOrValue<string>;
   unit?: ExpressionOrValue<string>;
   format?: ExpressionOrValue<string>;
@@ -491,13 +491,13 @@ export interface ValueLineNode extends LineBaseNode {
   comboBoxItems?: Expression<string[]>;
 }
 
-NodeUtils.register<ValueLineNode>({
-  kind: "ValueLine",
+NodeUtils.register<AutoLineNode>({
+  kind: "AutoLine",
   group: "Property",
   order: -1,
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("ValueLine", {
+  renderCode: (node, cc) => cc.elementCode("AutoLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     label: node.label,
@@ -514,7 +514,7 @@ NodeUtils.register<ValueLineNode>({
     autoTrim: node.autoTrim,
     onChange: node.onChange
   }),
-  render: (dn, ctx) => (<ValueLine
+  render: (dn, ctx) => (<AutoLine
     //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
@@ -601,7 +601,7 @@ NodeUtils.register<MultiValueLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(AutoLine, {ctx: mctx})"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(null)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.addValueText)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
@@ -1612,7 +1612,7 @@ export namespace NodeConstructor {
 
     if (ti) {
       if (ti.kind == "Enum")
-        return { kind: "ValueLine", field } as ValueLineNode;
+        return { kind: "AutoLine", field } as ValueLineNode;
 
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
@@ -1641,7 +1641,7 @@ export namespace NodeConstructor {
     }
 
     if (ValueLineController.getValueLineType(tr) != undefined)
-      return { kind: "ValueLine", field } as ValueLineNode;
+      return { kind: "AutoLine", field } as ValueLineNode;
 
     return undefined;
   }

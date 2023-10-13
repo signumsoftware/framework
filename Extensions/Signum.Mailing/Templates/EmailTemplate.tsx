@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, ValueLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
@@ -7,7 +7,7 @@ import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTo
 import TemplateControls from '../../Signum.Templating/TemplateControls'
 import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
 import IFrameRenderer from './IframeRenderer'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import TemplateApplicable from '../../Signum.Templating/Templates/TemplateApplicable';
 import { useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
@@ -57,10 +57,10 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
               <div className="row">
                 <div className="col-sm-4">
-                  <ValueLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox />
+                  <AutoLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox />
                 </div>
                 <div className="col-sm-4">
-                  <ValueLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
+                  <AutoLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
                 </div>
                 <div className="col-sm-4">
                 </div>
@@ -92,10 +92,10 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
         <div className="row mb-3">
           <div className="col-sm-6">
-            <ValueLine ctx={ctx3.subCtx(e => e.messageFormat, { labelColumns:4 })} onChange={forceUpdate} />
+            <AutoLine ctx={ctx3.subCtx(e => e.messageFormat, { labelColumns:4 })} onChange={forceUpdate} />
           </div>
           <div className="col-sm-6">
-            <ValueLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
+            <AutoLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
           </div>
         </div>
         <EntityLine ctx={ec.subCtx(e => e.masterTemplate, { labelColumns: 2 })} />
@@ -114,7 +114,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
   return (
     <div>
-      <ValueLine ctx={ctx3.subCtx(e => e.name)} />
+      <AutoLine ctx={ctx3.subCtx(e => e.name)} />
       <EntityCombo ctx={ctx3.subCtx(e => e.model)} />
       <EntityLine ctx={ctx3.subCtx(e => e.query)} onChange={() => forceUpdate()}
         remove={ctx.value.from == undefined &&
@@ -139,7 +139,7 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
           </FormGroup>
         </div>
         <div className="col-sm-2" >
-          <ValueLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
+          <AutoLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
         </div>
         <div className="col-sm-8">
           {p.query && sc.value.addressSource == "QueryToken" &&
@@ -151,10 +151,10 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
                 onTokenChanged={forceUpdate} />
               <div className="row">
                 <div className="col-sm-6">
-                  <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
+                  <AutoLine ctx={sc.subCtx(c => c.whenNone)} />
                 </div>
                 <div className="col-sm-6">
-                  <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+                  <AutoLine ctx={sc.subCtx(c => c.whenMany)} />
                 </div>
               </div>
             </div>
@@ -162,11 +162,11 @@ function EmailTemplateFrom(p: { ctx: TypeContext<EmailTemplateFromEmbedded>, que
 
           {sc.value.addressSource == "HardcodedAddress" && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
-              <ValueLine ctx={sc.subCtx(c => c.azureUserId)} onChange={forceUpdate} />
+              <AutoLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
+              <AutoLine ctx={sc.subCtx(c => c.azureUserId)} onChange={forceUpdate} />
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.displayName)}  onChange={forceUpdate} />
+              <AutoLine ctx={sc.subCtx(c => c.displayName)}  onChange={forceUpdate} />
             </div>
           </div>
           }
@@ -185,10 +185,10 @@ function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbe
     <div>
       <div className="row">
         <div className="col-sm-2" >
-          <ValueLine ctx={sc.subCtx(a => a.kind)} />
+          <AutoLine ctx={sc.subCtx(a => a.kind)} />
         </div>
         <div className="col-sm-2" >
-          <ValueLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
+          <AutoLine ctx={sc.subCtx(a => a.addressSource)} onChange={() => { sc.value.token = null; sc.value.emailAddress = null; sc.value.displayName = null; forceUpdate(); }} />
         </div>
         <div className="col-sm-8">
           {p.query && sc.value.addressSource == "QueryToken" &&
@@ -200,10 +200,10 @@ function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbe
                 onTokenChanged={forceUpdate} />
               <div className="row">
                 <div className="col-sm-6">
-                  <ValueLine ctx={sc.subCtx(c => c.whenNone)} />
+                  <AutoLine ctx={sc.subCtx(c => c.whenNone)} />
                 </div>
                 <div className="col-sm-6">
-                  <ValueLine ctx={sc.subCtx(c => c.whenMany)} />
+                  <AutoLine ctx={sc.subCtx(c => c.whenMany)} />
                 </div>
               </div>
             </div>
@@ -211,10 +211,10 @@ function EmailTemplateRecipient(p: { ctx: TypeContext<EmailTemplateRecipientEmbe
 
           {sc.value.addressSource == "HardcodedAddress" && <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
+              <AutoLine ctx={sc.subCtx(c => c.emailAddress)} onChange={forceUpdate} />
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={sc.subCtx(c => c.displayName)} onChange={forceUpdate} />
+              <AutoLine ctx={sc.subCtx(c => c.displayName)} onChange={forceUpdate} />
             </div>
           </div>
           }
@@ -254,7 +254,7 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
       <br/>
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />
-        <ValueLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
+        <AutoLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
         {p.messageFormat != 'HtmlSimple' ?
           <div className="code-container">
             <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />

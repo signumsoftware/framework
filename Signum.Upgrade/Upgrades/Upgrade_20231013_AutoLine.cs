@@ -11,7 +11,9 @@ class Upgrade_20231013_AutoLine : CodeUpgradeBase
     {
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
         {
-            file.Replace(new Regex(@"ValueLine"), m => "AutoLine");
+            file.Replace(new Regex(@"\bValueLine\b"), m => "AutoLine");
+            file.Replace(new Regex(@"<ValueLine"), m => "<AutoLine");
+            file.Replace(new Regex(@"ValueLineModal"), m => "AutoLineModal");
         });
     }
 }

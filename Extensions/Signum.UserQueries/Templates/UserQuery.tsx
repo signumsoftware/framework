@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
-import { FormGroup, ValueLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -31,7 +31,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   return (
     <div>
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
-      <ValueLine ctx={ctx.subCtx(e => e.displayName)} />
+      <AutoLine ctx={ctx.subCtx(e => e.displayName)} />
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {() => query && (
             Finder.isFindable(query.key, true) ?
@@ -49,7 +49,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               {p.ctx.value.entityType && <br />}
               {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
               {p.ctx.value.entityType && <br />}
-              {p.ctx.value.entityType && <ValueLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+              {p.ctx.value.entityType && <AutoLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
             </div>
           } />
 
@@ -57,14 +57,14 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
           <div className="row">
           <div className="col-sm-6">
-            <ValueLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
-            <ValueLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+            <AutoLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
+            <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
               helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
 
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={ctx4.subCtx(e => e.refreshMode)} />
-              <ValueLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
+              <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
+              <AutoLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
             </div>
           </div>
 
@@ -73,7 +73,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctxxs.value.query!.key}
             showPinnedFilterOptions={true} />
-          <ValueLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
+          <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
               {
                 property: a => a.token,
@@ -106,11 +106,11 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               },
               {
                 property: a => a.displayName,
-                template: (ctx, row) => <ValueLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                template: (ctx, row) => <AutoLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                   helpText={
                     <div>
-                      <ValueLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
-                      <ValueLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
+                      <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
+                      <AutoLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                     </div>
                    }
                 />
@@ -129,10 +129,10 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
           </div>
           <div className="row">
             <div className="col-sm-6">
-              <ValueLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} />
+              <AutoLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} />
             </div>
             <div className="col-sm-6">
-              <ValueLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
+              <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
             </div>
           </div>
           <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}

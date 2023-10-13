@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailFileType, EmailRecipientEmbedded } from '../Signum.Mailing'
 import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
@@ -22,16 +22,16 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
 
           <div className="row">
             <div className="col-sm-2">
-              <ValueLine ctx={ctx.subCtx(f => f.state)} />
-              <ValueLine ctx={ctx.subCtx(f => f.creationDate)} />
+              <AutoLine ctx={ctx.subCtx(f => f.state)} />
+              <AutoLine ctx={ctx.subCtx(f => f.creationDate)} />
             </div>
             <div className="col-sm-2">
-              <ValueLine ctx={ctx.subCtx(f => f.sent)} hideIfNull />
-              <ValueLine ctx={ctx.subCtx(f => f.receptionNotified)} hideIfNull />
+              <AutoLine ctx={ctx.subCtx(f => f.sent)} hideIfNull />
+              <AutoLine ctx={ctx.subCtx(f => f.receptionNotified)} hideIfNull />
             </div>
             <div className="col-sm-2">
-              <ValueLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
-              <ValueLine ctx={ctx.subCtx(f => f.bodyHash)} hideIfNull />
+              <AutoLine ctx={ctx.subCtx(f => f.uniqueIdentifier)} />
+              <AutoLine ctx={ctx.subCtx(f => f.bodyHash)} hideIfNull />
             </div>
             <div className="col-sm-2">
               <EntityLine ctx={ctx.subCtx(f => f.sentBy)} hideIfNull />
@@ -60,13 +60,13 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
           { property: p => p.contentId }
         ])} />
 
-        <ValueLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
-        <ValueLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
+        <AutoLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
+        <AutoLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
         {ctx.value.isBodyHtml ? <div className="code-container">
           <HtmlCodeMirror ctx={ctx.subCtx(f => f.body.text)} />
         </div> :
           <div>
-            <ValueLine ctx={ctx.subCtx(f => f.body.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
+            <AutoLine ctx={ctx.subCtx(f => f.body.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
           </div>
         }
         <EmailMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />
