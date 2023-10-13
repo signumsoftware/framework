@@ -18,6 +18,7 @@ import * as AppContext from "@framework/AppContext"
 import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
+import { TextBoxLine } from '@framework/Lines';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
@@ -72,7 +73,6 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
             e.preventDefault();
             var promise = AutoLineModal.show({
               type: { name: "string" },
-              valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
               label: UserADMessage.NameOrEmail.niceToString(),

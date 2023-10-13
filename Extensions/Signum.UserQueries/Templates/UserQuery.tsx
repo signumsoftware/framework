@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
-import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -49,7 +49,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               {p.ctx.value.entityType && <br />}
               {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
               {p.ctx.value.entityType && <br />}
-              {p.ctx.value.entityType && <AutoLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+              {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
             </div>
           } />
 
@@ -106,11 +106,11 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               },
               {
                 property: a => a.displayName,
-                template: (ctx, row) => <AutoLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
+                template: (ctx, row) => <TextBoxLine ctx={ctx.subCtx(a => a.displayName)} readOnly={ctx.value.hiddenColumn} valueHtmlAttributes={{ placeholder: ctx.value.token?.token?.niceName }}
                   helpText={
                     <div>
                       <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
-                      <AutoLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
+                      <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                     </div>
                    }
                 />

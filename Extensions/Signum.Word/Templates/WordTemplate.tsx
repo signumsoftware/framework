@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -67,10 +67,10 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
           </span>}>
             <div className="row">
               <div className="col-sm-4">
-                <AutoLine ctx={ctx.subCtx(e => e.disableAuthorization)} inlineCheckbox />
+                <CheckboxLine ctx={ctx.subCtx(e => e.disableAuthorization)} inlineCheckbox />
               </div>
               <div className="col-sm-4">
-                <AutoLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
+                <CheckboxLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
               </div>
               <div className="col-sm-4">
               </div>
@@ -152,10 +152,9 @@ function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<str
           code &&
           AutoLineModal.show({
             type: { name: "string" },
-            valueLineType: "TextArea",
+            customComponent: props => <TextAreaLine {...props} />,
             initialValue: code,
             title: "Embedded Widget",
             message: "Make a similar-looking Chart or Table in Excel and copy it to Word or PowerPoint. Then add the following code in the Alternative Text to bind the data:",
-            initiallyFocused: true,
           }))} >{text}</button>
 }

@@ -28,7 +28,6 @@ export default function TemplateControls(p: TemplateControlsProps) {
           currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),
         title: "Template",
         message: "Copy to clipboard: Ctrl+C, ESC",
-        initiallyFocused: true,
       })} />
   }
 

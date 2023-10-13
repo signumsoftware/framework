@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { classes, Dic } from '@framework/Globals'
-import { AutoLine, EntityLine, EntityCombo } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, TextBoxLine, EnumLine } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
@@ -20,7 +20,6 @@ import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
-import { ValueLineController } from '@framework/Lines/AutoLine'
 import { MultiValue } from '@framework/FinderRules'
 
 interface FilterBuilderEmbeddedProps {
@@ -117,10 +116,9 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
       var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
       var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
-      const vlt = tr && ValueLineController.getValueLineType(tr);
       const ft = tr && getFilterType(tr);
 
-      return <AutoLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} />
+      return <AutoLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={tr != null ? tr : { name: "string" }} format={format} unit={unit} />
 
     } else {
 
@@ -293,7 +291,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
   }
 
   if (liteRef.current === undefined)
-    return <AutoLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
+    return <TextBoxLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
@@ -329,7 +327,7 @@ interface ValueLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
+export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
 
   const foceUpdate = useForceUpdate();
   const valueRef = React.useRef<string | number | boolean | null | undefined>(undefined);
@@ -359,7 +357,7 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     );
   }
   if (valueRef.current === undefined)
-    return <AutoLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
+    return <TextBoxLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(valueRef, a => a.current));
 
@@ -376,9 +374,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <AutoLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
+    return <EnumLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
   } else {
-    return <AutoLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+    return <TextBoxLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
 }
 

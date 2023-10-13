@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, OptionItem } from '@framework/Lines'
+import { AutoLine, CheckboxLine, EnumLine, OptionItem } from '@framework/Lines'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Components/FileLine'
 import { CollectionElementEmbedded, ImportExcelMode, ImportExcelModel, ImportFromExcelMessage } from '../Signum.Excel'
@@ -37,10 +37,10 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
 
       <div className="row">
         <div className="col-sm-4">
-          <AutoLine ctx={ctx.subCtx(f => f.operationKey)} valueLineType="DropDownList"
+          <EnumLine ctx={ctx.subCtx(f => f.operationKey)} 
             optionItems={getSaveOperations(p.ctx.value.typeName, ctx.value.mode).map(a => softCast<OptionItem>({ value: a.key, label: a.niceName }))}
           />
-          <AutoLine ctx={ctx.subCtx(f => f.transactional)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(f => f.transactional)} inlineCheckbox="block" />
         </div>
         <div className="col-sm-4">
           <AutoLine ctx={ctx.subCtx(f => f.mode)} onChange={() => {
@@ -58,18 +58,18 @@ export default function ImportExcel(p: { ctx: TypeContext<ImportExcelModel>, sea
 
             forceUpdate();
           }} />
-          {(ctx.value.mode == "Insert" || ctx.value.mode == "InsertOrUpdate") && <AutoLine ctx={ctx.subCtx(f => f.identityInsert)} inlineCheckbox="block" />}
+          {(ctx.value.mode == "Insert" || ctx.value.mode == "InsertOrUpdate") && <CheckboxLine ctx={ctx.subCtx(f => f.identityInsert)} inlineCheckbox="block" />}
         </div>
         <div className="col-sm-4">
           {(ctx.value.mode == "Update" || ctx.value.mode == "InsertOrUpdate" || ctx.value.collections.length > 0) &&
-            <AutoLine ctx={ctx.subCtx(f => f.matchByColumn)} valueLineType="DropDownList" mandatory
+            <EnumLine ctx={ctx.subCtx(f => f.matchByColumn)} mandatory
               optionItems={p.fop.columnOptions.filter(a => a.token && !hasElement(a.token)).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
             />
           }
           {
             mlistItemContext(ctx.subCtx(a => a.collections))
               .filter((ctxe, i, arr) => ctx.value.mode == "Update" || ctx.value.mode == "InsertOrUpdate" || ctx.value.mode == "Insert" && i < arr.length - 1)
-              .map(ctxe => <AutoLine ctx={ctxe.subCtx(a => a.matchByColumn)} valueLineType="DropDownList"
+              .map(ctxe => <EnumLine ctx={ctxe.subCtx(a => a.matchByColumn)} 
                 label={ctxe.niceName(a => a.matchByColumn) + ": " + parentTokens[ctxe.value.collectionElement].niceName}
                 optionItems={potentialKeys(ctxe.value.collectionElement).map(c => softCast<OptionItem>({ value: c.token!.fullKey, label: c.displayName ?? c.token!.niceName! }))}
             />)

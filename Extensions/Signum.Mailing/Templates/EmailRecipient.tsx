@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailRecipientEmbedded } from '../Signum.Mailing'
 
@@ -15,10 +15,10 @@ export default function EmailRecipient(p : { ctx: TypeContext<EmailRecipientEmbe
         <EntityLine ctx={sc.subCtx(ea => ea.emailOwner)} />
       </div>
       <div className="col-sm-5 offset-sm-1">
-        <AutoLine ctx={sc.subCtx(c => c.emailAddress)} valueHtmlAttributes={{ onBlur: e => p.ctx.frame?.frameComponent.forceUpdate() }} />
+        <TextBoxLine ctx={sc.subCtx(c => c.emailAddress)} valueHtmlAttributes={{ onBlur: e => p.ctx.frame?.frameComponent.forceUpdate() }} />
       </div>
       <div className="col-sm-6">
-        <AutoLine ctx={sc.subCtx(c => c.displayName)} valueHtmlAttributes={{ onBlur: e => p.ctx.frame?.frameComponent.forceUpdate() }} />
+        <TextBoxLine ctx={sc.subCtx(c => c.displayName)} valueHtmlAttributes={{ onBlur: e => p.ctx.frame?.frameComponent.forceUpdate() }} />
       </div>
     </div>
   );

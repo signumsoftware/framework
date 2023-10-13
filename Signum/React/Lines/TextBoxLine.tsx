@@ -4,83 +4,15 @@ import { LineBaseController, LineBaseProps, setRefProp, useController, useInitia
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface TextBoxLineProps extends LineBaseProps {
-  unit?: React.ReactChild;
+export interface TextBoxLineProps extends ValueBaseProps<TextBoxLineController> {
   autoTrimString?: boolean;
   autoFixString?: boolean;
-  valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: TextBoxLineController) => React.ReactNode;
-  initiallyFocused?: boolean | number;
   datalist?: string[];
-  valueRef?: React.Ref<HTMLElement>;
 }
 
-export class TextBoxLineController extends LineBaseController<TextBoxLineProps>{
-
-  inputElement!: React.RefObject<HTMLElement>;
-  init(p: TextBoxLineProps) {
-    super.init(p);
-
-    this.inputElement = React.useRef<HTMLElement>(null);
-
-    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
-  }
-
-  setRefs = (node: HTMLElement | null) => {
-    setRefProp(this.props.valueRef, node);
-    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
-
-  static autoFixString(str: string | null | undefined, autoTrim: boolean, autoNull : boolean): string | null | undefined {
-
-    if (autoTrim)
-      str = str?.trim();
-
-    return str == "" && autoNull ? null : str;
-  }
-
-  overrideProps(state: TextBoxLineProps, overridenProps: TextBoxLineProps) {
-
-    const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
-    super.overrideProps(state, overridenProps);
-    state.valueHtmlAttributes = valueHtmlAttributes;
-  }
-
-  
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
-
-    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
-      return <>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-      </>;
-    }
-
-    return (
-      <div className={this.props.ctx.inputGroupClass}>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-        {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
-        {preExtraButton}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </div>
-    );
-  }
-
-  getPlaceholder(): string | undefined {
-    const p = this.props;
-    return p.valueHtmlAttributes?.placeholder ??
-      ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
-      undefined);
-  }
-}
-
-function asString(reactChild: React.ReactNode | undefined): string | undefined {
-  if (typeof reactChild == "string")
-    return reactChild as string;
-
-  return undefined;
+export class TextBoxLineController extends ValueBaseController<TextBoxLineProps>{
 }
 
 export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {

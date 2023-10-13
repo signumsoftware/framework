@@ -111,7 +111,6 @@ function chooseDate(): Promise<DateTime | undefined> {
         type: mi.type,
         unit: mi.unit,
         label: mi.niceName,
-        initiallyFocused: true,
         initialValue: result.toISO()!
       });
     } else {

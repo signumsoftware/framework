@@ -24,14 +24,20 @@ export { FetchInState, FetchAndRemember } from './Lines/Retrieve'
 export { AutoLine } from './Lines/AutoLine'
 export type { AutoLineProps } from './Lines/AutoLine'
 
-export { CheckBoxLine, CheckBoxLineController } from './Lines/CheckBoxLine'
-export type { CheckBoxLineProps } from './Lines/CheckBoxLine'
+export { CheckboxLine, CheckboxLineController } from './Lines/CheckboxLine'
+export type { CheckboxLineProps } from './Lines/CheckboxLine'
 
 export { EnumLine, EnumLineController } from './Lines/EnumLine'
 export type { EnumLineProps, OptionItem } from './Lines/EnumLine'
 
-export { DateTimeLine, DateTimeSplittedLine, TimeLine, DateTimeLineController,  } from './Lines/DateTimeLine'
+export { DateTimeLine, DateTimeLineController,  } from './Lines/DateTimeLine'
 export type { DateTimeLineProps } from './Lines/DateTimeLine'
+
+export { TimeLine, TimeLineController, } from './Lines/TimeLine'
+export type { TimeLineProps } from './Lines/TimeLine'
+
+export { DateTimeSplittedLine, DateTimeSplittedLineController } from './Lines/DateTimeSplittedLine'
+export type { DateTimeSplittedLineProps } from './Lines/DateTimeSplittedLine'
 
 export { NumberLine, DecimalLine, NumberLineController, } from './Lines/NumberLine'
 export type { NumberLineProps } from './Lines/NumberLine'

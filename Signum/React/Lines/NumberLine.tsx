@@ -11,84 +11,13 @@ import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface NumberLineProps extends LineBaseProps {
-  unit?: React.ReactChild;
-  format?: string;
-  autoFixString?: boolean;
-  valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: NumberLineController) => React.ReactNode;
-  initiallyFocused?: boolean | number;
+export interface NumberLineProps extends ValueBaseProps<NumberLineController> {
   incrementWithArrow?: boolean | number;
-  valueRef?: React.Ref<HTMLElement>;
 }
 
-export class NumberLineController extends LineBaseController<NumberLineProps>{
-
-  inputElement!: React.RefObject<HTMLElement>;
-  init(p: NumberLineProps) {
-    super.init(p);
-
-    this.inputElement = React.useRef<HTMLElement>(null);
-
-    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
-  }
-
-  setRefs = (node: HTMLElement | null) => {
-
-    setRefProp(this.props.valueRef, node);
-
-    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
-
-  static autoFixString(str: string | null | undefined, autoTrim: boolean, autoNull : boolean): string | null | undefined {
-
-    if (autoTrim)
-      str = str?.trim();
-
-    return str == "" && autoNull ? null : str;
-  }
-
-  overrideProps(state: NumberLineProps, overridenProps: NumberLineProps) {
-
-    const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
-    super.overrideProps(state, overridenProps);
-    state.valueHtmlAttributes = valueHtmlAttributes;
-  }
-
-   withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
-
-    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
-      return <>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-      </>;
-    }
-
-    return (
-      <div className={this.props.ctx.inputGroupClass}>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-        {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
-        {preExtraButton}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </div>
-    );
-  }
-
-  getPlaceholder(): string | undefined {
-    const p = this.props;
-    return p.valueHtmlAttributes?.placeholder ??
-      ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
-      undefined);
-  }
-}
-
-function asString(reactChild: React.ReactNode | undefined): string | undefined {
-  if (typeof reactChild == "string")
-    return reactChild as string;
-
-  return undefined;
+export class NumberLineController extends ValueBaseController<NumberLineProps>{
 }
 
 export const NumberLine = React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {

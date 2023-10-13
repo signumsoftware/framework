@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityDetail, EntityRepeater, EntityAccordion, EntityTable, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailMessageEntity, EmailAttachmentEmbedded, EmailFileType, EmailRecipientEmbedded } from '../Signum.Mailing'
 import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
@@ -61,12 +61,12 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
         ])} />
 
         <AutoLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
-        <AutoLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
+        <CheckboxLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />
         {ctx.value.isBodyHtml ? <div className="code-container">
           <HtmlCodeMirror ctx={ctx.subCtx(f => f.body.text)} />
         </div> :
           <div>
-            <AutoLine ctx={ctx.subCtx(f => f.body.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
+            <TextAreaLine ctx={ctx.subCtx(f => f.body.text)} valueHtmlAttributes={{ style: { height: "180px" } }} formGroupStyle="SrOnly" />
           </div>
         }
         <EmailMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />

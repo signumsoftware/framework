@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Tabs, Tab } from 'react-bootstrap'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { EntityLine, RenderEntity, EntityDetail, EntityRepeater, EntityTable, EntityCombo, TextBoxLine, ColorLine, EnumLine, NumberLine, CheckBoxLine, AutoLine } from '@framework/Lines'
+import { EntityLine, RenderEntity, EntityDetail, EntityRepeater, EntityTable, EntityCombo, TextBoxLine, ColorLine, EnumLine, NumberLine, CheckboxLine, AutoLine } from '@framework/Lines'
 import { tryGetTypeInfos, New, getTypeInfos } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
@@ -133,8 +133,8 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         </div>
         <div className="row">
           <div className="col-sm-8">
-            <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
-              helpText={<CheckBoxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
+            <CheckboxLine ctx={ctx.subCtx(cp => cp.displayName)}
+              helpText={<CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
           </div>
           <div className="col-sm-4">
             <AutoLine ctx={ctxLabel5.subCtx(cp => cp.autoRefreshPeriod)} />
@@ -143,7 +143,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         <div className="row">
           <div className="col-sm-8">
             <EntityLine ctx={ctx.subCtx(cp => cp.entityType)} onChange={handleEntityTypeChange}
-              helpText={ctx.value.entityType && <CheckBoxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox /> }
+              helpText={ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox /> }
             />
           </div>
           {ctx.value.entityType && <div className="col-sm-4">
@@ -175,7 +175,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
       <Tabs id={ctxBasic.getUniqueId("tabs")}>
         <Tab title={ctxBasic.niceName(a => a.parts)} eventKey="parts">
-          <CheckBoxLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
+          <CheckboxLine ctx={ctxBasic.subCtx(cp => cp.combineSimilarRows)} inlineCheckbox={true} />
           <div className="sf-dashboard-admin">
             <EntityGridRepeater ctx={ctx.subCtx(cp => cp.parts)} getComponent={renderPart} onCreate={handleOnCreate} />
           </div>
@@ -210,5 +210,5 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
 
 export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {
   const forceUpate = useForceUpdate();
-  return <CheckBoxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
+  return <CheckboxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
 }

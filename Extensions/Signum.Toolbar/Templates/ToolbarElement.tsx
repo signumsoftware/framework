@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Toolbar'
 import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead'
@@ -62,7 +62,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
             }
           </div>
           <div className="col-sm-5">
-          <AutoLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
+          <TextBoxLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
             {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <AutoLine ctx={ctx2.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>

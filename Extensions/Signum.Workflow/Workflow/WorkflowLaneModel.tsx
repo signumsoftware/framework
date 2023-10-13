@@ -57,7 +57,7 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
           onChange={handleFixBooleans}
         /> :
         <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.actorsEval), ctx.niceName(e => e.mainEntityType))}</div>}
-      {ctx.value.actorsEval && <AutoLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
+      {ctx.value.actorsEval && <CheckboxLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
       {ctx.value.actorsEval && ctx.value.actors.length > 0 && < AutoLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
     </div>
   );

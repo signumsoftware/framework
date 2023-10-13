@@ -12,82 +12,14 @@ import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextBoxLineController } from './TextBoxLine'
+import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface TextAreaLineProps extends LineBaseProps {
-  autoTrimString?: boolean;
+export interface TextAreaLineProps extends ValueBaseProps<TextAreaLineController> {
   autoFixString?: boolean;
-  valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: TextAreaLineController) => React.ReactNode;
-  initiallyFocused?: boolean | number;
-  valueRef?: React.Ref<HTMLElement>;
+  autoTrimString?: boolean;
 }
 
-export class TextAreaLineController extends LineBaseController<TextAreaLineProps>{
-
-  inputElement!: React.RefObject<HTMLElement>;
-
-  init(p: TextAreaLineProps) {
-    super.init(p);
-
-    this.inputElement = React.useRef<HTMLElement>(null);
-
-    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
-  }
-
-  setRefs = (node: HTMLElement | null) => {
-
-    setRefProp(this.props.valueRef, node);
-
-    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
-
-  static autoFixString(str: string | null | undefined, autoTrim: boolean, autoNull : boolean): string | null | undefined {
-
-    if (autoTrim)
-      str = str?.trim();
-
-    return str == "" && autoNull ? null : str;
-  }
-
-  overrideProps(state: TextAreaLineProps, overridenProps: TextAreaLineProps) {
-
-    const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
-    super.overrideProps(state, overridenProps);
-    state.valueHtmlAttributes = valueHtmlAttributes;
-  }
-
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
-
-    if (!this.props.extraButtons && !preExtraButton) {
-      return <>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-      </>;
-    }
-
-    return (
-      <div className={this.props.ctx.inputGroupClass}>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-        {preExtraButton}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </div>
-    );
-  }
-
-  getPlaceholder(): string | undefined {
-    const p = this.props;
-    return p.valueHtmlAttributes?.placeholder ??
-      ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
-      undefined);
-  }
-}
-
-function asString(reactChild: React.ReactNode | undefined): string | undefined {
-  if (typeof reactChild == "string")
-    return reactChild as string;
-
-  return undefined;
+export class TextAreaLineController extends ValueBaseController<TextAreaLineProps>{
 }
 
 export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {

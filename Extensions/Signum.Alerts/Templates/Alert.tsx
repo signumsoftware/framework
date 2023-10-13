@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityCombo, FormGroup } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, FormGroup, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertMessage } from '../Signum.Alerts'
 import * as AlertsClient from '../AlertsClient'
@@ -38,7 +38,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
 
       <EntityCombo ctx={ctx.subCtx(n => n.alertType)} onChange={forceUpdate} />
       <AutoLine ctx={ctx.subCtx(n => n.alertDate)} />
-      <AutoLine ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
+      <TextBoxLine ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Title.niceToString()} valueHtmlAttributes={{ placeholder: (ctx.value.alertType && AlertsClient.getTitle(null, ctx.value.alertType)) ?? undefined }} />
       {
         !ctx.value.isNew && !edit ?
           <FormGroup ctx={ctx.subCtx(n => n.titleField)} label={AlertMessage.Text.niceToString()} >
@@ -50,7 +50,7 @@ export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {
           </FormGroup>
           
           :
-          <AutoLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
+          <TextBoxLine ctx={ctx.subCtx(n => n.textField)} label={AlertMessage.Text.niceToString()} valueHtmlAttributes={{ style: { height: "180px" } }} />
       }
       {ctx.value.state == "Attended" &&
         <div>

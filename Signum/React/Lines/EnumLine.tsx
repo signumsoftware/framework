@@ -7,72 +7,26 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface EnumLineProps extends LineBaseProps {
-  unit?: React.ReactChild;
+export interface EnumLineProps extends ValueBaseProps<EnumLineController> {
+  lineType?:
+  "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
+  "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
+  "RadioGroup";
   optionItems?: (OptionItem | MemberInfo | string)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
-  valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: EnumLineController) => React.ReactNode;
-  initiallyFocused?: boolean | number;
-  valueRef?: React.Ref<HTMLElement>;
-  lineType?:
-    "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
-    "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
-    "RadioGroup";
   columnCount?: number;
   columnWidth?: number;
+}
+
+export class EnumLineController extends ValueBaseController<EnumLineProps>{
+
 }
 
 export interface OptionItem {
   value: any;
   label: string;
-}
-
-export class EnumLineController extends LineBaseController<EnumLineProps>{
-
-  inputElement!: React.RefObject<HTMLElement>;
-  init(p: EnumLineProps) {
-    super.init(p);
-
-    this.inputElement = React.useRef<HTMLElement>(null);
-
-    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);    
-  }
-
-  setRefs = (node: HTMLElement | null) => {
-
-    setRefProp(this.props.valueRef, node);
-
-    (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
-  }
-
-  overrideProps(state: EnumLineProps, overridenProps: EnumLineProps) {
-
-    const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
-    super.overrideProps(state, overridenProps);
-    state.valueHtmlAttributes = valueHtmlAttributes;
-  }
-
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
-
-    if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
-      return <>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-      </>;
-    }
-
-    return (
-      <div className={this.props.ctx.inputGroupClass}>
-        {getTimeMachineIcon({ ctx: this.props.ctx })}
-        {input}
-        {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
-        {preExtraButton}
-        {this.props.extraButtons && this.props.extraButtons(this)}
-      </div>
-    );
-  }
 }
 
 export const EnumLine = React.memo(React.forwardRef(function EnumLine(props: EnumLineProps, ref: React.Ref<EnumLineController>) {

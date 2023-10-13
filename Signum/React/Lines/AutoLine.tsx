@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
-import { CheckBoxLine, DateTimeLine, DateTimeLineController, DecimalLine, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
+import { CheckboxLine, DateTimeLine, DateTimeLineController, DecimalLine, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
 export interface AutoLineProps extends LineBaseProps {
-  unit?: React.ReactChild;
+  unit?: string;
   format?: string;
 }
 
@@ -107,7 +107,7 @@ export namespace AutoLine {
         return p => <EnumLine {...p} />;
 
       if (tr.name == "boolean")
-        return p => <CheckBoxLine {...p} />;
+        return p => <CheckboxLine {...p} />;
 
       if (tr.name == "DateTime" || tr.name == "DateTimeOffset" || tr.name == "DateOnly")
         return p => <DateTimeLine {...p} />;

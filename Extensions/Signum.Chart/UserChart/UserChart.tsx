@@ -1,6 +1,6 @@
 import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
-import { FormGroup, AutoLine, EntityLine, EntityStrip } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
@@ -55,7 +55,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
             {p.ctx.value.entityType && <br />}
             {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
             {p.ctx.value.entityType && <br/>}
-            {p.ctx.value.entityType && <AutoLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+            {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
           </div>
         }/>
       <AutoLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />

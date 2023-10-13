@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
@@ -57,10 +57,10 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
               <div className="row">
                 <div className="col-sm-4">
-                  <AutoLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox />
+                  <CheckboxLine ctx={ctx3.subCtx(e => e.disableAuthorization)} inlineCheckbox />
                 </div>
                 <div className="col-sm-4">
-                  <AutoLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
+                  <CheckboxLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
                 </div>
                 <div className="col-sm-4">
                 </div>
@@ -95,7 +95,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
             <AutoLine ctx={ctx3.subCtx(e => e.messageFormat, { labelColumns:4 })} onChange={forceUpdate} />
           </div>
           <div className="col-sm-6">
-            <AutoLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
+            <CheckboxLine ctx={ctx3.subCtx(e => e.editableMessage)} inlineCheckbox={true} />
           </div>
         </div>
         <EntityLine ctx={ec.subCtx(e => e.masterTemplate, { labelColumns: 2 })} />

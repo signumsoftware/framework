@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine } from '@framework/Lines'
+import { AutoLine, CheckboxLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
@@ -14,10 +14,10 @@ export default function UserChartPart(p: { ctx: TypeContext<UserChartPartEntity>
 
       <div className="row">
         <div className="col-sm-6">
-          <AutoLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
-          <AutoLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
-          <AutoLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
-          <AutoLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.createNew)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.autoRefresh)} inlineCheckbox="block" />
           {ctx.findParentCtx(DashboardEntity).value.cacheQueryConfiguration && <IsQueryCachedLine ctx={ctx.subCtx(p => p.isQueryCached)} />}
         </div>
         <div className="col-sm-6">
