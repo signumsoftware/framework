@@ -27,6 +27,7 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   buttons: MessageModalButtons;
   buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
   buttonHtmlAttributes?: (button: MessageModalResult) => React.ButtonHTMLAttributes<any> | null | undefined;
+  buttonClass?: (button: MessageModalResult) => string | undefined;
   icon?: MessageModalIcon | null;
   customIcon?: IconProp;
   size?: BsSize;
@@ -87,7 +88,7 @@ export default function MessageModal(p: MessageModalProps) {
 
     const htmlAtts = p.buttonHtmlAttributes && p.buttonHtmlAttributes(res);
 
-    const baseButtonClass = classes("btn", res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary", `sf-close-button sf-${res}-button ms-1`)
+    const baseButtonClass = classes("btn", p.buttonClass ? p.buttonClass(res) : (res == 'yes' || res == 'ok' ? "btn-primary" : "btn-secondary"), `sf-close-button sf-${res}-button ms-1`)
 
     return (
       <button
