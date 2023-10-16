@@ -30,7 +30,7 @@ export class ValueBaseController<T extends ValueBaseProps<any>> extends LineBase
 
   assertType(tagName: string, types: string[]) {
     if (!types.contains(this.props.type!.name))
-      throw new Error(`Invalid type ${this.props.type?.name} in ${tagName} für ${this.props.ctx.propertyPath ?? "?"}")
+      throw new Error(`Invalid type ${this.props.type?.name} in ${tagName} for ${this.props.ctx.propertyPath ?? "?"}`)
   }
 
   overrideProps(state: T, overridenProps: T) {
