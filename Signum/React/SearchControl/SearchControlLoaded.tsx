@@ -599,17 +599,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = (mode: SearchControlFilterMode) => {
+  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true) => {
     if (this.state.filterMode == mode)
       return;
 
-    this.getFindOptionsWithSFB().then(() => {
-      this.simpleFilterBuilderInstance = undefined;
-      this.setState({
-        simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
-        filterMode: mode
-      }, () => this.handleHeightChanged());
-    });
+    if (refreshFilters)
+      await this.getFindOptionsWithSFB();
+
+    this.simpleFilterBuilderInstance = undefined;
+    this.setState({
+      simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
+      filterMode: mode
+    }, () => this.handleHeightChanged());
+    
   }
 
   handleSystemTimeClick = () => {
@@ -919,7 +921,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var showFilter = await rule.execute(token, value, this);
 
     if (this.state.filterMode == "Simple" && showFilter) {
-      this.handleChangeFiltermode("Advanced");
+      await this.handleChangeFiltermode("Advanced", false);
     }
 
     if (rt && cm.rowIndex != null)
