@@ -104,7 +104,7 @@ public enum HelpKindMessage
 
     [Description(" automatically by the system")]
     AutomaticallyByTheSystem,
-    [Description(" and is Master Data (rarely changes{0})")]
+    [Description(" and is Master Data (rarely changes)")]
     AndIsMasterDataRarelyChanges,
     [Description(" and is Transactional Data (created regularly)")]
     andIsTransactionalDataCreatedRegularly,

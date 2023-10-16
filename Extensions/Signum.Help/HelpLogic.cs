@@ -366,6 +366,7 @@ public static class HelpLogic
         return PropertyRoute.GenerateRoutes(type).Where(a => ReflectionServer.InTypeScript(a)).ToList();
     }
 
+
     static SqlPreCommand? SynchronizeNamespace(Replacements replacements, SyncData data)
     {
         var entities = Database.Query<NamespaceHelpEntity>().ToList();
@@ -470,7 +471,7 @@ public static class HelpLogic
                         if (type == null)
                             return HelpLink(letter + "-error", link);
 
-                        var routes = PublicRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
+                        var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
 
                         string? pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, data.StringDistance);
                         if (pr == null)
