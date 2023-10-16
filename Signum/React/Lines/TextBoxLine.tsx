@@ -5,8 +5,10 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
+import { TypeContext } from '../Lines'
 
 export interface TextBoxLineProps extends ValueBaseProps<TextBoxLineController> {
+  ctx: TypeContext<string | undefined | null>;
   autoTrimString?: boolean;
   autoFixString?: boolean;
   datalist?: string[];

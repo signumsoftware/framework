@@ -4,8 +4,10 @@ import { LineBaseController, LineBaseProps, setRefProp, useController, useInitia
 import { FormGroup } from '../Lines/FormGroup'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
+import { TypeContext } from '../Lines'
 
 export interface CheckboxLineProps extends ValueBaseProps<CheckboxLineController> {
+  ctx: TypeContext<boolean | undefined | null>;
   inlineCheckbox?: boolean | "block";
 }
 

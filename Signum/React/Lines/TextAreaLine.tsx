@@ -13,13 +13,19 @@ import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextBoxLineController } from './TextBoxLine'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
+import { TypeContext } from '../Lines'
 
 export interface TextAreaLineProps extends ValueBaseProps<TextAreaLineController> {
+  ctx: TypeContext<string | undefined | null>;
   autoFixString?: boolean;
   autoTrimString?: boolean;
 }
 
 export class TextAreaLineController extends ValueBaseController<TextAreaLineProps>{
+  init(p: TextAreaLineProps) {
+    super.init(p);
+    this.assertType("TextAreaLine", ["string"]);
+  }
 }
 
 export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {
