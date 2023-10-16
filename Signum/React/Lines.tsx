@@ -24,8 +24,8 @@ export { FetchInState, FetchAndRemember } from './Lines/Retrieve'
 export { AutoLine } from './Lines/AutoLine'
 export type { AutoLineProps } from './Lines/AutoLine'
 
-export { CheckboxLine, CheckboxLineController } from './Lines/CheckboxLine'
-export type { CheckboxLineProps } from './Lines/CheckboxLine'
+export { CheckboxLine, CheckboxLineController } from './Lines/CheckBoxLine'
+export type { CheckboxLineProps } from './Lines/CheckBoxLine'
 
 export { EnumLine, EnumLineController } from './Lines/EnumLine'
 export type { EnumLineProps, OptionItem } from './Lines/EnumLine'
