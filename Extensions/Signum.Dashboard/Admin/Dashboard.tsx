@@ -133,7 +133,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         </div>
         <div className="row">
           <div className="col-sm-8">
-            <CheckboxLine ctx={ctx.subCtx(cp => cp.displayName)}
+            <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
               helpText={<CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
           </div>
           <div className="col-sm-4">
