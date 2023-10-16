@@ -98,7 +98,17 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     if (!promise)
       return;
 
-    promise.then(e => {
+    promise.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+
+      if (e == undefined)
+        return undefined;
+
+      if (!this.props.viewOnCreate)
+        return Promise.resolve(e);
+
+      return this.doView(e);
+
+    }).then(e => {
       if (e) {
         this.refresh++;
         this.forceUpdate();
