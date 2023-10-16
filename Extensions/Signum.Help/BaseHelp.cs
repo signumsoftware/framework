@@ -132,7 +132,7 @@ public class TypeHelp : BaseHelp
         var props = DBEntity?.Properties.ToDictionaryEx(a => a.Property.ToPropertyRoute(), a => a.Description);
         var opers = DBEntity?.Operations.ToDictionaryEx(a => a.Operation, a => a.Description);
 
-        Properties = PropertyRoute.GenerateRoutes(type)
+        Properties =  HelpLogic.PublicRoutes(type)
                     .ToDictionary(pp => pp, pp => new PropertyHelp(pp, props?.TryGetCN(pp)));
 
         Operations = OperationLogic.TypeOperations(type)

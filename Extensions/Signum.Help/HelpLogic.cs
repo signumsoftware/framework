@@ -12,6 +12,7 @@ using Signum.Omnibox;
 using Signum.Files;
 using Signum.Entities;
 using DocumentFormat.OpenXml.Vml.Office;
+using Signum.API;
 
 namespace Signum.Help;
 
@@ -343,11 +344,11 @@ public static class HelpLogic
                     return null; //PreDeleteSqlSync
 
                 var repProperties = replacements.TryGetC(PropertyRouteLogic.PropertiesFor.FormatWith(eh.Type.CleanName));
-                var routes = PropertyRoute.GenerateRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties?.TryGetC(ps) ?? ps; });
+                var routes = PublicRoutes(type).ToDictionary(pr => { var ps = pr.PropertyString(); return repProperties?.TryGetC(ps) ?? ps; });
                 eh.Properties.RemoveAll(p => !routes.ContainsKey(p.Property.Path));
                 foreach (var prop in eh.Properties)
                     prop.Description = SynchronizeContent(prop.Description, replacements, data);
-                
+
                 var resOperations = replacements.TryGetC(typeof(OperationSymbol).Name);
                 var operations = OperationLogic.TypeOperations(type).ToDictionary(o => { var key = o.OperationSymbol.Key; return resOperations?.TryGetC(key) ?? key; });
                 eh.Operations.RemoveAll(p => !operations.ContainsKey(p.Operation.Key));
@@ -358,6 +359,11 @@ public static class HelpLogic
 
                 return table.UpdateSqlSync(eh, e => e.Type.CleanName == eh.Type.CleanName);
             }).Combine(Spacing.Simple);
+    }
+
+    public static List<PropertyRoute> PublicRoutes(Type type)
+    {
+        return PropertyRoute.GenerateRoutes(type).Where(a => ReflectionServer.InTypeScript(a)).ToList();
     }
 
     static SqlPreCommand? SynchronizeNamespace(Replacements replacements, SyncData data)
@@ -464,7 +470,7 @@ public static class HelpLogic
                         if (type == null)
                             return HelpLink(letter + "-error", link);
 
-                        var routes = PropertyRoute.GenerateRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
+                        var routes = PublicRoutes(TypeLogic.GetType(type)).Select(a => a.PropertyString()).ToList();
 
                         string? pr = r.SelectInteractive(link.After('.'), routes, "PropertyRoutes-" + type, data.StringDistance);
                         if (pr == null)
