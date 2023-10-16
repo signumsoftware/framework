@@ -117,7 +117,7 @@ export namespace AutoLine {
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")
         return p => <TimeLine {...p} />;
 
-      return p => <span className="text-alert">Not supported type by AutoLine</span>;
+      return p => <span className="text-danger">Not supported type by AutoLine</span>;
     }
   }
 

@@ -12,7 +12,10 @@ export interface TimeLineProps extends ValueBaseProps<TimeLineController> {
 }
 
 export class TimeLineController extends ValueBaseController<TimeLineProps>{
-
+  init(p: TimeLineProps) {
+    super.init(p);
+    this.assertType("TimeLine", ["TimeOnly", "TimeSpan"]);
+  }
 }
 export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
 

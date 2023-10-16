@@ -174,7 +174,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
             onChange={(value, metadata) => p.onTokenSelected(value ?? p.parentToken, metadata.originalEvent?.nativeEvent instanceof KeyboardEvent)}
             dataKey="fullKey"
             textField="toStr"
-            onBlur={() => { p.setLastTokenChange(undefined); }}
+            onBlur={() => { p.selectedToken == null && p.setLastTokenChange(undefined); }}
             renderValue={a => <QueryTokenItem item={a.item} />}
             renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
             defaultOpen={p.defaultOpen}

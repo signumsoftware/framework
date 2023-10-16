@@ -15,6 +15,10 @@ export interface TextBoxLineProps extends ValueBaseProps<TextBoxLineController> 
 }
 
 export class TextBoxLineController extends ValueBaseController<TextBoxLineProps>{
+  init(p: TextBoxLineProps) {
+    super.init(p);
+    this.assertType("TextBoxLine", ["string"]);
+  }
 }
 
 export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {

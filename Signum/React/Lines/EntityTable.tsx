@@ -98,8 +98,9 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
           if (c.property == null)
             throw new Error("Column has no property and no template");
 
+          debugger;
           var propertyRoute = c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!);
-          var factory = AutoLine.getComponentFactory(propertyRoute.typeReference, propertyRoute);
+          var factory = AutoLine.getComponentFactory(propertyRoute.typeReference(), propertyRoute);
 
           c.template = (ctx, row, state) => {
             var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);

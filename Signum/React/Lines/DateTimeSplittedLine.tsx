@@ -13,8 +13,10 @@ import { KeyCodes } from '../Components/Basic';
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { defaultRenderDay, trimDateToFormat } from './DateTimeLine'
 import { TimeTextBox, isDuration } from './TimeLine'
+import { TypeContext } from '../TypeContext'
 
 export interface DateTimeSplittedLineProps extends ValueBaseProps<DateTimeSplittedLineController> {
+  ctx: TypeContext<string /*Date or DateTime*/ | undefined | null>;
   minDate?: Date;
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
@@ -22,7 +24,10 @@ export interface DateTimeSplittedLineProps extends ValueBaseProps<DateTimeSplitt
 }
 
 export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps>{
-
+  init(p: DateTimeSplittedLineProps) {
+    super.init(p);
+    this.assertType("DateTimeSplittedLine", ["DateOnly", "DateTime"]);
+  }
 }
 
 
