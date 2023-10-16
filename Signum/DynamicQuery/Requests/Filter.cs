@@ -1,5 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
+using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -17,7 +18,7 @@ public enum FilterGroupOperation
 
 public abstract class Filter
 {
-    public abstract Expression GetExpression(BuildExpressionContext ctx);
+    public abstract Expression GetExpression(BuildExpressionContext ctx, bool inMemory);
 
     public abstract IEnumerable<Filter> GetAllFilters();
 
@@ -29,7 +30,7 @@ public abstract class Filter
 
     public abstract IEnumerable<string> GetKeywords();
 
-    protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll)
+    protected Expression GetExpressionWithAnyAll(BuildExpressionContext ctx, CollectionAnyAllToken anyAll, bool inMemory)
     {
         var ept = MListElementPropertyToken.AsMListEntityProperty(anyAll.Parent!);
         if (ept != null)
@@ -39,7 +40,7 @@ public abstract class Filter
 
             var p = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
             ctx.Replacements.Add(anyAll, new ExpressionBox(p, mlistElementRoute: anyAll.GetPropertyRoute()));
-            var body = GetExpression(ctx);
+            var body = GetExpression(ctx, inMemory);
             ctx.Replacements.Remove(anyAll);
 
             return anyAll.BuildAnyAll(collection, p, body);
@@ -52,7 +53,7 @@ public abstract class Filter
 
             var p = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
             ctx.Replacements.Add(anyAll, new ExpressionBox(p.BuildLiteNullifyUnwrapPrimaryKey(new[] { anyAll.GetPropertyRoute()! })));
-            var body = GetExpression(ctx);
+            var body = GetExpression(ctx, inMemory);
             ctx.Replacements.Remove(anyAll);
 
             return anyAll.BuildAnyAll(collection, p, body);
@@ -103,7 +104,7 @@ public class FilterGroup : Filter
 
 
 
-    public override Expression GetExpression(BuildExpressionContext ctx)
+    public override Expression GetExpression(BuildExpressionContext ctx, bool inMemory)
     {
         var anyAll = Token?.Follow(a => a.Parent)
                 .OfType<CollectionAnyAllToken>()
@@ -112,10 +113,10 @@ public class FilterGroup : Filter
 
         if (anyAll == null)
             return this.GroupOperation == FilterGroupOperation.And ?
-                Filters.Select(f => f.GetExpression(ctx)).AggregateAnd() :
-                Filters.Select(f => f.GetExpression(ctx)).AggregateOr();
+                Filters.Select(f => f.GetExpression(ctx, inMemory)).AggregateAnd() :
+                Filters.Select(f => f.GetExpression(ctx, inMemory)).AggregateOr();
 
-        return GetExpressionWithAnyAll(ctx, anyAll);
+        return GetExpressionWithAnyAll(ctx, anyAll, inMemory);
     }
 
     public override Filter? ToFullText()
@@ -234,7 +235,7 @@ public class FilterCondition : Filter
 
     static MethodInfo miContainsEnumerable = ReflectionTools.GetMethodInfo((IEnumerable<int> s) => s.Contains(2)).GetGenericMethodDefinition();
 
-    public override Expression GetExpression(BuildExpressionContext ctx)
+    public override Expression GetExpression(BuildExpressionContext ctx, bool inMemory)
     {
         CollectionAnyAllToken? anyAll = Token.Follow(a => a.Parent)
               .OfType<CollectionAnyAllToken>()
@@ -242,9 +243,9 @@ public class FilterCondition : Filter
               .LastOrDefault();
 
         if (anyAll == null)
-            return GetConditionExpressionBasic(ctx);
+            return GetConditionExpressionBasic(ctx, inMemory);
 
-        return GetExpressionWithAnyAll(ctx, anyAll);
+        return GetExpressionWithAnyAll(ctx, anyAll, inMemory);
 
     }
 
@@ -252,7 +253,7 @@ public class FilterCondition : Filter
 
     public static Func<bool> ToLowerString = () => false;
 
-    private Expression GetConditionExpressionBasic(BuildExpressionContext context)
+    private Expression GetConditionExpressionBasic(BuildExpressionContext context, bool inMemory)
     {
         Expression left = Token.BuildExpression(context);
 
@@ -321,16 +322,16 @@ public class FilterCondition : Filter
             if (Token.Type == typeof(string) && ToLowerString())
             {
                 Expression right = Expression.Constant(((string)val!).ToLower(), Token.Type);
-                return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right);
+                return QueryUtils.GetCompareExpression(Operation, Expression.Call(left, miToLower), right, inMemory);
             }
             else if (Token.Type == typeof(bool) && val == null)
             {
-                return QueryUtils.GetCompareExpression(Operation, left, Expression.Constant(false, typeof(bool)));
+                return QueryUtils.GetCompareExpression(Operation, left, Expression.Constant(false, typeof(bool)), inMemory);
             }
             else
             {
                 Expression right = Expression.Constant(val, Token.Type);
-                return QueryUtils.GetCompareExpression(Operation, left, right);
+                return QueryUtils.GetCompareExpression(Operation, left, right, inMemory);
             }
         }
     }
@@ -456,7 +457,7 @@ public class FilterFullText : Filter
 
     public string SearchCondition { get; }
 
-    public override Expression GetExpression(BuildExpressionContext ctx)
+    public override Expression GetExpression(BuildExpressionContext ctx, bool inMemory)
     {
         if (this.IsTable)
         {
