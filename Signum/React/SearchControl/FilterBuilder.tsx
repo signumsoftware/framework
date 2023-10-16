@@ -18,7 +18,7 @@ import { Dropdown } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
-import { NumericTextBox } from '../Lines/NumberLine'
+import { NumberBox } from '../Lines/NumberLine'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -710,7 +710,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     var numberFormat = toNumberFormat("0");
 
     return (
-      <NumericTextBox readonly={p.readonly} value={val == undefined ? null : val}
+      <NumberBox readonly={p.readonly} value={val == undefined ? null : val}
         format={numberFormat}
         
         onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}

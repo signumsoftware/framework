@@ -9,9 +9,11 @@ import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { JavascriptMessage } from '../Signum.Entities';
 import { ValueBaseProps, ValueBaseController } from './ValueBase';
+import { TypeContext } from '../Lines';
+import Exception from '../Exceptions/Exception';
 
 export interface DateTimeLineProps extends ValueBaseProps<DateTimeLineController> {
-
+  ctx: TypeContext<string /*Date or DateTime*/ | undefined | null>;
   showTimeBox?: boolean;
   minDate?: Date;
   maxDate?: Date;
@@ -20,7 +22,10 @@ export interface DateTimeLineProps extends ValueBaseProps<DateTimeLineController
 }
 
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps>{
-
+  init(p: DateTimeLineProps) {
+    super.init(p);
+    this.assertType("DateTimeLine", ["DateOnly", "DateTime"]);
+  }
 }
 
 export const DateTimeLine = React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {

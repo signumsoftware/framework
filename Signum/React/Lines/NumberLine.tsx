@@ -12,8 +12,10 @@ import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
+import { TypeContext } from '../Lines'
 
 export interface NumberLineProps extends ValueBaseProps<NumberLineController> {
+  ctx: TypeContext<number | undefined | null>;
   incrementWithArrow?: boolean | number;
 }
 
@@ -76,7 +78,7 @@ function numericTextBox(vl: NumberLineController, validateKey: (e: React.Keyboar
   return (
     <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => vl.withItemGroup(
-        <NumericTextBox
+        <NumberBox
           id={inputId }
           htmlAttributes={htmlAttributes}
           value={s.ctx.value}
@@ -91,8 +93,8 @@ function numericTextBox(vl: NumberLineController, validateKey: (e: React.Keyboar
   );
 }
 
-export interface NumericTextBoxProps {
-  value: number | null;
+export interface NumberBoxProps {
+  value: number | null | undefined;
   readonly?: boolean;
   onChange: (newValue: number | null) => void;
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
@@ -121,7 +123,7 @@ function getLocaleSeparators(locale: string) {
 }
 
 
-export function NumericTextBox(p: NumericTextBoxProps) {
+export function NumberBox(p: NumberBoxProps) {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 

@@ -28,6 +28,11 @@ export class ValueBaseController<T extends ValueBaseProps<any>> extends LineBase
       (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   };
 
+  assertType(tagName: string, types: string[]) {
+    if (!types.contains(this.props.type!.name))
+      throw new Error(`Invalid type ${this.props.type?.name} in ${tagName} für ${this.props.ctx.propertyPath ?? "?"}")
+  }
+
   overrideProps(state: T, overridenProps: T) {
 
       const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };

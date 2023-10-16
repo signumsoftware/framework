@@ -30,7 +30,7 @@ export type { CheckboxLineProps } from './Lines/CheckBoxLine'
 export { EnumLine, EnumLineController } from './Lines/EnumLine'
 export type { EnumLineProps, OptionItem } from './Lines/EnumLine'
 
-export { DateTimeLine, DateTimeLineController,  } from './Lines/DateTimeLine'
+export { DateTimeLine, DateTimeLineController  } from './Lines/DateTimeLine'
 export type { DateTimeLineProps } from './Lines/DateTimeLine'
 
 export { TimeLine, TimeLineController, } from './Lines/TimeLine'
@@ -39,7 +39,7 @@ export type { TimeLineProps } from './Lines/TimeLine'
 export { DateTimeSplittedLine, DateTimeSplittedLineController } from './Lines/DateTimeSplittedLine'
 export type { DateTimeSplittedLineProps } from './Lines/DateTimeSplittedLine'
 
-export { NumberLine, NumberLineController, } from './Lines/NumberLine'
+export { NumberLine, NumberLineController } from './Lines/NumberLine'
 export type { NumberLineProps } from './Lines/NumberLine'
 
 export { TextAreaLine, TextAreaLineController } from './Lines/TextAreaLine'
