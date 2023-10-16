@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine';
 import { useForceUpdate } from '@framework/Hooks'
 import { toNumberFormat } from '@framework/Reflection';
 import { Change, diffLines, diffWords } from 'diff';
-import { softCast } from '@framework/Globals';
+import { isNumber, softCast } from '@framework/Globals';
+import { NumericTextBox } from '@framework/Lines/NumberLine';
 
 
 export interface LineOrWordsChange {

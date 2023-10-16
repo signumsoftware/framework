@@ -31,7 +31,7 @@ public static class InlineImagesLogic
                     var newAtts = atts.ToDictionary();
                     if (atts.TryGetValue("data-help-image-id", out var imageId))
                     {
-                        toDeleteImages.Remove(new PrimaryKey(int.Parse(imageId)));
+                        toDeleteImages.Remove(PrimaryKey.Parse(imageId, typeof(HelpImageEntity)));
                     }
 
                     if (atts.TryGetValue("data-binary-file", out var base64Data))

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { FormGroup, FormControlReadonly, ValueLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
+import { FormGroup, FormControlReadonly, AutoLine, EntityTable, StyleContext, OptionItem, LineBaseProps } from '@framework/Lines'
 import { SearchValue } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, TensorFlowOptimizer } from '../Signum.MachineLearning'
@@ -70,7 +70,7 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
   return (
     <div>
       <h4>{NeuralNetworkSettingsEntity.niceName()}</h4>
-      <ValueLine ctx={ctx.subCtx(a => a.predictionType)} onChange={handlePredictionTypeChanged} />
+      <AutoLine ctx={ctx.subCtx(a => a.predictionType)} onChange={handlePredictionTypeChanged} />
       {renderCount(ctx, pred, "Input")}
       <EntityTable ctx={ctx.subCtx(a => a.hiddenLayers)} columns={EntityTable.typedColumns<NeuralNetworkHidenLayerEmbedded>([
         { property: a => a.size, headerHtmlAttributes: { style: { width: "33%" } } },
@@ -83,20 +83,20 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
             {renderCount(ctxb, pred, "Output")}
           </div>
           <div className="col-sm-4">
-            <ValueLine ctx={ctxb.subCtx(a => a.outputActivation)} />
+            <AutoLine ctx={ctxb.subCtx(a => a.outputActivation)} />
           </div>
           <div className="col-sm-4">
-            <ValueLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
+            <AutoLine ctx={ctxb.subCtx(a => a.outputInitializer)} />
           </div>
         </div>
         <div className="row">
           <div className="col-sm-4">
           </div>
           <div className="col-sm-4">
-            <ValueLine ctx={ctxb.subCtx(a => a.lossFunction)} />
+            <AutoLine ctx={ctxb.subCtx(a => a.lossFunction)} />
           </div>
           <div className="col-sm-4">
-            <ValueLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
+            <AutoLine ctx={ctxb.subCtx(a => a.evalErrorFunction)} />
           </div>
 
         </div>
@@ -104,15 +104,15 @@ export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetwo
       <hr />
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx6.subCtx(a => a.optimizer)} onChange={handleOptimizerChange} helpText={getHelpBlock(ctx.value.optimizer)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.learningRate)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.optimizer)} onChange={handleOptimizerChange} helpText={getHelpBlock(ctx.value.optimizer)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.learningRate)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.numMinibatches)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.bestResultFromLast)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.saveProgressEvery)} />
-          <ValueLine ctx={ctx6.subCtx(a => a.saveValidationProgressEvery)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.minibatchSize)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.numMinibatches)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.bestResultFromLast)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.saveProgressEvery)} />
+          <AutoLine ctx={ctx6.subCtx(a => a.saveValidationProgressEvery)} />
         </div>
       </div>
     </div>

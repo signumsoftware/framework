@@ -3,19 +3,18 @@ import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
 import { TypeReference, Binding } from './Reflection'
 import { TypeContext } from './TypeContext'
-import { ValueLineType, ValueLine } from './Lines/ValueLine'
-import { ValueLineProps } from "./Lines";
 import { MemberInfo } from './Reflection';
 import { BsSize } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
+import { AutoLine, AutoLineProps } from './Lines/AutoLine';
 
-interface ValueLineModalProps extends IModalProps<any> {
-  options: ValueLineModalOptions;
+interface AutoLineModalProps extends IModalProps<any> {
+  options: AutoLineModalOptions;
 }
 
-export default function ValueLineModal(p: ValueLineModalProps) {
+export default function AutoLineModal(p: AutoLineModalProps) {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -48,21 +47,23 @@ export default function ValueLineModal(p: ValueLineModalProps) {
 
   const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
-  var vlp: ValueLineProps = {
+  var label = props.label !== undefined ? props.label : props.member?.niceName;
+
+  var alp: AutoLineProps = {
     ctx: ctx,
     format: props.format !== undefined ? props.format : props.member?.format,
     unit: props.unit !== undefined ? props.unit : props.member?.unit,
-    label: props.label !== undefined ? props.label : props.member?.niceName,
+    label: label,
     type: props.type ?? props.member?.type,
-    valueLineType: props.valueLineType ?? (props.member?.isMultiline ? "TextArea" : undefined),
-    valueHtmlAttributes: props.valueHtmlAttributes,
-    initiallyFocused: props.initiallyFocused,
-    initiallyShowOnly: props.initiallyShowOnly,
+    formGroupStyle: label ? "Basic" : "SrOnly",
+    onChange: forceUpdate
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
 
   const error = p.options.validateValue ? p.options.validateValue(ctx.value) : undefined;
+
+
 
   return (
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
@@ -75,8 +76,7 @@ export default function ValueLineModal(p: ValueLineModalProps) {
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
         <AutoFocus>
-          <ValueLine
-            formGroupStyle={vlp.label ? "Basic" : "SrOnly"} {...vlp} onChange={forceUpdate} />
+          {p.options.customComponent ? p.options.customComponent(alp) :<AutoLine {...alp} />}
         </AutoFocus>
         {p.options.validateValue && <p className="text-danger">
           {error}
@@ -92,26 +92,23 @@ export default function ValueLineModal(p: ValueLineModalProps) {
       </div>
     </Modal>
   );
-
 }
 
-ValueLineModal.show = (options: ValueLineModalOptions): Promise<any> => {
-  return openModal<any>(<ValueLineModal options={options} />);
+AutoLineModal.show = (options: AutoLineModalOptions): Promise<any> => {
+  return openModal<any>(<AutoLineModal options={options} />);
 }
 
-export interface ValueLineModalOptions {
+export interface AutoLineModalOptions {
   member?: MemberInfo;
   type?: TypeReference;
-  valueLineType?: ValueLineType;
   initialValue?: any;
   title?: React.ReactChild;
   message?: React.ReactChild;
   label?: React.ReactChild;
+  customComponent?: (p: AutoLineProps) => React.ReactElement;
   validateValue?: (val: any) => string | undefined;
   format?: string;
   unit?: string;
-  initiallyFocused?: boolean;
-  initiallyShowOnly?: "Date" | "Time";
   valueHtmlAttributes?: React.HTMLAttributes<any>;
   allowEmptyValue?: boolean;
   modalSize?: BsSize;

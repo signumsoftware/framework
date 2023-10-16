@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap';
 import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -50,7 +50,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
-        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
       <table className="table table-sm sf-auth-rules">

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, TypeContext, EntityDetail, RenderEntity, EntityLine } from '@framework/Lines'
+import { AutoLine, TypeContext, EntityDetail, RenderEntity, EntityLine } from '@framework/Lines'
 import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded, WorkflowTimerConditionEntity } from '../Signum.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
@@ -59,10 +59,10 @@ export default function WorkflowEventModelComponent(p: WorkflowEventModelCompone
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(we => we.name)} />
-      <ValueLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} optionItems={getTypeComboItems()} onChange={loadTask} />
-      {ctx.value.type == "BoundaryForkTimer" && <ValueLine ctx={ctx.subCtx(a => a.runRepeatedly)} />}
-      {ctx.value.type == "BoundaryInterruptingTimer" && <ValueLine ctx={ctx.subCtx(a => a.decisionOptionName)} />}
+      <AutoLine ctx={ctx.subCtx(we => we.name)} />
+      <EnumLine ctx={ctx.subCtx(we => we.type)} readOnly={isTimer(ctx.value.type!)} optionItems={getTypeComboItems()} onChange={loadTask} />
+      {ctx.value.type == "BoundaryForkTimer" && <AutoLine ctx={ctx.subCtx(a => a.runRepeatedly)} />}
+      {ctx.value.type == "BoundaryInterruptingTimer" && <AutoLine ctx={ctx.subCtx(a => a.decisionOptionName)} />}
       {ctx.value.task && <WorkflowEventTask ctx={ctx.subCtx(a => a.task!)} mainEntityType={ctx.value.mainEntityType} isConditional={isConditional()} />}
       {ctx.value.timer && <WorkflowTimer ctx={ctx.subCtx(a => a.timer!)} mainEntityType={ctx.value.mainEntityType}/>}
     </div>
@@ -79,9 +79,9 @@ function WorkflowEventTask(p: { ctx: TypeContext<WorkflowEventTaskModel>, mainEn
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(te => te.suspended)} />
+      <AutoLine ctx={ctx.subCtx(te => te.suspended)} />
       <EntityDetail ctx={ctx.subCtx(te => te.rule)} />
-      <ValueLine ctx={ctx.subCtx(te => te.triggeredOn)} onChange={handleTriggeredOnChange} />
+      <AutoLine ctx={ctx.subCtx(te => te.triggeredOn)} onChange={handleTriggeredOnChange} />
       {p.isConditional && <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(t => t.condition)} />}
       <WorkflowEventTaskActionComponent ctx={ctx.subCtx(t => t.action!)} mainEntityType={p.mainEntityType} />
     </div>

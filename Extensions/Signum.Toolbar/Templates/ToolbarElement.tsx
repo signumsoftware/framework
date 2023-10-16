@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarElementEmbedded } from '../Signum.Toolbar'
 import { IconTypeaheadLine, parseIcon } from '@framework/Components/IconTypeahead'
@@ -40,7 +40,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
     <div>
       <div className="row">
         <div className="col-sm-5">
-          <ValueLine ctx={ctx4.subCtx(t => t.type)} onChange={handleTypeChanges} />
+          <AutoLine ctx={ctx4.subCtx(t => t.type)} onChange={handleTypeChanges} />
         </div>
         <div className="col-sm-5 offset-sm-1">
           {ctx2.value.type != "Divider" && <EntityLine ctx={ctx2.subCtx(t => t.content)} onChange={handleContentChange} />}
@@ -51,8 +51,8 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
         <div className="row">
           <div className="col-sm-5">
             <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"]} />
-            <ValueLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
-            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <ValueLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
+            <AutoLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
+            {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <AutoLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
           <div className="col-sm-1">
             {icon && <div style={{ marginTop: "17px" }}>
@@ -62,12 +62,12 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
             }
           </div>
           <div className="col-sm-5">
-          <ValueLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
-            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <ValueLine ctx={ctx2.subCtx(t => t.url)} />}
+          <TextBoxLine ctx={ctx2.subCtx(t => t.label)} valueHtmlAttributes={{ placeholder: getToString(content) || undefined }} />
+            {(ctx2.value.type == "Header" || ctx2.value.type == "Item") && (ctx2.value.content == null || PermissionSymbol.isLite(ctx2.value.content)) && <AutoLine ctx={ctx2.subCtx(t => t.url)} />}
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") &&
               <div>
-                <ValueLine ctx={ctx6.subCtx(t => t.openInPopup)} />
-                <ValueLine ctx={ctx6.subCtx(t => t.autoRefreshPeriod)} />
+                <AutoLine ctx={ctx6.subCtx(t => t.openInPopup)} />
+                <AutoLine ctx={ctx6.subCtx(t => t.autoRefreshPeriod)} />
               </div>
             }
           </div>

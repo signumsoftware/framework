@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DropdownButton, Dropdown } from 'react-bootstrap'
 import { Dic } from '@framework/Globals';
-import ValueLineModal from '@framework/ValueLineModal';
+import AutoLineModal from '@framework/AutoLineModal';
 import { globalModules } from './GlobalModules';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 
@@ -269,7 +269,7 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
     var text = [clientModules[key], modules[key]].filter(a => a).join("\r\n\r\n");
     if (text == "")
       return;
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
       valueLineType: "TextArea",

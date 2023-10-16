@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
-import { customTypeComponent } from '@framework/Lines/DynamicComponent'
+import { AutoLine } from '@framework/Lines/AutoLine'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
 import { FileLine } from './Components/FileLine'
 import CellFormatter = Finder.CellFormatter;
@@ -32,17 +32,16 @@ export function start(options: { routes: RouteObject[] }) {
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
-  customTypeComponent[type.typeName] = ctx => {
-    const tr = ctx.propertyRoute!.typeReference();
+  AutoLine.registerComponent(type.typeName, (tr, pr) => { 
     if (tr.isCollection)
-      return <MultiFileLine ctx={ctx} />;
+      return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx} {...rest} />;
 
-    var m = ctx.propertyRoute!.member;
+    var m = pr?.member;
     if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
-      return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
+      return ({ ctx, ...rest }) => <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} {...rest} />;
 
-    return <FileLine ctx={ctx} />;
-  };
+    return ({ ctx, ...rest }) => <FileLine ctx={ctx} {...rest} />; 
+  });
 
   Finder.formatRules.push({
     name: type.typeName + "_Download",

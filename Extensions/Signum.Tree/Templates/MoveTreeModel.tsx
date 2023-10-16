@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { Lite } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
 import { MoveTreeModel, TreeEntity } from '../Signum.Tree'
@@ -26,7 +26,7 @@ export default function MoveTreeModelComponent(p : MoveTreeModelComponentProps){
         }}
         onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: p.lite, frozen: true }])} />
 
-      <ValueLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => forceUpdate()} />
+      <AutoLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => forceUpdate()} />
 
       {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
         <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}

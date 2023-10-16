@@ -102,6 +102,7 @@ public enum TreeMessage
     Move0,
     [Description("Copy {0}")]
     Copy0,
+    ListView,
 }
 
 

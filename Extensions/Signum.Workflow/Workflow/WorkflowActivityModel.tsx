@@ -2,7 +2,7 @@ import * as React from 'react'
 import {
   WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, ButtonOptionEmbedded, WorkflowActivityMessage,
 } from '../Signum.Workflow'
-import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
+import { TypeContext, AutoLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
@@ -194,9 +194,9 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => forceUpdate()} />
-      <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={handleTypeChange} valueColumns={5} />
-      <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} valueColumns={5} />
+      <AutoLine ctx={ctx.subCtx(d => d.name)} onChange={() => forceUpdate()} />
+      <AutoLine ctx={ctx.subCtx(d => d.type)} onChange={handleTypeChange} valueColumns={5} />
+      <AutoLine ctx={ctx.subCtx(a => a.estimatedDuration)} valueColumns={5} />
 
       {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
         <div>
@@ -221,12 +221,12 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                 columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
                   {
                     property: a => a.name,
-                    template: ctx => <ValueLine ctx={ctx.subCtx(a => a.name)} />
+                    template: ctx => <AutoLine ctx={ctx.subCtx(a => a.name)} />
                   },
                   {
                     property: a => a.expression,
                     template: (ctx: TypeContext<ViewNamePropEmbedded>) =>
-                      <ValueLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
+                      <AutoLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
                       />
                   }
                 ])} />}
@@ -234,7 +234,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
-        <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+        <AutoLine ctx={ctx.subCtx(a => a.requiresOpen)} />
 
         {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
 
@@ -247,7 +247,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
             <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
             <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
           </fieldset>
-          <ValueLine ctx={ctx.subCtx(d => d.comments)} />
+          <AutoLine ctx={ctx.subCtx(d => d.comments)} />
         </div>
       }
 

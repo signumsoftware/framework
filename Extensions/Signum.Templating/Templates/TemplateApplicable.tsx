@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { PropertyRoute } from '@framework/Reflection'
-import { TypeContext } from '@framework/Lines'
+import { TextAreaLine, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { TemplateApplicableEval } from "../Signum.Templating";
 import TypeHelpButtonBarComponent from "../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent";
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
@@ -33,13 +33,12 @@ export default function TemplateApplicable(p: TemplateApplicableProps) {
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 

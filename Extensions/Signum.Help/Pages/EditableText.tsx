@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useForceUpdate, useWindowEvent } from '@framework/Hooks';
 import * as HelpClient from '../HelpClient';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Binding, PropertyRoute, ReadonlyBinding, TypeContext, ValueLine } from '@framework/Lines';
+import { Binding, PropertyRoute, ReadonlyBinding, TypeContext, AutoLine } from '@framework/Lines';
 import { classes } from '@framework/Globals';
 import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
@@ -23,7 +23,7 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
   return (
     <span className="sf-edit-container">
       {
-        (editable ? <ValueLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} placeholderLabels={false} valueHtmlAttributes={{ placeholder: defaultText || ctx.niceName() }} formGroupHtmlAttributes={{ style: { display: "inline-block" } }} /> : 
+        (editable ? <AutoLine ctx={ctx} formGroupStyle="SrOnly" onChange={() => { forceUpdate(); onChange && onChange(); }} placeholderLabels={false} valueHtmlAttributes={{ placeholder: defaultText || ctx.niceName() }} formGroupHtmlAttributes={{ style: { display: "inline-block" } }} /> : 
         ctx.value ? <span>{ctx.value}</span> :
           defaultText ? <span>{defaultText}</span> :
             <span className="sf-no-text">[{ctx.niceName()}]</span>)

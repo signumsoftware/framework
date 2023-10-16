@@ -1,25 +1,24 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { Dic, areEqual, classes, KeyGenerator } from '../Globals'
+import { areEqual, classes, isNumber, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
-  hasAnyOrAll, getTokenParents, isPrefix, FilterConditionOption, PinnedFilter, PinnedFilterParsed, isCheckBox, canSplitValue, getFilterGroupUnifiedFilterType, FilterOption, isFilterGroup, isFilterCondition
+  hasAnyOrAll, getTokenParents, isPrefix, isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
 } from '../FindOptions'
-import { SearchMessage, Lite, EntityControlMessage, Entity, toMList, MList, newMListElement } from '../Signum.Entities'
-import { isNumber, trimDateToFormat, ValueLineController } from '../Lines/ValueLine'
-import { ValueLine, EntityLine, EntityCombo, StyleContext, FormControlReadonly, EntityStrip } from '../Lines'
-import { Binding, IsByAll, tryGetTypeInfos, toLuxonFormat, getTypeInfos, toNumberFormat, PropertyRoute } from '../Reflection'
+import { SearchMessage, Lite, EntityControlMessage } from '../Signum.Entities'
+import { StyleContext } from '../Lines'
+import { Binding, IsByAll, getTypeInfos, toNumberFormat } from '../Reflection'
 import { TypeContext } from '../TypeContext'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
-import { NumericTextBox } from '../Lines/ValueLine';
-import { useStateWithPromise, useForceUpdate, useForceUpdatePromise } from '../Hooks'
-import { Button, Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
-import { TypeEntity } from '../Signum.Basics'
+import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
+import { Dropdown } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
+import { trimDateToFormat } from '../Lines/DateTimeLine'
+import { NumericTextBox } from '../Lines/NumberLine'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -310,7 +309,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   return (
     <>
       <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
-        <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
+        <td style={{ paddingLeft: paddingLeft }} colSpan={3}>
           <div className="d-flex">
             {!readOnly &&
               <a href="#"
@@ -327,7 +326,9 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                 <FontAwesomeIcon icon={fg.expanded ? ["far", "square-minus"] : ["far", "square-plus"]} className="me-2"
                   title={(fg.expanded ? EntityControlMessage.Collapse : EntityControlMessage.Expand).niceToString()} />
               </a>
-              <strong className="me-2">{p.filterGroup.groupOperation == "Or" ? SearchMessage.OrGroup.niceToString() : SearchMessage.AndGroup.niceToString()} </strong>
+              <select className="form-select form-select-xs sf-group-selector fw-bold me-2 w-auto" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
+                {FilterGroupOperation.values().map((ft, i) => <option key={i} value={ft as any}>{ft == "Or" ? SearchMessage.OrGroup.niceToString() : SearchMessage.AndGroup.niceToString()}</option>)}
+              </select>
               <small style={{ whiteSpace: "nowrap" }}>
                 Prefix:
               </small>

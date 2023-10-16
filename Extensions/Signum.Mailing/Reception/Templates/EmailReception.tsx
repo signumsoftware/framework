@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 import { TypeContext } from '@framework/TypeContext'
@@ -12,9 +12,9 @@ export default function EmailReception(p: { ctx: TypeContext<EmailReceptionEntit
   return (
     <div>
       <EntityLine ctx={sc.subCtx(s => s.emailReceptionConfiguration)} />
-      <ValueLine ctx={sc.subCtx(s => s.startDate)} />
-      <ValueLine ctx={sc.subCtx(s => s.endDate)} />
-      <ValueLine ctx={sc.subCtx(s => s.newEmails)} />
+      <AutoLine ctx={sc.subCtx(s => s.startDate)} />
+      <AutoLine ctx={sc.subCtx(s => s.endDate)} />
+      <AutoLine ctx={sc.subCtx(s => s.newEmails)} />
       <EntityLine ctx={sc.subCtx(s => s.exception)} />
       <SearchValueLine ctx={sc} findOptions={{ queryName: EmailMessageEntity, filterOptions: [{ token: EmailMessageEntity.token(a => a.entity).mixin(EmailReceptionMixin).append(a => a.receptionInfo!.reception), value: sc.value }]}} />
       <SearchValueLine ctx={sc} findOptions={{ queryName: ExceptionEntity, filterOptions: [{ token: ExceptionEntity.token(a => a.entity).expression("Pop3Reception"), value: sc.value }]}} />

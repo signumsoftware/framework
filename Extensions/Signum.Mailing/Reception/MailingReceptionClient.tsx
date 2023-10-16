@@ -5,7 +5,7 @@ import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { EntitySettings } from '@framework/Navigator'
 import { getMixin } from '@framework/Signum.Entities'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import { Tab } from 'react-bootstrap';
 import { EmailReceptionConfigurationEntity, EmailReceptionEntity, EmailReceptionMixin } from './Signum.Mailing.Reception'
 import { EmailMessageEntity } from '../Signum.Mailing'
@@ -26,10 +26,10 @@ export function start(options: {  routes: RouteObject[] }) {
       <fieldset>
         <legend>Properties</legend>
         <EntityLine ctx={riCtx.subCtx(f => f.reception)} />
-        <ValueLine ctx={riCtx.subCtx(f => f.uniqueId)} />
-        <ValueLine ctx={riCtx.subCtx(f => f.sentDate)} />
-        <ValueLine ctx={riCtx.subCtx(f => f.receivedDate)} />
-        <ValueLine ctx={riCtx.subCtx(f => f.deletionDate)} />
+        <AutoLine ctx={riCtx.subCtx(f => f.uniqueId)} />
+        <AutoLine ctx={riCtx.subCtx(f => f.sentDate)} />
+        <AutoLine ctx={riCtx.subCtx(f => f.receivedDate)} />
+        <AutoLine ctx={riCtx.subCtx(f => f.deletionDate)} />
       </fieldset>
       <h3>{riCtx.niceName(a => a.rawContent)}</h3>
       <pre>{riCtx.value.rawContent?.text}</pre>

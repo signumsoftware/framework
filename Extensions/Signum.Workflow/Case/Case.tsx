@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity, WorkflowEntity } from '../Signum.Workflow'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
@@ -55,12 +55,12 @@ export default function CaseComponent(p: CaseComponentProps) {
         <div className="col-sm-6">
           <EntityLine ctx={ctx.subCtx(a => a.workflow)} view={!Navigator.isReadOnly(WorkflowEntity)} />
           <EntityLine ctx={ctx.subCtx(a => a.parentCase)} />
-          <ValueLine ctx={ctx.subCtx(a => a.startDate)} />
+          <AutoLine ctx={ctx.subCtx(a => a.startDate)} />
         </div>
         <div className="col-sm-6">
           <EntityLine ctx={ctx.subCtx(a => a.mainEntity)} view={false} />
-          <ValueLine ctx={ctx.subCtx(a => a.description)} />
-          <ValueLine ctx={ctx.subCtx(a => a.finishDate)} />
+          <AutoLine ctx={ctx.subCtx(a => a.description)} />
+          <AutoLine ctx={ctx.subCtx(a => a.finishDate)} />
         </div>
       </div>
 
