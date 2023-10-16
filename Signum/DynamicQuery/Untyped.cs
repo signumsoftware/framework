@@ -77,11 +77,11 @@ public static class Untyped
 
     static GenericInvoker<Func<IEnumerable, Delegate, IEnumerable>> giWhereE =
         new((q, predicate) => ((IEnumerable<string>)q).Where<string>((Func<string, bool>)predicate));
-    public static IEnumerable Where(IEnumerable collection, Delegate selector)
+    public static IEnumerable Where(IEnumerable collection, Delegate predicate)
     {
-        var types = selector.GetType().GenericTypeArguments;
+        var types = predicate.GetType().GenericTypeArguments[0];
 
-        return giSelectE.GetInvoker(types)(collection, selector);
+        return giWhereE.GetInvoker(types)(collection, predicate);
     }
 
     static MethodInfo miDistinctQ =
