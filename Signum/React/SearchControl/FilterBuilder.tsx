@@ -106,12 +106,14 @@ export default function FilterBuilder(p: FilterBuilderProps) {
   var keyGenerator = React.useMemo(() => new KeyGenerator(), []);
   var showDashboardBehaviour = showPinnedFiltersOptions && (p.showDashboardBehaviour ?? true);
   return (
-    <fieldset className="form-xs">
-      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3 border-bottom">
+    <>
+      {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
         <h4 className="lead">Preview</h4>
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} showGrid={true} />
       </div>
       }
+    <fieldset className="form-xs">
+     
       {p.title && <legend>{p.title}</legend>}
       <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
         <table className="table-sm">
@@ -190,6 +192,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
         </table>
       </div>
     </fieldset>
+    </>
   );
 }
 
@@ -309,7 +312,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   return (
     <>
       <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
-        <td style={{ paddingLeft: paddingLeft }} colSpan={3}>
+        <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
           <div className="d-flex">
             {!readOnly &&
               <a href="#"
