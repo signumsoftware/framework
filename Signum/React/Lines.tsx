@@ -76,7 +76,6 @@ export { MultiValueLine } from './Lines/MultiValueLine'
 export { EntityTable, EntityTableRow } from './Lines/EntityTable'
 export type { EntityTableColumn } from './Lines/EntityTable'
 
-export { default as DynamicComponent } from './Lines/DynamicComponent';
 export { EntityListBaseController } from './Lines/EntityListBase';
 export type { EntityListBaseProps } from './Lines/EntityListBase';
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, PasswordLine } from '@framework/Lines'
+import { AutoLine, PasswordLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ExchangeWebServiceEmailServiceEntity } from '../Signum.Mailing.ExchangeWS';
 
