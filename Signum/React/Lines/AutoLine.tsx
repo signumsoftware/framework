@@ -13,6 +13,9 @@ export interface AutoLineProps extends LineBaseProps {
 export function AutoLine(p: AutoLineProps) {
   const pr = p.ctx.propertyRoute;
 
+  if (p.type == null && pr == null)
+    return undefined;
+
   const factory = React.useMemo(() => AutoLine.getComponentFactory(p.type ?? pr!.typeReference(), pr), [pr?.propertyPath(), p.type?.name]);
 
   return factory(p);
