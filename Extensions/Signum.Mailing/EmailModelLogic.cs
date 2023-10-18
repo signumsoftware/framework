@@ -304,7 +304,7 @@ public static class EmailModelLogic
     }
 
 
-    private static EmailTemplateEntity GetCurrentTemplate(EmailModelEntity emailModelEntity, Entity? entity)
+    public static EmailTemplateEntity GetCurrentTemplate(EmailModelEntity emailModelEntity, Entity? entity)
     {
         var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
 
