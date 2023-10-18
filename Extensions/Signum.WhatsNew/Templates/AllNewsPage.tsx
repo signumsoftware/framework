@@ -20,8 +20,8 @@ export default function AllNews() {
       <h2>{WhatsNewMessage.YourNews.niceToString()} {news && <span className="sf-news-notify-badge" style={{ marginTop: "6px", marginLeft: "3px", fontSize: "12px" }}>{news.length}</span>}
       </h2>
         <div className="mt-3">
-            <div style={{ display: "flex", flexFlow: "wrap" }}>
-                {news && news.map(wn =>
+        <div style={{ display: "flex", flexFlow: "wrap" }}>
+          {news && news.orderByDescending(n => n.creationDate).map(wn =>
                   <WhatsNewPreviewPicture key={wn.whatsNew.id} news={wn} />
                 )}
             </div>
