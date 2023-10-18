@@ -442,8 +442,10 @@ public class UserChartDataTableProvider : IWordDataTableProvider
             ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
             var tokens = chartRequest.Columns.Select(a => a.Token).NotNull().ToList();
 
+            var converter = new UnambiguousNiceDataTableValueConverter(result);
 
             return result.ToDataTable();
+            return result.ToDataTable(converter);
         }
     }
 
