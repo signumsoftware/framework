@@ -2159,7 +2159,7 @@ const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: Re
     <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
       href=""
       onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <FontAwesomeIcon icon="ellipsis" title={SearchMessage.Options.niceToString()} />
+      <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" />
       {p.children}
     </a>
   );
