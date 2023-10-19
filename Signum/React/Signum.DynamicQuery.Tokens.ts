@@ -6,6 +6,27 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
+export const AggregateFunction = new EnumType<AggregateFunction>("AggregateFunction");
+export type AggregateFunction =
+  "Count" |
+  "Average" |
+  "Sum" |
+  "Min" |
+  "Max";
+
+export const CollectionAnyAllType = new EnumType<CollectionAnyAllType>("CollectionAnyAllType");
+export type CollectionAnyAllType =
+  "Any" |
+  "All" |
+  "NotAny" |
+  "NotAll";
+
+export const CollectionElementType = new EnumType<CollectionElementType>("CollectionElementType");
+export type CollectionElementType =
+  "Element" |
+  "Element2" |
+  "Element3";
+
 export const ContainerTokenKey = new EnumType<ContainerTokenKey>("ContainerTokenKey");
 export type ContainerTokenKey =
   "Operations" |
@@ -74,6 +95,38 @@ export module QueryTokenMessage {
   export const MatchRankFor0 = new MessageKey("QueryTokenMessage", "MatchRankFor0");
   export const MatchSnippet = new MessageKey("QueryTokenMessage", "MatchSnippet");
   export const SnippetOf0 = new MessageKey("QueryTokenMessage", "SnippetOf0");
+  export const FilterField = new MessageKey("QueryTokenMessage", "FilterField");
+  export const AFilterConsistsOfA0AComparison1AndAConstant2 = new MessageKey("QueryTokenMessage", "AFilterConsistsOfA0AComparison1AndAConstant2");
+  export const Field = new MessageKey("QueryTokenMessage", "Field");
+  export const Operator = new MessageKey("QueryTokenMessage", "Operator");
+  export const Value = new MessageKey("QueryTokenMessage", "Value");
+  export const FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("QueryTokenMessage", "FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity");
+  export const FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1 = new MessageKey("QueryTokenMessage", "FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1");
+  export const LearnMoreAboutFieldExpressions = new MessageKey("QueryTokenMessage", "LearnMoreAboutFieldExpressions");
+  export const YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems = new MessageKey("QueryTokenMessage", "YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems");
+  export const Strings = new MessageKey("QueryTokenMessage", "Strings");
+  export const ASequenceOfCharactersContinuingTheExpressionAllowsSimpleOperationsLike0 = new MessageKey("QueryTokenMessage", "ASequenceOfCharactersContinuingTheExpressionAllowsSimpleOperationsLike0");
+  export const Numbers = new MessageKey("QueryTokenMessage", "Numbers");
+  export const AnyNumericValueCanContinueWithSimpleExpressionLike0Or1ForHistograms = new MessageKey("QueryTokenMessage", "AnyNumericValueCanContinueWithSimpleExpressionLike0Or1ForHistograms");
+  export const Dates = new MessageKey("QueryTokenMessage", "Dates");
+  export const _0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith345returnANumberOr678ReturnADate = new MessageKey("QueryTokenMessage", "_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith345returnANumberOr678ReturnADate");
+  export const EntityRelationships = new MessageKey("QueryTokenMessage", "EntityRelationships");
+  export const EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields = new MessageKey("QueryTokenMessage", "EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields");
+  export const InSql = new MessageKey("QueryTokenMessage", "InSql");
+  export const Collections = new MessageKey("QueryTokenMessage", "Collections");
+  export const CollectionOfEntitiesOrRelationships = new MessageKey("QueryTokenMessage", "CollectionOfEntitiesOrRelationships");
+  export const CollectionOperators = new MessageKey("QueryTokenMessage", "CollectionOperators");
+  export const MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012 = new MessageKey("QueryTokenMessage", "MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012");
+  export const AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens = new MessageKey("QueryTokenMessage", "AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens");
+  export const Aggregates = new MessageKey("QueryTokenMessage", "Aggregates");
+  export const WhenGroupingAllowsToCollapseManyValuesInOneValue = new MessageKey("QueryTokenMessage", "WhenGroupingAllowsToCollapseManyValuesInOneValue");
+  export const CountNotNull = new MessageKey("QueryTokenMessage", "CountNotNull");
+  export const CountDistinct = new MessageKey("QueryTokenMessage", "CountDistinct");
+  export const CanOnlyBeUsedAfterAnotherField = new MessageKey("QueryTokenMessage", "CanOnlyBeUsedAfterAnotherField");
+  export const FinallyRememberThatYouCan01FullFieldExpression = new MessageKey("QueryTokenMessage", "FinallyRememberThatYouCan01FullFieldExpression");
+  export const AndOrGroups = new MessageKey("QueryTokenMessage", "AndOrGroups");
+  export const UsingAddOrGroupYouCanGroupAFewFiltersTogether = new MessageKey("QueryTokenMessage", "UsingAddOrGroupYouCanGroupAFewFiltersTogether");
+  export const FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement = new MessageKey("QueryTokenMessage", "FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement");
 }
 
 export const RoundingType = new EnumType<RoundingType>("RoundingType");

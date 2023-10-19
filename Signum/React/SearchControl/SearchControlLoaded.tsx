@@ -599,17 +599,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = (mode: SearchControlFilterMode) => {
+  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true) => {
     if (this.state.filterMode == mode)
       return;
 
-    this.getFindOptionsWithSFB().then(() => {
-      this.simpleFilterBuilderInstance = undefined;
-      this.setState({
-        simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
-        filterMode: mode
-      }, () => this.handleHeightChanged());
-    });
+    if (refreshFilters)
+      await this.getFindOptionsWithSFB();
+
+    this.simpleFilterBuilderInstance = undefined;
+    this.setState({
+      simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
+      filterMode: mode
+    }, () => this.handleHeightChanged());
+    
   }
 
   handleSystemTimeClick = () => {
@@ -919,7 +921,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var showFilter = await rule.execute(token, value, this);
 
     if (this.state.filterMode == "Simple" && showFilter) {
-      this.handleChangeFiltermode("Advanced");
+      await this.handleChangeFiltermode("Advanced", false);
     }
 
     if (rt && cm.rowIndex != null)
@@ -1666,7 +1668,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
  
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
       c.hasToArray != null ? this.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
-        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
         c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
   }
 
@@ -2157,7 +2159,7 @@ const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: Re
     <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
       href=""
       onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <FontAwesomeIcon icon="ellipsis" title={SearchMessage.Options.niceToString()} />
+      <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" />
       {p.children}
     </a>
   );

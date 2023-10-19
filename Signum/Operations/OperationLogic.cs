@@ -828,14 +828,14 @@ Consider the following options:
 
 public static class FluentOperationInclude
 {
-    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
+    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation, Action<T, object?[]?>? execute = null)
         where T : Entity
     {
         new Graph<T>.Execute(saveOperation)
         {
             CanBeNew = true,
             CanBeModified = true,
-            Execute = (e, _) => { }
+            Execute = execute ?? ((e, _) => { })
         }.Register();
 
         return fi;

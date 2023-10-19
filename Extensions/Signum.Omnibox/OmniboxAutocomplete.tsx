@@ -47,6 +47,8 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
     <ErrorBoundary>
       <Typeahead ref={typeahead } getItems={str => abortRequest.getData(str)}
         renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
+        isHeader={item => (item as OmniboxClient.OmniboxResult).resultTypeName == "HelpOmniboxResult" && (item as OmniboxClient.HelpOmniboxResult).referencedTypeName == null}
+        isDisabled={item => (item as OmniboxClient.OmniboxResult).resultTypeName == "HelpOmniboxResult"}
         onSelect={(item, e) => handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
         inputAttrs={inputAttr}
         minLength={0} />

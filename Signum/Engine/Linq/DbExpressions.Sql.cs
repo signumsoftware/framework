@@ -1364,9 +1364,6 @@ internal class DeleteExpression : CommandExpression
     public readonly Expression? Where;
     public readonly bool ReturnRowCount;
 
-    public readonly SourceWithAliasExpression? PostgresUsing; //Contains the remaining source
-
-
     public DeleteExpression(ITable table, bool useHistoryTable, SourceWithAliasExpression source, Expression? where, bool returnRowCount, Alias? alias)
         : base(DbExpressionType.Delete)
     {

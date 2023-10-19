@@ -136,7 +136,7 @@ public class CollectionAnyAllToken : QueryToken
 
     public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
     {
-        if (this.CollectionAnyAllType == CollectionAnyAllType.AnyNo)
+        if (this.CollectionAnyAllType == CollectionAnyAllType.NotAll)
             body = Expression.Not(body);
 
         var lambda = Expression.Lambda(body, param);
@@ -147,7 +147,7 @@ public class CollectionAnyAllToken : QueryToken
 
         var result = Expression.Call(mi.MakeGenericMethod(param.Type), collection, lambda);
 
-        if (this.CollectionAnyAllType == CollectionAnyAllType.NoOne)
+        if (this.CollectionAnyAllType == CollectionAnyAllType.NotAny)
             return Expression.Not(result);
 
         return result;
@@ -155,11 +155,11 @@ public class CollectionAnyAllToken : QueryToken
 }
 
 
-[DescriptionOptions(DescriptionOptions.Members)]
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum CollectionAnyAllType
 {
     Any,
     All,
-    NoOne,
-    AnyNo,
+    NotAny,
+    NotAll,
 }

@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowScriptEntity } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
 
 interface WorkflowScriptComponentProps {
@@ -34,7 +34,7 @@ export default function WorkflowScriptComponent(p : WorkflowScriptComponentProps
 
 
   function handleRestClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// REST
 var response = HttpClient.Post<MyResponse>("Your URL", new { paramName = e.[Property Name], ... });
@@ -50,7 +50,7 @@ class MyResponse {}`,
   }
 
   function handleSoapClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// SOAP
 var lib = Assembly.Load("[Assembly full path name]").GetType("[Type Name]").GetMethod("[Method Name]").Invoke(e.[Property Name]);
@@ -65,7 +65,7 @@ e.[Property Name] = lib;`,
 
   function handleCtxClick() {
     const hint = "WorkflowScriptContext Members";
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// ${hint}
 CaseActivityEntity CaseActivity;
@@ -79,7 +79,7 @@ int RetryCount;`,
   }
 
   function handleTryCatchClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `try
 {
@@ -100,7 +100,7 @@ catch (Exception e)
   const ctx = p.ctx;
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(ws => ws.name)} />
+      <AutoLine ctx={ctx.subCtx(ws => ws.name)} />
       <EntityLine ctx={ctx.subCtx(ws => ws.mainEntityType)} onChange={handleMainEntityTypeChange} />
 
       {ctx.value.mainEntityType &&

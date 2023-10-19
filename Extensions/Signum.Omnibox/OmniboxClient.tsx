@@ -37,6 +37,7 @@ export function registerProvider(prov: OmniboxProvider<OmniboxResult>) {
 export interface HelpOmniboxResult extends OmniboxResult {
   text: string;
   referencedTypeName: string;
+  isMainTitle?: boolean;
 }
 
 
@@ -58,7 +59,7 @@ function renderHelpItem(help: HelpOmniboxResult): React.ReactNode[] {
     .replaceAll("(", "<strong>")
     .replaceAll(")", "</strong>");
 
-  result.push(<span style={{ fontStyle: "italic" }} dangerouslySetInnerHTML={{ __html: str }} />);
+  result.push(<span style={help.isMainTitle ? { fontWeight: "bold" } : { fontStyle: "italic" }} dangerouslySetInnerHTML = {{ __html: str }} />);
 
   return result;
 }

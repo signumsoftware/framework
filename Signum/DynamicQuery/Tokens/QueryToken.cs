@@ -2,6 +2,11 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Signum.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.Intrinsics.X86;
+using System.Xml.Linq;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -579,11 +584,29 @@ public class BuildExpressionContext
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
     public readonly List<Filter>? Filters; //For Snippet keyword detection
 
+    public Expression<Func<object, T>>? TryGetSelectorUntyped<T>(string key)
+    {
+        var expBox = Replacements.SingleOrDefault(a => a.Key.FullKey() == key).Value;
+        if (expBox.RawExpression == null)
+            return null;
+
+        var param = Expression.Parameter(typeof(object), "obj");
+        var cast = Expression.Convert(param, ElementType);
+
+        var body = ExpressionReplacer.Replace(expBox.GetExpression(), new Dictionary<ParameterExpression, Expression>()
+        {
+            {  Parameter, cast }
+        });
+
+        return Expression.Lambda<Func<object, T>>(Expression.Convert(body, typeof(T)), param);
+    }
+
+
     public LambdaExpression GetEntitySelector()
     {
-        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+        var expBox = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
 
-        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression(), typeof(Lite<Entity>)), Parameter);
+        return Expression.Lambda(Expression.Convert(expBox.GetExpression(), typeof(Lite<Entity>)), Parameter);
     }
 
     public LambdaExpression GetEntityFullSelector()
@@ -739,7 +762,72 @@ public enum QueryTokenMessage
     MatchSnippet,
 
     [Description("Snippet for {0}")]
-    SnippetOf0
+    SnippetOf0,
+
+    [Description("FILTER Field")]
+    FilterField,
+    [Description("A filter consists of a {0}, a comparison {1} and a constant {2}.")]
+    AFilterConsistsOfA0AComparison1AndAConstant2,
+
+    Field,
+    Operator,
+    Value,
+
+    [Description("Field can be any field of the {0}, or any related entity.")]
+    FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity,
+
+    [Description("Field can be any column of the query {0}, or any field of {1}.")]
+    FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1,
+
+    LearnMoreAboutFieldExpressions,
+
+    [Description("You can navigate database relationships by continuing the expression with more items.")]
+    YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems,
+    
+    Strings,
+    [Description("A sequence of characters, continuing the expression allows simple operations like {0}.")]
+    ASequenceOfCharactersContinuingTheExpressionAllowsSimpleOperationsLike0,
+
+    Numbers,
+    [Description("any numeric value, can continue with simple expression like {0} or {1} (for histograms).")]
+    AnyNumericValueCanContinueWithSimpleExpressionLike0Or1ForHistograms,
+    Dates,
+    [Description("{0} and {2}, you can extracts parts of the date by continuing the expression with {3}, {4}, {5}, ... (return a number) or {6}, {7}, {8}, ... (return a date)")]
+    _0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith345returnANumberOr678ReturnADate,
+    [Description("Entity Relationships")]
+    EntityRelationships,
+    EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields,
+    [Description("in SQL")]
+    InSql,
+
+    Collections,
+    [Description("Collection of entities or relationships.")]
+    CollectionOfEntitiesOrRelationships,
+
+    CollectionOperators,
+    [Description("Multiplies the number of rows by all the elements in the collection. ({0} / {1} {2}). All the field expressions using the same {3} reuse the same {4}, to avoid this use {5} / {6}.")]
+    MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012,
+    [Description("Allows to add filters that use conditions on the collection elemens (without multiplying the number of rows) ({0} {1}). To combine different conditons use {2} / {3} groups with a prefix (see below).")]
+    AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens,
+    Aggregates,
+    [Description("When Grouping, allows to collapse many values in one value")]
+    WhenGroupingAllowsToCollapseManyValuesInOneValue,
+    [Description("Count Not Null")]
+    CountNotNull, 
+    [Description("Count Distinct")]
+    CountDistinct,
+    [Description("Can only be used after another field.")]
+    CanOnlyBeUsedAfterAnotherField,
+    [Description("Finally, remember that you can {0} / {1} full field expression to other filters or columns by opening the drop-down-list and using {2} / {3}.")]
+    FinallyRememberThatYouCan01FullFieldExpression,
+    [Description("AND / OR Groups")]
+    AndOrGroups,
+    [Description("Using [+ Add OR Group] you can group a few filters together so that only one condition needs to be satisfied. Inside an OR Group you can create a nested AND Group and so on. ")]
+    UsingAddOrGroupYouCanGroupAFewFiltersTogether,
+    [Description("Filter groups can also be used to combine filters that should be satisfied by the same element of a collection when using operator like Any or All in the prefix field.")]
+    FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement
+
+
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

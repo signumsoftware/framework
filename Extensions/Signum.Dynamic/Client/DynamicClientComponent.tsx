@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, TypeContext } from '@framework/Lines'
+import { AutoLine, TypeContext } from '@framework/Lines'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror';
 import { useForceUpdate } from '@framework/Hooks';
@@ -20,7 +20,7 @@ export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClie
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(d => d.name)} />
+      <AutoLine ctx={ctx.subCtx(d => d.name)} />
       <br />
       <div className="row">
         <div className="col-sm-7">

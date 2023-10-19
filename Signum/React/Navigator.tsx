@@ -318,7 +318,7 @@ export class BasicViewDispatcher implements ViewDispatcher {
 
 }
 
-export class DynamicComponentViewDispatcher implements ViewDispatcher {
+export class AutoViewDispatcher implements ViewDispatcher {
 
   hasDefaultView(typeName: string) {
     return true;
@@ -340,7 +340,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
     if (viewName == undefined) {
 
       if (es?.getViewPromise == null)
-        return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
+        return new ViewPromise<ModifiableEntity>(import('./AutoComponent'));
 
       return es.getViewPromise(entity).applyViewOverrides(entity.Type);
     } else {
@@ -357,7 +357,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
   }
 }
 
-export let viewDispatcher: ViewDispatcher = new DynamicComponentViewDispatcher();
+export let viewDispatcher: ViewDispatcher = new AutoViewDispatcher();
 
 export function getViewPromise<T extends ModifiableEntity>(entity: T, viewName?: string): ViewPromise<T> {
   return viewDispatcher.getViewPromise(entity, viewName);

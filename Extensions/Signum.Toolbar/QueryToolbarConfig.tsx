@@ -10,6 +10,7 @@ import { SearchValue, FindOptions } from '@framework/Search';
 import * as Navigator from '@framework/Navigator';
 import { useAPI, useInterval } from '@framework/Hooks'
 import { classes } from '@framework/Globals'
+import { ShowCount } from './Signum.Toolbar'
 
 export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
   constructor() {
@@ -23,7 +24,11 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
       return (
         <>
           {super.getIcon(element)}
-          <SearchToolbarCount findOptions={{ queryName: getToString(element.content)! }} color={element.iconColor ?? "red"} autoRefreshPeriod={element.autoRefreshPeriod} />
+          <SearchToolbarCount
+            findOptions={{ queryName: getToString(element.content)! }}
+            color={element.iconColor ?? "red"}
+            autoRefreshPeriod={element.autoRefreshPeriod}
+            showCount={element.showCount} />
         </>
       );
     }
@@ -60,6 +65,7 @@ interface CountIconProps {
   autoRefreshPeriod?: number;
   findOptions: FindOptions;
   moreThanZero?: boolean;
+  showCount: ShowCount;
 }
 
 export function SearchToolbarCount(p: CountIconProps) {
@@ -79,13 +85,21 @@ export function SearchToolbarCount(p: CountIconProps) {
     findOptions={p.findOptions}
     avoidNotifyPendingRequest={true}
     onRender={val => val == 0 && p.moreThanZero ? null :
-        <ToolbarCount num={val}/>}
+      <ToolbarCount num={val} showCount={p.showCount} />}
   />;
 }
 
 
-export function ToolbarCount(p: { num: number | null | undefined }) {
-  return <div className="sf-toolbar-count-container"><div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div></div>
+export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }) {
+
+  if (!p.num && p.showCount == "MoreThan0")
+    return null;
+
+  return (
+    <div className="sf-toolbar-count-container">
+      <div className={classes("badge badge-pill sf-toolbar-count", !p.num ? "bg-light text-secondary" : "bg-danger")}>{p.num ?? "…"}</div>
+    </div>
+  );
 }
 
 

@@ -63,7 +63,15 @@ table.sf-search-results > tbody > tr > td {
     box-shadow: inset #AAA 0px 3px 0px 0px !important;
 }
 
+tr.drag-top td {
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
+}
+
 .drag-bottom {
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
+}
+
+tr.drag-bottom td {
     box-shadow: inset #AAA 0px -3px 0px 0px !important;
 }
 

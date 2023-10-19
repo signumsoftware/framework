@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityStrip } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityStrip } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { downloadFile } from '../../Signum.Files/Components/FileDownloader';
 import { useAPI } from '@framework/Hooks';
@@ -19,13 +19,13 @@ export default function CachedQueryView(p: { ctx: TypeContext<CachedQueryEntity>
     <div>
       <EntityLine ctx={ctx.subCtx(a => a.dashboard)} />
       <EntityStrip ctx={ctx.subCtx(a => a.userAssets)} />
-      <ValueLine ctx={ctx.subCtx(a => a.creationDate)} />
+      <AutoLine ctx={ctx.subCtx(a => a.creationDate)} />
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx.subCtx(a => a.queryDuration)} labelColumns={4}/>
+          <AutoLine ctx={ctx.subCtx(a => a.queryDuration)} labelColumns={4}/>
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx.subCtx(a => a.queryDuration)} labelColumns={4}/>
+          <AutoLine ctx={ctx.subCtx(a => a.queryDuration)} labelColumns={4}/>
         </div>
       </div>
       <FileLine ctx={ctx.subCtx(a => a.file)} />

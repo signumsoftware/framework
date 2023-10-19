@@ -3,7 +3,7 @@ import { WorkflowEventTaskActionEval } from '../Signum.Workflow'
 import { TypeContext, PropertyRoute } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
 import { useForceUpdate } from '@framework/Hooks'
 
@@ -26,7 +26,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
       valueLineType: "TextArea",
@@ -37,7 +37,7 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
   }
 
   function handleCreateCaseClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `CreateCase(new ${p.mainEntityType.cleanName}Entity(){ initial properties here... });`,
       valueLineType: "TextArea",

@@ -5,7 +5,6 @@ import * as Navigator from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
-import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from './DynamicComponent'
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breakpoints, getBreakpoint, useAPI, useBreakpoint, useForceUpdate } from '../Hooks'
@@ -13,6 +12,7 @@ import { useController } from './LineBase'
 import { KeyCodes } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { AutoLine } from './AutoLine'
 
 
 export interface EntityTableProps extends EntityListBaseProps {
@@ -98,11 +98,13 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
           if (c.property == null)
             throw new Error("Column has no property and no template");
 
-          var factory = getAppropiateComponentFactory(c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!));
+          debugger;
+          var propertyRoute = c.property == "string" ? pr.addMember("Member", c.property, true) : pr.addLambda(c.property!);
+          var factory = AutoLine.getComponentFactory(propertyRoute.typeReference(), propertyRoute);
 
           c.template = (ctx, row, state) => {
             var subCtx = typeof c.property == "string" ? ctx.subCtx(c.property) : ctx.subCtx(c.property!);
-            return factory(subCtx);
+            return factory({ ctx: subCtx });
           };
         }
 
@@ -440,9 +442,9 @@ export function EntityTableRow(p: EntityTableRowProps) {
       throw new Error("Column has no property and no template");
 
     if (typeof col.property == "string")
-      return getAppropiateComponent(p.ctx.subCtx(col.property)); /*string overload*/
+      return <AutoLine ctx={p.ctx.subCtx(col.property)} />; /*string overload*/
     else
-      return getAppropiateComponent(p.ctx.subCtx(col.property)); /*lambda overload*/
+      return AutoLine.getComponentFactory(col.property)({ ctx: p.ctx.subCtx(col.property) }); /*lambda overload*/
 
   }
 }

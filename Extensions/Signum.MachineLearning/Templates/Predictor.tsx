@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Tab, Tabs } from 'react-bootstrap'
-import { ValueLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityDetail, EntityCombo, EntityRepeater, EntityTable, IRenderButtons, EntityTabRepeater } from '@framework/Lines'
 import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Components/FileLine';
@@ -166,8 +166,8 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
     <div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctxxs4.subCtx(e => e.name)} readOnly={ctx.readOnly} />
-          <ValueLine ctx={ctxxs4.subCtx(e => e.state, { readOnly: true })} />
+          <AutoLine ctx={ctxxs4.subCtx(e => e.name)} readOnly={ctx.readOnly} />
+          <AutoLine ctx={ctxxs4.subCtx(e => e.state, { readOnly: true })} />
           <EntityLine ctx={ctxxs4.subCtx(e => e.trainingException, { readOnly: true })} hideIfNull={true} />
         </div>
         <div className="col-sm-6">
@@ -184,7 +184,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
               <legend>{ctxmq.niceName()}</legend>
               <EntityLine ctx={ctxmq.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={handleQueryChange} />
               {queryKey && <div>
-                <ValueLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={handleGroupChange} />
+                <AutoLine ctx={ctxmq.subCtx(f => f.groupResults)} onChange={handleGroupChange} />
 
                 <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                   queryKey={queryKey}

@@ -27,7 +27,7 @@ import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as Constructor from '@framework/Constructor'
 import SelectorModal from '@framework/SelectorModal'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import {
   WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
@@ -400,7 +400,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   }));
 
   function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
-    return ValueLineModal.show({
+    return AutoLineModal.show({
       type: { name: "string" },
       valueLineType: "DateTime",
       modalSize: "md",
@@ -506,7 +506,7 @@ public interface IWorkflowTransition
     Lite<WorkflowActionEntity> Action { get; }
 }`;
 
-  ValueLineModal.show({
+  AutoLineModal.show({
     type: { name: "string" },
     initialValue: value,
     valueLineType: "TextArea",

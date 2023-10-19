@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityRepeater } from '@framework/Lines'
+import { AutoLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailReceptionConfigurationEntity } from '../Signum.Mailing.Reception';
 
@@ -8,11 +8,11 @@ export default function EmailReceptionConfiguration(p: { ctx: TypeContext<EmailR
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(s => s.active)} />
-      <ValueLine ctx={sc.subCtx(s => s.emailAddress)} />
-      <ValueLine ctx={sc.subCtx(s => s.deleteMessagesAfter)} />
-      <ValueLine ctx={sc.subCtx(s => s.compareInbox)} />
-      <ValueLine ctx={sc.subCtx(s => s.service)} />
+      <AutoLine ctx={sc.subCtx(s => s.active)} />
+      <AutoLine ctx={sc.subCtx(s => s.emailAddress)} />
+      <AutoLine ctx={sc.subCtx(s => s.deleteMessagesAfter)} />
+      <AutoLine ctx={sc.subCtx(s => s.compareInbox)} />
+      <AutoLine ctx={sc.subCtx(s => s.service)} />
     </div>
 
   );

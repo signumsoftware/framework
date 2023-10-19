@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine, PasswordLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ExchangeWebServiceEmailServiceEntity } from '../Signum.Mailing.ExchangeWS';
 
@@ -8,11 +8,11 @@ export default function ExchangeWebServiceEmailService(p: { ctx: TypeContext<Exc
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(s => s.exchangeVersion)} />
-      <ValueLine ctx={sc.subCtx(s => s.url)} />
-      <ValueLine ctx={sc.subCtx(s => s.useDefaultCredentials)} />
-      <ValueLine ctx={sc.subCtx(s => s.username)} />
-      <ValueLine ctx={sc.subCtx(s => s.password)} valueLineType="Password" />
+      <AutoLine ctx={sc.subCtx(s => s.exchangeVersion)} />
+      <AutoLine ctx={sc.subCtx(s => s.url)} />
+      <AutoLine ctx={sc.subCtx(s => s.useDefaultCredentials)} />
+      <AutoLine ctx={sc.subCtx(s => s.username)} />
+      <AutoLine ctx={sc.subCtx(s => s.password)} />
     </div>
   );
 }
