@@ -14,11 +14,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { DashboardBehaviour, FilterGroupOperation, PinnedFilterActive } from '../Signum.DynamicQuery';
 import "./FilterBuilder.css"
 import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
-import { Dropdown } from 'react-bootstrap'
+import { Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
 import { NumberBox } from '../Lines/NumberLine'
+import { FieldPopover } from './QueryTokenHelp'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -183,6 +184,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
                   </a>
                   }
+                  <FieldPopover queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
                 </td>
               </tr>
             }
@@ -192,7 +194,6 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     </fieldset>
   );
 }
-
 
 export interface RenderValueContext {
   filter: FilterConditionOptionParsed | FilterGroupOptionParsed;

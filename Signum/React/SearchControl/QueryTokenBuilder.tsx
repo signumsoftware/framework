@@ -222,9 +222,9 @@ export function QueryTokenOptionalItem(p: { item: QueryToken | null }) {
 
   return (
     <span data-token={item.key}
-      style={{ color: item.typeColor }}
+      style={{ color: item.typeColor, whiteSpace: 'nowrap' }}
       title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
-      {((item.parent && !parentToken) ? " > " : "") + item.toStr}
+      {((item.parent && !parentToken) ? (item.parent.niceName + " › ") : "") + item.toStr}
     </span>
   );
 }
