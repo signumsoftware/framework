@@ -12,7 +12,7 @@ import TextArea from '../Components/TextArea';
 import { KeyCodes } from '../Components/Basic';
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { defaultRenderDay, trimDateToFormat } from './DateTimeLine'
-import { TimeTextBox, isDuration } from './TimeLine'
+import { TimeTextBox, isDurationKey } from './TimeLine'
 import { TypeContext } from '../TypeContext'
 
 export interface DateTimeSplittedLineProps extends ValueBaseProps<DateTimeSplittedLineController> {
@@ -200,7 +200,7 @@ function DateTimePickerSplitted(p: {
               (p.value ? getTimeOfDay(DateTime.fromJSDate(p.value))?.toISOTime() : null) :
               (temp.type == "Time" ? temp.time : null)}
             onChange={handleTimeChange}
-            validateKey={isDuration}
+            validateKey={isDurationKey}
             htmlAttributes={{
               ...p.htmlAttributes,
               placeholder: timePlaceholder(timeFormat),

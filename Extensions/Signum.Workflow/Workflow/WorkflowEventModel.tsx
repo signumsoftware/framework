@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, TypeContext, EntityDetail, RenderEntity, EntityLine } from '@framework/Lines'
+import { AutoLine, TypeContext, EntityDetail, RenderEntity, EntityLine, EnumLine } from '@framework/Lines'
 import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded, WorkflowTimerConditionEntity } from '../Signum.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'

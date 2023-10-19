@@ -11,7 +11,7 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
-import { AutoLine, EnumLine, NumberLine, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
+import { AutoLine, EnumLine, NumberLine, NumberLineProps, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
 import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
 
 export interface ChartBuilderProps {
@@ -178,45 +178,50 @@ export function Parameters(props: {
 
 function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
 
-
   if (scriptParameter.type == "Special") {
     var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
 
     if (sp.specialParameterType == "ColorCategory") {
-      return <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
-        optionItems={Dic.getKeys(colorSchemes)}
-        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-          <ColorScheme colorScheme={oi.value} />
-          {oi.label}
-        </div>} />
+      return (
+        <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
+          optionItems={Dic.getKeys(colorSchemes)}
+          onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+            <ColorScheme colorScheme={oi.value} />
+            {oi.label}
+          </div>} />
+      );
     }
 
     if (sp.specialParameterType == "ColorInterpolate") {
-      return <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
-        optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
-        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-          <ColorInterpolate colorInterpolator={oi.value} />
-          {oi.label}
-        </div>}
-        helpText={<label>
-          <input type="checkbox" className="form-check me-2"
-            checked={ctx.value.value?.startsWith("-")}
-            onChange={e => {
-              if (ctx.value.value)
-                ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
+      return (
+        <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
+          optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
+          onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+            <ColorInterpolate colorInterpolator={oi.value} />
+            {oi.label}
+          </div>}
+          helpText={<label>
+            <input type="checkbox" className="form-check me-2"
+              checked={ctx.value.value?.startsWith("-")}
+              onChange={e => {
+                if (ctx.value.value)
+                  ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
 
-              onRedraw?.();
-            }} />
-          Invert
-        </label>}
-      />
+                onRedraw?.();
+              }} />
+            Invert
+          </label>}
+        />
+      );
     }
+
+    throw new Error("Unexpected SpecialParameterType = " + sp.specialParameterType);
   }
 
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
-  if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
+  if (scriptParameter.type == "String") {
     const tbl: TextBoxLineProps = {
       ctx: ctx.subCtx(a => a.value),
       label: scriptParameter.displayName!,
@@ -224,7 +229,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     tbl.valueHtmlAttributes = { onBlur: onRedraw };
     if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
       tbl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-    return <TextBoxLine {...tbl } />
+    return <TextBoxLine {...tbl} />;
   }
   else if (scriptParameter.type == "Enum") {
     const el: EnumLineProps = {
@@ -248,6 +253,9 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
       el.labelHtmlAttributes = { style: { fontWeight: "bold" } };
     return <EnumLine {...el} />
+  }
+  else {
+    throw new Error("Unexpected Type = " + scriptParameter.type);
   }
 }
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, TypeContext, EntityStrip, EntityDetail } from '@framework/Lines'
+import { AutoLine, TypeContext, EntityStrip, EntityDetail, CheckboxLine } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowLaneModel, WorkflowLaneActorsEval, WorkflowMessage } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -58,7 +58,7 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
         /> :
         <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.actorsEval), ctx.niceName(e => e.mainEntityType))}</div>}
       {ctx.value.actorsEval && <CheckboxLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
-      {ctx.value.actorsEval && ctx.value.actors.length > 0 && < AutoLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
+      {ctx.value.actorsEval && ctx.value.actors.length > 0 && <CheckboxLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
     </div>
   );
 }

@@ -214,7 +214,7 @@ public class AggregateToken : QueryToken
     }
 }
 
-[DescriptionOptions(DescriptionOptions.Members)]
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum AggregateFunction
 {
     Count,

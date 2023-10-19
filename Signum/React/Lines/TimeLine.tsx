@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { addClass, classes, isNumber } from '../Globals';
+import { addClass, classes } from '../Globals';
 import { timeToString, timePlaceholder, toLuxonDurationFormat } from '../Reflection';
 import { LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
 import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
 import { Duration } from 'luxon';
+import { isNumberKey } from './NumberLine';
 
 export interface TimeLineProps extends ValueBaseProps<TimeLineController> {
 
@@ -59,7 +60,7 @@ export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: Tim
                     id={inputId}
                     value={s.ctx.value}
                     onChange={handleOnChange}
-                    validateKey={isDuration}
+                    validateKey={isDurationKey}
                     formControlClass={classes(s.ctx.formControlClass, c.mandatoryClass)}
                     durationFormat={durationFormat}
                     innerRef={c.setRefs} />
@@ -165,7 +166,7 @@ TimeTextBox.defaultProps = {
   durationFormat: "hh:mm:ss"
 };
 
-export function isDuration(e: React.KeyboardEvent<any>): boolean {
+export function isDurationKey(e: React.KeyboardEvent<any>): boolean {
   const c = e.keyCode;
-  return isNumber(e) || e.key == ":";
+  return isNumberKey(e) || e.key == ":";
 }
