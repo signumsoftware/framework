@@ -330,7 +330,7 @@ public static class CaseActivityLogic
                             return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
                         }).Select(a => a.Activity.ToLite()).ToList();
 
-                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                    return candidates.Where(a => !a.Event.Timer!.AvoidExecuteConditionByTimer && a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                 }).Distinct().ToList();
 
                 if (!activities.Any())
@@ -852,12 +852,16 @@ public static class CaseActivityLogic
                 ToStates = { CaseActivityState.Done, CaseActivityState.Pending },
                 CanExecute = ca => (ca.WorkflowActivity is WorkflowEventEntity we && we.Type.IsTimer() ||
                 ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ? null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
-                Execute = (ca, _) =>
+                Execute = (ca, args) =>
                 {
                     var now = Clock.Now;
 
                     var candidateEvents = ca.WorkflowActivity is WorkflowEventEntity @event ? new WorkflowEventEntity[] { @event } :
-                    ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
+                        ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
+
+                    var evaluateSpecificEvents = args.TryGetArgC<List<Lite<WorkflowEventEntity>>>();
+                    if (evaluateSpecificEvents != null)
+                        candidateEvents = candidateEvents.Where(ce => evaluateSpecificEvents.Any(e => e.Is(ce))).ToArray();
 
                     var lastExecutions = (
                         from et in ca.ExecutedTimers()
