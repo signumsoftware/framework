@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { WorkflowEventTaskActionEval } from '../Signum.Workflow'
-import { TypeContext, PropertyRoute } from '@framework/Lines'
+import { TypeContext, PropertyRoute, TextAreaLine } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
@@ -29,10 +29,9 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -40,10 +39,9 @@ export default function WorkflowEventTaskActionComponent(p : WorkflowEventTaskAc
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: `CreateCase(new ${p.mainEntityType.cleanName}Entity(){ initial properties here... });`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Create case Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
