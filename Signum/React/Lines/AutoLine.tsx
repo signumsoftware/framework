@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
-import { CheckboxLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
+import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
 export interface AutoLineProps extends LineBaseProps {
@@ -106,7 +106,7 @@ export namespace AutoLine {
           return p => <PasswordLine {...p} />;
 
         if (pr?.member!.format == "Color")
-          return p => <PasswordLine {...p} />;
+          return p => <ColorLine {...p} />;
 
         return p => <TextBoxLine {...p} />;
       }

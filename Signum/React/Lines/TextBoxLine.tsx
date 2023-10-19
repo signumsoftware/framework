@@ -36,9 +36,16 @@ export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(prop
   return LineBaseController.propEquals(prev, next);
 });
 
-export const PasswordLine = React.memo(React.forwardRef(function PasswordLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export class PasswordLineController extends ValueBaseController<TextBoxLineProps>{
+  init(p: TextBoxLineProps) {
+    super.init(p);
+    this.assertType("PasswordLine", ["string"]);
+  }
+}
 
-  const c = useController(TextBoxLineController, props, ref);
+export const PasswordLine = React.memo(React.forwardRef(function PasswordLine(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+
+  const c = useController(PasswordLineController, props, ref);
 
   if (c.isHidden)
     return null;
@@ -51,9 +58,16 @@ export const PasswordLine = React.memo(React.forwardRef(function PasswordLine(pr
   return LineBaseController.propEquals(prev, next);
 });
 
-export const GuidLine = React.memo(React.forwardRef(function GuidLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export class GuidLineController extends ValueBaseController<TextBoxLineProps>{
+  init(p: TextBoxLineProps) {
+    super.init(p);
+    this.assertType("TextBoxLine", ["Guid"]);
+  }
+}
 
-  const c = useController(TextBoxLineController, props, ref);
+export const GuidLine = React.memo(React.forwardRef(function GuidLine(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+
+  const c = useController(GuidLineController, props, ref);
 
   if (c.isHidden)
     return null;
@@ -147,69 +161,4 @@ function internalTextBox(vl: TextBoxLineController, type: "password" | "color" |
       </>}
     </FormGroup>
   );
-}
-
-export interface ColorTextBoxProps {
-  value: string | null;
-  onChange: (newValue: string | null) => void;
-  formControlClass?: string;
-  groupClass?: string;
-  textValueHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
-  groupHtmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
-  innerRef?: React.Ref<HTMLInputElement>;
-}
-
-export function ColorTextBox(p: ColorTextBoxProps) {
-
-  const [text, setText] = React.useState<string | undefined>(undefined);
-
-  const value = text != undefined ? text : p.value != undefined ? p.value : "";
-
-  return (
-    <span {...p.groupHtmlAttributes} className={addClass(p.groupHtmlAttributes, classes(p.groupClass))}>
-      <input type="text"
-        autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
-        {...p.textValueHtmlAttributes}
-        className={addClass(p.textValueHtmlAttributes, classes(p.formControlClass))}
-        value={value}
-        onBlur={handleOnBlur}
-        onChange={handleOnChange}
-        onFocus={handleOnFocus}
-        ref={p.innerRef} />
-      <input type="color"
-        className={classes(p.formControlClass, "sf-color")}
-        value={value}
-        onBlur={handleOnBlur}
-        onChange={handleOnChange}
-      />
-    </span>);
-
-  function handleOnFocus(e: React.FocusEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-
-    input.setSelectionRange(0, input.value != null ? input.value.length : 0);
-
-    if (p.textValueHtmlAttributes?.onFocus)
-      p.textValueHtmlAttributes.onFocus(e);
-  };
-
-  function handleOnBlur(e: React.FocusEvent<any>) {
-
-    const input = e.currentTarget as HTMLInputElement;
-
-    var result = input.value == undefined || input.value.length == 0 ? null : input.value;
-
-    setText(undefined);
-    if (p.value != result)
-      p.onChange(result);
-    if (p.textValueHtmlAttributes?.onBlur)
-      p.textValueHtmlAttributes.onBlur(e);
-  }
-
-  function handleOnChange(e: React.SyntheticEvent<any>) {
-    const input = e.currentTarget as HTMLInputElement;
-    setText(input.value);
-    if (p.onChange)
-      p.onChange(input.value);
-  }
 }
