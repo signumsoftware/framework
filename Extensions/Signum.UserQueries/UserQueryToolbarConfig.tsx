@@ -10,6 +10,7 @@ import { UserQueryEntity } from './Signum.UserQueries'
 import { useAPI } from '@framework/Hooks';
 import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbarConfig';
 import { useFetchInState } from '@framework/Navigator'
+import { ShowCount } from '../Signum.Toolbar/Signum.Toolbar'
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {
@@ -23,7 +24,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
       return (
         <>
           {super.getIcon(element)}
-          <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} />
+          <SearchUserQueryCount userQuery={element.content!} color={element.iconColor} autoRefreshPeriod={element.autoRefreshPeriod} showCount={element.showCount} />
         </>
       );
     }
@@ -70,6 +71,7 @@ interface CountUserQueryIconProps {
   userQuery: Lite<UserQueryEntity>;
   color?: string;
   autoRefreshPeriod?: number;
+  showCount: ShowCount;
 }
 
 
@@ -79,7 +81,7 @@ export function SearchUserQueryCount(p: CountUserQueryIconProps) {
   var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)
-    return <ToolbarCount num={ undefined} />;
+    return <ToolbarCount num={undefined} showCount={p.showCount} />;
 
-  return <SearchToolbarCount findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} />
+  return <SearchToolbarCount findOptions={findOptions} autoRefreshPeriod={p.autoRefreshPeriod} color={p.color} showCount={p.showCount} />
 }

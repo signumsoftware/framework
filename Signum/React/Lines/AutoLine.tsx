@@ -10,11 +10,11 @@ export interface AutoLineProps extends LineBaseProps {
 }
 
 
-export function AutoLine(p: AutoLineProps) {
+export function AutoLine(p: AutoLineProps): React.ReactElement | null {
   const pr = p.ctx.propertyRoute;
 
   if (p.type == null && pr == null)
-    return undefined;
+    return <span className="text-danger">Unable to render AutoLine with type = null and propertyRoute = null</span>;
 
   const factory = React.useMemo(() => AutoLine.getComponentFactory(p.type ?? pr!.typeReference(), pr), [pr?.propertyPath(), p.type?.name]);
 
@@ -23,7 +23,7 @@ export function AutoLine(p: AutoLineProps) {
 
 export interface AutoLineFactoryRule {
   name: string;
-  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any> | undefined);
+  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>);
 }
 
 export namespace AutoLine {
@@ -31,11 +31,11 @@ export namespace AutoLine {
     [typeName: string]: AutoLineFactoryRule[];
   } = {};
 
-  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any> | undefined), name?: string) {
+  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>), name?: string) {
     (customTypeComponent[type] ??= []).push({ name: name ?? type, factory });
   }
 
-  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement<any> | undefined {
+  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement<any> {
 
     const customs = customTypeComponent[tr.name]?.map(rule => rule.factory(tr, pr)).notNull().first();
 
@@ -120,7 +120,7 @@ export namespace AutoLine {
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")
         return p => <TimeLine {...p} />;
 
-      return p => <span className="text-danger">Not supported type by AutoLine</span>;
+      return p => <span className="text-danger">Not supported type {tr.name} by AutoLine</span>;
     }
   }
 

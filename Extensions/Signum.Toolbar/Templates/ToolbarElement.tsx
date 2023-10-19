@@ -57,7 +57,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
           <div className="col-sm-1">
             {icon && <div style={{ marginTop: "17px" }}>
               <FontAwesomeIcon icon={icon} style={{ backgroundColor: bgColor, color: ctx4.value.iconColor || undefined, fontSize: "25px",  }} />
-              {ctx.value.showCount && <ToolbarCount num={ctx.value.showCount == "Always" ? 0 : 1} />}
+              {ctx.value.showCount && <ToolbarCount showCount={ctx.value.showCount} num={ctx.value.showCount == "Always" ? 0 : 1} />}
             </div>
             }
           </div>
