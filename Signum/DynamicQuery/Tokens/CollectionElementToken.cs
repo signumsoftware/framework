@@ -145,7 +145,7 @@ public class CollectionElementToken : QueryToken
     }
 }
 
-[DescriptionOptions(DescriptionOptions.Members)]
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum CollectionElementType
 {
     Element,
