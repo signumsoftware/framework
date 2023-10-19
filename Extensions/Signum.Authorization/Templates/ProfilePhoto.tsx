@@ -7,12 +7,7 @@ import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
 import { Dic, classes } from "@framework/Globals";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | null)[] = [];
-
-export function clearCache() {
-  urlCache?.clear();
-  urlCache = undefined;
-}
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => Promise<string> | null)[] = [];
 
 export function clearCache() {
   Dic.clear(urlCache);
@@ -21,10 +16,7 @@ export function clearCache() {
 
 export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   const [imageError, setImageError] = useState(false);
-  const url = useFirstCachedUrl(p.user, p.size!);
-
-  var url = urlProviders.map(f => f(p.user, p.size)).notNull().firstOrNull();
-  const url = useCachedUrl(p.user, p.size!);
+  let url = useCachedUrl(p.user, p.size!);
 
   useEffect(() => {
     setImageError(false);
@@ -47,11 +39,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
 export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string, fallback?: React.ReactNode }) {
   const [imageError, setImageError] = useState(false);
   const size = p.size ?? 22;
-  const url = useFirstCachedUrl(p.user, size!);
-  var size = p.size ?? 22;
-  const size = p.size ?? 22;
 
-  var url = urlProviders.map(f => f(p.user, size!)).notNull().firstOrNull();
   const url = useCachedUrl(p.user, size!);
 
   useEffect(() => {
