@@ -19,7 +19,7 @@ import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
 import { NumberBox } from '../Lines/NumberLine'
-import { FieldPopover } from './QueryTokenHelp'
+import { FieldHelp } from './QueryTokenHelp'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -169,6 +169,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             {!p.readOnly &&
               <tr className="sf-filter-create">
                 <td colSpan={4}>
+                  <FieldHelp queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
                   <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
                     className="sf-line-button sf-create sf-create-condition"
                     onClick={e => handlerNewFilter(e, false)}>
@@ -186,7 +187,6 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
                   </a>
                   }
-                  <FieldPopover queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
                 </td>
               </tr>
             }
