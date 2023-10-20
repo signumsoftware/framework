@@ -4,6 +4,7 @@ import * as Finder from '@framework/Finder'
 import { TypeHelpMode } from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import AutoLineModal from '@framework/AutoLineModal';
 import { getToString } from '@framework/Signum.Entities';
+import { TextAreaLine } from '../../../Signum/React/Lines';
 
 interface WorkflowHelpComponentProps {
   typeName: string;
@@ -36,10 +37,9 @@ export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){
         AutoLineModal.show({
           type: { name: "string" },
           initialValue: text,
-          valueLineType: "TextArea",
+          customComponent: props => <TextAreaLine {...props} />,
           title: WorkflowActivityMessage.ActivityIs.niceToString(),
           message: "Copy to clipboard: Ctrl+C, ESC",
-          initiallyFocused: true,
           valueHtmlAttributes: { style: { height: "200px" } },
         });
 

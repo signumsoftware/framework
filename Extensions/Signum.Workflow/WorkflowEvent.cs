@@ -79,6 +79,8 @@ public class WorkflowTimerEmbedded : EmbeddedEntity
 {
     public TimeSpanEmbedded? Duration { get; set; }
 
+    public bool AvoidExecuteConditionByTimer { get; set; }
+
     public Lite<WorkflowTimerConditionEntity>? Condition { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -96,6 +98,7 @@ public class WorkflowTimerEmbedded : EmbeddedEntity
     {
         WorkflowTimerEmbedded result = new WorkflowTimerEmbedded
         {
+            AvoidExecuteConditionByTimer = this.AvoidExecuteConditionByTimer,
             Condition = this.Condition,
             Duration = this.Duration == null ? null : this.Duration.Clone(),
         };
