@@ -34,7 +34,12 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
         (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
         tryGetMixin(u, UserADMixin)?.oID;
 
-      return oid == null ? null : AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+      if (oid == null)
+        return null;
+
+      var url = AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+
+      return Promise.resolve(url);
     })
   }
 
@@ -42,14 +47,15 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
     var sid =
       (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
         tryGetMixin(u, UserADMixin)?.sID;
+
     if (sid == null)
       return null;
-    var url = "";
-    if (UserEntity.isLite(u))
-      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName);
-    else
-      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
-    return url;
+
+    var url = UserEntity.isLite(u) ?
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
+    return Promise.resolve(url);
   });
 
 

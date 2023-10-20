@@ -816,6 +816,7 @@ export const WorkflowTimerEmbedded = new Type<WorkflowTimerEmbedded>("WorkflowTi
 export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowTimerEmbedded";
   duration: TimeSpanEmbedded | null;
+  avoidExecuteConditionByTimer: boolean;
   condition: Entities.Lite<WorkflowTimerConditionEntity> | null;
 }
 

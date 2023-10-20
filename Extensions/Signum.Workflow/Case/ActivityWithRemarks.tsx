@@ -11,6 +11,7 @@ import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'
 import { useAPI } from '@framework/Hooks'
+import { TextAreaLine } from '../../../Signum/React/Lines'
 
 export interface ActivityWithRemarks {
   workflowActivity: Lite<WorkflowActivityEntity>;
@@ -66,12 +67,11 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
 
     AutoLineModal.show({
       type: { name: "string" },
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: CaseNotificationEntity.nicePropertyName(a => a.remarks),
       message: CaseActivityMessage.PersonalRemarksForThisNotification.niceToString(),
       label: undefined,
       initialValue: remarks,
-      initiallyFocused: true
     }).then(remarks => {
 
       if (remarks === undefined)
