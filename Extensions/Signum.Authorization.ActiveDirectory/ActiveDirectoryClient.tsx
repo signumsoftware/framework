@@ -39,7 +39,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
       var url = AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
 
-      return Promise.resolve(url);
+      return url;
     })
   }
 
@@ -55,7 +55,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
       AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
 
-    return Promise.resolve(url);
+    return url;
   });
 
 

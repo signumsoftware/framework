@@ -5,9 +5,9 @@ import './ProfilePhoto.css'
 import { getToString, Lite, liteKey, toLite } from "@framework/Signum.Entities";
 import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
-import { Dic, classes } from "@framework/Globals";
+import { Dic, classes, isPromise } from "@framework/Globals";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => Promise<string> | null)[] = [];
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string> | null)[] = [];
 
 export function clearCache() {
   Dic.clear(urlCache);
@@ -53,7 +53,7 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
     </div>
   );
 }
-var urlCache: { [userKey: string]: Promise<string | null> | null } = { };
+var urlCache: { [userKey: string]: Promise<string | null> | string | null } = { };
 
 function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
   const [url, setUrl] = useState<string | null>(null);
@@ -63,9 +63,11 @@ function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
     const userLite = UserEntity.isLite(user) ? user : toLite(user);
     const userLiteKey = liteKey(userLite);
 
-    const promise = (urlCache[userLiteKey] ??= urlProviders.map(f => f(user, size)).notNull().firstOrNull());
+    const val = (urlCache[userLiteKey] ??= urlProviders.map(f => f(user, size)).notNull().firstOrNull());
 
-    promise ? promise.then(u => setUrl(u)) : setUrl(null);
+    isPromise(val) ? val.then(u => setUrl(u)) :
+      typeof val == "string" ? setUrl(val) : 
+      setUrl(null);
 
   }, [user.id]);
 
