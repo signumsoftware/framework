@@ -6,7 +6,7 @@ import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';
 import { CombineRows } from '../Signum.DynamicQuery';
-import { ColumnPopover } from './QueryTokenHelp';
+import { ColumnHelp } from './QueryTokenHelp';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -138,7 +138,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           </div>
         </div>
         <div className="col-sm-2">
-            {/*<ColumnPopover queryKey="" type="" />*/}
+          <ColumnHelp queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
         </div>
       </div>
     </div>

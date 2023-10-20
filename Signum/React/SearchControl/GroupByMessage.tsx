@@ -5,6 +5,7 @@ import { FindOptionsParsed } from '../FindOptions'
 import { TypeReference, getQueryNiceName } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities.Validation';
 import { CollectionMessage } from '../Signum.External';
+import { GroupHelp } from './SearchHelp';
 
 export default function GroupByMessage(p: { findOptions: FindOptionsParsed, mainType: TypeReference}) {
   const fo = p.findOptions;
@@ -21,6 +22,7 @@ export default function GroupByMessage(p: { findOptions: FindOptionsParsed, main
   return (
     <div className="sf-search-message alert alert-info">
       {"Ʃ"}&nbsp;{message}
+      <GroupHelp />
     </div>
   );
 }
