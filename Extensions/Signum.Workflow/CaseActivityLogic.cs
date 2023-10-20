@@ -874,7 +874,12 @@ public static class CaseActivityLogic
                     });
 
                     if (timer == null)
-                        throw new InvalidOperationException(WorkflowActivityMessage.NoActiveTimerFound.NiceToString());
+                    {
+                        if (evaluateSpecificEvents == null)
+                            throw new InvalidOperationException(WorkflowActivityMessage.NoActiveTimerFound.NiceToString());
+                        else
+                            return; //If evaluating a specific timer manually it is not an error not to find a suitable timer to execute
+                    }
 
                     switch (timer.Type)
                     {
