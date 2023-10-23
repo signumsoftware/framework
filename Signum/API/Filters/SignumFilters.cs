@@ -105,7 +105,7 @@ public class SignumTimesTrackerFilter : SignumDisposableResourceFilter
         {
             var bla = (UserWithClaims)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key]!;
 
-            return bla.User;
+            return bla?.User!;
         });
     }
 }
