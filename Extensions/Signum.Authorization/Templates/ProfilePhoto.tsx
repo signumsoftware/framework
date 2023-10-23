@@ -6,6 +6,7 @@ import { getToString, Lite, liteKey, toLite } from "@framework/Signum.Entities";
 import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
 import { Dic, classes, isPromise } from "@framework/Globals";
+import { useAPI } from "@framework/Hooks";
 
 export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string> | null)[] = [];
 
@@ -56,21 +57,19 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
 var urlCache: { [userKey: string]: Promise<string | null> | string | null } = { };
 
 function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
-  const [url, setUrl] = useState<string | null>(null);
 
-  useEffect(() => {
+  var url = useAPI(() => {
 
-    const userLite = UserEntity.isLite(user) ? user : toLite(user);
-    const userLiteKey = liteKey(userLite);
+    const val = !user.id ? getFirstUrl(user, size) :
+      (urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user))] ??= getFirstUrl(user, size));
 
-    const val = (urlCache[userLiteKey] ??= urlProviders.map(f => f(user, size)).notNull().firstOrNull());
-
-    isPromise(val) ? val.then(u => setUrl(u)) :
-      typeof val == "string" ? setUrl(val) : 
-      setUrl(null);
-
+    return val;
   }, [user.id]);
 
   return url
+}
+
+function getFirstUrl(user: Lite<UserEntity> | UserEntity, size: number): Promise<string | null> | string | null {
+  return urlProviders.map(f => f(user, size)).notNull().firstOrNull();
 }
 
