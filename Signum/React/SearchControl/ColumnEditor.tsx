@@ -6,7 +6,9 @@ import { SearchMessage } from '../Signum.Entities'
 import QueryTokenBuilder from './QueryTokenBuilder'
 import { StyleContext } from '../Lines';
 import { CombineRows } from '../Signum.DynamicQuery';
-import { ColumnHelp } from './QueryTokenHelp';
+import { VisualTipIcon } from '../Basics/VisualTipIcon';
+import { SearchVisualTip } from '../Signum.Basics';
+import { ColumnHelp, FilterHelp } from './SearchControlVisualTips';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -138,7 +140,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           </div>
         </div>
         <div className="col-sm-2">
-          <ColumnHelp queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
+          <VisualTipIcon visualTip={SearchVisualTip.ColumnHelp} content={props => <ColumnHelp queryDescription={p.queryDescription} injected={props} />} />
         </div>
       </div>
     </div>

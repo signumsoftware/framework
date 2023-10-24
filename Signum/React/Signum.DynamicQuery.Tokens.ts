@@ -91,8 +91,9 @@ export module FilterFieldMessage {
   export const FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("FilterFieldMessage", "FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity");
   export const FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1 = new MessageKey("FilterFieldMessage", "FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1");
   export const AndOrGroups = new MessageKey("FilterFieldMessage", "AndOrGroups");
-  export const UsingAddOrGroupYouCanGroupAFewFiltersTogether = new MessageKey("FilterFieldMessage", "UsingAddOrGroupYouCanGroupAFewFiltersTogether");
-  export const FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement = new MessageKey("FilterFieldMessage", "FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement");
+  export const Using0YouCanGroupAFewFiltersTogether = new MessageKey("FilterFieldMessage", "Using0YouCanGroupAFewFiltersTogether");
+  export const FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012 = new MessageKey("FilterFieldMessage", "FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012");
+  export const TheSameElement = new MessageKey("FilterFieldMessage", "TheSameElement");
 }
 
 export module QueryTokenMessage {

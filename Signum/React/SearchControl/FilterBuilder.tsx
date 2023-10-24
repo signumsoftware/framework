@@ -19,7 +19,9 @@ import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
 import { NumberBox } from '../Lines/NumberLine'
-import { FieldHelp } from './QueryTokenHelp'
+import { VisualTipIcon } from '../Basics/VisualTipIcon'
+import { SearchVisualTip } from '../Signum.Basics'
+import { FilterHelp } from './SearchControlVisualTips'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -113,87 +115,87 @@ export default function FilterBuilder(p: FilterBuilderProps) {
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} showGrid={true} />
       </div>
       }
-    <fieldset className="form-xs">
-     
-      {p.title && <legend>{p.title}</legend>}
-      <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
-        <table className="table-sm">
-          <thead>
-            <tr>
-              <th className="ps-0">
-                <div className="d-flex">
-                  {!p.readOnly && p.filterOptions.length > 0 &&
-                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
-                      className="sf-line-button sf-remove sf-remove-filter-icon"
-                      onClick={handleDeleteAllFilters}>
-                      <FontAwesomeIcon icon="xmark" />
-                    </a>}
-                  {SearchMessage.Field.niceToString()}
-                </div>
-              </th>
-              <th>{SearchMessage.Operation.niceToString()}</th>
-              <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
-              {showPinnedFiltersOptions && <th></th>}
-              {showDashboardBehaviour && <th></th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.Label.niceToString()}</th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.Column.niceToString()}</th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.ColSpan.niceToString()}</th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.Row.niceToString()}</th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.IsActive.niceToString()}</th>}
-              {showPinnedFiltersOptions && <th>{SearchMessage.Split.niceToString()}</th>}
-            </tr>
-          </thead>
-          <tbody>
-            {p.filterOptions.map((f) => isFilterGroup(f) ?
-              <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
-                allFilterOptions={p.filterOptions}
-                prefixToken={undefined}
-                subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
-                onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
-                lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
-                showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={showDashboardBehaviour}
-                disableValue={false}
-                level={0}
-              /> :
-              <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
-                allFilterOptions={p.filterOptions}
-                prefixToken={undefined}
-                subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
-                onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
-                showPinnedFiltersOptions={showPinnedFiltersOptions}
-                showDashboardBehaviour={showDashboardBehaviour}
-                disableValue={false}
-                level={0} />
-            )}
-            {!p.readOnly &&
-              <tr className="sf-filter-create">
-                <td colSpan={4}>
-                  <FieldHelp queryKey={p.queryDescription.queryKey} type={p.queryDescription.columns['Entity'].displayName} />
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
-                    className="sf-line-button sf-create sf-create-condition"
-                    onClick={e => handlerNewFilter(e, false)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
-                  </a>
-                  <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
-                    className="sf-line-button sf-create sf-create-group ms-3"
-                    onClick={e => handlerNewFilter(e, true)}>
-                    <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
-                  </a>
+      <fieldset className="form-xs">
 
-                  {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
-                    className="sf-line-button ms-3"
-                    onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
-                    <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
-                  </a>
-                  }
-                </td>
+        {p.title && <legend>{p.title}</legend>}
+        <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
+          <table className="table-sm">
+            <thead>
+              <tr>
+                <th className="ps-0">
+                  <div className="d-flex">
+                    {!p.readOnly && p.filterOptions.length > 0 &&
+                      <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteAllFilter.niceToString() : undefined}
+                        className="sf-line-button sf-remove sf-remove-filter-icon"
+                        onClick={handleDeleteAllFilters}>
+                        <FontAwesomeIcon icon="xmark" />
+                      </a>}
+                    {SearchMessage.Field.niceToString()}
+                  </div>
+                </th>
+                <th>{SearchMessage.Operation.niceToString()}</th>
+                <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
+                {showPinnedFiltersOptions && <th></th>}
+                {showDashboardBehaviour && <th></th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.Label.niceToString()}</th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.Column.niceToString()}</th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.ColSpan.niceToString()}</th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.Row.niceToString()}</th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.IsActive.niceToString()}</th>}
+                {showPinnedFiltersOptions && <th>{SearchMessage.Split.niceToString()}</th>}
               </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </fieldset>
+            </thead>
+            <tbody>
+              {p.filterOptions.map((f) => isFilterGroup(f) ?
+                <FilterGroupComponent key={keyGenerator.getKey(f)} filterGroup={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  allFilterOptions={p.filterOptions}
+                  prefixToken={undefined}
+                  subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
+                  onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged}
+                  lastToken={p.lastToken} onHeightChanged={handleHeightChanged} renderValue={p.renderValue}
+                  showPinnedFiltersOptions={showPinnedFiltersOptions}
+                  showDashboardBehaviour={showDashboardBehaviour}
+                  disableValue={false}
+                  level={0}
+                /> :
+                <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
+                  allFilterOptions={p.filterOptions}
+                  prefixToken={undefined}
+                  subTokensOptions={p.subTokensOptions} queryDescription={p.queryDescription}
+                  onTokenChanged={p.onTokenChanged} onFilterChanged={handleFilterChanged} renderValue={p.renderValue}
+                  showPinnedFiltersOptions={showPinnedFiltersOptions}
+                  showDashboardBehaviour={showDashboardBehaviour}
+                  disableValue={false}
+                  level={0} />
+              )}
+              {!p.readOnly &&
+                <tr className="sf-filter-create">
+                  <td colSpan={4}>
+                    {p.queryDescription && <VisualTipIcon visualTip={SearchVisualTip.FilterHelp} content={props => <FilterHelp queryDescription={p.queryDescription} injected={props} />} />}
+                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddFilter.niceToString() : undefined}
+                      className="sf-line-button sf-create sf-create-condition"
+                      onClick={e => handlerNewFilter(e, false)}>
+                      <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddFilter.niceToString()}
+                    </a>
+                    <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.AddOrGroup.niceToString() : undefined}
+                      className="sf-line-button sf-create sf-create-group ms-3"
+                      onClick={e => handlerNewFilter(e, true)}>
+                      <FontAwesomeIcon icon="plus" className="sf-create me-1" />{SearchMessage.AddOrGroup.niceToString()}
+                    </a>
+
+                    {p.showPinnedFiltersOptionsButton && <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.EditPinnedFilters.niceToString() : undefined}
+                      className="sf-line-button ms-3"
+                      onClick={e => { e.preventDefault(); setShowPinnedFiltersOptions(!showPinnedFiltersOptions); }}>
+                      <FontAwesomeIcon color="orange" icon={[showPinnedFiltersOptions ? "fas" : "far", "pen-to-square"]} className="me-1" />{SearchMessage.EditPinnedFilters.niceToString()}
+                    </a>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </fieldset>
     </>
   );
 }

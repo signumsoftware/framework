@@ -38,7 +38,9 @@ import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faEllipsis, faFilter } from '@fortawesome/free-solid-svg-icons'
 import { similarToken } from '../Search'
-import { SearchHelp } from './SearchHelp'
+import { SearchHelp } from './SearchControlVisualTips'
+import { VisualTipIcon } from '../Basics/VisualTipIcon'
+import { SearchVisualTip} from '../Signum.Basics'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -678,7 +680,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       ...leftButtonBarElements,
       {
         order: 10,
-        button: <SearchHelp sc={this} />
+        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} content={props => <SearchHelp sc={this} injected={props} />} />
       }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)

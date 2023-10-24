@@ -19,10 +19,12 @@ public enum FilterFieldMessage
     FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1,
     [Description("AND / OR Groups")]
     AndOrGroups,
-    [Description("Using [+ Add OR Group] you can group a few filters together so that only one condition needs to be satisfied. Inside an OR Group you can create a nested AND Group and so on. ")]
-    UsingAddOrGroupYouCanGroupAFewFiltersTogether,
-    [Description("Filter groups can also be used to combine filters that should be satisfied by the same element of a collection when using operator like Any or All in the prefix field.")]
-    FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement,
+    [Description("Using {0} you can group a few filters together so that only one condition needs to be satisfied. Inside an {1} you can create a nested {2} and so on. ")]
+    Using0YouCanGroupAFewFiltersTogether,
+    [Description("Filter groups can also be used to combine filters for {0} of a collection when using operator like {1} or {2} in the prefix field.")]
+    FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012,
+    [Description("the same element")]
+    TheSameElement,
 }
 
 public enum FieldExpressionMessage
@@ -102,7 +104,7 @@ public enum ColumnFieldMessage
     
     CombineValues,
 
-    [Description("When a table has many repeated values in a column you can combine them vertically ({0}) either when the value is the same, or when is the same and belongs to the same main entity.")]
+    [Description("When a table has many repeated values in a column you can combine them vertically ({0}) either when the value is the same, or when is the same and belongs to the same {1}.")]
     WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically,
 
     [Description("Grouping results by one (or more) column")]
