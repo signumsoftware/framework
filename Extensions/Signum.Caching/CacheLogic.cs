@@ -580,6 +580,7 @@ public static class CacheLogic
         {
             Invalidated?.Invoke(this, CacheEventArgs.Invalidated);
         }
+
         public override List<T> RequestByBackReference<R>(IRetriever retriever, Expression<Func<T, Lite<R>?>> backReference, Lite<R> lite)
         {
            // throw new InvalidOperationException(); /*CSBUG https://github.com/dotnet/roslyn/issues/33276*/
@@ -589,12 +590,9 @@ public static class CacheLogic
 
             return ids.Select(id => retriever.Complete<T>(id, e =>
             {
-                retriever.ModifiablePostRetrieving(e);
                 this.Complete(e, retriever);
             })!).ToList();
         }
-
-      
 
         public Type Type
         {
