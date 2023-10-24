@@ -232,12 +232,8 @@ export function isNumberKey(e: React.KeyboardEvent<any>) {
 }
 
 export function isDecimalKey(e: React.KeyboardEvent<any>): boolean {
-  const c = e.keyCode;
   return (isNumberKey(e) ||
-    (c == 110) /*NumPad Decimal*/ ||
-    (c == 190) /*.*/ ||
-    (c == 188) /*,*/);
+    (e.key == "Separator") /*NumPad Decimal*/ ||
+    (e.key == ".") /*.*/ ||
+    (e.key == ",") /*,*/);
 }
-
-
-

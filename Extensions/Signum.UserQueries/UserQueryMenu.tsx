@@ -311,7 +311,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleSearchKeyDown(e: React.KeyboardEvent<any>) {
 
-    if (!e.shiftKey && e.key == KeyNames.down) {
+    if (!e.shiftKey && e.key == KeyNames.arrowDown) {
 
       e.preventDefault();
       const div = document.getElementById("userquery-items-container")!;

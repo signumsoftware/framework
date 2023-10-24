@@ -41,6 +41,7 @@ import { similarToken } from '../Search'
 import { SearchHelp } from './SearchControlVisualTips'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip} from '../Signum.Basics'
+import { KeyNames } from '../Components'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -481,7 +482,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.keyCode == 13) {
+    if (e.key == KeyNames.enter) {
       window.setTimeout(() => {
         var input = (document.activeElement as HTMLInputElement);
         input.blur();

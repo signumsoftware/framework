@@ -4,7 +4,7 @@ import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
 import { TypeReference, Binding } from './Reflection'
 import { TypeContext } from './TypeContext'
 import { MemberInfo } from './Reflection';
-import { BsSize } from './Components';
+import { BsSize, KeyNames } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
@@ -37,7 +37,7 @@ export default function AutoLineModal(p: AutoLineModalProps) {
   }
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.keyCode == 13) {
+    if (e.key == KeyNames.enter) {
       btnOkRef.current!.focus();
       window.setTimeout(() => {
         handleOkClick();

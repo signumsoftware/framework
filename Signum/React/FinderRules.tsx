@@ -30,6 +30,7 @@ import { TextAreaLine } from "./Lines/TextAreaLine";
 import { TextBoxLine } from "./Lines/TextBoxLine";
 import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
+import { KeyNames } from "./Components";
 
 
 export function isMultiline(pr?: PropertyRoute) {
@@ -787,13 +788,13 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean
     valueHtmlAttributes={p.isComplex ? {
       onKeyDown: e => {
         console.log(e);
-        if (e.keyCode == 13 && !e.shiftKey) {
+        if (e.key == KeyNames.enter && !e.shiftKey) {
           e.preventDefault();
         }
       },
       onKeyUp: e => {
         console.log(e);
-        if (e.keyCode == 13 && e.shiftKey) {
+        if (e.key == KeyNames.enter && e.shiftKey) {
           e.stopPropagation()
         }
       }
