@@ -6,14 +6,12 @@ namespace Signum.API.Filters;
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 public class ProfilerActionSplitterAttribute : Attribute
 {
-    readonly string requestKey;
+    public string RequestKey { get; }
 
     public ProfilerActionSplitterAttribute(string requestKey)
     {
         this.RequestKey = requestKey;
     }
-
-    public string RequestKey { get; }
 
     public static string GetActionDescription(FilterContext actionContext)
     {
