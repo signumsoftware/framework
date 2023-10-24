@@ -1,6 +1,6 @@
 import * as draftjs from 'draft-js';
 import { HtmlEditorPlugin, HtmlEditorController } from '../HtmlEditor';
-import { KeyCodes } from '@framework/Components';
+import { KeyNames } from '@framework/Components';
 import { ContentBlock, EditorState, genKey, getDefaultKeyBinding, KeyBindingUtil, Modifier, RichUtils } from 'draft-js';
 
 export default class ListCommandsPlugin implements HtmlEditorPlugin {
@@ -39,12 +39,12 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
       if (prevKeyBindingFn)
         prevKeyBindingFn(e);
 
-      if ((e.keyCode == KeyCodes.space || e.keyCode == KeyCodes.backspace || e.keyCode == KeyCodes.tab)) {
+      if ((e.key == KeyNames.space || e.key == KeyNames.backspace || e.key == KeyNames.tab)) {
         var block = getSelectedBlock(controller.editorState);
         var blockText = block.getText();
         var blockType = block.getType();
 
-        if (e.keyCode === KeyCodes.tab) {
+        if (e.key === KeyNames.tab) {
           const newEditorState = draftjs.RichUtils.onTab(e, controller.editorState, 6 /* maxDepth */)
           if (newEditorState !== controller.editorState) {
             controller.setEditorState(newEditorState);
@@ -52,7 +52,7 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
           return null;
         }
 
-        if (e.keyCode == KeyCodes.space && blockText && blockText.length <= 2) {
+        if (e.key == KeyNames.space && blockText && blockText.length <= 2) {
           if (blockText == "*") {
             return 'unordered-list-item';
           }
@@ -60,7 +60,7 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
             return 'ordered-list-item';
           }
         }
-        else if (e.keyCode == KeyCodes.backspace && (blockType == 'unordered-list-item' || blockType == 'ordered-list-item') && blockText.length == 0) {
+        else if (e.key == KeyNames.backspace && (blockType == 'unordered-list-item' || blockType == 'ordered-list-item') && blockText.length == 0) {
           return 'end-list';
         }
       } 

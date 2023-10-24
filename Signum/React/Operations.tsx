@@ -14,7 +14,7 @@ import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';
 import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualOperationClick, OperationMenuItem } from './Operations/ContextualOperations';
 import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
-import { BsColor, KeyCodes } from "./Components/Basic";
+import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
 import { FilterOperation } from "./Signum.DynamicQuery";
@@ -704,7 +704,6 @@ export interface KeyboardShortcut{
   altKey?: boolean;
   shiftKey?: boolean;
   key?: string;
-  keyCode?: number; //lowercase
 }
 
 export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
@@ -713,7 +712,7 @@ export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
     return a?.toLowerCase();
   }
 
-  return (toLower(e.key) == toLower(ks.key) || e.keyCode == ks.keyCode) &&
+  return (toLower(e.key) == toLower(ks.key)) &&
     e.ctrlKey == (ks.ctrlKey || false) &&
     e.altKey == (ks.altKey || false) &&
     e.shiftKey == (ks.shiftKey || false);
@@ -722,17 +721,11 @@ export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
 
 
 export function getShortcutToString(ks: KeyboardShortcut) {
-  
-  function getKeyName(keyCode: number) {
-
-    var pair = Dic.map(KeyCodes as any, (key: string, value: number) => ({ key, value })).singleOrNull(a => a.value == ks.keyCode);
-    return pair ? pair.key.firstUpper() : "(KeyCode=" + keyCode + ")";
-  }
 
   return (ks.ctrlKey ? "Ctrl+" : "") +
     (ks.altKey ? "Alt+" : "") +
     (ks.shiftKey ? "Shift+" : "") +
-    (ks.key ? ks.key.firstUpper() : getKeyName(ks.keyCode!));
+    (ks.key);
 
 }
 
@@ -805,8 +798,8 @@ export namespace Defaults {
   }
 
   export function getKeyboardShortcut(oi: OperationInfo): KeyboardShortcut | undefined {
-    return oi.operationType == "Delete" ? ({ ctrlKey: true, shiftKey: true, keyCode: KeyCodes.delete }) :
-      oi.operationType == "Execute" && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s", keyCode: 83 }) : undefined;
+    return oi.operationType == "Delete" ? ({ ctrlKey: true, shiftKey: true, key: KeyNames.delete }) :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? ({ ctrlKey: true, key: "s" }) : undefined;
   }
 
   export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {

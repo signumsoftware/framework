@@ -17,7 +17,7 @@ import { FilterOption, FilterOptionParsed } from '@framework/Search'
 import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'
 import { AutoFocus } from '@framework/Components/AutoFocus'
-import { KeyCodes } from '@framework/Components'
+import { KeyNames } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { TokenCompleter } from '@framework/Finder'
@@ -311,7 +311,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   function handleSearchKeyDown(e: React.KeyboardEvent<any>) {
 
-    if (!e.shiftKey && e.keyCode == KeyCodes.down) {
+    if (!e.shiftKey && e.key == KeyNames.down) {
 
       e.preventDefault();
       const div = document.getElementById("userquery-items-container")!;

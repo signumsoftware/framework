@@ -9,7 +9,6 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
-import { KeyCodes } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextBoxLineController } from './TextBoxLine'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
