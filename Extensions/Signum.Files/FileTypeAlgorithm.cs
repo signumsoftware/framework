@@ -112,7 +112,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             catch (IOException ex)
             {
                 ex.Data.Add("FullPhysicalPath", fullPhysicalPath);
-                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal!.Identity!.Name);
+                ex.Data.Add("CurrentPrincipal", System.Threading.Thread.CurrentPrincipal?.Identity?.Name);
 
                 throw;
             }

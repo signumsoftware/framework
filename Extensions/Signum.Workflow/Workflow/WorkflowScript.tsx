@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowScriptEntity } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -41,10 +41,9 @@ var response = HttpClient.Post<MyResponse>("Your URL", new { paramName = e.[Prop
 e.[Property Name] = response.[Property Name];
 
 class MyResponse {}`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "REST Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
@@ -55,10 +54,9 @@ class MyResponse {}`,
       initialValue: `// SOAP
 var lib = Assembly.Load("[Assembly full path name]").GetType("[Type Name]").GetMethod("[Method Name]").Invoke(e.[Property Name]);
 e.[Property Name] = lib;`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "SOAP Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
@@ -70,10 +68,9 @@ e.[Property Name] = lib;`,
       initialValue: `// ${hint}
 CaseActivityEntity CaseActivity;
 int RetryCount;`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: hint,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
@@ -89,10 +86,9 @@ catch (Exception e)
 {
     throw e;
 }`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Try/Catch block",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "180px" } },
     });
   }

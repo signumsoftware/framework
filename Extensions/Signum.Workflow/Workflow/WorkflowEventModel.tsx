@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, TypeContext, EntityDetail, RenderEntity, EntityLine } from '@framework/Lines'
+import { AutoLine, TypeContext, EntityDetail, RenderEntity, EntityLine, EnumLine } from '@framework/Lines'
 import { WorkflowEventModel, WorkflowEventTaskModel, WorkflowEventTaskActionEval, WorkflowEventTaskConditionEval, WorkflowMessage, WorkflowEventType, TriggeredOn, WorkflowTimerEmbedded, WorkflowTimerConditionEntity } from '../Signum.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
 import WorkflowEventTaskActionComponent from './WorkflowEventTaskActionComponent'
@@ -107,7 +107,8 @@ function WorkflowTimer(p: { ctx: TypeContext<WorkflowTimerEmbedded>, mainEntityT
     <div>
       <EntityDetail ctx={ctx.subCtx(te => te.duration)} />
       <EntityLine ctx={ctx.subCtx(te => te.condition)}
-        findOptions={{ queryName: WorkflowTimerConditionEntity, filterOptions: [{ token: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), value: p.mainEntityType }]}} />
+        findOptions={{ queryName: WorkflowTimerConditionEntity, filterOptions: [{ token: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), value: p.mainEntityType }] }} />
+      <ValueLine ctx={ctx.subCtx(te => te.avoidExecuteConditionByTimer)} />
     </div>
   );
 }

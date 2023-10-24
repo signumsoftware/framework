@@ -159,7 +159,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 }
 
-function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[] {
+export function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[] {
   var direct = filterOptions.filter(a => a.pinned != null);
 
   var recursive = filterOptions

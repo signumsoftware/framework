@@ -1562,8 +1562,12 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + ".All");
   }
 
-  anyNo<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".AnyNo");
+  notAll<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NotAll");
+  }
+
+  notAny<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NotAny");
   }
 
   separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
@@ -1583,9 +1587,7 @@ export class QueryTokenString<T> {
   }
   
 
-  noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".NoOne");
-  }
+
 
   element<S = ArrayElement<T>>(index = 1): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));

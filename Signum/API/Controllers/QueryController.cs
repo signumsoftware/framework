@@ -96,31 +96,31 @@ public class QueryController : ControllerBase
         public SubTokensOptions options;
     }
 
-    [HttpPost("api/query/executeQuery"), ProfilerActionSplitter]
-    public async Task<ResultTable> ExecuteQuery([Required, FromBody]QueryRequestTS request, CancellationToken token)
+    [HttpPost("api/query/executeQuery/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public async Task<ResultTable> ExecuteQuery(string queryKey, [Required, FromBody]QueryRequestTS request, CancellationToken token)
     {
-        var qr = request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+        var qr = request.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
         AssertQuery?.Invoke(qr);
         var result = await QueryLogic.Queries.ExecuteQueryAsync(qr, token);
         return result;
     }
 
-    [HttpPost("api/query/lites"), ProfilerActionSplitter]
-    public async Task<List<Lite<Entity>>> GetLites([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+    [HttpPost("api/query/lites/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public async Task<List<Lite<Entity>>> GetLites(string queryKey, [Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
+        return await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
-    [HttpPost("api/query/entities"), ProfilerActionSplitter]
-    public async Task<List<Entity>> GetEntities([Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
+    [HttpPost("api/query/entities/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public async Task<List<Entity>> GetEntities(string queryKey, [Required, FromBody]QueryEntitiesRequestTS request, CancellationToken token)
     {
-        return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).ToListAsync(token);
+        return await QueryLogic.Queries.GetEntitiesFull(request.ToQueryEntitiesRequest(queryKey, SignumServer.JsonSerializerOptions)).ToListAsync(token);
     }
 
-    [HttpPost("api/query/queryValue"), ProfilerActionSplitter, EmbeddedPropertyRouteAttribute<QueryValueResolver>]
-    public async Task<object?> QueryValue([Required, FromBody]QueryValueRequestTS request, CancellationToken token)
+    [HttpPost("api/query/queryValue/{queryKey}"), ProfilerActionSplitter("queryKey"), EmbeddedPropertyRouteAttribute<QueryValueResolver>]
+    public async Task<object?> QueryValue(string queryKey, [Required, FromBody]QueryValueRequestTS request, CancellationToken token)
     {
-        var qvRequest = request.ToQueryValueRequest(SignumServer.JsonSerializerOptions);
+        var qvRequest = request.ToQueryValueRequest(queryKey, SignumServer.JsonSerializerOptions);
 
         HttpContext.Items["queryValueRequests"] = qvRequest;
         return await QueryLogic.Queries.ExecuteQueryValueAsync(qvRequest, token);

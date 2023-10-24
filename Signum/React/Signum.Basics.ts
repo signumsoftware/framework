@@ -135,6 +135,13 @@ export interface QueryEntity extends Entities.Entity {
   key: string;
 }
 
+export module SearchVisualTip {
+  export const SearchHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.SearchHelp");
+  export const GroupHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.GroupHelp");
+  export const FilterHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.FilterHelp");
+  export const ColumnHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.ColumnHelp");
+}
+
 export interface SemiSymbol extends Entities.Entity {
   key: string | null;
   name: string;
@@ -166,5 +173,22 @@ export interface TypeEntity extends Entities.Entity {
   cleanName: string;
   namespace: string;
   className: string;
+}
+
+export const VisualTipConsumedEntity = new Type<VisualTipConsumedEntity>("VisualTipConsumed");
+export interface VisualTipConsumedEntity extends Entities.Entity {
+  Type: "VisualTipConsumed";
+  visualTip: VisualTipSymbol;
+  user: Entities.Lite<Security.IUserEntity>;
+  consumedOn: string /*DateTime*/;
+}
+
+export module VisualTipConsumedOperation {
+  export const Delete : Operations.DeleteSymbol<VisualTipConsumedEntity> = registerSymbol("Operation", "VisualTipConsumedOperation.Delete");
+}
+
+export const VisualTipSymbol = new Type<VisualTipSymbol>("VisualTip");
+export interface VisualTipSymbol extends Symbol {
+  Type: "VisualTip";
 }
 
