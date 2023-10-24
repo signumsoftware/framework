@@ -309,19 +309,39 @@ public class NiceDataTableValueConverter : DataTableValueConverter
 
     public override object? ConvertValue(object? value, Column column)
     {
-        if (value is Lite<Entity>)
-            return ((Lite<Entity>)value).ToString();
+        if (value is Lite<Entity> lite)
+            return lite.ToString();
 
-        if (value is Enum)
-            return ((Enum)value).NiceToString();
+        if (value is Enum @enum)
+            return @enum.NiceToString();
 
-        if (value is DateTime && column.Token.Format != "g")
-            return ((DateTime)value).ToString(column.Token.Format);
+        if (value is DateTime time && column.Token.Format != "g")
+            return time.ToString(column.Token.Format);
 
         return value;
     }
 }
 
+public class UnambiguousNiceDataTableValueConverter : NiceDataTableValueConverter
+{
+    HashSet<Lite<Entity>> ambiguousObjects = new HashSet<Lite<Entity>>();
+
+    public UnambiguousNiceDataTableValueConverter(ResultTable rt)
+    {
+        this.ambiguousObjects = rt.Columns
+            .Where(a => typeof(Lite<Entity>).IsAssignableFrom(a.Column.Type))
+            .SelectMany(c => c.Values.Cast<Lite<Entity>?>().NotNull().Distinct().GroupBy(v => base.ConvertValue(v, c.Column)).Where(g => g.Count() > 1).SelectMany(a => a))
+            .ToHashSet();
+    }
+
+    public override object? ConvertValue(object? value, Column column)
+    {
+        if (value is Lite<Entity> lite && ambiguousObjects.Contains(lite))
+            return lite.ToString() + "(" + lite.Key() + ")";
+
+        return base.ConvertValue(value, column);
+    }
+}
 
 public class InvariantDataTableValueConverter : NiceDataTableValueConverter
 {
@@ -340,13 +360,11 @@ public class InvariantDataTableValueConverter : NiceDataTableValueConverter
 
     public override object? ConvertValue(object? value, Column column)
     {
-        var type = column.Token.Type;
+        if (value is Lite<Entity> lite)
+            return lite.KeyLong();
 
-        if (value is Lite<Entity>)
-            return ((Lite<Entity>)value).KeyLong();
-
-        if (value is Enum)
-            return ((Enum)value).ToString();
+        if (value is Enum @enum)
+            return @enum.ToString();
 
         return value;
     }

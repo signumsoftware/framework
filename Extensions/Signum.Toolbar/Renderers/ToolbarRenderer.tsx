@@ -195,11 +195,11 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
           if (ei.content) {
             var config = ToolbarClient.getConfig(ei);
             if (config == null) {
-              return <span className="text-danger">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
+              return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
             }
             else {
 
-              return <button className="btn btn-sm border-0 py-0 m-0" key={i} onClick={e => {
+              return <button className="btn btn-sm border-0 py-0 m-0 sf-extra-icon" key={i} onClick={e => {
                 e.preventDefault();
                 e.stopPropagation();
                 config!.handleNavigateClick(e, ei);
@@ -211,7 +211,7 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
             };
           }
 
-          return <button className="btn btn-sm border-0 py-0 m-0" key={i} onClick={e => {
+          return <button className="btn btn-sm border-0 py-0 m-0 sf-extra-icon" key={i} onClick={e => {
             e.preventDefault();
             e.stopPropagation();
 
