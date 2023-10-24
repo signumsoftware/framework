@@ -46,6 +46,8 @@ export default function FilterBuilder(p: FilterBuilderProps) {
 
   const showPinnedFiltersOptions = p.showPinnedFiltersOptionsButton ? showPinnedFiltersOptionsState : (p.showPinnedFiltersOptions ?? false);
 
+  const [highlightFilter, setHighlightFilter] = React.useState<FilterOptionParsed | undefined>();
+
   const forceUpdate = useForceUpdatePromise();
 
   function handlerNewFilter(e: React.MouseEvent<any>, isGroup: boolean) {
@@ -112,7 +114,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     <>
       {showPinnedFiltersOptions && !p.avoidPreview && <div className="mb-3">
         <h4 className="lead">Preview</h4>
-        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} showGrid={true} />
+        <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
       </div>
       }
       <fieldset className="form-xs">
@@ -156,6 +158,8 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                   showPinnedFiltersOptions={showPinnedFiltersOptions}
                   showDashboardBehaviour={showDashboardBehaviour}
                   disableValue={false}
+                  setHighlightFilter={showPinnedFiltersOptions ? setHighlightFilter : undefined}
+                  
                   level={0}
                 /> :
                 <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
@@ -166,6 +170,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                   showPinnedFiltersOptions={showPinnedFiltersOptions}
                   showDashboardBehaviour={showDashboardBehaviour}
                   disableValue={false}
+                  setHighlightFilter={showPinnedFiltersOptions ? setHighlightFilter : undefined}
                   level={0} />
               )}
               {!p.readOnly &&
@@ -222,6 +227,7 @@ export interface FilterGroupComponentsProps {
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   disableValue: boolean;
+  setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;
   level: number;
 }
 
@@ -314,7 +320,10 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
   var paddingLeftNext = (25 * (p.level + 1)) + 5;
   return (
     <>
-      <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}>
+      <tr className="sf-filter-group" style={{ backgroundColor: "#eee" }}
+        onMouseEnter={() => p.setHighlightFilter?.(fg.pinned ? fg : undefined)}
+        onMouseLeave={() => p.setHighlightFilter?.(undefined)}
+      >
         <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
           <div className="d-flex">
             {!readOnly &&
@@ -375,7 +384,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
         {p.showPinnedFiltersOptions && p.showDashboardBehaviour && <td>
           <DashboardBehaviourComponent filter={fg} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
-        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => changeFilter()} readonly={readOnly} />}
+        {p.showPinnedFiltersOptions && fg.pinned && <PinnedFilterEditor fo={fg} onChange={() => { changeFilter(); p.setHighlightFilter?.(fg.pinned ? fg : undefined); }} readonly={readOnly} />}
       </tr >
 
       {
@@ -393,6 +402,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                 showDashboardBehaviour={p.showDashboardBehaviour}
                 disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
                 level={p.level + 1}
+                setHighlightFilter={p.setHighlightFilter}
               /> :
 
               <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
@@ -403,6 +413,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
                 showPinnedFiltersOptions={p.showPinnedFiltersOptions}
                 showDashboardBehaviour={p.showDashboardBehaviour}
                 disableValue={p.disableValue || fg.pinned != null && !isCheckBox(fg.pinned.active)}
+                setHighlightFilter={p.setHighlightFilter}
                 level={p.level + 1}
               />
             )}
@@ -488,6 +499,7 @@ export interface FilterConditionComponentProps {
   renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
+  setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;
   disableValue: boolean;
   level: number;
 }
@@ -577,7 +589,10 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
   return (
     <>
-      <tr className="sf-filter-condition">
+      <tr className="sf-filter-condition"
+        onMouseEnter={() => p.setHighlightFilter?.(f.pinned ? f : undefined)}
+        onMouseLeave={() => p.setHighlightFilter?.(undefined)}
+      >
         <td style={{ paddingLeft: (25 * p.level) }}>
           <div className="d-flex">
             {!readOnly &&
@@ -626,7 +641,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
           <DashboardBehaviourComponent filter={f} readonly={readOnly} onChange={() => changeFilter()} />
         </td>}
 
-        {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor fo={f} onChange={() => changeFilter()} readonly={readOnly} />}
+        {p.showPinnedFiltersOptions && f.pinned && <PinnedFilterEditor fo={f} onChange={() => { changeFilter(); p.setHighlightFilter?.(f.pinned ? f : undefined); }} readonly={readOnly} />}
 
       </tr>
     </>

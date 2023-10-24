@@ -374,3 +374,7 @@ ul.sf-context-menu li a:not([disabled]) {
 select.sf-pagination-mode, select.sf-elements-per-page {
     vertical-align: text-top;
 }
+
+.sf-filter-highlight {
+    box-shadow: 0 1px 4px 0 rgb(255 229 182), 0 1px 20px 0 rgb(255 231 188);
+}
