@@ -29,26 +29,13 @@ export type CollectionElementType =
 
 export module ColumnFieldMessage {
   export const ColumnsHelp = new MessageKey("ColumnFieldMessage", "ColumnsHelp");
-  export const ModifyingColumns = new MessageKey("ColumnFieldMessage", "ModifyingColumns");
-  export const TheDefaultColumnsCanBeChangedAtWillBy0InAColumnHeaderAndThenSelect1Or2Or3 = new MessageKey("ColumnFieldMessage", "TheDefaultColumnsCanBeChangedAtWillBy0InAColumnHeaderAndThenSelect1Or2Or3");
   export const Rearrange = new MessageKey("ColumnFieldMessage", "Rearrange");
-  export const RightClicking = new MessageKey("ColumnFieldMessage", "RightClicking");
   export const RightClick = new MessageKey("ColumnFieldMessage", "RightClick");
-  export const WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumn = new MessageKey("ColumnFieldMessage", "WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumn");
-  export const OnceEditingAColumnTheFollowingFieldsAreAvailable = new MessageKey("ColumnFieldMessage", "OnceEditingAColumnTheFollowingFieldsAreAvailable");
   export const YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity");
   export const YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity");
   export const TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression = new MessageKey("ColumnFieldMessage", "TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression");
   export const YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices = new MessageKey("ColumnFieldMessage", "YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices");
-  export const CombineValues = new MessageKey("ColumnFieldMessage", "CombineValues");
   export const WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically = new MessageKey("ColumnFieldMessage", "WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically");
-  export const GroupingResultsByOneOrMoreColumn = new MessageKey("ColumnFieldMessage", "GroupingResultsByOneOrMoreColumn");
-  export const YouCanGroupResultsBy0InAColumnHeaderAndSelecting1 = new MessageKey("ColumnFieldMessage", "YouCanGroupResultsBy0InAColumnHeaderAndSelecting1");
-  export const AnyNewColumnShouldEitherBeAnAggregateOrItWillBeConsideredANew0 = new MessageKey("ColumnFieldMessage", "AnyNewColumnShouldEitherBeAnAggregateOrItWillBeConsideredANew0");
-  export const OnceGroupingYouCanFilterNormallyOrUsingAggregatesInYourFields = new MessageKey("ColumnFieldMessage", "OnceGroupingYouCanFilterNormallyOrUsingAggregatesInYourFields");
-  export const FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1 = new MessageKey("ColumnFieldMessage", "FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1");
-  export const OrderingResults = new MessageKey("ColumnFieldMessage", "OrderingResults");
-  export const YouCanOrderResultsByClickingInAColumnHeaderDefualtOrderingIsAscending = new MessageKey("ColumnFieldMessage", "YouCanOrderResultsByClickingInAColumnHeaderDefualtOrderingIsAscending");
   export const SummaryHeaderField = new MessageKey("ColumnFieldMessage", "SummaryHeaderField");
   export const ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery = new MessageKey("ColumnFieldMessage", "ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery");
   export const NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination = new MessageKey("ColumnFieldMessage", "NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination");

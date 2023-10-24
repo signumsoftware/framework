@@ -52,13 +52,13 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
   );
 }
 
-export function GroupHelp(p: {injected: OverlayInjectedProps }) {
+export function GroupHelp(p: { injected: OverlayInjectedProps }) {
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
       <Popover.Header as="h3"><strong>Group help</strong></Popover.Header>
       <Popover.Body>
-        <p className="my-2">Any new column should either be an aggregate or it will be considered a new group key <FontAwesomeIcon icon="key" color="gray"/>.</p>
-        <p className="my-2">Once grouping you can filter normally or using aggregates in your fields (<code>HAVING</code> in SQL).</p>
+        <p className="my-2">Any new column should either be an aggregate (<samp>{AggregateFunction.niceToString("Count")}</samp>, <samp>{AggregateFunction.niceToString("Sum")}</samp>, <samp>{AggregateFunction.niceToString("Min")}</samp>...) or it will be considered a new group key <FontAwesomeIcon icon="key" color="gray" />.</p>
+        <p className="my-2">Once grouping you can filter normally or using aggregates as the field (<code>HAVING</code> in SQL).</p>
         <p className="my-2">Finally you can stop grouping by <strong><samp style={{ whiteSpace: 'nowrap' }}>right-clicking</samp></strong> in a column header and select {getResotreDefaultColumnsIcon()}<em style={{ whiteSpace: 'nowrap' }}>Restore default columns</em>.</p>
       </Popover.Body>
     </Popover>
@@ -115,36 +115,20 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
       <Popover.Header as="h3"><strong>{ColumnFieldMessage.ColumnsHelp.niceToString()}</strong></Popover.Header>
       <Popover.Body>
         <div className="my-2">You are editing a column, let me explain what each field does:</div>
-        <strong>{ColumnFieldMessage.ModifyingColumns.niceToString()}</strong>
-        <div className="my-2">{ColumnFieldMessage.TheDefaultColumnsCanBeChangedAtWillBy0InAColumnHeaderAndThenSelect1Or2Or3.niceToString()
-          .formatHtml(<em>{ColumnFieldMessage.RightClicking.niceToString()}</em>, <em>{JavascriptMessage.insertColumn.niceToString()}</em>,
-            <em>{JavascriptMessage.editColumn.niceToString()}</em>, <em>{JavascriptMessage.removeColumn.niceToString()}</em>, <em>{ColumnFieldMessage.Rearrange.niceToString()}</em>)}</div>
-        <div className="my-2">{ColumnFieldMessage.WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumn.niceToString().formatHtml(<em>{ColumnFieldMessage.RightClick.niceToString()}</em>)}</div>
-        <div className="my-2">{ColumnFieldMessage.OnceEditingAColumnTheFollowingFieldsAreAvailable.niceToString()}</div>
         <ul>
-          <li><strong>{FilterFieldMessage.Field.niceToString()}</strong></li>
-          <ul>
-            {!isDefaultQuery && <li>{ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity.niceToString().formatHtml(<strong>{getQueryNiceName(p.queryDescription.queryKey)}</strong>, <strong>{type}</strong>)}</li>}
-            {isDefaultQuery && <li>{ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity.niceToString().formatHtml(<strong>{type}</strong>)}</li>}
+          <li>
+            <strong>{FilterFieldMessage.Field.niceToString()}: </strong>          
+            {!isDefaultQuery && ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity.niceToString().formatHtml(<strong>{getQueryNiceName(p.queryDescription.queryKey)}</strong>, <strong>{type}</strong>)}
+            {isDefaultQuery && ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity.niceToString().formatHtml(<strong>{type}</strong>)}
             <LearnMoreAboutFieldExpressions expanded={expressionExpanded} onSetExpanded={setExpressionExpanded} showAny={false} />
-          </ul>
+          </li>
           <li><strong>{SearchMessage.DisplayName.niceToString()}: </strong>{ColumnFieldMessage.TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression.niceToString()
             .formatHtml(<em>{SearchMessage.DisplayName.niceToString()}</em>)}</li>
           <li><strong>{SearchMessage.SummaryHeader.niceToString()} (Ʃ): </strong>{ColumnFieldMessage.YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices.niceToString()
             .formatHtml(<span><em>{AggregateFunction.niceToString("Count")}</em>, <em>{AggregateFunction.niceToString("Sum")}</em></span>)}</li>
-          <li><strong>{ColumnFieldMessage.CombineValues.niceToString()}: </strong>{ColumnFieldMessage.WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically.niceToString()
+          <li><strong>{SearchMessage.CombineRowsWith.niceToString()}: </strong>{ColumnFieldMessage.WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically.niceToString()
             .formatHtml(<code>rowSpan</code>, <strong><samp>{type}</samp></strong>)}</li>
         </ul>
-        <strong>{ColumnFieldMessage.GroupingResultsByOneOrMoreColumn.niceToString()} </strong><FontAwesomeIcon icon="layer-group" />
-        <div className="my-2">{ColumnFieldMessage.YouCanGroupResultsBy0InAColumnHeaderAndSelecting1.niceToString()
-          .formatHtml(<em>{ColumnFieldMessage.RightClicking.niceToString()}</em>, <em>{JavascriptMessage.groupByThisColumn.niceToString()}</em>, <em>{AggregateFunction.niceToString("Count")}</em>)}</div>
-        <div className="my-2">{ColumnFieldMessage.AnyNewColumnShouldEitherBeAnAggregateOrItWillBeConsideredANew0.niceToString()
-          .formatHtml(<span><em>{SearchMessage.GroupKey.niceToString()}</em> <FontAwesomeIcon icon="key" /></span>)} </div>
-        <div className="my-2">{ColumnFieldMessage.OnceGroupingYouCanFilterNormallyOrUsingAggregatesInYourFields.niceToString().formatHtml(<code>HAVING</code>, FieldExpressionMessage.InSql.niceToString())}</div>
-        <div className="my-2">{ColumnFieldMessage.FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1.niceToString()
-          .formatHtml(<em>{ColumnFieldMessage.RightClicking.niceToString()}</em>, <em>{JavascriptMessage.restoreDefaultColumns.niceToString()}</em>)}</div>
-        <strong>{ColumnFieldMessage.OrderingResults.niceToString()} </strong><FontAwesomeIcon icon="sort-up" />
-        <div className="my-2">{ColumnFieldMessage.YouCanOrderResultsByClickingInAColumnHeaderDefualtOrderingIsAscending.niceToString().formatHtml(<kbd>Shift</kbd>)}</div>
       </Popover.Body>
     </Popover>
   );
@@ -154,7 +138,7 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
 
 export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpanded: (a: any) => void, showAny: boolean }) {
   return (
-    <div className="mb-4">
+    <div className="mb-2">
       <a href="#" onClick={e => {
         e.preventDefault();
         p.onSetExpanded(!p.expanded);
