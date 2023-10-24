@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { areEqual, classes, isNumber, KeyGenerator } from '../Globals'
+import { areEqual, classes, KeyGenerator } from '../Globals'
 import {
   FilterOptionParsed, QueryDescription, QueryToken, SubTokensOptions, getFilterOperations, isList, FilterOperation, FilterConditionOptionParsed, FilterGroupOptionParsed,
   hasAnyOrAll, getTokenParents, isPrefix, isCheckBox, canSplitValue, isFilterGroup, isFilterCondition
@@ -18,7 +18,7 @@ import { Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
 import { renderFilterValue } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
-import { NumberBox } from '../Lines/NumberLine'
+import { isNumberKey, NumberBox } from '../Lines/NumberLine'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { FilterHelp } from './SearchControlVisualTips'
@@ -735,7 +735,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
         format={numberFormat}
         
         onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
-        validateKey={isNumber} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder.toString(), title: title, style: { width: "60px" } }} />
+        validateKey={isNumberKey} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder.toString(), title: title, style: { width: "60px" } }} />
     );
   }
 
