@@ -24,7 +24,9 @@ public class ProfilerActionSplitterAttribute : Attribute
         var splitter = actionContext.ActionDescriptor.EndpointMetadata.OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
         if (splitter != null)
         {
-            var obj = actionContext.RouteData.Values.GetOrThrow(splitter.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
+            var obj = actionContext.RouteData.Values.TryGetCN(splitter.RequestKey) ??
+                actionContext.HttpContext.Request.Query[splitter.RequestKey].Only() ??
+                throw new InvalidOperationException("Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
             if (obj != null)
                 action += " " + obj.ToString();
