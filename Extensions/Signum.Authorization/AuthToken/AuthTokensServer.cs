@@ -99,7 +99,7 @@ public static class AuthTokenServer
             throw new AuthenticationException(LoginAuthMessage.TheUserIsNotLongerInTheDatabase.NiceToString());
 
         if (user.State == UserState.Deactivated)
-            throw new AuthenticationException(LoginAuthMessage.User0IsDisabled.NiceToString(user));
+            throw new AuthenticationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 
         if (user.ToString() != oldToken.User.ToString())
             throw new AuthenticationException(LoginAuthMessage.InvalidUsername.NiceToString());
