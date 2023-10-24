@@ -3,6 +3,7 @@ using Signum.UserAssets;
 using System.Globalization;
 using Signum.Engine.Sync;
 using Signum.Scheduler;
+using System.Diagnostics;
 
 namespace Signum.Workflow;
 
@@ -107,7 +108,8 @@ public class WorkflowImportExport
                 e.Event.DecisionOptionName.HasText() ? new XAttribute("DecisionOptionName", e.Event.DecisionOptionName) : null,
                 e.Event.Timer == null ? null! : new XElement("Timer",
                     e.Event.Timer.Duration?.ToXml("Duration")!,
-                    e.Event.Timer.Condition == null ? null! : new XAttribute("Condition", ctx.Include(e.Event.Timer.Condition))),
+                    e.Event.Timer.Condition == null ? null! : new XAttribute("Condition", ctx.Include(e.Event.Timer.Condition)),
+                    e.Event.Timer.AvoidExecuteConditionByTimer == false ? null! : new XElement("AvoidExecuteConditionByTimer", e.Event.Timer.AvoidExecuteConditionByTimer)),
                 e.Event.BoundaryOf == null ? null! : new XAttribute("BoundaryOf", this.activities.Values.SingleEx(a => a.Is(e.Event.BoundaryOf)).BpmnElementId),
                 e.Event.Xml.ToXml(),
                 e.WorkflowEventTaskModel == null ? null! : new XElement("WorkflowEventTaskModel",
@@ -364,6 +366,7 @@ public class WorkflowImportExport
                         {
                             time.Duration = time.Duration.CreateOrAssignEmbedded(xml.Element("Duration"), (ts, xml) => ts.FromXml(xml));
                             time.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowTimerConditionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
+                            time.AvoidExecuteConditionByTimer = (bool?)xml.Attribute("AvoidExecuteConditionByTimer") ?? false;
                         });
                         ev.BoundaryOf = xml.Attribute("BoundaryOf")?.Let(a => activities.GetOrThrow(a.Value).ToLiteFat());
 

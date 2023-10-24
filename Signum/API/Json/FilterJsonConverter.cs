@@ -253,15 +253,18 @@ public class SystemTimeTS
 
 public class QueryValueRequestTS
 {
-    public required string querykey;
+    public required string queryKey;
     public List<FilterTS>? filters;
     public string? valueToken;
     public bool? multipleValues;
     public SystemTimeTS? systemTime;
 
-    public QueryValueRequest ToQueryValueRequest(JsonSerializerOptions jsonSerializerOptions)
+    public QueryValueRequest ToQueryValueRequest(string queryKey, JsonSerializerOptions jsonSerializerOptions)
     {
-        var qn = QueryLogic.ToQueryName(this.querykey);
+        if (queryKey != this.queryKey)
+            throw new ArgumentException(nameof(queryKey));
+
+        var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
 
         var value = valueToken.HasText() ? QueryUtils.Parse(valueToken, qd, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement) : null;
@@ -276,7 +279,7 @@ public class QueryValueRequestTS
         };
     }
 
-    public override string ToString() => querykey;
+    public override string ToString() => queryKey;
 }
 
 public class QueryRequestTS
@@ -303,8 +306,11 @@ public class QueryRequestTS
         };
     }
 
-    public QueryRequest ToQueryRequest(JsonSerializerOptions jsonSerializerOptions, string? referrerUrl)
+    public QueryRequest ToQueryRequest(string queryKey, JsonSerializerOptions jsonSerializerOptions, string? referrerUrl)
     {
+        if (queryKey != this.queryKey)
+            throw new ArgumentException(nameof(queryKey));
+
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
 
@@ -334,8 +340,11 @@ public class QueryEntitiesRequestTS
 
     public override string ToString() => queryKey;
 
-    public QueryEntitiesRequest ToQueryEntitiesRequest(JsonSerializerOptions jsonSerializerOptions)
+    public QueryEntitiesRequest ToQueryEntitiesRequest(string queryKey, JsonSerializerOptions jsonSerializerOptions)
     {
+        if (queryKey != this.queryKey)
+            throw new ArgumentException(queryKey);
+
         var qn = QueryLogic.ToQueryName(queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
         return new QueryEntitiesRequest

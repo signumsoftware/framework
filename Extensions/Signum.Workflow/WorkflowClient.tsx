@@ -45,7 +45,7 @@ import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
-import { EntityLine } from '@framework/Lines';
+import { EntityLine, TextAreaLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../Signum.SMS/Signum.SMS';
 import { EmailMessageEntity } from '../Signum.Mailing/Signum.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
@@ -401,8 +401,7 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
 
   function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
     return AutoLineModal.show({
-      type: { name: "string" },
-      valueLineType: "DateTime",
+      type: { name: "DateTime" },
       modalSize: "md",
       title: WorkflowMessage.DeactivateWorkflow.niceToString(),
       message:
@@ -509,10 +508,9 @@ public interface IWorkflowTransition
   AutoLineModal.show({
     type: { name: "string" },
     initialValue: value,
-    valueLineType: "TextArea",
+    customComponent: props => <TextAreaLine {...props} />,
     title: "WorkflowTransitionContext Members",
     message: "Copy to clipboard: Ctrl+C, ESC",
-    initiallyFocused: true,
     valueHtmlAttributes: { style: { height: 215 } },
   });
 }

@@ -1,17 +1,21 @@
-﻿.task {
+﻿.st-tt-entry {
     border-bottom: 1px solid #ddd;
     list-style: none;
 }
 
-    .task .processName {
+    .st-tt-entry .processName {
         font-size: 150%;
     }
 
-    .task .numTimes {
+    .st-tt-entry .numTimes {
         color: #666;
     }
 
-    .task .max, .task .med, .task .min, .task .last, .task .sum {
+    .st-tt-entry .max, 
+    .st-tt-entry .med, 
+    .st-tt-entry .min, 
+    .st-tt-entry .last, 
+    .st-tt-entry .sum {
         display: block;
         height: 10px;
         float: left;
@@ -19,23 +23,23 @@
         margin-left: 0px;
     }
 
-    .task .max {
+    .st-tt-entry .max {
         background: #b22222;
     }
 
-    .task .med {
+    .st-tt-entry .med {
         background: #ff7722;
     }
 
-    .task .min {
+    .st-tt-entry .min {
         background: #ffd700;
     }
 
-    .task .last {
+    .st-tt-entry .last {
         background: #b27aff;
     }
 
-    .task .sum {
+    .st-tt-entry .sum {
         background: #597FFF;
     }
 
@@ -43,16 +47,16 @@
     border-left: 1px solid #eee;
 }
 
-#tasks {
+#st-tt-entrys {
     width: 1200px;
 }
 
-    #tasks .left {
+    #st-tt-entrys .left {
         float: left;
     }
 
 
-.entityName {
-    color:darkgreen;
+.sf-tt-entityName {
+    color:gray;
     font-weight:bold;
 }

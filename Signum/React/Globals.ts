@@ -1249,7 +1249,7 @@ export function getColorContrasColorBWByHex (hexcolor: string) {
 }
 
 export function isPromise(value: any): value is Promise<any> {
-  return value.then != null;
+  return value != null && value.then != null;
 }
 
 export function toPromise<T>(value: T | Promise<T>): Promise<T> {

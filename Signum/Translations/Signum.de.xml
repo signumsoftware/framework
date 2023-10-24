@@ -30,8 +30,8 @@
   <Type Name="CollectionAnyAllType">
     <Member Name="All" Description="Alle" />
     <Member Name="Any" Description="Irgend" />
-    <Member Name="AnyNo" Description="Irgend nicht" />
-    <Member Name="NoOne" Description="Keine" />
+    <Member Name="NotAll" Description="Nicht alle" />
+    <Member Name="NotAny" Description="Keine" />
   </Type>
   <Type Name="CollectionElementType">
     <Member Name="Element" Description="Element" />
@@ -43,6 +43,32 @@
     <Member Name="SeparatedByCommaDistinct" Description="Getrennt durch Komma (Distinct)" />
     <Member Name="SeparatedByNewLine" Description="Getrennt durch neue Zeile" />
     <Member Name="SeparatedByNewLineDistinct" Description="Getrennt durch neue Linie (Distinct)" />
+  </Type>
+  <Type Name="ColumnFieldMessage">
+    <Member Name="ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery" Description="Aktivieren Sie 'ZusammenfassungKopfzeile', um ein Aggregat für die gesamte Abfrage (wie die Summe eines numerischen Wertes) unter Verwendung eines Feldausdrucks hinzuzufügen." />
+    <Member Name="AnyNewColumnShouldEitherBeAnAggregateOrItWillBeConsideredANew0" Description="Jede neue Spalte sollte entweder ein Aggregat sein oder sie wird als neue {0} betrachtet." />
+    <Member Name="ColumnsHelp" Description="Hilfe zu Spalten" />
+    <Member Name="CombineValues" Description="Werte kombinieren" />
+    <Member Name="FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1" Description="Schließlich können Sie die Gruppierung nach {0} in einer Spaltenüberschrift beenden und {1} auswählen." />
+    <Member Name="GroupingResultsByOneOrMoreColumn" Description="Ergebnisse nach einer (oder mehreren) Spalten gruppieren" />
+    <Member Name="ModifyingColumns" Description="Ändern von Spalten" />
+    <Member Name="NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination" Description="Hinweis: Die Aggregation umfasst Zeilen, die aufgrund der Paginierung möglicherweise nicht sichtbar sind." />
+    <Member Name="OnceEditingAColumnTheFollowingFieldsAreAvailable" Description="Wenn Sie eine Spalte bearbeiten, sind die folgenden Felder verfügbar:" />
+    <Member Name="OnceGroupingYouCanFilterNormallyOrUsingAggregatesInYourFields" Description="Nach der Gruppierung können Sie normal filtern oder Aggregate in Ihren Feldern verwenden ({0} {1})." />
+    <Member Name="OrderingResults" Description="Sortieren der Ergebnisse" />
+    <Member Name="Rearrange" Description="neu anordnen" />
+    <Member Name="RightClick" Description="Rechtsklick auf" />
+    <Member Name="RightClicking" Description="Rechtsklick auf" />
+    <Member Name="SummaryHeaderField" Description="ZusammenfassungKopfzeileFeld" />
+    <Member Name="TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression" Description="Der Text der Spaltenüberschrift wird in der Regel automatisch in Abhängigkeit vom Feldausdruck gesetzt, kann aber durch manuelles Setzen von {0} angepasst werden." />
+    <Member Name="TheDefaultColumnsCanBeChangedAtWillBy0InAColumnHeaderAndThenSelect1Or2Or3" Description="Die Standardspalten können nach Belieben geändert werden, indem Sie {0} in einer Spaltenüberschrift und dann {1}, {2} oder {3} wählen. Sie können die Spalten auch {4} durch Ziehen und Ablegen an eine andere Position verschieben." />
+    <Member Name="WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically" Description="Wenn eine Tabelle viele sich wiederholende Werte in einer Spalte hat, können Sie sie vertikal kombinieren ({0}), entweder wenn der Wert gleich ist oder wenn er gleich ist und zur gleichen Haupteinheit gehört." />
+    <Member Name="WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumn" Description="Beim Einfügen wird die neue Spalte vor oder nach der ausgewählten Spalte eingefügt, je nachdem, wo Sie {0}." />
+    <Member Name="YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices" Description="Sie können der Spaltenüberschrift einen numerischen Wert hinzufügen (wie die Gesamtsumme der Rechnungen), indem Sie einen Feldausdruck verwenden, der auf ein Aggregat endet (wie {0},...). Hinweis: Die Aggregation umfasst auch Zeilen, die aufgrund der Paginierung möglicherweise nicht sichtbar sind!" />
+    <Member Name="YouCanGroupResultsBy0InAColumnHeaderAndSelecting1" Description="Sie können Ergebnisse gruppieren, indem Sie {0} in einer Spaltenüberschrift eingeben und {1} auswählen. Alle Spalten mit Ausnahme der ausgewählten Spalte und einer Aggregationsspalte (in der Regel {2}) werden ausgeblendet." />
+    <Member Name="YouCanOrderResultsByClickingInAColumnHeaderDefualtOrderingIsAscending" Description="Sie können die Ergebnisse sortieren, indem Sie in eine Spaltenüberschrift klicken. Die Standardreihenfolge ist aufsteigend, durch erneutes Klicken ändert sich die Reihenfolge in absteigend. Sie können nach mehr als einer Spalte sortieren, wenn Sie beim Klicken auf die Spaltenüberschrift {0} gedrückt halten." />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity" Description="Sie können einen Feldausdruck auswählen, der auf eine beliebige Spalte der Abfrage {0}, ein beliebiges Feld von {1} oder eine verwandte Entität verweist." />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity" Description="Sie können einen Feldausdruck auswählen, der auf ein beliebiges Feld der Entität {0} oder eine verwandte Entität verweist." />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
@@ -202,6 +228,40 @@
   <Type Name="ExceptionOrigin" Description="Ausnahme Ursprung">
     <Member Name="Backend_DotNet" Description="Backend DotNet" />
     <Member Name="Frontend_React" Description="Frontend React" />
+  </Type>
+  <Type Name="FieldExpressionMessage">
+    <Member Name="_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate" Description="{0} und {1}, können Sie Teile des Datums extrahieren, indem Sie den Ausdruck mit {2} (Rückgabe einer Zahl) oder {3} (Rückgabe eines Datums) fortsetzen" />
+    <Member Name="Aggregates" Description="Aggregate" />
+    <Member Name="AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens" Description="Ermöglicht das Hinzufügen von Filtern, die Bedingungen für die Elemente der Sammlung (ohne Multiplikation der Anzahl der Zeilen) verwenden ({0} {1}). Um verschiedene Bedingungen zu kombinieren, verwenden Sie {2} / {3} Gruppen mit einem Präfix (siehe unten)." />
+    <Member Name="AStringLikeHelloANumberLike" Description="Eine Zeichenfolge (z. B. &quot;Hallo&quot;), eine Zahl (z. B. 3.14) oder ein boolescher Wert (true). Manchmal können Sie den Ausdruck fortsetzen, z. B. die {0} einer Zeichenfolge oder die Berechnung der {1} oder {2} einer Zahl (für Histogramme)." />
+    <Member Name="CanOnlyBeUsedAfterAnotherField" Description="Kann nur nach einem anderen Feld verwendet werden." />
+    <Member Name="CollectionOfEntitiesOrRelationships" Description="Sammlung von Entitäten oder Beziehungen." />
+    <Member Name="CollectionOperators" Description="Betreiber von Sammlungen" />
+    <Member Name="Collections" Description="Collection" />
+    <Member Name="CountDistinct" Description="Unterschiedlich zählen" />
+    <Member Name="CountNotNull" Description="Anzahl nicht NULL" />
+    <Member Name="Dates" Description="Daten" />
+    <Member Name="EntityRelationships" Description="Entitätsbeziehungen" />
+    <Member Name="EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields" Description="Entitätsbeziehungen ermöglichen es Ihnen, zu anderen Tabellen zu navigieren, um Felder abzurufen" />
+    <Member Name="FinallyRememberThatYouCan01FullFieldExpression" Description="Denken Sie schließlich daran, dass Sie {0} / {1} vollständige Feldausdrücke auf andere Filter oder Spalten übertragen können, indem Sie die Dropdown-Liste öffnen und {2} / {3}." />
+    <Member Name="InSql" Description="in SQL" />
+    <Member Name="LearnMoreAboutFieldExpressions" Description="Weitere Informationen zu Feldausdrücken" />
+    <Member Name="MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012" Description="Multipliziert die Anzahl der Zeilen mit allen Elementen der Sammlung. ({0} / {1} {2}). Alle Feldausdrücke, die dasselbe {3} verwenden, verwenden dasselbe {4}, um dies zu vermeiden, verwenden Sie {5} / {6}." />
+    <Member Name="SimpleValues" Description="Einfache Werte" />
+    <Member Name="WhenGroupingAllowsToCollapseManyValuesInOneValue" Description="Wenn viele Werte in einem Wert zusammengefasst werden können" />
+    <Member Name="YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems" Description="Sie können in Datenbankbeziehungen navigieren, indem Sie den Ausdruck mit weiteren Elementen fortsetzen." />
+  </Type>
+  <Type Name="FilterFieldMessage">
+    <Member Name="AFilterConsistsOfA0AComparison1AndAConstant2" Description="Ein Filter besteht aus einem {0}, einem Vergleich {1} und einer Konstante {2}." />
+    <Member Name="AndOrGroups" Description="UND/ODER-Gruppen" />
+    <Member Name="Field" Description="Feld" />
+    <Member Name="FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1" Description="Feld kann jede Spalte der Abfrage {0} oder jedes Feld von {1} sein." />
+    <Member Name="FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity" Description="Feld kann ein beliebiges Feld der {0} oder einer verwandten Entität sein." />
+    <Member Name="FilterGroupsCanAlsoBeUsedToCombineFiltersThatShouldBeSatisfiedByTheSameElement" Description="Filtergruppen können auch verwendet werden, um Filter zu kombinieren, die von demselben Element einer Sammlung erfüllt werden sollen, wenn man Operatoren wie Any oder All im Präfixfeld verwendet." />
+    <Member Name="FiltersHelp" Description="Hilfe zu Filtern" />
+    <Member Name="Operator" Description="Operator" />
+    <Member Name="UsingAddOrGroupYouCanGroupAFewFiltersTogether" Description="Mit [+ ODER-Gruppe hinzufügen] können Sie mehrere Filter zusammenfassen, so dass nur eine Bedingung erfüllt sein muss. Innerhalb einer ODER-Gruppe können Sie eine verschachtelte UND-Gruppe erstellen und so weiter." />
+    <Member Name="Value" Description="Wert" />
   </Type>
   <Type Name="FilterGroupOperation" Description="Filtergruppeoperation">
     <Member Name="And" Description="Und" />
@@ -508,7 +568,6 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
-    <Member Name="Explore" Description="Erforsche" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
     <Member Name="Filters" Description="Filter" />

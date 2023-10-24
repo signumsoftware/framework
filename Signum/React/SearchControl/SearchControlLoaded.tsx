@@ -38,6 +38,9 @@ import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faEllipsis, faFilter } from '@fortawesome/free-solid-svg-icons'
 import { similarToken } from '../Search'
+import { SearchHelp } from './SearchControlVisualTips'
+import { VisualTipIcon } from '../Basics/VisualTipIcon'
+import { SearchVisualTip} from '../Signum.Basics'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -674,7 +677,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         </button>
       },
 
-      ...leftButtonBarElements
+      ...leftButtonBarElements,
+      {
+        order: 10,
+        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} content={props => <SearchHelp sc={this} injected={props} />} />
+      }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
@@ -1079,10 +1086,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
       menuItems.push(<Dropdown.Header>{SearchMessage.Filters.niceToString()}</Dropdown.Header>);
       menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}>
-        <span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-        </span>&nbsp;{JavascriptMessage.addFilter.niceToString()}
+        {getAddFilterIcon()}&nbsp;{JavascriptMessage.addFilter.niceToString()}
       </Dropdown.Item>);
     }
 
@@ -1095,38 +1099,27 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
-          <span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-          </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+          {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
-        </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
+        menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
+          {getEditColumnIcon()}&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
-        </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
+          {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Divider />);
 
         if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
-          menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
-          </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
+          menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}>
+            {getGroupByThisColumnIcon()}&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
       }
 
-      menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
-      </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
+      menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}>
+        {getResotreDefaultColumnsIcon()}&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
 
       if (fo.columnOptions.some(a => a.hiddenColumn == true)) {
@@ -2022,6 +2015,48 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 }
 
+export function getResotreDefaultColumnsIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
+    </span>
+}
+
+export function getGroupByThisColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
+    </span>
+}
+
+export function getRemoveColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
+    </span>
+}
+
+export function getEditColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
+    </span>
+}
+
+export function getInsertColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
+    </span>
+}
+
+export function getAddFilterIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
+    </span>
+}
+
 function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
   if (qt == undefined)
     return undefined;
@@ -2108,7 +2143,7 @@ function dominates(root: QueryToken, big: QueryToken) {
 }
 
 
-function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
+export function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
 
   var [width, height, ligatures, unicode, data] = p.iconDefinition.icon;
 
@@ -2159,7 +2194,7 @@ const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: Re
     <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
       href=""
       onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <FontAwesomeIcon icon="ellipsis" title={SearchMessage.Options.niceToString()} />
+      <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" />
       {p.children}
     </a>
   );

@@ -10,9 +10,17 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="HelpImageEntity" Description="Hilfebild" PluralDescription="Hilfe-Bilder" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="File" Description="Datei" />
+    <Member Name="Target" Description="Ziel" />
+  </Type>
+  <Type Name="HelpImageFileType">
+    <Member Name="Image" Description="Bild" />
+  </Type>
   <Type Name="HelpKindMessage">
-    <Member Name="AndAreFrequentlyCreatedOrModified" Description=" und sind häufig erstellt oder geändert" />
-    <Member Name="AndIsRarelyCreatedOrModified" Description=" und sind selten erstellt oder geändert" />
+    <Member Name="AndIsMasterDataRarelyChanges" Description=" und ist Stammdaten (ändert sich selten)" />
+    <Member Name="andIsTransactionalDataCreatedRegularly" Description=" und sind Transaktionsdaten (regelmäßig erstellt)" />
     <Member Name="AutomaticallyByTheSystem" Description=" automatisch vom System" />
     <Member Name="ClassifyOtherEntities" Description="andere Entitäten klassifizieren" />
     <Member Name="HisMainFunctionIsTo0" Description="Ihre Hauptfunktion ist {0}" />
@@ -23,33 +31,38 @@
     <Member Name="StorePartsOfInformationSharedByDifferentEntities" Description="Teile der Informationen, die von verschiedenen Entitäten geteilt wurden, speichern" />
   </Type>
   <Type Name="HelpMessage">
-    <Member Name="_0IsA1" Description="{0} ist ein {1}" />
+    <Member Name="_0IsA1_G" Description="{0} ist ein {1}" />
     <Member Name="_0IsA1AndShows2" Description="{0} ist ein {1} und zeigt {2}" />
     <Member Name="_0IsACalculated1" Description="{0} ist eine berechnete {1}" />
     <Member Name="_0IsACollectionOfElements1" Description="{0} ist eine Liste von {1}-Elementen " />
     <Member Name="_0IsThePrimaryKeyOf1OfType2" Description="{0} ist der Primärschlüssel von {1}, des Typs {2}" />
     <Member Name="Amount" Description="Betrag" />
+    <Member Name="AnEmbeddedEntityOfType0" Description="Eine eingebettete Entität vom Typ {0}" />
     <Member Name="Any" Description="irgendein" />
     <Member Name="Appendices" Description="Anhang" />
+    <Member Name="AReference1ToA2_G" Description="Ein Verweis ({1}) auf eine {2}" />
     <Member Name="BooleanValue" Description="boolescher Wert (ja oder nein)" />
     <Member Name="Buscador" Description="Suchmaschine" />
     <Member Name="Call0Over1OfThe2" Description="Führt {0} auf {1} von {2}" />
     <Member Name="Character" Description="Zeichen" />
+    <Member Name="Close" Description="Schließen" />
     <Member Name="ConstructsANew0" Description="Erstellt eine neue {0}" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
+    <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="Entities" Description="Entitäten" />
     <Member Name="ExpressedIn" Description="ausgedrückt in " />
     <Member Name="From0OfThe1" Description="von {0} von {1} " />
     <Member Name="FromMany0" Description="von vielen {0}" />
+    <Member Name="full" Description="voll" />
     <Member Name="Help" Description="Hilfe" />
     <Member Name="HelpNotLoaded" Description="Hilfe nicht geladen" />
     <Member Name="In0" Description="(in {0})" />
     <Member Name="Integer" Description="ganze Zahl " />
     <Member Name="Key0NotFound" Description="Key {0} wurde nicht gefunden" />
+    <Member Name="lite" Description="leicht" />
     <Member Name="Next" Description="Nächster" />
-    <Member Name="OfThe0" Description="der {0}" />
-    <Member Name="OrNull" Description="oder null" />
+    <Member Name="Optional" Description=" (fakultativ)" />
     <Member Name="Previous" Description="Vorherige" />
     <Member Name="Property0NotExistsInType1" Description="Die Eigenschaft {0} ist in Typ {1} nicht vorhanden" />
     <Member Name="QueryOf0" Description="Abfrage von {0} " />
@@ -57,14 +70,15 @@
     <Member Name="SearchText" Description="Text suchen" />
     <Member Name="Should" Description=". Sollte  " />
     <Member Name="String" Description="Zeichenkette" />
-    <Member Name="The0" Description="Der {0}" />
     <Member Name="TheDatabaseVersion" Description="die Version der Datenbank" />
     <Member Name="TheProperty0" Description="die Eigenschaft {0}" />
     <Member Name="Value" Description="Wert" />
     <Member Name="ValueLike0" Description="Wert wie {0}" />
+    <Member Name="ViewMore" Description="Mehr sehen" />
     <Member Name="YourVersion" Description="Ihre Version" />
   </Type>
   <Type Name="HelpPermissions">
+    <Member Name="DownloadHelp" Description="Hilfe herunterladen" />
     <Member Name="ViewHelp" Description="Hilfe anzeigen" />
   </Type>
   <Type Name="HelpSearchMessage">

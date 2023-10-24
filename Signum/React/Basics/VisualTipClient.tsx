@@ -1,0 +1,21 @@
+import { VisualTipSymbol } from "../Signum.Basics";
+import * as AppContext from "../AppContext";
+import { ajaxGet, ajaxPost } from "../Services";
+
+export function start() {
+  AppContext.clearSettingsActions.push(() => API.cached = null);
+}
+
+export module API {
+
+  export let cached: Promise<string[] | null> | null | undefined  = null;
+
+  export function getConsumed(): Promise<string[] | null> {
+    return (cached ??= ajaxGet({ url: "/api/visualtip/getConsumed" }));
+  }
+
+  export function consume(symbolKey: string): Promise<null> {
+    cached = null;
+    return ajaxPost({ url: "/api/visualtip/consume" }, symbolKey);
+  }
+}

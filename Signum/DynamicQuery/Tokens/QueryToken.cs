@@ -2,6 +2,14 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Signum.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.Intrinsics.X86;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
+using System.Linq.Expressions;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -757,7 +765,7 @@ public enum QueryTokenMessage
     MatchSnippet,
 
     [Description("Snippet for {0}")]
-    SnippetOf0
+    SnippetOf0,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

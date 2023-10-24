@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Workflow'
@@ -34,10 +34,9 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
   var ctx = p.ctx;

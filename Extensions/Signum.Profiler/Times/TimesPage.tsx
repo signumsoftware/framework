@@ -1,14 +1,18 @@
 import * as React from 'react'
-import { DateTime } from 'luxon'
+import { DateTime, Duration } from 'luxon'
 import * as Navigator from '@framework/Navigator'
-import { API, TimeTrackerEntry } from '../ProfilerClient'
+import { API, HeavyProfilerEntry, TimeTrackerEntry, TimeTrackerTime } from '../ProfilerClient'
 import { useLocation, useParams } from "react-router";
 
 import "./Times.css"
 import { Tab, Tabs } from 'react-bootstrap';
 import { useAPI, useAPIWithReload } from '@framework/Hooks';
 import { useTitle } from '@framework/AppContext';
-
+import { formatRules } from '@framework/Finder';
+import { toNumberFormat } from '@framework/Reflection';
+import { isDurationKey } from '@framework/Lines/TimeLine';
+import { Color } from '@framework/Basics/Color';
+import { getToString } from '@framework/Signum.Entities';
 
 
 export default function TimesPage() {
@@ -43,56 +47,74 @@ export default function TimesPage() {
   );
 }
 
+
+function toHumanMilis(milis: number) {
+  var result = Duration.fromMillis(milis).shiftTo("hour", "minute", "second", "millisecond").toObject();
+  for (var key in result) {
+    if ((result as any)[key] == 0)
+      delete (result as any)[key];
+  }
+
+  return Duration.fromObject(result).toHuman();
+}
+
 function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
-  const maxWith = 600;
 
-  const maxValue = times.map(a => a.maxTime).max()!;
-  const maxTotal = times.map(a => a.totalTime).max()!;
+  var nf = toNumberFormat("C0");
+  function formatMilis(milis: number) {
+    return <span title={ toHumanMilis(milis)}>{nf.format(milis)} ms</span>
+  }
+  const maxWidth = 600;
 
-  const ratio = maxWith / maxValue;
+  const maxDuration = times.map(a => a.max.duration).max()!;
+  const maxTotal = times.map(a => a.totalDuration).max()!;
+
+  const ratio = maxWidth / maxDuration;
+
+  function drawLineRow(label: string, time: TimeTrackerTime, className: string) {
+    return (
+      <tr>
+        <td>{label}</td>
+        <td className="leftBorder" title={time && `${time.date} (${DateTime.fromISO(time.date).toRelative()})
+      ${time.url}
+      ${getToString(time.user)}
+      `}>
+          <span className={className} style={{ width: (time.duration * ratio) + "px", marginTop: "8px" }}></span> {formatMilis(time.duration)} ({DateTime.fromISO(time.date).toRelative()})
+        </td>
+      </tr>
+    );
+  }
 
   return (
     <table className="table">
       <tbody>
         {
-          times.orderByDescending(a => a.totalTime).map((pair, i) =>
-            <tr className="task" key={i}>
+          times.orderByDescending(a => a.totalDuration).map((pair, i) =>
+            <tr className="st-tt-entry" key={i}>
               <td>
                 <div>
-                  <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
-                  {pair.key.tryAfter(' ') != undefined && <span className="entityName"> {pair.key.after(' ')} </span>}
+                  <span className="processName"> {pair.identifier.tryBefore(' ') ?? pair.identifier}</span>
+                  {pair.identifier.tryAfter(' ') != undefined && <span className="sf-tt-entityname"> {pair.identifier.after(' ')} </span>}
                 </div>
                 <div>
-                  <span className="numTimes">Executed {pair.count} {pair.count == 1 ? "time" : "times"} Total {pair.totalTime} ms </span>
+                  <span className="numTimes">Executed {pair.count} {pair.count == 1 ? "time" : "times"} Total {formatMilis(pair.totalDuration)}</span>
                 </div>
-                <div className="sum" style={{ width: (100 * pair.totalTime / maxTotal) + "%" }}></div>
+                <div className="sum" style={{ width: (100 * pair.totalDuration / maxTotal) + "%"}}></div>
               </td>
               <td>
                 <table>
-                  <tr>
-                    <td>Max</td>
-                    <td className="leftBorder">
-                      <span className="max" style={{ width: (pair.maxTime * ratio) + "px" }}></span> {pair.maxTime} ms ({DateTime.fromISO(pair.maxDate).toRelative()})
-                    </td>
-                  </tr>
+                  {drawLineRow("Last", pair.last, "last")}
+                  {drawLineRow("Max", pair.max, "max")}
+                  {pair.max2 && drawLineRow("Max 2", pair.max2, "max")}
+                  {pair.max3 &&drawLineRow("Max 3", pair.max3, "max")}
                   <tr>
                     <td>Average</td>
                     <td className="leftBorder">
-                      <span className="med" style={{ width: (pair.averageTime * ratio) + "px" }}></span> {pair.averageTime} ms
+                      <span className="med" style={{ width: (pair.averageDuration * ratio) + "px", marginTop: "8px"  }}></span> {formatMilis(pair.averageDuration)}
                   </td>
                   </tr>
-                  <tr>
-                    <td>Min</td>
-                    <td className="leftBorder">
-                      <span className="min" style={{ width: (pair.minTime * ratio) + "px" }}></span> {pair.minTime} ms ({DateTime.fromISO(pair.minDate).toRelative()})
-                  </td>
-                  </tr>
-                  <tr>
-                    <td>Last</td>
-                    <td className="leftBorder">
-                      <span className="last" style={{ width: (pair.lastTime * ratio) + "px" }}></span> {pair.lastTime} ms ({DateTime.fromISO(pair.lastDate).toRelative()})
-                  </td>
-                  </tr>
+                  {drawLineRow("Min", pair.min, "min")}
+
                 </table>
               </td>
             </tr>
@@ -103,16 +125,36 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
 }
 
 function TimesTable({ times }: { times: TimeTrackerEntry[] }) {
-  const getColor = (f: number) => `rgb(255, ${(1 - f) * 255}, ${(1 - f) * 255})`;
+
+  var white = Color.White;
+  var blue = Color.parse("#2980B9");
+  const getColorCount = (f: number) => white.lerp(f, blue).toString();
+  var red = Color.parse("#C0392B");
+  const getColorMax = (f: number) => white.lerp(f, red).toString();
+  var violet = Color.parse("#6C3483");
+  const getColorTotal = (f: number) => white.lerp(f, violet).toString();
 
   const max = {
-    count: times.map(a => a.count).max()!,
-    lastTime: times.map(a => a.lastTime).max()!,
-    minTime: times.map(a => a.minTime).max()!,
-    averageTime: times.map(a => a.averageTime).max()!,
-    maxTime: times.map(a => a.maxTime).max()!,
-    totalTime: times.map(a => a.totalTime).max()!,
+    count: times.max(a => a.count)!,
+    duration: times.max(a => a.max.duration)!,
+    totalDuration: times.max(a => a.totalDuration)!,
   };
+
+  var nf = toNumberFormat("C0");
+
+  function getTimeCell(time?: TimeTrackerTime) {
+    if (time == null)
+      return <td></td>;
+
+    return (
+      <td style={{ textAlign: "right", background: getColorMax(time.duration / max.duration) }}
+        title={`${time.date} (${DateTime.fromISO(time.date).toRelative()})
+      ${time.url}
+      ${getToString(time.user)}
+      `}
+      >{nf.format(time.duration)} ms</td>
+    );
+  }
 
   return (
     <table className="table table-nonfluid">
@@ -120,29 +162,33 @@ function TimesTable({ times }: { times: TimeTrackerEntry[] }) {
         <tr>
           <th>Name</th>
           <th>Entity</th>
-          <th>Executions</th>
-          <th>Last Time</th>
+          <th>Count</th>
           <th>Min</th>
           <th>Average</th>
+          <th>Max 3</th>
+          <th>Max 2</th>
           <th>Max</th>
+          <th>Last</th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody>
-        {times.map((pair, i) =>
+        {times.orderByDescending(a => a.totalDuration).map((pair, i) =>
           <tr style={{ background: "#FFFFFF" }} key={i}>
             <td>
-              <span className="processName"> {pair.key.tryBefore(' ') ?? pair.key}</span>
+              <span className="processName"> {pair.identifier.tryBefore(' ') ?? pair.identifier}</span>
             </td>
             <td>
-              {pair.key.tryAfter(' ') && <span className="entityName">{pair.key.tryAfter(' ')}</span>}
+              {pair.identifier.tryAfter(' ') && <span className="sf-tt-entityname">{pair.identifier.tryAfter(' ')}</span>}
             </td>
-            <td style={{ textAlign: "center", background: getColor(pair.count / max.count) }}>{pair.count}</td>
-            <td style={{ textAlign: "right", background: getColor(pair.lastTime / max.lastTime) }}>{pair.lastTime} ms</td>
-            <td style={{ textAlign: "right", background: getColor(pair.minTime / max.minTime) }}>{pair.minTime} ms</td>
-            <td style={{ textAlign: "right", background: getColor(pair.averageTime / max.averageTime) }}>{pair.averageTime} ms</td>
-            <td style={{ textAlign: "right", background: getColor(pair.maxTime / max.maxTime) }}>{pair.maxTime} ms</td>
-            <td style={{ textAlign: "right", background: getColor(pair.totalTime / max.totalTime) }}>{pair.totalTime} ms</td>
+            <td style={{ textAlign: "end", background: getColorCount(pair.count / max.count) }}>{pair.count}</td>
+            {getTimeCell(pair.min)}
+            <td style={{ textAlign: "end", background: getColorMax(pair.averageDuration / max.duration) }}>{pair.count}</td>
+            {getTimeCell(pair.max3)}
+            {getTimeCell(pair.max2)}
+            {getTimeCell(pair.max)}
+            {getTimeCell(pair.last)}
+            <td style={{ textAlign: "end", background: getColorTotal(pair.totalDuration / max.totalDuration) }}>{nf.format(pair.totalDuration)} ms</td>
           </tr>
         )}
       </tbody>
