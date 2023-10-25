@@ -160,6 +160,8 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
+    string? alreadyCreated; 
+
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateSuffixWithRenames"))
@@ -172,22 +174,19 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             fp.SetPrefixPair(GetPrefixPair(fp));
 
             var client = GetClient(fp);
-            if (CreateBlobContainerIfNotExists)
+            if (CreateBlobContainerIfNotExists && alreadyCreated != client.Name)
             {
                 using (HeavyProfiler.LogNoStackTrace("AzureBlobStorage CreateIfNotExists"))
                 {
                     try
                     {
                         client.CreateIfNotExists();
+                        alreadyCreated = client.Name;
                     }
                     catch (Azure.RequestFailedException ex) when (ex.ErrorCode == "ContainerAlreadyExists")
                     {
                         // The error message "The specified container already exists" suggests that there is a concurrency issue at play
                         // Ignore it and continue, since the container exists which is what we wanted anyway
-                    }
-                    finally
-                    {
-                        CreateBlobContainerIfNotExists = false;
                     }
                 }
             }
