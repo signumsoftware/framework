@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
-import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextAreaLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
+import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityMultiSelect, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextAreaLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
 export interface AutoLineProps extends LineBaseProps {
@@ -61,7 +61,7 @@ export namespace AutoLine {
           return p => <EntityRepeater {...p} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return p => <EntityCheckboxList {...p} />;
+          return p => <EntityCheckboxList {...p} />; //Alternative <EntityCheckboxList {...p} />
 
         return p => <EntityStrip {...p} />;
       }
@@ -73,7 +73,7 @@ export namespace AutoLine {
 
     } else {
 
-      if (tr.name == "[ALL]")
+      if (tr.name == IsByAll)
         return p => <EntityLine {...p} />;
 
       if (tis.length) {
@@ -126,7 +126,6 @@ export namespace AutoLine {
       return p => <span className="text-danger">Not supported type {tr.name} by AutoLine</span>;
     }
   }
-
 }
 
 
