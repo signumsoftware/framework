@@ -167,6 +167,5 @@ TimeTextBox.defaultProps = {
 };
 
 export function isDurationKey(e: React.KeyboardEvent<any>): boolean {
-  const c = e.keyCode;
   return isNumberKey(e) || e.key == ":";
 }

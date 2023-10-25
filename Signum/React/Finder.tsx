@@ -159,7 +159,7 @@ export namespace Options {
     return import("./SearchControl/SearchModal");
   }
 
-  export let entityColumnHeader: () => React.ReactChild = () => "";
+  export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
 
   export let tokenCanSetPropery = (qt: QueryToken) =>
     qt.filterType == "Lite" && qt.key != "Entity" ||
@@ -2050,7 +2050,7 @@ export interface FormatRule {
 
 export class CellFormatter {
   constructor(
-    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactChild | undefined,
+    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactElement | string | null | undefined,
     public fillWidth: boolean,
     public cellClass?: string) {
   }
@@ -2083,7 +2083,7 @@ export interface EntityFormatRule {
 
 export class EntityFormatter {
   constructor(
-    public formatter: (ctx: CellFormatterContext) => React.ReactChild | undefined,
+    public formatter: (ctx: CellFormatterContext) => React.ReactElement | string | null | undefined,
     public cellClass?: string) {
   }
 }

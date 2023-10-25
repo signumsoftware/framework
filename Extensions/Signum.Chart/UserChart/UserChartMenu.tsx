@@ -13,7 +13,7 @@ import { ChartRequestViewHandle } from '../Templates/ChartRequestView'
 import * as UserAssetClient from '../../Signum.UserAssets/UserAssetClient'
 import { useForceUpdate } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus'
-import { KeyCodes } from '@framework/Components'
+import { KeyNames } from '@framework/Components'
 import { UserQueryMerger } from '../../Signum.UserQueries/UserQueryMenu'
 import { UserChartEntity, UserChartOperation } from '../UserChart/Signum.Chart.UserChart'
 
@@ -202,7 +202,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
 
   function handleSearchKeyDown(e: React.KeyboardEvent<any>) {
 
-    if (!e.shiftKey && e.keyCode == KeyCodes.down) {
+    if (!e.shiftKey && e.key == KeyNames.arrowDown) {
 
       e.preventDefault();
       const div = document.getElementById("userchart-items-container")!;

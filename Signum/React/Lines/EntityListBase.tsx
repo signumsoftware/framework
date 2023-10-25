@@ -8,10 +8,9 @@ import { TypeContext, mlistItemContext } from '../TypeContext'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
-import { FindOptionsAutocompleteConfig, LiteAutocompleteConfig } from './AutoCompleteConfig'
 import { tryGetTypeInfos } from '../Reflection'
-import { KeyCodes } from '../Components'
 import { isRtl, toAbsoluteUrl } from '../AppContext'
+import { KeyNames } from '../Components'
 
 export interface EntityListBaseProps extends EntityBaseProps {
   move?: boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean);
@@ -416,8 +415,8 @@ export abstract class EntityListBaseController<T extends EntityListBaseProps> ex
 
     if (ke.ctrlKey) {
       var direction =
-        ke.keyCode == KeyCodes.down || ke.keyCode == KeyCodes.right ? +1 :
-          ke.keyCode == KeyCodes.up || ke.keyCode == KeyCodes.left ? -1 :
+        ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight ? +1 :
+          ke.key == KeyNames.arrowUp || ke.key == KeyNames.arrowLeft ? -1 :
             null;
 
       if (direction != null) {

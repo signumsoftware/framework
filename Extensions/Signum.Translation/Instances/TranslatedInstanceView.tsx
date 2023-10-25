@@ -12,7 +12,7 @@ import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Ho
 import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
-import { KeyCodes } from '@framework/Components'
+import { KeyNames } from '@framework/Components'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
@@ -107,7 +107,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (e.keyCode == KeyCodes.enter) {
+    if (e.key == KeyNames.enter) {
       e.preventDefault();
       p.setFilter(tmpFilter);
     }

@@ -72,6 +72,9 @@ public class WindowsAuthenticationServer
                     }
                     else
                     {
+                        if(user.State == UserState.Deactivated)
+                            return throwError ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
+
                         if (config.AutoUpdateUsers)
                         {
                             using (PrincipalContext pc = GetPrincipalContext(config))

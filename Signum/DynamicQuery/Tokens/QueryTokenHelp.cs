@@ -72,23 +72,12 @@ public enum FieldExpressionMessage
 public enum ColumnFieldMessage
 {
     ColumnsHelp,
-    ModifyingColumns,
-    
-    [Description("The default columns can be changed at will by {0} in a column header and then select {1}, {2} or {3}. You can also {4} the columns by dragging and dropping them to another position.")]
-    TheDefaultColumnsCanBeChangedAtWillBy0InAColumnHeaderAndThenSelect1Or2Or3,
     
     [Description("rearrange")]
     Rearrange,
-    [Description("right-clicking")]
-    RightClicking,
+
     [Description("right-click")]
     RightClick,
-    
-    [Description("When inserting, the new column will be added before or after the selected column, depending where you {0}.")]
-    WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumn,
-    
-    [Description("Once editing a column, the following fields are available:")]
-    OnceEditingAColumnTheFollowingFieldsAreAvailable,   
     
     [Description("You can select a field expression to point to any column of the query {0}, or any field of {1} or any related entity.")]
     YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity,
@@ -102,31 +91,9 @@ public enum ColumnFieldMessage
     [Description("You can add one numeric value to the column header (like the total sum of the invoices), using a field expression ending in an aggregate (like {0},...). Note: The aggregation includes rows that may not be visible due to pagination!")]
     YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices,
     
-    CombineValues,
-
     [Description("When a table has many repeated values in a column you can combine them vertically ({0}) either when the value is the same, or when is the same and belongs to the same {1}.")]
     WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically,
 
-    [Description("Grouping results by one (or more) column")]
-    GroupingResultsByOneOrMoreColumn,
-    
-    [Description("You can group results by {0} in a column header and selecting {1}. All the columns will disapear except the selected one and an agregation column (typically {2}).")]
-    YouCanGroupResultsBy0InAColumnHeaderAndSelecting1,
-    
-    [Description("Any new column should either be an aggregate or it will be considered a new {0}.")]
-    AnyNewColumnShouldEitherBeAnAggregateOrItWillBeConsideredANew0,
-    
-    [Description("Once grouping you can filter normally or using aggregates in your fields ({0} {1}).")]
-    OnceGroupingYouCanFilterNormallyOrUsingAggregatesInYourFields,
-    
-    [Description("Finally you can stop grouping by {0} in a column header and select {1}.")]
-    FinallyYouCanStopGroupingBy0InAColumnHeaderAndSelect1,
-
-    OrderingResults,
-    
-    [Description("You can order results by clicking in a column header, defualt ordering is Ascending and by clicking again it changes to Descending. You can order by more than one column if you keep {0} down when clicking on the columns header.")]
-    YouCanOrderResultsByClickingInAColumnHeaderDefualtOrderingIsAscending,
-    
     [Description("SummaryHeaderField")]
     SummaryHeaderField,
     

@@ -9,7 +9,7 @@ import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Breakpoints, getBreakpoint, useAPI, useBreakpoint, useForceUpdate } from '../Hooks'
 import { useController } from './LineBase'
-import { KeyCodes } from '../Components'
+import { KeyNames } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 import { AutoLine } from './AutoLine'
@@ -129,7 +129,7 @@ export class EntityTableController extends EntityListBaseController<EntityTableP
 
   handleKeyDown = (sender: EntityTableRowHandle, e: React.KeyboardEvent<HTMLTableRowElement>) => {
 
-    if (e.keyCode != KeyCodes.tab) {
+    if (e.key != KeyNames.tab) {
       if (this.recentlyCreated.current && sender.props.ctx.value == this.recentlyCreated.current)
         this.recentlyCreated.current = null;
 

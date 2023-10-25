@@ -9,7 +9,7 @@ import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
-import { KeyCodes } from '../Components/Basic';
+import { KeyNames } from '../Components/Basic';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { TypeContext } from '../Lines'
@@ -60,10 +60,10 @@ function numericTextBox(vl: NumberLineController, validateKey: (e: React.Keyboar
   var incNumber = typeof vl.props.incrementWithArrow == "number" ? vl.props.incrementWithArrow : 1;
 
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
-    if (e.keyCode == KeyCodes.down) {
+    if (e.key == KeyNames.arrowDown) {
       e.preventDefault();
       vl.setValue((s.ctx.value ?? 0) - incNumber, e);
-    } else if (e.keyCode == KeyCodes.up) {
+    } else if (e.key == KeyNames.arrowUp) {
       e.preventDefault();
       vl.setValue((s.ctx.value ?? 0) + incNumber, e);
     }
@@ -211,35 +211,29 @@ export function NumberBox(p: NumberBoxProps) {
 }
 
 export function isNumberKey(e: React.KeyboardEvent<any>) {
-  const c = e.keyCode;
-  return ((c >= 48 && c <= 57 && !e.shiftKey) /*0-9*/ ||
-    (c >= 96 && c <= 105) /*NumPad 0-9*/ ||
-    (c == KeyCodes.enter) ||
-    (c == KeyCodes.backspace) ||
-    (c == KeyCodes.tab) ||
-    (c == KeyCodes.clear) ||
-    (c == KeyCodes.esc) ||
-    (c == KeyCodes.left) ||
-    (c == KeyCodes.right) ||
-    (c == KeyCodes.up) ||
-    (c == KeyCodes.down) ||
-    (c == KeyCodes.delete) ||
-    (c == KeyCodes.home) ||
-    (c == KeyCodes.end) ||
-    (c == KeyCodes.numpadMinus) /*NumPad -*/ ||
-    (c == KeyCodes.minus) /*-*/ ||
-    (e.ctrlKey && c == 86) /*Ctrl + v*/ ||
-    (e.ctrlKey && c == 88) /*Ctrl + x*/ ||
-    (e.ctrlKey && c == 67) /*Ctrl + c*/);
+  const c = e.key;
+  return ((c >= '0' && c <= '9' && !e.shiftKey) /*0-9*/ ||
+    (c == KeyNames.enter) ||
+    (c == KeyNames.backspace) ||
+    (c == KeyNames.tab) ||
+    (c == KeyNames.esc) ||
+    (c == KeyNames.arrowLeft) ||
+    (c == KeyNames.arrowRight) ||
+    (c == KeyNames.arrowUp) ||
+    (c == KeyNames.arrowDown) ||
+    (c == KeyNames.delete) ||
+    (c == KeyNames.home) ||
+    (c == KeyNames.end) ||
+    (c == KeyNames.numpadMinus) /*NumPad -*/ ||
+    (c == KeyNames.minus) /*-*/ ||
+    (e.ctrlKey && c == 'v') /*Ctrl + v*/ ||
+    (e.ctrlKey && c == 'x') /*Ctrl + x*/ ||
+    (e.ctrlKey && c == 'c') /*Ctrl + c*/);
 }
 
 export function isDecimalKey(e: React.KeyboardEvent<any>): boolean {
-  const c = e.keyCode;
   return (isNumberKey(e) ||
-    (c == 110) /*NumPad Decimal*/ ||
-    (c == 190) /*.*/ ||
-    (c == 188) /*,*/);
+    (e.key == "Separator") /*NumPad Decimal*/ ||
+    (e.key == ".") /*.*/ ||
+    (e.key == ",") /*,*/);
 }
-
-
-

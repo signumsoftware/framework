@@ -4,7 +4,6 @@ import { TypeContext, StyleOptions } from '../TypeContext'
 import { TypeReference } from '../Reflection'
 import { ValidationMessage } from '../Signum.Entities.Validation'
 import { useForceUpdate } from '../Hooks'
-import { KeyCodes } from '../Components'
 
 export interface ChangeEvent {
   newValue: any;

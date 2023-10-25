@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
-import { KeyCodes } from '@framework/Components';
 import TextEllipsis from './Components/TextEllipsis';
 import { XKeyTicks, YScaleTicks, YScaleTicksEnd } from './Components/Ticks';
 import { XAxis, YAxis, YAxisEnd } from './Components/Axis';
