@@ -498,7 +498,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                             {
                                 if (!markedAsModified && parentRoute.RootType.IsEntity())
                                 {
-                                    if (!pi.HasAttribute<IgnoreAttribute>())
+                                    if (!(pi.HasAttribute<IgnoreAttribute>() && !VirtualMList.IsVirtualMList(pr)))
                                     {
                                         try
                                         {
