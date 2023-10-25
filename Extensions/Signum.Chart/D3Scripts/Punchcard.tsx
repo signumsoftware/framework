@@ -52,7 +52,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
   var colorColumn = data.columns.c3! as ChartColumn<number> | undefined;
   var opacityColumn = data.columns.c4! as ChartColumn<number> | undefined;
   var innerSizeColumn = data.columns.c5! as ChartColumn<number> | undefined;
-  var orderingColumn = data.columns.c6! as ChartColumn<number> | undefined;
+  var orderColumn = data.columns.c6! as ChartColumn<number> | undefined;
 
   function groupAndSort(rows: ChartRow[], shortType: string, column: ChartColumn<unknown>, completeValues: string | null | undefined): unknown[] {
     var dictionary = rows.groupToObject(r => "k" + column.getValueKey(r));
@@ -78,13 +78,13 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if (elements == undefined)
       return 0;
 
-    if (orderingColumn == null)
+    if (orderColumn == null)
       return 0;
 
     if ((elements as any).__sum__ !== undefined)
       return (elements as any).__sum__;
 
-    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderingColumn!.getValue(r) ?? 0, 0);
+    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderColumn!.getValue(r) ?? 0, 0);
   }
 
   var horizontalKeys = groupAndSort(data.rows, parameters["XSort"]!, horizontalColumn, parameters['CompleteHorizontalValues']);
@@ -254,7 +254,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
                     (colorColumn == null ? "" : ("\n" + colorColumn.title + ": " + colorColumn.getValueNiceName(r))) +
                     (opacityColumn == null ? "" : ("\n" + opacityColumn.title + ": " + opacityColumn.getValueNiceName(r))) +
                     (innerSizeColumn == null ? "" : ("\n" + innerSizeColumn.title + ": " + (ist == "Relative" ? percentage(innerSizeColumn.getValue(r)) : innerSizeColumn.getValueNiceName(r)))) +
-                    (orderingColumn == null ? "" : ("\n" + orderingColumn.title + ": " + orderingColumn.getValueNiceName(r)))}
+                    (orderColumn == null ? "" : ("\n" + orderColumn.title + ": " + orderColumn.getValueNiceName(r)))}
                 </title>
               </g>
             );

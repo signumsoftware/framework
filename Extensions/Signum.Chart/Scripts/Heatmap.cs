@@ -7,25 +7,25 @@ public class HeatmapChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("heatmap.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Latitude", ChartColumnType.Magnitude),
-            new ChartScriptColumn("Longitude", ChartColumnType.Magnitude),
-            new ChartScriptColumn("Weight", ChartColumnType.Magnitude) { IsOptional = true }
+            new ChartScriptColumn(ChartColumnMessage.Latitude, ChartColumnType.Magnitude),
+            new ChartScriptColumn(ChartColumnMessage.Longitude, ChartColumnType.Magnitude),
+            new ChartScriptColumn(ChartColumnMessage.Weight, ChartColumnType.Magnitude) { IsOptional = true }
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
-            new ChartScriptParameterGroup("Map")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Map)
             {
-                new ChartScriptParameter("MapType", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Roadmap|Satellite") },
-                new ChartScriptParameter("MapStyle", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Standard|Silver|Retro|Dark|Night|Aubergine") }
+                new ChartScriptParameter(ChartParameterMessage.MapType, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Roadmap|Satellite") },
+                new ChartScriptParameter(ChartParameterMessage.MapStyle, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("Standard|Silver|Retro|Dark|Night|Aubergine") }
             },
-            new ChartScriptParameterGroup("Label")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Label)
             {
-                new ChartScriptParameter("Opacity", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1") },
-                new ChartScriptParameter("Radius(px)", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 10m } },
+                new ChartScriptParameter(ChartParameterMessage.Opacity, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("1|0.9|0.8|0.7|0.6|0.5|0.4|0.3|0.2|0.1") },
+                new ChartScriptParameter(ChartParameterMessage.RadiousPx, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 10m } },
             },
-            new ChartScriptParameterGroup("Color Gradient")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.ColorGradient)
             {
-                new ChartScriptParameter("ColorInterpolate", ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
+                new ChartScriptParameter(ChartParameterMessage.ColorInterpolate, ChartParameterType.Special) {  ValueDefinition = new SpecialParameter(SpecialParameterType.ColorInterpolate) },
             }
         };
     }

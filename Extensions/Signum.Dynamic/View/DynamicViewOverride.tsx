@@ -10,7 +10,7 @@ import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from './Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
@@ -95,7 +95,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
     const text = `modules.React.createElement(${node.kind}, { ctx: ctx.subCtx(o => ${expression}) })`;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
       valueLineType: "TextArea",
@@ -245,7 +245,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   }
 
   function showPropmt(title: string, text: string) {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
       valueLineType: "TextArea",

@@ -7,7 +7,6 @@ import 'draft-js/dist/Draft.css'
 import { InlineStyleButton, Separator, BlockStyleButton, SubMenuButton } from './HtmlEditorButtons';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 import { classes } from '@framework/Globals';
-import { KeyCodes } from '@framework/Components';
 
 export interface IContentStateConverter {
   contentStateToText(content: draftjs.ContentState): string;

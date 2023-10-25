@@ -63,7 +63,15 @@ table.sf-search-results > tbody > tr > td {
     box-shadow: inset #AAA 0px 3px 0px 0px !important;
 }
 
+tr.drag-top td {
+    box-shadow: inset #AAA 0px 3px 0px 0px !important;
+}
+
 .drag-bottom {
+    box-shadow: inset #AAA 0px -3px 0px 0px !important;
+}
+
+tr.drag-bottom td {
     box-shadow: inset #AAA 0px -3px 0px 0px !important;
 }
 
@@ -365,4 +373,8 @@ ul.sf-context-menu li a:not([disabled]) {
 
 select.sf-pagination-mode, select.sf-elements-per-page {
     vertical-align: text-top;
+}
+
+.sf-filter-highlight {
+    box-shadow: 0 1px 4px 0 rgb(255 229 182), 0 1px 20px 0 rgb(255 231 188);
 }

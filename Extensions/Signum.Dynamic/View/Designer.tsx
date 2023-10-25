@@ -9,7 +9,7 @@ import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { Typeahead } from '@framework/Components';
 import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
 import { ModalFooterButtons, ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
@@ -356,7 +356,7 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
       valueLineType: "TextArea",
@@ -436,7 +436,7 @@ export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
 
   function handlePropsClick(val: string) {
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `props.${val}`,
       valueLineType: "TextArea",

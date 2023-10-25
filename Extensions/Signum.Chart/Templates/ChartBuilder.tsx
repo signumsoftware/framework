@@ -2,7 +2,6 @@
 import * as React from 'react'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { is } from '@framework/Signum.Entities'
-import { ValueLine, ValueLineProps, OptionItem } from '@framework/Lines'
 import { ChartColumnEmbedded, ChartMessage, ChartParameterEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
@@ -12,6 +11,8 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
+import { AutoLine, EnumLine, NumberLine, NumberLineProps, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
+import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -94,7 +95,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
               </div>)}
           </div>
           <div className="card-body">
-            <ValueLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
+            <NumberLine ctx={p.ctx.subCtx(a => a.maxRows)} formGroupStyle="Basic" formSize="xs" valueHtmlAttributes={{ className: p.maxRowsReached ? "text-danger fw-bold" : undefined }} />
           </div>
         </div>
       </div >
@@ -150,7 +151,7 @@ export function Parameters(props: {
           .filter(sp => sp.columnIndex == props.columnIndex)
           .map((sp, j) => props.parameterDic[sp.name] ?
             <ParameterValueLine key={sp.name} ctx={props.parameterDic[sp.name]} scriptParameter={sp} chart={props.chart} onRedraw={props.onRedraw} /> :
-            <p key={sp.name} className="text-danger">{sp.name}</p>)}
+            <p key={sp.name} className="text-danger">{sp.name} ({sp.displayName})</p>)}
       </div>
     );
 
@@ -177,78 +178,84 @@ export function Parameters(props: {
 
 function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
 
-
   if (scriptParameter.type == "Special") {
     var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
 
     if (sp.specialParameterType == "ColorCategory") {
-      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
-        valueLineType="DropDownList"
-        optionItems={Dic.getKeys(colorSchemes)}
-        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-          <ColorScheme colorScheme={oi.value} />
-          {oi.label}
-        </div>} />
+      return (
+        <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
+          optionItems={Dic.getKeys(colorSchemes)}
+          onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+            <ColorScheme colorScheme={oi.value} />
+            {oi.label}
+          </div>} />
+      );
     }
 
     if (sp.specialParameterType == "ColorInterpolate") {
-      return <ValueLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.name} onChange={onRedraw}
-        valueLineType="DropDownList"
-        optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
-        onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
-          <ColorInterpolate colorInterpolator={oi.value} />
-          {oi.label}
-        </div>}
-        helpText={<label>
-          <input type="checkbox" className="form-check me-2"
-            checked={ctx.value.value?.startsWith("-")}
-            onChange={e => {
-              if (ctx.value.value)
-                ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
+      return (
+        <EnumLine ctx={ctx.subCtx(a => a.value)} label={scriptParameter.displayName} onChange={onRedraw}
+          optionItems={Dic.getKeys(colorInterpolators).map(a => (ctx.value.value?.startsWith("-") ? "-" : "") + a)}
+          onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
+            <ColorInterpolate colorInterpolator={oi.value} />
+            {oi.label}
+          </div>}
+          helpText={<label>
+            <input type="checkbox" className="form-check me-2"
+              checked={ctx.value.value?.startsWith("-")}
+              onChange={e => {
+                if (ctx.value.value)
+                  ctx.value.value = e.currentTarget.checked ? ("-" + ctx.value.value) : ctx.value.value.after("-");
 
-              onRedraw?.();
-            }} />
-          Invert
-        </label>}
-      />
+                onRedraw?.();
+              }} />
+            Invert
+          </label>}
+        />
+      );
     }
+
+    throw new Error("Unexpected SpecialParameterType = " + sp.specialParameterType);
   }
 
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
-
-
-  const vl: ValueLineProps = {
-    ctx: ctx.subCtx(a => a.value),
-    label: scriptParameter.name!,
-  };
-
-  if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
-    vl.valueLineType = "TextBox";
-    vl.valueHtmlAttributes = { onBlur: onRedraw };
+  if (scriptParameter.type == "String") {
+    const tbl: TextBoxLineProps = {
+      ctx: ctx.subCtx(a => a.value),
+      label: scriptParameter.displayName!,
+    };
+    tbl.valueHtmlAttributes = { onBlur: onRedraw };
+    if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
+      tbl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
+    return <TextBoxLine {...tbl} />;
   }
   else if (scriptParameter.type == "Enum") {
-    vl.valueLineType = "DropDownList";
-    vl.type = { name: "string", isNotNullable: true };
+    const el: EnumLineProps = {
+      ctx: ctx.subCtx(a => a.value),
+      label: scriptParameter.displayName!,
+    };
+    el.type = { name: "string", isNotNullable: true };
 
     const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
 
     if (compatible.length <= 1)
-      vl.ctx.styleOptions.readOnly = true;
+      el.ctx.styleOptions.readOnly = true;
 
-    vl.optionItems = compatible.map(ev => ({
+    el.optionItems = compatible.map(ev => ({
       value: ev.name,
       label: ev.name
     } as OptionItem));
 
-    vl.valueHtmlAttributes = { size: null as any };
-    vl.onChange = onRedraw;
+    el.valueHtmlAttributes = { size: null as any };
+    el.onChange = onRedraw;
+    if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
+      el.labelHtmlAttributes = { style: { fontWeight: "bold" } };
+    return <EnumLine {...el} />
   }
-
-  if (ctx.value.value != ChartClient.defaultParameterValue(scriptParameter, token))
-    vl.labelHtmlAttributes = { style: { fontWeight: "bold" } };
-
-  return <ValueLine {...vl} />;
+  else {
+    throw new Error("Unexpected Type = " + scriptParameter.type);
+  }
 }
 

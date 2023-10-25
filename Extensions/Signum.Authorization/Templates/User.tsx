@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { UserEntity, UserState, LoginAuthMessage, RoleEntity } from '../Signum.Authorization'
 import { Binding } from '@framework/Reflection'
-import { ValueLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, FormGroup, TypeContext } from '@framework/Lines'
 import { DoublePassword } from './DoublePassword'
 import { tryGetMixin } from '@framework/Signum.Entities'
 import * as AppContext from "@framework/AppContext"
@@ -25,8 +25,8 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
           </div>
         </div>
         <div className="col-sm-8">
-          <ValueLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
-          <ValueLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
+          <AutoLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
+          <AutoLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
           {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && changePasswordVisible(ctx.value) &&
             <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory />}
 
@@ -41,7 +41,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
               return AuthAdminClient.API.trivialMergeRole(rs);
             })} />
 
-          <ValueLine ctx={ctx.subCtx(e => e.email)} readOnly={emailReadonly(ctx.value) ? true : undefined} />
+          <AutoLine ctx={ctx.subCtx(e => e.email)} readOnly={emailReadonly(ctx.value) ? true : undefined} />
           <EntityCombo ctx={ctx.subCtx(e => e.cultureInfo)} />
         </div>
       </div>

@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, LiteAutocompleteConfig } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine } from '@framework/Lines'
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowTimerConditionEntity } from '../Signum.Workflow'
 import { API } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
 
 interface WorkflowTimerConditionComponentProps {
@@ -31,20 +31,19 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
   var ctx = p.ctx;
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
+      <AutoLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
         autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac))}

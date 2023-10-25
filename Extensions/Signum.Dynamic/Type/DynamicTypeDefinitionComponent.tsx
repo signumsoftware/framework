@@ -16,7 +16,7 @@ import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTy
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import "./DynamicType.css"
 import { Tabs, Tab } from 'react-bootstrap';
 import CollapsableCard from '@framework/Components/CollapsableCard';
@@ -122,7 +122,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
       valueLineType: "TextArea",
@@ -617,7 +617,7 @@ public static class ${entityName}Operation2
   }
 
   function popupCodeSnippet(snippet: string) {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: snippet,
       valueLineType: "TextArea",

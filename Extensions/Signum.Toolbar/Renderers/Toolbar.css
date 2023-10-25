@@ -26,3 +26,11 @@
     left: -5px;
     border-radius: 10px !important;
 }
+
+.btn .badge.sf-toolbar-count {
+    top: -8px;
+}
+
+.sidebar-nav.narrow .sf-extra-icon{
+    display: none;
+}

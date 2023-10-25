@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PrintLineEntity } from '../Signum.Printing'
@@ -11,11 +11,11 @@ export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
 
   return (
     <div>
-      <ValueLine ctx={e.subCtx(f => f.creationDate)} />
+      <AutoLine ctx={e.subCtx(f => f.creationDate)} />
       <EntityLine ctx={e.subCtx(f => f.referred)} />
       <FileLine ctx={e.subCtx(f => f.file)} fileType={e.value.testFileType ?? undefined} readOnly={p.ctx.value.state != "NewTest"} />
-      <ValueLine ctx={e.subCtx(f => f.state)} />
-      <ValueLine ctx={e.subCtx(f => f.printedOn)} />
+      <AutoLine ctx={e.subCtx(f => f.state)} />
+      <AutoLine ctx={e.subCtx(f => f.printedOn)} />
       {!e.value.isNew &&
         <fieldset>
           <legend>{ProcessExceptionLineEntity.nicePluralName()}</legend>

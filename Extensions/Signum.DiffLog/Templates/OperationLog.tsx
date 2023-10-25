@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Navigator from '@framework/Navigator'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { Entity, getMixin, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import { DiffLogMixin, DiffLogMessage } from '../Signum.DiffLog'
@@ -28,8 +28,8 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
           <EntityLine ctx={ctx6.subCtx(f => f.user)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx6.subCtx(f => f.start)} />
-          <ValueLine ctx={ctx6.subCtx(f => f.end)} />
+          <AutoLine ctx={ctx6.subCtx(f => f.start)} />
+          <AutoLine ctx={ctx6.subCtx(f => f.end)} />
           <EntityLine ctx={ctx6.subCtx(f => f.exception)} />
         </div>
       </div>

@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString } from '../Reflection'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
@@ -12,6 +12,7 @@ import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 import { RefreshMode } from '../Signum.DynamicQuery';
+import { HeaderType, Title } from '../Lines/GroupHeader'
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -73,6 +74,7 @@ export interface SearchControlProps {
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
+  showTitle?: HeaderType;
 }
 
 export interface SearchControlState {
@@ -196,6 +198,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   return (
     <ErrorBoundary>
+      {p.showTitle && <Title type={p.showTitle}>{getQueryNiceName(qd.queryKey)}</Title>}
       <SearchControlLoaded ref={searchControlLoaded}
         findOptions={fop}
         queryDescription={qd}

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext, EntityCombo } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext, EntityCombo } from '@framework/Lines'
 import * as Navigator from '@framework/Navigator'
 import { WorkflowEventTaskEntity, WorkflowEventEntity, WorkflowEventTaskActionEval, WorkflowEventType, TriggeredOn, WorkflowEventTaskConditionEval, WorkflowEventTaskModel } from '../Signum.Workflow'
 import WorkflowEventTaskConditionComponent from './WorkflowEventTaskConditionComponent'
@@ -60,7 +60,7 @@ export default function WorkflowEventTaskComponent(p : WorkflowEventTaskComponen
           ]
         }} />
 
-          <ValueLine ctx={ctx.subCtx(wet => wet.triggeredOn)} onChange={handleTriggeredOnChange} />
+          <AutoLine ctx={ctx.subCtx(wet => wet.triggeredOn)} onChange={handleTriggeredOnChange} />
 
           {isConditional() &&
             <WorkflowEventTaskConditionComponent ctx={ctx.subCtx(wet => wet.condition)} />}

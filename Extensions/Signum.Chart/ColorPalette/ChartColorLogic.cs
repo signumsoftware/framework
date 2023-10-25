@@ -33,4 +33,9 @@ public static class ColorPaletteLogic
     {
         return ColorPaletteCache.Value.TryGetC(entity.GetType())?.SpecificColors.SingleEx(a => a.Entity.Is(entity))?.Color;
     }
+
+    public static string? ColorFor(Lite<Entity> lite)
+    {
+        return ColorPaletteCache.Value.TryGetC(lite.EntityType)?.SpecificColors.SingleEx(a => a.Entity.Is(lite))?.Color;
+    }
 }

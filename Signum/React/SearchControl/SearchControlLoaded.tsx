@@ -38,6 +38,10 @@ import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faEllipsis, faFilter } from '@fortawesome/free-solid-svg-icons'
 import { similarToken } from '../Search'
+import { SearchHelp } from './SearchControlVisualTips'
+import { VisualTipIcon } from '../Basics/VisualTipIcon'
+import { SearchVisualTip} from '../Signum.Basics'
+import { KeyNames } from '../Components'
 
 interface ColumnParsed {
   column: ColumnOptionParsed;
@@ -478,7 +482,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   handleFiltersKeyUp = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.keyCode == 13) {
+    if (e.key == KeyNames.enter) {
       window.setTimeout(() => {
         var input = (document.activeElement as HTMLInputElement);
         input.blur();
@@ -599,17 +603,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = (mode: SearchControlFilterMode) => {
+  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true) => {
     if (this.state.filterMode == mode)
       return;
 
-    this.getFindOptionsWithSFB().then(() => {
-      this.simpleFilterBuilderInstance = undefined;
-      this.setState({
-        simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
-        filterMode: mode
-      }, () => this.handleHeightChanged());
-    });
+    if (refreshFilters)
+      await this.getFindOptionsWithSFB();
+
+    this.simpleFilterBuilderInstance = undefined;
+    this.setState({
+      simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
+      filterMode: mode
+    }, () => this.handleHeightChanged());
+    
   }
 
   handleSystemTimeClick = () => {
@@ -672,7 +678,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         </button>
       },
 
-      ...leftButtonBarElements
+      ...leftButtonBarElements,
+      {
+        order: 10,
+        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} content={props => <SearchHelp sc={this} injected={props} />} />
+      }
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
@@ -919,7 +929,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var showFilter = await rule.execute(token, value, this);
 
     if (this.state.filterMode == "Simple" && showFilter) {
-      this.handleChangeFiltermode("Advanced");
+      await this.handleChangeFiltermode("Advanced", false);
     }
 
     if (rt && cm.rowIndex != null)
@@ -1077,10 +1087,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
       menuItems.push(<Dropdown.Header>{SearchMessage.Filters.niceToString()}</Dropdown.Header>);
       menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}>
-        <span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-        </span>&nbsp;{JavascriptMessage.addFilter.niceToString()}
+        {getAddFilterIcon()}&nbsp;{JavascriptMessage.addFilter.niceToString()}
       </Dropdown.Item>);
     }
 
@@ -1093,38 +1100,27 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       if (cm.columnIndex != null) {
         menuItems.push(<Dropdown.Item className="sf-insert-column" onClick={this.handleInsertColumn}>
-          <span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-          </span>&nbsp;{JavascriptMessage.insertColumn.niceToString()}
+          {getInsertColumnIcon()}&nbsp;{JavascriptMessage.insertColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
-        </span>&nbsp;{JavascriptMessage.editColumn.niceToString()}
+        menuItems.push(<Dropdown.Item className="sf-edit-column" onClick={this.handleEditColumn}>
+          {getEditColumnIcon()}&nbsp;{JavascriptMessage.editColumn.niceToString()}
         </Dropdown.Item>);
 
-        menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}><span className="fa-layers fa-fw icon">
-          <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-          <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
-        </span>&nbsp;{JavascriptMessage.removeColumn.niceToString()}
+        menuItems.push(<Dropdown.Item className="sf-remove-column" onClick={this.handleRemoveColumn}>
+          {getRemoveColumnIcon()}&nbsp;{JavascriptMessage.removeColumn.niceToString()}
         </Dropdown.Item>);
 
         menuItems.push(<Dropdown.Divider />);
 
         if (p.showGroupButton && isColumnGroupable(cm.columnIndex))
-          menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}><span className="fa-layers fa-fw icon">
-            <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-            <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
-          </span>&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
+          menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}>
+            {getGroupByThisColumnIcon()}&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
       }
 
-      menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}><span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
-      </span>&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
+      menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}>
+        {getResotreDefaultColumnsIcon()}&nbsp;{JavascriptMessage.restoreDefaultColumns.niceToString()}
       </Dropdown.Item>);
 
       if (fo.columnOptions.some(a => a.hiddenColumn == true)) {
@@ -1582,7 +1578,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
   }
 
-  joinNodes(values: (React.ReactChild | undefined)[], separator: React.ReactChild) {
+  joinNodes(values: (React.ReactElement | string | null | undefined)[], separator: React.ReactElement | string) {
 
     if (values.length > (SearchControlLoaded.maxToArrayElements - 1))
       values = [...values.filter((a, i) => i < SearchControlLoaded.maxToArrayElements - 1), "…"];
@@ -1666,7 +1662,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
  
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
       c.hasToArray != null ? this.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
-        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistict" ? <span className="text-muted">, </span> : <br />) :
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
         c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
   }
 
@@ -2020,6 +2016,48 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 }
 
+export function getResotreDefaultColumnsIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
+    </span>
+}
+
+export function getGroupByThisColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
+    </span>
+}
+
+export function getRemoveColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
+    </span>
+}
+
+export function getEditColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
+    </span>
+}
+
+export function getInsertColumnIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
+    </span>
+}
+
+export function getAddFilterIcon() {
+    return <span className="fa-layers fa-fw icon">
+        <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
+        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
+    </span>
+}
+
 function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
   if (qt == undefined)
     return undefined;
@@ -2106,7 +2144,7 @@ function dominates(root: QueryToken, big: QueryToken) {
 }
 
 
-function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
+export function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
 
   var [width, height, ligatures, unicode, data] = p.iconDefinition.icon;
 
@@ -2157,7 +2195,7 @@ const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: Re
     <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
       href=""
       onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <FontAwesomeIcon icon="ellipsis" title={SearchMessage.Options.niceToString()} />
+      <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" />
       {p.children}
     </a>
   );

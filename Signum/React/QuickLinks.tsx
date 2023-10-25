@@ -119,7 +119,10 @@ export async function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<Quic
   var quickLinkFiltered = await Promise.all(quickLinks
     .map(ql => {
       if (ql.onlyForToken || ql.isVisible == false)
-        return Promise.resolve(null);
+        return null;
+
+      if (!ql.allowsMultiple && ctx.lites.length > 1)
+        return null;
 
       if (ql.isVisible == true || ql.isVisible == undefined)
         return Promise.resolve(ql);
@@ -127,8 +130,8 @@ export async function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<Quic
       if (typeof ql.isVisible == "function")
         return ql.isVisible(ctx).then(val => val ? ql : null);
 
-      return Promise.resolve(null);
-    }));
+      return null;
+    }).notNull());
 
   return quickLinkFiltered.notNull().orderBy(ql => ql!.order);
 }
@@ -320,6 +323,7 @@ export abstract class QuickLink<T extends Entity> {
   color?: BsColor;
   group?: QuickLinkGroup;
   openInAnotherTab?: boolean;
+  allowsMultiple?: boolean;
   
 
   static defaultGroup: QuickLinkGroup = {

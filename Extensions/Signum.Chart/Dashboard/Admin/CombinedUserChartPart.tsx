@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityStrip, EntityTable } from '@framework/Lines'
+import { AutoLine, CheckboxLine, EntityLine, EntityStrip, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { D3ChartScript } from '../../Signum.Chart';
 import { CombinedUserChartElementEmbedded, CombinedUserChartPartEntity, UserChartEntity } from '../../UserChart/Signum.Chart.UserChart';
@@ -33,13 +33,13 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
 
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
-          <ValueLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
-          <ValueLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
-          <ValueLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.showData)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.allowChangeShowData)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.combinePinnedFiltersWithSameLabel)} inlineCheckbox="block" />
+          <CheckboxLine ctx={ctx.subCtx(p => p.useSameScale)} inlineCheckbox="block" />
         </div>
         <div className="col-sm-6">
-            <ValueLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
+            <AutoLine ctx={ctx.subCtx(p => p.minHeight)} formGroupStyle="Basic" />
         </div>
       </div>
     </div>

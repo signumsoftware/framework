@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityRepeater } from '@framework/Lines'
+import { AutoLine, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3';
 
@@ -10,28 +10,28 @@ export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3Emai
     <div>
       <div className="row">
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.host)} />
+          <AutoLine ctx={sc.subCtx(s => s.host)} />
         </div>
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.port)} />
+          <AutoLine ctx={sc.subCtx(s => s.port)} />
         </div>
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.enableSSL)} />
+          <AutoLine ctx={sc.subCtx(s => s.enableSSL)} />
         </div>
       </div>
 
       <div className="row">
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.username)} />
+          <AutoLine ctx={sc.subCtx(s => s.username)} />
         </div>
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.password)} valueLineType="Password" />
+          <AutoLine ctx={sc.subCtx(s => s.password)} valueLineType="Password" />
         </div>
       </div>
       
       <div className="row">
         <div className="col-sm-auto">
-          <ValueLine ctx={sc.subCtx(s => s.readTimeout)} />
+          <AutoLine ctx={sc.subCtx(s => s.readTimeout)} />
         </div>
       </div>
 

@@ -8,6 +8,9 @@
     <Member Name="ApiKey" Description="API-Schlüssel" />
     <Member Name="User" Description="Benutzer" />
   </Type>
+  <Type Name="RestApiKeyMessage">
+    <Member Name="GenerateApiKey" Description="API-Schlüssel generieren" />
+  </Type>
   <Type Name="RestApiKeyOperation">
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />

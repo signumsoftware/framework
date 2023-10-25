@@ -7,40 +7,40 @@ public class LineChartScript : ChartScript
         Icon = ChartScriptLogic.LoadIcon("lines.png");
         Columns = new List<ChartScriptColumn>
         {
-            new ChartScriptColumn("Horizontal Axis", ChartColumnType.Any),
-            new ChartScriptColumn("Height", ChartColumnType.Positionable)
+            new ChartScriptColumn(ChartColumnMessage.HorizontalAxis, ChartColumnType.Any),
+            new ChartScriptColumn(ChartColumnMessage.Height, ChartColumnType.Positionable)
         };
         ParameterGroups = new List<ChartScriptParameterGroup>
         {
             new ChartScriptParameterGroup()
             {
-                new ChartScriptParameter("CompleteValues", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
-                new ChartScriptParameter("HorizontalScale", ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
-                new ChartScriptParameter("VerticalScale", ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
+                new ChartScriptParameter(ChartParameterMessage.CompleteValues, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Auto|Yes|No|FromFilters") },
+                new ChartScriptParameter(ChartParameterMessage.HorizontalScale, ChartParameterType.Enum) { ColumnIndex = 0,  ValueDefinition = EnumValueList.Parse("Bands|ZeroMax (M)|MinMax (P)|Log (M)") },
+                new ChartScriptParameter(ChartParameterMessage.VerticalScale, ChartParameterType.Enum) { ColumnIndex = 1,  ValueDefinition = EnumValueList.Parse("ZeroMax (M)|MinMax|Log (M)") },
             },
-            new ChartScriptParameterGroup("Margins")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Margins)
             {
-                new ChartScriptParameter("UnitMargin", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
+                new ChartScriptParameter(ChartParameterMessage.UnitMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
             },
-            new ChartScriptParameterGroup("Number")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {
-                new ChartScriptParameter("NumberMinWidth", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20 } },
-                new ChartScriptParameter("NumberOpacity", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
+                new ChartScriptParameter(ChartParameterMessage.NumberMinWidth, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 20 } },
+                new ChartScriptParameter(ChartParameterMessage.NumberOpacity, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 0.8m } },
             },
-           new ChartScriptParameterGroup("Circle")
+           new ChartScriptParameterGroup(ChartParameterGroupMessage.Circle)
             {
-                new ChartScriptParameter("CircleAutoReduce", ChartParameterType.Enum) { ValueDefinition = EnumValueList.Parse("Yes|No") },
-                new ChartScriptParameter("CircleRadius", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 5 } },
-                new ChartScriptParameter("CircleStroke", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2 } },
-                new ChartScriptParameter("CircleRadiusHover", ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 15 } },
+                new ChartScriptParameter(ChartParameterMessage.CircleAutoReduce, ChartParameterType.Enum) { ValueDefinition = EnumValueList.Parse("Yes|No") },
+                new ChartScriptParameter(ChartParameterMessage.CircleRadius, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 5 } },
+                new ChartScriptParameter(ChartParameterMessage.CircleStroke, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2 } },
+                new ChartScriptParameter(ChartParameterMessage.CircleRadiusHover, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 15 } },
             },
-            new ChartScriptParameterGroup("Color")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Color)
             {
-                new ChartScriptParameter("Color", ChartParameterType.String) {  ValueDefinition = new StringValue("steelblue") },
+                new ChartScriptParameter(ChartParameterMessage.Color, ChartParameterType.String) {  ValueDefinition = new StringValue("steelblue") },
             },
-            new ChartScriptParameterGroup("Form")
+            new ChartScriptParameterGroup(ChartParameterGroupMessage.Shape)
             {
-                new ChartScriptParameter("Interpolate", ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
+                new ChartScriptParameter(ChartParameterMessage.Interpolate, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("linear|step-before|step-after|cardinal|monotone|basis|bundle|catmull-rom") },
             }
         };
     }

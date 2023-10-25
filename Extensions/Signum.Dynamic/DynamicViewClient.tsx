@@ -337,7 +337,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   let code = dvo.script!;
 
   // Lines
-  var ValueLine = Lines.ValueLine;
+  var AutoLine = Lines.AutoLine;
   var EntityLine = Lines.EntityLine;
   var EntityCombo = Lines.EntityCombo;
   var EnumCheckboxList = Lines.EnumCheckboxList;

@@ -1,9 +1,8 @@
 import * as React from "react";
-import { TypeContext, FormGroup } from "../Lines";
+import { TypeContext, FormGroup, AutoLine, AutoLineProps } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
 import { LineBaseProps, LineBaseController, useController } from "./LineBase";
@@ -125,20 +124,19 @@ export interface MultiValueLineElementProps {
 }
 
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
-  const ctx = props.ctx;
+  const mctx = props.ctx;
 
-  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute!)
-
+  var renderItem = props.onRenderItem ?? AutoLine.getComponentFactory(mctx.propertyRoute!.typeReference, mctx.propertyRoute!)
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
-      {!ctx.readOnly &&
-        <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+      {!mctx.readOnly &&
+        <a href="#" title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
           onClick={props.onRemove}>
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {React.cloneElement(renderItem(ctx) as React.ReactElement, { mandatory: true })}
+      {React.cloneElement(renderItem({ ctx: mctx, mandatory: true} as any)!)}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-export { KeyCodes } from './Basic'
+export { KeyNames } from './Basic'
 export type { BsColor, BsSize } from './Basic'
 
 //Components taken from react-router-bootstrap

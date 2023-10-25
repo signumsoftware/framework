@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
@@ -236,7 +236,7 @@ function DynamicViewDesigner(p: DynamicViewDesignerProps) {
       <h3>
         <small>{Navigator.getTypeSubTitle(p.dynamicView, undefined)}</small>
       </h3>
-      <ValueLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
+      <AutoLine ctx={ctx.subCtx(e => e.viewName)} formGroupStyle="SrOnly" placeholderLabels={true} />
       {renderButtonBar()}
       <DynamicViewTabs ctx={ctx} rootNode={p.rootNode}/>
       <CollapsableTypeHelp initialTypeName={dv.entityType!.cleanName} />

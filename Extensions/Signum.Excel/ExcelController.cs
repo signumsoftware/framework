@@ -12,12 +12,12 @@ namespace Signum.Excel;
 [ValidateModelFilter]
 public class ExcelController : ControllerBase
 {
-    [HttpPost("api/excel/plain")]
-    public async Task<FileStreamResult> ToPlainExcel([Required, FromBody]QueryRequestTS request, [FromQuery]bool forImport, CancellationToken token)
+    [HttpPost("api/excel/plain/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public async Task<FileStreamResult> ToPlainExcel(string queryKey, [Required, FromBody]QueryRequestTS request, [FromQuery]bool forImport, CancellationToken token)
     {
         ExcelPermission.PlainExcel.AssertAuthorized();
 
-        var queryRequest = request.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+        var queryRequest = request.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
         ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
         byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
@@ -27,16 +27,16 @@ public class ExcelController : ControllerBase
         return MimeMapping.GetFileStreamResult(new MemoryStream(binaryFile), fileName);
     }
 
-    [HttpGet("api/excel/reportsFor/{queryKey}")]
+    [HttpGet("api/excel/reportsFor/{queryKey}"), ProfilerActionSplitter("queryKey")]
     public IEnumerable<Lite<ExcelReportEntity>> GetExcelReports(string queryKey)
     {
         return ExcelLogic.GetExcelReports(QueryLogic.ToQueryName(queryKey));
     }
 
-    [HttpPost("api/excel/excelReport")]
-    public FileStreamResult GenerateExcelReport([Required, FromBody]ExcelReportRequest request)
+    [HttpPost("api/excel/excelReport/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public FileStreamResult GenerateExcelReport(string queryKey, [Required, FromBody]ExcelReportRequest request)
     {
-        byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+        byte[] file = ExcelLogic.ExecuteExcelReport(request.excelReport, request.queryRequest.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
 
         var fileName = request.excelReport.ToString() + "-" + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 
@@ -49,22 +49,22 @@ public class ExcelController : ControllerBase
         public Lite<ExcelReportEntity> excelReport;
     }
 
-    [HttpPost("api/excel/validateForImport")]
-    public QueryTokenTS? ValidateForImport([Required, FromBody] QueryRequestTS queryRequest)
+    [HttpPost("api/excel/validateForImport/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public QueryTokenTS? ValidateForImport(string queryKey, [Required, FromBody] QueryRequestTS queryRequest)
     {
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
-        var result = ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
+        var result = ImporterFromExcel.ParseQueryRequest(queryRequest.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer));
 
         return result.ElementTopToken == null ? null : new QueryTokenTS(result.ElementTopToken, true);
     }
 
-    [HttpPost("api/excel/import")]
-    public IAsyncEnumerable<ImportResult> ImportFromExcel([Required, FromBody] ImportFromExcelRequest request)
+    [HttpPost("api/excel/import/{queryKey}"), ProfilerActionSplitter("queryKey")]
+    public IAsyncEnumerable<ImportResult> ImportFromExcel(string queryKey, [Required, FromBody] ImportFromExcelRequest request)
     {
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
-        var qr = request.QueryRequest.ToQueryRequest(SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
+        var qr = request.QueryRequest.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
         Type mainType = TypeLogic.GetType(request.ImportModel.TypeName);
 

@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { UserEntity, UserLiteModel} from '../Signum.Authorization/Signum.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import ValueLineModal from '@framework/ValueLineModal';
+import AutoLineModal from '@framework/AutoLineModal';
 import { FindOptionsParsed, ResultRow } from '@framework/FindOptions';
 import MessageModal from '@framework/Modals/MessageModal';
 import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
@@ -18,6 +18,7 @@ import * as AppContext from "@framework/AppContext"
 import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
+import { TextBoxLine } from '@framework/Lines';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
@@ -33,7 +34,12 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
         (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
         tryGetMixin(u, UserADMixin)?.oID;
 
-      return oid == null ? null : AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+      if (oid == null)
+        return null;
+
+      var url = AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+
+      return url;
     })
   }
 
@@ -41,13 +47,14 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
     var sid =
       (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
         tryGetMixin(u, UserADMixin)?.sID;
+
     if (sid == null)
       return null;
-    var url = "";
-    if (UserEntity.isLite(u))
-      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName);
-    else
-      url = AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
+    var url = UserEntity.isLite(u) ?
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
     return url;
   });
 
@@ -70,9 +77,8 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
         button: <button className="btn btn-info ms-2"
           onClick={e => {
             e.preventDefault();
-            var promise = ValueLineModal.show({
+            var promise = AutoLineModal.show({
               type: { name: "string" },
-              valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
               label: UserADMessage.NameOrEmail.niceToString(),

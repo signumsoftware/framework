@@ -10,9 +10,8 @@ import { QueryString } from '@framework/QueryString';
 import { Lite, Entity, ModifiableEntity } from '@framework/Signum.Entities';
 import * as CultureClient from '@framework/Basics/CultureClient'
 import { AutomaticTranslation } from './TranslationClient';
-import { Binding, tasks } from '@framework/Lines';
+import { Binding, TextBoxLineController, TextBoxLineProps, tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
-import { ValueLineController, ValueLineProps } from '@framework/Lines/ValueLine';
 import { classes } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getLambdaMembers } from '@framework/Reflection';
@@ -27,7 +26,6 @@ export function start(options: { routes: RouteObject[] }) {
     onClick: () => Promise.resolve("/translatedInstance/status")
   });
 
-  tasks.push(taskSetTranslatableIcon)
 
   options.routes.push(
     { path: "/translatedInstance/status", element: <ImportComponent onImport={() => import("./Instances/TranslatedInstanceStatus")} /> },
@@ -36,9 +34,10 @@ export function start(options: { routes: RouteObject[] }) {
   );
 }
 
+tasks.push(taskSetTranslatableIcon)
 export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state: LineBaseProps) {
-  if (lineBase instanceof ValueLineController) {
-    const vProps = state as ValueLineProps;
+  if (lineBase instanceof TextBoxLineController) {
+    const vProps = state as TextBoxLineProps;
 
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field" &&
@@ -57,7 +56,7 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
   }
 }
 
-export function TranslateButton(p: { controller: ValueLineController }) {
+export function TranslateButton(p: { controller: TextBoxLineController }) {
 
   var ctx = p.controller.props.ctx.tryFindRootEntity();
 

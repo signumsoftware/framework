@@ -6,10 +6,82 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
+export const AggregateFunction = new EnumType<AggregateFunction>("AggregateFunction");
+export type AggregateFunction =
+  "Count" |
+  "Average" |
+  "Sum" |
+  "Min" |
+  "Max";
+
+export const CollectionAnyAllType = new EnumType<CollectionAnyAllType>("CollectionAnyAllType");
+export type CollectionAnyAllType =
+  "Any" |
+  "All" |
+  "NotAny" |
+  "NotAll";
+
+export const CollectionElementType = new EnumType<CollectionElementType>("CollectionElementType");
+export type CollectionElementType =
+  "Element" |
+  "Element2" |
+  "Element3";
+
+export module ColumnFieldMessage {
+  export const ColumnsHelp = new MessageKey("ColumnFieldMessage", "ColumnsHelp");
+  export const Rearrange = new MessageKey("ColumnFieldMessage", "Rearrange");
+  export const RightClick = new MessageKey("ColumnFieldMessage", "RightClick");
+  export const YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity");
+  export const YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity");
+  export const TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression = new MessageKey("ColumnFieldMessage", "TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression");
+  export const YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices = new MessageKey("ColumnFieldMessage", "YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices");
+  export const WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically = new MessageKey("ColumnFieldMessage", "WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically");
+  export const SummaryHeaderField = new MessageKey("ColumnFieldMessage", "SummaryHeaderField");
+  export const ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery = new MessageKey("ColumnFieldMessage", "ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery");
+  export const NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination = new MessageKey("ColumnFieldMessage", "NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination");
+}
+
 export const ContainerTokenKey = new EnumType<ContainerTokenKey>("ContainerTokenKey");
 export type ContainerTokenKey =
   "Operations" |
   "QuickLinks";
+
+export module FieldExpressionMessage {
+  export const LearnMoreAboutFieldExpressions = new MessageKey("FieldExpressionMessage", "LearnMoreAboutFieldExpressions");
+  export const YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems = new MessageKey("FieldExpressionMessage", "YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems");
+  export const SimpleValues = new MessageKey("FieldExpressionMessage", "SimpleValues");
+  export const AStringLikeHelloANumberLike = new MessageKey("FieldExpressionMessage", "AStringLikeHelloANumberLike");
+  export const Dates = new MessageKey("FieldExpressionMessage", "Dates");
+  export const _0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate = new MessageKey("FieldExpressionMessage", "_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate");
+  export const EntityRelationships = new MessageKey("FieldExpressionMessage", "EntityRelationships");
+  export const EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields = new MessageKey("FieldExpressionMessage", "EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields");
+  export const InSql = new MessageKey("FieldExpressionMessage", "InSql");
+  export const Collections = new MessageKey("FieldExpressionMessage", "Collections");
+  export const CollectionOfEntitiesOrRelationships = new MessageKey("FieldExpressionMessage", "CollectionOfEntitiesOrRelationships");
+  export const CollectionOperators = new MessageKey("FieldExpressionMessage", "CollectionOperators");
+  export const MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012 = new MessageKey("FieldExpressionMessage", "MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012");
+  export const AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens = new MessageKey("FieldExpressionMessage", "AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens");
+  export const Aggregates = new MessageKey("FieldExpressionMessage", "Aggregates");
+  export const WhenGroupingAllowsToCollapseManyValuesInOneValue = new MessageKey("FieldExpressionMessage", "WhenGroupingAllowsToCollapseManyValuesInOneValue");
+  export const CountNotNull = new MessageKey("FieldExpressionMessage", "CountNotNull");
+  export const CountDistinct = new MessageKey("FieldExpressionMessage", "CountDistinct");
+  export const CanOnlyBeUsedAfterAnotherField = new MessageKey("FieldExpressionMessage", "CanOnlyBeUsedAfterAnotherField");
+  export const FinallyRememberThatYouCan01FullFieldExpression = new MessageKey("FieldExpressionMessage", "FinallyRememberThatYouCan01FullFieldExpression");
+}
+
+export module FilterFieldMessage {
+  export const FiltersHelp = new MessageKey("FilterFieldMessage", "FiltersHelp");
+  export const AFilterConsistsOfA0AComparison1AndAConstant2 = new MessageKey("FilterFieldMessage", "AFilterConsistsOfA0AComparison1AndAConstant2");
+  export const Field = new MessageKey("FilterFieldMessage", "Field");
+  export const Operator = new MessageKey("FilterFieldMessage", "Operator");
+  export const Value = new MessageKey("FilterFieldMessage", "Value");
+  export const FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("FilterFieldMessage", "FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity");
+  export const FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1 = new MessageKey("FilterFieldMessage", "FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1");
+  export const AndOrGroups = new MessageKey("FilterFieldMessage", "AndOrGroups");
+  export const Using0YouCanGroupAFewFiltersTogether = new MessageKey("FilterFieldMessage", "Using0YouCanGroupAFewFiltersTogether");
+  export const FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012 = new MessageKey("FilterFieldMessage", "FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012");
+  export const TheSameElement = new MessageKey("FilterFieldMessage", "TheSameElement");
+}
 
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");

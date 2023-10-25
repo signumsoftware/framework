@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Workflow'
-import { TypeContext, ValueLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
+import { TypeContext, AutoLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
 import { API } from '../WorkflowClient'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
@@ -150,12 +150,12 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
         defaultOpen={ctx.value.isNew} >
         <div className="row">
           <div className="col-sm-6">
-            <ValueLine ctx={ctx.subCtx(d => d.name)} />
+            <AutoLine ctx={ctx.subCtx(d => d.name)} />
             <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
               autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }))}
               find={false}
               onRemove={handleMainEntityTypeChange} />
-            <ValueLine ctx={ctx.subCtx(d => d.expirationDate)} />
+            <AutoLine ctx={ctx.subCtx(d => d.expirationDate)} />
           </div>
           <div className="col-sm-6">
             <EnumCheckboxList ctx={ctx.subCtx(d => d.mainEntityStrategies)} columnCount={1} formGroupHtmlAttributes={{ style: { marginTop: "-15px" } }} />

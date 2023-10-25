@@ -2,6 +2,14 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Signum.Entities;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.Intrinsics.X86;
+using System.Xml.Linq;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
+using System.Linq.Expressions;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -579,11 +587,29 @@ public class BuildExpressionContext
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
     public readonly List<Filter>? Filters; //For Snippet keyword detection
 
+    public Expression<Func<object, T>>? TryGetSelectorUntyped<T>(string key)
+    {
+        var expBox = Replacements.SingleOrDefault(a => a.Key.FullKey() == key).Value;
+        if (expBox.RawExpression == null)
+            return null;
+
+        var param = Expression.Parameter(typeof(object), "obj");
+        var cast = Expression.Convert(param, ElementType);
+
+        var body = ExpressionReplacer.Replace(expBox.GetExpression(), new Dictionary<ParameterExpression, Expression>()
+        {
+            {  Parameter, cast }
+        });
+
+        return Expression.Lambda<Func<object, T>>(Expression.Convert(body, typeof(T)), param);
+    }
+
+
     public LambdaExpression GetEntitySelector()
     {
-        var entityColumn = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
+        var expBox = Replacements.Single(a => a.Key.FullKey() == "Entity").Value;
 
-        return Expression.Lambda(Expression.Convert(entityColumn.GetExpression(), typeof(Lite<Entity>)), Parameter);
+        return Expression.Lambda(Expression.Convert(expBox.GetExpression(), typeof(Lite<Entity>)), Parameter);
     }
 
     public LambdaExpression GetEntityFullSelector()
@@ -739,7 +765,7 @@ public enum QueryTokenMessage
     MatchSnippet,
 
     [Description("Snippet for {0}")]
-    SnippetOf0
+    SnippetOf0,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

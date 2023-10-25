@@ -1,7 +1,7 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Alerts;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
-using Signum.Dynamic.Types;
 using Signum.Mailing;
 using Signum.Mailing.Package;
 using Signum.Processes;
@@ -154,7 +154,6 @@ public static class CaseActivityLogic
                 CanExecute = c => c.FinishDate == null ? null : CaseActivityMessage.AlreadyFinished.NiceToString(),
                 Execute = (c, args) =>
                 {
-
                     var avoidRecompose = args.TryGetArgS<bool>() ?? false;
 
                     foreach (var sc in c.SubCases().Where(a => a.FinishDate == null))
@@ -178,7 +177,7 @@ public static class CaseActivityLogic
                             notification.Save();
                         }
                     }
-
+                     
                     c.FinishDate = Clock.Now;
                     CancelEntity(c.MainEntity, c);
                     c.Save();
@@ -213,18 +212,21 @@ public static class CaseActivityLogic
                 c.Delete();
             }
 
-            IQueryable<CaseActivityEntity> CancelledCases(CaseEntity c)
+            IQueryable<CaseActivityEntity> RejectedCases(CaseEntity c)
             {
-                return c.CaseActivities().Where(a => a.DoneBy != null && a.DoneType == DoneType.Jump &&
-                        (a.DoneDecision == CaseActivityMessage.CanceledCase.ToString() || a.DoneDecision == CaseActivityMessage.CanceledCase.NiceToString()));
+                return c.CaseActivities().Where(a => a.DoneBy != null && ( a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
             }
 
             new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
             {
-                CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+                CanExecute = c => c.FinishDate != null &&  CancelledCases(c).Any()  ? null : CaseActivityMessage.NotCanceled.NiceToString(),
                 Execute = (c, _) =>
                 {
+                    ReactivateEntity(c.MainEntity, c);
+
                     var currentActivities = CancelledCases(c).ToList();
+
+                    currentActivities = currentActivities.Concat(RejectedCases(c).ToList()).ToList();
 
                     foreach (var ca in currentActivities)
                     {
@@ -232,6 +234,8 @@ public static class CaseActivityLogic
                         ca.DoneDate = null;
                         ca.DoneType = null;
                         ca.DoneDecision = null;
+                        var connections = ca.WorkflowActivity.NextConnections().ToList();
+
                         ca.Save();
 
                         foreach (var notification in ca.Notifications().ToList())
@@ -243,6 +247,11 @@ public static class CaseActivityLogic
 
                     c.FinishDate = null;
                     c.Save();
+
+                    foreach (var sc in c.SubCases().Where(a => a.FinishDate != null))
+                    {
+                        sc.Execute(CaseOperation.Reactivate, true);
+                    }
                 }
             }.Register();
 
@@ -321,7 +330,7 @@ public static class CaseActivityLogic
                             return a.Event.Timer!.Duration != null && a.Event.Timer!.Duration!.Add(startDate) < now;
                         }).Select(a => a.Activity.ToLite()).ToList();
 
-                    return candidates.Where(a => a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
+                    return candidates.Where(a => !a.Event.Timer!.AvoidExecuteConditionByTimer && a.Event.Timer!.Condition.Is(cond) && cond.Evaluate(a.Activity, now)).Select(a => a.Activity.ToLite()).ToList();
                 }).Distinct().ToList();
 
                 if (!activities.Any())
@@ -409,21 +418,19 @@ public static class CaseActivityLogic
                     .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
                     );
 
-            sb.Schema.WhenIncluded<DynamicTypeEntity>(() =>
-            {
-                new Graph<DynamicTypeEntity>.Execute(CaseActivityOperation.FixCaseDescriptions)
-                {
-                    Execute = (e, _) =>
-                    {
-                        var type = TypeLogic.GetType(e.TypeName);
-                        giFixCaseDescriptions.GetInvoker(type)();
-                    },
-                }.Register();
-            });
-
+          
             CaseActivityGraph.Register();
             OverrideCaseActivityMixin(sb);
         }
+
+    }
+
+
+    public static IQueryable<CaseActivityEntity> CancelledCases(CaseEntity c)
+    {
+        return c.CaseActivities().Where(a => a.DoneBy != null && a.DoneType == DoneType.Jump &&
+                (a.DoneDecision == CaseActivityMessage.CanceledCase.ToString() || a.DoneDecision == CaseActivityMessage.CanceledCase.NiceToString())
+         );
     }
 
     class ActivityEvent
@@ -449,16 +456,6 @@ public static class CaseActivityLogic
         return caseActivity.Execute(CaseActivityOperation.Register);
     }
 
-    static readonly GenericInvoker<Action> giFixCaseDescriptions = new(() => FixCaseDescriptions<Entity>());
-
-    public static void FixCaseDescriptions<T>() where T : Entity
-    {
-        Database.Query<CaseEntity>()
-                      .Where(a => a.MainEntity.GetType() == typeof(T))
-                      .UnsafeUpdate()
-                      .Set(a => a.Description, a => ((T)a.MainEntity).ToString())
-                      .Execute();
-    }
 
     public static Dictionary<Type, WorkflowOptions> Options = new Dictionary<Type, WorkflowOptions>();
 
@@ -467,16 +464,18 @@ public static class CaseActivityLogic
         public Func<ICaseMainEntity>? Constructor;
         public Action<ICaseMainEntity> SaveEntity;
         public Action<ICaseMainEntity, CaseEntity>? Cancel;
+        public Action<ICaseMainEntity, CaseEntity>? Reactivate;
 
-        public WorkflowOptions(Func<ICaseMainEntity>? constructor, Action<ICaseMainEntity> saveEntity, Action<ICaseMainEntity, CaseEntity>? cancel)
+        public WorkflowOptions(Func<ICaseMainEntity>? constructor, Action<ICaseMainEntity> saveEntity, Action<ICaseMainEntity, CaseEntity>? cancel, Action<ICaseMainEntity, CaseEntity>? reactivate)
         {
             Constructor = constructor;
             SaveEntity = saveEntity;
             Cancel = cancel;
+            Reactivate = reactivate;
         }
     }
 
-    public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save, Action<T, CaseEntity>? cancel = null)
+    public static FluentInclude<T> WithWorkflow<T>(this FluentInclude<T> fi, Func<T>? constructor, Action<T> save, Action<T, CaseEntity>? cancel = null, Action<T, CaseEntity>? reactivate = null)
         where T : Entity, ICaseMainEntity
     {
         fi.SchemaBuilder.Schema.EntityEvents<T>().Saved += (e, args) =>
@@ -489,7 +488,8 @@ public static class CaseActivityLogic
 
         Options[typeof(T)] = new WorkflowOptions(constructor,
             saveEntity: e => save((T)e),
-            cancel: cancel  == null ? null : ((e, c) => cancel((T)e, c)));
+            cancel: cancel  == null ? null : ((e, c) => cancel((T)e, c)),
+            reactivate: reactivate == null ? null : ((e, c) => reactivate((T)e, c)));
 
         return fi;
     }
@@ -599,6 +599,13 @@ public static class CaseActivityLogic
         var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
         using (AvoidNotifyInProgress())
             options.Cancel?.Invoke(mainEntity, caseEntity);
+    }
+
+    static void ReactivateEntity(ICaseMainEntity mainEntity, CaseEntity caseEntity)
+    {
+        var options = CaseActivityLogic.Options.GetOrThrow(mainEntity.GetType());
+        using (AvoidNotifyInProgress())
+            options.Reactivate?.Invoke(mainEntity, caseEntity);
     }
 
     public static CaseActivityEntity RetrieveForViewing(Lite<CaseActivityEntity> lite)
@@ -845,12 +852,16 @@ public static class CaseActivityLogic
                 ToStates = { CaseActivityState.Done, CaseActivityState.Pending },
                 CanExecute = ca => (ca.WorkflowActivity is WorkflowEventEntity we && we.Type.IsTimer() ||
                 ca.WorkflowActivity is WorkflowActivityEntity wa && wa.BoundaryTimers.Any()) ? null : CaseActivityMessage.Activity0HasNoTimers.NiceToString(ca.WorkflowActivity),
-                Execute = (ca, _) =>
+                Execute = (ca, args) =>
                 {
                     var now = Clock.Now;
 
                     var candidateEvents = ca.WorkflowActivity is WorkflowEventEntity @event ? new WorkflowEventEntity[] { @event } :
-                    ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
+                        ((WorkflowActivityEntity)ca.WorkflowActivity).BoundaryTimers.ToArray();
+
+                    var evaluateSpecificEvents = args.TryGetArgC<List<Lite<WorkflowEventEntity>>>();
+                    if (evaluateSpecificEvents != null)
+                        candidateEvents = candidateEvents.Where(ce => evaluateSpecificEvents.Any(e => e.Is(ce))).ToArray();
 
                     var lastExecutions = (
                         from et in ca.ExecutedTimers()

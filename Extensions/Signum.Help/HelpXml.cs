@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Vml.Office;
 using DocumentFormat.OpenXml.Wordprocessing;
+using Signum.API;
 using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
@@ -426,7 +427,7 @@ public static class HelpXml
             var props = element.Element(_Properties);
             if (props != null)
             {
-                var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).ToDictionary(a => a.Path);
+                var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(pr => ReflectionServer.InTypeScript(pr.ToPropertyRoute())).ToDictionary(a => a.Path);
 
                 foreach (var item in props.Elements(_Property))
                 {

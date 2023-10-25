@@ -42,7 +42,7 @@ export function HelpWidget(p: HelpWidgetProps) {
 
 export function HelpIcon(p: { ctx: TypeContext<any> }) {
 
-  debugger;
+  //debugger;
 
   if (p.ctx.propertyRoute == null)
     return undefined;
