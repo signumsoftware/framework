@@ -680,7 +680,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       {
         order: -1,
-        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} content={props => <SearchHelp sc={this} injected={props} />} />
+        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} className="mx-2" content={props => <SearchHelp sc={this} injected={props} />} />
       },
       ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
