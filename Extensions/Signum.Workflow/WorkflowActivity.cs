@@ -120,17 +120,7 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
         model.Name = this.Name;
         model.Type = this.Type;
         model.RequiresOpen = this.RequiresOpen;
-        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel
-        {
-            Name = we.Name,
-            MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
-            Type = we.Type,
-            RunRepeatedly = we.RunRepeatedly,
-            DecisionOptionName = we.DecisionOptionName,
-            Timer = we.Timer,
-            BpmnElementId = we.BpmnElementId
-        }).ToMList());
-
+        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => (WorkflowEventModel)we.GetModel()).ToMList());
         model.DecisionOptions.AssignMList(this.DecisionOptions);
         model.CustomNextButton = this.CustomNextButton;
         model.EstimatedDuration = this.EstimatedDuration;

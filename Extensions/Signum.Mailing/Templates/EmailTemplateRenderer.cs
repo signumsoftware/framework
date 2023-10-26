@@ -142,7 +142,14 @@ class EmailMessageBuilder
     TextTemplateParser.BlockNode SubjectNode(EmailTemplateMessageEmbedded message)
     {
         if (message.SubjectParsedNode == null)
-            message.SubjectParsedNode = TextTemplateParser.Parse(message.Subject, qd, template.Model?.ToType());
+        {
+            var subject = message.Subject
+                .Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(l => l.Trim())
+                .ToString(" ");
+
+            message.SubjectParsedNode = TextTemplateParser.Parse(subject, qd, template.Model?.ToType());
+        }
 
         return (TextTemplateParser.BlockNode)message.SubjectParsedNode;
     }
