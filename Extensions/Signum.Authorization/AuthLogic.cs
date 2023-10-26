@@ -294,7 +294,7 @@ public static class AuthLogic
         var result = RetrieveUserByUsername(username);
 
         if (result != null && result.State == UserState.Deactivated)
-            throw new ApplicationException(LoginAuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
+            throw new ApplicationException(LoginAuthMessage.User0IsDeactivated.NiceToString().FormatWith(result.UserName));
 
         return result;
     }
@@ -416,7 +416,7 @@ public static class AuthLogic
 
                         user.Execute(UserOperation.Deactivate);
 
-                        throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
+                        throw new UserLockedException(LoginAuthMessage.User0IsDeactivated.NiceToString()
                             .FormatWith(user.UserName));
                     }
 
