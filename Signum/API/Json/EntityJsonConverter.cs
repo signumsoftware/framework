@@ -114,7 +114,7 @@ public class EntityJsonConverterFactory : JsonConverterFactory
     public Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>();
     public Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
     public Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
-    public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error";
+    public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error in " + pi.Name;
 
     public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
     {
@@ -498,7 +498,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                             {
                                 if (!markedAsModified && parentRoute.RootType.IsEntity())
                                 {
-                                    if (!pi.HasAttribute<IgnoreAttribute>())
+                                    if (!(pi.HasAttribute<IgnoreAttribute>() && !VirtualMList.IsVirtualMList(pr)))
                                     {
                                         try
                                         {
