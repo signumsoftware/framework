@@ -258,7 +258,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
   const label = (
     <span title={currentUserQueryToStr}>
-      <FontAwesomeIcon icon={["far", "rectangle-list"]} />
+      <FontAwesomeIcon icon={ "rectangle-list"} />
       {p.searchControl.props.largeToolbarButtons == true && <>
         &nbsp;
         <span className="d-none d-sm-inline">
@@ -302,10 +302,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={["fas", "arrow-rotate-left"]} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={["fas", "share-from-square"]} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
-        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={["fas", "pen-to-square"]} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
-        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={["fas", "plus"]} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
+        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={"share-from-square"} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
+        {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={"pen-to-square"} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
+        {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={"plus"} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
     </Dropdown>
   );
 

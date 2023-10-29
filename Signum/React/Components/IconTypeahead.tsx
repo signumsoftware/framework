@@ -165,7 +165,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     );
   }
 
-  var currentPrefix = !parsedIcon ? "" :
+  var currentPrefix: IconPrefix | "" = !parsedIcon ? "" :
     typeof parsedIcon == "string" ? "" :
       typeof parsedIcon == "object" ? (parsedIcon as IconLookup).prefix : "";
 
@@ -190,7 +190,7 @@ export function IconTypeahead(p: IconTypeaheadProps) {
         />
       </div>
       <div className="col-sm-5">
-        <select className={p.formControlClass?.replaceAll("control", "select")} value={currentPrefix} disabled={!(p.icon && (hasDefault || prefixes != null && prefixes.length > 1))} onChange={handleSelectFamily}>
+        <select className={p.formControlClass?.replaceAll("control", "select")} value={currentPrefix  && toLongPrefix(currentPrefix)} disabled={!(p.icon && (hasDefault || prefixes != null && prefixes.length > 1))} onChange={handleSelectFamily}>
           {hasDefault && <option value={""} > ({config.styleDefault})</option>}
           {prefixes?.map((prefix, i) => <option key={prefix} value={toLongPrefix(prefix)}>{toLongPrefix(prefix)}</option>)}
         </select>

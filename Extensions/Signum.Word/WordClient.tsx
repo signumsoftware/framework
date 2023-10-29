@@ -140,7 +140,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
         header: WordTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
           <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-            <FontAwesomeIcon icon={["far", "file-word"]} className="icon" />
+            <FontAwesomeIcon icon={"file-word"} className="icon" />
             {getToString(wt)}
           </Dropdown.Item>
         )

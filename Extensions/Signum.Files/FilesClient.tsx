@@ -117,7 +117,7 @@ export const extensionInfo: { [ext: string]: ExtensionInfo } = {
   ["info"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true  },
   ["log"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true},
 
-  ["csv"]: { icon: ["fas", "file-csv"], color: "#566573", mimeType: "text/plain"  },
+  ["csv"]: { icon: "file-csv", color: "#566573", mimeType: "text/plain"  },
 
   ["avi"]: { icon: "file-video", color: "red", mimeType: "video/x-msvideo", browserView: true },
   ["mkv"]: { icon: "file-video", color: "red", mimeType: "video/x-matroska", browserView: true },
