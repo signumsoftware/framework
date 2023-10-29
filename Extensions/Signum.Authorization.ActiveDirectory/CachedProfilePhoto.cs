@@ -12,7 +12,9 @@ public class CachedProfilePhotoEntity : Entity
     public int Size { get; set; }
 
     [DefaultFileType(nameof(AuthADFileType.CachedProfilePhoto))]
-    public FilePathEmbedded Photo { get; set; }
+    public FilePathEmbedded? Photo { get; set; }
+
+    public DateTime CreationDate { get; private set; } = Clock.Now;
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{User} {Size}px");

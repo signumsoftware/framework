@@ -16,6 +16,7 @@ using Microsoft.Azure.Amqp.Framing;
 using Order = Signum.DynamicQuery.Order;
 using Microsoft.Graph.Models.ODataErrors;
 using System;
+using Signum.Files;
 
 namespace Signum.Authorization.ActiveDirectory.Azure;
 
@@ -53,7 +54,6 @@ public static class AzureADLogic
                 ToStringValue = u.ToString(),
                 OID = u.Mixin<UserADMixin>().OID,
                 SID = u.Mixin<UserADMixin>().SID,
-                PhotoSuffix = CachedProfilePhotoLogic.IsStarted ? u.DefaultCachedProfilePhotoSuffix() : null
             });
 
             if (deactivateUsersTask)
@@ -461,25 +461,17 @@ public static class AzureADLogic
     }
 
 
-    public static Task<Stream> GetUserPhoto(Guid oid, int size)
+    public static Task<MemoryStream> GetUserPhoto(Guid oid, int size)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
         int imageSize = ToAzureSize(size);
 
-
-        if (CachedProfilePhotoLogic.IsStarted)
-        {
-            Task<Stream> cachedPicture = CachedProfilePhotoLogic.GetCachedPicture(oid, size);
-        }
-
         return graphClient.Users[oid.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.GetAsync().ContinueWith(photo =>
         {
             MemoryStream ms = new MemoryStream();
             photo.Result!.CopyTo(ms);
-
-          
-
+            ms.Position = 0;
             return ms;
         }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }

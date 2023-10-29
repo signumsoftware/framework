@@ -1,3 +1,5 @@
+using Microsoft.Graph.Models;
+using Npgsql.Replication.PgOutput.Messages;
 using Signum.Authorization.ActiveDirectory.Azure;
 using Signum.Files;
 using System.IO;
@@ -14,10 +16,6 @@ public static class CachedProfilePhotoLogic
     public static IQueryable<CachedProfilePhotoEntity> CachedProfilePhotos(this UserEntity u) =>
         As.Expression(() => Database.Query<CachedProfilePhotoEntity>().Where(a => a.User.Is(u)));
 
-    [AutoExpressionField]
-    public static string? DefaultCachedProfilePhotoSuffix(this UserEntity u) =>
-        As.Expression(() => Database.Query<CachedProfilePhotoEntity>().Where(a => a.User.Is(u) && a.Size == DefaultSize).Select(a => a.Photo.Suffix).SingleOrDefaultEx());
-
     public static void Start(SchemaBuilder sb, IFileTypeAlgorithm algorithm)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
@@ -26,7 +24,7 @@ public static class CachedProfilePhotoLogic
 
             sb.Include<CachedProfilePhotoEntity>()
                 .WithDelete(CachedProfilePhotoOperation.Delete)
-                
+                .WithExpressionFrom((UserEntity u) => u.CachedProfilePhotos())
                 .WithQuery(() => e => new
                 {
                     Entity = e,
@@ -39,8 +37,39 @@ public static class CachedProfilePhotoLogic
         }
     }
 
-    internal static async CachedProfilePhotoEntity? GetCachedPicture(Guid oid, int size)
+    internal static async Task<CachedProfilePhotoEntity> GetOrCreateCachedPicture(Guid oid, int size)
     {
-        return Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+        using (AuthLogic.Disable())
+        {
+            var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+
+            if (result != null)
+                return result;
+
+            size = AzureADLogic.ToAzureSize(size);
+
+            var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
+
+            using (var tr = new Transaction())
+            {
+                var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
+
+                result = new CachedProfilePhotoEntity
+                {
+                    Photo = stream == null ? null :  new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
+                    User = user,
+                    Size = size
+                }.Save();
+
+                tr.Commit();
+            }
+
+            return result;
+        }
+    }
+
+    internal static Task<bool> HasCachedPicture(Guid oid, int size)
+    {
+        return Database.Query<CachedProfilePhotoEntity>().AnyAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
     }
 }
