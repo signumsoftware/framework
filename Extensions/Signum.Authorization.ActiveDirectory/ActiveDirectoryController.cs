@@ -107,12 +107,12 @@ public class ActiveDirectoryController : ControllerBase
             MaxAge = PictureMaxAge,
         };
 
-        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(ms =>
+        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(task =>
         {
-            if (ms.IsFaulted || ms.IsCanceled)
+            if (task.IsFaulted || task.IsCanceled)
                 return (ActionResult)new NotFoundResult();
 
-            var photo = ms.Result;
+            var photo = task.Result;
             photo.Position = 0;
             return new FileStreamResult(photo, "image/jpeg");
         });

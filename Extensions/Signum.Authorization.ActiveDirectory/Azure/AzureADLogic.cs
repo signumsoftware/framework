@@ -53,6 +53,7 @@ public static class AzureADLogic
                 ToStringValue = u.ToString(),
                 OID = u.Mixin<UserADMixin>().OID,
                 SID = u.Mixin<UserADMixin>().SID,
+                PhotoSuffix = CachedProfilePhotoLogic.IsStarted ? u.DefaultCachedProfilePhotoSuffix() : null
             });
 
             if (deactivateUsersTask)
@@ -460,27 +461,38 @@ public static class AzureADLogic
     }
 
 
-    public static Task<MemoryStream> GetUserPhoto(Guid OId, int size)
+    public static Task<Stream> GetUserPhoto(Guid oid, int size)
     {
         var tokenCredential = GetTokenCredential();
         GraphServiceClient graphClient = new GraphServiceClient(tokenCredential);
-        int imageSize =
-            size <= 48 ? 48 :
-            size <= 64 ? 64 :
-            size <= 96 ? 96 :
-            size <= 120 ? 120 :
-            size <= 240 ? 240 :
-            size <= 360 ? 360 :
-            size <= 432 ? 432 :
-            size <= 504 ? 504 : 648;
+        int imageSize = ToAzureSize(size);
 
-        return graphClient.Users[OId.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.GetAsync().ContinueWith(photo =>
+
+        if (CachedProfilePhotoLogic.IsStarted)
+        {
+            Task<Stream> cachedPicture = CachedProfilePhotoLogic.GetCachedPicture(oid, size);
+        }
+
+        return graphClient.Users[oid.ToString()].Photos[$"{imageSize}x{imageSize}"].Content.GetAsync().ContinueWith(photo =>
         {
             MemoryStream ms = new MemoryStream();
             photo.Result!.CopyTo(ms);
+
+          
+
             return ms;
         }, TaskContinuationOptions.OnlyOnRanToCompletion);
     }
+
+    public static int ToAzureSize(int size) => 
+        size <= 48 ? 48 :
+        size <= 64 ? 64 :
+        size <= 96 ? 96 :
+        size <= 120 ? 120 :
+        size <= 240 ? 240 :
+        size <= 360 ? 360 :
+        size <= 432 ? 432 :
+        size <= 504 ? 504 : 648;
 }
 
 public record SimpleGroup(Guid Id, string? DisplayName);

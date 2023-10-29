@@ -54,14 +54,14 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
     </div>
   );
 }
-var urlCache: { [userKey: string]: Promise<string | null> | string | null } = { };
+var urlCache: { [userKeyPlusSize: string]: Promise<string | null> | string | null } = { };
 
 function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
 
   var url = useAPI(() => {
 
     const val = !user.id ? getFirstUrl(user, size) :
-      (urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user))] ??= getFirstUrl(user, size));
+      (urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user)) + ":" + size] ??= getFirstUrl(user, size));
 
     return val;
   }, [user.id]);
