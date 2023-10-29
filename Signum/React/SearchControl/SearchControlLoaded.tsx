@@ -36,7 +36,6 @@ import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
-import { faEllipsis, faFilter } from '@fortawesome/free-solid-svg-icons'
 import { similarToken } from '../Search'
 import { SearchHelp } from './SearchControlVisualTips'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
@@ -678,11 +677,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         </button>
       },
 
-      ...leftButtonBarElements,
       {
-        order: 10,
-        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} content={props => <SearchHelp sc={this} injected={props} />} />
-      }
+        order: -1,
+        button: <VisualTipIcon visualTip={SearchVisualTip.SearchHelp} className="mx-2" content={props => <SearchHelp sc={this} injected={props} />} />
+      },
+      ...leftButtonBarElements
     ] as (ButtonBarElement | null | false | undefined)[])
       .filter(a => a)
       .map(a => a as ButtonBarElement);
@@ -2143,26 +2142,6 @@ function dominates(root: QueryToken, big: QueryToken) {
 
 }
 
-
-export function CustomFontAwesomeIcon(p: { iconDefinition: IconDefinition, title?: string, stroke?: string, fill?: string, strokeWith?: number | string }) {
-
-  var [width, height, ligatures, unicode, data] = p.iconDefinition.icon;
-
-  return (
-    <svg
-      aria-hidden="true" focusable="false"
-      data-prefix={p.iconDefinition.prefix}
-      data-icon={p.iconDefinition.iconName}
-      className={"svg-inline--fa fa-" + p.iconDefinition.iconName}
-      role="img"
-      viewBox={`0 0 ${width} ${height}`}>
-      <path strokeWidth={p.strokeWith} d={Array.isArray(data) ? data[0] : data} stroke={p.stroke} fill={p.fill}></path>
-    </svg>
-  );
-}
-
-
-
 function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boolean }) {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -2195,7 +2174,7 @@ const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: Re
     <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
       href=""
       onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" />
+      <FontAwesomeIcon icon="filter" />
       {p.children}
     </a>
   );

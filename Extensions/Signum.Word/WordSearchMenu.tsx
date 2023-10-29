@@ -35,7 +35,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps){
   if (!wordReports || !wordReports.length)
     return null;
 
-  const label = <span><FontAwesomeIcon icon={["far", "file-word"]} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
+  const label = <span><FontAwesomeIcon icon={"file-word"} />&nbsp;{p.searchControl.props.largeToolbarButtons == true ? " " + WordTemplateMessage.WordReport.niceToString() : undefined}</span>;
 
   return (
     <DropdownButton id="wordTemplateDropDown" className="sf-word-dropdown" title={label}>

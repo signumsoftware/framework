@@ -789,8 +789,8 @@ export namespace Defaults {
   }
 
   export function getIcon(oi: OperationInfo): IconProp | undefined {
-    return oi.operationType == "Delete" ? ["far", "trash-alt"] :
-      oi.operationType == "Execute" && Defaults.isSave(oi) ? ["far", "save"] : undefined;
+    return oi.operationType == "Delete" ? "trash-alt" :
+      oi.operationType == "Execute" && Defaults.isSave(oi) ? "save" : undefined;
   }
 
   export function getGroup(oi: OperationInfo): EntityOperationGroup | undefined {

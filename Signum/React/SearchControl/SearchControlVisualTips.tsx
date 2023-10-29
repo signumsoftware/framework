@@ -1,7 +1,7 @@
 import React from "react";
 import { OverlayTrigger, Popover } from "react-bootstrap";
 import { getQueryNiceName, isTypeEntity } from "../Reflection";
-import SearchControlLoaded, { CustomFontAwesomeIcon, getAddFilterIcon, getEditColumnIcon, getGroupByThisColumnIcon, getInsertColumnIcon, getRemoveColumnIcon, getResotreDefaultColumnsIcon } from "./SearchControlLoaded";
+import SearchControlLoaded, { getAddFilterIcon, getEditColumnIcon, getGroupByThisColumnIcon, getInsertColumnIcon, getRemoveColumnIcon, getResotreDefaultColumnsIcon } from "./SearchControlLoaded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Dic } from "../Globals";
 import { CollectionMessage } from "../Signum.External";
@@ -44,7 +44,7 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
         <p className="my-2">You can also <em>rearrange</em> the columns by dragging and dropping them to another position.</p>
         <p className="my-2">When inserting, the new column will be added before or after the selected column, depending where you <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong>.</p>
         <div className="pt-2"><strong>Advanced Filters</strong></div>
-        <p className="my-2">Click on the <CustomFontAwesomeIcon iconDefinition={faFilter} strokeWith={"40px"} stroke="currentColor" fill="transparent" /> button to open the Advanced filters, this will allow you create complex filters manually by selecting the <strong>field</strong> of the entity (or a related entities), a comparison <strong>operator</strong> and a <strong>value</strong> to compare.</p>
+        <p className="my-2">Click on the <FontAwesomeIcon icon="filter" /> button to open the Advanced filters, this will allow you create complex filters manually by selecting the <strong>field</strong> of the entity (or a related entities), a comparison <strong>operator</strong> and a <strong>value</strong> to compare.</p>
         <p className="my-2">Trick: You can <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong> on a <strong>column header</strong> and choose {getAddFilterIcon()}<em>Add filter</em> to quickly filter by this column. Even more, you can <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong> on a <strong>value</strong> to filter by this value directly.</p>
         <div className="pt-2"><strong>Grouping results by one (or more) column</strong></div>
         <p className="my-2">You can group results by <strong><samp style={{ whiteSpace: 'nowrap' }}>right-clicking</samp></strong> in a column header and selecting {getGroupByThisColumnIcon()}<em style={{ whiteSpace: 'nowrap' }}>Group by this column</em>. All the columns will disapear except the selected one and an agregation column (typically <em>Count</em>).</p>

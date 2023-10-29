@@ -70,6 +70,8 @@ public enum OperationMessage
 
     [Description("Are you sure you want to cancel the operation?")]
     AreYouSureYouWantToCancelTheOperation,
+
+    Operation
 }
 
 public enum SynchronizerMessage
@@ -204,7 +206,7 @@ public enum SearchMessage
     NoFiltersSpecified,
     [Description("of")]
     Of,
-    Operation,
+    Operator,
     [Description("Query {0} is not allowed")]
     Query0IsNotAllowed,
     [Description("Query {0} is not allowed")]

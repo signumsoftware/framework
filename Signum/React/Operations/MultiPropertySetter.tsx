@@ -117,7 +117,7 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         <tr>
           <th style={{ minWidth: "24px" }}></th>
           <th>{SearchMessage.Field.niceToString()}</th>
-          <th>{SearchMessage.Operation.niceToString()}</th>
+          <th>{OperationMessage.Operation.niceToString()}</th>
           <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
         </tr>
       </thead>

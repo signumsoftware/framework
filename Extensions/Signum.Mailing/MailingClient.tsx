@@ -163,7 +163,7 @@ export function getEmailTemplates(ctx: ContextualItemsContext<Entity>): Promise<
         header: EmailTemplateEntity.nicePluralName(),
         menuItems: wts.map(et =>
           <Dropdown.Item data-operation={et.EntityType} onClick={() => handleMenuClick(et, ctx)}>
-            <FontAwesomeIcon icon={["far", "envelope"]} className="icon" />
+            <FontAwesomeIcon icon="envelope" className="icon" />
             {getToString(et)}
           </Dropdown.Item>
         )

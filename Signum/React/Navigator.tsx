@@ -139,10 +139,10 @@ export function setDefaultRenderTitleFunction(newFunction: (typeInfo: TypeInfo, 
 let renderId = (entity: Entity): React.ReactChild => {
   var idType = getTypeInfo(entity.Type).members["Id"].type;
 
-  const guid = idType!.name == "Guid";
+  const hideId = getSettings(entity.Type)?.hideId ?? idType!.name == "Guid";
   return (
     <>
-      <span className={guid ? "sf-hide-id" : ""}>
+      <span className={hideId ? "sf-hide-id" : ""}>
         {entity.id}
       </span>
       <CopyLiteButton className={"sf-hide-id"} entity={entity} />
@@ -948,6 +948,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
 
+  hideId?: boolean;
+
   allowWrapEntityLink?: boolean;
   avoidFillSearchColumnWidth?: boolean;
 
@@ -1025,6 +1027,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   isReadOnly?: boolean;
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
+
+  hideId?: boolean;
 
   allowWrapEntityLink?: boolean;
   avoidFillSearchColumnWidth?: boolean;

@@ -10,6 +10,7 @@ using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
+using System.Linq.Expressions;
 
 namespace Signum.UserQueries;
 
@@ -321,22 +322,19 @@ public static class UserQueryLogic
     {
         sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(UserEntity));
 
-        TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
-            uq => uq.Owner.Is(UserEntity.Current));
-
-        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
-             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
-
-        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
     }
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
     {
         sb.Schema.Settings.AssertImplementedBy((UserQueryEntity uq) => uq.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition,
-            uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+    }
+
+    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<UserQueryEntity, bool>> condition)
+    {
+        TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
 
         TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
              cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
@@ -344,7 +342,6 @@ public static class UserQueryLogic
         TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
-
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
     {
