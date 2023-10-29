@@ -638,6 +638,7 @@ export module SearchMessage {
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const Equal0 = new MessageKey("SearchMessage", "Equal0");
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");

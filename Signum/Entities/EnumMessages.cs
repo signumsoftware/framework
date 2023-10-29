@@ -171,6 +171,7 @@ public enum SearchMessage
     [Description("Add filter")]
     AddFilter,
 
+
     [Description("Add OR group")]
     AddOrGroup,
     [Description("Add AND group")]
@@ -299,6 +300,9 @@ public enum SearchMessage
     [Description("More than one {0} selected")]
     MoreThanOne0Selected,
     CombineRowsWith,
+
+    [Description("Equal {0}")]
+    Equal0,
 
     SwitchViewMode,
 

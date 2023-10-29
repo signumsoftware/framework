@@ -29,15 +29,11 @@ export type CollectionElementType =
 
 export module ColumnFieldMessage {
   export const ColumnsHelp = new MessageKey("ColumnFieldMessage", "ColumnsHelp");
-  export const Rearrange = new MessageKey("ColumnFieldMessage", "Rearrange");
-  export const RightClick = new MessageKey("ColumnFieldMessage", "RightClick");
   export const YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity");
   export const YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity");
   export const TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression = new MessageKey("ColumnFieldMessage", "TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression");
   export const YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices = new MessageKey("ColumnFieldMessage", "YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices");
-  export const WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically = new MessageKey("ColumnFieldMessage", "WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically");
-  export const SummaryHeaderField = new MessageKey("ColumnFieldMessage", "SummaryHeaderField");
-  export const ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery = new MessageKey("ColumnFieldMessage", "ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery");
+  export const WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01 = new MessageKey("ColumnFieldMessage", "WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01");
   export const NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination = new MessageKey("ColumnFieldMessage", "NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination");
 }
 

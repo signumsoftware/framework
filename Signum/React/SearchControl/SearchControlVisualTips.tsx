@@ -11,6 +11,7 @@ import { AggregateFunction, CollectionAnyAllType, CollectionElementType, ColumnF
 import { JavascriptMessage, SearchMessage } from "../Signum.Entities";
 import { OverlayInjectedProps } from "react-bootstrap/esm/Overlay";
 import { QueryDescription } from "../FindOptions";
+import { getNiceTypeName } from "../Operations/MultiPropertySetter";
 
 export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }) {
   var sc = p.sc;
@@ -108,7 +109,7 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
 
 export function ColumnHelp(p: { queryDescription: QueryDescription, injected: OverlayInjectedProps }) {
   const [expressionExpanded, setExpressionExpanded] = React.useState(false);
-  var type = p.queryDescription.columns['Entity'].displayName;
+  const type = getNiceTypeName(p.queryDescription.columns['Entity'].type);
   const isDefaultQuery = isTypeEntity(p.queryDescription.queryKey);
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 800 }}>
@@ -124,9 +125,12 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
           </li>
           <li><strong>{SearchMessage.DisplayName.niceToString()}: </strong>{ColumnFieldMessage.TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression.niceToString()
             .formatHtml(<em>{SearchMessage.DisplayName.niceToString()}</em>)}</li>
-          <li><strong>{SearchMessage.SummaryHeader.niceToString()} (Ʃ): </strong>{ColumnFieldMessage.YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices.niceToString()
-            .formatHtml(<span><em>{AggregateFunction.niceToString("Count")}</em>, <em>{AggregateFunction.niceToString("Sum")}</em></span>)}</li>
-          <li><strong>{SearchMessage.CombineRowsWith.niceToString()}: </strong>{ColumnFieldMessage.WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically.niceToString()
+          <li><strong>{SearchMessage.SummaryHeader.niceToString()} (Ʃ): </strong>
+            {ColumnFieldMessage.YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices.niceToString().formatHtml(<span><em>{AggregateFunction.niceToString("Count")}</em>, <em>{AggregateFunction.niceToString("Sum")}</em></span>)}
+            <br/>
+            {ColumnFieldMessage.NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination.niceToString()}
+          </li>
+          <li><strong>{SearchMessage.CombineRowsWith.niceToString()}: </strong>{ColumnFieldMessage.WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01.niceToString()
             .formatHtml(<code>rowSpan</code>, <strong><samp>{type}</samp></strong>)}</li>
         </ul>
       </Popover.Body>

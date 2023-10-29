@@ -508,9 +508,6 @@ export function getTypeColor(type: TypeReference) {
         if (type.isEmbedded)
           return "#156F8A";
 
-        if (type.isLite)
-          return "#2B91AF";
-
         var tis = tryGetTypeInfos(type.name);
 
         if (tis[0]) {
@@ -542,8 +539,6 @@ export function getNiceTypeName(tr: TypeReference) {
         if (tr.isEmbedded)
           return QueryTokenMessage.Embedded0.niceToString().formatWith(tr.typeNiceName);
 
-        if (tr.isLite)
-          return "#2B91AF";
 
         if (tr.name == IsByAll)
           return QueryTokenMessage.AnyEntity.niceToString();
