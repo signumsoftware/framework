@@ -135,7 +135,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                     {SearchMessage.Field.niceToString()}
                   </div>
                 </th>
-                <th>{SearchMessage.Operation.niceToString()}</th>
+                <th>{SearchMessage.Operator.niceToString()}</th>
                 <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
                 {showPinnedFiltersOptions && <th></th>}
                 {showDashboardBehaviour && <th></th>}
