@@ -221,7 +221,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
   const token = scriptParameter.columnIndex == undefined ? undefined :
     chart.columns[scriptParameter.columnIndex].element.token?.token;
 
-  if (scriptParameter.type == "String") {
+  if (scriptParameter.type == "Number" || scriptParameter.type == "String") {
     const tbl: TextBoxLineProps = {
       ctx: ctx.subCtx(a => a.value),
       label: scriptParameter.displayName!,
