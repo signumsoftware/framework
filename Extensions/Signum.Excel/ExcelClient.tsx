@@ -55,7 +55,7 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
         <button
           className="sf-query-button sf-chart-script-edit btn btn-light"
           onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
-          <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
+          <FontAwesomeIcon icon={"file-excel"} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
         </button>
       );
     });

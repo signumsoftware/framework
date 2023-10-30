@@ -9,6 +9,7 @@
   "references": [
     { "path": "../../Signum" },
     { "path": "../Signum.Authorization" },
-    { "path": "../Signum.Scheduler" }
+    { "path": "../Signum.Scheduler" },
+    { "path": "../Signum.Files" }
   ]
 }

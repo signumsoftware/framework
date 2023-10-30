@@ -28,6 +28,7 @@
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Mailing\Signum.Mailing.csproj" />
+		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 	</ItemGroup>
 

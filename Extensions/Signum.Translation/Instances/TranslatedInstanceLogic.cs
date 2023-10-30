@@ -9,6 +9,7 @@ using Signum.Translation;
 using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Excel;
+using Signum.UserAssets;
 
 namespace Signum.Translation.Instances;
 
@@ -386,7 +387,7 @@ public static class TranslatedInstanceLogic
             .OrderBy(a => a.Key.Instance.Id)
             .ThenBy(a => a.Key.Route.PropertyInfo!.MetadataToken).Select(r => new ExcelRow
             {
-                Instance = r.Key.Instance.Key(),
+                Instance = r.Key.Instance.KeyLong(),
                 Path = r.Key.Route.PropertyString(),
                 RowId = r.Key.RowId?.ToString(),
                 Original = r.Value.OriginalText,
@@ -408,7 +409,7 @@ public static class TranslatedInstanceLogic
                     orderby ic.Instance, pr.Key.ToString()
                     select new ExcelRow
                     {
-                        Instance = ic.Instance.Key(),
+                        Instance = ic.Instance.KeyLong(),
                         Path = pr.Key.Route.PropertyString(),
                         RowId = pr.Key.RowId?.ToString(),
                         Original = pr.Value.GetOrThrow(DefaultCulture).Original,

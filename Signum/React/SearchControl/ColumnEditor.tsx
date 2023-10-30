@@ -9,6 +9,7 @@ import { CombineRows } from '../Signum.DynamicQuery';
 import { VisualTipIcon } from '../Basics/VisualTipIcon';
 import { SearchVisualTip } from '../Signum.Basics';
 import { ColumnHelp, FilterHelp } from './SearchControlVisualTips';
+import { getNiceTypeName } from '../Operations/MultiPropertySetter';
 
 interface ColumnEditorProps {
   columnOption: ColumnOptionParsed
@@ -65,15 +66,14 @@ export default function ColumnEditor(p: ColumnEditorProps) {
   return (
     <div className="sf-column-editor">
 
+
       <div className="row">
-        <div className="col-sm-1">
-          <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>{SearchMessage.Field.niceToString()}</label>
-        </div>
-        <div className="col-sm-6">
-          <div className={classes("d-flex", isCollection || isInvalid ? "error" : undefined)}
-            title={!StyleContext.default.titleLabels ? undefined :
-              isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
-                isInvalid ? SearchMessage.InvalidColumnExpression.niceToString() : undefined}>
+        <div className="col-sm-7">
+
+          <div className="d-flex" title={!StyleContext.default.titleLabels ? undefined :
+            isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
+              isInvalid ? SearchMessage.InvalidColumnExpression.niceToString() : undefined}>
+            <label className="col-form-label col-form-label-xs me-2">{SearchMessage.Field.niceToString()}</label>
             <div className="flex-grow-1">
               <div className="rw-widget-xs">
                 <QueryTokenBuilder
@@ -85,65 +85,58 @@ export default function ColumnEditor(p: ColumnEditorProps) {
               </div>
             </div>
           </div>
+
+
+          <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
+            title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
+            <label className="col-form-label col-form-label-xs me-2">
+              <input type="checkbox" disabled={co.token == null} className="form-check-input me-2" checked={co.summaryToken != null} onChange={handleSummaryCheck} />
+              {SearchMessage.SummaryHeader.niceToString()}
+            </label>
+            <div className="rw-widget-xs">
+              {co.summaryToken && <QueryTokenBuilder
+                queryToken={co.summaryToken!}
+                onTokenChange={handleSummaryTokenChanged}
+                queryKey={p.queryDescription.queryKey}
+                subTokenOptions={p.subTokensOptions | SubTokensOptions.CanAggregate}
+                readOnly={false} />
+              }
+            </div>
+          </div>
+
         </div>
-        <div className="col-sm-3">
+
+        <div className="col-sm-4">
+
           <div className="d-flex">
-            <label className="col-form-label col-form-label-xs" style={{ minWidth: "140px" }}>{SearchMessage.DisplayName.niceToString()}</label>
+            <label className="col-form-label col-form-label-xs me-2">{SearchMessage.DisplayName.niceToString()}</label>
             <div className="flex-grow-1">
               <input className="form-control form-control-xs "
                 value={co.displayName || ""} disabled={co.hiddenColumn}
                 onChange={handleOnChange} />
             </div>
           </div>
-        </div>
 
-        <div className="col-sm-2">
-            <label className="col-form-label col-form-label-xs">
-              <input type="checkbox" disabled={co.token == null} className="form-check-input me-1" checked={co.hiddenColumn} onChange={handleHiddenColumnClick} />
-              {SearchMessage.HiddenColumn.niceToString()}
-            </label>
-            <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
-        </div>
-      </div>
-
-      <div className="row">
-        <div className="col-sm-1">
-          <div className={classes("d-flex", co.summaryToken && summaryNotAggregate ? "error" : undefined)}
-            title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
-            <label className="col-form-label col-form-label-xs" style={{ minWidth: "140px" }}>
-              <input type="checkbox" disabled={co.token == null} className="form-check-input me-1" checked={co.summaryToken != null} onChange={handleSummaryCheck} />
-              {SearchMessage.SummaryHeader.niceToString()}
-            </label>
-          </div>
-        </div>
-        <div className="col-sm-6">
-          <div className="rw-widget-xs">
-            {co.summaryToken && <QueryTokenBuilder
-              queryToken={co.summaryToken!}
-              onTokenChange={handleSummaryTokenChanged}
-              queryKey={p.queryDescription.queryKey}
-              subTokenOptions={p.subTokensOptions | SubTokensOptions.CanAggregate}
-              readOnly={false} />
-            }
-          </div>
-        </div>
-        <div className="col-sm-3">
           <div className="d-flex">
-            <label htmlFor="combineRows" className="col-form-label col-form-label-xs" style={{ minWidth: "140px" }}>  {SearchMessage.CombineRowsWith.niceToString()}</label>
+            <label htmlFor="combineRows" className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>  {SearchMessage.CombineRowsWith.niceToString()}</label>
             <div className="flex-grow-1">
               <select className="form-select form-select-xs" id="combineRows" value={co.combineRows ?? ""} onChange={handleCombineEqualsVertically}>
                 <option value={""}>{" - "}</option>
-                <option value={CombineRows.value("EqualEntity")}>{CombineRows.niceToString("EqualEntity")}</option>
+                <option value={CombineRows.value("EqualEntity")}>{SearchMessage.Equal0.niceToString(getNiceTypeName(p.queryDescription.columns['Entity'].type))}</option>
                 <option value={CombineRows.value("EqualValue")}>{CombineRows.niceToString("EqualValue")}</option>
               </select>
             </div>
           </div>
         </div>
-        <div className="col-sm-2">
+
+        <div className="col-sm-1">
+          <button type="button" className="btn-close float-end" aria-label="Close" onClick={p.close} />
           <VisualTipIcon visualTip={SearchVisualTip.ColumnHelp} content={props => <ColumnHelp queryDescription={p.queryDescription} injected={props} />} />
         </div>
+
       </div>
-    </div>
+
+    </div >
   );
 }
 

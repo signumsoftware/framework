@@ -51,7 +51,6 @@ public static class FilePathEmbeddedLogic
                 }
             };
 
-            FilePathEmbedded.CalculatePrefixPair += CalculatePrefixPair;
 
             sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
         }
@@ -186,7 +185,7 @@ public static class FilePathEmbeddedLogic
             (t, rowId, retriever) => propertyRoute);
     }
 
-    static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
+    public static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
             return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);
