@@ -208,7 +208,6 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
           filters: toFilterList(gr.elements, indent + 1),
           value: gr.key.valueString ?? undefined,
           frozen: false,
-          expanded: false,
           pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
           dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
         };

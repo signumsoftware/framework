@@ -73,7 +73,6 @@ export module Converter {
         pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
         dashboardBehaviour: fn.dashboardBehaviour,
         frozen: false,
-        expanded: false,
       });
     else
       return softCast<FilterConditionOptionParsed>({
