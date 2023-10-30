@@ -1157,7 +1157,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu position={cm.position} onHide={this.handleContextOnHide} alignRight={(window.innerWidth - cm.position.left) < 200}>
         {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
       </ContextMenu>
     );
