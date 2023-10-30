@@ -305,12 +305,12 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
   if (p.filterType == "Lite") {
     if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
     else
-      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else if (p.filterType == "Embedded" || p.filterType == "Model") {
-    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else
     throw new Error("Unexpected Filter Type");
@@ -375,8 +375,8 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
     return <EnumLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
-  } else {
-    return <TextBoxLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+  }else {
+    return <AutoLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
 }
 

@@ -226,7 +226,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
-            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+            {p.extraButtons && p.extraButtons(c)}
           </span>
         </div>
       </legend>

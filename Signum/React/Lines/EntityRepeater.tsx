@@ -56,7 +56,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
 
