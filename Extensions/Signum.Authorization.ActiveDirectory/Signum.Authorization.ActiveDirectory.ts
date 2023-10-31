@@ -7,6 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
+import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
@@ -70,6 +71,24 @@ export interface ADGroupEntity extends Entities.Entity {
 export module ADGroupOperation {
   export const Save : Operations.ExecuteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Save");
   export const Delete : Operations.DeleteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Delete");
+}
+
+export module AuthADFileType {
+  export const CachedProfilePhoto : Files.FileTypeSymbol = registerSymbol("FileType", "AuthADFileType.CachedProfilePhoto");
+}
+
+export const CachedProfilePhotoEntity = new Type<CachedProfilePhotoEntity>("CachedProfilePhoto");
+export interface CachedProfilePhotoEntity extends Entities.Entity {
+  Type: "CachedProfilePhoto";
+  user: Entities.Lite<Authorization.UserEntity>;
+  size: number;
+  photo: Files.FilePathEmbedded | null;
+  creationDate: string /*DateTime*/;
+}
+
+export module CachedProfilePhotoOperation {
+  export const Save : Operations.ExecuteSymbol<CachedProfilePhotoEntity> = registerSymbol("Operation", "CachedProfilePhotoOperation.Save");
+  export const Delete : Operations.DeleteSymbol<CachedProfilePhotoEntity> = registerSymbol("Operation", "CachedProfilePhotoOperation.Delete");
 }
 
 export const RoleMappingEmbedded = new Type<RoleMappingEmbedded>("RoleMappingEmbedded");

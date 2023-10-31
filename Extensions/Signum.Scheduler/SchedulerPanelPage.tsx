@@ -50,7 +50,7 @@ export default function SchedulerPanelPage() {
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon={["far", "clock"]} /> Scheduler Panel</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon="clock" /> Scheduler Panel</h2>
       <div className="btn-toolbar">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" :  "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>

@@ -395,27 +395,22 @@ public static class DashboardLogic
     {
         sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(UserEntity));
 
-        TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition,
-            uq => uq.Owner.Is(UserEntity.Current));
-
-        RegisterPartsTypeCondition(typeCondition);
+        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
     }
 
     public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
     {
         sb.Schema.Settings.AssertImplementedBy((DashboardEntity uq) => uq.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition,
-            uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
-
-        RegisterPartsTypeCondition(typeCondition);
+        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
     }
 
-    public static void RegisterPartsTypeCondition(TypeConditionSymbol typeCondition)
+    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<DashboardEntity, bool>> conditionExpression)
     {
+        TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
+
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
             teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)));
-
 
         TypeConditionLogic.Register<LinkListPartEntity>(typeCondition,
              llp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(llp)));

@@ -112,7 +112,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
 
       {ti != null && (ti.kind != "Enum" || enumConverter != null) &&
         <EntityTable ctx={ctx.subCtx(p => p.specificColors)}
-          extraButtonsAfter={() => <a href="#" className={classes("sf-line-button", "sf-create")}
+          extraButtons={() => <a href="#" className={classes("sf-line-button", "sf-create")}
             title={ColorPaletteMessage.FillAutomatically.niceToString()}
             onClick={handleMagicWand}>
             <FontAwesomeIcon icon="wand-magic-sparkles" />

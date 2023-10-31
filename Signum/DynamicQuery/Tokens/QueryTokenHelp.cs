@@ -73,12 +73,7 @@ public enum ColumnFieldMessage
 {
     ColumnsHelp,
     
-    [Description("rearrange")]
-    Rearrange,
 
-    [Description("right-click")]
-    RightClick,
-    
     [Description("You can select a field expression to point to any column of the query {0}, or any field of {1} or any related entity.")]
     YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity,
     
@@ -92,13 +87,8 @@ public enum ColumnFieldMessage
     YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices,
     
     [Description("When a table has many repeated values in a column you can combine them vertically ({0}) either when the value is the same, or when is the same and belongs to the same {1}.")]
-    WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically,
+    WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01,
 
-    [Description("SummaryHeaderField")]
-    SummaryHeaderField,
-    
-    [Description("Activate 'SummaryHeader' to add an aggregate for the whole query (like the sum of some numeric value) using and field expression.")]
-    ActivateSummaryHeaderToAddAnAggregateForTheWholeQuery,
     
     [Description("Note: The aggregation includes rows that may not be visible due to pagination.")]
     NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination,

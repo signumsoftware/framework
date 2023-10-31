@@ -521,6 +521,7 @@ export module OperationMessage {
   export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
   export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
   export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
+  export const Operation = new MessageKey("OperationMessage", "Operation");
 }
 
 export module PaginationMessage {
@@ -582,7 +583,7 @@ export module SearchMessage {
   export const NoColumnSelected = new MessageKey("SearchMessage", "NoColumnSelected");
   export const NoFiltersSpecified = new MessageKey("SearchMessage", "NoFiltersSpecified");
   export const Of = new MessageKey("SearchMessage", "Of");
-  export const Operation = new MessageKey("SearchMessage", "Operation");
+  export const Operator = new MessageKey("SearchMessage", "Operator");
   export const Query0IsNotAllowed = new MessageKey("SearchMessage", "Query0IsNotAllowed");
   export const Query0NotAllowed = new MessageKey("SearchMessage", "Query0NotAllowed");
   export const Query0NotRegistered = new MessageKey("SearchMessage", "Query0NotRegistered");
@@ -638,6 +639,7 @@ export module SearchMessage {
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const Equal0 = new MessageKey("SearchMessage", "Equal0");
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");

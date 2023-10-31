@@ -133,7 +133,7 @@ export function UserChartTemplateButton(p: {qd: QueryDescription}) {
 }
 
 export function UserQueryTemplateButton(p: { qd: QueryDescription }) {
-  return renderWidgetButton(<><FontAwesomeIcon icon={["far", "rectangle-list"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+  return renderWidgetButton(<><FontAwesomeIcon icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
     queryName: UserQueryEntity,
     filterOptions: [{
       token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),

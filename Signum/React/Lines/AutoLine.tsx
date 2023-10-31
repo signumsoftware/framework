@@ -7,6 +7,8 @@ import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 export interface AutoLineProps extends LineBaseProps {
   unit?: string;
   format?: string;
+  extraButtons?: (vl: any) => React.ReactNode; /* Not always implemented */
+  extraButtonsBefore?: (vl: any) => React.ReactNode; /* Not always implemented */
 }
 
 

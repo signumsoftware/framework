@@ -78,6 +78,11 @@
             color: var(--sidebar-accent);
         }
 
+
+    .sidebar-inner .nav-item .sf-extra-icon:hover {
+        background-color: #d5d5d5;
+    }
+
     .sidebar-inner .nav-item-sub-menu .nav-item .nav-link.active {
         background-color: #dfdfdf;
     }
@@ -343,6 +348,7 @@
         overflow: hidden;
         display: inline-block;
     }
+
 
 
 .sidebar-container .sidebar {

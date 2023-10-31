@@ -144,7 +144,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
         {c.renderCreateButton(true)}
         {c.renderFindButton(true)}
         {c.renderPasteButton(true)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </>
     );
 

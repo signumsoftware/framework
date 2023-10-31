@@ -207,7 +207,9 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
-    private static BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
+    public Func<IFilePath, string?>? GetCacheControl = null;
+
+    private BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
     {
         var contentType = action == BlobAction.Download ? "application/octet-stream" :
                 ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream");
@@ -215,7 +217,8 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         return new BlobHttpHeaders
         {
             ContentType = contentType,
-            ContentDisposition = action == BlobAction.Download ? "attachment" : "inline"
+            ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
         };
     }
 

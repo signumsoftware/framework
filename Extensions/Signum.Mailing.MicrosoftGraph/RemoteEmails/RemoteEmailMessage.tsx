@@ -64,7 +64,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
             return (
               <span>
                 <FontAwesomeIcon className="me-1"
-                  icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
+                  icon={info?.icon ?? "file"}
                   color={info?.color ?? "grey"} />
                 {item.toStr}
               </span>

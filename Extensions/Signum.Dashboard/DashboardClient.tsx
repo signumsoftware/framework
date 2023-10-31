@@ -99,17 +99,17 @@ export function start(options: { routes: RouteObject[] }) {
 
   registerRenderer(LinkListPartEntity, {
     component: () => import('./View/LinkListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#B9770E" })
+    defaultIcon: () => ({ icon: "list", iconColor: "#B9770E" })
   });
 
   registerRenderer(ImagePartEntity, {
     component: () => import('./View/ImagePartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
 

@@ -265,7 +265,7 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
   <BlockStyleButton controller={c} blockType="unordered-list-item" icon="list-ul" title="Unordered list" />
   <BlockStyleButton controller={c} blockType="ordered-list-item" icon="list-ol" title="Ordered list" />
   <BlockStyleButton controller={c} blockType="blockquote" icon="quote-right" title="Quote" />
-  <BlockStyleButton controller={c} blockType="code-block" icon={["far", "file-code"]} title="Code Block" />
+  <BlockStyleButton controller={c} blockType="code-block" icon="file-code" title="Code Block" />
   {c.extraButtons()}
 </div>;
 

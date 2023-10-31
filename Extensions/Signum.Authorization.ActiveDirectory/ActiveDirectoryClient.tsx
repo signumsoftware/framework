@@ -20,7 +20,7 @@ import * as User from '../Signum.Authorization/Templates/User'
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
 import { TextBoxLine } from '@framework/Lines';
 
-export function start(options: { routes: RouteObject[], adGroups: boolean }) {
+export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }) {
 
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./ActiveDirectoryConfiguration')));
 
@@ -30,6 +30,8 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+
+
       var oid =
         (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
         tryGetMixin(u, UserADMixin)?.oID;
@@ -37,9 +39,10 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       if (oid == null)
         return null;
 
-      var url = AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+      if (!options.cachedProfilePhoto)
+        return AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
 
-      return url;
+      return API.cachedAzureUserPhotoUrl(size, oid);
     })
   }
 
@@ -244,9 +247,9 @@ export module API {
     return ajaxPost({ url: `/api/createADGroup` }, request);
   }
 
-
-
-
+  export function cachedAzureUserPhotoUrl(size: number, oID: string): Promise<string | null> {
+    return ajaxGet({ url: `/api/cachedAzureUserPhoto/${size}/${oID}`, cache: "default"  });
+  }
 }
 
 export interface ActiveDirectoryUser {

@@ -8,7 +8,7 @@ import * as UserCircles from "./UserCircle";
 import { Dic, classes, isPromise } from "@framework/Globals";
 import { useAPI } from "@framework/Hooks";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string> | null)[] = [];
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string | null> | null)[] = [];
 
 export function clearCache() {
   Dic.clear(urlCache);
@@ -54,19 +54,22 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
     </div>
   );
 }
-var urlCache: { [userKey: string]: Promise<string | null> | string | null } = { };
 
-function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
+function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number): string | null | undefined {
 
   var url = useAPI(() => {
 
-    const val = !user.id ? getFirstUrl(user, size) :
-      (urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user))] ??= getFirstUrl(user, size));
+    const val = !user.id ? getFirstUrl(user, size) : getCachedFirstUrl(user, size);
 
     return val;
   }, [user.id]);
 
   return url
+}
+
+var urlCache: { [userKeyPlusSize: string]: Promise<string | null> | string | null } = { };
+function getCachedFirstUrl(user: Lite<UserEntity> | UserEntity, size: number) {
+  return urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user)) + ":" + size] ??= getFirstUrl(user, size);
 }
 
 function getFirstUrl(user: Lite<UserEntity> | UserEntity, size: number): Promise<string | null> | string | null {

@@ -155,12 +155,12 @@ public static class AutocompleteUtils
         return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefault();
     }
 
-    static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>>>> giLiteByIdAsync =
+    static GenericInvoker<Func<PrimaryKey, CancellationToken, Task<Lite<Entity>?>>> giLiteByIdAsync =
         new((id, token) => LiteByIdAsync<TypeEntity>(id, token));
-    static Task<Lite<Entity>> LiteByIdAsync<T>(PrimaryKey id, CancellationToken token)
+    static async Task<Lite<Entity>?> LiteByIdAsync<T>(PrimaryKey id, CancellationToken token)
         where T : Entity
     {
-        return Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefaultAsync(token).ContinueWith(t => (Lite<Entity>)t.Result);
+        return (Lite<Entity>?)await Database.Query<T>().Where(a => a.id == id).Select(a => a.ToLite()).SingleOrDefaultAsync(token);
     }
 
     static GenericInvoker<Func<string[], int, List<Lite<Entity>>>> giLiteContaining =
@@ -278,7 +278,7 @@ public static class AutocompleteUtils
             {
                 if (TryParsePrimaryKey(p, typeof(T), out PrimaryKey id))
                 {
-                    Lite<T> entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
+                    Lite<T>? entity = await query.SingleOrDefaultAsync(e => e.Id == id, token);
 
                     if (entity != null)
                         results.Add(entity);

@@ -124,6 +124,14 @@ public class SignumCurrentContextFilter : SignumDisposableResourceFilter
 
     public static FilterContext? CurrentContext => CurrentContextVariable.Value;
 
+    public static T GetOrCreateItem<T>(string key, Func<T> generator)
+    {
+        if (CurrentContext == null)
+            return generator();
+
+        return (T)CurrentContext.HttpContext.Items.GetOrCreate(key, () => generator())!;
+    }
+
     public static UrlHelper? Url
     {
         get
