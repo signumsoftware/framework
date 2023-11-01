@@ -345,7 +345,7 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     internal object? TextParsedNode;
 
     string subject;
-    [StringLengthValidator(Min = 3, Max = 200)]
+    [StringLengthValidator(Min = 3, Max = int.MaxValue)]
     public string Subject
     {
         get { return subject; }
