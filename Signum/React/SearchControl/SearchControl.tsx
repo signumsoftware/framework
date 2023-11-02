@@ -238,7 +238,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showBarExtensionOption={p.showBarExtensionOption}
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
-        avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
+        avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
         deps={state.deps}
         extraOptions={p.extraOptions}
 

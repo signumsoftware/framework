@@ -139,7 +139,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
     return (
       <div>
-        <span className="sf-entity-title">{p.title || getToString(pack.activity)}</span>&nbsp;
+        <span className="sf-entity-title">{p.title || Navigator.renderEntity(pack.activity)}</span>&nbsp;
         {renderExpandLink(pack)}
         {
           (subTitle || widgets) &&

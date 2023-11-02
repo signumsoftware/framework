@@ -257,7 +257,7 @@ export default function CaseFramePage() {
 
     return (
       <h3 className="border-bottom pb-3">
-        <span className="sf-entity-title">{getToString(pack.activity)}</span>
+        <span className="sf-entity-title">{Navigator.renderEntity(pack.activity)}</span>
         {
           (subTitle || widgets) &&
           <div className="sf-entity-sub-title">

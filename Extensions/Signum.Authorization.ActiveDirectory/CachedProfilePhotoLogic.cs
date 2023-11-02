@@ -25,12 +25,15 @@ public static class CachedProfilePhotoLogic
             sb.Include<CachedProfilePhotoEntity>()
                 .WithDelete(CachedProfilePhotoOperation.Delete)
                 .WithExpressionFrom((UserEntity u) => u.CachedProfilePhotos())
+                .WithUniqueIndex(u => new { u.User, u.Size })
                 .WithQuery(() => e => new
                 {
                     Entity = e,
                     e.Id,
-                    e.User,
+                    e.CreationDate,
                     e.Size,
+                    e.User,
+                    e.Photo,
                 });
 
             FileTypeLogic.Register(AuthADFileType.CachedProfilePhoto, algorithm);
@@ -52,6 +55,10 @@ public static class CachedProfilePhotoLogic
 
             using (var tr = new Transaction())
             {
+                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+                if (result != null)
+                    return result;
+
                 var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
                 result = new CachedProfilePhotoEntity

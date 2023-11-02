@@ -105,7 +105,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
         {c.renderRemoveButton(true, val)}
-        {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
+        {c.props.extraButtons && c.props.extraButtons(c)}
       </>;
 
     if (!EntityBaseController.hasChildrens(buttons))

@@ -118,8 +118,8 @@ public class FilePathUtils
 
     public static string SafeCombine(string safeBaseDirectory, string unsafeSufix)
     {
-        if (!safeBaseDirectory.EndsWith("\\"))
-            safeBaseDirectory = safeBaseDirectory + "\\";
+        //if (!safeBaseDirectory.EndsWith("\\"))
+        //    safeBaseDirectory = safeBaseDirectory + "\\";
 
         safeBaseDirectory = Path.GetFullPath(safeBaseDirectory);
 

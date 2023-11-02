@@ -142,7 +142,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
       {c.renderPasteButton(true)}
-      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
+      {c.props.extraButtons && c.props.extraButtons(c)}
     </>
   );
 
