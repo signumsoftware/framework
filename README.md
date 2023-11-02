@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2023.10.31 From ValueLine to AutoLine](https://github.com/signumsoftware/framework/commit/44ca21e578187949932b6861f2a3be66b78ff290#commitcomment-131412697)
 * [2023.09.02 Presenting QueryAuditors (aka TypeConditionLogic.RegisterWhenAlreadyFilteringBy)](https://github.com/signumsoftware/framework/commit/b93dea738b259640790a470b25357eedad022dd4#comments)
 * [2023.08.30 QuickLinks in SearchControl Columns](https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments)
 * [2023.05.09 Modular Revolution 🔥🔥🔥](https://github.com/signumsoftware/framework/commit/25f239479afa9027d24b7cc12f75722550411f06#comments)

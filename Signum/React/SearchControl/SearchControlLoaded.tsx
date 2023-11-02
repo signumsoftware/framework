@@ -39,7 +39,7 @@ import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { similarToken } from '../Search'
 import { SearchHelp } from './SearchControlVisualTips'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
-import { SearchVisualTip} from '../Signum.Basics'
+import { SearchVisualTip } from '../Signum.Basics'
 import { KeyNames } from '../Components'
 
 interface ColumnParsed {
@@ -181,10 +181,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const qs = Finder.getSettings(fo.queryKey);
 
     return this.props.mobileOptions?.(fop) ?? qs?.mobileOptions?.(fop) ?? SearchControlLoaded.mobileOptions?.(fop) ??
-      {
-        showSwitchViewModesButton: true,
-        defaultViewMode: "Mobile"
-      };
+    {
+      showSwitchViewModesButton: true,
+      defaultViewMode: "Mobile"
+    };
   }
 
   onResize = () => {
@@ -313,11 +313,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return Promise.resolve();
     }
     else {
-      return this.doSearch({dataChanged: true});
+      return this.doSearch({ dataChanged: true });
     }
   }
 
-  doSearch(opts : { dataChanged?: boolean, force?: boolean}): Promise<void> {
+  doSearch(opts: { dataChanged?: boolean, force?: boolean }): Promise<void> {
 
     if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !opts.force))
       return Promise.resolve();
@@ -340,7 +340,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       const customRequest = this.props.customRequest;
 
       return Promise.all([this.abortableSearch.getData({ request: qr, fop, customRequest }),
-        qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined) 
+      qrSummary ? this.abortableSearchSummary.getData({ request: qrSummary, fop, customRequest }) : Promise.resolve<ResultTable | undefined>(undefined)
       ]).then(([rt, summaryRt]) => {
         this.setState({
           resultTable: rt,
@@ -460,7 +460,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   handleFiltersChanged = (avoidSearch?: boolean) => {
 
     //if (this.isManualRefreshOrAllPagination() || avoidSearch)
-      this.forceUpdate();
+    this.forceUpdate();
 
     if (this.props.onFiltersChanged)
       this.props.onFiltersChanged(this.props.findOptions.filterOptions);
@@ -534,13 +534,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 lastToken={this.state.lastToken}
                 subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
                 onTokenChanged={this.handleFilterTokenChanged}
-                onFiltersChanged={()=> this.handleFiltersChanged()}
+                onFiltersChanged={() => this.handleFiltersChanged()}
                 onHeightChanged={this.handleHeightChanged}
                 showPinnedFiltersOptions={this.state.filterMode == 'Pinned'}
                 showPinnedFiltersOptionsButton={false}
                 showDashboardBehaviour={false}
               /> :
-              sfb && <div className="simple-filter-builder">{sfb}</div>}
+                sfb && <div className="simple-filter-builder">{sfb}</div>}
           </div>
         }
         {p.showHeader == true && this.state.filterMode == "Simple" && !sfb && this.renderPinnedFilters(true)}
@@ -548,7 +548,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         {p.showHeader == true && this.renderToolBar()}
         {p.showHeader == true && <MultipliedMessage findOptions={fo} mainType={this.entityColumn().type} />}
         {p.showHeader == true && fo.groupResults && <GroupByMessage findOptions={fo} mainType={this.entityColumn().type} />}
-        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()}  />}
+        {p.showHeader == true && fo.systemTime && <SystemTimeEditor findOptions={fo} queryDescription={qd} onChanged={() => this.forceUpdate()} />}
         {this.state.isMobile == true && this.state.viewMode == "Mobile" ? this.renderMobile() :
           <>
             {
@@ -581,7 +581,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   renderMobile() {
     return (
-      <div ref={d => this.containerDiv = d} 
+      <div ref={d => this.containerDiv = d}
         className="sf-scroll-table-container"
         style={{ maxHeight: this.props.maxResultsHeight }}>
         <div className="sf-search-results mobile">
@@ -614,7 +614,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       simpleFilterBuilder: mode == "Simple" ? this.getSimpleFilterBuilderElement() : undefined,
       filterMode: mode
     }, () => this.handleHeightChanged());
-    
+
   }
 
   handleSystemTimeClick = () => {
@@ -697,7 +697,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       this.state.isMobile == true && this.getMobileOptions(this.props.findOptions).showSwitchViewModesButton && {
         button: <button className="sf-query-button btn btn-light" onClick={this.handleViewModeClick}>
-          <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} /> 
+          <FontAwesomeIcon icon={this.state.viewMode == "Mobile" ? "desktop" : "mobile-alt"} title={SearchMessage.SwitchViewMode.niceToString()} />
         </button>
       }
     ] as (ButtonBarElement | null | false | undefined)[])
@@ -729,7 +729,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.dataChanged();
     }
   }
- 
+
   handleCreate = (ev: React.MouseEvent<any>) => {
 
     if (!this.props.create)
@@ -784,7 +784,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             }))
             .then(entity => this.handleCreated(entity));
         }
-        
+
       });
     }
   }
@@ -876,7 +876,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .then(() => this.setMarkedRows(dic));
   }
 
-  setMarkedRows(dic: MarkedRowsDictionary){
+  setMarkedRows(dic: MarkedRowsDictionary) {
     this.setState({ markedRows: { ...this.state.markedRows, ...dic } as MarkedRowsDictionary })
   }
 
@@ -945,9 +945,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .firstOrNull(f => isFilterCondition(f) &&
         similarToken(f.token?.fullKey, token?.fullKey) &&
         f.operation == operation &&
-        (f.value == null || f.value == "")  &&
+        (f.value == null || f.value == "") &&
         f.pinned != null && f.pinned?.active == "WhenHasValue"
-    );
+      );
 
     if (alreadyPinned) {
       alreadyPinned.value = value;
@@ -1049,7 +1049,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   handleRestoreDefaultColumn = () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
-    
+
     const col = fo.columnOptions[cm.columnIndex!];
     fo.columnOptions.clear();
     fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
@@ -1126,7 +1126,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         menuItems.push(<Dropdown.Divider />);
 
         if (this.state.showHiddenColumns) {
-          menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns : undefined })}>
+          menuItems.push(<Dropdown.Item className="sf-hide-hidden-columns" onClick={() => this.setState({ showHiddenColumns: undefined })}>
             <FontAwesomeIcon icon="eye-slash" color="#21618C" />&nbsp;{SearchMessage.HideHiddenColumns.niceToString()}
           </Dropdown.Item>);
         } else {
@@ -1134,7 +1134,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             <FontAwesomeIcon icon="eye" color="#21618C" />&nbsp;{SearchMessage.ShowHiddenColumns.niceToString()}
           </Dropdown.Item>);
         }
-    }
+      }
     }
 
     if (cm.rowIndex != undefined && showCM != "Basic") {
@@ -1157,7 +1157,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
+      <ContextMenu position={cm.position} onHide={this.handleContextOnHide} alignRight={(window.innerWidth - cm.position.left) < 200}>
         {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
       </ContextMenu>
     );
@@ -1174,7 +1174,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     navigator.clipboard.writeText(text);
   }
-  
+
   //SELECTED ROWS
 
   allSelected() {
@@ -1219,7 +1219,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.forceUpdate();
 
-      this.doSearchPage1();
+    this.doSearchPage1();
   }
 
   //HEADER DRAG AND DROP
@@ -1293,14 +1293,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     });
   }
 
-  
+
 
   renderHeaders(): React.ReactNode {
 
     var rt = this.state.summaryResultTable;
     var scl = this;
 
-    function getSummary(summaryToken: QueryToken | undefined ) {
+    function getSummary(summaryToken: QueryToken | undefined) {
 
       if (rt == null || summaryToken == undefined)
         return null;
@@ -1323,10 +1323,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <span className="text-muted me-1">{prefix}</span>
 
           {formatter.formatter(val, {
-          columns: rt.columns,
-          row: rt.rows[0],
-          rowIndex: 0,
-          refresh: () => scl.dataChanged(),
+            columns: rt.columns,
+            row: rt.rows[0],
+            rowIndex: 0,
+            refresh: () => scl.dataChanged(),
             systemTime: scl.props.findOptions.systemTime,
             searchControl: scl,
           }, summaryToken)}
@@ -1336,7 +1336,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var rootKeys = !this.props.findOptions.groupResults ? [] : getRootKeyColumn(this.props.findOptions.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasToArray(co.token)));
 
-    function isDerivedKey(token: QueryToken | undefined) : boolean {
+    function isDerivedKey(token: QueryToken | undefined): boolean {
       if (token == null)
         return false;
 
@@ -1365,7 +1365,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         </th>
         }
         {(this.props.view || this.props.findOptions.groupResults) && <th className="sf-small-column sf-th-entity" data-column-name="Entity">{Finder.Options.entityColumnHeader()}</th>}
-        {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) => 
+        {visibleColumns.map(({ column: co, cellFormatter, columnIndex: i }) =>
           <th key={i}
             draggable={true}
             className={classes(
@@ -1375,7 +1375,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               co.hiddenColumn && "sf-hidden-column",
               !this.canOrder(co) && "noOrder",
               co.token && co.token.type.isCollection && "error",
-              co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token)  && "error", 
+              co.token && this.props.findOptions.groupResults && isNotDerivedToArray(co.token) && "error",
               this.state.dropBorderIndex != null && i == this.state.dropBorderIndex ? "drag-left " :
                 this.state.dropBorderIndex != null && i == this.state.dropBorderIndex - 1 ? "drag-right " : undefined)}
             data-column-name={co.token && co.token.fullKey}
@@ -1392,7 +1392,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
                 <FontAwesomeIcon icon="key" className="me-1"
                   color={rootKeys.contains(co) ? "gray" : "lightgray"}
-                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()  } /></span>}
+                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} /></span>}
               {co.displayName}
             </div>
           </th>
@@ -1598,7 +1598,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const resultColumns = this.state.resultTable?.columns;
     const qs = this.props.querySettings;
 
-    return columnOptions.map(({co, i}) => ({
+    return columnOptions.map(({ co, i }) => ({
       column: co,
       columnIndex: i,
       hasToArray: hasToArray(co.token),
@@ -1658,7 +1658,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
- 
+
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
       c.hasToArray != null ? this.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
@@ -1680,7 +1680,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     var noResultsElement = this.getNoResultsElement();
-    if (noResultsElement != null) 
+    if (noResultsElement != null)
       return <tr><td colSpan={columnsCount}>{noResultsElement}</td></tr>;
 
     const entityFormatter = this.getEntityFormatter();
@@ -1693,8 +1693,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
         mark?.status == "Warning" ? "table-warning" :
           mark?.status == "Error" ? "table-danger" :
-          mark?.status == "Muted" ? "text-muted" :
-            undefined;
+            mark?.status == "Muted" ? "text-muted" :
+              undefined;
 
       var ra = this.getRowAttributes(row);
 
@@ -1729,15 +1729,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           {this.props.allowSelection &&
             <td className="centered-cell">
               {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
-                <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e=>this.handleChecked(e, i)} data-index={i} />}
+                <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e => this.handleChecked(e, i)} data-index={i} />}
             </td>
           }
 
           {this.hasEntityColumn() &&
             (
               anyCombineEquals && i != 0 && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-              <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
-                {entityFormatter.formatter(fctx)}
+                <td className={entityFormatter.cellClass} rowSpan={anyCombineEquals ? calculateRowSpan(row => row.entity) : undefined}>
+                  {entityFormatter.formatter(fctx)}
                 </td>
             )
           }
@@ -1746,13 +1746,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             columns.map((c, j) =>
               i != 0 && c.column.combineRows == "EqualValue" && equals(resultTable.rows[i - 1].columns[c.resultIndex], row.columns[c.resultIndex]) ? null :
                 i != 0 && c.column.combineRows == "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
-                <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
+                  <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                     rowSpan={
                       c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[c.resultIndex]) :
-                      c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
-                      undefined}>
-                  {this.getColumnElement(fctx, c)}
-                </td>
+                        c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
+                          undefined}>
+                    {this.getColumnElement(fctx, c)}
+                  </td>
             )
           }
         </tr>
@@ -1787,9 +1787,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const markIconColor: string =
       mark.status == "Success" ? "green" :
         mark.status == "Warning" ? "orange" :
-          mark.status == "Error" ? "red" : 
+          mark.status == "Error" ? "red" :
             mark.status == "Muted" ? "gray" : null!;
-        
+
     const icon = <span><FontAwesomeIcon icon={markIcon} color={markIconColor} /></span>;
 
     return (
@@ -1843,7 +1843,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
               {this.props.allowSelection &&
                 <span className="row-selection">
                   {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
-                    <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e=>this.handleChecked(e, i)} data-index={i} />}
+                    <input type="checkbox" className="sf-td-selection form-check-input" checked={this.state.selectedRows!.contains(row)} onChange={e => this.handleChecked(e, i)} data-index={i} />}
                 </span>
               }
 
@@ -1894,7 +1894,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       </AutoFocus>
     );
   }
-  
+
   handleOnNavigated = (lite: Lite<Entity>) => {
 
     if (this.props.onNavigated)
@@ -1915,7 +1915,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const m = this.state.markedRows[key];
     if (m === null)
-        return { status: "Success", message: undefined };
+      return { status: "Success", message: undefined };
 
     if (typeof m === "string") {
       if (m == "")
@@ -2016,45 +2016,45 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 }
 
 export function getResotreDefaultColumnsIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon="rotate-left" transform="shrink-4 up-8 right-8" color="black" />
+  </span>
 }
 
 export function getGroupByThisColumnIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="layer-group" transform="shrink-4 up-8 right-8" color="#21618C" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon={["fas", "layer-group"]} transform="shrink-3 up-8 right-8" color="#21618C" />
+  </span>
 }
 
 export function getRemoveColumnIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="square-minus" transform="shrink-4 up-8 right-9" color="#ca0000" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon={["fas", "square-xmark"]} transform="shrink-3 up-8 right-8" color="#ca0000" />
+  </span>
 }
 
 export function getEditColumnIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="square-pen" transform="shrink-4 up-8 right-8" color="orange" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon={["fas", "square-pen"]} transform="shrink-3 up-8 right-8" color="orange" />
+  </span>
 }
 
 export function getInsertColumnIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#008400" />
+  </span>
 }
 
 export function getAddFilterIcon() {
-    return <span className="fa-layers fa-fw icon">
-        <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
-        <FontAwesomeIcon icon="square-plus" transform="shrink-4 up-8 right-8" color="#008400" />
-    </span>
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#008400" />
+  </span>
 }
 
 function withoutAllAny(qt: QueryToken | undefined): QueryToken | undefined {
@@ -2156,7 +2156,7 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
   var filterMode = p.sc.state.filterMode;
   return (
     <Dropdown onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle as={EllipseToggle} id="ellipsisMenuDropDown" variant={"light"} >  
+      <Dropdown.Toggle as={EllipseToggle} id="ellipsisMenuDropDown" variant={"light"} >
       </Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>

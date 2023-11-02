@@ -351,7 +351,7 @@ export default function FramePage() {
       return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
 
     const entity = state.pack.entity;
-    const title = getToString(entity);
+    const title = Navigator.renderEntity(entity); 
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 

@@ -128,8 +128,8 @@ function SearchModal(p: SearchModalProps) {
         <span className="sf-entity-title">
           {p.title}
           &nbsp;
-          </span>
-        <a className="sf-popup-fullscreen pointer" onMouseUp={(e) => searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e)}>
+        </span>
+        <a className="sf-popup-fullscreen" href="#" onClick={(e) => { e.preventDefault(); searchControl.current && searchControl.current.searchControlLoaded!.handleFullScreenClick(e); } }>
           <FontAwesomeIcon icon="up-right-from-square" title={FrameMessage.Fullscreen.niceToString()} />
         </a>
         {p.message && <>
