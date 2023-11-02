@@ -14,7 +14,7 @@ class Upgrade_20231102_NodeScript : CodeUpgradeBase
             file.ReplaceLine(l => l.Contains("curl -sL https://deb.nodesource.com/setup_1"), """
                 RUN curl -SLO https://deb.nodesource.com/nsolid_setup_deb.sh
                 RUN chmod 500 nsolid_setup_deb.sh
-                RUN./ nsolid_setup_deb.sh 21
+                RUN ./nsolid_setup_deb.sh 21
                 """
                 );
         });
