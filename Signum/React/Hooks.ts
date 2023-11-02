@@ -211,7 +211,13 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
     var promiseOrValue = makeCall(abortController.signal, data && data.result);
 
     (promiseOrValue instanceof Promise ? promiseOrValue : Promise.resolve(promiseOrValue))
-      .then(result => !abortController.signal.aborted && setData({ result, deps }));
+      .then(result => !abortController.signal.aborted && setData({ result, deps }),
+        error => {
+          if (error instanceof Error && error.name == "AbortError")
+            return;
+
+          throw error;
+        });
 
     return () => {
       abortController.abort();
