@@ -60,4 +60,5 @@ public enum UserOIDMessage
 public static class ActiveDirectoryPermission
 {
     public static PermissionSymbol InviteUsersFromAD;
+    public static PermissionSymbol ViewData;
 }

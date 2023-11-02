@@ -132,6 +132,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
         string fullPhysicalPath = path.FullPhysicalPath();
         using (HeavyProfiler.Log("OpenRead", () => fullPhysicalPath))
+            
             return File.OpenRead(fullPhysicalPath);
     }
 
