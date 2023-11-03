@@ -102,6 +102,32 @@ public static class StreamExtensions
     }
 
     [DebuggerStepThrough]
+    public static R Using<T, R>(this T disposable, Func<R> function)
+        where T : IDisposable?
+    {
+        //using (disposable)
+        //    return function(disposable);
+
+        try
+        {
+            return function();
+        }
+        catch (Exception e)
+        {
+
+            if (disposable is IDisposableException de)
+                de.OnException(e);
+
+            throw;
+        }
+        finally
+        {
+            if (disposable != null)
+                disposable.Dispose();
+        }
+    }
+
+    [DebuggerStepThrough]
     public static void EndUsing<T>(this T disposable, Action<T> action)
         where T : IDisposable? 
     {
