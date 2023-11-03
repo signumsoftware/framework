@@ -56,7 +56,6 @@ export module ActiveDirectoryMessage {
 
 export module ActiveDirectoryPermission {
   export const InviteUsersFromAD : Basics.PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
-  export const ViewData : Basics.PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.ViewData");
 }
 
 export module ActiveDirectoryTask {
