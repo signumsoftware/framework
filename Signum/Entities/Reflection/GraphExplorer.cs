@@ -335,7 +335,9 @@ public static class GraphExplorer
 
     public static bool HasChanges(Modifiable mod)
     {
-        return GraphExplorer.FromRootVirtual(mod).Any(a => a.Modified == ModifiedState.SelfModified);
+        var graph  = GraphExplorer.FromRootVirtual(mod);
+        //graph.EntityDGML();
+        return graph.Any(a => a.Modified == ModifiedState.SelfModified);
     }
 
     public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, IntegrityCheckException e)
