@@ -111,8 +111,11 @@ export module QueryTokenMessage {
   export const QuarterStart = new MessageKey("QueryTokenMessage", "QuarterStart");
   export const WeekStart = new MessageKey("QueryTokenMessage", "WeekStart");
   export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
+  export const Every0Hours = new MessageKey("QueryTokenMessage", "Every0Hours");
   export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");
+  export const Every0Minutes = new MessageKey("QueryTokenMessage", "Every0Minutes");
   export const SecondStart = new MessageKey("QueryTokenMessage", "SecondStart");
+  export const Every0Seconds = new MessageKey("QueryTokenMessage", "Every0Seconds");
   export const TimeOfDay = new MessageKey("QueryTokenMessage", "TimeOfDay");
   export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
   export const Number = new MessageKey("QueryTokenMessage", "Number");

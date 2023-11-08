@@ -294,11 +294,35 @@ public abstract class QueryToken : IEquatable<QueryToken>
             new DateToken(parent),
             precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.TimeOfDay), () => utc + QueryTokenMessage.TimeOfDay.NiceToString()),
             precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Hour), () => utc + QueryTokenMessage.Hour.NiceToString()),
-            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.TruncHours),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Hours, 2),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Hours, 3),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Hours, 4),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Hours, 6),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Hours, 12),
+
             precision < DateTimePrecision.Minutes ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Minute), () => utc + QueryTokenMessage.Minute.NiceToString()),
-            precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
+            precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.TruncMinutes),
+
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 2),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 3),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 4),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 5),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 10),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 20),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Minutes, 30),
+
             precision < DateTimePrecision.Seconds ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Second), () => utc + QueryTokenMessage.Second.NiceToString()),
             precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
+
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 2),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 3),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 4),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 5),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 10),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 20),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.Every0Seconds, 30),
+
             precision < DateTimePrecision.Milliseconds? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((DateTime dt)=>dt.Millisecond), () => utc + QueryTokenMessage.Millisecond.NiceToString()),
         }.NotNull().ToList();
     }
@@ -319,9 +343,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return new List<QueryToken?>
         {
             precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Hours), () => QueryTokenMessage.Hour.NiceToString()),
-            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.HourStart),
+            precision < DateTimePrecision.Hours ? null: new DatePartStartToken(parent, QueryTokenMessage.TruncHours),
             precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Minutes), () => QueryTokenMessage.Minute.NiceToString()),
-            precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
+            precision < DateTimePrecision.Minutes ? null: new DatePartStartToken(parent, QueryTokenMessage.TruncMinutes),
             precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Seconds), () => QueryTokenMessage.Second.NiceToString()),
             precision < DateTimePrecision.Seconds ? null: new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
             precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeSpan dt)=>dt.Milliseconds), () => QueryTokenMessage.Millisecond.NiceToString()),
@@ -342,9 +366,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return new List<QueryToken?>
         {
             precision < DateTimePrecision.Hours ? null: new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Hour), () => QueryTokenMessage.Hour.NiceToString()),
-            new DatePartStartToken(parent, QueryTokenMessage.HourStart),
+            new DatePartStartToken(parent, QueryTokenMessage.TruncHours),
             precision < DateTimePrecision.Minutes ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Minute), () => QueryTokenMessage.Minute.NiceToString()),
-            new DatePartStartToken(parent, QueryTokenMessage.MinuteStart),
+            new DatePartStartToken(parent, QueryTokenMessage.TruncMinutes),
             precision < DateTimePrecision.Seconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Second), () => QueryTokenMessage.Second.NiceToString()),
             new DatePartStartToken(parent, QueryTokenMessage.SecondStart),
             precision < DateTimePrecision.Milliseconds ? null:  new NetPropertyToken(parent, ReflectionTools.GetPropertyInfo((TimeOnly dt)=>dt.Millisecond), () => QueryTokenMessage.Millisecond.NiceToString()),
@@ -705,11 +729,17 @@ public enum QueryTokenMessage
     [Description("Week Start")]
     WeekStart,
     [Description("Hour Start")]
-    HourStart,
+    TruncHours,
+    [Description("Every {0} Hours")]
+    Every0Hours,
     [Description("Minute Start")]
-    MinuteStart,
+    TruncMinutes,
+    [Description("Every {0} Minutes")]
+    Every0Minutes,
     [Description("Second Start")]
     SecondStart,
+    [Description("Every {0} Seconds")]
+    Every0Seconds,
     TimeOfDay,
     [Description("More than one column named {0}")]
     MoreThanOneColumnNamed0,

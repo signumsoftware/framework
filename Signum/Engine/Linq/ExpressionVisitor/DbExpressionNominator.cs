@@ -649,6 +649,15 @@ internal class DbExpressionNominator : DbExpressionVisitor
         }
         else
         {
+            if(((SqlServerConnector)Connector.Current).SupportsDateTrunc)
+            {
+                Expression? result =
+                TrySqlFunction(null, SqlFunction.DATETRUNC, expr.Type,
+                    new SqlConstantExpression(part.ToString()), expr);
+
+                return Add(result);
+            }
+
             if (part == SqlEnums.second)
             {
                 Expression result =
@@ -1661,8 +1670,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.month);
             case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.quarter);
             case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.week);
-            case "DateTimeExtensions.HourStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
-            case "DateTimeExtensions.MinuteStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
+            case "DateTimeExtensions.TruncHours": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
+            case "DateTimeExtensions.TruncMinutes": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
             case "DateTimeExtensions.SecondStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second);
             case "DateTimeExtensions.YearsTo": return TryDatePartTo(SqlEnums.year, m.GetArgument("start"), m.GetArgument("end"));
             case "DateTimeExtensions.MonthsTo": return TryDatePartTo(SqlEnums.month, m.GetArgument("start"), m.GetArgument("end"));
