@@ -56,8 +56,8 @@ public static class UserAssetsExporter
                 ctx.elements.Values));
 
 
-       if(PreExport!=null)
-            doc=PreExport(doc);
+        if (PreExport != null)
+            doc = PreExport(doc);
 
         return new MemoryStream().Using(s => { doc.Save(s); return s.ToArray(); });
     }
@@ -83,7 +83,7 @@ public static class UserAssetsImporter
         public Dictionary<Guid, IUserAssetEntity> entities = new();
         public Dictionary<Guid, XElement> elements;
 
-        public Dictionary<Guid, ModelEntity?> customResolutionModel = new ();
+        public Dictionary<Guid, ModelEntity?> customResolutionModel = new();
         public Dictionary<Guid, Dictionary<(Lite<Entity> from, PropertyRoute route), Lite<Entity>?>> liteConflicts = new();
 
         public Dictionary<Guid, UserAssetPreviewLineEmbedded> previews = new();
@@ -179,8 +179,8 @@ public static class UserAssetsImporter
         {
             var lite = Lite.Parse(liteKey);
 
-            var newLite = 
-                lite.EntityType == typeof(RoleEntity) && lite.ToString() is string str ? AuthLogic.TryGetRole(str) : 
+            var newLite =
+                lite.EntityType == typeof(RoleEntity) && lite.ToString() is string str ? AuthLogic.TryGetRole(str) :
                 Database.TryRetrieveLite(lite.EntityType, lite.Id);
 
             if (newLite == null || lite.ToString() != newLite.ToString() || lite.Id != newLite.Id)
@@ -248,7 +248,7 @@ public static class UserAssetsImporter
         QueryEntity IFromXmlContext.GetQuery(string queryKey)
         {
             var qn = QueryLogic.ToQueryName(queryKey);
-            
+
             return QueryLogic.GetQueryEntity(qn);
         }
 
@@ -352,30 +352,43 @@ public static class UserAssetsImporter
 
     public static void Import(byte[] document, UserAssetPreviewModel preview)
     {
-        using (var tr = new Transaction())
+        try
         {
-            var doc = new MemoryStream(document).Using(XDocument.Load);
-            if (PreImport != null)
-                doc = PreImport(doc);
+            OperationLogic.AllowSaveGlobally = true;
 
-            ImporterContext importer = new(doc,
-                overrideEntity: preview.Lines
-                .Where(a => a.Action == EntityAction.Different)
-                .ToDictionary(a => a.Guid, a => a.OverrideEntity),
-                customResolution: preview.Lines
-                .Where(a => a.Action == EntityAction.Different)
-                .ToDictionary(a => a.Guid, a => a.CustomResolution),
-                liteConflicts: preview.Lines
-                .ToDictionary(a => a.Guid, a => a.LiteConflicts.ToDictionary(l => (l.From, PropertyRoute.Parse(l.PropertyRoute)), l => l.To))
-                );
 
-            foreach (var item in importer.elements)
-                importer.GetEntity(item.Key);
+            using (var tr = new Transaction())
+            {
+                var doc = new MemoryStream(document).Using(XDocument.Load);
+                if (PreImport != null)
+                    doc = PreImport(doc);
 
-            Database.DeleteList(importer.toRemove);
+                ImporterContext importer = new(doc,
+                    overrideEntity: preview.Lines
+                    .Where(a => a.Action == EntityAction.Different)
+                    .ToDictionary(a => a.Guid, a => a.OverrideEntity),
+                    customResolution: preview.Lines
+                    .Where(a => a.Action == EntityAction.Different)
+                    .ToDictionary(a => a.Guid, a => a.CustomResolution),
+                    liteConflicts: preview.Lines
+                    .ToDictionary(a => a.Guid, a => a.LiteConflicts.ToDictionary(l => (l.From, PropertyRoute.Parse(l.PropertyRoute)), l => l.To))
+                    );
 
-            tr.Commit();
+                foreach (var item in importer.elements)
+                    importer.GetEntity(item.Key);
+
+                Database.DeleteList(importer.toRemove);
+
+                tr.Commit();
+            }
+
         }
+        finally
+        {
+
+            OperationLogic.AllowSaveGlobally = false;
+        }
+
 
     }
 
