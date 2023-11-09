@@ -58,6 +58,9 @@ function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
 
   useEffect(() => {
 
+    if (!user.id)
+      return;
+
     const userLite = UserEntity.isLite(user) ? user : toLite(user);
     const userLiteKey = liteKey(userLite);
 
