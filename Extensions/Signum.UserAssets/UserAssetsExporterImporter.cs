@@ -352,9 +352,9 @@ public static class UserAssetsImporter
 
     public static void Import(byte[] document, UserAssetPreviewModel preview)
     {
-        try
+        //try
         {
-            OperationLogic.AllowSaveGlobally = true;
+            //OperationLogic.AllowSaveGlobally = true;
 
 
             using (var tr = new Transaction())
@@ -383,11 +383,11 @@ public static class UserAssetsImporter
             }
 
         }
-        finally
-        {
+        //finally
+        //{
 
-            OperationLogic.AllowSaveGlobally = false;
-        }
+        //    //OperationLogic.AllowSaveGlobally = false;
+        //}
 
 
     }
