@@ -37,7 +37,7 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceMultipleImages<TImage>(WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png, 
+    public static void ReplaceMultipleImages<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, ImagePartType imagePartType = ImagePartType.Png, 
         ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
         ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
