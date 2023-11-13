@@ -509,11 +509,13 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
 
-      const newValue = s.autoFixString == false ? input.value :
-        ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
+      var value = input.value;
+      
+      if (s.autoFixString != false)
+        value = ValueLineController.autoFixString(value, s.autoTrimString != null ? s.autoTrimString : true);
 
-      if (newValue != s.ctx.value)
-        vl.setValue(newValue, e);
+      if (value != (s.ctx.value ?? ""))
+        vl.setValue(value, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
@@ -586,11 +588,13 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
 
-      const newValue = s.autoFixString == false ? input.value :
-        ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
+      var value = input.value;
 
-      if (newValue != s.ctx.value)
-        vl.setValue(newValue, e);
+      if (s.autoFixString != false)
+        value = ValueLineController.autoFixString(value, s.autoTrimString != null ? s.autoTrimString : true);
+
+      if (value != (s.ctx.value ?? ""))
+        vl.setValue(value, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
