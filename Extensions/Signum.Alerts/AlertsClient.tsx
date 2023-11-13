@@ -40,7 +40,7 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
     {
       key: getQueryKey(AlertEntity),
       text: () => AlertEntity.nicePluralName(),
-      isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
+      isVisible: Finder.isFindable(AlertEntity, false) && couldHaveAlerts(entityType, "QuickLink"),
       icon: "clock-rotate-left",
       iconColor: "green",
       color: "success",

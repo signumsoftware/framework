@@ -110,7 +110,7 @@ export function start(options: {
     });
 
 
-  if (Navigator.isViewable(EmailMessageEntity)) {
+  if (Finder.isFindable(EmailMessageEntity, false)) {
     var cachedAllTypes: Promise<string[]>;
     QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
       .then(types => !types.contains(entityType) ? [] :
