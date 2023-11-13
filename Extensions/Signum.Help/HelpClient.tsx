@@ -16,8 +16,12 @@ import { HelpIcon, HelpWidget } from './HelpWidget';
 import { Entity, isEntity } from '@framework/Signum.Entities';
 import { tasks } from '@framework/Lines';
 import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Help", () => import("./Changelog"));
+
   OmniboxClient.registerProvider(new HelpOmniboxProvider());
 
   options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });

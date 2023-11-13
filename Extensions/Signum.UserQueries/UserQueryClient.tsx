@@ -29,8 +29,12 @@ import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import UserQueryToolbarConfig from './UserQueryToolbarConfig';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import UserQueryOmniboxProvider from './UserQueryOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
+
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 

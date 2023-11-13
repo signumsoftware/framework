@@ -12,8 +12,12 @@ import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dic } from '@framework/Globals';
 import QueryToolbarConfig from './QueryToolbarConfig';
 import { ToolbarConfig } from './ToolbarConfig';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Toolbar", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(ToolbarEntity, t => import('./Templates/Toolbar')));
   Navigator.addSettings(new EntitySettings(ToolbarMenuEntity, t => import('./Templates/ToolbarMenu')));
   Navigator.addSettings(new EntitySettings(ToolbarElementEmbedded, t => import('./Templates/ToolbarElement')));

@@ -30,6 +30,7 @@ import { QueryDescription, SubTokensOptions, getTokenParents, isFilterCondition 
 import { similarTokenToStr } from '@framework/FinderRules';
 import { CollectionMessage } from '@framework/Signum.External';
 import { useAPI } from '@framework/Hooks';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export let types: boolean;
 export let properties: boolean;
@@ -38,6 +39,8 @@ export let queries: boolean;
 export let permissions: boolean;
 
 export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
+
+  registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
 
   types = options.types;
   properties = options.properties;

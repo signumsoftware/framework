@@ -8,8 +8,11 @@ import ConcurrentUser from './ConcurrentUser'
 import { ajaxGet } from '@framework/Services'
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import { getTypeInfo, TypeInfo } from '@framework/Reflection'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[], activatedFor?: (e: Entity) => boolean }) {
+
+  registerChangeLogModule("Signum.ConcurrentUser", () => import("./Changelog"));
 
   //Keep in sync with ConcurrentUserLogic activatedFor!
   const activatedFor = options.activatedFor ?? (e => {

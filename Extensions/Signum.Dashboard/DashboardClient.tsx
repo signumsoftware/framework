@@ -31,6 +31,7 @@ import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
@@ -65,6 +66,8 @@ export interface PartRenderer<T extends IPartEntity> {
 export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
