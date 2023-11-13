@@ -19,8 +19,11 @@ import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMes
 import * as User from '../Signum.Authorization/Templates/User'
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
 import { TextBoxLine } from '@framework/Lines';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }) {
+
+  registerChangeLogModule("Signum.ActiveDirectory", () => import("./Changelog"));
 
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./ActiveDirectoryConfiguration')));
 

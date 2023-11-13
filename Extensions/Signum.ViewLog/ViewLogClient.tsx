@@ -5,9 +5,11 @@ import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { getQueryKey } from '@framework/Reflection'
 import { ViewLogEntity } from './Signum.ViewLog'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[], showQuickLink?: (typeName: string) => boolean }) {
 
+  registerChangeLogModule("Signum.ViewLog", () => import("./Changelog"));
 
   if (Finder.isFindable(ViewLogEntity, false)) {
     QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([

@@ -16,8 +16,11 @@ import { expandNumbers } from '../Signum.DiffLog/Templates/DiffDocument';
 import { EvalPanelPermission } from './Signum.Eval';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Eval", () => import("./Changelog"));
 
   OmniboxSpecialAction.registerSpecialAction({
     allowed: () => AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),

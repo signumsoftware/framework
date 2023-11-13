@@ -30,6 +30,7 @@ import "./Mailing.css";
 import { SearchControlLoaded } from '@framework/Search';
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn, FileTokenAttachmentEntity, ImageAttachmentEntity } from './Signum.Mailing.Templates';
 import { CultureInfoEntity } from '@framework/Signum.Basics';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 
 export var allTypes: string[] = [];
@@ -40,6 +41,8 @@ export function start(options: {
   queryButton: boolean,
   quickLinkInDefaultGroup?: boolean
 }) {
+
+  registerChangeLogModule("Signum.Mailing", () => import("./Changelog"));
 
   EvalClient.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
