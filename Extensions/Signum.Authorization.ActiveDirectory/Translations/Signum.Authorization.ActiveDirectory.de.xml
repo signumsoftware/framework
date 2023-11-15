@@ -51,9 +51,22 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
+  <Type Name="AuthADFileType">
+    <Member Name="CachedProfilePhoto" Description="gecachte Profilfoto" />
+  </Type>
   <Type Name="AzureADQuery">
     <Member Name="ActiveDirectoryGroups" Description="Active Directory-Gruppen" />
     <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
+  </Type>
+  <Type Name="CachedProfilePhotoEntity" Description="gecachte Profilfoto" PluralDescription="gecachte Profilfotos" Gender="n">
+    <Member Name="CreationDate" Description="Erstellungsdatum" />
+    <Member Name="Photo" Description="Foto" />
+    <Member Name="Size" Description="Größe" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="CachedProfilePhotoOperation">
+    <Member Name="Delete" Description="Löschen" />
+    <Member Name="Save" Description="Speichern" />
   </Type>
   <Type Name="OnPremisesExtensionAttributesModel" Description="On premises extension attributes">
     <Member Name="ExtensionAttribute1" Description="Extension attribute 1" />
