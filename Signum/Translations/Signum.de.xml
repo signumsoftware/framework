@@ -441,6 +441,35 @@
   <Type Name="QueryEntity" Description="Abfrage">
     <Member Name="Key" Description="Schlüssel" />
   </Type>
+	<Type Name="QueryTokenDateMessage">
+		<Member Name="Date" Description="Datum" />
+		<Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
+		<Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
+		<Member Name="Day" Description="Tag" />
+		<Member Name="DayOfWeek" Description="Tag der Woche" />
+		<Member Name="DayOfYear" Description="Tag des Jahres" />
+		<Member Name="Hour" Description="Stunde" />
+		<Member Name="HourStart" Description="Start Stunde" />
+		<Member Name="Millisecond" Description="Millisekunde" />
+		<Member Name="Minute" Description="Minute" />
+		<Member Name="MinuteStart" Description="Start Minute" />
+		<Member Name="Month" Description="Monat" />
+		<Member Name="MonthStart" Description="Monatsbeginn " />
+		<Member Name="Quarter" Description="Quartal" />
+		<Member Name="QuarterStart" Description="Quartalsstart" />
+		<Member Name="Second" Description="Sekunde" />
+		<Member Name="SecondStart" Description="Start Sekunde" />
+		<Member Name="TimeOfDay" Description="Tageszeit" />
+		<Member Name="TotalDays" Description="Tage insgesamt" />
+		<Member Name="TotalHours" Description="Stunden insgesamt" />
+		<Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+		<Member Name="TotalMinutes" Description="Minuten insgesamt" />
+		<Member Name="TotalSeconds" Description="Sekunden insgesamt" />
+		<Member Name="UtcDateTime" Description="UTC Datum und Uhrzeit" />
+		<Member Name="WeekNumber" Description="Kalenderwoche" />
+		<Member Name="WeekStart" Description="Wochenstart" />
+		<Member Name="Year" Description="Jahr" />
+	</Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
     <Member Name="_0HasValue" Description="{0} hat einen Wert" />
@@ -455,55 +484,34 @@
     <Member Name="Column0NotFound" Description="Die Spalte {0} wurde nicht gefunden" />
     <Member Name="ContainerOfCellOperations" Description="Container für Zellenoperationen" />
     <Member Name="Count" Description="Anzahl" />
-    <Member Name="Date" Description="Datum" />
+ 
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
-    <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
-    <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
-    <Member Name="Day" Description="Tag" />
-    <Member Name="DayOfWeek" Description="Tag der Woche" />
-    <Member Name="DayOfYear" Description="Tag des Jahres" />
+ 
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
-    <Member Name="Hour" Description="Stunde" />
-    <Member Name="HourStart" Description="Start Stunde" />
+
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
     <Member Name="MatchRank" Description="Match-Rang" />
     <Member Name="MatchRankFor0" Description="Match-Rang für {0}" />
     <Member Name="MatchSnippet" Description="Match-Snippet" />
-    <Member Name="Millisecond" Description="Millisekunde" />
-    <Member Name="Minute" Description="Minute" />
-    <Member Name="MinuteStart" Description="Start Minute" />
+ 
     <Member Name="Modulo0" Description="Modulo {0}" />
-    <Member Name="Month" Description="Monat" />
-    <Member Name="MonthStart" Description="Monatsbeginn " />
+   
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
-    <Member Name="Quarter" Description="Quartal" />
-    <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="RowId" Description="RowID" />
     <Member Name="RowOrder" Description="RowOrder" />
-    <Member Name="Second" Description="Sekunde" />
-    <Member Name="SecondStart" Description="Start Sekunde" />
     <Member Name="SnippetOf0" Description="Snippet für {0}" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
-    <Member Name="TimeOfDay" Description="Tageszeit" />
-    <Member Name="TotalDays" Description="Tage insgesamt" />
-    <Member Name="TotalHours" Description="Stunden insgesamt" />
-    <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
-    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
-    <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
-    <Member Name="UtcDateTime" Description="UTC Datum und Uhrzeit" />
-    <Member Name="WeekNumber" Description="Kalenderwoche" />
-    <Member Name="WeekStart" Description="Wochenstart" />
-    <Member Name="Year" Description="Jahr" />
+  
   </Type>
   <Type Name="QuickLinkMessage">
     <Member Name="No0Found" Description="Keine(n) {0} gefunden" />

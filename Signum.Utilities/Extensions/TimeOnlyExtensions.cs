@@ -27,6 +27,11 @@ public static class TimeOnlyExtensions
         return new TimeOnly(time.Hour, time.Minute, (time.Second / step) * step);
     }
 
+    public static TimeOnly TruncMilliseconds(this TimeOnly time, int step)
+    {
+        return new TimeOnly(time.Hour, time.Minute, time.Second, (time.Millisecond / step) * step);
+    }
+
     public static TimeOnly TruncMinutes(this TimeOnly time)
     {
         return new TimeOnly(time.Hour, time.Minute, 0);

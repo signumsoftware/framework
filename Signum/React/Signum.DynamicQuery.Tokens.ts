@@ -79,6 +79,40 @@ export module FilterFieldMessage {
   export const TheSameElement = new MessageKey("FilterFieldMessage", "TheSameElement");
 }
 
+export module QueryTokenDateMessage {
+  export const TimeOfDay = new MessageKey("QueryTokenDateMessage", "TimeOfDay");
+  export const Date = new MessageKey("QueryTokenDateMessage", "Date");
+  export const Year = new MessageKey("QueryTokenDateMessage", "Year");
+  export const Quarter = new MessageKey("QueryTokenDateMessage", "Quarter");
+  export const Month = new MessageKey("QueryTokenDateMessage", "Month");
+  export const WeekNumber = new MessageKey("QueryTokenDateMessage", "WeekNumber");
+  export const DayOfYear = new MessageKey("QueryTokenDateMessage", "DayOfYear");
+  export const Day = new MessageKey("QueryTokenDateMessage", "Day");
+  export const Days = new MessageKey("QueryTokenDateMessage", "Days");
+  export const DayOfWeek = new MessageKey("QueryTokenDateMessage", "DayOfWeek");
+  export const Hour = new MessageKey("QueryTokenDateMessage", "Hour");
+  export const Minute = new MessageKey("QueryTokenDateMessage", "Minute");
+  export const Second = new MessageKey("QueryTokenDateMessage", "Second");
+  export const Millisecond = new MessageKey("QueryTokenDateMessage", "Millisecond");
+  export const UtcDateTime = new MessageKey("QueryTokenDateMessage", "UtcDateTime");
+  export const DateTimePart = new MessageKey("QueryTokenDateMessage", "DateTimePart");
+  export const TotalDays = new MessageKey("QueryTokenDateMessage", "TotalDays");
+  export const TotalHours = new MessageKey("QueryTokenDateMessage", "TotalHours");
+  export const TotalSeconds = new MessageKey("QueryTokenDateMessage", "TotalSeconds");
+  export const TotalMinutes = new MessageKey("QueryTokenDateMessage", "TotalMinutes");
+  export const TotalMilliseconds = new MessageKey("QueryTokenDateMessage", "TotalMilliseconds");
+  export const MonthStart = new MessageKey("QueryTokenDateMessage", "MonthStart");
+  export const QuarterStart = new MessageKey("QueryTokenDateMessage", "QuarterStart");
+  export const WeekStart = new MessageKey("QueryTokenDateMessage", "WeekStart");
+  export const Every0Hours = new MessageKey("QueryTokenDateMessage", "Every0Hours");
+  export const HourStart = new MessageKey("QueryTokenDateMessage", "HourStart");
+  export const Every0Minutes = new MessageKey("QueryTokenDateMessage", "Every0Minutes");
+  export const MinuteStart = new MessageKey("QueryTokenDateMessage", "MinuteStart");
+  export const Every0Seconds = new MessageKey("QueryTokenDateMessage", "Every0Seconds");
+  export const SecondStart = new MessageKey("QueryTokenDateMessage", "SecondStart");
+  export const Every0Milliseconds = new MessageKey("QueryTokenDateMessage", "Every0Milliseconds");
+}
+
 export module QueryTokenMessage {
   export const _0As1 = new MessageKey("QueryTokenMessage", "_0As1");
   export const And = new MessageKey("QueryTokenMessage", "And");
@@ -87,42 +121,17 @@ export module QueryTokenMessage {
   export const Check = new MessageKey("QueryTokenMessage", "Check");
   export const Column0NotFound = new MessageKey("QueryTokenMessage", "Column0NotFound");
   export const Count = new MessageKey("QueryTokenMessage", "Count");
-  export const Date = new MessageKey("QueryTokenMessage", "Date");
-  export const DateTime = new MessageKey("QueryTokenMessage", "DateTime");
-  export const DateTimeOffset = new MessageKey("QueryTokenMessage", "DateTimeOffset");
-  export const Day = new MessageKey("QueryTokenMessage", "Day");
-  export const DayOfWeek = new MessageKey("QueryTokenMessage", "DayOfWeek");
-  export const DayOfYear = new MessageKey("QueryTokenMessage", "DayOfYear");
   export const DecimalNumber = new MessageKey("QueryTokenMessage", "DecimalNumber");
   export const Embedded0 = new MessageKey("QueryTokenMessage", "Embedded0");
   export const GlobalUniqueIdentifier = new MessageKey("QueryTokenMessage", "GlobalUniqueIdentifier");
-  export const Hour = new MessageKey("QueryTokenMessage", "Hour");
   export const ListOf0 = new MessageKey("QueryTokenMessage", "ListOf0");
-  export const Millisecond = new MessageKey("QueryTokenMessage", "Millisecond");
-  export const TotalDays = new MessageKey("QueryTokenMessage", "TotalDays");
-  export const TotalHours = new MessageKey("QueryTokenMessage", "TotalHours");
-  export const TotalSeconds = new MessageKey("QueryTokenMessage", "TotalSeconds");
-  export const TotalMinutes = new MessageKey("QueryTokenMessage", "TotalMinutes");
-  export const TotalMilliseconds = new MessageKey("QueryTokenMessage", "TotalMilliseconds");
-  export const Minute = new MessageKey("QueryTokenMessage", "Minute");
-  export const Month = new MessageKey("QueryTokenMessage", "Month");
-  export const MonthStart = new MessageKey("QueryTokenMessage", "MonthStart");
-  export const Quarter = new MessageKey("QueryTokenMessage", "Quarter");
-  export const QuarterStart = new MessageKey("QueryTokenMessage", "QuarterStart");
-  export const WeekStart = new MessageKey("QueryTokenMessage", "WeekStart");
-  export const HourStart = new MessageKey("QueryTokenMessage", "HourStart");
-  export const Every0Hours = new MessageKey("QueryTokenMessage", "Every0Hours");
-  export const MinuteStart = new MessageKey("QueryTokenMessage", "MinuteStart");
-  export const Every0Minutes = new MessageKey("QueryTokenMessage", "Every0Minutes");
-  export const SecondStart = new MessageKey("QueryTokenMessage", "SecondStart");
-  export const Every0Seconds = new MessageKey("QueryTokenMessage", "Every0Seconds");
   export const TimeOfDay = new MessageKey("QueryTokenMessage", "TimeOfDay");
+  export const Date = new MessageKey("QueryTokenMessage", "Date");
+  export const DateTime = new MessageKey("QueryTokenMessage", "DateTime");
+  export const DateTimeOffset = new MessageKey("QueryTokenMessage", "DateTimeOffset");
   export const MoreThanOneColumnNamed0 = new MessageKey("QueryTokenMessage", "MoreThanOneColumnNamed0");
   export const Number = new MessageKey("QueryTokenMessage", "Number");
-  export const Second = new MessageKey("QueryTokenMessage", "Second");
   export const Text = new MessageKey("QueryTokenMessage", "Text");
-  export const Year = new MessageKey("QueryTokenMessage", "Year");
-  export const WeekNumber = new MessageKey("QueryTokenMessage", "WeekNumber");
   export const _0Steps1 = new MessageKey("QueryTokenMessage", "_0Steps1");
   export const Step0 = new MessageKey("QueryTokenMessage", "Step0");
   export const Length = new MessageKey("QueryTokenMessage", "Length");
@@ -139,8 +148,6 @@ export module QueryTokenMessage {
   export const CellOperation = new MessageKey("QueryTokenMessage", "CellOperation");
   export const ContainerOfCellOperations = new MessageKey("QueryTokenMessage", "ContainerOfCellOperations");
   export const EntityType = new MessageKey("QueryTokenMessage", "EntityType");
-  export const UtcDateTime = new MessageKey("QueryTokenMessage", "UtcDateTime");
-  export const DateTimePart = new MessageKey("QueryTokenMessage", "DateTimePart");
   export const MatchRank = new MessageKey("QueryTokenMessage", "MatchRank");
   export const MatchRankFor0 = new MessageKey("QueryTokenMessage", "MatchRankFor0");
   export const MatchSnippet = new MessageKey("QueryTokenMessage", "MatchSnippet");

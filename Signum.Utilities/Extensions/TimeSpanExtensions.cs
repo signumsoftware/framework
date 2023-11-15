@@ -30,6 +30,11 @@ public static class TimeSpanExtensions
         return new TimeSpan(time.Days, time.Hours, time.Minutes, (time.Seconds / step) * step);
     }
 
+    public static TimeSpan TruncMilliseconds(this TimeSpan time, int step)
+    {
+        return new TimeSpan(time.Days, time.Hours, time.Minutes, time.Seconds, (time.Milliseconds / step) * step);
+    }
+
     public static TimeSpan TruncMinutes(this TimeSpan time)
     {
         return new TimeSpan(time.Days, time.Hours, time.Minutes, 0);

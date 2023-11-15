@@ -483,6 +483,11 @@ public static class DateTimeExtensions
         return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, (dateTime.Second / step) * step, dateTime.Kind);
     }
 
+    public static DateTime TruncMilliseconds(this DateTime dateTime, int step)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, (dateTime.Millisecond / step) * step, dateTime.Kind);
+    }
+
     public static string ToMonthName(this DateTime dateTime)
     {
         return CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(dateTime.Month);
