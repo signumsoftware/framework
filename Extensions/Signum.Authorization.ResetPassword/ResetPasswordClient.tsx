@@ -6,8 +6,11 @@ import { ajaxPost } from "@framework/Services";
 import { LoginAuthMessage } from "../Signum.Authorization/Signum.Authorization";
 import LoginPage from "../Signum.Authorization/Login/LoginPage";
 import * as AuthClient from "../Signum.Authorization/AuthClient";
+import { registerChangeLogModule } from "@framework/Basics/ChangeLogClient";
 
 export function startPublic(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.ResetPassword", () => import("./Changelog"));
 
   options.routes.push({ path: "/auth/forgotPasswordEmail", element: <ImportComponent onImport={() => import("./ForgotPasswordEmailPage")} /> });
   options.routes.push({ path: "/auth/resetPassword", element: <ImportComponent onImport={() => import("./ResetPassword")} /> });

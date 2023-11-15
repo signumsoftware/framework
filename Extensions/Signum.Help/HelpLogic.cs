@@ -187,7 +187,7 @@ public static class HelpLogic
         }));
     }
 
-    public static QueryHelp GetQueryHelp(object queryName) => CachedQueriesHelp().GetOrThrow(queryName).Do(a => a.AssertAllowed());
+    public static QueryHelp GetQueryHelp(object queryName) => CachedQueriesHelp().GetOrThrow(queryName);
     public static Dictionary<object, QueryHelp> CachedQueriesHelp()
     {
         return Queries.Value.GetOrAdd(GetCulture(), ci => GlobalContext(() =>
