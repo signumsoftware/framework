@@ -855,6 +855,20 @@ public static class EnumerableExtensions
         }
     }
 
+
+
+    //return one element more
+    public static IEnumerable<IEnumerable<T>> GroupByTake<T>(this IEnumerable<T> collection,int sizeGroup)
+    {
+        return collection.Select((elemento, index) => new { Index = index, Elemento = elemento })
+                              .GroupBy(x => x.Index / sizeGroup)
+                              .Select(g => g.Select(x => x.Elemento).ToList())
+                              .ToList();
+
+    }
+
+
+
     //return one element more
     public static IEnumerable<S> SelectAggregate<T, S>(this IEnumerable<T> collection, S seed, Func<S, T, S> aggregate)
     {
