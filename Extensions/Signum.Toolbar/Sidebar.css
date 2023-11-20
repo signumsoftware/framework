@@ -178,21 +178,8 @@
 }
 
 .nav-arrow-icon {
-}
-
-.nav-icon-with-arrow {
-    opacity: .3;
-}
-
-
-.sidebar-nav.wide .nav-arrow-icon {
     margin-left: -18px;
 }
-
-.sidebar-nav.wide .nav-icon-with-arrow {
-    opacity: .8;
-}
-
 
 @media (min-width: 768px) {
     .sidebar-container {

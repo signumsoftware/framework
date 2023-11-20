@@ -15,8 +15,11 @@ import { FetchInState } from '@framework/Lines/Retrieve';
 import { FileImage } from './Components/FileImage';
 import { ImageModal } from './Components/ImageModal';
 import { IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Files", () => import("./Changelog"));
 
   registerAutoFileLine(FileEntity);
   registerAutoFileLine(FileEmbedded);

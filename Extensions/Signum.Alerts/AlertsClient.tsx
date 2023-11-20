@@ -19,8 +19,12 @@ import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { getQueryKey, ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[], showAlerts: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
+
+  registerChangeLogModule("Signum.Alerts", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
   Navigator.addSettings(new EntitySettings(SendNotificationEmailTaskEntity, e => import('./Templates/SendNotificationEmailTask')));
@@ -40,7 +44,7 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
     {
       key: getQueryKey(AlertEntity),
       text: () => AlertEntity.nicePluralName(),
-      isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
+      isVisible: Finder.isFindable(AlertEntity, false) && couldHaveAlerts(entityType, "QuickLink"),
       icon: "clock-rotate-left",
       iconColor: "green",
       color: "success",

@@ -111,9 +111,9 @@ public class SqlFunctionsTest
         Dump((NoteWithDateEntity n) => n.CreationTime.MonthStart());
         Dump((NoteWithDateEntity n) => n.CreationTime.WeekStart());
         Dump((NoteWithDateEntity n) => n.CreationTime.Date);
-        Dump((NoteWithDateEntity n) => n.CreationTime.HourStart());
-        Dump((NoteWithDateEntity n) => n.CreationTime.MinuteStart());
-        Dump((NoteWithDateEntity n) => n.CreationTime.SecondStart());
+        Dump((NoteWithDateEntity n) => n.CreationTime.TruncHours());
+        Dump((NoteWithDateEntity n) => n.CreationTime.TruncMinutes());
+        Dump((NoteWithDateEntity n) => n.CreationTime.TruncSeconds());
 
         Dump((NoteWithDateEntity n) => n.CreationDate.YearStart());
         Dump((NoteWithDateEntity n) => n.CreationDate.QuarterStart());

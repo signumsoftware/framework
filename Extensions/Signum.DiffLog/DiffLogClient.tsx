@@ -6,9 +6,13 @@ import { Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import * as AuthAdminClient from '../Signum.Authorization/AuthAdminClient'
 import { OperationLogTypeCondition } from './Signum.DiffLog';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.DiffLog", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(OperationLogEntity, e => import('./Templates/OperationLog')));
   AuthAdminClient.registerQueryAuditorToken(OperationLogEntity, OperationLogEntity.token(a => a.target), OperationLogTypeCondition.FilteringByTarget);
 }

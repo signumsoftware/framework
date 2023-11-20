@@ -11,7 +11,7 @@ import { MListElementBinding } from "../Reflection";
 
 interface MultiValueLineProps extends LineBaseProps {
   ctx: TypeContext<MList<any>>;
-  onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  onRenderItem?: (p: AutoLineProps) => React.ReactElement<any>;
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
   valueColumClass?: string;
@@ -74,7 +74,14 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
 export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
   const c = useController(MultiValueLineController, props, ref);
   const p = c.props;
-  const list = p.ctx.value;
+
+  var renderItem = React.useMemo(() => {
+    if (props.onRenderItem)
+      return props.onRenderItem;
+
+    var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true)!;
+    return AutoLine.getComponentFactory(pr.typeReference(), pr);
+  }, [Boolean(p.onRenderItem), p.ctx.propertyPath]);
 
   if (c.isHidden)
     return null;
@@ -95,7 +102,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
                     <MultiValueLineElement
                       ctx={mlec}
                       onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                      onRenderItem={p.onRenderItem}
+                      onRenderItem={renderItem}
                       valueColumClass={p.valueColumClass!} />
                   </div>
                 </ErrorBoundary>
@@ -119,14 +126,14 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
   onRemove: (event: React.MouseEvent<any>) => void;
-  onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  onRenderItem: (p: AutoLineProps) => React.ReactElement<any>;
   valueColumClass: string;
 }
 
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
   const mctx = props.ctx;
 
-  var renderItem = props.onRenderItem ?? AutoLine.getComponentFactory(mctx.propertyRoute!.typeReference, mctx.propertyRoute!)
+
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
       {!mctx.readOnly &&
@@ -136,7 +143,7 @@ export function MultiValueLineElement(props: MultiValueLineElementProps) {
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {React.cloneElement(renderItem({ ctx: mctx, mandatory: true} as any)!)}
+      {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true})!)}
     </div>
   );
 }

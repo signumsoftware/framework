@@ -13,6 +13,7 @@ export interface IconTypeaheadLineProps {
   onChange?: () => void;
   extraIcons?: string[];
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+  extraButtons?: () => React.ReactNode;
 }
 
 export function IconTypeaheadLine(p : IconTypeaheadLineProps){
@@ -28,12 +29,16 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
 
   return (
     <FormGroup ctx={ctx} label={ctx.niceName()}>
-      {inputId => <IconTypeahead icon={ctx.value}
+      {inputId => <>
+        <IconTypeahead icon={ctx.value}
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}
         formControlClass={ctx.formControlClass}
         inputAttrs={p.inputAttrs}
-        onChange={handleChange} />}
+          onChange={handleChange} />
+        {p.extraButtons?.()}
+      </>
+      }
     </FormGroup>
   );
 }
