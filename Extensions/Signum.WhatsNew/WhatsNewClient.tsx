@@ -10,8 +10,11 @@ import { Entity, Lite } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
 import { WhatsNewEntity, WhatsNewMessage } from './Signum.WhatsNew'
 import { ImportComponent } from '@framework/ImportComponent'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.WhatsNew", () => import("./Changelog"));
 
   options.routes.push({ path: "/newspage/:newsId", element: <ImportComponent onImport={() => import("./Templates/NewsPage")} /> });
   options.routes.push({ path: "/news", element: <ImportComponent onImport={() => import("./Templates/AllNewsPage")} /> });

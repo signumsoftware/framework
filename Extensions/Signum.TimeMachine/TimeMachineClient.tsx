@@ -25,8 +25,11 @@ import * as Widgets from '@framework/Frames/Widgets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getTimeMachineIcon, TimeMachineColors } from '@framework/Lines/TimeMachineIcon';
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.TimeMachine", () => import("./Changelog"));
 
   if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
     QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :

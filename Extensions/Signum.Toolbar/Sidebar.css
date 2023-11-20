@@ -181,10 +181,6 @@
     margin-left: -18px;
 }
 
-.nav-icon-with-arrow {
-    opacity: .3;
-}
-
 @media (min-width: 768px) {
     .sidebar-container {
         flex-direction: row;

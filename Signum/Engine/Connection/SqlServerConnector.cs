@@ -529,6 +529,11 @@ public class SqlServerConnector : Connector
         get { return Version >= SqlServerVersion.SqlServer2016; }
     }
 
+    public bool SupportsDateTrunc
+    {
+        get { return Version >= SqlServerVersion.SqlServer2022; }
+    }
+
     public override int MaxNameLength => 128;
 
     public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";

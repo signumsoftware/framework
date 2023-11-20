@@ -104,13 +104,14 @@ export namespace AutoLine {
         return p => <DateTimeLine {...p} />;
 
       if (tr.name == "string") {
-        if (pr?.member!.format == "Password")
+        var member = pr == null ? null : pr.propertyRouteType == "MListItem" ? pr.parent?.member : pr.member;
+        if (member?.format == "Password")
           return p => <PasswordLine {...p} />;
 
-        if (pr?.member!.format == "Color")
+        if (member?.format == "Color")
           return p => <ColorLine {...p} />;
 
-        if (pr?.member!.isMultiline)
+        if (member?.isMultiline)
           return p => <TextAreaLine {...p} />;
 
         return p => <TextBoxLine {...p} />;
