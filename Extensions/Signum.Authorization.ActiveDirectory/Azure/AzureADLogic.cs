@@ -70,13 +70,14 @@ public static class AzureADLogic
                         var users = graphClient.Users.GetAsync(r =>
                         {
                             r.QueryParameters.Select = new[] { "id", "accountEnabled" };
+                            r.QueryParameters.Filter = filter;
                         }).Result;
 
                         var isEnabledDictionary = users!.Value!.ToDictionary(a => Guid.Parse(a.Id!), a => a.AccountEnabled!.Value);
 
                         foreach (var u in gr)
                         {
-                            if (u.State == UserState.Active && !isEnabledDictionary.GetOrThrow(u.Mixin<UserADMixin>().OID!.Value))
+                            if (u.State == UserState.Active && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) != true)
                             {
                                 stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
                                 u.Execute(UserOperation.Deactivate);

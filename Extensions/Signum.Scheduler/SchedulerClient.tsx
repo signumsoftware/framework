@@ -48,7 +48,7 @@ export function start(options: { routes: RouteObject[] }) {
 
   var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
   es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
-    <SearchValueLine ctx={ctx} findOptions={{
+    <SearchValueLine ctx={ctx} badgeColor="danger" isBadge="MoreThanZero" findOptions={{
       queryName: SchedulerTaskExceptionLineEntity,
       filterOptions: [{ token: SchedulerTaskExceptionLineEntity.token(e => e.schedulerTaskLog), value: ctx.value}],
     }} />

@@ -72,12 +72,12 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
       return undefined;
 
     var alert: Partial<AlertEntity> = {
-      createdBy: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.createdBy).toString())],
-      creationDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.creationDate).toString())],
-      alertDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.alertDate).toString())],
-      target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
-      linkTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.linkTarget).toString())],
-      textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
+      createdBy: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.createdBy)),
+      creationDate: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.creationDate)),
+      alertDate: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.alertDate)),
+      target: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.target)),
+      linkTarget: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.linkTarget)),
+      textArguments: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.entity.textArguments))
     };
     return format(cell, alert);
   }, true);

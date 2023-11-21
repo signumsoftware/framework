@@ -8,8 +8,9 @@ import { BsSize, KeyNames } from './Components';
 import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
-import { AutoLine, AutoLineProps } from './Lines/AutoLine';
+import type { AutoLineProps } from './Lines/AutoLine';
 
+const AutoLine = React.lazy(() => import("./Lines/AutoLine"));
 interface AutoLineModalProps extends IModalProps<any> {
   options: AutoLineModalOptions;
 }
