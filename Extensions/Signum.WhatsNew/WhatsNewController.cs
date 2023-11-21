@@ -14,7 +14,7 @@ public class WhatsNewController : ControllerBase
     {
         return new MyNewsCountResult
         {
-            NumWhatsNews = WhatsNewLogic.GetWhatNews().Count(t => !t.isRead)
+            NumWhatsNews = WhatsNewLogic.GetWhatNews().Where(t => t.wn.Status == WhatsNewState.Publish).Count(t => !t.isRead)
         };
     }
 
@@ -27,7 +27,7 @@ public class WhatsNewController : ControllerBase
     public List<WhatsNewShort> MyNews()
     {
         return WhatsNewLogic.GetWhatNews()
-            .Where(t => !t.isRead)
+            .Where(t => !t.isRead && t.wn.Status == WhatsNewState.Publish)
             .Select(t =>
             {
                 var wn = t.wn;
