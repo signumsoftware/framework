@@ -127,7 +127,7 @@ public static class WhatsNewLogic
 
             new Graph<WhatsNewEntity>.Delete(WhatsNewOperation.Delete)
             {
-                Delete = (e, _) => { },
+                Delete = (e, _) => { e.Delete(); },
             }.Register();
         } 
     }
