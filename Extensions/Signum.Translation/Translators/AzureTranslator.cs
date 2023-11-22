@@ -1,3 +1,4 @@
+using Signum.Utilities.Synchronization;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -61,7 +62,7 @@ public class AzureTranslator : ITranslator
         var result = list.Chunk(10).SelectMany(listPart => Task.Run(async () =>
         {
             return await TranslateBatchAsync(listPart.ToList(), from, to);
-        }).Result!).ToList();
+        }).ResultSafe()!).ToList();
 
         return result;
     }
