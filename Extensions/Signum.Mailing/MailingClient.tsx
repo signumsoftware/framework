@@ -30,6 +30,7 @@ import "./Mailing.css";
 import { SearchControlLoaded } from '@framework/Search';
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateEntity, EmailTemplateMessageEmbedded, EmailTemplateVisibleOn, FileTokenAttachmentEntity, ImageAttachmentEntity } from './Signum.Mailing.Templates';
 import { CultureInfoEntity } from '@framework/Signum.Basics';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 
 export var allTypes: string[] = [];
@@ -40,6 +41,8 @@ export function start(options: {
   queryButton: boolean,
   quickLinkInDefaultGroup?: boolean
 }) {
+
+  registerChangeLogModule("Signum.Mailing", () => import("./Changelog"));
 
   EvalClient.Options.checkEvalFindOptions.push({ queryName: EmailTemplateEntity });
 
@@ -110,7 +113,7 @@ export function start(options: {
     });
 
 
-  if (Navigator.isViewable(EmailMessageEntity)) {
+  if (Finder.isFindable(EmailMessageEntity, false)) {
     var cachedAllTypes: Promise<string[]>;
     QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
       .then(types => !types.contains(entityType) ? [] :

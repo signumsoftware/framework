@@ -19,6 +19,22 @@ export type BootstrapStyle =
   "Warning" |
   "Danger";
 
+export module ChangeLogMessage {
+  export const ThereIsNotAnyNewChangesFrom0 = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
+  export const SeeMore = new MessageKey("ChangeLogMessage", "SeeMore");
+}
+
+export const ChangeLogViewLogEntity = new Type<ChangeLogViewLogEntity>("ChangeLogViewLog");
+export interface ChangeLogViewLogEntity extends Entities.Entity {
+  Type: "ChangeLogViewLog";
+  user: Entities.Lite<Security.IUserEntity>;
+  lastDate: string /*DateTime*/;
+}
+
+export module ChangeLogViewLogOperation {
+  export const Delete : Operations.DeleteSymbol<ChangeLogViewLogEntity> = registerSymbol("Operation", "ChangeLogViewLogOperation.Delete");
+}
+
 export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
   Type: "ClientErrorModel";

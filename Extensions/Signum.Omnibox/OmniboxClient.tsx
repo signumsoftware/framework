@@ -7,8 +7,11 @@ import DynamicQueryOmniboxProvider from './DynamicQueryOmniboxProvider';
 import EntityOmniboxProvider from './EntityOmniboxProvider';
 import { OmniboxProvider } from './OmniboxProvider';
 import SpecialOmniboxProvider from './SpecialOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start() {
+
+  registerChangeLogModule("Signum.Omnibox", () => import("./Changelog"));
 
   registerProvider(new EntityOmniboxProvider());
   registerProvider(new DynamicQueryOmniboxProvider());

@@ -157,7 +157,7 @@ public class DeleteLogParametersEmbedded : EmbeddedEntity
         if (moreThan == null)
             return null;
 
-        return moreThan == 0 ? Clock.Now.TrimToHours() : Clock.Now.Date.AddDays(-moreThan.Value);
+        return moreThan == 0 ? Clock.Now.TruncHours() : Clock.Now.Date.AddDays(-moreThan.Value);
     }
 
     public DateTime? GetDateLimitDeleteWithExceptions(TypeEntity type)
@@ -167,7 +167,7 @@ public class DeleteLogParametersEmbedded : EmbeddedEntity
         if (moreThan == null)
             return null;
 
-        return moreThan.Value == 0 ? Clock.Now.TrimToHours() : Clock.Now.Date.AddDays(-moreThan.Value);
+        return moreThan.Value == 0 ? Clock.Now.TruncHours() : Clock.Now.Date.AddDays(-moreThan.Value);
     }
 
     public int ChunkSize { get; set; } = 1000;

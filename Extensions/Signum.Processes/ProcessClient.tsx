@@ -19,8 +19,12 @@ import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+
+  registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable: "Never" }));
 
   if (options.packages || options.packageOperations) {

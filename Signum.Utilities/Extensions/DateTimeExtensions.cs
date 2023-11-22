@@ -240,33 +240,19 @@ public static class DateTimeExtensions
 
 
     /// <param name="precision">Using Milliseconds does nothing, using Days use DateTime.Date</param>
-    public static DateTime TrimTo(this DateTime dateTime, DateTimePrecision precision)
+    public static DateTime TruncTo(this DateTime dateTime, DateTimePrecision precision)
     {
         return precision switch
         {
             DateTimePrecision.Days => dateTime.Date,
-            DateTimePrecision.Hours => TrimToHours(dateTime),
-            DateTimePrecision.Minutes => TrimToMinutes(dateTime),
-            DateTimePrecision.Seconds => TrimToSeconds(dateTime),
+            DateTimePrecision.Hours => TruncHours(dateTime),
+            DateTimePrecision.Minutes => TruncMinutes(dateTime),
+            DateTimePrecision.Seconds => TruncSeconds(dateTime),
             DateTimePrecision.Milliseconds => dateTime,
             _ => throw new UnexpectedValueException(precision),
         };
     }
 
-    public static DateTime TrimToSeconds(this DateTime dateTime)
-    {
-        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind);
-    }
-
-    public static DateTime TrimToMinutes(this DateTime dateTime)
-    {
-        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind);
-    }
-
-    public static DateTime TrimToHours(this DateTime dateTime)
-    {
-        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
-    }
 
     public static DateTimePrecision GetPrecision(this DateTime dateTime)
     {
@@ -467,19 +453,39 @@ public static class DateTimeExtensions
         return date.AddDays(-diff);
     }
 
-    public static DateTime HourStart(this DateTime dateTime)
+    public static DateTime TruncHours(this DateTime dateTime)
     {
         return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, 0, 0, dateTime.Kind);
     }
 
-    public static DateTime MinuteStart(this DateTime dateTime)
+    public static DateTime TruncHours(this DateTime dateTime, int step)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, (dateTime.Hour / step) * step, 0, 0, dateTime.Kind);
+    }
+
+    public static DateTime TruncMinutes(this DateTime dateTime)
     {
         return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, 0, dateTime.Kind);
     }
 
-    public static DateTime SecondStart(this DateTime dateTime)
+    public static DateTime TruncMinutes(this DateTime dateTime, int step)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, (dateTime.Minute / step) * step, 0, dateTime.Kind);
+    }
+
+    public static DateTime TruncSeconds(this DateTime dateTime)
     {
         return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Kind);
+    }
+
+    public static DateTime TruncSeconds(this DateTime dateTime, int step)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, (dateTime.Second / step) * step, dateTime.Kind);
+    }
+
+    public static DateTime TruncMilliseconds(this DateTime dateTime, int step)
+    {
+        return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, dateTime.Hour, dateTime.Minute, dateTime.Second, (dateTime.Millisecond / step) * step, dateTime.Kind);
     }
 
     public static string ToMonthName(this DateTime dateTime)
