@@ -21,6 +21,7 @@ class Upgrade_20231122_DotNet8 : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@"Southwind\Dockerfile", file =>
         {
+            file.Replace("bullseye-slim", "bookworm-slim");
             file.Replace("dotnet/aspnet:7.", "dotnet/aspnet:8.");
             file.Replace("dotnet/sdk:7.", "dotnet/sdk:8.");
             file.WarningLevel = WarningLevel.None;
