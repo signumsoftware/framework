@@ -2,8 +2,8 @@
   "profiles": {
     "Signum": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
-      "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum\\"
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.dll\" \"obj\\SignumReferences.txt\"",
+      "workingDirectory": "..\\Signum\\"
     }
   }
 }

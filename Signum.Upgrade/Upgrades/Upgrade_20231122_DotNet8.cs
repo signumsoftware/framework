@@ -12,6 +12,8 @@ class Upgrade_20231122_DotNet8 : CodeUpgradeBase
         uctx.ForeachCodeFile(@"*.csproj", file =>
         {
             file.Replace("<TargetFramework>net7.0</TargetFramework>", "<TargetFramework>net8.0</TargetFramework>");
+            file.UpdateNugetReference("Signum.TSGenerator", "8.0.0");
+            file.UpdateNugetReference("Signum.MSBuildTask", "8.0.0");
         });
 
         uctx.ForeachCodeFile(@"deploy*.ps1", file =>
