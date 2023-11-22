@@ -2,22 +2,22 @@
   "profiles": {
     "Signum": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.dll\" \"D:\\Signum\\southwind\\Framework\\Signum\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Signum\\"
     },
     "Authorization": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Authorization.dll\" \"C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Authorization.dll\" \"C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\obj\\SignumReferences.txt\"",
       "workingDirectory": "C:\\Code\\Agile360\\Framework\\Extensions\\Signum.Authorization\\"
     },
     "Files": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.Files.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\obj\\SignumReferences.txt\"",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.Files.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.Files\\"
     },
     "MailingPackage": {
       "commandName": "Project",
-      "commandLineArgs": "\"obj\\Debug\\net7.0\\Signum.MailingPackage.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\obj\\SignumReferences.txt\"",
+      "commandLineArgs": "\"obj\\Debug\\net8.0\\Signum.MailingPackage.dll\" \"D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\obj\\SignumReferences.txt\"",
       "workingDirectory": "D:\\Signum\\southwind\\Framework\\Extensions\\Signum.MailingPackage\\"
     },
     "Southwind": {
