@@ -26,6 +26,7 @@ export interface ValueLineProps extends LineBaseProps {
   extraButtonsBefore?: (vl: ValueLineController) => React.ReactNode;
   extraButtons?: (vl: ValueLineController) => React.ReactNode;
   initiallyFocused?: boolean | number;
+  forceSetValueOnBlur?: boolean;
 
   incrementWithArrow?: boolean | number;
 
@@ -480,6 +481,8 @@ ValueLineRenderers.renderers.set("Color", (vl) => {
 
 function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text") {
 
+  const [text, setText] = React.useState<string | undefined>(undefined);
+
   const s = vl.props;
 
   var htmlAtts = vl.props.valueHtmlAttributes;
@@ -493,23 +496,30 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
       </FormGroup>
     );
 
-  const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
+  function handleTextOnChange (e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.value, e);
-  };
+    if (s.forceSetValueOnBlur == true)
+      setText(input.value)
+    else
+      vl.setValue(input.value, e);
+  }
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
-  if (s.autoFixString != false) {
+  if (s.autoFixString != false || s.forceSetValueOnBlur == true)
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true);
-      if (fixed != input.value)
-        vl.setValue(fixed, e);
+
+      var value = input.value;
+      
+      if (s.autoFixString != false)
+        value = ValueLineController.autoFixString(value, s.autoTrimString != null ? s.autoTrimString : true);
+
+      if (value != (s.ctx.value ?? ""))
+        vl.setValue(value, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
     };
-  }
 
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
@@ -520,7 +530,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
             autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
             {...vl.props.valueHtmlAttributes}
             className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
-            value={s.ctx.value ?? ""}
+            value={text ?? s.ctx.value ?? ""}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}
             placeholder={vl.getPlaceholder()}
@@ -547,6 +557,8 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
 
 ValueLineRenderers.renderers.set("TextArea", (vl) => {
 
+  const [text, setText] = React.useState<string | undefined>(undefined);
+
   const s = vl.props;
 
   var htmlAtts = vl.props.valueHtmlAttributes;
@@ -563,23 +575,30 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
       </FormGroup>
     );
 
-  const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
+  function handleTextOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.value, e);
-  };
+    if (s.forceSetValueOnBlur == true)
+      setText(input.value)
+    else
+      vl.setValue(input.value, e);
+  }
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
-  if (s.autoFixString != false) {
+  if (s.autoFixString != false || s.forceSetValueOnBlur == true)
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
-      var fixed = ValueLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false);
-      if (fixed != input.value)
-        vl.setValue(fixed, e);
+
+      var value = input.value;
+
+      if (s.autoFixString != false)
+        value = ValueLineController.autoFixString(value, s.autoTrimString != null ? s.autoTrimString : true);
+
+      if (value != (s.ctx.value ?? ""))
+        vl.setValue(value, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
     };
-  }
 
   const handleOnFocus = (e: React.FocusEvent<any>) => {
     console.log("onFocus handler called");
@@ -593,7 +612,8 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   return (
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId =>  vl.withItemGroup(
-        <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
+          value={text ?? s.ctx.value ?? ""}
           id={inputId}
           minHeight={vl.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}
