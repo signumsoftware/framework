@@ -10,9 +10,7 @@ import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
 import type { AutoLineProps } from './Lines/AutoLine';
 
-//const AutoLine = React.lazy(() => import("./Lines/AutoLine"));
-
-const AutoLine = React.lazy(() => import("./Lines/AutoLine").then(module => ({ default: module.AutoLine })))
+const AutoLine = React.lazy(() => import("./Lines/AutoLine").then(module => ({ default: module.AutoLine })));
 
 interface AutoLineModalProps extends IModalProps<any> {
   options: AutoLineModalOptions;
