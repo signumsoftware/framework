@@ -12,6 +12,8 @@ class Upgrade_20231122_DotNet8 : CodeUpgradeBase
         uctx.ForeachCodeFile(@"*.csproj", file =>
         {
             file.Replace("<TargetFramework>net7.0</TargetFramework>", "<TargetFramework>net8.0</TargetFramework>");
+            file.UpdateNugetReference("Signum.TSGenerator", "8.0.0");
+            file.UpdateNugetReference("Signum.MSBuildTask", "8.0.0");
         });
 
         uctx.ForeachCodeFile(@"deploy*.ps1", file =>
@@ -22,6 +24,7 @@ class Upgrade_20231122_DotNet8 : CodeUpgradeBase
         uctx.ChangeCodeFile(@"Southwind\Dockerfile", file =>
         {
             file.Replace("bullseye-slim", "bookworm-slim");
+            file.ReplaceLine(a => a == "EXPOSE 80", "EXPOSE 8080");
             file.Replace("dotnet/aspnet:7.", "dotnet/aspnet:8.");
             file.Replace("dotnet/sdk:7.", "dotnet/sdk:8.");
             file.WarningLevel = WarningLevel.None;

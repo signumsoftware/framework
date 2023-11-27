@@ -89,7 +89,8 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
     hiddenColumns: [
       { token: AlertEntity.token(a => a.target) },
       { token: AlertEntity.token(a => a.linkTarget) },
-      { token: AlertEntity.token(a => a.entity.textArguments) }
+      { token: AlertEntity.token(a => a.entity.textArguments) },
+      { token: AlertEntity.token(a => a.creationDate) }
     ],
     formatters: {
       "Text": cellFormatter

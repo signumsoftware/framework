@@ -273,7 +273,7 @@ export default function renderPivotTable({ data, width, height, parameters, load
       placeholder: parameters["Placeholder" + columnName] as "no" | "empty" | "filled",
       subTotal: parameters["SubTotal" + columnName] as "no" | "yes",
       cssStyle: parameters["CSSStyle" + columnName],
-      cssStyleDiv: parameters["CSSStyleDiv " + columnName],
+      cssStyleDiv: parameters["CSSStyleDiv" + columnName],
       maxTextLength: parseInt(parameters["MaxTextLength" + columnName]) || undefined,
     });
   }
