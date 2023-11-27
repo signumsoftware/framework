@@ -44,7 +44,7 @@ export function ChangeLogViewer() {
 
 function ShowLogs(p: { logs: ChangeItem[] | null, date: DateTime | null }) {
   const [seeMore, setSeeMore] = React.useState(false);
-  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => l.date >= p.date.toFormat('yyyy.MM.d')) : p.logs;
+  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => l.date >= p.date!.toFormat('yyyy.MM.d')) : p.logs;
 
   return (
     <div>
