@@ -39,12 +39,12 @@ export function ChangeLogViewer() {
       message: <ShowLogs logs={logs} date={date} />,
       buttons: "ok"
     });
-  }}><FontAwesomeIcon icon="list-timeline" color={logs?.filter(l => !date ? true : DateTime.fromISO(l.date) >= date).length ? "orange" : undefined} /></a>);
+  }}><FontAwesomeIcon icon="list-timeline" color={logs?.filter(l => !date ? true : l.date >= date.toFormat('yyyy.MM.d')).length ? "orange" : undefined} /></a>);
 }
 
 function ShowLogs(p: { logs: ChangeItem[] | null, date: DateTime | null }) {
   const [seeMore, setSeeMore] = React.useState(false);
-  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => DateTime.fromISO(l.date) >= p.date!) : p.logs;
+  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => l.date >= p.date!.toFormat('yyyy.MM.d')) : p.logs;
 
   return (
     <div>
