@@ -297,9 +297,9 @@ public static class UserChartLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uc) => uc.DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uc) => uc.DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)

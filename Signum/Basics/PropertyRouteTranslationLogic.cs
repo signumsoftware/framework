@@ -33,19 +33,19 @@ public static class PropertyRouteTranslationLogic
 
                 foreach (var kvp in prs)
                 {
-                    AddRoute(kvp.Key, kvp.Value);
+                    RegisterRoute(kvp.Key, kvp.Value);
                 }
             };
         }
     }
 
 
-    public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
+    public static void RegisterRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
     {
-        AddRoute(PropertyRoute.Construct(propertyRoute), type);
+        RegisterRoute(PropertyRoute.Construct(propertyRoute), type);
     }
 
-    public static void AddRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
+    public static void RegisterRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
     {
         if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
             throw new InvalidOperationException("Routes of type {0} can not be traducibles".FormatWith(route.PropertyRouteType));
