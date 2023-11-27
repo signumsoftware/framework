@@ -9,6 +9,7 @@ import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
 import type { AutoLineProps } from './Lines/AutoLine';
+//import { AutoLine } from './Lines/AutoLine';
 
 const AutoLine = React.lazy(() => import("./Lines/AutoLine").then(module => ({ default: module.AutoLine })));
 
@@ -78,7 +79,11 @@ export default function AutoLineModal(p: AutoLineModalProps) {
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
         <AutoFocus>
-          {p.options.customComponent ? p.options.customComponent(alp) :<AutoLine {...alp} />}
+          {p.options.customComponent ? p.options.customComponent(alp) :
+            <React.Suspense fallback={JavascriptMessage.loading.niceToString()}>
+              <AutoLine {...alp} />
+            </React.Suspense>
+          }
         </AutoFocus>
         {p.options.validateValue && <p className="text-danger">
           {error}
