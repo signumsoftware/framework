@@ -145,6 +145,10 @@ export interface PropertyRouteEntity extends Entities.Entity {
   rootType: TypeEntity;
 }
 
+export module PropertyRouteMessage {
+  export const Translated = new MessageKey("PropertyRouteMessage", "Translated");
+}
+
 export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
   Type: "Query";

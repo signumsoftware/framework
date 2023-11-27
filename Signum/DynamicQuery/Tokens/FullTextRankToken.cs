@@ -11,7 +11,7 @@ internal class FullTextRankToken : QueryToken
 {
     public FullTextRankToken(QueryToken parent)
     {
-        if (!(parent is EntityPropertyToken ep && ep.HasFullTextIndex))
+        if (!(parent.GetPropertyRoute() is PropertyRoute pr && EntityPropertyToken.HasFullTextIndex(pr)))
             throw new InvalidOperationException("invalid parent for FullTextRankToken");
 
         Parent = parent;
