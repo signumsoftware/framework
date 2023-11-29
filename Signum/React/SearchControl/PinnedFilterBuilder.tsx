@@ -14,6 +14,7 @@ import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
+  highlightFilter?: FilterOptionParsed;
   onFiltersChanged?: (filters: FilterOptionParsed[], avoidSearch?: boolean) => void;
   pinnedFilterVisible?: (fo: FilterOptionParsed) => boolean 
   onSearch?: () => void;
@@ -62,7 +63,6 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
         }
         {
           Array.range(0, maxRows).map((r, i) => {
-            debugger;
             var rowPinned = allPinned.filter(a => (a.pinned?.row ?? 0) == r);
             var hiddenColumns = rowPinned.filter(a => getColSpan(a) > 1)
               .flatMap(a => Array.range(0, a.pinned!.colSpan! - 1).map(i => (a.pinned!.column ?? 0) + i + 1))
@@ -81,7 +81,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
                     || hiddenColumns.contains(c);
 
                   return (<div key={j} className={classes("col-sm-" + (bsBase * colSpan), error && "border-danger", p.showGrid && "border border-1 rounded-0")}>
-                      {cellPinned.map((f, i) => <div key={i}>{renderValue(f)}</div>)}
+                    {cellPinned.map((f, i) => <div key={i} className={f == p.highlightFilter ? "sf-filter-highlight" : undefined}>{renderValue(f)}</div>)}
                   </div>
                   );
                 })}
@@ -151,7 +151,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
   }
 
   function handleFiltersKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (p.onSearch && e.keyCode == 13) {
+    if (p.onSearch && e.key === 'Enter') {
       window.setTimeout(() => {
         p.onSearch!();
       }, 200);
@@ -160,7 +160,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
 }
 
-function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[] {
+export function getAllPinned(filterOptions: FilterOptionParsed[]): FilterOptionParsed[] {
   var direct = filterOptions.filter(a => a.pinned != null);
 
   var recursive = filterOptions

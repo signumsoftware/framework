@@ -143,14 +143,6 @@ public static class DictionaryExtensions
         return dictionary.ToDictionaryEx(p => mapKey(p.Key), p => mapValue(p.Key, p.Value));
     }
 
-    public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
-        where K : notnull
-    {
-        var result = new Dictionary<K, V>();
-        result.AddRange<K, V>(collection);
-        return result;
-    }
-
     public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
         where K : notnull
     {

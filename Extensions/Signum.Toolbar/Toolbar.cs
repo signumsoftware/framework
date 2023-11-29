@@ -142,7 +142,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             { ToolbarElementType.Divider,   false,          false,     false,          false  },
             { ToolbarElementType.Header,    null,           null,       null,           null  },
             { ToolbarElementType.Item,      null,           null,      null,           null },
-            { ToolbarElementType.ExtraIcon, null,           true,      true,           null },
+            { ToolbarElementType.ExtraIcon, null,           null,      null,           null },
         };
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -157,7 +157,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
             if(pi.Name == nameof(Url))
             { 
-                if (string.IsNullOrEmpty(Url) && Content == null && Type == ToolbarElementType.Item)
+                if (string.IsNullOrEmpty(Url) && Content == null && Type is ToolbarElementType.Item or ToolbarElementType.ExtraIcon)
                     return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
         }
@@ -173,7 +173,7 @@ public enum ShowCount
 {
     [Description("More than 0")]
     MoreThan0 = 1,
-    Always
+    Always,
 }
 
 public enum ToolbarElementType

@@ -32,29 +32,32 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
         if (context.Exception != null)
         {
             await LogException(context.Exception, context);
-            
+
             if (ExpectsJsonResult(context))
             {
                 var ci = TranslateExceptionMessage(context.Exception) ? SignumCultureSelectorFilter.GetCurrentCulture?.Invoke(precontext) : null;
 
+                var response = context.HttpContext.Response;
+                HttpStatusCode statusCode;
+                HttpError error;
                 using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                 {
-                    var statusCode = GetStatus(context.Exception.GetType());
+                    statusCode = GetStatus(context.Exception.GetType());
+                    error = CustomHttpErrorFactory(context.Exception);
+                } //No await inside
 
-                    var error = CustomHttpErrorFactory(context.Exception);
+                response.StatusCode = (int)statusCode;
+                response.ContentType = "application/json";
 
-                    var response = context.HttpContext.Response;
-                    response.StatusCode = (int)statusCode;
-                    response.ContentType = "application/json";
+                var userWithClaims = (UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key];
 
-                    var userWithClaims = (UserWithClaims?)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key];
+                string errorJson;
+                using (UserHolder.Current == null && userWithClaims != null ? UserHolder.UserSession(userWithClaims) : null)
+                    errorJson = JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions);
 
-                    using (UserHolder.Current == null && userWithClaims != null ? UserHolder.UserSession(userWithClaims) : null)
-                    {
-                        await response.WriteAsync(JsonSerializer.Serialize(error, SignumServer.JsonSerializerOptions));
-                    }
-                    context.ExceptionHandled = true;
-                }
+                await response.WriteAsync(errorJson);
+                context.ExceptionHandled = true;
+
             }
         }
     }
@@ -148,14 +151,17 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
 public class HttpError
 {
-    public HttpError(Exception e, bool includeErrorDetails = true)
+    public HttpError(Exception e, bool includeErrorDetails = true, bool includeId = true)
     {
         this.ExceptionMessage = e.Message;
         this.ExceptionType = e.GetType().FullName!;
         this.Model = e is ModelRequestedException mre ? mre.Model : null;
+
+        if (includeId)
+            this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
+
         if (includeErrorDetails)
         {
-            this.ExceptionId = e.GetExceptionEntity()?.Id.ToString();
             this.StackTrace = e.StackTrace;
             this.InnerException = e.InnerException == null ? null : new HttpError(e.InnerException);
         }

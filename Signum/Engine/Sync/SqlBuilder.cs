@@ -65,16 +65,14 @@ public class SqlBuilder
 
         var result = new SqlPreCommandSimple($"CREATE {(IsPostgres && t.Name.IsTemporal ? "TEMPORARY " : "")}TABLE {tableName ?? t.Name}(\r\n{columns}\r\n)" + systemVersioning + ";");
 
-        if (!(IsPostgres && t.SystemVersioned != null))
-            return result;
 
-        return new[]
-        {
-                result,
-                new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned.TableName}(LIKE {t.Name});"),
-                CreateVersioningTrigger(t)
-            }.Combine(Spacing.Simple)!;
+        return result;
 
+    }
+
+    public SqlPreCommandSimple CreateSystemTableVersionLike(ITable t)
+    {
+        return new SqlPreCommandSimple($"CREATE TABLE {t.SystemVersioned!.TableName}(LIKE {t.Name});");
     }
 
     public SqlPreCommand CreateVersioningTrigger(ITable t, bool replace = false)
@@ -91,7 +89,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
 
     public SqlPreCommandSimple DropVersionningTrigger(ObjectName tableName, string triggerName)
     {
-        return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName}");
+        return new SqlPreCommandSimple($"DROP TRIGGER {triggerName} ON {tableName};");
     }
 
 

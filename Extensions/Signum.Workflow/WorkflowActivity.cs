@@ -1,4 +1,3 @@
-using Signum.Dynamic.Views;
 using Signum.Eval;
 using System.ComponentModel;
 using System.Xml.Linq;
@@ -86,13 +85,8 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
         {
             if (ViewNameProps.Count > 0 && !ViewName.HasText())
                 return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
-
-            if (ViewName.HasText())
-            {
-                var dv = DynamicViewEntity.TryGetDynamicView(Lane.Pool.Workflow.MainEntityType.ToType(), ViewName);
-                if (dv != null)
-                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
-            }
+                
+            //Injected in WorkflowDynamic
         }
 
         if (pi.Name == nameof(DecisionOptions))
@@ -120,17 +114,7 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
         model.Name = this.Name;
         model.Type = this.Type;
         model.RequiresOpen = this.RequiresOpen;
-        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel
-        {
-            Name = we.Name,
-            MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
-            Type = we.Type,
-            RunRepeatedly = we.RunRepeatedly,
-            DecisionOptionName = we.DecisionOptionName,
-            Timer = we.Timer,
-            BpmnElementId = we.BpmnElementId
-        }).ToMList());
-
+        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => (WorkflowEventModel)we.GetModel()).ToMList());
         model.DecisionOptions.AssignMList(this.DecisionOptions);
         model.CustomNextButton = this.CustomNextButton;
         model.EstimatedDuration = this.EstimatedDuration;
@@ -174,16 +158,7 @@ public class ViewNamePropEmbedded : EmbeddedEntity
     [StringLengthValidator(Max = 100)]
     public string? Expression { get; set; }
 
-    internal static string? ValidateViewNameProps(DynamicViewEntity dv, MList<ViewNamePropEmbedded> viewNameProps)
-    {
-        var extra = viewNameProps.Where(a => !dv.Props.Any(p => p.Name == a.Name)).CommaAnd(a => a.Name);
-        var missing = dv.Props.Where(p => !p.Type.EndsWith("?") && !viewNameProps.Any(a => a.Expression.HasText() && p.Name == a.Name)).CommaAnd(a => a.Name);
-
-        return " and ".Combine(
-            extra.HasText() ? "The ViewProps " + extra + " are not declared in " + dv.ViewName : null,
-            missing.HasText() ? "The ViewProps " + missing + " are mandatory in " + dv.ViewName : null
-            ).DefaultToNull();
-    }
+   
 }
 
 public class ButtonOptionEmbedded : EmbeddedEntity
@@ -386,12 +361,7 @@ public class WorkflowActivityModel : ModelEntity
             if (ViewNameProps.Count > 0 && !ViewName.HasText())
                 return ValidationMessage._0ShouldBeNull.NiceToString(pi.NiceName());
 
-            if (ViewName.HasText() && Workflow != null)
-            {
-                var dv = DynamicViewEntity.TryGetDynamicView(Workflow.MainEntityType.ToType(), ViewName);
-                if (dv != null)
-                    return ViewNamePropEmbedded.ValidateViewNameProps(dv, ViewNameProps);
-            }
+            //Injected in WorkflowDynamic
         }
 
         if (pi.Name == nameof(DecisionOptions))

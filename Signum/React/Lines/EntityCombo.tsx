@@ -99,7 +99,7 @@ export const EntityCombo = React.memo(React.forwardRef(function EntityCombo(prop
       {!hasValue && c.renderFindButton(true)}
       {hasValue && c.renderViewButton(true, c.props.ctx.value!)}
       {hasValue && c.renderRemoveButton(true, c.props.ctx.value!)}
-      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
+      {c.props.extraButtons && c.props.extraButtons(c)}
     </>
   );
 

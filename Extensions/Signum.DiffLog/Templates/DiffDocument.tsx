@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { NumericTextBox, ValueLine, isNumber } from '@framework/Lines/ValueLine';
 import { useForceUpdate } from '@framework/Hooks'
 import { toNumberFormat } from '@framework/Reflection';
 import { Change, diffLines, diffWords } from 'diff';
 import { softCast } from '@framework/Globals';
+import { NumberBox, isNumberKey } from '@framework/Lines/NumberLine';
 
 
 export interface LineOrWordsChange {
@@ -21,8 +21,8 @@ export function DiffDocument(p: { first: string, second: string }) {
       <div>
         <label>
           <input type="checkbox" className="form-check-input" checked={margin != null} onChange={() => setMargin(margin == null ? DiffDocument.defaultMarginLines : null)} />
-          <span className="mx-2">Show only</span><NumericTextBox format={toNumberFormat("0")} value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
-            validateKey={isNumber} /> lines arround each change</label>
+          <span className="mx-2">Show only</span><NumberBox format={toNumberFormat("0")} value={margin == null ? 4 : margin} onChange={num => setMargin(num == null ? 0 : Math.max(num, 0))}
+            validateKey={isNumberKey} /> lines arround each change</label>
       </div>
       <div>
         {(p.first.length > DiffDocument.maxSize || p.second.length >  DiffDocument.maxSize) && !force ?

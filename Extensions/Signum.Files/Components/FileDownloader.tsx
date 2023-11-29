@@ -85,7 +85,7 @@ export function FileDownloader(p: FileDownloaderProps) {
         {getChildren() ??
           <>
           {p.showFileIcon && <FontAwesomeIcon className="me-1"
-            icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
+            icon={info?.icon ?? "file"}
             color={info?.color ?? "grey"} />}
             {toStr}
           </>}
@@ -97,7 +97,7 @@ export function FileDownloader(p: FileDownloaderProps) {
             e.preventDefault();
             handleOnClick(e, true);
           }}>
-          <FontAwesomeIcon className="ms-1 sf-pointer" icon={["fas", "download"]} title={EntityControlMessage.Download.niceToString()}/>
+          <FontAwesomeIcon className="ms-1 sf-pointer" icon={"download"} title={EntityControlMessage.Download.niceToString()}/>
         </a>
       }
     </div>

@@ -7,7 +7,7 @@ import * as Navigator from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
@@ -19,8 +19,12 @@ import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'
 import { getQueryKey, ISymbol, PropertyRoute, symbolNiceName } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[], showAlerts: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
+
+  registerChangeLogModule("Signum.Alerts", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(AlertEntity, e => import('./Templates/Alert')));
   Navigator.addSettings(new EntitySettings(AlertTypeSymbol, e => import('./Templates/AlertType')));
   Navigator.addSettings(new EntitySettings(SendNotificationEmailTaskEntity, e => import('./Templates/SendNotificationEmailTask')));
@@ -40,7 +44,7 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
     {
       key: getQueryKey(AlertEntity),
       text: () => AlertEntity.nicePluralName(),
-      isVisible: Navigator.isViewable(AlertEntity) && couldHaveAlerts(entityType, "QuickLink"),
+      isVisible: Finder.isFindable(AlertEntity, false) && couldHaveAlerts(entityType, "QuickLink"),
       icon: "clock-rotate-left",
       iconColor: "green",
       color: "success",
@@ -68,12 +72,12 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
       return undefined;
 
     var alert: Partial<AlertEntity> = {
-      createdBy: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.createdBy).toString())],
-      creationDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.creationDate).toString())],
-      alertDate: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.alertDate).toString())],
-      target: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.target).toString())],
-      linkTarget: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.linkTarget).toString())],
-      textArguments: ctx.row.columns[ctx.columns.indexOf(AlertEntity.token(a => a.entity.textArguments).toString())]
+      createdBy: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.createdBy)),
+      creationDate: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.creationDate)),
+      alertDate: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.alertDate)),
+      target: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.target)),
+      linkTarget: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.linkTarget)),
+      textArguments: ctx.searchControl?.getRowValue(ctx.row, AlertEntity.token(a => a.entity.textArguments))
     };
     return format(cell, alert);
   }, true);
@@ -85,7 +89,8 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
     hiddenColumns: [
       { token: AlertEntity.token(a => a.target) },
       { token: AlertEntity.token(a => a.linkTarget) },
-      { token: AlertEntity.token(a => a.entity.textArguments) }
+      { token: AlertEntity.token(a => a.entity.textArguments) },
+      { token: AlertEntity.token(a => a.creationDate) }
     ],
     formatters: {
       "Text": cellFormatter
@@ -106,12 +111,11 @@ function chooseDate(): Promise<DateTime | undefined> {
     var result = DateTime.local();
     if (val == "Custom") {
       var mi = AlertEntity.memberInfo(a => a.alertDate);
-      return ValueLineModal.show({
+      return AutoLineModal.show({
         title: AlertMessage.CustomDelay.niceToString(),
         type: mi.type,
         unit: mi.unit,
         label: mi.niceName,
-        initiallyFocused: true,
         initialValue: result.toISO()!
       });
     } else {

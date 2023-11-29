@@ -30,7 +30,7 @@ export module LoginAuthMessage {
   export const ThePasswordMustHaveAtLeast0Characters = new MessageKey("LoginAuthMessage", "ThePasswordMustHaveAtLeast0Characters");
   export const NotUserLogged = new MessageKey("LoginAuthMessage", "NotUserLogged");
   export const Username0IsNotValid = new MessageKey("LoginAuthMessage", "Username0IsNotValid");
-  export const User0IsDisabled = new MessageKey("LoginAuthMessage", "User0IsDisabled");
+  export const User0IsDeactivated = new MessageKey("LoginAuthMessage", "User0IsDeactivated");
   export const IncorrectPassword = new MessageKey("LoginAuthMessage", "IncorrectPassword");
   export const Login = new MessageKey("LoginAuthMessage", "Login");
   export const MyProfile = new MessageKey("LoginAuthMessage", "MyProfile");
@@ -117,7 +117,7 @@ export interface UserLiteModel extends Entities.ModelEntity {
   toStringValue: string | null;
   oID: string /*Guid*/ | null;
   sID: string | null;
-  customPhotoHash: string | null;
+  photoSuffix: string | null;
 }
 
 export module UserOperation {

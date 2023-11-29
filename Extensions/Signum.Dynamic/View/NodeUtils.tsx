@@ -509,7 +509,7 @@ export function asFunction(thisObject: React.Component<any, any>, expression: Ex
 export function evalWithScope(code: string, modules: any, props: any, locals: any) {
 
   // Lines
-  var ValueLine = Lines.ValueLine;
+  var AutoLine = Lines.AutoLine;
 
   return eval(code);
 }

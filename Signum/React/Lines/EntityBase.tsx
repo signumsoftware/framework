@@ -31,7 +31,7 @@ export interface EntityBaseProps extends LineBaseProps {
   findOptions?: FindOptions;
   findOptionsDictionary?: { [typeName: string]: FindOptions };
   extraButtonsBefore?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
-  extraButtonsAfter?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
+  extraButtons?: (ec: EntityBaseController<EntityBaseProps>) => React.ReactNode;
   liteToString?: (e: any /*T*/) => string;
 
   getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
@@ -74,7 +74,7 @@ export class EntityBaseController<P extends EntityBaseProps> extends LineBaseCon
   static propEquals(prevProps: EntityBaseProps, nextProps: EntityBaseProps): boolean {
     if (
       nextProps.getComponent || prevProps.getComponent ||
-      nextProps.extraButtonsAfter || prevProps.extraButtonsAfter ||
+      nextProps.extraButtons || prevProps.extraButtons ||
       nextProps.extraButtonsBefore || prevProps.extraButtonsBefore)
       return false;
 

@@ -4,7 +4,7 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { mlistItemContext, TypeContext } from '../TypeContext'
-import { ReadonlyBinding, TypeReference } from '../Reflection'
+import { MListElementBinding, ReadonlyBinding, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString, MListElement } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { useController } from './LineBase'
@@ -69,12 +69,12 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
   }
 
   handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
-    const list = this.props.ctx.value!;
-    const toRemove = list.filter(mle => is(this.getKeyEntity(mle.element), lite))
+    const ctx = this.props.ctx!;
+    const toRemove = this.getMListItemContext(ctx).filter(ctxe => is(this.getKeyEntity(ctxe.value), lite))
 
     if (toRemove.length) {
-      toRemove.forEach(mle => list.remove(mle));
-      this.setValue(list, event);
+      toRemove.forEach(ctxe => ctx.value.remove((ctxe.binding as MListElementBinding<any>).getMListElement()));
+      this.setValue(ctx.value, event);
     }
     else {
       (this.props.createElementFromLite ? this.props.createElementFromLite(lite) : this.convert(lite)).then(e => {
@@ -98,7 +98,17 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     if (!promise)
       return;
 
-    promise.then(e => {
+    promise.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+
+      if (e == undefined)
+        return undefined;
+
+      if (!this.props.viewOnCreate)
+        return Promise.resolve(e);
+
+      return this.doView(e);
+
+    }).then(e => {
       if (e) {
         this.refresh++;
         this.forceUpdate();

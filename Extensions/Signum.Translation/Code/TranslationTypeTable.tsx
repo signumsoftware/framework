@@ -4,6 +4,7 @@ import { API, AssemblyResult, LocalizedType, LocalizableType, LocalizedMember } 
 import { Dic } from '@framework/Globals'
 import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
+import { KeyNames } from '@framework/Components';
 
 export function TranslationTypeTable(p : { type: LocalizableType, result: AssemblyResult, currentCulture: string }){
 
@@ -88,7 +89,7 @@ export function TranslationMember({ type, member, loc, edit }: { type: Localizab
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+    if (e.key == KeyNames.space || e.key == "F2") { 
       e.preventDefault();
       setAvoidCombo(true);
     }
@@ -190,7 +191,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
 
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+    if (e.key == KeyNames.space || e.key == "F2") {
       e.preventDefault();
       setAvoidCombo(true);
     }

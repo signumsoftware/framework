@@ -11,7 +11,6 @@ import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
-import * as Types from '../Signum.Dynamic/Signum.Dynamic.Types'
 import * as Processes from '../Signum.Processes/Signum.Processes'
 
 interface IWorkflowTimerConditionEvaluator {}
@@ -129,7 +128,6 @@ export module CaseActivityOperation {
   export const ScriptExecute : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptExecute");
   export const ScriptScheduleRetry : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptScheduleRetry");
   export const ScriptFailureJump : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptFailureJump");
-  export const FixCaseDescriptions : Operations.ExecuteSymbol<Types.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
 export module CaseActivityProcessAlgorithm {
@@ -818,6 +816,7 @@ export const WorkflowTimerEmbedded = new Type<WorkflowTimerEmbedded>("WorkflowTi
 export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
   Type: "WorkflowTimerEmbedded";
   duration: TimeSpanEmbedded | null;
+  avoidExecuteConditionByTimer: boolean;
   condition: Entities.Lite<WorkflowTimerConditionEntity> | null;
 }
 

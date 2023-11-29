@@ -18,8 +18,6 @@ public class UniqueKeyException : ApplicationException
     public string? Values { get; private set; }
     public object?[]? HumanValues { get; private set; }
 
-    protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-
     static Regex[] regexes = new[]
     {
             new Regex(@"Cannot insert duplicate key row in object '(?<table>.*)' with unique index '(?<index>.*)'\. The duplicate key value is \((?<value>.*)\)"),
@@ -165,11 +163,9 @@ public class ForeignKeyException : ApplicationException
 
     public bool IsInsert { get; private set; }
 
-    static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
+    static Regex indexRegex = new Regex(@"['""»]FK_(?<parts>.+?)['""«]");
 
     static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
-
-    protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
     public ForeignKeyException(Exception inner) : base(null, inner)
     {
@@ -255,10 +251,6 @@ public class EntityNotFoundException : Exception
     public Type Type { get; private set; }
     public PrimaryKey[] Ids { get; private set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
-
     public EntityNotFoundException(Type type, params PrimaryKey[] ids)
         : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
     {
@@ -271,10 +263,6 @@ public class ConcurrencyException : Exception
 {
     public Type Type { get; private set; }
     public PrimaryKey[] Ids { get; private set; }
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public ConcurrencyException(Type type, params PrimaryKey[] ids)
         : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))

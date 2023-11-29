@@ -21,11 +21,14 @@ import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 let started = false;
 export function start(options: { routes: RouteObject[] }) {
   if (started)
     return;
+
+  registerChangeLogModule("Signum.UserAssets", () => import("./Changelog"));
 
   options.routes.push({ path: "/userAssets/import", element: <ImportComponent onImport={() => import("./ImportAssetsPage")} /> });
   OmniboxSpecialAction.registerSpecialAction({
@@ -73,7 +76,6 @@ export module Converter {
         pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
         dashboardBehaviour: fn.dashboardBehaviour,
         frozen: false,
-        expanded: false,
       });
     else
       return softCast<FilterConditionOptionParsed>({

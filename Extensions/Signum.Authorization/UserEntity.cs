@@ -143,7 +143,7 @@ public class UserLiteModel : ModelEntity
 
     public string? SID { get; set; }
 
-    public string? CustomPhotoHash { get; set; }
+    public string? PhotoSuffix { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => ToStringValue ?? UserName);

@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
-import { customTypeComponent } from '@framework/Lines/DynamicComponent'
+import { AutoLine } from '@framework/Lines/AutoLine'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
 import { FileLine } from './Components/FileLine'
 import CellFormatter = Finder.CellFormatter;
@@ -15,8 +15,11 @@ import { FetchInState } from '@framework/Lines/Retrieve';
 import { FileImage } from './Components/FileImage';
 import { ImageModal } from './Components/ImageModal';
 import { IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Files", () => import("./Changelog"));
 
   registerAutoFileLine(FileEntity);
   registerAutoFileLine(FileEmbedded);
@@ -32,17 +35,16 @@ export function start(options: { routes: RouteObject[] }) {
 
 
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
-  customTypeComponent[type.typeName] = ctx => {
-    const tr = ctx.propertyRoute!.typeReference();
+  AutoLine.registerComponent(type.typeName, (tr, pr) => { 
     if (tr.isCollection)
-      return <MultiFileLine ctx={ctx} />;
+      return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx} {...rest} />;
 
-    var m = ctx.propertyRoute!.member;
+    var m = pr?.member;
     if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
-      return <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} />;
+      return ({ ctx, ...rest }) => <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} {...rest} />;
 
-    return <FileLine ctx={ctx} />;
-  };
+    return ({ ctx, ...rest }) => <FileLine ctx={ctx} {...rest} />; 
+  });
 
   Finder.formatRules.push({
     name: type.typeName + "_Download",
@@ -118,7 +120,7 @@ export const extensionInfo: { [ext: string]: ExtensionInfo } = {
   ["info"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true  },
   ["log"]: { icon: "file-lines", color: "#566573", mimeType: "text/plain", browserView: true},
 
-  ["csv"]: { icon: ["fas", "file-csv"], color: "#566573", mimeType: "text/plain"  },
+  ["csv"]: { icon: "file-csv", color: "#566573", mimeType: "text/plain"  },
 
   ["avi"]: { icon: "file-video", color: "red", mimeType: "video/x-msvideo", browserView: true },
   ["mkv"]: { icon: "file-video", color: "red", mimeType: "video/x-matroska", browserView: true },

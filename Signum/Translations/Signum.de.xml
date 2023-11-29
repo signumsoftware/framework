@@ -17,6 +17,17 @@
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Heute" />
   </Type>
+  <Type Name="ChangeLogMessage">
+    <Member Name="SeeMore" Description="mehr sehen ..." />
+    <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
+  </Type>
+  <Type Name="ChangeLogViewLogEntity" Description="Änderungsprotokoll-Ansichtsprotokoll" PluralDescription="Protokollansichtsprotokolle ändern" Gender="n">
+    <Member Name="LastDate" Description="Letzter Termin" />
+    <Member Name="User" Description="Benutzer" />
+  </Type>
+  <Type Name="ChangeLogViewLogOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
   <Type Name="ClientErrorModel" Description="Client-Fehler">
     <Member Name="ErrorType" Description="Fehlertyp" />
     <Member Name="Message" Description="Nachricht" />
@@ -30,8 +41,8 @@
   <Type Name="CollectionAnyAllType">
     <Member Name="All" Description="Alle" />
     <Member Name="Any" Description="Irgend" />
-    <Member Name="AnyNo" Description="Irgend nicht" />
-    <Member Name="NoOne" Description="Keine" />
+    <Member Name="NotAll" Description="Nicht alle" />
+    <Member Name="NotAny" Description="Keine" />
   </Type>
   <Type Name="CollectionElementType">
     <Member Name="Element" Description="Element" />
@@ -43,6 +54,15 @@
     <Member Name="SeparatedByCommaDistinct" Description="Getrennt durch Komma (Distinct)" />
     <Member Name="SeparatedByNewLine" Description="Getrennt durch neue Zeile" />
     <Member Name="SeparatedByNewLineDistinct" Description="Getrennt durch neue Linie (Distinct)" />
+  </Type>
+  <Type Name="ColumnFieldMessage">
+    <Member Name="ColumnsHelp" Description="Hilfe zu Spalten" />
+    <Member Name="NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination" Description="Hinweis: Die Aggregation umfasst Zeilen, die aufgrund der Paginierung möglicherweise nicht sichtbar sind." />
+    <Member Name="TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression" Description="Der Text der Spaltenüberschrift wird in der Regel automatisch in Abhängigkeit vom Feldausdruck gesetzt, kann aber durch manuelles Setzen von {0} angepasst werden." />
+    <Member Name="WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01" Description="Wenn eine Tabelle viele wiederholte Werte in einer Spalte enthält, können Sie diese vertikal ({0}) kombinieren, entweder wenn der Wert identisch ist oder wenn der Wert gleich ist und zum selben {1} gehört." />
+    <Member Name="YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices" Description="Sie können der Spaltenüberschrift einen numerischen Wert hinzufügen (wie die Gesamtsumme der Rechnungen), indem Sie einen Feldausdruck verwenden, der auf ein Aggregat endet (wie {0},...). Hinweis: Die Aggregation umfasst auch Zeilen, die aufgrund der Paginierung möglicherweise nicht sichtbar sind!" />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity" Description="Sie können einen Feldausdruck auswählen, der auf eine beliebige Spalte der Abfrage {0}, ein beliebiges Feld von {1} oder eine verwandte Entität verweist." />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity" Description="Sie können einen Feldausdruck auswählen, der auf ein beliebiges Feld der Entität {0} oder eine verwandte Entität verweist." />
   </Type>
   <Type Name="ColumnOptionsMode" Description="Spaltenoptionenmodus">
     <Member Name="Add" Description="Hinzufügen" />
@@ -203,6 +223,41 @@
     <Member Name="Backend_DotNet" Description="Backend DotNet" />
     <Member Name="Frontend_React" Description="Frontend React" />
   </Type>
+  <Type Name="FieldExpressionMessage">
+    <Member Name="_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate" Description="{0} und {1}, können Sie Teile des Datums extrahieren, indem Sie den Ausdruck mit {2} (Rückgabe einer Zahl) oder {3} (Rückgabe eines Datums) fortsetzen" />
+    <Member Name="Aggregates" Description="Aggregate" />
+    <Member Name="AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens" Description="Ermöglicht das Hinzufügen von Filtern, die Bedingungen für die Elemente der Sammlung (ohne Multiplikation der Anzahl der Zeilen) verwenden ({0} {1}). Um verschiedene Bedingungen zu kombinieren, verwenden Sie {2} / {3} Gruppen mit einem Präfix (siehe unten)." />
+    <Member Name="AStringLikeHelloANumberLike" Description="Eine Zeichenfolge (z. B. &quot;Hallo&quot;), eine Zahl (z. B. 3.14) oder ein boolescher Wert (true). Manchmal können Sie den Ausdruck fortsetzen, z. B. die {0} einer Zeichenfolge oder die Berechnung der {1} oder {2} einer Zahl (für Histogramme)." />
+    <Member Name="CanOnlyBeUsedAfterAnotherField" Description="Kann nur nach einem anderen Feld verwendet werden." />
+    <Member Name="CollectionOfEntitiesOrRelationships" Description="Sammlung von Entitäten oder Beziehungen." />
+    <Member Name="CollectionOperators" Description="Betreiber von Sammlungen" />
+    <Member Name="Collections" Description="Collection" />
+    <Member Name="CountDistinct" Description="Unterschiedlich zählen" />
+    <Member Name="CountNotNull" Description="Anzahl nicht NULL" />
+    <Member Name="Dates" Description="Daten" />
+    <Member Name="EntityRelationships" Description="Entitätsbeziehungen" />
+    <Member Name="EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields" Description="Entitätsbeziehungen ermöglichen es Ihnen, zu anderen Tabellen zu navigieren, um Felder abzurufen" />
+    <Member Name="FinallyRememberThatYouCan01FullFieldExpression" Description="Denken Sie schließlich daran, dass Sie {0} / {1} vollständige Feldausdrücke auf andere Filter oder Spalten übertragen können, indem Sie die Dropdown-Liste öffnen und {2} / {3}." />
+    <Member Name="InSql" Description="in SQL" />
+    <Member Name="LearnMoreAboutFieldExpressions" Description="Weitere Informationen zu Feldausdrücken" />
+    <Member Name="MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012" Description="Multipliziert die Anzahl der Zeilen mit allen Elementen der Sammlung. ({0} / {1} {2}). Alle Feldausdrücke, die dasselbe {3} verwenden, verwenden dasselbe {4}, um dies zu vermeiden, verwenden Sie {5} / {6}." />
+    <Member Name="SimpleValues" Description="Einfache Werte" />
+    <Member Name="WhenGroupingAllowsToCollapseManyValuesInOneValue" Description="Wenn viele Werte in einem Wert zusammengefasst werden können" />
+    <Member Name="YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems" Description="Sie können in Datenbankbeziehungen navigieren, indem Sie den Ausdruck mit weiteren Elementen fortsetzen." />
+  </Type>
+  <Type Name="FilterFieldMessage">
+    <Member Name="AFilterConsistsOfA0AComparison1AndAConstant2" Description="Ein Filter besteht aus einem {0}, einem Vergleich {1} und einer Konstante {2}." />
+    <Member Name="AndOrGroups" Description="UND/ODER-Gruppen" />
+    <Member Name="Field" Description="Feld" />
+    <Member Name="FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1" Description="Feld kann jede Spalte der Abfrage {0} oder jedes Feld von {1} sein." />
+    <Member Name="FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity" Description="Feld kann ein beliebiges Feld der {0} oder einer verwandten Entität sein." />
+    <Member Name="FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012" Description="Filtergruppen können auch verwendet werden, um Filter für {0} einer Sammlung zu kombinieren, wenn Operatoren wie {1} oder {2} im Präfixfeld verwendet werden." />
+    <Member Name="FiltersHelp" Description="Hilfe zu Filtern" />
+    <Member Name="Operator" Description="Operator" />
+    <Member Name="TheSameElement" Description="das gleiche Element" />
+    <Member Name="Using0YouCanGroupAFewFiltersTogether" Description="Mit {0} können Sie einige Filter gruppieren, so dass nur eine Bedingung erfüllt sein muss. Innerhalb eines {1} können Sie eine verschachtelte {2} erstellen und so weiter. " />
+    <Member Name="Value" Description="Wert" />
+  </Type>
   <Type Name="FilterGroupOperation" Description="Filtergruppeoperation">
     <Member Name="And" Description="Und" />
     <Member Name="Or" Description="Oder" />
@@ -229,6 +284,7 @@
   </Type>
   <Type Name="FrameMessage">
     <Member Name="Copied" Description="Kopiert" />
+    <Member Name="CopyToClipboard" Description="In Zwischenablage kopieren" />
     <Member Name="Fullscreen" Description="Vollbild" />
     <Member Name="Main" Description="Haupt" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
@@ -331,6 +387,7 @@
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />
+    <Member Name="Operation" Description="Operation" />
     <Member Name="Operation01IsNotAuthorized" Description="Operation {0} ({1}) ist nicht autorisiert." />
     <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Bitte bestätigen Sie, dass Sie die obigen Änderungen anwenden und {0} über {1} {2} ausführen möchten" />
     <Member Name="PleaseConfirmYouWouldLikeTo01" Description="Bitte bestätigen Sie, dass Sie {1} {0} möchten" />
@@ -380,6 +437,39 @@
   <Type Name="QueryEntity" Description="Abfrage">
     <Member Name="Key" Description="Schlüssel" />
   </Type>
+  <Type Name="QueryTokenDateMessage">
+    <Member Name="Date" Description="Datum" />
+    <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
+    <Member Name="Day" Description="Tag" />
+    <Member Name="DayOfWeek" Description="Tag der Woche" />
+    <Member Name="DayOfYear" Description="Tag des Jahres" />
+    <Member Name="Days" Description="Tage" />
+    <Member Name="Every0Hours" Description="Alle {0} Stunden" />
+    <Member Name="Every0Milliseconds" Description="Alle {0} Millisekunden" />
+    <Member Name="Every0Minutes" Description="Alle {0} Minuten" />
+    <Member Name="Every0Seconds" Description="Alle {0} Sekunden" />
+    <Member Name="Hour" Description="Stunde" />
+    <Member Name="HourStart" Description="Start Stunde" />
+    <Member Name="Millisecond" Description="Millisekunde" />
+    <Member Name="Minute" Description="Minute" />
+    <Member Name="MinuteStart" Description="Start Minute" />
+    <Member Name="Month" Description="Monat" />
+    <Member Name="MonthStart" Description="Monatsbeginn " />
+    <Member Name="Quarter" Description="Quartal" />
+    <Member Name="QuarterStart" Description="Quartalsstart" />
+    <Member Name="Second" Description="Sekunde" />
+    <Member Name="SecondStart" Description="Start Sekunde" />
+    <Member Name="TimeOfDay" Description="Tageszeit" />
+    <Member Name="TotalDays" Description="Tage insgesamt" />
+    <Member Name="TotalHours" Description="Stunden insgesamt" />
+    <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
+    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
+    <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
+    <Member Name="UtcDateTime" Description="UTC Datum und Uhrzeit" />
+    <Member Name="WeekNumber" Description="Kalenderwoche" />
+    <Member Name="WeekStart" Description="Wochenstart" />
+    <Member Name="Year" Description="Jahr" />
+  </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="({0} als {1})" />
     <Member Name="_0HasValue" Description="{0} hat einen Wert" />
@@ -397,52 +487,28 @@
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
-    <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
-    <Member Name="Day" Description="Tag" />
-    <Member Name="DayOfWeek" Description="Tag der Woche" />
-    <Member Name="DayOfYear" Description="Tag des Jahres" />
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
     <Member Name="Distinct" Description="Unterschiedlich" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
     <Member Name="HasValue" Description="Hat einen Wert" />
-    <Member Name="Hour" Description="Stunde" />
-    <Member Name="HourStart" Description="Start Stunde" />
     <Member Name="Length" Description="Länge" />
     <Member Name="ListOf0" Description="Liste von {0}" />
     <Member Name="MatchRank" Description="Match-Rang" />
     <Member Name="MatchRankFor0" Description="Match-Rang für {0}" />
     <Member Name="MatchSnippet" Description="Match-Snippet" />
-    <Member Name="Millisecond" Description="Millisekunde" />
-    <Member Name="Minute" Description="Minute" />
-    <Member Name="MinuteStart" Description="Start Minute" />
     <Member Name="Modulo0" Description="Modulo {0}" />
-    <Member Name="Month" Description="Monat" />
-    <Member Name="MonthStart" Description="Monatsbeginn " />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
-    <Member Name="Quarter" Description="Quartal" />
-    <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="RowId" Description="RowID" />
     <Member Name="RowOrder" Description="RowOrder" />
-    <Member Name="Second" Description="Sekunde" />
-    <Member Name="SecondStart" Description="Start Sekunde" />
     <Member Name="SnippetOf0" Description="Snippet für {0}" />
     <Member Name="Step0" Description="Schritt {0}" />
     <Member Name="Text" Description="Text" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
-    <Member Name="TotalDays" Description="Tage insgesamt" />
-    <Member Name="TotalHours" Description="Stunden insgesamt" />
-    <Member Name="TotalMilliseconds" Description="Milisekunden insgesamt" />
-    <Member Name="TotalMinutes" Description="Minuten insgesamt" />
-    <Member Name="TotalSeconds" Description="Sekunden insgesamt" />
-    <Member Name="UtcDateTime" Description="UTC Datum und Uhrzeit" />
-    <Member Name="WeekNumber" Description="Kalenderwoche" />
-    <Member Name="WeekStart" Description="Wochenstart" />
-    <Member Name="Year" Description="Jahr" />
   </Type>
   <Type Name="QuickLinkMessage">
     <Member Name="No0Found" Description="Keine(n) {0} gefunden" />
@@ -507,7 +573,7 @@
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Möchten Sie [m:den neuen|f:die neue|n:das neue] {0} ({1}) übernehmen?" />
     <Member Name="EditPinnedFilters" Description="Angeheftete Filter bearbeiten" />
-    <Member Name="Explore" Description="Erforsche" />
+    <Member Name="Equal0" Description="Gleich {0}" />
     <Member Name="Field" Description="Feld" />
     <Member Name="FilterDesigner" Description="Filter-Designer" />
     <Member Name="Filters" Description="Filter" />
@@ -534,8 +600,8 @@
     <Member Name="NoResultsFoundInPage01" Description="Keine Ergebnisse auf Seite {0} gefunden, {1} " />
     <Member Name="NoResultsInThisPage" Description="Keine Ergebnisse auf dieser Seite" />
     <Member Name="Of" Description="von" />
-    <Member Name="Operation" Description="Operation" />
     <Member Name="Operations" Description="Operationen" />
+    <Member Name="Operator" Description="Operator" />
     <Member Name="Options" Description="Optionen" />
     <Member Name="OrGroup" Description="OR-Gruppe" />
     <Member Name="PaginationAll_0Elements" Description="{0} Elemente" />
@@ -573,6 +639,12 @@
     <Member Name="ViewSelected" Description="Ausgewählte Ansicht" />
     <Member Name="WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound" Description="Wenn gedrückt wird, wird der Filterwert geteilt und alle Wörter müssen gefunden werden" />
     <Member Name="WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull" Description="Wenn gedrückt wird, wird der Filter nicht wirksam, wenn der Wert Null ist." />
+  </Type>
+  <Type Name="SearchVisualTip">
+    <Member Name="ColumnHelp" Description="Spalten-Hilfe" />
+    <Member Name="FilterHelp" Description="Filter-Hilfe" />
+    <Member Name="GroupHelp" Description="Gruppen-Hilfe" />
+    <Member Name="SearchHelp" Description="Suchhilfe" />
   </Type>
   <Type Name="SelectorMessage">
     <Member Name="_0Selector" Description="{0}-Selektor" />
@@ -720,6 +792,15 @@
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Die Zeilen werden nach {0} gruppiert" />
     <Member Name="Type0NotAllowed" Description="Der Typ {0} ist nicht zulässig" />
   </Type>
+  <Type Name="VisualTipConsumedEntity" Description="Visual-Tipp verbraucht" PluralDescription="Visueller Tipp verbraucht" Gender="m">
+    <Member Name="ConsumedOn" Description="Verbraucht am" />
+    <Member Name="User" Description="Benutzer" />
+    <Member Name="VisualTip" Description="Visueller Tipp" />
+  </Type>
+  <Type Name="VisualTipConsumedOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
+  <Type Name="VisualTipSymbol" Description="Visual-Tipp" PluralDescription="Visuelle Tipps" Gender="m" />
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>

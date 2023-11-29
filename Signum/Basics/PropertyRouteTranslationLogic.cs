@@ -1,4 +1,5 @@
 using Signum.Engine.Maps;
+using Signum.Utilities.Reflection;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -12,9 +13,9 @@ namespace Signum.Basics;
 
 public static class PropertyRouteTranslationLogic
 {
-
     public static Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>> TranslateableRoutes = new Dictionary<Type, Dictionary<PropertyRoute, TranslateableRouteType>>();
 
+    public static bool IsActivated { get; set; }
 
     public static void Start(SchemaBuilder sb)
     {
@@ -33,19 +34,19 @@ public static class PropertyRouteTranslationLogic
 
                 foreach (var kvp in prs)
                 {
-                    AddRoute(kvp.Key, kvp.Value);
+                    RegisterRoute(kvp.Key, kvp.Value);
                 }
             };
         }
     }
 
 
-    public static void AddRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
+    public static void RegisterRoute<T, S>(Expression<Func<T, S>> propertyRoute, TranslateableRouteType type = TranslateableRouteType.Text) where T : Entity
     {
-        AddRoute(PropertyRoute.Construct(propertyRoute), type);
+        RegisterRoute(PropertyRoute.Construct(propertyRoute), type);
     }
 
-    public static void AddRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
+    public static void RegisterRoute(PropertyRoute route, TranslateableRouteType type = TranslateableRouteType.Text)
     {
         if (route.PropertyRouteType != PropertyRouteType.FieldOrProperty)
             throw new InvalidOperationException("Routes of type {0} can not be traducibles".FormatWith(route.PropertyRouteType));
@@ -54,6 +55,11 @@ public static class PropertyRouteTranslationLogic
             throw new InvalidOperationException("Only string routes can be traducibles");
 
         TranslateableRoutes.GetOrCreate(route.RootType).Add(route, type);
+    }
+
+    public static bool IsTranslateable(PropertyRoute route)
+    {
+        return IsActivated && TranslateableRoutes.TryGetC(route.RootType)?.ContainsKey(route) == true;
     }
 
     public static TranslateableRouteType? RouteType(PropertyRoute route)
@@ -120,6 +126,7 @@ public static class PropertyRouteTranslationLogic
         return TranslatedField(element.Lite, route, element.RowId, fallback);
     }
 
+
     [return: NotNullIfNotNull("fallbackString")]
     public static string? TranslatedField<T>(this Lite<T> lite, Expression<Func<T, string?>> property, string? fallbackString) where T : Entity
     {
@@ -136,17 +143,20 @@ public static class PropertyRouteTranslationLogic
     }
 
 
-    public static TranslatedFieldDelegate OnTranslateField = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
+    public static Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?> TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
+    public static Expression<Func<Lite<Entity>, PropertyRoute, PrimaryKey?, string?, string?>> TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) => fallbackString;
+
+
+    public static MethodInfo miTranslatedField = ReflectionTools.GetMethodInfo(() => TranslatedField((Lite<Entity>)null!, (PropertyRoute)null!, (PrimaryKey?)null, (string?)null));
 
     [return: NotNullIfNotNull("fallbackString")]
+    [ExpressionField("TranslatedFieldExpression")]
     public static string? TranslatedField(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString)
     {
-        return OnTranslateField(lite, route, rowId, fallbackString);
-
-
+        return TranslatedFieldFunc(lite, route, rowId, fallbackString);
     }
 
-    public delegate string? TranslatedFieldDelegate(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString);
+
 }
 
 public struct TranslatableElement<T>

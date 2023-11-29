@@ -40,7 +40,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
   var ti = tryGetTypeInfos(p.type!).onlyOrNull();
 
   var showAsCheckBox = p.showAsCheckBox ??
-    ((p.type!.isEmbedded || ti != null && ti.entityKind == "Part") && p.extraButtonsAfter == undefined && p.extraButtonsBefore == undefined);
+    ((p.type!.isEmbedded || ti != null && ti.entityKind == "Part") && p.extraButtons == undefined && p.extraButtonsBefore == undefined);
 
 
   function renderType() {
@@ -64,7 +64,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
           <label className="lead">
             {renderCheckBox()}
             {p.label} {renderType()}
-            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+            {p.extraButtons && p.extraButtons(c)}
           </label>
           :
           <div className="lead">
@@ -88,7 +88,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
             <label>
               {renderCheckBox()}
               {p.label} {renderType()}
-              {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+              {p.extraButtons && p.extraButtons(c)}
             </label>
             :
             <div>
@@ -131,7 +131,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
         {!hasValue && c.renderFindButton(false)}
         {hasValue && c.renderViewButton(false, p.ctx.value!)}
         {hasValue && c.renderRemoveButton(false, p.ctx.value!)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
     return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;

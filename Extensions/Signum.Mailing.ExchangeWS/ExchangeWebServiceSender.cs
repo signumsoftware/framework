@@ -1,6 +1,7 @@
 using Microsoft.Exchange.WebServices.Data;
 using Signum.Files;
 using Signum.Mailing;
+using Signum.Utilities.Synchronization;
 
 namespace Signum.Mailing.ExchangeWS;
 
@@ -38,7 +39,7 @@ public class ExchangeWebServiceSender : EmailSenderBase
         message.BccRecipients.AddRange(email.Recipients.Where(r => r.Kind == EmailRecipientKind.Bcc).Select(r => r.ToEmailAddress()).ToList());
         message.Subject = email.Subject;
         message.Body = new MessageBody(email.IsBodyHtml ? BodyType.HTML : BodyType.Text, email.Body.Text);
-        message.Send();
+        message.Send().WaitSafe();
     }
 
     protected virtual bool RedirectionUrlValidationCallback(string redirectionUrl)

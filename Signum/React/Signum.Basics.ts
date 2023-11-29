@@ -19,6 +19,22 @@ export type BootstrapStyle =
   "Warning" |
   "Danger";
 
+export module ChangeLogMessage {
+  export const ThereIsNotAnyNewChangesFrom0 = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
+  export const SeeMore = new MessageKey("ChangeLogMessage", "SeeMore");
+}
+
+export const ChangeLogViewLogEntity = new Type<ChangeLogViewLogEntity>("ChangeLogViewLog");
+export interface ChangeLogViewLogEntity extends Entities.Entity {
+  Type: "ChangeLogViewLog";
+  user: Entities.Lite<Security.IUserEntity>;
+  lastDate: string /*DateTime*/;
+}
+
+export module ChangeLogViewLogOperation {
+  export const Delete : Operations.DeleteSymbol<ChangeLogViewLogEntity> = registerSymbol("Operation", "ChangeLogViewLogOperation.Delete");
+}
+
 export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
   Type: "ClientErrorModel";
@@ -129,10 +145,21 @@ export interface PropertyRouteEntity extends Entities.Entity {
   rootType: TypeEntity;
 }
 
+export module PropertyRouteMessage {
+  export const Translated = new MessageKey("PropertyRouteMessage", "Translated");
+}
+
 export const QueryEntity = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
   Type: "Query";
   key: string;
+}
+
+export module SearchVisualTip {
+  export const SearchHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.SearchHelp");
+  export const GroupHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.GroupHelp");
+  export const FilterHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.FilterHelp");
+  export const ColumnHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.ColumnHelp");
 }
 
 export interface SemiSymbol extends Entities.Entity {
@@ -166,5 +193,22 @@ export interface TypeEntity extends Entities.Entity {
   cleanName: string;
   namespace: string;
   className: string;
+}
+
+export const VisualTipConsumedEntity = new Type<VisualTipConsumedEntity>("VisualTipConsumed");
+export interface VisualTipConsumedEntity extends Entities.Entity {
+  Type: "VisualTipConsumed";
+  visualTip: VisualTipSymbol;
+  user: Entities.Lite<Security.IUserEntity>;
+  consumedOn: string /*DateTime*/;
+}
+
+export module VisualTipConsumedOperation {
+  export const Delete : Operations.DeleteSymbol<VisualTipConsumedEntity> = registerSymbol("Operation", "VisualTipConsumedOperation.Delete");
+}
+
+export const VisualTipSymbol = new Type<VisualTipSymbol>("VisualTip");
+export interface VisualTipSymbol extends Symbol {
+  Type: "VisualTip";
 }
 

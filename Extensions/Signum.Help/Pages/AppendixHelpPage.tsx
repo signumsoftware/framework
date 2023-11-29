@@ -15,6 +15,7 @@ import { notifySuccess } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
+import { Shortcut } from './TypeHelpPage'
 
 
 export default function AppendixHelpHelp() {
@@ -33,10 +34,18 @@ export default function AppendixHelpHelp() {
       <h1 className="display-6"><Link to={Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
-        <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+        <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={() => { ctx.value.isNew && (ctx.value.uniqueName = ctx.value.title.replace(/[^a-zA-Z0-9]/g, "")); forceUpdate(); }} defaultEditable={appendix.isNew} />
         <small className="ms-5 text-muted display-7">({ctx.value.culture.englishName})</small>
       </h1>
-      <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+
+      <div className={classes("mb-2 shortcut-container")}>
+        <div>
+          <strong className="me-2">{ctx.niceName(a => a.uniqueName)}</strong>
+          <EditableTextComponent ctx={ctx.subCtx(a => a.uniqueName)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
+        </div>
+        <Shortcut text={`[a:${ctx.value.uniqueName}]`} />
+      </div>
+
       <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
         <SaveButton ctx={ctx} onSuccess={() => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(ctx.value.uniqueName)) : reloadAppendix()} />

@@ -7,10 +7,11 @@ import { FindOptions } from '@framework/Search'
 import * as Finder from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import * as Operations from '@framework/Operations'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'
 import { useAPI } from '@framework/Hooks'
+import { TextAreaLine } from '../../../Signum/React/Lines'
 
 export interface ActivityWithRemarks {
   workflowActivity: Lite<WorkflowActivityEntity>;
@@ -64,14 +65,13 @@ export default function ActivityWithRemarksComponent(p: ActivityWithRemarksProps
   function handleRemarksClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: CaseNotificationEntity.nicePropertyName(a => a.remarks),
       message: CaseActivityMessage.PersonalRemarksForThisNotification.niceToString(),
       label: undefined,
       initialValue: remarks,
-      initiallyFocused: true
     }).then(remarks => {
 
       if (remarks === undefined)

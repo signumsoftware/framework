@@ -100,7 +100,13 @@ public class SignumTimesTrackerFilter : SignumDisposableResourceFilter
     public override IDisposable? GetResource(ResourceExecutingContext context)
     {
         string action = ProfilerActionSplitterAttribute.GetActionDescription(context);
-        return TimeTracker.Start(action);
+
+        return TimeTracker.Start(action, context.HttpContext.Request.GetEncodedUrl(), () =>
+        {
+            var bla = (UserWithClaims)context.HttpContext.Items[SignumAuthenticationFilter.Signum_User_Holder_Key]!;
+
+            return bla?.User!;
+        });
     }
 }
 
@@ -117,6 +123,14 @@ public class SignumCurrentContextFilter : SignumDisposableResourceFilter
     static AsyncThreadVariable<FilterContext?> CurrentContextVariable = Statics.ThreadVariable<FilterContext?>("currentContext");
 
     public static FilterContext? CurrentContext => CurrentContextVariable.Value;
+
+    public static T GetOrCreateItem<T>(string key, Func<T> generator)
+    {
+        if (CurrentContext == null)
+            return generator();
+
+        return (T)CurrentContext.HttpContext.Items.GetOrCreate(key, () => generator())!;
+    }
 
     public static UrlHelper? Url
     {

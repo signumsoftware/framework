@@ -2,6 +2,15 @@ import * as React from 'react';
 import { classes } from '../Globals';
 
 export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7";   
+export function Title(p: { children: React.ReactNode, type: HeaderType }) {
+
+  var ElementType = p.type.contains("display-") ? ("h" + p.type.after("display-")) as "h1" :
+    p.type as "h1";
+
+  const className = p.type.contains("display-") ? p.type : undefined;
+
+  return <ElementType className={classes("mt-3", className)}>{p.children}</ElementType>;
+}
 
 export function GroupHeader(p: {
   label: React.ReactNode;
@@ -15,17 +24,9 @@ export function GroupHeader(p: {
 
   if (p.avoidFieldSet) {
 
-    var HeaderType = typeof p.avoidFieldSet == "boolean" ? undefined :
-      p.avoidFieldSet.contains("display-") ? ("h" + p.avoidFieldSet.after("display-")) as "h1" :
-        p.avoidFieldSet as "h1";
-
-
-    const className = typeof p.avoidFieldSet == "boolean" ? undefined :
-      p.avoidFieldSet.contains("display-") ? p.avoidFieldSet : undefined;
-
     return (
       <div className={p.className} {...p.htmlAttributes}>
-        {HeaderType && <HeaderType className={className}>{p.label}{p.labelIcon} {p.buttons}</HeaderType>}
+        {p.avoidFieldSet != true && <Title type={p.avoidFieldSet}>{p.label}{p.labelIcon} {p.buttons}</Title>}
         {p.children}
       </div>
     );

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { TypeContext, ValueLine } from '@framework/Lines';
+import { TypeContext, AutoLine } from '@framework/Lines';
 import { ImagePartEntity } from '../Signum.Dashboard';
 
 export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }) {
@@ -7,9 +7,9 @@ export default function ImagePart(p: { ctx: TypeContext<ImagePartEntity> }) {
 
   return (
     <div className="form-inline">
-      <ValueLine ctx={ctx.subCtx(c => c.imageSrcContent)} />
-      <ValueLine ctx={ctx.subCtx(c => c.clickActionURL)} />
-      <ValueLine ctx={ctx.subCtx(c => c.altText)} />
+      <AutoLine ctx={ctx.subCtx(c => c.imageSrcContent)} />
+      <AutoLine ctx={ctx.subCtx(c => c.clickActionURL)} />
+      <AutoLine ctx={ctx.subCtx(c => c.altText)} />
     </div>
   );
 }

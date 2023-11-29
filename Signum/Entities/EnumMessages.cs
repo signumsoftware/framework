@@ -70,6 +70,8 @@ public enum OperationMessage
 
     [Description("Are you sure you want to cancel the operation?")]
     AreYouSureYouWantToCancelTheOperation,
+
+    Operation
 }
 
 public enum SynchronizerMessage
@@ -171,6 +173,7 @@ public enum SearchMessage
     [Description("Add filter")]
     AddFilter,
 
+
     [Description("Add OR group")]
     AddOrGroup,
     [Description("Add AND group")]
@@ -203,7 +206,7 @@ public enum SearchMessage
     NoFiltersSpecified,
     [Description("of")]
     Of,
-    Operation,
+    Operator,
     [Description("Query {0} is not allowed")]
     Query0IsNotAllowed,
     [Description("Query {0} is not allowed")]
@@ -235,7 +238,6 @@ public enum SearchMessage
     NoResultsFoundInPage01,
     [Description("go back to page one")]
     GoBackToPageOne,
-    Explore,
     PinnedFilter,
     Label,
     Column,
@@ -300,6 +302,9 @@ public enum SearchMessage
     [Description("More than one {0} selected")]
     MoreThanOne0Selected,
     CombineRowsWith,
+
+    [Description("Equal {0}")]
+    Equal0,
 
     SwitchViewMode,
 

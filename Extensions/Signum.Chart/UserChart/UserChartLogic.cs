@@ -273,13 +273,7 @@ public static class UserChartLogic
     {
         sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(UserEntity));
 
-        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
-
-        TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
-             ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
-
-        TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
-            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+        RegisterTypeCondition(typeCondition, uq => uq.Owner.Is(UserEntity.Current));
     }
 
 
@@ -287,8 +281,12 @@ public static class UserChartLogic
     {
         sb.Schema.Settings.AssertImplementedBy((UserChartEntity uq) => uq.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition,
-            uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+        RegisterTypeCondition(typeCondition, uq => AuthLogic.CurrentRoles().Contains(uq.Owner) || uq.Owner == null);
+    }
+
+    public static void RegisterTypeCondition(TypeConditionSymbol typeCondition, Expression<Func<UserChartEntity, bool>> conditionExpression)
+    {
+        TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
 
         TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
              ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
@@ -299,9 +297,9 @@ public static class UserChartLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uc) => uc.DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uc) => uc.DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Columns[0].DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserChartEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
@@ -368,7 +366,7 @@ public static class UserChartLogic
                                     continue;
 
                                 QueryTokenEmbedded token = item.Token;
-                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.DisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate, " " + item.ScriptColumn.GetDisplayName, allowRemoveToken: item.ScriptColumn.IsOptional, allowReCreate: false))
                                 {
                                     case FixTokenResult.Nothing: break;
                                     case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uc, u => u.Guid == uc.Guid);

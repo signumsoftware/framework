@@ -649,6 +649,31 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
     public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute? skipBefore = null)
     {
         ParameterExpression pe = Expression.Parameter(typeof(T), "p");
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, typeof(R));
+
+        var selector = Expression.Lambda<Func<T, R>>(exp, pe);
+        return selector;
+    }
+
+    /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
+    /// <typeparam name="R">Result type</typeparam>
+    /// <returns></returns>
+    public LambdaExpression GetLambdaExpression(Type fromType, Type resultType, bool safeNullAccess, PropertyRoute? skipBefore = null)
+    {
+        ParameterExpression pe = Expression.Parameter(fromType, "p");
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, resultType);
+
+        var selector = Expression.Lambda(exp, pe);
+        return selector;
+    }
+
+    static bool IsPotentiallyNull(Expression exp)
+    {
+        return exp!.Type.IsEmbeddedEntity() || exp is ConditionalExpression /*Conditional Embedded with Mixin*/;
+    }
+
+    Expression GetBody(bool safeNullAccess, PropertyRoute? skipBefore, ParameterExpression pe, Type resultType)
+    {
         Expression exp = null!;
 
         var steps = this.Follow(a => a.Parent).Reverse();
@@ -700,18 +725,10 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
             }
         }
 
-        if (exp.Type != typeof(R))
-            exp = Expression.Convert(exp, typeof(R));
-
-        var selector = Expression.Lambda<Func<T, R>>(exp, pe);
-        return selector;
-
-        static bool IsPotentiallyNull(Expression exp)
-        {
-            return exp!.Type.IsEmbeddedEntity() || exp is ConditionalExpression /*Conditional Embedded with Mixin*/;
-        }
+        if (exp.Type != resultType)
+            exp = Expression.Convert(exp, resultType);
+        return exp;
     }
-
 
     public bool IsToStringProperty()
     {

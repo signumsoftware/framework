@@ -12,22 +12,22 @@ export function start(options: { routes: RouteObject[] }) {
 
   Operations.addSettings(new EntityOperationSettings(DisableOperation.Disable, {
     contextual: {
-      icon: ["fas", "arrow-down"],
+      icon: "arrow-down",
       iconColor: "gray",
     },
     contextualFromMany: {
-      icon: ["fas", "arrow-down"],
+      icon: "arrow-down",
       iconColor: "gray",
     },
   }));
 
   Operations.addSettings(new EntityOperationSettings(DisableOperation.Enabled, {
     contextual: {
-      icon: ["fas", "arrow-up"],
+      icon: "arrow-up",
       iconColor: "black",
     },
     contextualFromMany: {
-      icon: ["fas", "arrow-up"],
+      icon: "arrow-up",
       iconColor: "black",
     },
   }));

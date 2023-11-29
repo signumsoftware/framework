@@ -147,6 +147,12 @@ public static class GraphExplorer
         return graph.Any(a => a.IsGraphModified);
     }
 
+    public static bool IsGraphModifiedVirtual(Modifiable modifiable)
+    {
+        var graph = FromRootVirtual(modifiable);
+        return graph.Any(a => a.IsGraphModified);
+    }
+
     public static DirectedGraph<Modifiable> PreSaving(Func<DirectedGraph<Modifiable>> recreate)
     {
         return PreSaving(recreate, (Modifiable m, PreSavingContext ctx) =>
@@ -329,7 +335,9 @@ public static class GraphExplorer
 
     public static bool HasChanges(Modifiable mod)
     {
-        return GraphExplorer.FromRootVirtual(mod).Any(a => a.Modified == ModifiedState.SelfModified);
+        var graph  = GraphExplorer.FromRootVirtual(mod);
+        //graph.EntityDGML();
+        return graph.Any(a => a.Modified == ModifiedState.SelfModified);
     }
 
     public static void SetValidationErrors(DirectedGraph<Modifiable> directedGraph, IntegrityCheckException e)
@@ -379,9 +387,4 @@ public class IntegrityCheckException : Exception
     {
         this.Errors = errors;
     }
-
-    protected IntegrityCheckException(
-      SerializationInfo info,
-      StreamingContext context)
-        : base(info, context) { }
 }

@@ -6,7 +6,7 @@ import { EntitySettings } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { UserEntity, UserLiteModel} from '../Signum.Authorization/Signum.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import ValueLineModal from '@framework/ValueLineModal';
+import AutoLineModal from '@framework/AutoLineModal';
 import { FindOptionsParsed, ResultRow } from '@framework/FindOptions';
 import MessageModal from '@framework/Modals/MessageModal';
 import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
@@ -18,8 +18,12 @@ import * as AppContext from "@framework/AppContext"
 import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
 import { AzureADQuery } from './Signum.Authorization.ActiveDirectory.Azure';
+import { TextBoxLine } from '@framework/Lines';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
-export function start(options: { routes: RouteObject[], adGroups: boolean }) {
+export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }) {
+
+  registerChangeLogModule("Signum.ActiveDirectory", () => import("./Changelog"));
 
   Navigator.addSettings(new EntitySettings(ActiveDirectoryConfigurationEmbedded, e => import('./ActiveDirectoryConfiguration')));
 
@@ -29,12 +33,19 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
 
   if (window.__azureApplicationId) {
     urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+
+
       var oid =
         (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
         tryGetMixin(u, UserADMixin)?.oID;
 
-      const url = oid == null ? null : AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid)
-      return Promise.resolve(url);
+      if (oid == null)
+        return null;
+
+      if (!options.cachedProfilePhoto)
+        return AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
+
+      return API.cachedAzureUserPhotoUrl(size, oid);
     })
   }
 
@@ -43,11 +54,14 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
       (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
         tryGetMixin(u, UserADMixin)?.sID;
 
-    const url = sid == null ? null :
-      UserEntity.isLite(u) ? AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + ((u as Lite<UserEntity>).model as UserLiteModel)?.userName) :
-        AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+    if (sid == null)
+      return null;
 
-    return Promise.resolve(url);
+    var url = UserEntity.isLite(u) ?
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
+      AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
+    return url;
   });
 
 
@@ -69,9 +83,8 @@ export function start(options: { routes: RouteObject[], adGroups: boolean }) {
         button: <button className="btn btn-info ms-2"
           onClick={e => {
             e.preventDefault();
-            var promise = ValueLineModal.show({
+            var promise = AutoLineModal.show({
               type: { name: "string" },
-              valueLineType: "TextBox",
               modalSize: "md",
               title: <><FontAwesomeIcon icon="address-book" /> {UserADMessage.FindInActiveDirectory.niceToString()}</>,
               label: UserADMessage.NameOrEmail.niceToString(),
@@ -237,9 +250,9 @@ export module API {
     return ajaxPost({ url: `/api/createADGroup` }, request);
   }
 
-
-
-
+  export function cachedAzureUserPhotoUrl(size: number, oID: string): Promise<string | null> {
+    return ajaxGet({ url: `/api/cachedAzureUserPhoto/${size}/${oID}`, cache: "default"  });
+  }
 }
 
 export interface ActiveDirectoryUser {

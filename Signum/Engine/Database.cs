@@ -217,7 +217,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 }
             }
 
-            T retrieved = await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id, token);
+            T? retrieved = await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id, token);
 
             if (retrieved == null)
                 throw new EntityNotFoundException(typeof(T), id);

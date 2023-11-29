@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorRegressionMetricsEmbedded, PredictorEntity } from '../Signum.MachineLearning'
 
@@ -13,8 +13,8 @@ export default function PredictorRegressionMetrics(p : { ctx: TypeContext<Predic
     return (
       <tr>
         <th>{ctxT.niceName(property)}{unit && " (" + unit + ")"}</th>
-        <td><ValueLine ctx={ctxT.subCtx(property)} unit="" /></td>
-        <td><ValueLine ctx={ctxV.subCtx(property)} unit="" /></td>
+        <td><AutoLine ctx={ctxT.subCtx(property)} unit="" /></td>
+        <td><AutoLine ctx={ctxV.subCtx(property)} unit="" /></td>
       </tr>
     );
   }

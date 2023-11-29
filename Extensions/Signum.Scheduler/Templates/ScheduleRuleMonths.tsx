@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ScheduleRuleMonthsEntity } from '../Signum.Scheduler'
 
@@ -9,27 +9,27 @@ export default function ScheduleRuleMonths(p : { ctx: TypeContext<ScheduleRuleMo
 
   return (
     <div>
-      <ValueLine ctx={ctx2.subCtx(f => f.startingOn)} helpText="The hour determines when each execution will occour" />
+      <AutoLine ctx={ctx2.subCtx(f => f.startingOn)} helpText="The hour determines when each execution will occour" />
       <div className="row">
         <div className="col-sm-3">
-          <ValueLine ctx={ctx4.subCtx(f => f.january)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.february)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.march)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.january)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.february)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.march)} />
         </div>
         <div className="col-sm-3">
-          <ValueLine ctx={ctx4.subCtx(f => f.april)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.may)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.june)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.april)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.may)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.june)} />
         </div>
         <div className="col-sm-3">
-          <ValueLine ctx={ctx4.subCtx(f => f.july)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.august)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.september)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.july)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.august)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.september)} />
         </div>
         <div className="col-sm-3">
-          <ValueLine ctx={ctx4.subCtx(f => f.october)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.november)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.december)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.october)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.november)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.december)} />
         </div>
       </div>
     </div>

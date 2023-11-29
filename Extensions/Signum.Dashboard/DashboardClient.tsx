@@ -31,6 +31,7 @@ import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
@@ -66,6 +67,8 @@ export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = 
 
 export function start(options: { routes: RouteObject[] }) {
 
+  registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
+
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
 
@@ -99,17 +102,17 @@ export function start(options: { routes: RouteObject[] }) {
 
   registerRenderer(LinkListPartEntity, {
     component: () => import('./View/LinkListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: ["fas", "list"], iconColor: "#B9770E" })
+    defaultIcon: () => ({ icon: "list", iconColor: "#B9770E" })
   });
 
   registerRenderer(ImagePartEntity, {
     component: () => import('./View/ImagePartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "forestgreen" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
 

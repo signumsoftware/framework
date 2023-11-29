@@ -3,7 +3,7 @@
   <Type Name="WhatsNewEntity" Description="Was ist neu" Gender="f">
     <Member Name="Attachment" Description="Anhang" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
-    <Member Name="Messages" Description="Nachrichten" />
+    <Member Name="Messages" Description="Neuigkeiten" />
     <Member Name="Name" Description="Name" />
     <Member Name="PreviewPicture" Description="Vorschaubild" />
     <Member Name="Related" Description="Verwandt" />
@@ -31,14 +31,14 @@
     <Member Name="Language" Description="Sprache" />
     <Member Name="MyActiveNews" Description="Meine aktiven News" />
     <Member Name="NewNews" Description="Neuigkeiten" />
-    <Member Name="News" Description="Nachrichten" />
+    <Member Name="News" Description="Neuigkeiten" />
     <Member Name="NewsPage" Description="News-Seite" />
-    <Member Name="NewUnreadNews" Description="Neue ungelesene Nachrichten" />
+    <Member Name="NewUnreadNews" Description="Neue ungelesene Neuigkeiten" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="ReadFurther" Description="Weiterlesen" />
     <Member Name="ThisNewIsNoLongerAvailable" Description="Diese Neuigkeit ist nicht mehr verfügbar" />
     <Member Name="ViewMore" Description="Mehr anzeigen" />
-    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Nachrichten" />
+    <Member Name="YouDoNotHaveAnyUnreadNews" Description="Sie haben keine ungelesenen Neuigkeiten" />
     <Member Name="YourNews" Description="Ihre Neuigkeiten" />
   </Type>
   <Type Name="WhatsNewMessageEmbedded" Description="Was ist die neue Nachricht?">

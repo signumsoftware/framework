@@ -4,11 +4,10 @@ import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, 
 import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
 import * as Navigator from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
-import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
+import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
 import { Type } from '../Reflection';
 import { EntityRepeater } from '../Lines/EntityRepeater';
 import { MultiValueLine } from '../Lines/MultiValueLine';
-import { ValueLineController } from '../Lines/ValueLine';
 import { API, Defaults } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -23,6 +22,8 @@ import SelectorModal from '../SelectorModal'
 import { FilterOperation, filterOperations, getFilterType } from '../FindOptions'
 import { PropertyOperation } from '../Signum.Operations'
 import { CollectionMessage } from '../Signum.External'
+import { EnumLine } from '../Lines/EnumLine'
+import { AutoLine } from '../Lines/AutoLine'
 
 
 
@@ -116,7 +117,7 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
         <tr>
           <th style={{ minWidth: "24px" }}></th>
           <th>{SearchMessage.Field.niceToString()}</th>
-          <th>{SearchMessage.Operation.niceToString()}</th>
+          <th>{OperationMessage.Operation.niceToString()}</th>
           <th style={{ paddingRight: "20px" }}>{SearchMessage.Value.niceToString()}</th>
         </tr>
       </thead>
@@ -350,10 +351,6 @@ function showSetters(o: PropertyOperation) {
 export function createSetterValueControl(ctx: TypeContext<any>, handleValueChange: () => void): React.ReactElement<any> {
   var tr = ctx.propertyRoute!.typeReference();
 
-  var vlt = ValueLineController.getValueLineType(tr)
-  if (vlt)
-    return <ValueLine ctx={ctx} onChange={handleValueChange} />;
-
   if (tr.isEmbedded)
     return <EntityLine ctx={ctx} autocomplete={null} onChange={handleValueChange} create={false} />;
 
@@ -367,7 +364,7 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
     if (tis[0].kind == "Enum") {
       const ti = tis.single()!;
       const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-      return <ValueLine ctx={ctx} optionItems={members} onChange={handleValueChange} />;
+      return <EnumLine ctx={ctx} optionItems={members} onChange={handleValueChange} />;
     }
 
     if (tr.name == IsByAll || tis.some(ti => !ti!.isLowPopulation))
@@ -375,8 +372,7 @@ export function createSetterValueControl(ctx: TypeContext<any>, handleValueChang
     else
       return <EntityCombo ctx={ctx} onChange={handleValueChange} />
   }
-
-  return <span className="text-alert">Not supported</span>
+  return <AutoLine ctx={ctx} onChange={handleValueChange} />;
 }
 
 interface PropertySelectorProps {
@@ -512,9 +508,6 @@ export function getTypeColor(type: TypeReference) {
         if (type.isEmbedded)
           return "#156F8A";
 
-        if (type.isLite)
-          return "#2B91AF";
-
         var tis = tryGetTypeInfos(type.name);
 
         if (tis[0]) {
@@ -546,8 +539,6 @@ export function getNiceTypeName(tr: TypeReference) {
         if (tr.isEmbedded)
           return QueryTokenMessage.Embedded0.niceToString().formatWith(tr.typeNiceName);
 
-        if (tr.isLite)
-          return "#2B91AF";
 
         if (tr.name == IsByAll)
           return QueryTokenMessage.AnyEntity.niceToString();

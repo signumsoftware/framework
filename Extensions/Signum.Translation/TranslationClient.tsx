@@ -7,8 +7,11 @@ import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { ImportComponent } from '@framework/ImportComponent'
 import { TranslatedSummaryState } from './Signum.Translation.Instances';
 import { isPermissionAuthorized } from '@framework/AppContext';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Translation", () => import("./Changelog"));
 
   OmniboxSpecialAction.registerSpecialAction({
     allowed: () => isPermissionAuthorized(TranslationPermission.TranslateCode),

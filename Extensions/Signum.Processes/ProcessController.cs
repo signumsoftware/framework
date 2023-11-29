@@ -9,12 +9,12 @@ namespace Signum.Processes;
 [ValidateModelFilter]
 public class ProcessController : ControllerBase
 {
-    [HttpPost("api/processes/constructFromMany")]
-    public EntityPackTS ConstructFromMany([Required, FromBody]OperationController.MultiOperationRequest request)
+    [HttpPost("api/processes/constructFromMany/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public EntityPackTS ConstructFromMany(string operationKey, [Required, FromBody]OperationController.MultiOperationRequest request)
     {
         var type = request.Type == null ? null : TypeLogic.GetType(request.Type);
 
-        var op = request.GetOperationSymbol(type!);
+        var op = request.GetOperationSymbol(operationKey, type!);
         var entity = PackageLogic.CreatePackageOperation(request.Lites, op, request.ParseArgs(op));
 
         return SignumServer.GetEntityPack(entity);
