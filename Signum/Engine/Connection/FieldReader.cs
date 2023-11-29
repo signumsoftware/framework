@@ -725,10 +725,6 @@ public class FieldReaderException : DbException
         this.ColumnName = columnName;
         this.MethodName = methodName;
     }
-    protected FieldReaderException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context)
-        : base(info, context) { }
 
     public override string Message
     {

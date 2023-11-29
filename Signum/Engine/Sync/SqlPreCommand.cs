@@ -353,9 +353,6 @@ public class ExecuteSqlScriptException : Exception
     public ExecuteSqlScriptException() { }
     public ExecuteSqlScriptException(string message) : base(message) { }
     public ExecuteSqlScriptException(string message, Exception inner) : base(message, inner) { }
-    protected ExecuteSqlScriptException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 }
 
 public class SqlPreCommandSimple : SqlPreCommand
