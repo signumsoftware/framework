@@ -17,8 +17,11 @@ import { TypeInfo } from '@framework/Reflection';
 import { softCast } from '@framework/Globals';
 import { QueryString } from '@framework/QueryString';
 import { isPermissionAuthorized } from '@framework/AppContext';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
+
+  registerChangeLogModule("Signum.Excel", () => import("./Changelog"));
 
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));

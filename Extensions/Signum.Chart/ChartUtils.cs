@@ -44,7 +44,7 @@ public static class ChartUtils
 
     public static bool IsDateOnly(QueryToken token)
     {
-        if ((token is DatePartStartToken dt && (dt.Name == QueryTokenMessage.MonthStart || dt.Name == QueryTokenMessage.WeekStart)) ||
+        if ((token is DatePartStartToken dt && dt.Name is QueryTokenDateMessage.MonthStart or QueryTokenDateMessage.WeekStart or QueryTokenDateMessage.QuarterStart) ||
             token is DateToken)
             return true;
 

@@ -7,7 +7,7 @@ import { Dic } from "../Globals";
 import { CollectionMessage } from "../Signum.External";
 import { getAllPinned } from "./PinnedFilterBuilder";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { AggregateFunction, CollectionAnyAllType, CollectionElementType, ColumnFieldMessage, FieldExpressionMessage, FilterFieldMessage, QueryTokenMessage } from "../Signum.DynamicQuery.Tokens";
+import { AggregateFunction, CollectionAnyAllType, CollectionElementType, ColumnFieldMessage, FieldExpressionMessage, FilterFieldMessage, QueryTokenDateMessage, QueryTokenMessage } from "../Signum.DynamicQuery.Tokens";
 import { JavascriptMessage, SearchMessage } from "../Signum.Entities";
 import { OverlayInjectedProps } from "react-bootstrap/esm/Overlay";
 import { QueryDescription } from "../FindOptions";
@@ -152,8 +152,8 @@ export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpa
         <ul>
           <li><strong>{FieldExpressionMessage.SimpleValues.niceToString()}: </strong>{FieldExpressionMessage.AStringLikeHelloANumberLike.niceToString().formatHtml(<em>{QueryTokenMessage.Length.niceToString()}</em>, <em>{QueryTokenMessage.Modulo0.niceToString("")}</em>, <em>{QueryTokenMessage.Step0.niceToString("")}</em>)}</li>
           <li><strong style={{ color: '#5100a1' }}>{FieldExpressionMessage.Dates.niceToString()}: </strong>{FieldExpressionMessage._0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate.niceToString()
-            .formatHtml(<em>{QueryTokenMessage.Date.niceToString()}</em>, <em>{QueryTokenMessage.DateTime.niceToString()}</em>, <span><em>{QueryTokenMessage.Month.niceToString()}</em>, <em>{QueryTokenMessage.WeekNumber.niceToString()}</em>, <em>{QueryTokenMessage.Day.niceToString()}</em></span>,
-              <span><em>{QueryTokenMessage.MonthStart.niceToString()}</em>, <em>{QueryTokenMessage.WeekStart.niceToString()}</em>, <em>{QueryTokenMessage.Date.niceToString()}</em></span>)}
+            .formatHtml(<em>{QueryTokenMessage.Date.niceToString()}</em>, <em>{QueryTokenMessage.DateTime.niceToString()}</em>, <span><em>{QueryTokenDateMessage.Month.niceToString()}</em>, <em>{QueryTokenDateMessage.WeekNumber.niceToString()}</em>, <em>{QueryTokenDateMessage.Day.niceToString()}</em></span>,
+              <span><em>{QueryTokenDateMessage.MonthStart.niceToString()}</em>, <em>{QueryTokenDateMessage.WeekStart.niceToString()}</em>, <em>{QueryTokenDateMessage.Date.niceToString()}</em></span>)}
           </li>
           <li><strong style={{ color: '#2b91af' }}>{FieldExpressionMessage.EntityRelationships.niceToString()}: </strong> {FieldExpressionMessage.EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields.niceToString()} (<code>LEFT JOIN</code> {FieldExpressionMessage.InSql.niceToString()})</li>
           <li><strong style={{ color: '#ce6700' }}>{FieldExpressionMessage.Collections.niceToString()}: </strong> {FieldExpressionMessage.CollectionOfEntitiesOrRelationships.niceToString()}</li>

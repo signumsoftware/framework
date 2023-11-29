@@ -306,8 +306,8 @@ public static class DashboardLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((DashboardEntity d) => d.DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((DashboardEntity d) => d.Parts[0].Title);
+        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((DashboardEntity d) => d.Parts[0].Title);
     }
 
     public static List<DashboardEntity> GetEmbeddedDashboards(Type entityType)

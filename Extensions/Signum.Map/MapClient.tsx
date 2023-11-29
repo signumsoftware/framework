@@ -11,10 +11,13 @@ import MapOmniboxProvider from './MapOmniboxProvider';
 import { SchemaMapInfo, getColorProviders } from './Schema/ClientColorProvider';
 import { tryGetTypeInfo } from '@framework/Reflection';
 import { RoleEntity, UserEntity } from '../Signum.Authorization/Signum.Authorization';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Map", () => import("./Changelog"));
 
   options.routes.push(
     { path: "/map", element: <ImportComponent onImport={() => import("./Schema/SchemaMapPage")} /> },

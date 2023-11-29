@@ -176,9 +176,8 @@ export module NotifyPendingFilter {
 
     notifyPendingRequests(++pendingRequests);
 
-    return makeCall().then(
-      resp => { notifyPendingRequests(--pendingRequests); return resp; },
-      error => { notifyPendingRequests(--pendingRequests); throw error; });
+    return makeCall()
+      .finally(() => notifyPendingRequests(--pendingRequests));
   }
 }
 

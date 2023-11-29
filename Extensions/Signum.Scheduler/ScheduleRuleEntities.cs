@@ -23,7 +23,7 @@ public class ScheduleRuleMinutelyEntity : Entity, IScheduleRuleEntity
 
     public DateTime Next(DateTime now)
     {
-        DateTime candidate = DateTimeExtensions.Max(now, StartingOn).TrimToMinutes();
+        DateTime candidate = DateTimeExtensions.Max(now, StartingOn).TruncMinutes();
 
         if (this.IsAligned)
             candidate = candidate.AddMinutes(-(candidate.Minute % EachMinutes));

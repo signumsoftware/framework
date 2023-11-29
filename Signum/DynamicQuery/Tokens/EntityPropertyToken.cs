@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 
 namespace Signum.DynamicQuery.Tokens;
@@ -27,15 +28,18 @@ public class EntityPropertyToken : QueryToken
     }
 
 
-    internal static Func<EntityPropertyToken, DateTimeKind> DateTimeKindFunc = null!;
-    public override DateTimeKind DateTimeKind => DateTimeKindFunc(this);
+    public static DateTimeKind GetDateTimeKind(PropertyRoute route) => Schema.Current.Settings.FieldAttribute<DbTypeAttribute>(route)?.DateTimeKind ?? DateTimeKind.Unspecified;
+    public static bool HasFullTextIndex(PropertyRoute route) => Schema.Current.HasFullTextIndex(route);
 
-    internal static Func<EntityPropertyToken, bool> HasFullTextIndexFunc = null!;
-    public bool HasFullTextIndex => HasFullTextIndexFunc(this);
+    public static bool HasSnippet(PropertyRoute pr)
+    {
+        if (pr.Type != typeof(string) || !pr.RootType.IsEntity())
+            return false;
 
-    internal static Func<EntityPropertyToken, bool> HasSnippetFunc = null!;
-    public bool HasSnippet => HasSnippetFunc(this);
+        var field = Schema.Current.TryField(pr);
 
+        return field is FieldValue fv && (fv.Size == null || fv.Size > 200);
+    }
 
     public override Type Type
     {
@@ -143,14 +147,19 @@ public class EntityPropertyToken : QueryToken
             PropertyRoute? route = this.GetPropertyRoute();
             var result = StringTokens();
 
-            if (this.HasFullTextIndex)
+            if (route != null && HasFullTextIndex(route))
             {
                 result.Add(new FullTextRankToken(this));
             }
 
-            if (this.HasSnippet && (options & SubTokensOptions.CanSnippet) != 0)
+            if (route != null && HasSnippet(route) && (options & SubTokensOptions.CanSnippet) != 0)
             {
                 result.Add(new StringSnippetToken(this));
+            }
+
+            if(route != null && PropertyRouteTranslationLogic.IsTranslateable(route))
+            {
+                result.Add(new TranslatedToken(this));
             }
 
             return result.AndHasValue(this);

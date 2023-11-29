@@ -299,9 +299,9 @@ public static class UserQueryLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
-        PropertyRouteTranslationLogic.AddRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
+        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Columns[0].DisplayName);
+        PropertyRouteTranslationLogic.RegisterRoute((UserQueryEntity uq) => uq.Filters[0].Pinned!.Label);
     }
 
     public static UserQueryEntity RetrieveUserQuery(this Lite<UserQueryEntity> userQuery)

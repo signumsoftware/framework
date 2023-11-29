@@ -108,7 +108,7 @@ function WorkflowTimer(p: { ctx: TypeContext<WorkflowTimerEmbedded>, mainEntityT
       <EntityDetail ctx={ctx.subCtx(te => te.duration)} />
       <EntityLine ctx={ctx.subCtx(te => te.condition)}
         findOptions={{ queryName: WorkflowTimerConditionEntity, filterOptions: [{ token: WorkflowTimerConditionEntity.token(a => a.entity.mainEntityType), value: p.mainEntityType }] }} />
-      <ValueLine ctx={ctx.subCtx(te => te.avoidExecuteConditionByTimer)} />
+      <AutoLine ctx={ctx.subCtx(te => te.avoidExecuteConditionByTimer)} />
     </div>
   );
 }

@@ -14,12 +14,12 @@ public class DateToken : QueryToken
 
     public override string ToString()
     {
-        return QueryTokenMessage.Date.NiceToString();
+        return QueryTokenDateMessage.Date.NiceToString();
     }
 
     public override string NiceName()
     {
-        return QueryTokenMessage._0Of1.NiceToString(QueryTokenMessage.Date.NiceToString(), parent.ToString());
+        return QueryTokenMessage._0Of1.NiceToString(QueryTokenDateMessage.Date.NiceToString(), parent.ToString());
     }
 
     public override string? Format

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityDetail, FindOptionsAutocompleteConfig } from '@framework/Lines'
+import { EntityLine, EntityDetail, FindOptionsAutocompleteConfig, AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { ScheduledTaskEntity, ScheduledTaskLogEntity } from '../Signum.Scheduler'
 import { SearchValueLine } from '@framework/Search';
