@@ -45,25 +45,26 @@ public static class MailingServer
         };
 
 
-        if (Schema.Current.Tables.ContainsKey(typeof(SmtpEmailServiceEntity)))
-        {
-            var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
-            var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
-            pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
-            pcs.Add("newPassword", new PropertyConverter
-            {
-                AvoidValidate = true,
-                CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
-                CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
-                {
-                    ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                    var password = reader.GetString()!;
+        //if (Schema.Current.Tables.ContainsKey(typeof(SmtpEmailServiceEntity)))
+        //{
+        //    var piPassword = ReflectionTools.GetPropertyInfo((SmtpNetworkDeliveryEmbedded e) => e.Password);
+        //    var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(SmtpNetworkDeliveryEmbedded));
+        //    pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
+        //    pcs.Add("newPassword", new PropertyConverter
+        //    {
+        //        AvoidValidate = true,
+        //        CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+        //        CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
+        //        {
+        //            ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                    ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
-                }
-            });
-        }
+        //            var password = reader.GetString()!;
+
+        //            ((SmtpNetworkDeliveryEmbedded)ctx.Entity).Password = EmailSenderConfigurationLogic.EncryptPassword(password);
+        //        }
+        //    });
+        //}
 
      
     }

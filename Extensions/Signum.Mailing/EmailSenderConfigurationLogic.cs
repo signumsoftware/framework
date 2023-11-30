@@ -40,7 +40,17 @@ public static class EmailSenderConfigurationLogic
             {
                 CanBeNew = true,
                 CanBeModified = true,
-                Execute = (sc, _) => { },
+                Execute = (sc, _) => {
+
+
+                    var smtps = sc.Service as SmtpEmailServiceEntity;
+                    if (smtps?.Network?.NewPassword!=null)
+                    {
+                        smtps.Network.Password= EmailSenderConfigurationLogic.EncryptPassword(smtps.Network.NewPassword);
+                        smtps.Network.NewPassword = null;
+                    }
+
+                },
             }.Register();
 
             new Graph<EmailSenderConfigurationEntity>.ConstructFrom<EmailSenderConfigurationEntity>(EmailSenderConfigurationOperation.Clone)

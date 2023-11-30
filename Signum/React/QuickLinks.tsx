@@ -62,6 +62,7 @@ export function clearQuickLinks() {
   Dic.clear(globalQuickLinks);
   Dic.clear(typeQuickLinks);
   Dic.clear(dynamicQuickLink);
+  Dic.clear(quickLinksCache);
 }
 
 export interface QuickLinkContext<T extends Entity> {
