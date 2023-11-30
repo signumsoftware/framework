@@ -21,6 +21,6 @@ public enum ChangeLogMessage
 {
     [Description("There is not any new changes from {0}")]
     ThereIsNotAnyNewChangesFrom0,
-    [Description("see more ...")]
+    [Description("See more…")]
     SeeMore,
 }
