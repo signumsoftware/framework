@@ -61,6 +61,7 @@ function CellQuickLink(p: { quickLinkKey: string, lite: Lite<Entity> }) {
 export function clearQuickLinks() {
   Dic.clear(globalQuickLinks);
   Dic.clear(typeQuickLinks);
+  Dic.clear(quickLinksCache);
 }
 
 export interface QuickLinkContext<T extends Entity> {
