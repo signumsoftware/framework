@@ -234,11 +234,11 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
-        <AutoLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+          <AutoLine ctx={ctx.subCtx(a => a.requiresOpen)} />
 
-        {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
+          {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
 
-        {ctx.value.type == "Task" ? <EntityDetail ctx={ctx.subCtx(a => a.customNextButton)} labelColumns={1} valueColumns={4} /> : null}
+          {ctx.value.type == "Task" ? <EntityDetail ctx={ctx.subCtx(a => a.customNextButton)} labelColumns={1} valueColumns={4} /> : null}
 
           {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={false} /> :
             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
