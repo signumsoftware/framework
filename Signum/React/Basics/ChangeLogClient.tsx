@@ -3,7 +3,7 @@ import { RouteObject } from "react-router";
 
 export function start(options: { routes: RouteObject[], applicationName: string, mainChangeLog: () => Promise<{ default: ChangeLogDic }> }) {
 
-  changeLogs["Framework"] = () => import("./Changelog");
+  changeLogs["Framework"] = () => import("../../Changelog");
   changeLogs[options.applicationName] = options.mainChangeLog;
 
 }

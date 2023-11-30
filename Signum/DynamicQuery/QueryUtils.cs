@@ -96,7 +96,7 @@ public static class QueryUtils
 
         var result = FilterOperations[filtertype];
 
-        if (token is EntityPropertyToken ept && ept.HasFullTextIndex)
+        if (token is EntityPropertyToken ept && EntityPropertyToken.HasFullTextIndex(ept.PropertyRoute))
         {
             return result.PreAnd(FilterOperation.FreeText).PreAnd(FilterOperation.ComplexCondition).ToList();
         }

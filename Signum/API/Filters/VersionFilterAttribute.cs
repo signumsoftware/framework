@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Primitives;
 using Signum.Utilities.Reflection;
 
 namespace Signum.API.Filters;
@@ -20,8 +22,8 @@ public class VersionFilterAttribute : ActionFilterAttribute
             if (BuildTimeUTC == null)
                 BuildTimeUTC = MainAssembly.BuildTimeUTC().ToString("o");
 
-            context.HttpContext.Response.Headers.Add("X-App-Version", Version);
-            context.HttpContext.Response.Headers.Add("X-App-BuildTime", BuildTimeUTC);
+            context.HttpContext.Response.Headers.Append("X-App-Version", new StringValues(Version));
+            context.HttpContext.Response.Headers.Append("X-App-BuildTime", new StringValues(BuildTimeUTC));
         }
     }
 }
