@@ -60,9 +60,8 @@ function ShowLogs(p: { logs: ChangeItem[], date: DateTime | null }) {
           {p.date == null || p.date < DateTime.fromISO(gr.key) ? <strong>{gr.key}</strong> : <span>{gr.key}</span>}
 
           <ul className="mb-2 p-0" key={gr.key}>
-            {gr.elements.map((e, i) =>
-              (Array.isArray(e.changeLog) ? e.changeLog : [e.changeLog])
-                .map((a, i) => <li className="ms-5 pb-1" key={i}><strong><samp>{e.module}{" > "}</samp></strong>{a}</li>)}
+            {gr.elements.flatMap(e =>Array.isArray(e.changeLog) ? e.changeLog.map(cl => ({module: e.module, changeLog: cl })) : [{module: e.module, changeLog: e.changeLog}])
+                .map((a, i) => <li className="ms-5 pb-1" key={i}><strong><samp>{a.module}{" > "}</samp></strong>{a.changeLog}</li>)}
           </ul>
         </div>
       )}
