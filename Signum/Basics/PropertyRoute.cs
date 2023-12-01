@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Basics;
 
-public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
+public class PropertyRoute : IEquatable<PropertyRoute>
 {
     Type? type;
     public PropertyRouteType PropertyRouteType { get; private set; }
@@ -587,49 +587,6 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
             default:
                 throw new InvalidOperationException("PropertyRoute of type {0} not expected".FormatWith(PropertyRouteType));
         }
-    }
-
-#pragma warning disable IDE0051 // Remove unused private members
-    PropertyRoute(SerializationInfo info, StreamingContext ctxt)
-#pragma warning restore IDE0051 // Remove unused private members
-    {
-        string rootName = info.GetString("rootType")!;
-
-        Type root = Type.GetType(rootName)!;
-
-        string? route = info.GetString("property");
-
-        if (route == null)
-            this.SetRootType(root);
-        else
-        {
-            string? before = route.TryBeforeLast(".");
-
-            if (before != null)
-            {
-                var parent = Parse(root, before);
-
-                SetParentAndProperty(parent, parent.GetMember(route.AfterLast('.')));
-            }
-            else
-            {
-                var parent = Root(root);
-
-                SetParentAndProperty(parent, parent.GetMember(route));
-            }
-        }
-    }
-
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("rootType", RootType.AssemblyQualifiedName);
-
-        string? property =
-            PropertyRouteType == PropertyRouteType.Root ? null :
-            (PropertyRouteType == PropertyRouteType.LiteEntity ? this.Parent!.PropertyString() + ".Entity" :
-            this.PropertyString()).Replace("/", ".Item.").TrimEnd('.');
-
-        info.AddValue("property", property);
     }
 
     public PropertyRoute? GetMListItemsRoute()

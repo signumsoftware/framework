@@ -118,6 +118,9 @@ public class SmtpNetworkDeliveryEmbedded : EmbeddedEntity
 
     [StringLengthValidator(Max = 100), Format(FormatAttribute.Password)]
     public string? Password { get; set; }
+    
+    [Ignore, InTypeScript(true)]
+    public string? NewPassword { get; set; }
 
     public bool UseDefaultCredentials { get; set; } = true;
 

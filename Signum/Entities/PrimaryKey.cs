@@ -11,7 +11,7 @@ namespace Signum.Entities;
 /// The default value represents an invalid state.
 /// </summary>
 [TypeConverter(typeof(PrimaryKeyTypeConverter))]
-public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, ISerializable, IFormattable
+public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<PrimaryKey>, IFormattable
 {
     public static Dictionary<Type, Type> PrimaryKeyType = new Dictionary<Type, Type>();
     public static Dictionary<PropertyRoute, Type> MListPrimaryKeyType = new Dictionary<PropertyRoute, Type>();
@@ -266,30 +266,6 @@ public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<Prim
     {
         return ((IFormattable)this.Object).ToString(format, formatProvider);
     }
-
-    private PrimaryKey(SerializationInfo info, StreamingContext ctxt)
-    {
-        this.Object = null!;
-        this.VariableName = null!;
-        foreach (SerializationEntry item in info)
-        {
-            switch (item.Name)
-            {
-                case "Object": this.Object = (IComparable)item.Value!; break;
-            }
-        }
-
-        if (this.Object == null)
-            throw new SerializationException("Object not set");
-    }
-
-
-    void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("Object", this.Object);
-    }
-
-
 }
 
 class PrimaryKeyTypeConverter : TypeConverter

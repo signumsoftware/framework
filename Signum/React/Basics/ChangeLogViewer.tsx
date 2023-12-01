@@ -14,7 +14,7 @@ interface ChangeItem {
   changeLog: ChangeLogLine | ChangeLogLine[];
 }
 
-export function ChangeLogViewer() {
+export default function ChangeLogViewer() {
 
   var changes = useAPI(() => Promise.all(Object.values(changeLogs).map(v => v())), []);
 
@@ -26,37 +26,46 @@ export function ChangeLogViewer() {
       return { module: m, date: date, changeLog: dic[date] };
     });
   });
-  
+
   if (logs == null)
     return null;
-  
+
   var date = lastDate ? DateTime.fromISO(lastDate) : null;
 
-  return (<a style={{ alignSelf: "center" }} title="Change logs" onClick={() => {
-    MessageModal.show({
-      title: "Change logs",
-      size: 'md',
-      message: <ShowLogs logs={logs} date={date} />,
-      buttons: "ok"
-    });
-  }}><FontAwesomeIcon icon="list-timeline" color={logs?.filter(l => !date ? true : l.date >= date.toFormat('yyyy.MM.d')).length ? "orange" : undefined} /></a>);
+  return (
+    <a style={{ alignSelf: "center" }} title="Change logs" onClick={(() => {
+      MessageModal.show({
+        title: "Change logs",
+        size: 'md',
+        message: <ShowLogs logs={logs!} date={date} />,
+        buttons: "ok"
+      });
+    })}>
+      <FontAwesomeIcon icon="list-timeline" color={logs?.some(l => !date ? true : DateTime.fromISO(l.date) > date) ? "orange" : undefined} />
+    </a>
+  );
 }
 
-function ShowLogs(p: { logs: ChangeItem[] | null, date: DateTime | null }) {
-  const [seeMore, setSeeMore] = React.useState(false);
-  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => l.date >= p.date!.toFormat('yyyy.MM.d')) : p.logs;
+function ShowLogs(p: { logs: ChangeItem[], date: DateTime | null }) {
+
+  const [seeMore, setSeeMore] = React.useState(2);
+
+  var logsByDate = p.logs.orderByDescending(l => l.date).groupBy(l => l.date);
+  var filterdLogs = logsByDate.slice(0, seeMore);
 
   return (
     <div>
-      {filterdLogs?.length == 0 ? <div>
-        {ChangeLogMessage.ThereIsNotAnyNewChangesFrom0.niceToString(p.date!.toLocaleString())}
+      {filterdLogs.map(gr =>
+        <div>
+          {p.date == null || p.date < DateTime.fromISO(gr.key) ? <strong>{gr.key}</strong> : <span>{gr.key}</span>}
 
-        <a href="#" style={{ display: "block" }} onClick={() => setSeeMore(true)}>{ChangeLogMessage.SeeMore.niceToString()}</a>
-        
-      </div> :
-        filterdLogs!.orderByDescending(l => l.date).groupBy(l => l.date).map(gr => <ul className="mb-2 p-0" key={gr.key}><strong>{gr.key}</strong>
-          {gr.elements.map((e, i) => <li className="ms-5 pb-1" key={i}><strong><samp>{e.module}{" > "}</samp></strong>{Array.isArray(e.changeLog) ? e.changeLog.joinComma(', ') : e.changeLog.toString()}</li>)}
-        </ul>)}
+          <ul className="mb-2 p-0" key={gr.key}>
+            {gr.elements.flatMap(e =>Array.isArray(e.changeLog) ? e.changeLog.map(cl => ({module: e.module, changeLog: cl })) : [{module: e.module, changeLog: e.changeLog}])
+                .map((a, i) => <li className="ms-5 pb-1" key={i}><strong><samp>{a.module}{" > "}</samp></strong>{a.changeLog}</li>)}
+          </ul>
+        </div>
+      )}
+      {logsByDate && logsByDate?.length > seeMore && <a href="#" style={{ display: "block" }} onClick={() => setSeeMore(a => a + 2)}>{ChangeLogMessage.SeeMore.niceToString()}</a>}
     </div>
   );
 }

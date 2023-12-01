@@ -43,11 +43,13 @@ export class ValueBaseController<T extends ValueBaseProps<any>> extends LineBase
 
   withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
 
-      if (!this.props.extraButtons && !preExtraButton) {
-          return <>
-              {getTimeMachineIcon({ ctx: this.props.ctx })}
-              {input}
-          </>;
+      if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
+        return (
+          <>
+            {getTimeMachineIcon({ ctx: this.props.ctx })}
+            {input}
+          </>
+        );
       }
 
       return (
@@ -55,6 +57,7 @@ export class ValueBaseController<T extends ValueBaseProps<any>> extends LineBase
               {getTimeMachineIcon({ ctx: this.props.ctx })}
               {this.props.extraButtonsBefore && this.props.extraButtonsBefore(this)}
               {input}
+              {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
               {preExtraButton}
               {this.props.extraButtons && this.props.extraButtons(this)}
           </div>
@@ -99,6 +102,7 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
 
 tasks.push(taskSetUnit);
 export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+
   if (lineBase instanceof ValueBaseController) {
     const vProps = state as ValueBaseProps<any>;
 
