@@ -64,10 +64,12 @@ export type ValueLineType =
 
 export class ValueLineController extends LineBaseController<ValueLineProps>{
 
+  textRef!: React.RefObject<string>;
   inputElement!: React.RefObject<HTMLElement>;
   init(p: ValueLineProps) {
     super.init(p);
 
+    this.textRef = React.useRef<string>(null);
     this.inputElement = React.useRef<HTMLElement>(null);
 
     React.useEffect(() => {
@@ -177,6 +179,15 @@ export class ValueLineController extends LineBaseController<ValueLineProps>{
     return p.valueHtmlAttributes?.placeholder ??
       (p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
       undefined;
+  }
+
+  setText(value: string | null) {
+    (this.textRef as React.MutableRefObject<string | null>).current = value;
+    this.forceUpdate();
+  }
+
+  getValue() {
+    return this.textRef.current ?? this.props.ctx.value ?? "";
   }
 }
 
@@ -481,8 +492,6 @@ ValueLineRenderers.renderers.set("Color", (vl) => {
 
 function internalTextBox(vl: ValueLineController, type: "password" | "color" | "text") {
 
-  const [text, setText] = React.useState<string | undefined>(undefined);
-
   const s = vl.props;
 
   var htmlAtts = vl.props.valueHtmlAttributes;
@@ -496,10 +505,10 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
       </FormGroup>
     );
 
-  function handleTextOnChange (e: React.SyntheticEvent<any>) {
+  function handleTextOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
     if (s.forceSetValueOnBlur == true)
-      setText(input.value)
+      vl.setText(input.value)
     else
       vl.setValue(input.value, e);
   }
@@ -530,7 +539,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
             autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
             {...vl.props.valueHtmlAttributes}
             className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
-            value={text ?? s.ctx.value ?? ""}
+            value={vl.getValue()}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}
             placeholder={vl.getPlaceholder()}
@@ -538,7 +547,7 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
             ref={vl.setRefs} />,
           type == "color" ? <input type="color"
             className={classes(s.ctx.formControlClass, "sf-color")}
-            value={s.ctx.value ?? ""}
+            value={vl.getValue()}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}
           /> : undefined
@@ -556,8 +565,6 @@ function internalTextBox(vl: ValueLineController, type: "password" | "color" | "
 }
 
 ValueLineRenderers.renderers.set("TextArea", (vl) => {
-
-  const [text, setText] = React.useState<string | undefined>(undefined);
 
   const s = vl.props;
 
@@ -578,7 +585,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
   function handleTextOnChange(e: React.SyntheticEvent<any>) {
     const input = e.currentTarget as HTMLInputElement;
     if (s.forceSetValueOnBlur == true)
-      setText(input.value)
+      vl.setText(input.value)
     else
       vl.setValue(input.value, e);
   }
@@ -613,7 +620,7 @@ ValueLineRenderers.renderers.set("TextArea", (vl) => {
     <FormGroup ctx={s.ctx} label={s.label} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId =>  vl.withItemGroup(
         <TextArea {...vl.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
-          value={text ?? s.ctx.value ?? ""}
+          value={vl.getValue()}
           id={inputId}
           minHeight={vl.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}

@@ -177,6 +177,7 @@ export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
   port: number;
   username: string | null;
   password: string | null;
+  newPassword: string | null;
   useDefaultCredentials: boolean;
   enableSSL: boolean;
   clientCertificationFiles: Entities.MList<ClientCertificationFileEmbedded>;
