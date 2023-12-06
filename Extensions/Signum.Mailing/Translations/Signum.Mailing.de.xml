@@ -292,6 +292,7 @@
     <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
     <Member Name="EnableSSL" Description="SSL aktivieren" />
     <Member Name="Host" Description="Host" />
+    <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="Port" Description="Port" />
     <Member Name="UseDefaultCredentials" Description="Verwenden der Standardanmeldeinformationen" />
