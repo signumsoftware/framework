@@ -434,6 +434,9 @@
     <Member Name="Path" Description="Pfad" />
     <Member Name="RootType" Description="Stammtyp" />
   </Type>
+  <Type Name="PropertyRouteMessage">
+    <Member Name="Translated" Description="Übersetzt" />
+  </Type>
   <Type Name="QueryEntity" Description="Abfrage">
     <Member Name="Key" Description="Schlüssel" />
   </Type>
