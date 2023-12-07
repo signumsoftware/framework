@@ -65,7 +65,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   React.useEffect(() => {
     const uq = p.searchControl.props.tag == "SearchPage" ? decodeUserQueryFromUrl(location) : p.searchControl.props.extraOptions?.userQuery;
     if (uq && UserQueryEntity.isLite(uq)) {
-      if (!is(p.searchControl.getCurrentUserQuery?.(), uq))
+      if (!is(p.searchControl.getCurrentUserQuery?.(), uq) || !p.searchControl.pageSubTitle)
         setCurrentUserQuery(uq, undefined);
     }
     else
