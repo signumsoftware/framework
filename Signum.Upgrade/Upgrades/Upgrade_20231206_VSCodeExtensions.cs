@@ -13,8 +13,9 @@ class Upgrade_20231206_VSCodeExtensions : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@".vscode/extensions.json", file =>
         {
-            file.InsertAfterFirstLine(a =>a.Contains("ms-dotnettools.csharp"), """
-                "ms-dotnettools.csdevkit"
+            file.ReplaceLine(a =>a.Contains("ms-vscode.csharp"), """
+                "ms-dotnettools.csharp",
+                "ms-dotnettools.csdevkit",
                 "ms-dotnettools.vscode-dotnet-runtime",
                 "ms-dotnettools.vscodeintellicode-csharp"
                 """);
