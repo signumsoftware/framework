@@ -6,18 +6,17 @@ import * as Navigator from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
 import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
-import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, AutoLine } from "@framework/Lines";
+import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, AutoLine, EnumLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
 import { tryGetTypeInfos, ReadonlyBinding, getTypeInfo, getTypeInfos, toNumberFormatOptions, toNumberFormat } from "@framework/Reflection";
 import { IsByAll } from "@framework/Reflection";
-import { Dic } from "@framework/Globals";
+import { Dic, isNumber } from "@framework/Globals";
 import { Binding } from "@framework/Reflection";
 import { is } from "@framework/Signum.Entities";
 import { isLite } from "@framework/Signum.Entities";
-import {  } from "@framework/Components";
 import { ModalHeaderButtons } from "@framework/Components/ModalHeaderButtons";
-import { NumericTextBox, isNumber } from "@framework/Lines/AutoLine";
 import { AbortableRequest } from "@framework/Services";
+import { NumberBox } from "@framework/Lines/NumberLine";
 
 interface PredictModalProps extends IModalProps<undefined> {
   initialPredict: PredictRequest;
@@ -90,7 +89,8 @@ export function AlternativesCheckBox(p : { binding: Binding<number | null>, onCh
   var val = p.binding.getValue();
   return (
     <label>
-      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumericTextBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions </label>
+      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumberBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions 
+      </label>
   );
 }
 
