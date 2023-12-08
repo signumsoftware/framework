@@ -243,7 +243,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
           {button}
           {buttonAlternatives.map((aos, i) =>
             <Button key={i}
-              variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+              variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
               onClick={() => aos.onClick(eoc)}
               title={aos.text + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
