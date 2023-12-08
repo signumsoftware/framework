@@ -6,7 +6,6 @@ import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
-import { UserAssetMessage } from '../Signum.UserAssets'
 import {
   QueryDescription, SubTokensOptions, FilterConditionOptionParsed,
   isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
@@ -19,7 +18,7 @@ import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
+import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 
 interface FilterBuilderEmbeddedProps {
@@ -284,7 +283,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
   function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
-      title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
+      title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
       <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
@@ -350,7 +349,7 @@ export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
           valueRef.current = isValue ? undefined : null;
           foceUpdate();
         }}
-        title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
+        title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
         <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
