@@ -385,6 +385,7 @@
     <Member Name="Deleting" Description="Löschen" />
     <Member Name="Executing0" Description="Ausführen {0}" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
+    <Member Name="LastOperationLog" Description="Letztes Operationsprotokoll" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation" Description="Operation" />
