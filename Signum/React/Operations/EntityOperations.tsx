@@ -57,6 +57,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: React.cloneElement(
           <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
+            {undefined}
           </DropdownButton>,
           undefined,
           ...groupButtons.map(bbe => bbe.button)

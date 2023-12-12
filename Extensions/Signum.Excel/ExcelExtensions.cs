@@ -180,26 +180,25 @@ public static class ExcelExtensions
         if (theCell.DataType == null)
             return value;
 
-        switch (theCell.DataType.Value)
+        if(theCell.DataType.Value == CellValues.SharedString)
         {
-            case CellValues.SharedString:
-                // For shared strings, look up the value in the shared strings table.
-                var stringTable = document.WorkbookPart!.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
-                // If the shared string table is missing, something's wrong.
-                // Just return the index that you found in the cell.
-                // Otherwise, look up the correct text in the table.
-                if (stringTable != null)
-                    return stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
-                break;
-            case CellValues.Boolean:
-                switch (value)
-                {
-                    case "0":
-                        return "FALSE";
-                    default:
-                        return "TRUE";
-                }
-                //break;
+            // For shared strings, look up the value in the shared strings table.
+            var stringTable = document.WorkbookPart!.GetPartsOfType<SharedStringTablePart>().FirstOrDefault();
+            // If the shared string table is missing, something's wrong.
+            // Just return the index that you found in the cell.
+            // Otherwise, look up the correct text in the table.
+            if (stringTable != null)
+                return stringTable.SharedStringTable.ElementAt(int.Parse(value)).InnerText;
+        }
+        else if (theCell.DataType.Value == CellValues.Boolean)
+        {
+            switch (value)
+            {
+                case "0":
+                    return "FALSE";
+                default:
+                    return "TRUE";
+            }
         }
         return value;
     }
