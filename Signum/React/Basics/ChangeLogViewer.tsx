@@ -6,20 +6,22 @@ import { DateTime } from "luxon";
 import { Last } from "react-bootstrap/esm/PageItem";
 import { ChangeLogMessage } from "../Signum.Basics";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import * as AppContext from "../AppContext";
 import { ConnectionMessage, JavascriptMessage } from "../Signum.Entities";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { VersionInfoTooltip } from "../Frames/VersionChangedAlert";
+import { VersionInfo, VersionInfoTooltip } from "../Frames/VersionChangedAlert";
 import './ChangeLog.css'
 
 
 
 export default function ChangeLogViewer(p: { extraInformation?: string }) {
+  var hasUser = AppContext.currentUser != null;
 
-  var [lastDateString, reloadLastDate] = useAPIWithReload(() => ChangeLogClient.API.getLastDate(), [], { avoidReset: true });
-  var [logs] = useAPIWithReload(() => ChangeLogClient.getChangeLogs(), []);
+  var [lastDateString, reloadLastDate] = useAPIWithReload(() => !hasUser ? null : ChangeLogClient.API.getLastDate(), [hasUser], { avoidReset: true });
+  var logs = useAPI(() => !hasUser ? null : ChangeLogClient.getChangeLogs(), [hasUser]);
 
-  if (logs == null)
-    return null;
+  if (!hasUser  || logs == null)
+    return <VersionInfo/>;
 
   var lastDate = lastDateString ? DateTime.fromISO(lastDateString) : null;
 
@@ -65,7 +67,7 @@ function ShowLogs(p: { logs: ChangeLogClient.ChangeItem[], lastDate: DateTime | 
   return (
     <div>
       {filterdLogs.map(gr =>
-        <div>
+        <div key={gr.key}>
           {p.lastDate == null || p.lastDate < DateTime.fromISO(gr.key) ? <strong title={"Deployed on " + gr.key}>{gr.key}</strong> : <span>{gr.key}</span>}
 
           <ul className="mb-2 p-0" key={gr.key}>
