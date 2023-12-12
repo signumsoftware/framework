@@ -39,7 +39,7 @@ public static class ExcelExtensions
 
     public static decimal FromExcelNumber(string number)
     {
-        return decimal.Parse(number, CultureInfo.InvariantCulture);
+        return decimal.Parse(number, NumberStyles.Number | NumberStyles.AllowExponent, CultureInfo.InvariantCulture);
     }
 
     public static SheetData ToSheetDataWithIndexes(this IEnumerable<Row> rows)
