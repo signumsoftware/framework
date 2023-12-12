@@ -383,6 +383,7 @@ public class ImporterFromExcel
                 var t when t.IsLite() => Lite.Parse(strValue),
                 var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
                 var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
+                var t when t == typeof(decimal) => RoundToValidator(ExcelExtensions.FromExcelNumber(strValue), token),
                 var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
                 var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
                 var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
@@ -391,6 +392,15 @@ public class ImporterFromExcel
                    throw new ApplicationException($"Unable to convert '{strValue}' to {token.Type.TypeName()}. Cell Reference = {CellReference(row, colIndex)}")
             };
         return value;
+    }
+
+    private static decimal RoundToValidator(decimal val, QueryToken token)
+    {
+        var pr = token.GetPropertyRoute();
+
+        var decimalValidator = pr == null ? null : Validator.TryGetPropertyValidator(pr)?.Validators.OfType<DecimalsValidatorAttribute>().SingleOrDefaultEx();
+
+        return decimalValidator == null ? val : val.RoundTo(decimalValidator.DecimalPlaces);
     }
 
     private static string CellReference(Row row, int colIndex)
