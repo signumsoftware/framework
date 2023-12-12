@@ -21,7 +21,7 @@
     <Member Name="SeeMore" Description="mehr sehen ..." />
     <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
   </Type>
-  <Type Name="ChangeLogViewLogEntity" Description="Änderungsprotokoll-Ansichtsprotokoll" PluralDescription="Protokollansichtsprotokolle ändern" Gender="n">
+  <Type Name="ChangeLogViewLogEntity" Description="Change-Log Ansichtsprotokoll" PluralDescription="Change-Log Ansichtsprotokolle" Gender="n">
     <Member Name="LastDate" Description="Letzter Termin" />
     <Member Name="User" Description="Benutzer" />
   </Type>

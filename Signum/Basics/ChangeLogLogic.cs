@@ -20,16 +20,25 @@ public static class ChangeLogLogic
         }
     }
 
-    public static DateTime? GetLastDateAndUpdate()
+    public static DateTime? GetLastDate()
     {
         using (ExecutionMode.Global())
         {
-            var lastLog = Database.Query<ChangeLogViewLogEntity>().Where(cl => cl.User.Is(UserHolder.Current.User)).SingleOrDefault();
-            var result = lastLog?.LastDate;
-            lastLog ??= new ChangeLogViewLogEntity { User = UserHolder.Current.User, LastDate = Clock.Now };
+            var lastLog = Database.Query<ChangeLogViewLogEntity>().SingleOrDefault(cl => cl.User.Is(UserHolder.Current.User));
+            return lastLog?.LastDate;
+       
+        }
+    }
+
+    
+    public static void UpdateLastDate()
+    {
+        using (ExecutionMode.Global())
+        {
+            var lastLog = Database.Query<ChangeLogViewLogEntity>().SingleOrDefault(cl => cl.User.Is(UserHolder.Current.User)) ?? 
+            new ChangeLogViewLogEntity { User = UserHolder.Current.User };
             lastLog.LastDate = Clock.Now;
             lastLog.Save();
-            return result;
         }
     }
 }
