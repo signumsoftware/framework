@@ -23,6 +23,15 @@ class Upgrade_20231212_NugetUpdate : CodeUpgradeBase
                     <PackageReference Include="HtmlAgilityPack" Version="1.11.54" />
                     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
                     <PackageReference Include="Npgsql" Version="8.0.1" />
+                    <PackageReference Include="Selenium.Support" Version="4.16.2" />
+                    <PackageReference Include="Selenium.WebDriver" Version="4.16.2" />
+                    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.6" />
+                    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+                    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+                    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+                    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+                    <PackageReference Include="LibGit2Sharp" Version="0.29.0" />
+                    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
                     """);
         });
     }
