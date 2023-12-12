@@ -151,7 +151,10 @@ public static class AsyncEmailSender
                                     }
                                 }
                                 SetTimer();
-                                SetSqlDepndency();
+                                if (CacheLogic.WithSqlDependency)
+                                {
+                                    SetSqlDepndency();
+                                }
                             }
                         }
                     }
