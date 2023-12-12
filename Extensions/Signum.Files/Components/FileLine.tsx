@@ -69,19 +69,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       labelHtmlAttributes={p.labelHtmlAttributes}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}>
-      {() => hasValue ? renderFile() : p.ctx.readOnly ? undefined :
-        <FileUploader
-          accept={p.accept}
-          maxSizeInBytes={p.maxSizeInBytes}
-          dragAndDrop={p.dragAndDrop}
-          dragAndDropMessage={p.dragAndDropMessage}
-          fileType={p.fileType}
-          onFileLoaded={c.handleFileLoaded}
-          typeName={p.ctx.propertyRoute!.typeReference().name}
-          buttonCss={p.ctx.buttonClass}
-          fileDropCssClass={c.mandatoryClass ?? undefined}
-          divHtmlAttributes={{ className: "sf-file-line-new" }} />
-      }
+      {() => hasValue ? renderFile() : p.ctx.readOnly ? undefined : renderFileUploader()}
     </FormGroup>
   );
 
@@ -115,6 +103,32 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       <div className={ctx.inputGroupClass}>
         {content}
         {buttons}
+      </div>
+    );
+  }
+
+  function renderFileUploader() {
+
+    const content = <FileUploader
+      accept={p.accept}
+      maxSizeInBytes={p.maxSizeInBytes}
+      dragAndDrop={p.dragAndDrop}
+      dragAndDropMessage={p.dragAndDropMessage}
+      fileType={p.fileType}
+      onFileLoaded={c.handleFileLoaded}
+      typeName={p.ctx.propertyRoute!.typeReference().name}
+      buttonCss={p.ctx.buttonClass}
+      fileDropCssClass={c.mandatoryClass ?? undefined}
+      divHtmlAttributes={{ className: "sf-file-line-new" }} />;
+
+    if (!p.extraButtonsBefore && !p.extraButtonsAfter)
+      return content;
+
+    return (
+      <div className={p.ctx.inputGroupClass}>
+        {p.extraButtonsBefore?.(c)}
+        {content}
+        {p.extraButtonsAfter?.(c)}
       </div>
     );
   }

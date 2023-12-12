@@ -104,8 +104,10 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
   function renderButtons() {
     return (
       <span className="float-end">
+        {p.extraButtonsBefore?.(c)}
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
+        {p.extraButtonsAfter?.(c)}
       </span>
     );
   }
