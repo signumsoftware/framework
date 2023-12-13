@@ -32,6 +32,11 @@ class Upgrade_20231212_NugetUpdate : CodeUpgradeBase
                     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
                     <PackageReference Include="LibGit2Sharp" Version="0.29.0" />
                     <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
+                    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.0" />
+                    <PackageReference Include="SciSharp.TensorFlow.Redist" Version="2.16.0" />
+                    <PackageReference Include="xunit" Version="2.6.3" />
+                    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.5">
+                    <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="120.0.6099.7100" />
                     """);
         });
     }
