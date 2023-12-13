@@ -37,8 +37,8 @@ class Upgrade_20231213_ChangeLog : CodeUpgradeBase
                 """);
 
             c.InsertAfterFirstLine(a => a.Contains("ExceptionClient.start"),
-                """
-                ChangeLogClient.start({ routes, applicationName: "Spitzlei", mainChangeLog: () => import("./Changelog") });
+                $$"""
+                ChangeLogClient.start({ routes, applicationName: "{{uctx.ApplicationName}}", mainChangeLog: () => import("./Changelog") });
                 """);
         });
 
