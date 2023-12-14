@@ -387,9 +387,4 @@ public class IntegrityCheckException : Exception
     {
         this.Errors = errors;
     }
-
-    protected IntegrityCheckException(
-      SerializationInfo info,
-      StreamingContext context)
-        : base(info, context) { }
 }

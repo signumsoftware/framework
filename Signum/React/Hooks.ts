@@ -195,7 +195,7 @@ export interface APIHookOptions {
   avoidReset?: boolean;
 }
 
-export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T>, deps: ReadonlyArray<any>, options?: APIHookOptions): [T | undefined, () => void] {
+export function useAPIWithReload<T>(makeCall: (signal: AbortSignal, oldData: T | undefined) => Promise<T> | T, deps: ReadonlyArray<any>, options?: APIHookOptions): [T | undefined, () => void] {
   const [count, setCount] = React.useState(0);
   const value = useAPI<T>(makeCall, [...(deps || []), count], options);
   return [value, () => setCount(c => c + 1)];

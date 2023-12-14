@@ -8,6 +8,7 @@ import { LoginAuthMessage } from '../Signum.Authorization'
 import * as AuthClient from '../AuthClient'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as AppContext from '@framework/AppContext'
+import { QueryString } from "@framework/QueryString"
 import "./Login.css"
 
 export interface LoginContext {
@@ -85,7 +86,9 @@ export function LoginForm(p: { ctx: LoginContext }) {
         setModelState(undefined);
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
-        AuthClient.Options.onLogin();
+
+        const back = QueryString.parse(window.location.search).back
+        AuthClient.Options.onLogin(back);
       })
       .catch((e: ValidationError) => {
         p.ctx.setLoading(undefined);

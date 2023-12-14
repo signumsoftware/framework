@@ -1,5 +1,6 @@
 using System.Collections;
 using Signum.Engine.Sync;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq;
 
@@ -224,10 +225,10 @@ class TranslateResult<T> : ITranslateResult
 
     public object? Execute()
     {
-        return SqlServerRetry.Retry(() =>
+        using (new EntityCache())
+        using (var tr = new Transaction())
         {
-            using (new EntityCache())
-            using (var tr = new Transaction())
+            try
             {
                 object? result;
                 using (var retriever = EntityCache.NewRetriever())
@@ -269,15 +270,21 @@ class TranslateResult<T> : ITranslateResult
 
                 return tr.Commit(result);
             }
-        });
+            catch (Exception e)
+            {
+                tr.OnException(e);
+
+                throw;
+            }
+        }
     }
 
-    public Task<object?> ExecuteAsync(CancellationToken token)
+    public async Task<object?> ExecuteAsync(CancellationToken token)
     {
-        return SqlServerRetry.RetryAsync(async () =>
+        using (new EntityCache())
+        using (var tr = new Transaction())
         {
-            using (new EntityCache())
-            using (var tr = new Transaction())
+            try
             {
                 object? result;
                 using (var retriever = EntityCache.NewRetriever())
@@ -319,7 +326,13 @@ class TranslateResult<T> : ITranslateResult
 
                 return tr.Commit(result);
             }
-        });
+            catch (Exception e)
+            {
+                tr.OnException(e);
+
+                throw;
+            }
+        }
     }
 
     internal static T? UniqueMethod(IEnumerable<T> enumerable, UniqueFunction uniqueFunction)

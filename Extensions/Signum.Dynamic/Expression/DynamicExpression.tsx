@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AutoLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
@@ -14,6 +14,7 @@ import { Lite } from '@framework/Signum.Entities';
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicExpressionEntity } from '../Signum.Dynamic.Expression'
+import TextArea from '@framework/Components/TextArea'
 
 interface DynamicExpressionComponentProps {
   ctx: TypeContext<DynamicExpressionEntity>;
@@ -43,10 +44,9 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 

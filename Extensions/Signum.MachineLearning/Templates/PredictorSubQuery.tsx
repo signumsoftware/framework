@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityTable, TextBoxLine } from '@framework/Lines'
 import { FindOptions, ColumnOption } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.MachineLearning'
@@ -115,7 +115,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
 
   return (
     <div>
-      <AutoLine ctx={ctx.subCtx(f => f.name)} valueHtmlAttributes={{ onBlur: () => parentCtx.frame!.entityComponent!.forceUpdate() }} />
+      <TextBoxLine ctx={ctx.subCtx(f => f.name)} valueHtmlAttributes={{ onBlur: () => parentCtx.frame!.entityComponent!.forceUpdate() }} />
       <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={handleOnChange} />
       {queryKey &&
         <div>

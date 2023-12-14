@@ -332,7 +332,21 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
         return wa.decisionOptions.map(mle => ({
           order: s?.order ?? 0,
           shortcut: undefined,
-          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+          button: <OperationButton eoc={eoc} group={group}
+            onOperationClick={() => mle.element.withConfirmation ?
+              MessageModal.show({
+                title: WorkflowActivityMessage.Conformation.niceToString(),
+                message: WorkflowActivityMessage.Conformation0.niceToString(mle.element.name),
+                buttons: "yes_no",
+                style: "warning",
+              }).then(result => {
+                if (result == "yes") {
+                  eoc.defaultClick(mle.element.name)
+                }
+              })
+              : eoc.defaultClick(mle.element.name)
+              } color = { mle.element.style.toLowerCase() as BsColor } > { mle.element.name }
+          </OperationButton>,
         }));
       }
       else

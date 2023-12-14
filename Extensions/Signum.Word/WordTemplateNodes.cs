@@ -14,7 +14,7 @@ namespace Signum.Word;
 public interface INodeProvider
 {
     OpenXmlLeafTextElement NewText(string text);
-    OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode = SpaceProcessingModeValues.Default, bool initialBr = false);
+    OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false);
     bool IsRun(OpenXmlElement? element);
     bool IsText(OpenXmlElement? element);
     string GetText(OpenXmlElement run);
@@ -32,9 +32,9 @@ public class WordprocessingNodeProvider : INodeProvider
         return (W.Run)element;
     }
 
-    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
+    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
-        var textNode = new W.Text(text!) {Space = spaceMode};
+        var textNode = new W.Text(text!) { Space = spaceMode };
 
         var result = new W.Run(runProps!, textNode);
 
@@ -95,7 +95,7 @@ public class DrawingNodeProvider : INodeProvider
         return (D.Run)element;
     }
 
-    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
+    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
         var textElement = new D.Text(text!);
 
@@ -155,7 +155,7 @@ internal class SpreadsheetNodeProvider : INodeProvider
         return (S.Run)element;
     }
 
-    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues spaceMode, bool initialBr)
+    public OpenXmlCompositeElement NewRun(OpenXmlCompositeElement? runProps, string? text, SpaceProcessingModeValues? spaceMode = null, bool initialBr = false)
     {
         var textElement = new S.Text(text!);
         var result = new S.Run(runProps!, textElement);

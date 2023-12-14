@@ -1,62 +1,82 @@
 import React, { useState } from "react";
-import { API, ChangeLogLine, changeLogs } from './ChangeLogClient'
-import { useAPI } from "../Hooks";
+import * as ChangeLogClient from './ChangeLogClient'
+import { useAPI, useAPIWithReload } from "../Hooks";
 import MessageModal from "../Modals/MessageModal";
 import { DateTime } from "luxon";
 import { Last } from "react-bootstrap/esm/PageItem";
 import { ChangeLogMessage } from "../Signum.Basics";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { JavascriptMessage } from "../Signum.Entities";
+import * as AppContext from "../AppContext";
+import { ConnectionMessage, JavascriptMessage } from "../Signum.Entities";
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { VersionInfo, VersionInfoTooltip } from "../Frames/VersionChangedAlert";
+import './ChangeLog.css'
 
-interface ChangeItem {
-  module: string;
-  date: string;
-  changeLog: ChangeLogLine | ChangeLogLine[];
+
+
+export default function ChangeLogViewer(p: { extraInformation?: string }) {
+  var hasUser = AppContext.currentUser != null;
+
+  var [lastDateString, reloadLastDate] = useAPIWithReload(() => !hasUser ? null : ChangeLogClient.API.getLastDate(), [hasUser], { avoidReset: true });
+  var logs = useAPI(() => !hasUser ? null : ChangeLogClient.getChangeLogs(), [hasUser]);
+
+  if (!hasUser  || logs == null)
+    return <VersionInfo/>;
+
+  var lastDate = lastDateString ? DateTime.fromISO(lastDateString) : null;
+
+  var countLogs = logs.filter(l => !lastDate ? true : DateTime.fromISO(l.deployDate) > lastDate).length;
+
+return (
+  <div className="nav-link">
+  <OverlayTrigger
+    placement={"bottom-end"}
+    overlay={
+      <Tooltip id={`tooltip-buildId`}>
+        <VersionInfoTooltip extraInformation={p.extraInformation} />
+      </Tooltip>
+    }>
+      <span className="sf-pointer" onClick={async e => {
+        e.preventDefault();
+        await MessageModal.show({
+          title: "Change logs",
+          size: 'md',
+          message: <ShowLogs logs={logs!} lastDate={lastDate} />,
+          buttons: "ok"
+        });
+
+        await ChangeLogClient.API.updateLastDate();
+        reloadLastDate();
+      }}>
+      <FontAwesomeIcon icon="circle-info" />
+      <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
+      {countLogs > 0 && <span className="badge bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
+    </span>
+  </OverlayTrigger>
+  </div>
+  );
 }
 
-export function ChangeLogViewer() {
+function ShowLogs(p: { logs: ChangeLogClient.ChangeItem[], lastDate: DateTime | null }) {
 
-  var changes = useAPI(() => Promise.all(Object.values(changeLogs).map(v => v())), []);
+  const [seeMore, setSeeMore] = React.useState(2);
 
-  var lastDate = useAPI(() => API.getLastDate(), []);
-
-  var logs = changes == null ? null : Object.keys(changeLogs).flatMap((m, i) => {
-    var dic = changes![i].default;
-    return Object.keys(dic).map<ChangeItem>(date => {
-      return { module: m, date: date, changeLog: dic[date] };
-    });
-  });
-  
-  if (logs == null)
-    return null;
-  
-  var date = lastDate ? DateTime.fromISO(lastDate) : null;
-
-  return (<a style={{ alignSelf: "center" }} title="Change logs" onClick={() => {
-    MessageModal.show({
-      title: "Change logs",
-      size: 'md',
-      message: <ShowLogs logs={logs} date={date} />,
-      buttons: "ok"
-    });
-  }}><FontAwesomeIcon icon="list-timeline" color={logs?.filter(l => !date ? true : l.date >= date.toFormat('yyyy.MM.d')).length ? "orange" : undefined} /></a>);
-}
-
-function ShowLogs(p: { logs: ChangeItem[] | null, date: DateTime | null }) {
-  const [seeMore, setSeeMore] = React.useState(false);
-  var filterdLogs = !seeMore && p.date ? p.logs?.filter(l => l.date >= p.date!.toFormat('yyyy.MM.d')) : p.logs;
+  var logsByDate = p.logs.orderByDescending(l => l.deployDate).groupBy(l => l.deployDate);
+  var filterdLogs = logsByDate.slice(0, seeMore);
 
   return (
     <div>
-      {filterdLogs?.length == 0 ? <div>
-        {ChangeLogMessage.ThereIsNotAnyNewChangesFrom0.niceToString(p.date!.toLocaleString())}
+      {filterdLogs.map(gr =>
+        <div key={gr.key}>
+          {p.lastDate == null || p.lastDate < DateTime.fromISO(gr.key) ? <strong title={"Deployed on " + gr.key}>{gr.key}</strong> : <span>{gr.key}</span>}
 
-        <a href="#" style={{ display: "block" }} onClick={() => setSeeMore(true)}>{ChangeLogMessage.SeeMore.niceToString()}</a>
-        
-      </div> :
-        filterdLogs!.orderByDescending(l => l.date).groupBy(l => l.date).map(gr => <ul className="mb-2 p-0" key={gr.key}><strong>{gr.key}</strong>
-          {gr.elements.map((e, i) => <li className="ms-5 pb-1" key={i}><strong><samp>{e.module}{" > "}</samp></strong>{Array.isArray(e.changeLog) ? e.changeLog.joinComma(', ') : e.changeLog.toString()}</li>)}
-        </ul>)}
+          <ul className="mb-2 p-0" key={gr.key}>
+            {gr.elements.flatMap(e =>Array.isArray(e.changeLog) ? e.changeLog.map(cl => ({module: e.module, implDate: e.implDate, changeLog: cl,  })) : [{module: e.module, implDate: e.implDate, changeLog: e.changeLog}])
+                .map((a, i) => <li className="ms-5 pb-1" key={i}><strong title={"Implemented on " + a.implDate}><samp>{a.module}{" > "}</samp></strong>{a.changeLog}</li>)}
+          </ul>
+        </div>
+      )}
+      {logsByDate && logsByDate?.length > seeMore && <a href="#" style={{ display: "block" }} onClick={() => setSeeMore(a => a + 2)}>{ChangeLogMessage.SeeMore.niceToString()}</a>}
     </div>
   );
 }

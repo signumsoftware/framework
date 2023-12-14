@@ -649,7 +649,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         }
         else
         {
-            if(((SqlServerConnector)Connector.Current).SupportsDateTrunc && step == null)
+            if (((SqlServerConnector)Connector.Current).SupportsDateTrunc && step == null && part != SqlEnums.week)
             {
                 Expression? result =
                 TrySqlFunction(null, SqlFunction.DATETRUNC, expr.Type,
@@ -658,7 +658,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 return Add(result);
             }
 
-            if(step != null)
+            if (step != null)
             {
                 var stepVisit = Visit(step);
 

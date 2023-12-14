@@ -507,6 +507,7 @@ export module OperationMessage {
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
+  export const LastOperationLog = new MessageKey("OperationMessage", "LastOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
   export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");

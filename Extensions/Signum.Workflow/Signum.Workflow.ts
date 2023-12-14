@@ -50,6 +50,7 @@ export interface ButtonOptionEmbedded extends Entities.EmbeddedEntity {
   Type: "ButtonOptionEmbedded";
   name: string;
   style: Basics.BootstrapStyle;
+  withConfirmation: boolean;
 }
 
 export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
@@ -387,6 +388,8 @@ export module WorkflowActivityMessage {
   export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
   export const Approve = new MessageKey("WorkflowActivityMessage", "Approve");
   export const Decline = new MessageKey("WorkflowActivityMessage", "Decline");
+  export const Conformation = new MessageKey("WorkflowActivityMessage", "Conformation");
+  export const Conformation0 = new MessageKey("WorkflowActivityMessage", "Conformation0");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");

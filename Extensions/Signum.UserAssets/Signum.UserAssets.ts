@@ -32,8 +32,6 @@ export module UserAssetMessage {
   export const SelectTheXmlFileWithTheUserAssetsThatYouWantToImport = new MessageKey("UserAssetMessage", "SelectTheXmlFileWithTheUserAssetsThatYouWantToImport");
   export const SelectTheEntitiesToOverride = new MessageKey("UserAssetMessage", "SelectTheEntitiesToOverride");
   export const SucessfullyImported = new MessageKey("UserAssetMessage", "SucessfullyImported");
-  export const SwitchToValue = new MessageKey("UserAssetMessage", "SwitchToValue");
-  export const SwitchToExpression = new MessageKey("UserAssetMessage", "SwitchToExpression");
   export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
   export const SameSelectionForAllConflictsOf0 = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
   export const _0IsNotFilterable = new MessageKey("UserAssetMessage", "_0IsNotFilterable");

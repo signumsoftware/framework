@@ -279,3 +279,9 @@ public static class QueryFilterUtils
         }).ToList();
     }
 }
+
+public enum UserAssetQueryMessage
+{
+    SwitchToValue,
+    SwitchToExpression,
+}

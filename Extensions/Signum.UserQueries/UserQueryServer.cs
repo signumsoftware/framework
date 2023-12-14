@@ -9,6 +9,7 @@ public static class UserQueryServer
     public static void Start(IApplicationBuilder app)
     {
         UserAssetServer.Start(app);
+        UserAssetServer.QueryPermissionSymbols.Add(UserQueryPermission.ViewUserQuery);
 
         SignumServer.WebEntityJsonConverterFactory.AfterDeserilization.Register((UserQueryEntity uq) =>
         {
