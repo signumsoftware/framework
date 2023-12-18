@@ -589,11 +589,11 @@ public abstract class BlockContainerNode : BaseNode
         var chainLast = ((OpenXmlElement)last.MatchNode).Follow(a => a.Parent).Reverse().ToList();
 
         var result = chainFirst.Zip(chainLast, (f, l) => new { f, l }).First(a => a.f != a.l);
-        AssertNotImportant(chainFirst, result.f!, errorHintParent, first.MatchNode, last.MatchNode); /*CSBUG*/
-        AssertNotImportant(chainLast, result.l!, errorHintParent, last.MatchNode, first.MatchNode);
+        AssertNotImportant(chainFirst, result.f, errorHintParent, first.MatchNode, last.MatchNode); 
+        AssertNotImportant(chainLast, result.l, errorHintParent, last.MatchNode, first.MatchNode);
         
-        first.AscendantNode = result.f!;
-        last.AscendantNode = result.l!;
+        first.AscendantNode = result.f;
+        last.AscendantNode = result.l;
     }
 
     private void AssertNotImportant(List<OpenXmlElement> chain, OpenXmlElement openXmlElement, MatchNode errorHintParent, MatchNode errorHint1, MatchNode errorHint2)

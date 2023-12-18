@@ -887,7 +887,7 @@ ZONE".Lines().Select(a => a.Trim().ToUpperInvariant()).ToHashSet();
             .Where(gr => gr.Count() > 1)
             .Select(gr =>
             {
-                var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index!/*CSBUG*/.StartsWith("IX")).ThenByDescending(a => a.index).First();
+                var best = gr.OrderByDescending(a => a.is_unique).ThenByDescending(a => a.index.StartsWith("IX")).ThenByDescending(a => a.index).First();
 
                 return gr.Where(g => g != best)
                     .Select(g => sqlBuilder.DropIndex(t.Key!, g.index!))

@@ -172,15 +172,13 @@ public class ConsoleSwitch<K, V> : IEnumerable<KeyValuePair<string, WithDescript
             if (from == null && to == null)
                 return Enumerable.Empty<WithDescription<V>>();
 
-            if (from == null && to.HasValue)
+            if (from == null && to != null)
                 return dictionary.Keys.Take(to.Value + 1).Select(s => dictionary.GetOrThrow(s));
 
-            if (from.HasValue && to == null)
+            if (from != null && to == null)
                 return dictionary.Keys.Skip(from.Value).Select(s => dictionary.GetOrThrow(s));
 
-#pragma warning disable CS8629 // Nullable value type may be null. CSBUG
-            return dictionary.Keys.Skip(from.Value).Take((to.Value + 1) - from.Value).Select(s => dictionary.GetOrThrow(s));
-#pragma warning restore CS8629 // Nullable value type may be null.
+            return dictionary.Keys.Skip(from!.Value).Take((to!.Value + 1) - from.Value).Select(s => dictionary.GetOrThrow(s));
         }
         else
         {
