@@ -88,7 +88,7 @@ export function inferActive(r: ToolbarClient.ToolbarResponse<any>, location: Loc
   var prio = isCompatibleWithUrl(r, location, query);
   var bestExtra = r.extraIcons?.map(e => inferActive(e, location, query)).notNull().maxBy(a => a.prio) ?? null;
 
-  if(bestExtra != null && bestExtra.prio > 0 && bestExtra.prio > prio)
+  if (bestExtra != null && bestExtra.prio > 0 && bestExtra.prio > prio)
     return bestExtra;
 
   if (prio > 0)
@@ -164,7 +164,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
   }
 }
 
-function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, children: any, extraIcons: React.ReactElement | undefined  }) {
+function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, children: any, extraIcons: React.ReactElement | undefined }) {
   var [show, setShow] = React.useState(false);
 
   return (
@@ -195,58 +195,60 @@ export function ToolbarNavItem(p: { title: string | undefined, active?: boolean,
           {p.title}
           {p.isExternalLink && <FontAwesomeIcon icon="arrow-up-right-from-square" transform="shrink-5 up-3" />}
         </span>
-        { p.extraIcons}
+        {p.extraIcons}
         <div className={"nav-item-float"}>{p.title}</div>
       </Nav.Link>
     </li>
   );
 }
 
-export function renderExtraIcons(extraIcons?: ToolbarClient.ToolbarResponse<any>[], active?: ToolbarClient.ToolbarResponse<any> | null, autoClose?:() => void ): React.ReactElement | undefined{
-    if(extraIcons == null )
-        return undefined;
+export function renderExtraIcons(extraIcons?: ToolbarClient.ToolbarResponse<any>[], active?: ToolbarClient.ToolbarResponse<any> | null, autoClose?: () => void): React.ReactElement | undefined {
+  if (extraIcons == null)
+    return undefined;
 
   return (<>
-   {extraIcons?.map((ei, i) => {
-        if (ei.content) {
-            var config = ToolbarClient.getConfig(ei);
-            if (config == null) {
-              return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
-            }
-            else {
+    {extraIcons?.map((ei, i) => {
 
-              return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", ei == active  && "active")} key={i} onClick={e => {
-                e.preventDefault();
-                e.stopPropagation();
-                config!.handleNavigateClick(e, ei);
+      if (ei.url) {
+        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", ei == active && "active")} key={i} onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
 
-                if (autoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-                autoClose();
+          let url = ei.url!;
+          var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
+          Dic.getKeys(urlVariables).forEach(v => {
+            url = url.replaceAll(v, urlVariables[v]());
+          });
 
-              }} >{config.getIcon(ei)}</button>
-            };
-          }
+          if (isExternalLink)
+            window.open(AppContext.toAbsoluteUrl(url));
+          else
+            AppContext.pushOrOpenInTab(url, e);
 
-          return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", ei == active  && "active")} key={i} onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            let url = ei.url!;
-            var isExternalLink = url.startsWith("http") && !url.startsWith(window.location.origin + "/" + window.__baseName);
-            Dic.getKeys(urlVariables).forEach(v => {
-              url = url.replaceAll(v, urlVariables[v]());
-            });
-
-            if (isExternalLink)
-              window.open(AppContext.toAbsoluteUrl(url));
-            else
-              AppContext.pushOrOpenInTab(url, e);
-
-            if (autoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+          if (autoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
             autoClose();
 
-          }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>
+        }}>{ToolbarConfig.coloredIcon(parseIcon(ei.iconName!), ei.iconColor)}</button>;
+      }
 
-        })}
+
+      var config = ToolbarClient.getConfig(ei);
+      if (config == null) {
+        return <span className="text-danger sf-extra-icon">{ei.content!.EntityType + "ToolbarConfig not registered"}</span>
+      }
+      else {
+
+        return <button className={classes("btn btn-sm border-0 py-0 m-0 sf-extra-icon", ei == active && "active")} key={i} onClick={e => {
+          e.preventDefault();
+          e.stopPropagation();
+          config!.handleNavigateClick(e, ei);
+
+          if (autoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+            autoClose();
+
+        }} >{config.getIcon(ei)}</button>
+      };
+
+    })}
   </>);
 }

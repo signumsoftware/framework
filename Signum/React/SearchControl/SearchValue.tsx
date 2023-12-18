@@ -388,7 +388,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   function handleClick(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    onClick?.(e);
+    p.htmlAttributes?.onClick?.(e);
 
     var fo: FindOptions;
     if (p.findOptions.columnOptions == undefined && valueToken && valueToken.parent)
