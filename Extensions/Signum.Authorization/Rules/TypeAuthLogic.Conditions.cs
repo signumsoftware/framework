@@ -598,7 +598,7 @@ public static partial class TypeAuthLogic
         var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
             .Where(gr =>
             {
-                if (gr.Key.s.FieldInfo == null) /*CSBUG*/
+                if (gr.Key.s.FieldInfo == null)
                 {
                     var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
                     if (replacedName == null)

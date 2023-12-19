@@ -394,7 +394,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                     Resource = kvp.Key,
                     Role = role,
                     Allowed = kvp.Value.Allowed,
-                    ConditionRules = kvp.Value.Condition!.ToMList() /*CSBUG*/
+                    ConditionRules = kvp.Value.Condition!.ToMList()
                 }, comment: Comment(role, kvp.Key, kvp.Value.Allowed))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                 return restSql;
