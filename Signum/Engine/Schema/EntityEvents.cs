@@ -135,6 +135,10 @@ public class EntityEvents<T> : IEntityEvents
 
         AlternativeRetrieve(id, args);
 
+
+        if (args.AvoidAlternativeRetrieve)
+            return null;
+
         if (args.Entity == null)
             throw new EntityNotFoundException(typeof(T), id);
 
@@ -294,6 +298,7 @@ public delegate void BulkInsetHandler<T>(bool inMListTable);
 public class AlternativeRetrieveArgs<T> where T : Entity
 {
     public bool AvoidAccesVerify { get; set; }
+    public bool AvoidAlternativeRetrieve { get; set; }
     public T? Entity { get; set; }
 }
 
