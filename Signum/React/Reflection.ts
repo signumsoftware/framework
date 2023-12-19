@@ -153,10 +153,11 @@ export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, dur
 
 export function dateTimePlaceholder(luxonFormat: string) {
   var result = DateTime.expandFormat(luxonFormat);
-
+  
   return result
     .replace(/\bd\b/, "dd")
     .replace(/\bMM?\b/, "mm")
+    .replace(/\byyyyy\b/, "yyyy")
     .replace(/\bh\b/, "hh")
     .replace(/\bHH?\b/, "hh")
     .replace(/\bm\b/, "mm");
