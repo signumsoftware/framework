@@ -47,7 +47,7 @@ export async function getChangeLogs(): Promise<ChangeItem[]> {
         var mod = a.groups!.mod;
         var date = a.groups!.date ?? log.deployDate;
 
-        var newModueles = modLogs.extract(l => l.module == mod || l.module.startsWith(mod + ".") && l.implDate < date);
+        var newModueles = modLogs.extract(l => (l.module == mod || l.module.startsWith(mod + ".")) && l.implDate < date);
         newModueles.forEach(a => a.deployDate = date);
 
         result.push(...newModueles);

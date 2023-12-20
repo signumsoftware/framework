@@ -727,7 +727,7 @@ String.prototype.formatWith = function () {
 
 
 String.prototype.forGenderAndNumber = function (this: string, gender: any, number?: number) {
-
+  
   if (!number && !isNaN(parseFloat(gender))) {
     number = gender;
     gender = undefined;
@@ -738,13 +738,13 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
 
   function replacePart(textToReplace: string, ...prefixes: string[]): string {
     return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
-      const captures = m.substr(1, m.length - 2).split("|");
+      const captures = m.substring(1, m.length - 2).split("|");
 
       for (let i = 0; i < prefixes.length; i++) {
         const pr = prefixes[i];
         const capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
         if (capture != undefined)
-          return capture.substr(pr.length);
+          return capture.substring(pr.length);
       }
 
       return "";
@@ -763,9 +763,9 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
   }
 
   if (number == 1)
-    return replacePart(this, "1" + gender.Value + ":", "1:");
+    return replacePart(this, "1" + gender + ":", "1:");
 
-  return replacePart(this, gender.Value + number + ":", gender.Value + ":", number + ":", ":");
+  return replacePart(this, gender + number + ":", gender + ":", number + ":", ":");
 
 
 };
