@@ -11,6 +11,7 @@ import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
 import { useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { Row } from 'react-bootstrap'
 
 export interface EntityRepeaterProps extends EntityListBaseProps {
   createAsLink?: boolean | ((er: EntityRepeaterController) => React.ReactElement<any>);
@@ -18,6 +19,7 @@ export interface EntityRepeaterProps extends EntityListBaseProps {
   createMessage?: string;
   getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
   itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
+  rowClassName?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => string;
 }
 
 export class EntityRepeaterController extends EntityListBaseController<EntityRepeaterProps> {
@@ -88,6 +90,7 @@ export const EntityRepeater = React.forwardRef(function EntityRepeater(props: En
             move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
             drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
             itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
+            rowClassName={p.rowClassName ? (() => p.rowClassName!(c, mlec.index!)) : undefined}
             getComponent={p.getComponent}
             getViewPromise={p.getViewPromise}
             title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
@@ -116,13 +119,14 @@ export interface EntityRepeaterElementProps {
   drag?: DragConfig;
   title?: React.ReactElement<any>;
   itemExtraButtons?: () => React.ReactElement<any>;
+  rowClassName?: () => string;
 }
 
-export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps)
+export function EntityRepeaterElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, rowClassName, title }: EntityRepeaterElementProps)
 {
 
   return (
-    <div className={drag?.dropClass}
+    <div className={classes(drag?.dropClass, rowClassName?.())}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
