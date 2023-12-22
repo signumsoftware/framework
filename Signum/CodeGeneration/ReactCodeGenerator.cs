@@ -1,6 +1,8 @@
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
+using Signum.Utilities.Reflection;
 
 namespace Signum.CodeGeneration;
 
@@ -23,6 +25,7 @@ public class ReactCodeGenerator
             throw new InvalidOperationException("{0} not found. Override GetProjectFolder".FormatWith(projectFolder));
 
         bool? overwriteFiles = null;
+        bool? autoLineMemo = null;
 
         foreach (var mod in GetModules())
         {
@@ -63,7 +66,7 @@ public class ReactCodeGenerator
 
                 foreach (var t in mod.Types)
                 {
-                    WriteFile(() => WriteEntityComponentFile(t), () => GetViewFileName(mod, t), ref overwriteFiles);
+                    WriteFile(() => WriteEntityComponentFile(t, ref autoLineMemo), () => GetViewFileName(mod, t), ref overwriteFiles);
                 }
             }
             else
@@ -73,7 +76,7 @@ public class ReactCodeGenerator
 
                 foreach (var t in mod.Types)
                 {
-                    WriteFile(() => WriteEntityComponentFile(t), () => GetViewFileName(mod, t), ref overwriteFiles);
+                    WriteFile(() => WriteEntityComponentFile(t, ref autoLineMemo), () => GetViewFileName(mod, t), ref overwriteFiles);
                 }
 
                 WriteFile(() => WriteServerFile(mod), () => ServerFileName(mod), ref overwriteFiles);
@@ -92,8 +95,18 @@ public class ReactCodeGenerator
         var fileName = getFileName();
 
         FileTools.CreateParentDirectory(fileName);
-        if (!File.Exists(fileName) || SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
-            File.WriteAllText(fileName, content, Encoding.UTF8);
+        if (File.Exists(fileName))
+        {
+            if (SafeConsole.Ask(ref overwriteFiles, "Overwrite {0}?".FormatWith(fileName)))
+            {
+                SafeConsole.WriteLineColor(ConsoleColor.Yellow, "{0} overriten".FormatWith(fileName));
+                File.WriteAllText(fileName, content, Encoding.UTF8);
+            }
+        }
+        else
+        {
+            SafeConsole.WriteLineColor(ConsoleColor.Green, "{0} created".FormatWith(fileName));
+        }
     }
 
     protected virtual string GetProjectFolder()
@@ -165,7 +178,7 @@ public class ReactCodeGenerator
             if (selectedTypes.IsNullOrEmpty())
                 yield break;
 
-            var modules = selectedTypes.GroupBy(a =>  a.Namespace!.After(this.SolutionName + ".Entities").DefaultText(this.SolutionName))
+            var modules = selectedTypes.GroupBy(a =>  a.Namespace!.After(this.SolutionName).DefaultText(this.SolutionName))
                 .Select(gr => new Module(gr.Key.TryAfterLast(".") ?? gr.Key, gr.ToList())).ToList();
 
             foreach (var m in modules)
@@ -180,7 +193,7 @@ public class ReactCodeGenerator
 
     protected virtual List<Type> CandidateTypes()
     {
-        var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName + ".Entities"));
+        var assembly = Assembly.Load(Assembly.GetEntryAssembly()!.GetReferencedAssemblies().Single(a => a.Name == this.SolutionName));
 
         return assembly.GetTypes().Where(t => t.IsModifiableEntity() && !t.IsAbstract && !typeof(MixinEntity).IsAssignableFrom(t)).ToList();
     }
@@ -386,15 +399,25 @@ public class ReactCodeGenerator
     }
 
 
-    protected virtual string WriteEntityComponentFile(Type type)
+    protected virtual string WriteEntityComponentFile(Type type, ref bool? autoLineMemo)
     {
+        var v = GetVarName(type);
+
+        var autoLine = SafeConsole.Ask(ref autoLineMemo, "Use <AutoLine /> ?");
+        var props = GetProperties(type).Select(pi => WriteProperty(pi, v, autoLine)).ToString(Environment.NewLine);
+
+        var controls = Regex.Matches(props, @"<(?<cn>\w+) ")
+            .Select(cr => cr.Groups["cn"].Value)
+            .ToHashSet();
+
+        controls.UnionWith(["AutoLine", "EntityLine", "EntityTable"]);
+
         StringBuilder sb = new StringBuilder();
         sb.AppendLine("import * as React from 'react'");
         sb.AppendLine("import { " + type.Name + " } from '../" + type.Namespace + "'");
-        sb.AppendLine("import { TypeContext, ValueLine, EntityLine, EntityCombo, EntityList, EntityDetail, EntityStrip, EntityRepeater, EntityTable, FormGroup } from '@framework/Lines'");
-        sb.AppendLine("import { SearchControl, SearchValue, FilterOperation, OrderType, PaginationMode } from '@framework/Search'");
+        sb.AppendLine($"import {{ TypeContext, {controls.ToString(", ")}, FormGroup }} from '@framework/Lines'");
+        sb.AppendLine("import { SearchControl, SearchValue, SearchValueLine} from '@framework/Search'");
 
-        var v = GetVarName(type);
 
 
         if (this.GenerateFunctionalComponent(type))
@@ -405,14 +428,7 @@ public class ReactCodeGenerator
             sb.AppendLine("  var ctx = p.ctx;");
             sb.AppendLine("  return (");
             sb.AppendLine("    <div>");
-
-            foreach (var pi in GetProperties(type))
-            {
-                string? prop = WriteProperty(pi, v);
-                if (prop != null)
-                    sb.AppendLine(prop.Indent(6));
-            }
-
+            sb.AppendLine(props.Indent(6));
             sb.AppendLine("     </div>");
             sb.AppendLine("  );");
             sb.AppendLine("}");
@@ -426,14 +442,7 @@ public class ReactCodeGenerator
             sb.AppendLine("    var ctx = this.props.ctx;");
             sb.AppendLine("    return (");
             sb.AppendLine("      <div>");
-
-            foreach (var pi in GetProperties(type))
-            {
-                string? prop = WriteProperty(pi, v);
-                if (prop != null)
-                    sb.AppendLine(prop.Indent(8));
-            }
-
+            sb.AppendLine(props.Indent(8));
             sb.AppendLine("       </div>");
             sb.AppendLine("    );");
             sb.AppendLine("  }");
@@ -448,8 +457,11 @@ public class ReactCodeGenerator
         return true;
     }
 
-    protected virtual string? WriteProperty(PropertyInfo pi, string v)
+    protected virtual string? WriteProperty(PropertyInfo pi, string v, bool useAutoLine)
     {
+        if (useAutoLine)
+            return WriteAutoLine(pi, v);
+
         if (pi.PropertyType.IsLite() || pi.PropertyType.IsIEntity())
             return WriteEntityProperty(pi, v);
 
@@ -463,6 +475,11 @@ public class ReactCodeGenerator
             return WriteValueLine(pi, v);
 
         return null;
+    }
+
+    protected virtual string WriteAutoLine(PropertyInfo pi, string v)
+    {
+        return "<AutoLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
     }
 
     protected virtual string WriteMListProperty(PropertyInfo pi, string v)
@@ -526,7 +543,44 @@ public class ReactCodeGenerator
 
     protected virtual string WriteValueLine(PropertyInfo pi, string v)
     {
-        return "<ValueLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+        if (pi.PropertyType == typeof(string))
+        {
+            var slv = Validator.GetPropertyValidators(pi.DeclaringType!).TryGetC(pi.Name)?.Validators.OfType<StringLengthValidatorAttribute>().SingleOrDefault();
+            if(slv?.MultiLine == true)
+                return "<TextAreaLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+
+            FormatAttribute? format = pi.GetCustomAttribute<FormatAttribute>();
+            if (format?.Format == "Password")
+                return "<PasswordLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+            if (format?.Format == "Color")
+                return "<ColorLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+            return "<TextBoxLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+        }
+
+
+        if (ReflectionTools.IsNumber(pi.PropertyType.UnNullify()))
+            return "<NumberLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+        if (pi.PropertyType.UnNullify() == typeof(DateTime) ||
+            pi.PropertyType.UnNullify() == typeof(DateOnly))
+            return "<DateTimeLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+        if (pi.PropertyType.UnNullify() == typeof(TimeOnly) ||
+          pi.PropertyType.UnNullify() == typeof(TimeSpan))
+            return "<TimeLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+        if (pi.PropertyType.UnNullify() == typeof(Guid))
+            return "<GuidLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+        if (pi.PropertyType.IsEnum)
+            return "<EnumLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
+
+
+        return "<AutoLine ctx={{ctx.subCtx({0} => {0}.{1})}} /> /*Unknown type {2}*/".FormatWith(v, pi.Name.FirstLower(), pi.PropertyType.Name);
     }
 
     protected virtual IEnumerable<PropertyInfo> GetProperties(Type type)
