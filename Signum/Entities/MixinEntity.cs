@@ -195,7 +195,7 @@ public static class MixinDeclarations
 
         foreach (var pair in list)
         {
-            pair.nm!.CopyFrom(pair.om!, args); /*CSBUG*/
+            pair.nm!.CopyFrom(pair.om, args);
         }
 
         return newEntity;

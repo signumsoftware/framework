@@ -20,7 +20,7 @@ public static class OperationLogic
 
     [AutoExpressionField]
     public static OperationLogEntity? LastOperationLog(this Entity e) =>
-    As.Expression(() => e.OperationLogs().Where(ol => ol.Exception == null).OrderByDescending(a => a.End!.Value).FirstOrDefault());
+    As.Expression(() => e.OperationLogs().DisableQueryFilter().Where(ol => ol.Exception == null).OrderByDescending(a => a.End!.Value).FirstOrDefault());
 
 
     [AutoExpressionField]

@@ -68,6 +68,10 @@ public static class SchemaSynchronizer
         modelTables.JoinDictionaryForeach(databaseTables, (tn, tab, diff) =>
         {
             var key = Replacements.KeyColumnsForTable(tn);
+            
+            replacements.AskForReplacements(
+                diff.Columns.Keys.ToHashSet(),
+                tab.Columns.Keys.ToHashSet(), key);
 
             var incompatibleTypes = diff.Columns.JoinDictionary(tab.Columns, (cn, diff, col) => new { cn, diff, col }).Values.Where(a => !a.diff.CompatibleTypes(a.col) || a.diff.Identity != a.col.Identity).ToList();
 
