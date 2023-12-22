@@ -21,7 +21,7 @@
     <Member Name="SeeMore" Description="mehr sehen ..." />
     <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Es gibt keine neuen Änderungen von {0}" />
   </Type>
-  <Type Name="ChangeLogViewLogEntity" Description="Änderungsprotokoll-Ansichtsprotokoll" PluralDescription="Protokollansichtsprotokolle ändern" Gender="n">
+  <Type Name="ChangeLogViewLogEntity" Description="Change-Log Ansichtsprotokoll" PluralDescription="Change-Log Ansichtsprotokolle" Gender="n">
     <Member Name="LastDate" Description="Letzter Termin" />
     <Member Name="User" Description="Benutzer" />
   </Type>
@@ -385,6 +385,7 @@
     <Member Name="Deleting" Description="Löschen" />
     <Member Name="Executing0" Description="Ausführen {0}" />
     <Member Name="InUserInterface" Description="(in der Benutzeroberfläche)" />
+    <Member Name="LastOperationLog" Description="Letztes Operationsprotokoll" />
     <Member Name="Logs" Description="Logs" />
     <Member Name="MultiSetter" Description="Multi-Setter" />
     <Member Name="Operation" Description="Operation" />
@@ -433,6 +434,9 @@
   <Type Name="PropertyRouteEntity" Description="Eigenschaftsroute">
     <Member Name="Path" Description="Pfad" />
     <Member Name="RootType" Description="Stammtyp" />
+  </Type>
+  <Type Name="PropertyRouteMessage">
+    <Member Name="Translated" Description="Übersetzt" />
   </Type>
   <Type Name="QueryEntity" Description="Abfrage">
     <Member Name="Key" Description="Schlüssel" />

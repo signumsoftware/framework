@@ -1,0 +1,7 @@
+﻿.sf-change-log-badge {
+    padding: 1px 2px;
+    position: relative;
+    top: -10px;
+    left: -5px;
+    border-radius: 10px !important;
+}

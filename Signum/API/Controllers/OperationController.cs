@@ -143,7 +143,7 @@ public class OperationController : ControllerBase
 
         public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JsonElement, object?> converter)
         {
-            Func<JsonElement, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol); /*CSBUG*/
+            Func<JsonElement, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol);
 
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }

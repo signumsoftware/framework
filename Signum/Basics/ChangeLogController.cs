@@ -9,6 +9,12 @@ public class ChangeLogController : ControllerBase
     [HttpGet("api/changelog/getLastDate")]
     public DateTime? GetLastDate()
     {
-        return ChangeLogLogic.GetLastDateAndUpdate();
+        return ChangeLogLogic.GetLastDate();
+    }
+
+        [HttpPost("api/changelog/updateLastDate")]
+    public void UpdateLastDate()
+    {
+        ChangeLogLogic.UpdateLastDate();
     }
 }

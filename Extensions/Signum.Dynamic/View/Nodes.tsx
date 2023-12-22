@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { AutoLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, AutoLineProps, ColorLine, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -33,7 +33,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ColorTextBox, ValueLineController } from '@framework/Lines/AutoLine'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
 
@@ -480,15 +479,10 @@ export interface LineBaseNode extends BaseNode {
   mandatory?: ExpressionOrValue<boolean>;
 }
 
-export interface ValueLineNode extends LineBaseNode {
+export interface AutoLineNode extends LineBaseNode {
   kind: "AutoLine",
-  textArea?: ExpressionOrValue<string>;
   unit?: ExpressionOrValue<string>;
   format?: ExpressionOrValue<string>;
-  autoTrim?: ExpressionOrValue<boolean>;
-  inlineCheckbox?: ExpressionOrValue<boolean>;
-  valueHtmlAttributes?: HtmlAttributesExpression;
-  comboBoxItems?: Expression<string[]>;
 }
 
 NodeUtils.register<AutoLineNode>({
@@ -503,15 +497,10 @@ NodeUtils.register<AutoLineNode>({
     label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
-    valueHtmlAttributes: node.valueHtmlAttributes,
     unit: node.unit,
     format: node.format,
     readOnly: node.readOnly,
     mandatory: node.mandatory,
-    inlineCheckbox: node.inlineCheckbox,
-    valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
-    comboBoxItems: node.comboBoxItems,
-    autoTrim: node.autoTrim,
     onChange: node.onChange
   }),
   render: (dn, ctx) => (<AutoLine
@@ -520,43 +509,35 @@ NodeUtils.register<AutoLineNode>({
     label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
-    valueHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.valueHtmlAttributes)}
     unit={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unit, NodeUtils.isStringOrNull)}
     format={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.format, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
-    inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
-    valueLineType={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
-    optionItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
-    autoFixString={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
     onChange={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
   />),
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
-    return (<div>
-      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
-      <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
-      <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
-    </div>)
+    return (
+        <div>
+            {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+            <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
+        </div>
+    );
   },
 });
 
 export interface MultiValueLineNode extends LineBaseNode {
   kind: "MultiValueLine",
-  onRenderItem?: ExpressionOrValue<(ctx: TypeContext<any>) => React.ReactElement<any>>;
+  onRenderItem?: ExpressionOrValue<(p: AutoLineProps) => React.ReactElement<any>>;
   onCreate?: ExpressionOrValue<() => Promise<any[] | any | undefined>>;
   addValueText?: ExpressionOrValue<string>;
 }
@@ -1543,7 +1524,7 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.color)} type="string" defaultValue={null} options={["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"] as BsColor[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.size)} type="string" defaultValue={null} options={["lg", "md", "sm", "xs"] as BsSize[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.icon)} type="string" defaultValue={null} onRenderValue={(val, e) => <IconTypeahead icon={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newIcon => e.updateValue(newIcon)} />} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTextBox value={val as string | null} formControlClass="form-control form-control-xs" onChange={(newValue: string | null) => e.updateValue(newValue)} />} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <input type="color" value={val as string | undefined} className="form-control form-control-xs" onChange={ev => e.updateValue(ev.currentTarget.value)} />} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />
@@ -1612,7 +1593,7 @@ export namespace NodeConstructor {
 
     if (ti) {
       if (ti.kind == "Enum")
-        return { kind: "AutoLine", field } as ValueLineNode;
+        return { kind: "AutoLine", field } as AutoLineNode;
 
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
@@ -1640,10 +1621,7 @@ export namespace NodeConstructor {
       return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
     }
 
-    if (ValueLineController.getValueLineType(tr) != undefined)
-      return { kind: "AutoLine", field } as ValueLineNode;
-
-    return undefined;
+      return { kind: "AutoLine", field } as AutoLineNode;
   }
 }
 

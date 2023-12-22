@@ -37,6 +37,7 @@ public enum OperationMessage
     TheOperation0DidNotReturnAnEntity,
     Logs,
     PreviousOperationLog,
+    LastOperationLog,
     [Description("{0} & Close")]
     _0AndClose,
     [Description("{0} & New")]

@@ -28,7 +28,6 @@ public static class EvalLogic
         "Signum.Utilities.Reflection",
         "DocumentFormat.OpenXml",
         "DocumentFormat.OpenXml.Packaging",
-        "DocumentFormat.OpenXml.Spreadsheet",
     };
 
     public static HashSet<Type> AssemblyTypes = new HashSet<Type>

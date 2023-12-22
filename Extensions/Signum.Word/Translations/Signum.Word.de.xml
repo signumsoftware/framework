@@ -10,7 +10,7 @@
   <Type Name="WordModelEntity" Description="Word-Modell" PluralDescription="Word-Modelle" Gender="n">
     <Member Name="FullClassName" Description="Full Class Name" />
   </Type>
-  <Type Name="WordTemplateEntity" Description="Word-Vorlage">
+  <Type Name="WordTemplateEntity" Description="Word-Vorlage" Gender="f">
     <Member Name="Applicable" Description="Anwendbar" />
     <Member Name="Culture" Description="Kultur" />
     <Member Name="DisableAuthorization" Description="Autorisierung deaktivieren" />

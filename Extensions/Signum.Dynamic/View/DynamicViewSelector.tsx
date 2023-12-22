@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import { EntityLine, TypeContext } from '@framework/Lines'
+import { EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { Entity, JavascriptMessage, is, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
@@ -46,10 +46,9 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -137,10 +136,9 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: `"${viewName}"`,
-      valueLineType: "TextArea",
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: "View Name",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 

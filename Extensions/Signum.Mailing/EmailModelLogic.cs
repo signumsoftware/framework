@@ -165,7 +165,7 @@ public static class EmailModelLogic
                 from et in Database.Query<EmailTemplateEntity>()
                 where et.Model != null
                 select new { se = et.Model, et })
-                .GroupToDictionary(pair => pair.se!.ToLite(), pair => pair.et!), /*CSBUG*/ 
+                .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et), 
                 new InvalidateWith(typeof(EmailModelEntity), typeof(EmailTemplateEntity)));
 
             TypeToEntity = sb.GlobalLazy(() =>

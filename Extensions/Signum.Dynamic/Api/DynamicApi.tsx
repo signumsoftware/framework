@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AutoLine, TypeContext } from '@framework/Lines'
+import { AutoLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import AutoLineModal from '@framework/AutoLineModal';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicApiEntity } from '../Signum.Dynamic.Controllers'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
+import TextArea from '@framework/Components/TextArea';
 
 interface DynamicApiProps {
   ctx: TypeContext<DynamicApiEntity>;
@@ -33,11 +34,10 @@ public PizzaEntity GetPizza(string id)
 
     AutoLineModal.show({
       type: { name: "string" },
-      initialValue: code,
-      valueLineType: "TextArea",
+       initialValue: code,
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: `GET Code Snippet`,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
     });
   }
@@ -63,10 +63,9 @@ public class PizzaDTO
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: code,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: `POST Code Snippet`,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
     });
   }

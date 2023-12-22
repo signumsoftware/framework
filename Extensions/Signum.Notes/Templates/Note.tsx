@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine, EntityCombo } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { NoteEntity } from '../Signum.Notes'
 
@@ -21,7 +21,7 @@ export default function Note(p : { ctx: TypeContext<NoteEntity> }){
       <hr />
       <AutoLine ctx={ec.subCtx(n => n.title)} />
       <EntityCombo ctx={ec.subCtx(n => n.noteType)} remove={true} />
-      <AutoLine ctx={ec.subCtx(n => n.text)} valueLineType="TextArea" valueHtmlAttributes={{ style: { height: "180px" } }} />
+      <TextAreaLine ctx={ec.subCtx(n => n.text)} valueHtmlAttributes={{ style: { height: "180px" } }} />
     </div>
   );
 }
