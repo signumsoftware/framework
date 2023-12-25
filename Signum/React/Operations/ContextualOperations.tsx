@@ -189,6 +189,14 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
     return getDefaultConfirmMessage(coc);
   }
 
+  if (ContextualOperationContext.fallbackConfirmMessage) {
+    var result = ContextualOperationContext.fallbackConfirmMessage(coc);
+    if (result == true)
+      return getDefaultConfirmMessage(coc);
+    else
+      return result;
+  }
+
   return undefined;
 }
 
