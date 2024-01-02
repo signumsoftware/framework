@@ -489,6 +489,7 @@ export interface ValueLineNode extends LineBaseNode {
   inlineCheckbox?: ExpressionOrValue<boolean>;
   valueHtmlAttributes?: HtmlAttributesExpression;
   comboBoxItems?: Expression<string[]>;
+  extraButtons?: Expression<(vl: ValueLineController) => React.ReactNode>;
 }
 
 NodeUtils.register<ValueLineNode>({
@@ -511,6 +512,7 @@ NodeUtils.register<ValueLineNode>({
     inlineCheckbox: node.inlineCheckbox,
     valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
     comboBoxItems: node.comboBoxItems,
+    extraButtons: node.extraButtons,
     autoTrim: node.autoTrim,
     onChange: node.onChange
   }),
@@ -530,6 +532,7 @@ NodeUtils.register<ValueLineNode>({
     optionItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
     autoFixString={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
     onChange={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
+    extraButtons={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.extraButtons, NodeUtils.isFunctionOrNull)}
   />),
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
@@ -550,6 +553,7 @@ NodeUtils.register<ValueLineNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraButtons)} type={null} defaultValue={null} />
     </div>)
   },
 });

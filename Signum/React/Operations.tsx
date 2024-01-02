@@ -229,6 +229,8 @@ export interface ContextualOperationOptions<T extends Entity> {
 }
 
 export class ContextualOperationContext<T extends Entity> {
+  static fallbackConfirmMessage: ((coc: ContextualOperationContext<Entity>) => string | undefined | null | true) | null = 
+    coc => coc.context.lites.length > 1 ? true : null;
 
   context: ContextualItemsContext<T>
   operationInfo: OperationInfo;
