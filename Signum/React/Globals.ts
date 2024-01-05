@@ -738,7 +738,7 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
 
   function replacePart(textToReplace: string, ...prefixes: string[]): string {
     return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
-      const captures = m.substring(1, m.length - 2).split("|");
+      const captures = m.substring(1, m.length - 1).split("|");
 
       for (let i = 0; i < prefixes.length; i++) {
         const pr = prefixes[i];
