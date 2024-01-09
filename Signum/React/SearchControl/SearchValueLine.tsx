@@ -130,8 +130,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
       title={ctx.titleLabels ? EntityControlMessage.Find.niceToString() : undefined}>
       {EntityBaseController.getFindIcon()}
     </a>;
-  
-  const create = !p.ctx.frame?.currentDate && ((p.create == "ifNull" && value === null) || (p.create ?? false)) &&
+  const create = !p.ctx.frame?.currentDate && ((p.create == "ifNull" && value === null) || (p.create != 'ifNull' && p.create)) &&
     <a href="#" className={classes("sf-line-button sf-create", isFormControl ? "btn input-group-text" : undefined)}
       onClick={handleCreateClick}
       title={ctx.titleLabels ? EntityControlMessage.Create.niceToString() : undefined}>
