@@ -63,33 +63,33 @@ public static class ResetPasswordRequestLogic
         });
 
         new Graph<ResetPasswordRequestEntity>.Execute(ResetPasswordRequestOperation.Execute)
+        {
+            CanBeNew = false,
+            CanBeModified = false,
+            CanExecute = (e) => e.IsValid ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
+            Execute = (e, args) =>
             {
-                CanBeNew = false,
-                CanBeModified = false,
-                CanExecute = (e) => e.IsValid ? null : AuthEmailMessage.YourResetPasswordRequestHasExpired.NiceToString(),
-                Execute = (e, args) =>
+                string password = args.GetArg<string>();
+                e.Used = true;
+                var user = e.User;
+
+                var error = UserEntity.OnValidatePassword(password);
+                if (error != null)
+                    throw new ApplicationException(error);
+
+                if (user.State == UserState.Deactivated)
                 {
-                    string password = args.GetArg<string>();
-                    e.Used = true;
-                    var user = e.User;
-
-                    var error = UserEntity.OnValidatePassword(password);
-                    if (error != null)
-                        throw new ApplicationException(error);
-
-                    if (user.State == UserState.Deactivated)
-                    {
-                        user.Execute(UserOperation.Reactivate);
-                    }
-                    
-                    user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
-                    user.LoginFailedCounter = 0;
-                    using (AuthLogic.Disable())
-                    {
-                        user.Execute(UserOperation.Save);
-                    }
+                    user.Execute(UserOperation.Reactivate);
                 }
-            }.Register();
+
+                user.PasswordHash = PasswordEncoding.EncodePassword(user.UserName, password);
+                user.LoginFailedCounter = 0;
+                using (AuthLogic.Disable())
+                {
+                    user.Execute(UserOperation.Save);
+                }
+            }
+        }.Register();
     }
 
     public static ResetPasswordRequestEntity ResetPasswordRequestExecute(string code, string password)
@@ -99,6 +99,9 @@ public static class ResetPasswordRequestLogic
             var rpr = Database.Query<ResetPasswordRequestEntity>()
                  .Where(r => r.Code == code && r.IsValid)
                  .SingleEx();
+
+            RemoveOtherRequests(rpr);
+
 
             using (UserHolder.UserSession(rpr.User))
             {
@@ -140,28 +143,64 @@ public static class ResetPasswordRequestLogic
 
     }
 
-    public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user)
+    public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user, int maxValidCodes = 5)
     {
         using (OperationLogic.AllowSave<UserEntity>())
         using (AuthLogic.Disable())
         {
-            //Remove old previous requests
-            Database.Query<ResetPasswordRequestEntity>()
-                .Where(r => r.User.Is(user) && r.IsValid)
-                .UnsafeUpdate()
-                .Set(e => e.Used, e => true)
-                .Execute();
 
-            return new ResetPasswordRequestEntity
+            CancelExcess(user, maxValidCodes-1);
+
+            var rpr = new ResetPasswordRequestEntity
             {
                 Code = MyRandom.Current.NextString(32),
                 User = user,
                 RequestDate = Clock.Now,
             }.Save();
+
+
+            //RemoveOtherRequests(rpr);
+            return rpr; ;
         }
     }
+
+
+
+    private static void RemoveOtherRequests(ResetPasswordRequestEntity rpr)
+    {
+        Database.Query<ResetPasswordRequestEntity>()
+            .Where(r => r.User.Is(rpr.User) && r.IsValid && !r.Is(rpr))
+            .UnsafeUpdate()
+            .Set(e => e.Used, e => true)
+            .Execute();
+    }
+
+    private static void CancelExcess(UserEntity user, int maxValidCodes)
+    {
+        var valid = Database.Query<ResetPasswordRequestEntity>()
+             .Where(r => r.User.Is(user) && r.IsValid)
+             .OrderByDescending(r => r.RequestDate)
+             .Select(r => r.ToLite()).Take(maxValidCodes).ToList();
+
+
+
+        Database.Query<ResetPasswordRequestEntity>()
+      .Where(r => r.User.Is(user) && r.IsValid && !valid.Any(c => c.Is(r)))
+      .UnsafeUpdate()
+      .Set(e => e.Used, e => true)
+      .Execute();
+    }
+
+    private static void CancelResetPasswordReques(UserEntity user)
+    {
+        Database.Query<ResetPasswordRequestEntity>()
+            .Where(r => r.User.Is(user) && r.IsValid)
+            .UnsafeUpdate()
+            .Set(e => e.Used, e => true)
+            .Execute();
+    }
 }
-    
+
 public class ResetPasswordRequestEmail : EmailModel<ResetPasswordRequestEntity>
 {
     public string Url;
