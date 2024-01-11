@@ -129,7 +129,8 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                         configuration={p.configuration}
                         showFileIcon={p.showFileIcon}
                         download={p.download}
-                        entityOrLite={p.getFileFromElement ? p.getFileFromElement(mlec.value as EmbeddedEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
+                        containerEntity={p.getFileFromElement ? mlec.value as ModifiableEntity : undefined}
+                        entityOrLite={p.getFileFromElement ? p.getFileFromElement(mlec.value as ModifiableEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
                   }
                 </td>

@@ -94,11 +94,16 @@ export function RenderEntity(p: RenderEntityProps) {
     }
   }
 
+  function readonlySubCtx() {
+    const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(lastEntity, ""), prefix);
+    if (ctx.previousVersion && ctx.previousVersion.value)
+      newCtx.previousVersion = { value: ctx.previousVersion.value as any };
+    return newCtx;
+  }
 
-  const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(lastEntity, ""), prefix);
-  if (ctx.previousVersion && ctx.previousVersion.value)
-    newCtx.previousVersion = { value: ctx.previousVersion.value as any };
-  var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
+  const elementCtx = isLite(ctx.value) ? readonlySubCtx() : ctx;
+
+  var element = componentBox == "useGetComponent" ? p.getComponent!(elementCtx) : componentBox.func(elementCtx);
 
   if (p.extraProps)
     element = React.cloneElement(element, p.extraProps);
