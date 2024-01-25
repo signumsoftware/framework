@@ -272,7 +272,6 @@ public enum ChartParameterMessage
     [Description("Scale (8)")] Scale8,
     InnerRadious,
     Sort,
-    ValueAsNumberOrPercent,
     SvgUrl,
     LocationSelector,
     LocationAttribute,
@@ -323,6 +322,9 @@ public enum ChartParameterMessage
     HorizontalMargin,
     Padding,
     Zoom,
+    Value,
+    Percent,
+    Total
 }
 
 public enum ChartParameterGroupMessage
