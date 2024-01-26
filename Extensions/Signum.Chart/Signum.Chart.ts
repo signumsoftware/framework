@@ -237,7 +237,6 @@ export module ChartParameterMessage {
   export const Scale8 = new MessageKey("ChartParameterMessage", "Scale8");
   export const InnerRadious = new MessageKey("ChartParameterMessage", "InnerRadious");
   export const Sort = new MessageKey("ChartParameterMessage", "Sort");
-  export const ValueAsNumberOrPercent = new MessageKey("ChartParameterMessage", "ValueAsNumberOrPercent");
   export const SvgUrl = new MessageKey("ChartParameterMessage", "SvgUrl");
   export const LocationSelector = new MessageKey("ChartParameterMessage", "LocationSelector");
   export const LocationAttribute = new MessageKey("ChartParameterMessage", "LocationAttribute");
@@ -285,6 +284,9 @@ export module ChartParameterMessage {
   export const HorizontalMargin = new MessageKey("ChartParameterMessage", "HorizontalMargin");
   export const Padding = new MessageKey("ChartParameterMessage", "Padding");
   export const Zoom = new MessageKey("ChartParameterMessage", "Zoom");
+  export const Value = new MessageKey("ChartParameterMessage", "Value");
+  export const Percent = new MessageKey("ChartParameterMessage", "Percent");
+  export const Total = new MessageKey("ChartParameterMessage", "Total");
 }
 
 export const ChartParameterType = new EnumType<ChartParameterType>("ChartParameterType");

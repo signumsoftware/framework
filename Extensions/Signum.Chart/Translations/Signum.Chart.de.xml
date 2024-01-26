@@ -216,6 +216,7 @@
     <Member Name="OpacityScale" Description="Deckkraft-Skala" />
     <Member Name="Order" Description="Reihenfolge" />
     <Member Name="Padding" Description="Padding" />
+    <Member Name="Percent" Description="Prozent" />
     <Member Name="Placeholder" Description="Platzhalter" />
     <Member Name="PointSize" Description="Punktgröße" />
     <Member Name="RadiousPx" Description="Radious(px)" />
@@ -242,8 +243,9 @@
     <Member Name="SubTotal" Description="Zwischensumme" />
     <Member Name="SvgUrl" Description="Svg-URL" />
     <Member Name="TopMargin" Description="Oberer Rand" />
+    <Member Name="Total" Description="Gesamt" />
     <Member Name="UnitMargin" Description="Einheitsrand" />
-    <Member Name="ValueAsNumberOrPercent" Description="Wert als Zahl oder Prozent" />
+    <Member Name="Value" Description="Wert" />
     <Member Name="ValueAsPercent" Description="Wert in Prozent" />
     <Member Name="VerticalLineColor" Description="Farbe der vertikalen Linie" />
     <Member Name="VerticalScale" Description="Vertikale Skala" />
