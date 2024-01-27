@@ -194,7 +194,7 @@ public abstract class ModifiableEntity : Modifiable, IModifiableEntity, ICloneab
                 if (args.OldItems != null)
                 {
                     foreach (ModifiableEntity p in args.OldItems)
-                        p.SetParentEntity(this);
+                        p.ClearParentEntity(this);
                 }
             }
         }
