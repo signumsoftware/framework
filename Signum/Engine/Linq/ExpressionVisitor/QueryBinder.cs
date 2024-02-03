@@ -2075,6 +2075,7 @@ internal class QueryBinder : ExpressionVisitor
                                         "RowId" => mle.RowId.UnNullify(),
                                         "Parent" => mle.Parent,
                                         "RowOrder" => mle.Order ?? throw new InvalidOperationException("{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
+                                        "RowPartitionId" => mle.PartitionId ?? throw new InvalidOperationException("{0} has no {1}".FormatWith(mle.Table.Name, m.Member.Name)),
                                         "Element" => mle.Element,
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };

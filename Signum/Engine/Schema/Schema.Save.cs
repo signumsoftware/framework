@@ -4,6 +4,8 @@ using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Sync;
+using Signum.Entities;
+using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace Signum.Engine.Maps;
 
@@ -371,6 +373,8 @@ public partial class Table
 
 
     internal static FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity i) => i.id);
+    internal static FieldInfo fiPartitionId = ReflectionTools.GetFieldInfo((Entity i) => i.partitionId);
+    internal static FieldInfo fiOldPartitionId = ReflectionTools.GetFieldInfo((Entity i) => i.oldPartitionId);
 
     internal void UpdateMany(List<Entity> list, DirectedGraph<Entity>? backEdges)
     {
@@ -411,37 +415,42 @@ public partial class Table
             {
                 return (uniList, graph) =>
                 {
-                    Entity ident = uniList.Single();
-                    Entity entity = (Entity)ident;
+                    Entity entity = uniList.Single();
 
                     long oldTicks = entity.Ticks;
                     entity.Ticks = Clock.Now.Ticks;
 
-                    table.SetToStrField(ident);
+                    table.SetToStrField(entity);
 
-                    var forbidden = new Forbidden(graph, ident);
+                    var forbidden = new Forbidden(graph, entity);
 
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(ident, oldTicks, forbidden, "", ps))).ExecuteNonQuery();
+                    int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(entity, oldTicks, forbidden, "", ps))).ExecuteNonQuery();
                     if (num != 1)
-                        throw new ConcurrencyException(ident.GetType(), ident.Id);
+                        throw new ConcurrencyException(entity.GetType(), entity.Id);
 
                     if (table.saveCollections.Value != null)
-                        table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(ident, forbidden) });
+                        table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(entity, forbidden) });
+
+                    if (table.PartitionId != null)
+                        entity.OldPartitionId = entity.PartitionId;
                 };
             }
             else
             {
                 return (uniList, graph) =>
                 {
-                    Entity ident = uniList.Single();
+                    Entity entity = uniList.Single();
 
-                    table.SetToStrField(ident);
+                    table.SetToStrField(entity);
 
-                    var forbidden = new Forbidden(graph, ident);
+                    var forbidden = new Forbidden(graph, entity);
 
-                    int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(ident, -1, forbidden, "", ps))).ExecuteNonQuery();
+                    int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(entity, -1, forbidden, "", ps))).ExecuteNonQuery();
                     if (num != 1)
-                        throw new EntityNotFoundException(ident.GetType(), ident.Id);
+                        throw new EntityNotFoundException(entity.GetType(), entity.Id);
+
+                    if (table.PartitionId != null)
+                        entity.OldPartitionId = entity.PartitionId;
                 };
             }
         }
@@ -553,6 +562,7 @@ public partial class Table
                 var pb = Connector.Current.ParameterBuilder;
 
                 string idParamName = ParameterBuilder.GetParameterName("id");
+                string oldPartition = ParameterBuilder.GetParameterName("old_partition");
 
                 string oldTicksParamName = ParameterBuilder.GetParameterName("old_ticks");
 
@@ -566,7 +576,10 @@ public partial class Table
                     var result = $"UPDATE {table.Name} SET\r\n" +
 trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n") + "\r\n" +
 (output && !isPostgres ? $"OUTPUT INSERTED.{id} INTO {updated}\r\n" : null) +
-$"WHERE {id} = {idParamName + suffix}" + (table.Ticks != null ? $" AND {table.Ticks.Name.SqlEscape(isPostgres)} = {oldTicksParamName + suffix}" : null) + "\r\n" +
+$"WHERE {id} = {idParamName + suffix}" +
+(table.PartitionId != null ? $" AND {table.PartitionId.Name.SqlEscape(isPostgres)} = {oldPartition + suffix}" : null) +
+(table.Ticks != null ? $" AND {table.Ticks.Name.SqlEscape(isPostgres)} = {oldTicksParamName + suffix}" : null) +
+"\r\n" +
 (output && isPostgres ? $"RETURNING ({id})" : null);
 
                     if (!(isPostgres && output))
@@ -590,6 +603,11 @@ SELECT {id} FROM rows;";
                     parameters.Add(pb.ParameterFactory(Trio.Concat(oldTicksParamName, paramSuffix), table.Ticks.DbType, null, null, null, null, false, default, table.Ticks.ConvertTicks(paramOldTicks)));
                 }
 
+                if (table.PartitionId != null)
+                {
+                    parameters.Add(pb.ParameterFactory(Trio.Concat(oldPartition, paramSuffix), table.PartitionId.DbType, null, null, null, null, false, default, Expression.Field(paramIdent, fiOldParameterId)));
+                }
+
                 parameters.AddRange(trios.Select(a => (Expression)a.ParameterBuilder));
 
                 var expr = Expression.Lambda<Action<Entity, long, Forbidden, string, List<DbParameter>>>(
@@ -599,6 +617,8 @@ SELECT {id} FROM rows;";
                 return new UpdateCache(table, sqlUpdatePattern, expr.Compile());
             }
         }
+
+        static FieldInfo fiOldParameterId = ReflectionTools.GetFieldInfo((Entity e) => e.oldPartitionId);
 
     }
 
@@ -936,7 +956,7 @@ public partial class TableMList
         internal TableMList table = null!;
 
         internal Func<string, string> sqlDelete = null!;
-        public Func<Entity, string, DbParameter> DeleteParameter = null!;
+        public Func<Entity, string, List<DbParameter>> DeleteParameters = null!;
         public ConcurrentDictionary<int, Action<List<Entity>>> deleteCache = new ConcurrentDictionary<int, Action<List<Entity>>>();
 
         Action<List<Entity>> GetDelete(int numEntities)
@@ -950,7 +970,7 @@ public partial class TableMList
                     List<DbParameter> parameters = new List<DbParameter>();
                     for (int i = 0; i < num; i++)
                     {
-                        parameters.Add(DeleteParameter(list[i], i.ToString()));
+                        parameters.AddRange(DeleteParameters(list[i], i.ToString()));
                     }
                     new SqlPreCommandSimple(sql, parameters).ExecuteNonQuery();
                 };
@@ -958,7 +978,7 @@ public partial class TableMList
         }
 
         internal Func<int, string> sqlDeleteExcept = null!;
-        public Func<MListDelete, List<DbParameter>> DeleteExceptParameter = null!;
+        public Func<MListDelete, List<DbParameter>> DeleteExceptParameters = null!;
         public ConcurrentDictionary<int, Action<MListDelete>> deleteExceptCache = new ConcurrentDictionary<int, Action<MListDelete>>();
 
         Action<MListDelete> GetDeleteExcept(int numExceptions)
@@ -969,7 +989,7 @@ public partial class TableMList
 
                 return delete =>
                 {
-                    new SqlPreCommandSimple(sql, DeleteExceptParameter(delete)).ExecuteNonQuery();
+                    new SqlPreCommandSimple(sql, DeleteExceptParameters(delete)).ExecuteNonQuery();
                 };
             });
         }
@@ -1187,7 +1207,7 @@ public partial class TableMList
 
             if (collection == null)
             {
-                return new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) })
+                return new SqlPreCommandSimple(sqlDelete(suffix), DeleteParameters(parent, suffix) )
                     .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null);
             }
 
@@ -1195,7 +1215,7 @@ public partial class TableMList
                 return null;
 
             return SqlPreCommand.Combine(Spacing.Simple,
-                new SqlPreCommandSimple(sqlDelete(suffix), new List<DbParameter> { DeleteParameter(parent, suffix) }).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
+                new SqlPreCommandSimple(sqlDelete(suffix), DeleteParameters(parent, suffix)).ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null),
                 collection.Select((e, i) => new SqlPreCommandSimple(sqlInsert(new[] { suffix + "_" + i }, false), new List<DbParameter>().Do(ps => InsertParameters(parent, e, i, new Forbidden(), suffix + "_" + i, ps)))
                     .AddComment(e?.ToString())
                     .ReplaceFirstParameter(replaceParameter ? parent.Id.VariableName : null)
@@ -1232,6 +1252,7 @@ public partial class TableMList
 
     internal Lazy<IMListCache> cache;
 
+
     TableMListCache<T> CreateCache<T>()
     {
         var pb = Connector.Current.ParameterBuilder;
@@ -1242,13 +1263,34 @@ public partial class TableMList
             table = this,
             Getter = entity => (MList<T>)Getter(entity),
 
-            sqlDelete = suffix => "DELETE FROM {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix)),
-            DeleteParameter = (ident, suffix) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), ident.Id, this.BackReference.ReferenceTable.PrimaryKey),
+            sqlDelete = suffix =>
+            {
+                var sql = "DELETE FROM {0} WHERE {1} = {2}".FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name + suffix));
+                if (this.PartitionId != null)
+                    sql += " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(PartitionId.Name));
+
+                return sql;
+            },
+            DeleteParameters = (entity, suffix) => 
+            {
+                var list = new List<DbParameter>
+                {
+                    pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name + suffix), entity.Id, this.BackReference.ReferenceTable.PrimaryKey)
+                };
+
+                if (this.PartitionId != null)
+                    list.Add(pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(PartitionId.Name), entity.OldPartitionId, PartitionId));
+
+                return list;
+            },
 
             sqlDeleteExcept = num =>
             {
                 var sql = "DELETE FROM {0} WHERE {1} = {2}"
                     .FormatWith(Name, BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(BackReference.Name));
+
+                if (this.PartitionId != null)
+                    sql += " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(PartitionId.Name));
 
                 sql += " AND {0} NOT IN ({1})"
                     .FormatWith(PrimaryKey.Name.SqlEscape(isPostgres), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
@@ -1256,12 +1298,15 @@ public partial class TableMList
                 return sql;
             },
 
-            DeleteExceptParameter = delete =>
+            DeleteExceptParameters = delete =>
             {
                 var list = new List<DbParameter>
                 {
                     pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(BackReference.Name), delete.Entity.Id, BackReference)
                 };
+
+                if (this.PartitionId != null)
+                    list.Add(pb.CreateReferenceParameter(ParameterBuilder.GetParameterName(PartitionId.Name), delete.Entity.OldPartitionId, PartitionId));
 
                 list.AddRange(delete.ExceptRowIds.Select((e, i) => pb.CreateReferenceParameter(ParameterBuilder.GetParameterName("e" + i), e, PrimaryKey)));
 
@@ -1279,6 +1324,8 @@ public partial class TableMList
             var assigments = new List<Expression>();
 
             BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
+            if (this.PartitionId != null)
+                PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
             if (this.Order != null)
                 Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
@@ -1288,6 +1335,8 @@ public partial class TableMList
                 output && !isPostgres ? $"OUTPUT INSERTED.{PrimaryKey.Name.SqlEscape(isPostgres)}\r\n" : null,
                 suffixes.ToString(s => "  (" + trios.ToString(p => p.ParameterName + s, ", ") + ")", ",\r\n"),
                 output && isPostgres ? $"\r\nRETURNING {PrimaryKey.Name.SqlEscape(isPostgres)}" : null);
+
+         
 
             var expr = Expression.Lambda<Action<Entity, T, int, Forbidden, string, List<DbParameter>>>(
                 Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
@@ -1305,18 +1354,25 @@ public partial class TableMList
 
             var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
 
-            string parentId = "parentId";
-            string rowId = "rowId";
+            const string parentId = "parentId";
+            const string rowId = "rowId";
+            const string oldPartitionID = "oldPartitionID";
 
             //BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
             if (this.Order != null)
                 Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
+
+            if (this.PartitionId != null)
+                PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
+
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
-            result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5};".FormatWith(Name,
+            result.sqlUpdate = suffix => "UPDATE {0} SET \r\n{1}\r\n WHERE {2} = {3} AND {4} = {5}{6};".FormatWith(Name,
                 trios.ToString(p => "{0} = {1}".FormatWith(p.SourceColumn.SqlEscape(isPostgres), p.ParameterName + suffix).Indent(2), ",\r\n"),
                 this.BackReference.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(parentId + suffix),
-                this.PrimaryKey.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(rowId + suffix));
+                this.PrimaryKey.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(rowId + suffix),
+                this.PartitionId != null ? " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(oldPartitionID + suffix)) : null
+                );
 
             var parameters = trios.Select(a => a.ParameterBuilder).ToList();
 
@@ -1324,9 +1380,12 @@ public partial class TableMList
                 Expression.Field(Expression.Property(Expression.Field(paramIdent, Table.fiId), "Value"), "Object")));
             parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, null, null, null, false, default,
                 Expression.Field(paramRowId, "Object")));
+            if (this.PartitionId != null)
+                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(oldPartitionID, paramSuffix), this.PartitionId.DbType, null, null, null, null, false, default, Expression.Field(paramIdent, Table.fiOldPartitionId)));
 
             var expr = Expression.Lambda<Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
                 Table.CreateBlock(parameters, assigments, paramList), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
+
             result.UpdateParameters = expr.Compile();
         }
 

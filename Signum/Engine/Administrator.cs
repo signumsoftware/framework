@@ -204,9 +204,7 @@ public static class Administrator
 
         IColumn[] columns = IndexKeyColumns.Split(view, fields);
 
-        var index = unique ?
-            new UniqueTableIndex(view, columns) :
-            new TableIndex(view, columns);
+        var index = new TableIndex(view, columns) { Unique = unique };
 
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
@@ -632,8 +630,11 @@ public static class Administrator
         });
     }
 
-    public static IDisposable DisableUniqueIndex(UniqueTableIndex index)
+    public static IDisposable DisableUniqueIndex(TableIndex index)
     {
+        if (!index.Unique)
+            throw new InvalidOperationException($"Index {index.IndexName} is not unique");
+
         var sqlBuilder = Connector.Current.SqlBuilder;
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
         sqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();

@@ -254,7 +254,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                     writer.WriteBoolean("isNew", true);
                 }
 
-                if (Schema.Current.Table(entity.GetType()).Ticks != null)
+                var table = Schema.Current.Table(entity.GetType());
+
+                if (table.Ticks != null)
                 {
                     writer.WriteString("ticks", entity.Ticks.ToString());
                 }

@@ -12,7 +12,7 @@ public class UniqueKeyException : ApplicationException
     public Table? Table { get; private set; }
 
     public string? IndexName { get; private set; }
-    public UniqueTableIndex? Index { get; private set; }
+    public TableIndex? Index { get; private set; }
     public List<PropertyInfo>? Properties { get; private set; }
 
     public string? Values { get; private set; }
@@ -43,7 +43,7 @@ public class UniqueKeyException : ApplicationException
                 {
                     var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup =>
                     {
-                        var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+                        var index = tup.table.AllIndexes().FirstOrDefault(ix => ix.Unique == true && ix.IndexName == tup.indexName);
 
                         if (index == null)
                             return null;
@@ -130,8 +130,8 @@ public class UniqueKeyException : ApplicationException
     }
 
     static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
-    static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
-        new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
+    static ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+        new ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?>();
 
     public override string Message
     {

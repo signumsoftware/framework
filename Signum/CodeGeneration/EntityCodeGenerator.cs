@@ -394,13 +394,13 @@ public class EntityCodeGenerator
     protected virtual string? WriteMultiColumnIndexComment(DiffTable table, string name)
     {
         StringBuilder sb = new StringBuilder();
-        foreach (var ix in table.Indices.Values.Where(ix => ix.Columns.Count > 1 || ix.FilterDefinition.HasText() || ix.Columns.Any(ic => ic.IsIncluded)))
+        foreach (var ix in table.Indices.Values.Where(ix => ix.Columns.Count > 1 || ix.FilterDefinition.HasText() || ix.Columns.Any(ic => ic.Type != DiffIndexColumnType.Key)))
         {
             var columns =
-                $"e => new {{ {ix.Columns.Where(a => !a.IsIncluded).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
+                $"e => new {{ {ix.Columns.Where(a => a.Type == DiffIndexColumnType.Key).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
 
-            var incColumns = ix.Columns.Any(a => a.IsIncluded) ? null :
-                $"e => new {{ {ix.Columns.Where(a => a.IsIncluded).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
+            var incColumns = ix.Columns.Any(a => a.Type == DiffIndexColumnType.Included) ? null :
+                $"e => new {{ {ix.Columns.Where(a => a.Type == DiffIndexColumnType.Included).ToString(c => "e." + GetFieldName(table, table.Columns.GetOrThrow(c.ColumnName)).FirstUpper(), ", ")} }}";
 
             sb.AppendLine("//Add to Logic class");
             sb.AppendLine("//sb.AddUniqueIndex<{0}>({1});".FormatWith(name,
@@ -705,7 +705,7 @@ public class EntityCodeGenerator
     {
         return table.Indices.Values.Any(ix =>
             ix.FilterDefinition == null &&
-            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.IsIncluded == false) == true &&
+            ix.Columns.Only()?.Let(ic => ic.ColumnName == col.Name && ic.Type == DiffIndexColumnType.Key) == true &&
             ix.IsUnique &&
             ix.IsPrimary);
     }

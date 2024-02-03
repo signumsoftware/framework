@@ -584,6 +584,9 @@ internal static class TranslatorBuilder
             if (mle.Order != null)
                 bindings.Add(Expression.Bind(type.GetProperty("RowOrder")!, Visit(mle.Order)));
 
+            if (mle.PartitionId != null)
+                bindings.Add(Expression.Bind(type.GetProperty("RowPartitionId")!, Visit(mle.PartitionId)));
+
             bindings.Add(Expression.Bind(type.GetProperty("Element")!, Visit(mle.Element)));
 
             var init = Expression.MemberInit(Expression.New(type), bindings);

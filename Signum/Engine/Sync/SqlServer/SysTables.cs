@@ -289,6 +289,7 @@ public class SysIndexes : IView
     public string name;
     public int object_id;
     public bool is_unique;
+    public int data_space_id;
     public bool is_primary_key;
     public int type;
     public string filter_definition;
@@ -304,6 +305,10 @@ public class SysIndexes : IView
     [AutoExpressionField]
     public SysPartitions? Partition() =>
         As.Expression(() => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == object_id && au.index_id == index_id));
+
+    [AutoExpressionField]
+    public string? DataSpaceName() =>
+        As.Expression(() => Database.View<SysDataSpaces>().SingleOrDefault(au => au.data_space_id == data_space_id)!.name);
 }
 
 [TableName("sys.index_columns")]
@@ -314,6 +319,7 @@ public class SysIndexColumn : IView
     public int column_id;
     public int index_column_id;
     public int key_ordinal;
+    public int partition_ordinal;
     public bool is_included_column;
     public bool is_descending_key;
 }
@@ -468,6 +474,79 @@ public class SysAllocationUnits : IView
     [ViewPrimaryKey]
     public int container_id;
     public int total_pages;
+}
+
+[TableName("sys.partition_functions")]
+public class SysPartitionFunction : IView
+{
+    [ViewPrimaryKey]
+    public int function_id;
+    public string name;
+    public string type;
+    public string type_desc;
+    public int fanout;
+    public bool boundary_value_on_right;
+    public bool is_system;
+    public DateTime create_date;
+    public DateTime modify_date;
+}
+
+[TableName("sys.partition_range_values")]
+public class SysPartitionRangeValues : IView
+{
+    [ViewPrimaryKey]
+    public int function_id;
+    public int boundary_id;
+    public int parameter_id;
+    public string value;
+  
+}
+
+[TableName("sys.partition_schemes")]
+public class SysPartitionSchemes : IView
+{
+    [ViewPrimaryKey]
+    public int data_space_id;
+    public string name;
+    public string type;
+    public string type_desc;
+    public bool is_default;
+    public bool is_system;
+    public int function_id;
+
+}
+
+[TableName("sys.destination_data_spaces")]
+public class SysDestinationDataSpaces : IView
+{
+    public int partition_scheme_id;
+    public int destination_id;
+    public int data_space_id;
+}
+
+[TableName("sys.data_spaces")]
+public class SysDataSpaces : IView
+{
+    public string name;
+    public int data_space_id;
+    public string type;
+    public string type_desc;
+    public int is_default;
+}
+
+[TableName("sys.filegroups")]
+public class SysFileGroups : IView
+{
+    [ViewPrimaryKey]
+    public int data_space_id;
+    public string name;
+    public string type;
+    public string type_desc;
+    public bool is_default;
+    public bool is_system;
+    public Guid? filegroup_guid;
+    public bool is_read_only;
+    public bool is_autogrow_all_files;
 }
 
 #pragma warning restore 649

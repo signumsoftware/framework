@@ -570,6 +570,7 @@ internal class MListElementExpression : DbExpression
     public readonly PrimaryKeyExpression RowId;
     public readonly EntityExpression Parent;
     public readonly Expression? Order;
+    public readonly Expression? PartitionId;
     public readonly Expression Element;
 
     public readonly TableMList Table;
@@ -578,11 +579,12 @@ internal class MListElementExpression : DbExpression
 
     public readonly IntervalExpression? TablePeriod;
 
-    public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression element, IntervalExpression? systemPeriod, TableMList table, Alias alias)
+    public MListElementExpression(PrimaryKeyExpression rowId, EntityExpression parent, Expression? order, Expression? partitionId, Expression element, IntervalExpression? systemPeriod, TableMList table, Alias alias)
         : base(DbExpressionType.MListElement, typeof(MListElement<,>).MakeGenericType(parent.Type, element.Type))
     {
         this.RowId = rowId;
         this.Parent = parent;
+        this.PartitionId = partitionId;
         this.Order = order;
         this.Element = element;
         this.TablePeriod = systemPeriod;
@@ -592,10 +594,11 @@ internal class MListElementExpression : DbExpression
 
     public override string ToString()
     {
-        return "MListElement({0})\n{{\nParent={1},\nOrder={2},\nElement={3}}})".FormatWith(
+        return "MListElement({0})\n{{\nParent={1},\nOrder={2},\nPartitionId={3}\nElement={4}}})".FormatWith(
             RowId.ToString(),
             Parent.ToString(),
             Order?.ToString(),
+            PartitionId?.ToString(),
             Element.ToString());
     }
 

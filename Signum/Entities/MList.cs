@@ -782,6 +782,7 @@ public class MListElement<E, V> where E : Entity
 {
     public PrimaryKey RowId { get; set; }
     public int RowOrder { get; set; }
+    public int RowPartitionId { get; set; }
     public E Parent { get; set; }
     public V Element { get; set; }
 

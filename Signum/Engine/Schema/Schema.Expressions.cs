@@ -45,7 +45,10 @@ public partial class Table
         return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? this.SystemVersioned.IntervalExpression(tableAlias) : null;
     }
 
-
+    internal ColumnExpression PartitionIdExpression(Alias tableAlias)
+    {
+        return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PartitionId!).Name);
+    }
 
     internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
     {
@@ -60,6 +63,11 @@ public partial class Table
 
             if (!ReflectionTools.FieldEquals(fi, fiId))
                 result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id, period, entityContext)));
+        }
+
+        if(this.PartitionId != null)
+        {
+            result.Add(new FieldBinding(fiOldPartitionId, this.PartitionId.GetExpression(tableAlias, binder, id, period, entityContext)));
         }
 
         if (this.Type.IsEntity() && entityContext != null)
@@ -128,6 +136,11 @@ public partial class TableMList
         return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.Order!).Name);
     }
 
+    internal ColumnExpression PartitionIdExpression(Alias tableAlias)
+    {
+        return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PartitionId!).Name);
+    }
+
     internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, IntervalExpression? externalPeriod, bool withRowId)
     {
         var rowId = RowIdExpression(tableAlias);
@@ -166,6 +179,7 @@ public partial class TableMList
             rowId,
             backReference,
             this.Order == null ? null : OrderExpression(tableAlias),
+            this.PartitionId == null ? null : PartitionIdExpression(tableAlias),
             this.Field.GetExpression(tableAlias, binder, rowId, period, entityContext),
             period,
             this,

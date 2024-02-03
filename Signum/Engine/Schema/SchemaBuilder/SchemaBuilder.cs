@@ -4,6 +4,7 @@ using Signum.Utilities.DataStructures;
 using Signum.DynamicQuery.Tokens;
 using System.Reflection.Metadata.Ecma335;
 using Signum.API;
+using Microsoft.Identity.Client;
 
 namespace Signum.Engine.Maps;
 
@@ -45,7 +46,7 @@ public class SchemaBuilder
     }
 
 
-    public UniqueTableIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
+    public TableIndex AddUniqueIndex<T>(Expression<Func<T, object?>> fields, Expression<Func<T, bool>>? where = null, Expression<Func<T, object?>>? includeFields = null) where T : Entity
     {
         var table = Schema.Table<T>();
 
@@ -108,7 +109,7 @@ public class SchemaBuilder
         return index;
     }
 
-    public UniqueTableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
+    public TableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
         Expression<Func<MListElement<T, V>, object>> fields,
         Expression<Func<MListElement<T, V>, bool>>? where = null,
         Expression<Func<MListElement<T, V>, object>>? includeFields = null)
@@ -194,16 +195,16 @@ public class SchemaBuilder
         return index;
     }
 
-    public UniqueTableIndex AddUniqueIndex(ITable table, Field[] fields)
+    public TableIndex AddUniqueIndex(ITable table, Field[] fields)
     {
-        var index = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(fields));
+        var index = new TableIndex(table, TableIndex.GetColumnsFromFields(fields)) { Unique = true };
         AddIndex(index);
         return index;
     }
 
-    public UniqueTableIndex AddUniqueIndex(ITable table, IColumn[] columns)
+    public TableIndex AddUniqueIndex(ITable table, IColumn[] columns)
     {
-        var index = new UniqueTableIndex(table, columns);
+        var index = new TableIndex(table, columns) { Unique = true };
         AddIndex(index);
         return index;
     }
@@ -311,9 +312,21 @@ public class SchemaBuilder
             table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
             tr.Switch("GenerateTemporal");
             table.SystemVersioned = ToSystemVersionedInfo(Settings.TypeAttribute<SystemVersionedAttribute>(type), table.Name);
-            tr.Switch("GenerateColumns");
+            tr.Switch("PartitionScheme");
+            table.PartitionScheme = ToPartitionScheme(Settings.TypeAttribute<PartitionColumnAttribute>(type));
             table.GenerateColumns();
         }
+    }
+
+    private SqlPartitionScheme? ToPartitionScheme(PartitionColumnAttribute? att)
+    {
+        if (att == null)
+            return null;
+
+        if (att.SchemeName == null)
+            return schema.PartitionSchemes.SingleEx(); 
+        
+        return schema.PartitionSchemes.SingleEx(a => a.Name == att.SchemeName);
     }
 
     public SystemVersionedInfo? ToSystemVersionedInfo(SystemVersionedAttribute? att, ObjectName tableName)
@@ -400,7 +413,7 @@ public class SchemaBuilder
                     result.Add(fiId.Name, new EntityField(type, fiId, field));
                 }
 
-                TicksColumnAttribute? t = type.GetCustomAttribute<TicksColumnAttribute>();
+                TicksColumnAttribute? t = Settings.TypeAttribute<TicksColumnAttribute>(type);
                 if (t == null || t.HasTicks)
                 {
                     PropertyRoute route = root.Add(fiTicks);
@@ -421,6 +434,17 @@ public class SchemaBuilder
                         throw new InvalidOperationException("Duplicated field with name {0} on {1}, shadowing not supported".FormatWith(fiToStr.Name, type.TypeName()));
 
                     result.Add(fiToStr.Name, new EntityField(type, fiToStr, field));
+                }
+
+                PartitionColumnAttribute? a = Settings.TypeAttribute<PartitionColumnAttribute>(type);
+                if (a != null)
+                {
+                    PropertyRoute route = root.Add(fiPartitionId);
+
+                    Field field = GenerateField(table, route, preName, forceNull, inMList);
+
+                    result.Add(fiPartitionId.Name, new EntityField(type, fiPartitionId, field));
+
                 }
             }
 
@@ -454,6 +478,7 @@ public class SchemaBuilder
     static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity o) => o.toStr);
     static readonly FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity o) => o.ticks);
     static readonly FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity o) => o.id);
+    static readonly FieldInfo fiPartitionId = ReflectionTools.GetFieldInfo((Entity o) => o.partitionId);
 
     protected virtual Field GenerateField(ITable table, PropertyRoute route, NameSequence preName, bool forceNull, bool inMList)
     {
@@ -482,6 +507,8 @@ public class SchemaBuilder
                     return GenerateFieldPrimaryKey((Table)table, route, name);
                 case KindOfField.Ticks:
                     return GenerateFieldTicks((Table)table, route, name);
+                case KindOfField.PartitionId:
+                    return GenerateFieldPartition((Table)table, route, name);
                 case KindOfField.ToStr:
                     return GenerateFieldToString((Table)table, route, name);
                 case KindOfField.Value:
@@ -512,6 +539,7 @@ public class SchemaBuilder
     {
         PrimaryKey,
         Ticks,
+        PartitionId,
         ToStr,
         Value,
         Reference,
@@ -527,6 +555,9 @@ public class SchemaBuilder
 
         if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiTicks))
             return KindOfField.Ticks;
+
+        if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiPartitionId))
+            return KindOfField.PartitionId;
 
         if (route.FieldInfo != null && ReflectionTools.FieldEquals(route.FieldInfo, fiToStr))
             return KindOfField.ToStr;
@@ -612,6 +643,33 @@ public class SchemaBuilder
             Scale = Settings.GetSqlScale(ticksAttr, null, pair.DbType),
             Default = ticksAttr?.GetDefault(Settings.IsPostgres),
             Check = ticksAttr?.GetCheck(Settings.IsPostgres),
+        };
+    }
+
+    protected virtual FieldValue GenerateFieldPartition(Table table, PropertyRoute route, NameSequence name)
+    {
+        var partitionAttr = Settings.TypeAttribute<PartitionColumnAttribute>(table.Type);
+
+        if (partitionAttr == null)
+            throw new InvalidOperationException("PartitionColumnAttribute is null");
+
+        Type type = partitionAttr?.Type ?? route.Type;
+
+        DbTypePair pair = Settings.GetSqlDbType(partitionAttr, type);
+
+        string partitionName = partitionAttr?.Name ?? name.ToString();
+
+        return table.PartitionId = new FieldPartitionId(route, type, partitionName)
+        {
+            DbType = pair.DbType,
+            Collation = Settings.GetCollate(partitionAttr),
+            UserDefinedTypeName = pair.UserDefinedTypeName,
+            Nullable = IsNullable.No,
+            Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),
+            Precision = Settings.GetSqlPrecision(partitionAttr, null, pair.DbType),
+            Scale = Settings.GetSqlScale(partitionAttr, null, pair.DbType),
+            Default = partitionAttr?.GetDefault(Settings.IsPostgres),
+            Check = partitionAttr?.GetCheck(Settings.IsPostgres),
         };
     }
 
@@ -837,8 +895,32 @@ public class SchemaBuilder
 
         var sysAttribute = Settings.FieldAttribute<SystemVersionedAttribute>(route) ??
             (Settings.TypeAttribute<SystemVersionedAttribute>(table.Type) != null ? new SystemVersionedAttribute() : null);
-
         mlistTable.SystemVersioned = ToSystemVersionedInfo(sysAttribute, mlistTable.Name);
+
+        var partitionAttr = Settings.FieldAttribute<PartitionColumnAttribute>(route) ??
+            (Settings.TypeAttribute<PartitionColumnAttribute>(table.Type) != null ? new PartitionColumnAttribute() : null);
+        mlistTable.PartitionScheme = ToPartitionScheme(partitionAttr);
+        if(mlistTable.PartitionScheme != null)
+        {
+            Type type = partitionAttr?.Type ?? typeof(int);
+
+            DbTypePair pair = Settings.GetSqlDbType(partitionAttr, type);
+
+            string columnName = partitionAttr?.Name ?? "PartitionId";
+
+            mlistTable.PartitionId = new FieldPartitionId(route, type, columnName)
+            {
+                DbType = pair.DbType,
+                Collation = Settings.GetCollate(partitionAttr),
+                UserDefinedTypeName = pair.UserDefinedTypeName,
+                Nullable = IsNullable.No,
+                Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),
+                Precision = Settings.GetSqlPrecision(partitionAttr, null, pair.DbType),
+                Scale = Settings.GetSqlScale(partitionAttr, null, pair.DbType),
+                Default = partitionAttr?.GetDefault(Settings.IsPostgres),
+                Check = partitionAttr?.GetCheck(Settings.IsPostgres),
+            };
+        }
 
         mlistTable.GenerateColumns();
 
@@ -968,6 +1050,7 @@ public class SchemaBuilder
             case KindOfField.Value:
             case KindOfField.Embedded:
             case KindOfField.MList:  //only used for table name
+            case KindOfField.PartitionId:
                 return name;
             case KindOfField.Reference:
             case KindOfField.Enum:
@@ -1009,6 +1092,17 @@ public class SchemaBuilder
         });
 
         return result;
+    }
+
+
+    public void WithPartition<T>(Func<T, int> calculatePartitionId)
+        where T : Entity
+    {
+        if (Schema.Tables.ContainsKey(typeof(T)))
+            throw new InvalidOperationException($"Type {typeof(T).Name} already included");
+
+        Schema.Settings.TypeAttributes<T>().Add(new PartitionColumnAttribute());
+        Schema.EntityEvents<T>().PreSaving += (e, ctx) => e.PartitionId = calculatePartitionId(e);
     }
 }
 

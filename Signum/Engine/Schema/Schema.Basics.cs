@@ -24,7 +24,7 @@ public interface ITable
 
     List<TableIndex>? MultiColumnIndexes { get; set; }
 
-    List<TableIndex> GeneratAllIndexes();
+    List<TableIndex> AllIndexes();
 
     void GenerateColumns();
 
@@ -33,6 +33,9 @@ public interface ITable
     bool IdentityBehaviour { get; }
 
     FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
+
+    SqlPartitionScheme? PartitionScheme { get; } 
+
 }
 
 public class SystemVersionedInfo
@@ -299,7 +302,10 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         return fields;
     }
 
-    public List<TableIndex> GeneratAllIndexes()
+    List<TableIndex>? allIndexes;
+    public List<TableIndex> AllIndexes() => allIndexes ??= GeneratAllIndexes();
+
+    List<TableIndex> GeneratAllIndexes()
     {
         IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
         if (Mixins != null)
@@ -310,7 +316,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         if (MultiColumnIndexes != null)
             result.AddRange(MultiColumnIndexes);
 
-        if (result.OfType<UniqueTableIndex>().Any())
+        if (result.Where(a=>a.Unique).Any())
         {
             var s = Schema.Current.Settings;
             List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
@@ -321,13 +327,13 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
             {
                 result = result.Select(ix =>
                 {
-                    var ui = ix as UniqueTableIndex;
-                    if (ui == null || ui.AvoidAttachToUniqueIndexes)
+                    if (!ix.Unique || ix.AvoidAttachToUniqueIndexes)
                         return ix;
 
-                    return new UniqueTableIndex(ui.Table, ui.Columns.Union(attachedFields).ToArray())
+                    return new TableIndex(ix.Table, ix.Columns.Union(attachedFields).ToArray())
                     {
-                        Where = ui.Where
+                        Unique = true,
+                        Where = ix.Where
                     };
                 }).ToList();
             }
@@ -356,10 +362,22 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         return this.AllFields().SelectMany(f => f.Field.TablesMList());
     }
 
-    public FieldTicks Ticks { get; internal set; }
     public FieldPrimaryKey PrimaryKey { get; internal set; }
+    public FieldTicks? Ticks { get; internal set; }
+    public FieldPartitionId? PartitionId { get; internal set; }
 
     IColumn ITable.PrimaryKey => PrimaryKey;
+
+    public SqlPartitionScheme? PartitionScheme { get; set; }
+
+    public void SetPartitionSchem(SqlPartitionScheme scheme)
+    {
+        this.PartitionScheme = scheme;
+        foreach (var item in TablesMList())
+        {
+            item.PartitionScheme = scheme;
+        }
+    }
 
     public IEnumerable<EntityField> AllFields()
     {
@@ -372,7 +390,6 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
     }
-
 }
 
 public class EntityField
@@ -401,7 +418,7 @@ public abstract partial class Field
 {
     public Type FieldType { get; private set; }
     public PropertyRoute Route { get; private set; }
-    public UniqueTableIndex? UniqueIndex { get; set; }
+    public TableIndex? UniqueIndex { get; set; }
 
     public Field(PropertyRoute route, Type? fieldType = null)
     {
@@ -420,13 +437,14 @@ public abstract partial class Field
         return new[] { UniqueIndex };
     }
 
-    public virtual UniqueTableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
     {
         if (attribute == null)
             return null;
 
-        var result = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(this))
+        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this))
         {
+            Unique = true,
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
@@ -572,7 +590,14 @@ public partial class FieldPrimaryKey : Field, IColumn
         if (this.UniqueIndex != null)
             throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-        return new[] { new PrimaryKeyIndex(table) };
+        if (table.PartitionScheme == null)
+            return new[] { new TableIndex(table, this) { PrimaryKey = true, Clustered = true } };
+        else
+            return new[] {
+                new TableIndex(table, this) { PrimaryKey = true },
+                new TableIndex(table, this) { Clustered = true, Partitioned = true },
+            };
+
     }
 
     internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -645,6 +670,17 @@ public partial class FieldTicks : FieldValue
     public new Type Type { get; set; }
 
     public FieldTicks(PropertyRoute route, Type type, string name)
+        : base(route, null, name)
+    {
+        this.Type = type;
+    }
+}
+
+public partial class FieldPartitionId : FieldValue
+{
+    public new Type Type { get; set; }
+
+    public FieldPartitionId(PropertyRoute route, Type type, string name)
         : base(route, null, name)
     {
         this.Type = type;
@@ -1316,6 +1352,7 @@ public partial class FieldMList : Field, IFieldFinder
         }
     }
 
+
     internal override IEnumerable<TableMList> TablesMList()
     {
         return new[] { TableMList };
@@ -1344,6 +1381,8 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public string? Check { get; set; }
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
+
+
         public PrimaryKeyColumn(Type type, string name)
         {
             Type = type;
@@ -1359,9 +1398,11 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     public PrimaryKeyColumn PrimaryKey { get; set; }
     public FieldReference BackReference { get; set; }
     public FieldValue? Order { get; set; }
+    public FieldPartitionId PartitionId { get; internal set; }
     public Field Field { get; set; }
 
     public SystemVersionedInfo? SystemVersioned { get; set; }
+    public SqlPartitionScheme? PartitionScheme { get; set; }
 
     public Type CollectionType { get; private set; }
 
@@ -1392,6 +1433,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         if (Order != null)
             cols.Add(Order);
 
+        if (PartitionId != null)
+            cols.Add(PartitionId);
+
         cols.AddRange(Field.Columns());
 
         if (this.SystemVersioned != null)
@@ -1400,12 +1444,20 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         Columns = cols.ToDictionary(a => a.Name);
     }
 
-    public List<TableIndex> GeneratAllIndexes()
+    List<TableIndex>? allIndexes;
+    public List<TableIndex> AllIndexes() => allIndexes ??= GeneratAllIndexes();
+
+    List<TableIndex> GeneratAllIndexes()
     {
-        var result = new List<TableIndex>
-            {
-                new PrimaryKeyIndex(this)
-            };
+        var result = new List<TableIndex>();
+
+        if (PartitionScheme == null)
+            result.Add(new TableIndex(this, this.PrimaryKey) { Clustered = true, PrimaryKey = true });
+        else
+        {
+            result.Add(new TableIndex(this, this.PrimaryKey) { PrimaryKey = true });
+            result.Add(new TableIndex(this, this.PrimaryKey) { Clustered = true, Partitioned = true });
+        }
 
         result.AddRange(BackReference.GenerateIndexes(this));
         result.AddRange(Field.GenerateIndexes(this));
@@ -1444,6 +1496,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
         if (this.Order != null && predicate(this.Order))
             yield return this.Order;
+
+        if (this.PartitionId != null && predicate(this.PartitionId))
+            yield return this.PartitionId;
 
         if (predicate(this.Field))
             yield return this.Field;

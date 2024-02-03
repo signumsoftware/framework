@@ -52,6 +52,24 @@ public abstract class Entity : ModifiableEntity, IEntity
         set { ticks = value; }
     }
 
+    [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal int? oldPartitionId;
+    [HiddenProperty, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public int? OldPartitionId
+    {
+        get { return oldPartitionId; }
+        internal set { oldPartitionId = value; }
+    }
+
+    [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal int? partitionId;
+    [HiddenProperty]
+    public int? PartitionId
+    {
+        get { return partitionId; }
+        set { partitionId = value; }
+    }
+
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))

@@ -394,7 +394,7 @@ public class SqlPreCommandSimple : SqlPreCommand
 
     static readonly Regex regex = new Regex(@"@[_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}][_\p{Ll}\p{Lu}\p{Lt}\p{Lo}\p{Nl}\p{Nd}]*");
 
-    internal static string Encode(object? value, bool simple = false)
+    internal static string LiteralValue(object? value, bool simple = false)
     {
         if (value == null || value == DBNull.Value)
             return "NULL";
@@ -455,7 +455,7 @@ public class SqlPreCommandSimple : SqlPreCommand
             sb.Append(Sql);
         else
         {
-            var dic = Parameters.ToDictionary(a => a.ParameterName, a => Encode(a.Value));
+            var dic = Parameters.ToDictionary(a => a.ParameterName, a => LiteralValue(a.Value));
 
             sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
         }
@@ -470,7 +470,7 @@ public class SqlPreCommandSimple : SqlPreCommand
             p.ParameterName,
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
-        var parameterValues = pars.ToString(p => p.ParameterName + " = " + Encode(p.Value, simple: true), ",\r\n");
+        var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
 @params = N'{parameterVars}', 

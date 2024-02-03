@@ -167,10 +167,11 @@ internal class DbExpressionVisitor : ExpressionVisitor
         var rowId = (PrimaryKeyExpression)Visit(mle.RowId);
         var parent = (EntityExpression)Visit(mle.Parent);
         var order = Visit(mle.Order);
+        var partitionId = Visit(mle.PartitionId);
         var element = Visit(mle.Element);
         var period = (IntervalExpression?)Visit(mle.TablePeriod);
-        if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
-            return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
+        if (rowId != mle.RowId || parent != mle.Parent || partitionId != mle.PartitionId || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
+            return new MListElementExpression(rowId, parent, order, partitionId, element, period, mle.Table, mle.Alias);
         return mle;
     }
 
