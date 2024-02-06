@@ -117,7 +117,7 @@ public static class SysTablesSchema
                                               Columns = (from ic in i.IndexColumns()
                                                          join c in t.Columns() on ic.column_id equals c.column_id
                                                          orderby ic.index_column_id
-                                                         select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column }).ToList()
+                                                         select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column, IsDescending = ic.is_descending_key}).ToList()
                                           }).ToList(),
 
                          ViewIndices = (from v in Database.View<SysViews>()
@@ -131,7 +131,7 @@ public static class SysTablesSchema
                                             Columns = (from ic in i.IndexColumns()
                                                        join c in v.Columns() on ic.column_id equals c.column_id
                                                        orderby ic.index_column_id
-                                                       select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column }).ToList()
+                                                       select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column, IsDescending = ic.is_descending_key }).ToList()
 
                                         }).ToList(),
 
