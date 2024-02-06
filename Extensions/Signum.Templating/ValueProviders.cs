@@ -1,3 +1,4 @@
+using Microsoft.CodeAnalysis.FlowAnalysis;
 using Signum.DynamicQuery.Tokens;
 using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
@@ -110,6 +111,13 @@ public abstract class ValueProviderBase
         var type = match.Groups["type"].Value;
         var token = match.Groups["token"].Value;
 
+        void AssertNoColectionToken(ParsedToken pt)
+        {
+            if (pt.QueryToken != null && QueryToken.IsCollection(pt.QueryToken.Type))
+                tp.AddError(false, $"@[{typeToken}] is a collection, missing 'Element' token at the end");
+        }
+       
+
         switch (type)
         {
             case "":
@@ -124,14 +132,16 @@ public abstract class ValueProviderBase
                             return null;
                         }
 
-                        if (vp is not TokenValueProvider )
+                        if (vp is not TokenValueProvider)
                             return new ContinueValueProvider(token.TryAfter('.'), vp, tp) { Variable = variable };
                     }
 
                     if (ConstantValueProvider.TryParseConstantValue(token, out var val))
                         return new ConstantValueProvider(val, tp) { Variable = variable };
 
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.QueryDescription, tp.Variables, tp.AddError);
+
+                    AssertNoColectionToken(result);
 
                     if (result.QueryToken != null && TranslateInstanceValueProvider.IsTranslateInstanceCanditate(result.QueryToken))
                         return new TranslateInstanceValueProvider(result, false, tp) { Variable = variable };
@@ -140,14 +150,14 @@ public abstract class ValueProviderBase
                 }
             case "q":
                 {
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
-
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.QueryDescription, tp.Variables, tp.AddError);
+                    AssertNoColectionToken(result);
                     return new TokenValueProvider(result, true) { Variable = variable };
                 }
             case "t":
                 {
                     ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
-
+                    AssertNoColectionToken(result);
                     return new TranslateInstanceValueProvider(result, true, tp) { Variable = variable };
                 }
             case "m":
@@ -230,7 +240,18 @@ public class TokenValueProvider : ValueProviderBase
         if (p.Rows.IsEmpty())
             return null;
 
-        return p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
+        var value = p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
+
+        if(ParsedToken.QueryToken is CollectionToArrayToken ctat)
+        {
+            var array = (IEnumerable<object>)(value ?? Array.Empty<object>());
+
+            var separator = ctat.ToArrayType == CollectionToArrayType.SeparatedByNewLine || ctat.ToArrayType == CollectionToArrayType.SeparatedByNewLineDistinct ? "\n" : ", ";
+
+            return array.ToString(separator);
+        }
+
+        return value;
     }
 
     public override void Foreach(TemplateParameters p, Action forEachElement)

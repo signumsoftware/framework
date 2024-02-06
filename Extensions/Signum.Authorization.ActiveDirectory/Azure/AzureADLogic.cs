@@ -502,8 +502,8 @@ public class MicrosoftGraphCreateUserContext : IAutoCreateUserContext
     public string UserName => User.UserPrincipalName!;
     public string? EmailAddress => User.UserPrincipalName;
 
-    public string FirstName => User.GivenName!;
-    public string LastName => User.Surname!;
+    public string FirstName => User.GivenName ?? User.DisplayName.TryBefore(" ") ?? User.DisplayName!;
+    public string LastName => User.Surname ?? User.DisplayName.TryAfter(" ") ?? User.DisplayName!;
 
     public Guid? OID => Guid.Parse(User.Id!);
 
