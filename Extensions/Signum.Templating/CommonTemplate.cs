@@ -82,6 +82,7 @@ public static class TemplateUtils
         else
         {
             var vpb = ValueProviderBase.TryParse(filter.Groups["token"].Value, variable, parser);
+
             var operation = filter.Groups["operation"].Value;
             var value = filter.Groups["value"].Value;
             return new ConditionCompare(vpb, operation, value, parser.AddError);
