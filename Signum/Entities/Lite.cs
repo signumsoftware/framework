@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using Signum.Entities.Internal;
+using Signum.Engine.Maps;
 
 namespace Signum.Entities;
 
@@ -27,6 +28,12 @@ public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
     /// Returns the Id if the lite is not pointing to a new entity, otherwise exception
     /// </summary>
     PrimaryKey Id { get; }
+
+
+    /// <summary>
+    /// PartitionId to optimize queries
+    /// </summary>
+    int? PartitionId { get; }
 
     /// <summary>
     /// Determines whether the lite is pointing to a new Entity. 
@@ -154,8 +161,8 @@ public static class Lite
 {
     public static Type BaseImplementationType = typeof(LiteImp);
 
-    static GenericInvoker<Func<PrimaryKey, object?, Lite<Entity>>> giNewLite =
-        new((id, m) => new LiteImp<Entity, string>(id, (string?)m));
+    static GenericInvoker<Func<PrimaryKey, object?, int?, Lite<Entity>>> giNewLite =
+        new((id, m, partitionId) => new LiteImp<Entity, string>(id, (string?)m, partitionId));
 
     static GenericInvoker<Func<Entity, object?, Lite<Entity>>> giNewLiteFat =
         new((entity, m) => new LiteImp<Entity, string>(entity, (string?)m));
@@ -205,14 +212,24 @@ public static class Lite
         if (type == null)
             return LiteMessage.Type0NotFound.NiceToString().FormatWith(match.Groups["type"].Value);
 
-        if (!PrimaryKey.TryParse(match.Groups["id"].Value, type, out PrimaryKey id))
+        var idStr = match.Groups["id"].Value;
+        int? partitionId = null;
+        if (idStr.Contains("/"))
+        {
+            idStr = idStr.Before("/");
+            partitionId = int.Parse(idStr.After("/"));
+        }
+
+        if (!PrimaryKey.TryParse(idStr, type, out PrimaryKey id))
             return LiteMessage.IdNotValid.NiceToString();
 
         string? toStr = match.Groups["toStr"].Value.DefaultText(null!); //maybe null
 
-        result = giNewLite.GetInvoker(type, typeof(string))(id, toStr);
+        result = giNewLite.GetInvoker(type, typeof(string))(id, toStr, partitionId);
+
         return null;
     }
+       
 
     public static string? TryParse<T>(string liteKey, out Lite<T>? lite) where T : class, IEntity
     {
@@ -221,19 +238,22 @@ public static class Lite
         return result;
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id)
+    public static Lite<Entity> Create(Type type, PrimaryKey id) => Create(type, id);
+    public static Lite<Entity> Create(Type type, PrimaryKey id, int? partitionId)
     {
-        return giNewLite.GetInvoker(type, typeof(string))(id, null);
+        return giNewLite.GetInvoker(type, typeof(string))(id, null, partitionId);
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id, object model)
+    public static Lite<Entity> Create(Type type, PrimaryKey id, object model) => Create(type, id, model);
+    public static Lite<Entity> Create(Type type, PrimaryKey id, object model, int? partitionId)
     {
-        return giNewLite.GetInvoker(type, model.GetType())(id, model);
+        return giNewLite.GetInvoker(type, model.GetType())(id, model, partitionId);
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType)
+    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType) => Create(type, id, modelType);
+    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType, int? partitionId)
     {
-        return giNewLite.GetInvoker(type, modelType)(id, null);
+        return giNewLite.GetInvoker(type, modelType)(id, null, partitionId);
     }
 
     [DebuggerStepThrough]
@@ -247,7 +267,7 @@ public static class Lite
 
         var model = Lite.ConstructModel(entity, modelType);
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
+        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model, entity.PartitionId);
     }
 
     [DebuggerStepThrough]
@@ -259,7 +279,9 @@ public static class Lite
 
         var model = Lite.ConstructModel(entity, modelType);
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model);
+        var lite = (Lite<T>)giNewLite.GetInvoker(entity.GetType(), modelType)(entity.Id, model, entity.PartitionId);
+
+        return lite;
     }
 
     public static IEnumerable<Type> GetAllLiteModelTypes(Type entityType)
@@ -278,7 +300,7 @@ public static class Lite
         if (entity.IsNew)
             throw new InvalidOperationException("ToLite is not allowed for new entities, use ToLiteFat instead");
 
-        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), model.GetType())(entity.Id, model);
+        return (Lite<T>)giNewLite.GetInvoker(entity.GetType(), model.GetType())(entity.Id, model, entity.PartitionId);
     }
 
     [DebuggerStepThrough]
@@ -588,18 +610,25 @@ public static class Lite
         return Lite.Extract(t) ?? t;
     }
 
-
     public static Lite<T> Create<T>(PrimaryKey id) where T : Entity
     {
-        return new LiteImp<T, string>(id, null);
+        return new LiteImp<T, string>(id, null, null);
+    }
+
+    public static Lite<T> Create<T>(PrimaryKey id, int? partitionId) where T : Entity
+    {
+        return new LiteImp<T, string>(id, null, partitionId);
     }
 
     public static Lite<T> Create<T>(PrimaryKey id, object model) where T : Entity
+        => Create<T>(id, model, null);
+
+    public static Lite<T> Create<T>(PrimaryKey id, object model, int? partitionId) where T : Entity
     {
         if(model == null || model is string)
-            return new LiteImp<T, string>(id, (string?)model);
+            return new LiteImp<T, string>(id, (string?)model, partitionId);
 
-        return (Lite<T>)giNewLite.GetInvoker(typeof(T), model?.GetType() ?? typeof(string))(id, model);       
+        return (Lite<T>)giNewLite.GetInvoker(typeof(T), model?.GetType() ?? typeof(string))(id, model, partitionId);       
     }
 
     static ConcurrentDictionary<(Type type, Type modelType), ConstructorInfo> liteConstructorCache = new();
@@ -614,9 +643,9 @@ public static class Lite
     }
 
 
-    public static NewExpression NewExpression(Type type, Expression id, Expression model)
+    public static NewExpression NewExpression(Type type, Expression id, Expression model, Expression partitionId)
     {
-        return Expression.New(Lite.GetLiteConstructorFromCache(type, model.Type), id.UnNullify(), model);
+        return Expression.New(Lite.GetLiteConstructorFromCache(type, model.Type), id.UnNullify(), model, partitionId);
     }
 
     public static Lite<T> ParsePrimaryKey<T>(string id)

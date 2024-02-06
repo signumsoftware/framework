@@ -10,6 +10,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 {
     T? entityOrNull;
     PrimaryKey? id;
+    int? partitionId;
     M? model;
 
     // Methods
@@ -17,7 +18,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
     {
     }
 
-    public LiteImp(PrimaryKey id, M? model)
+    public LiteImp(PrimaryKey id, M? model, int? partitionId)
     {
         if (typeof(T).IsAbstract)
             throw new InvalidOperationException(typeof(T).Name + " is abstract");
@@ -26,6 +27,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
             throw new InvalidOperationException(typeof(T).TypeName() + " requires ids of type "
                 + PrimaryKey.Type(typeof(T)).TypeName() + ", not " + id.Object.GetType().TypeName());
 
+        this.partitionId = partitionId;
         this.id = id;
         this.model = model;
         this.Modified = ModifiedState.Clean;
@@ -41,6 +43,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
         this.entityOrNull = entity;
         this.id = entity.IdOrNull;
+        this.partitionId = entity.PartitionId;
         this.model = model;
         this.Modified = entity.Modified;
     }
@@ -97,6 +100,8 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
     public object? Model => this.model;
 
+    public int? PartitionId => this.partitionId;
+
     public void SetEntity(Entity ei)
     {
         if (id == null)
@@ -126,6 +131,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
     {
         var newId = entityOrNull!.Id;
         id = newId;
+        partitionId = entityOrNull!.partitionId;
         return newId;
     }
 
@@ -204,7 +210,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
 
     public Lite<T> Clone()
     {
-        return new LiteImp<T, M>(Id, model);
+        return new LiteImp<T, M>(Id, model, this.PartitionId);
     }
 
     public M1 GetModel<M1>() where M1 : ModelEntity

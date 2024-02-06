@@ -140,6 +140,8 @@ public interface IEntity : IModifiableEntity, IRootEntity
     [HiddenProperty]
     PrimaryKey? IdOrNull { get; }
 
+    int? PartitionId { get; }
+
     [HiddenProperty]
     bool IsNew { get; }
 

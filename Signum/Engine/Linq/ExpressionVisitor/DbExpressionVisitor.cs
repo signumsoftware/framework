@@ -84,8 +84,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
             return eos;
         });
 
-        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models)
-            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models);
+        var partitionIds = lite.PartitionIds == null ? null : Visit(lite.PartitionIds, pid => Visit(pid));
+        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models || partitionIds != lite.PartitionIds)
+            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models, partitionIds);
         return lite;
     }
 

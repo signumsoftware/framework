@@ -70,6 +70,12 @@ internal class EntityExpression : DbExpression
 
         return binding.Binding;
     }
+ 
+    public Expression? GetPartitionId()
+    {
+        FieldBinding? binding = Bindings?.SingleOrDefaultEx(fb => ReflectionTools.FieldEquals(Signum.Engine.Maps.Table.fiPartitionId, fb.FieldInfo));
+        return binding?.Binding;
+    }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
@@ -381,9 +387,10 @@ internal class LiteValueExpression : DbExpression
     public readonly PrimaryKeyExpression Id;
     public readonly Expression? CustomModelExpression; 
     public readonly ReadOnlyDictionary<Type, ExpressionOrType>? Models;
+    public readonly ReadOnlyDictionary<Type, Expression>? PartitionIds;
 
 
-    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? customModelExpression, ReadOnlyDictionary<Type, ExpressionOrType>? models) :
+    public LiteValueExpression(Type type, Expression typeId, PrimaryKeyExpression id, Expression? customModelExpression, ReadOnlyDictionary<Type, ExpressionOrType>? models, ReadOnlyDictionary<Type, Expression>? partitionIds) :
         base(DbExpressionType.LiteValue, type)
     {
         this.TypeId = typeId ?? throw new ArgumentNullException(nameof(typeId));
@@ -394,13 +401,14 @@ internal class LiteValueExpression : DbExpression
 
         this.CustomModelExpression = customModelExpression;
         this.Models = models;
+        this.PartitionIds = partitionIds;
     }
 
     public override string ToString()
     {
-
         var lastPart = CustomModelExpression != null ? ("custmoModelExpression: " + CustomModelExpression.ToString()) :
             Models != null ? ("models: {\n" + Models.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.ToString(), "\n, ").Indent(4) + "\n}") :
+            PartitionIds != null ? ("partitions: {\n" + PartitionIds.ToString(kvp => kvp.Key.TypeName() + ": " + kvp.Value.ToString(), "\n, ").Indent(4) + "\n}") :
             null;
 
         return $"new Lite<{Type.CleanType().TypeName()}>({TypeId},{Id}, {lastPart})";

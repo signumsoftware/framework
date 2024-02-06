@@ -1381,7 +1381,7 @@ public partial class TableMList
             parameters.Add(pb.ParameterFactory(Table.Trio.Concat(rowId, paramSuffix), this.PrimaryKey.DbType, null, null, null, null, false, default,
                 Expression.Field(paramRowId, "Object")));
             if (this.PartitionId != null)
-                parameters.Add(pb.ParameterFactory(Table.Trio.Concat(oldPartitionID, paramSuffix), this.PartitionId.DbType, null, null, null, null, false, default, Expression.Field(paramIdent, Table.fiOldPartitionId)));
+                    parameters.Add(pb.ParameterFactory(Table.Trio.Concat(oldPartitionID, paramSuffix), this.PartitionId.DbType, null, null, null, null, false, default, Expression.Field(paramIdent, Table.fiOldPartitionId)));
 
             var expr = Expression.Lambda<Action<Entity, PrimaryKey, T, int, Forbidden, string, List<DbParameter>>>(
                 Table.CreateBlock(parameters, assigments, paramList), paramIdent, paramRowId, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
