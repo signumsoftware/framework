@@ -50,6 +50,7 @@ export interface SearchValueLineProps {
   onValueChanged?: (value: any) => void;
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
   onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false,
+  onExplore?: (vsc: SearchValueController) => Promise<boolean>;
 }
 
 export interface SearchValueLineController {
@@ -183,6 +184,7 @@ const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValue
           unit={null}
           deps={p.deps}
           onRender={p.onRender}
+          onExplore={p.onExplore}
           customRequest={p.customRequest}
           avoidRenderTimeMachineIcon
         />
