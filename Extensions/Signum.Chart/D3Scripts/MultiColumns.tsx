@@ -68,7 +68,7 @@ export default function renderMultiColumns({ data, width, height, parameters, lo
 
   var y = scaleFor(valueColumn0, allValues, 0, yRule.size('content'), parameters["Scale"]);
 
-  var interMagin = 2;
+  var interMagin = parseInt(parameters["HorizontalMargin"]);
 
   var xSubscale = d3.scaleBand()
     .domain(pivot.columns.map(s => s.key))

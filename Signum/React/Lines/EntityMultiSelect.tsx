@@ -44,7 +44,7 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
     }
   }
 
-  handleOnSelect = (lites: Lite<Entity>[]) => {
+  handleOnSelect = (lites: (Lite<Entity> | Entity)[]) => {
     var current = this.props.ctx.value as MList<Lite<Entity> | Entity>;
 
     lites.filter(lite => !current.some(mle => is(mle.element, lite))).forEach(lite => {
@@ -124,7 +124,7 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
           textField="name"
           value={p.ctx.value}
           data={optionsRows}
-          onChange={(value => c.handleOnSelect(value.map(e => e.entity!)))}
+          onChange={((value: ResultRow[] | MList<Entity> | MList<Lite<Entity>>) => c.handleOnSelect(value.map(e => isMListElement(e) ? e.element : e.entity!)))}
           renderListItem={({ item }) => p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)}
           renderTagValue={({ item }) => isMListElement(item) ? Navigator.renderLite(getLite(item.element)) :
             p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)
@@ -146,7 +146,13 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
 
 
     p.ctx.value.forEach(mle => {
-      const lite = mle.element;
+      const entityOrLite = mle.element;
+
+      const lite = isEntity(entityOrLite) ? toLite(entityOrLite) : 
+      isLite(entityOrLite) ? entityOrLite : null;
+
+      if(lite == null)
+        throw new Error("Unexpected " +  mle.element);
 
       var index = elements.findIndex(a => is(a?.entity, lite));
       if (index == -1)
