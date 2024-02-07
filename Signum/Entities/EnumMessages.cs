@@ -152,6 +152,10 @@ public enum EntityControlMessage
     ToggleSideBar,
     Maximize,
     Minimize,
+    [Description("{0} character[s]")]
+    _0Characters,
+    [Description("{0} character[s] remaining")]
+    _0CharactersRemaining
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

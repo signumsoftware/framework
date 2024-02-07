@@ -412,6 +412,8 @@ export module EntityControlMessage {
   export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
   export const Maximize = new MessageKey("EntityControlMessage", "Maximize");
   export const Minimize = new MessageKey("EntityControlMessage", "Minimize");
+  export const _0Characters = new MessageKey("EntityControlMessage", "_0Characters");
+  export const _0CharactersRemaining = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
 }
 
 export module FrameMessage {
