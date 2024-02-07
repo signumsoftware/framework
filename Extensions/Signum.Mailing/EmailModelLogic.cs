@@ -73,7 +73,7 @@ public abstract class EmailModel<T> : IEmailModel
         throw new InvalidOperationException($"Since {typeof(T).Name} is not in {imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
     }
 
-    public virtual List<Order> GetOrders(QueryDescription queryDescription)
+    public virtual List<Order> GetOrders(QueryDescription qd)
     {
         return new List<Order>();
     }
