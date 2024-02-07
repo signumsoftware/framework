@@ -49,3 +49,10 @@ public enum TranslatedSummaryState
     Pending,
     None,
 }
+
+
+[AutoInit]
+public static class TranslatedInstanceOperation
+{
+    public static DeleteSymbol<TranslatedInstanceEntity> Delete;
+}

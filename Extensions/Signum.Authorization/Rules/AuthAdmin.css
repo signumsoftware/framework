@@ -36,6 +36,11 @@
 {
     font-style: italic;
 }
+
+    .sf-auth-rules .sf-auth-condition td {
+        background-color: #f7f7f7
+    }
+
 .sf-auth-rules .sf-auth-condition-button
 {
     margin: 5px 0 5px 3px;
@@ -50,11 +55,11 @@
 }
 
     .sf-auth-rules small {
-        color:#bbb
+        color: #656565
     }
 
     .sf-auth-rules small.and {
-        color: #444
+        color: black
     }
 
 a.sf-auth-chooser
@@ -115,8 +120,12 @@ table.sf-auth-rules tr.sf-auth-namespace td {
     color: #d8d8d8
 }
 
+.sf-auth-condition .sf-condition-icon {
+    font-size: small;
+}
+
 a.sf-condition-icon {
-    color: #999
+    color: #999;
 }
 
 a.sf-condition-icon:hover {

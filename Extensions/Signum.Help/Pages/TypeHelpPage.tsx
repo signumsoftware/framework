@@ -37,7 +37,7 @@ export default function TypeHelpPage() {
     var elem = hash && document.getElementById(hash);
 
     if (elem)
-      elem.scrollIntoView();
+      elem.scrollIntoView({ block: "center" });
 
   }, [hash, typeHelp]);
 

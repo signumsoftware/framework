@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { Lite, is } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -23,7 +23,7 @@ export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity>
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(s => s.name)} />
+      <AutoLine ctx={sc.subCtx(s => s.name)} />
       <EntityLine ctx={sc.subCtx(s => s.emailTemplate)} onChange={forceUpdate} />
       {type && <EntityLine ctx={sc.subCtx(s => s.targetsFromUserQuery)} />}
       {type && <EntityLine ctx={sc.subCtx(s => s.uniqueTarget)} type={{ isLite: true, name: type }} />}

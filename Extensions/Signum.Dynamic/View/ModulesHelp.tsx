@@ -1,9 +1,10 @@
 import * as React from 'react'
 import { DropdownButton, Dropdown } from 'react-bootstrap'
 import { Dic } from '@framework/Globals';
-import ValueLineModal from '@framework/ValueLineModal';
+import AutoLineModal from '@framework/AutoLineModal';
 import { globalModules } from './GlobalModules';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views';
+import { TextAreaLine } from '@framework/Lines';
 
 export function ModulesHelp(p: { cleanName: string; clientCode?: boolean; }) {
 
@@ -269,10 +270,10 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
     var text = [clientModules[key], modules[key]].filter(a => a).join("\r\n\r\n");
     if (text == "")
       return;
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: `${DynamicViewMessage.ModulesHelp.niceToString()}.${key}`,
       message: "Copy to clipboard: Ctrl+C, ESC",
       valueHtmlAttributes: { style: { height: "400px" } },

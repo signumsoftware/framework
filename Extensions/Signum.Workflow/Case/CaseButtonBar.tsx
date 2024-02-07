@@ -3,7 +3,7 @@ import * as React from 'react'
 import { DateTime } from 'luxon'
 import { TypeContext, EntityFrame } from '@framework/TypeContext'
 import { PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine } from '@framework/Lines'
 import { EntityPack, getToString } from '@framework/Signum.Entities'
 import { ButtonBar } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, CaseActivityMessage, WorkflowActivityEntity } from '../Signum.Workflow'
@@ -32,7 +32,7 @@ export default function CaseButtonBar(p : CaseButtonBarProps){
     <div>
       <div className="workflow-buttons">
         <ButtonBar frame={p.frame} pack={p.pack} />
-        <ValueLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.note)} formGroupStyle="None" placeholderLabels={true} />
       </div>
       {(ca.workflowActivity as WorkflowActivityEntity).userHelp &&
         <UserHelpComponent activity={ca.workflowActivity as WorkflowActivityEntity} />}

@@ -58,22 +58,22 @@ public static class Administrator
     {
         using (OverrideDatabaseInSysViews(tableName.Schema.Database))
         {
+            var table = Database.View<SysTables>().SingleEx(t => t.name == tableName.Name && t.Schema().name == tableName.Schema.Name);
+
             var columns =
-                (from t in Database.View<SysTables>()
-                 where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
-                 from c in t.Columns()
+                (from c in table.Columns()
                  select new DiffColumn
                  {
                      Name = c.name,
                      DbType = new AbstractDbType(SysTablesSchema.ToSqlDbType(c.Type()!.name)),
                      UserTypeName = null,
-                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
+                     PrimaryKey = table.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
                  }).ToList();
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($@"[TableName(""{tableName}"")]");
-            sb.AppendLine($"public class {tableName.Name} : IView");
+            sb.AppendLine($"public class {tableName.Name.Replace(" ", "")} : IView");
             sb.AppendLine(@"{");
             foreach (var c in columns)
             {

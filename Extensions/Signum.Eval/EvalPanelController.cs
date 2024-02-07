@@ -14,7 +14,7 @@ public class EvalPanelController : ControllerBase
     {
         EvalPanelPermission.ViewDynamicPanel.AssertAuthorized();
 
-        var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(SignumServer.JsonSerializerOptions)).Select(a => a.Entity).ToListAsync();
+        var allEntities = await QueryLogic.Queries.GetEntitiesLite(request.ToQueryEntitiesRequest(request.queryKey, SignumServer.JsonSerializerOptions)).Select(a => a.Entity).ToListAsync();
 
         return allEntities.Select(entity =>
         {

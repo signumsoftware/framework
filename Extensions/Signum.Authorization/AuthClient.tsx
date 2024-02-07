@@ -235,7 +235,7 @@ export namespace Options {
     throw new Error("onLogout should be defined (check MainPublic.tsx in Southwind)");
   }
 
-  export let onLogin: (url?: string) => void = () => {
+  export let onLogin: (back?: string) => void = () => {
     throw new Error("onLogin should be defined (check MainPublic.tsx in Southwind)");
   }
 

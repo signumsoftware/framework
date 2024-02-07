@@ -9,6 +9,7 @@ using Signum.Translation;
 using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Excel;
+using Signum.UserAssets;
 
 namespace Signum.Translation.Instances;
 
@@ -26,6 +27,7 @@ public static class TranslatedInstanceLogic
 
             PropertyRouteTranslationLogic.Start(sb);
             sb.Include<TranslatedInstanceEntity>()
+                //.WithDelete(TranslatedInstanceOperation.Delete)
                 .WithUniqueIndex(ti => new { ti.Culture, ti.PropertyRoute, ti.Instance, ti.RowId })
                 .WithQuery(() => e => new
                 {
@@ -61,7 +63,7 @@ public static class TranslatedInstanceLogic
                     }).ToDictionary())
                     , new InvalidateWith(typeof(TranslatedInstanceEntity)));
 
-            PropertyRouteTranslationLogic.OnTranslateField = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
+            PropertyRouteTranslationLogic.TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
             {
                 var result = GetTranslatedInstance(lite, route, rowId);
 
@@ -70,6 +72,17 @@ public static class TranslatedInstanceLogic
 
                 return fallbackString;
             };
+
+            PropertyRouteTranslationLogic.TranslatedFieldExpression = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
+                
+            Database.Query<TranslatedInstanceEntity>()
+                .Where(a => a.Instance.Is(lite) && a.PropertyRoute.Is(route.ToPropertyRouteEntity()) &&
+                (rowId == null ? a.RowId == null : a.RowId == rowId.ToString()) &&
+                (a.Culture.Is(CultureInfo.CurrentUICulture.TryGetCultureInfoEntity()) || !CultureInfo.CurrentUICulture.IsNeutralCulture && a.Culture.Is(CultureInfo.CurrentUICulture.Parent.TryGetCultureInfoEntity()))
+                ).OrderByDescending(a => a.Culture.Name.Length)
+                .FirstOrDefault()!.TranslatedText ?? fallbackString;
+
+            PropertyRouteTranslationLogic.IsActivated = true;
         }
     }
 
@@ -386,7 +399,7 @@ public static class TranslatedInstanceLogic
             .OrderBy(a => a.Key.Instance.Id)
             .ThenBy(a => a.Key.Route.PropertyInfo!.MetadataToken).Select(r => new ExcelRow
             {
-                Instance = r.Key.Instance.Key(),
+                Instance = r.Key.Instance.KeyLong(),
                 Path = r.Key.Route.PropertyString(),
                 RowId = r.Key.RowId?.ToString(),
                 Original = r.Value.OriginalText,
@@ -408,7 +421,7 @@ public static class TranslatedInstanceLogic
                     orderby ic.Instance, pr.Key.ToString()
                     select new ExcelRow
                     {
-                        Instance = ic.Instance.Key(),
+                        Instance = ic.Instance.KeyLong(),
                         Path = pr.Key.Route.PropertyString(),
                         RowId = pr.Key.RowId?.ToString(),
                         Original = pr.Value.GetOrThrow(DefaultCulture).Original,

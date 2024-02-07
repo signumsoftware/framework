@@ -150,7 +150,6 @@ export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
 export interface FilterGroupOptionParsed {
   groupOperation: FilterGroupOperation;
   frozen: boolean;
-  expanded: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
   pinned?: PinnedFilterParsed;

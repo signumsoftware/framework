@@ -9,7 +9,7 @@ export function Title(p: { children: React.ReactNode, type: HeaderType }) {
 
   const className = p.type.contains("display-") ? p.type : undefined;
 
-  return <ElementType className={className}>{p.children}</ElementType>;
+  return <ElementType className={classes("mt-3", className)}>{p.children}</ElementType>;
 }
 
 export function GroupHeader(p: {

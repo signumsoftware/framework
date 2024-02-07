@@ -27,7 +27,7 @@ import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import * as QuickLinks from '@framework/QuickLinks'
 import * as Constructor from '@framework/Constructor'
 import SelectorModal from '@framework/SelectorModal'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import {
   WorkflowEntity, WorkflowLaneEntity, WorkflowActivityEntity, WorkflowConnectionEntity, WorkflowConditionEntity, WorkflowActionEntity, CaseActivityQuery, CaseActivityEntity,
   CaseActivityOperation, CaseEntity, CaseNotificationState, WorkflowOperation, WorkflowPoolEntity, WorkflowScriptEntity, WorkflowScriptEval,
@@ -45,7 +45,7 @@ import { FilterRequest, ColumnRequest } from '@framework/FindOptions';
 import { BsColor } from '@framework/Components/Basic';
 import { GraphExplorer } from '@framework/Reflection';
 import WorkflowHelpComponent from './Workflow/WorkflowHelpComponent';
-import { EntityLine } from '@framework/Lines';
+import { EntityLine, TextAreaLine } from '@framework/Lines';
 import { SMSMessageEntity } from '../Signum.SMS/Signum.SMS';
 import { EmailMessageEntity } from '../Signum.Mailing/Signum.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
@@ -332,7 +332,21 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
         return wa.decisionOptions.map(mle => ({
           order: s?.order ?? 0,
           shortcut: undefined,
-          button: <OperationButton eoc={eoc} group={group} onOperationClick={() => eoc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationButton>,
+          button: <OperationButton eoc={eoc} group={group}
+            onOperationClick={() => mle.element.withConfirmation ?
+              MessageModal.show({
+                title: WorkflowActivityMessage.Conformation.niceToString(),
+                message: WorkflowActivityMessage.Conformation0.niceToString(mle.element.name),
+                buttons: "yes_no",
+                style: "warning",
+              }).then(result => {
+                if (result == "yes") {
+                  eoc.defaultClick(mle.element.name)
+                }
+              })
+              : eoc.defaultClick(mle.element.name)
+              } color = { mle.element.style.toLowerCase() as BsColor } > { mle.element.name }
+          </OperationButton>,
         }));
       }
       else
@@ -400,9 +414,8 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
   }));
 
   function chooseWorkflowExpirationDate(workflows: Lite<WorkflowEntity>[]): Promise<string | undefined> {
-    return ValueLineModal.show({
-      type: { name: "string" },
-      valueLineType: "DateTime",
+    return AutoLineModal.show({
+      type: { name: "DateTime" },
       modalSize: "md",
       title: WorkflowMessage.DeactivateWorkflow.niceToString(),
       message:
@@ -506,13 +519,12 @@ public interface IWorkflowTransition
     Lite<WorkflowActionEntity> Action { get; }
 }`;
 
-  ValueLineModal.show({
+  AutoLineModal.show({
     type: { name: "string" },
     initialValue: value,
-    valueLineType: "TextArea",
+    customComponent: props => <TextAreaLine {...props} />,
     title: "WorkflowTransitionContext Members",
     message: "Copy to clipboard: Ctrl+C, ESC",
-    initiallyFocused: true,
     valueHtmlAttributes: { style: { height: 215 } },
   });
 }

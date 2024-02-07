@@ -388,20 +388,31 @@ public class SqlServerConnector : Connector
     {
         EnsureConnectionRetry(con =>
         {
-            using (var bulkCopy = new SqlBulkCopy(
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
-                options,
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaction!))
-            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            try
             {
-                bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
+                using (var bulkCopy = new SqlBulkCopy(
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
+                    options,
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaction!))
+                using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+                {
+                    bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
 
-                foreach (var c in dt.Columns.Cast<DataColumn>())
-                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+                    foreach (var c in dt.Columns.Cast<DataColumn>())
+                        bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 
-                bulkCopy.DestinationTableName = destinationTable.ToString();
-                bulkCopy.WriteToServer(dt);
-                return 0;
+                    bulkCopy.DestinationTableName = destinationTable.ToString();
+                    bulkCopy.WriteToServer(dt);
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                var nex = HandleException(ex, new SqlPreCommandSimple($"## SqlBulkCopy into {destinationTable} ({columns.ToString(a => "'" + a.Name + "'", ", ")})"));
+                if (nex == ex)
+                    throw;
+
+                throw nex;
             }
         });
     }
@@ -527,6 +538,11 @@ public class SqlServerConnector : Connector
     public override bool SupportsTemporalTables
     {
         get { return Version >= SqlServerVersion.SqlServer2016; }
+    }
+
+    public bool SupportsDateTrunc
+    {
+        get { return Version >= SqlServerVersion.SqlServer2022; }
     }
 
     public override int MaxNameLength => 128;

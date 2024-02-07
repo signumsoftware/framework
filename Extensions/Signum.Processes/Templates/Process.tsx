@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
@@ -31,22 +31,22 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
     <div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.state)} readOnly={true} />
+          <AutoLine ctx={ctx4.subCtx(f => f.state)} readOnly={true} />
           <EntityLine ctx={ctx4.subCtx(f => f.algorithm)} />
           <EntityLine ctx={ctx4.subCtx(f => f.user)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.machineName)} />
-          <ValueLine ctx={ctx4.subCtx(f => f.applicationName)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.machineName)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.applicationName)} />
           <EntityLine ctx={ctx4.subCtx(f => f.data)} readOnly={true} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx5.subCtx(f => f.creationDate)} />
-          <ValueLine ctx={ctx5.subCtx(f => f.plannedDate)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.cancelationDate)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.queuedDate)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.executionStart)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.executionEnd)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.suspendDate)} hideIfNull={true} readOnly={true} />
-          <ValueLine ctx={ctx5.subCtx(f => f.exceptionDate)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.creationDate)} />
+          <AutoLine ctx={ctx5.subCtx(f => f.plannedDate)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.cancelationDate)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.queuedDate)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.executionStart)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.executionEnd)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.suspendDate)} hideIfNull={true} readOnly={true} />
+          <AutoLine ctx={ctx5.subCtx(f => f.exceptionDate)} hideIfNull={true} readOnly={true} />
         </div>
       </div>
 

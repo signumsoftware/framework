@@ -4188,8 +4188,4 @@ public class CurrentSourceNotFoundException : Exception
     public CurrentSourceNotFoundException() { }
     public CurrentSourceNotFoundException(string message) : base(message) { }
     public CurrentSourceNotFoundException(string message, Exception inner) : base(message, inner) { }
-    protected CurrentSourceNotFoundException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context)
-        : base(info, context) { }
 }

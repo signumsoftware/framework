@@ -2,14 +2,14 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { PropertyRoute, Binding } from '@framework/Reflection'
-import { ValueLine, EntityLine, TypeContext, FormGroup } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity } from '@framework/Signum.Entities'
 import * as Navigator from '@framework/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import PropertyRouteCombo from "@framework/Components/PropertyRouteCombo";
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
@@ -70,13 +70,12 @@ export default function DynamicValidation(p: DynamicValidationProps) {
     const ppr = getCurrentRoute(p.ctx.value.entityType.cleanName);
     const prefix = castToTop(ppr);
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression(prefix, pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Mixin Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -142,7 +141,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
   var ctx = p.ctx;
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(d => d.name)} />
+      <AutoLine ctx={ctx.subCtx(d => d.name)} />
       <EntityLine ctx={ctx.subCtx(d => d.entityType)} onChange={handleEntityTypeChange} />
       <FormGroup ctx={ctx.subCtx(d => d.subEntity)}>
         {() => ctx.value.entityType && <PropertyRouteCombo ctx={ctx.subCtx(d => d.subEntity)} type={ctx.value.entityType} onChange={forceUpdate} routes={PropertyRoute.generateAll(ctx.value.entityType.cleanName).filter(a => a.propertyRouteType == "Mixin" || a.typeReference().isEmbedded && !a.typeReference().isCollection)} />}
@@ -194,13 +193,12 @@ export function PropertyIsHelpComponent(p: PropertyIsHelpComponentProps) {
 
 return null;`;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: DynamicValidationMessage.PropertyIs.niceToString(),
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "200px" } },
     });
   }

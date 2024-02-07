@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 namespace Signum.Utilities;
 
 public static class TimeOnlyExtensions
@@ -7,28 +9,50 @@ public static class TimeOnlyExtensions
     {
         switch (precision)
         {
-            case DateTimePrecision.Hours: return TrimToHours(time);
-            case DateTimePrecision.Minutes: return TrimToMinutes(time);
-            case DateTimePrecision.Seconds: return TrimToSeconds(time);
+            case DateTimePrecision.Hours: return TruncHours(time);
+            case DateTimePrecision.Minutes: return TruncMinutes(time);
+            case DateTimePrecision.Seconds: return TruncSeconds(time);
             case DateTimePrecision.Milliseconds: return time;
         }
         throw new ArgumentException("precision");
     }
 
-    public static TimeOnly TrimToSeconds(this TimeOnly time)
+    public static TimeOnly TruncSeconds(this TimeOnly time)
     {
         return new TimeOnly(time.Hour, time.Minute, time.Second);
     }
 
-    public static TimeOnly TrimToMinutes(this TimeOnly time)
+    public static TimeOnly TruncSeconds(this TimeOnly time, int step)
+    {
+        return new TimeOnly(time.Hour, time.Minute, (time.Second / step) * step);
+    }
+
+    public static TimeOnly TruncMilliseconds(this TimeOnly time, int step)
+    {
+        return new TimeOnly(time.Hour, time.Minute, time.Second, (time.Millisecond / step) * step);
+    }
+
+    public static TimeOnly TruncMinutes(this TimeOnly time)
     {
         return new TimeOnly(time.Hour, time.Minute, 0);
     }
 
-    public static TimeOnly TrimToHours(this TimeOnly time)
+    public static TimeOnly TruncMinutes(this TimeOnly time, int step)
+    {
+        return new TimeOnly(time.Hour, (time.Minute / step) * step, 0);
+    }
+
+    public static TimeOnly TruncHours(this TimeOnly time)
     {
         return new TimeOnly(time.Hour, 0, 0);
     }
+
+    public static TimeOnly TruncHours(this TimeOnly time, int step)
+    {
+        return new TimeOnly((time.Hour / step) * step, 0, 0);
+    }
+
+
 
     public static DateTimePrecision? GetPrecision(this TimeOnly timeOnly)
     {

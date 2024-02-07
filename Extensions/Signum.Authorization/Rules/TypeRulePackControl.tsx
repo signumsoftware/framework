@@ -7,7 +7,7 @@ import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
@@ -138,7 +138,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
-        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
 
       <table className="table table-sm sf-auth-rules">
@@ -238,15 +238,15 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     let fallback = Binding.create(tctx.value.allowed, a => a.fallback);
     return [
       <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className} className={classes("sf-auth-type", tctx.value.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
-        <td className={tctx.value.allowed.fallback == null ? "text-danger fw-bold" : undefined} title={AuthAdminMessage.ConflictMergingTypeConditions.niceToString()}>
+        <td>
           {conditions.length > 1 || conditions.length == 1 && tctx.value.allowed.conditionRules.length == 0 ?
-            <span className="sf-condition-icon" title={AuthAdminMessage.AddCondition.niceToString()} onClick={() => handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource)}>
+            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={e => { e.preventDefault(); handleAddConditionClick(conditions, tctx.value.allowed, tctx.value.resource); }}>
               <FontAwesomeIcon icon="circle-plus" />
-            </span> :
-            <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>}
+            </a> :
+            <FontAwesomeIcon icon="circle" className="sf-placeholder-icon"></FontAwesomeIcon>
+            }
           &nbsp;
           {typeInfo.niceName} {typeInfo.entityData && <small title={typeInfo.entityData}>{typeInfo.entityData[0]}</small>}
-          {tctx.value.allowed.fallback == null && <FontAwesomeIcon icon="triangle-exclamation" className="ms-2 text-warning" />}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
           {colorRadio(fallback, "Write", "green")}
@@ -289,8 +289,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       return (
         <tr key={tctx.value.resource.namespace + "." + tctx.value.resource.className + "_" + cr.typeConditions.map(c => c.element.id).join("_")} className="sf-auth-condition" >
           <td>
-            {"\u00A0 \u00A0".repeat(i + 1)}
-            <span className="sf-condition-icon" onClick={() => handleRemoveConditionClick(tctx.value.allowed, cr)}><FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} /></span>
+            {"\u00A0 \u00A0"}
+            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => { e.preventDefault(); handleRemoveConditionClick(tctx.value.allowed, cr); }}><FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} /></a>
             &nbsp;
             {cr.typeConditions.flatMap((tc, j) => [
               <small className="mx-1" key={j}>{getToString(tc.element)}</small>,
@@ -306,7 +306,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           <td style={{ textAlign: "center" }}>
             {colorRadio(b, "None", "red")}
           </td>
-          <td style={{ textAlign: "center" }}>
+          <td style={{ textAlign: "center" }} colSpan={1 + Number(properties) + Number(operations) + Number(queries) }>
           </td>
         </tr>
       );

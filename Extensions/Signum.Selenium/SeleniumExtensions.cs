@@ -65,9 +65,6 @@ public static class SeleniumExtensions
         public WaitTakingTooLongException() { }
         public WaitTakingTooLongException(string message) : base(message) { }
         public WaitTakingTooLongException(string message, Exception inner) : base(message, inner) { }
-        protected WaitTakingTooLongException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
 
     public static string WaitNewWindow(this WebDriver selenium, Action action)

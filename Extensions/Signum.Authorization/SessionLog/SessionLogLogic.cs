@@ -52,7 +52,7 @@ public static class SessionLogLogic
                 new SessionLogEntity
                 {
                     User = UserEntity.Current,
-                    SessionStart = Clock.Now.TrimToSeconds(),
+                    SessionStart = Clock.Now.TruncSeconds(),
                     UserHostAddress = userHostAddress,
                     UserAgent = userAgent
                 }.Save();
@@ -67,7 +67,7 @@ public static class SessionLogLogic
 
         using (AuthLogic.Disable())
         {
-            var sessionEnd = timeOut.HasValue ? Clock.Now.Subtract(timeOut.Value).TrimToSeconds() : Clock.Now.TrimToSeconds();
+            var sessionEnd = timeOut.HasValue ? Clock.Now.Subtract(timeOut.Value).TruncSeconds() : Clock.Now.TruncSeconds();
 
             var rows = Database.Query<SessionLogEntity>()
                 .Where(sl => sl.User.Is(user))

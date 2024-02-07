@@ -29,8 +29,12 @@ import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import UserQueryToolbarConfig from './UserQueryToolbarConfig';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import UserQueryOmniboxProvider from './UserQueryOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
+
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
@@ -52,7 +56,7 @@ export function start(options: { routes: RouteObject[] }) {
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
-          icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
+          icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
           onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
         })))
     );
@@ -101,7 +105,7 @@ export function start(options: { routes: RouteObject[] }) {
   DashboardClient.registerRenderer(UserQueryPartEntity, {
     waitForInvalidation: true,
     component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
     defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
     withPanel: c => c.renderMode != "BigValue",
     getQueryNames: c => [c.userQuery?.query].notNull(),
@@ -169,7 +173,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
         header: UserQueryEntity.nicePluralName(),
         menuItems: uqs.map(uq =>
           <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)}>
-            <FontAwesomeIcon icon={["far", "rectangle-list"]} className="icon" color="dodgerblue" />
+            <FontAwesomeIcon icon={"rectangle-list"} className="icon" color="dodgerblue" />
             {getToString(uq)}
           </Dropdown.Item>
         )

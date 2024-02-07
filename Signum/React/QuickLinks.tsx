@@ -7,7 +7,7 @@ import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } fro
 import * as Finder from './Finder'
 import * as AppContext from './AppContext'
 import * as Navigator from './Navigator'
-import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is } from './Signum.Entities'
+import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is, isEntity, liteKey } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
 import { useAPI } from './Hooks';
@@ -62,6 +62,7 @@ export function clearQuickLinks() {
   Dic.clear(globalQuickLinks);
   Dic.clear(typeQuickLinks);
   Dic.clear(dynamicQuickLink);
+  Dic.clear(quickLinksCache);
 }
 
 export interface QuickLinkContext<T extends Entity> {
@@ -119,7 +120,10 @@ export async function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<Quic
   var quickLinkFiltered = await Promise.all(quickLinks
     .map(ql => {
       if (ql.onlyForToken || ql.isVisible == false)
-        return Promise.resolve(null);
+        return null;
+
+      if (!ql.allowsMultiple && ctx.lites.length > 1)
+        return null;
 
       if (ql.isVisible == true || ql.isVisible == undefined)
         return Promise.resolve(ql);
@@ -127,8 +131,8 @@ export async function getQuickLinks(ctx: QuickLinkContext<Entity>): Promise<Quic
       if (typeof ql.isVisible == "function")
         return ql.isVisible(ctx).then(val => val ? ql : null);
 
-      return Promise.resolve(null);
-    }));
+      return null;
+    }).notNull());
 
   return quickLinkFiltered.notNull().orderBy(ql => ql!.order);
 }
@@ -165,9 +169,19 @@ export function setIgnoreErrors(value: boolean) {
 }
 
 
-export function getQuickLinkWidget(ctx: WidgetContext<ModifiableEntity>): React.ReactElement<any> {
+export function getQuickLinkWidget(wc: WidgetContext<ModifiableEntity>): React.ReactElement<any> | undefined {
 
-  return <QuickLinkWidget wc={ctx} />;
+  var entity = wc.ctx.value;
+
+  if (!isEntity(entity) || entity.isNew)
+    return undefined;
+
+
+  return <QuickLinkWidget qlc={{
+    lite: toLiteFat(entity as Entity),
+    lites: [toLiteFat(entity as Entity)],
+    widgetContext: wc as WidgetContext<Entity>
+  }} />;
 }
 
 export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
@@ -194,25 +208,13 @@ export function getQuickLinkContextMenus(ctx: ContextualItemsContext<Entity>): P
 }
 
 export interface QuickLinkWidgetProps {
-  wc: WidgetContext<ModifiableEntity>
+  qlc: QuickLinkContext<Entity>
 }
+
 
 export function QuickLinkWidget(p: QuickLinkWidgetProps) {
 
-  const entity = p.wc.ctx.value;
-
-  const qlCtx = {
-    lite: toLiteFat(entity as Entity),
-    lites: [toLiteFat(entity as Entity)],
-    widgetContext: p.wc as WidgetContext<Entity>
-  };
-
-  const links = useAPI(signal => {
-    if (entity.isNew || !tryGetTypeInfo(entity.Type)?.entityKind)
-      return Promise.resolve([]);
-    else
-      return getQuickLinks(qlCtx);
-  }, [entity], { avoidReset: true });
+  const links = useAPI(signal => getQuickLinks(p.qlc), [liteKey(p.qlc.lite)], { avoidReset: true });
 
   if (links == undefined)
     return <span>…</span>;
@@ -237,7 +239,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                 role="button"
                 href="#"
                 data-toggle="dropdown"
-                onClick={e => { e.preventDefault(); first.handleClick(qlCtx, e); }}>
+                onClick={e => { e.preventDefault(); first.handleClick(p.qlc, e); }}>
                 {first.icon && <FontAwesomeIcon icon={first.icon} color={first.color ? undefined : first.iconColor} />}
                 {first.icon && "\u00A0"}
                 {first.text()}
@@ -248,7 +250,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
             var dd = first.group;
 
             return (
-              <Dropdown id={p.wc.frame.prefix + "_" + dd.name} key={i}>
+              <Dropdown id={p.qlc.widgetContext!.frame.prefix + "_" + dd.name} key={i}>
                 <DDToggle as={QuickLinkToggle}
                   title={QuickLinkMessage.Quicklinks.niceToString()}
                   badgeColor={dd.color}
@@ -258,7 +260,7 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps) {
                   {dd.text(gr.elements)}
                 </>} />
                 <Dropdown.Menu align="end">
-                  {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(qlCtx), { key: i }))}
+                  {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(p.qlc), { key: i }))}
                 </Dropdown.Menu>
               </Dropdown>
             );
@@ -320,6 +322,7 @@ export abstract class QuickLink<T extends Entity> {
   color?: BsColor;
   group?: QuickLinkGroup;
   openInAnotherTab?: boolean;
+  allowsMultiple?: boolean;
   
 
   static defaultGroup: QuickLinkGroup = {

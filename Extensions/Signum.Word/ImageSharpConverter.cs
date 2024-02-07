@@ -54,25 +54,27 @@ public class ImageSharpConverter : IImageConverter<Image>
         });
     }
 
-    public void Save(Image image, Stream str, ImagePartType imagePartType)
+    public void Save(Image image, Stream str, PartTypeInfo imagePartType)
     {
         image.Save(str, ToImageFormat(imagePartType));
     }
 
-    private static IImageEncoder ToImageFormat(ImagePartType imagePartType)
+    public static Dictionary<PartTypeInfo, IImageEncoder> EncodersDictionary = new Dictionary<PartTypeInfo, IImageEncoder>
     {
-        switch (imagePartType)
-        {
-            case ImagePartType.Bmp: return new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder();
-            case ImagePartType.Emf: throw new NotSupportedException(imagePartType.ToString());
-            case ImagePartType.Gif: return new SixLabors.ImageSharp.Formats.Gif.GifEncoder();
-            case ImagePartType.Icon: throw new NotSupportedException(imagePartType.ToString());
-            case ImagePartType.Jpeg: return new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder();
-            case ImagePartType.Png: return new SixLabors.ImageSharp.Formats.Png.PngEncoder();
-            case ImagePartType.Tiff: return new SixLabors.ImageSharp.Formats.Tiff.TiffEncoder();
-            case ImagePartType.Wmf: throw new NotSupportedException(imagePartType.ToString());
-        }
+        { ImagePartType.Bmp, new SixLabors.ImageSharp.Formats.Bmp.BmpEncoder()},
+        { ImagePartType.Gif, new SixLabors.ImageSharp.Formats.Gif.GifEncoder()},
+        { ImagePartType.Jpeg, new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder()},
+        { ImagePartType.Png, new SixLabors.ImageSharp.Formats.Png.PngEncoder()},
+        { ImagePartType.Tiff, new SixLabors.ImageSharp.Formats.Tiff.TiffEncoder()},
+    };
 
-        throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
+    private static IImageEncoder ToImageFormat(PartTypeInfo imagePartType)
+    {
+        var encoder = EncodersDictionary.TryGetC(imagePartType);
+
+        if(encoder == null)
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
+
+        return encoder;
     }
 }

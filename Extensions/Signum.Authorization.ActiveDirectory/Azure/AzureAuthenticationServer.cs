@@ -43,6 +43,9 @@ public class AzureADAuthenticationServer
                 }
                 else
                 {
+                    if (user.State == UserState.Deactivated)
+                        return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
+
                     if (config.AutoUpdateUsers)
                         ada.UpdateUser(user, ctx);
                 }

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityCombo, EntityTabRepeater, EntityRepeater } from '@framework/Lines'
+import { AutoLine, EntityCombo, EntityTabRepeater, EntityRepeater } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import HtmlCodeMirror from '../../Signum.CodeMirror/HtmlCodeMirror'
 import IFrameRenderer from './IframeRenderer'
@@ -13,8 +13,8 @@ export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTe
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(f => f.name)} />
-      <ValueLine ctx={ctx.subCtx(f => f.isDefault)} />
+      <AutoLine ctx={ctx.subCtx(f => f.name)} />
+      <AutoLine ctx={ctx.subCtx(f => f.isDefault)} />
       <Tabs id={ctx.prefix + "tabs"}>
         <Tab eventKey="messages" title={ctx.niceName(a => a.messages)}>
           <EntityTabRepeater ctx={ctx.subCtx(a => a.messages)} avoidFieldSet onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>

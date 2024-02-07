@@ -74,15 +74,10 @@ public static class SchemaSynchronizer
         modelTables.JoinDictionaryForeach(databaseTables, (tn, tab, diff) =>
         {
             var key = Replacements.KeyColumnsForTable(tn);
-
-            //START IBA Migration 2022.04.04
-            var newIBAs = tab.Columns.OfType<ImplementedByAllIdColumn>().Where(a => !diff.Columns.ContainsKey(a.Name) && diff.Columns.ContainsKey(a.Name.BeforeLast("_"))).Select(a => a.Name).ToList();
-            var oldIBAs = diff.Columns.Values.Where(c => !tab.Columns.ContainsKey(c.Name) && Schema.Current.Settings.ImplementedByAllPrimaryKeyTypes.All(t => tab.Columns.TryGetC(c.Name + "_" + t.Name) is ImplementedByAllIdColumn)).Select(a => a.Name).ToList();
-            //END
-
+            
             replacements.AskForReplacements(
-                diff.Columns.Keys.Except(oldIBAs).ToHashSet(),
-                tab.Columns.Keys.Except(newIBAs).ToHashSet(), key);
+                diff.Columns.Keys.ToHashSet(),
+                tab.Columns.Keys.ToHashSet(), key);
 
             var incompatibleTypes = diff.Columns.JoinDictionary(tab.Columns, (cn, diff, col) => new { cn, diff, col }).Values.Where(a => !a.diff.CompatibleTypes(a.col) || a.diff.Identity != a.col.Identity).ToList();
 
@@ -1037,6 +1032,8 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
 
     private static SqlPreCommand? SyncEnums(Schema schema, Table table, Dictionary<string, Entity> current, Dictionary<string, Entity> should)
     {
+        var isPostgres = schema.Settings.IsPostgres;
+
         var deletes = Synchronizer.SynchronizeScript(Spacing.Double, should, current,
                    createNew: null,
                    removeOld: (str, c) => table.DeleteSqlSync(c, null, comment: c.toStr),
@@ -1055,8 +1052,8 @@ JOIN {oldFk} {oldFkAlias} ON {tnAlias}.{tabCol.Name} = {oldFkAlias}.Id");
                        var move = (from t in schema.GetDatabaseTables()
                                    from col in t.Columns.Values
                                    where col.ReferenceTable == table
-                                   select new SqlPreCommandSimple("UPDATE {0} SET {1} = {2} WHERE {1} = {3} -- {4} re-indexed"
-                                       .FormatWith(t.Name, col.Name, s.Id, c.Id, c.toStr)))
+                                   select new SqlPreCommandSimple("UPDATE {0} SET {1} = {2} WHERE {1} = {3}; -- {4} re-indexed"
+                                       .FormatWith(t.Name, col.Name.SqlEscape(isPostgres), s.Id, c.Id, c.toStr)))
                                     .Combine(Spacing.Simple);
 
                        var delete = table.DeleteSqlSync(c, null, comment: c.toStr);

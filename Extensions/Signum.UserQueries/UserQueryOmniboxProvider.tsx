@@ -14,7 +14,7 @@ export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryO
   }
 
   icon() {
-    return this.coloredIcon(["far", "list-alt"], "dodgerblue");
+    return this.coloredIcon( "list-alt", "dodgerblue");
   }
 
   renderItem(result: UserQueryOmniboxResult): React.ReactChild[] {

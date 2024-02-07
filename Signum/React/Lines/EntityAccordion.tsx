@@ -103,7 +103,7 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {p.createAsLink == false && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
 

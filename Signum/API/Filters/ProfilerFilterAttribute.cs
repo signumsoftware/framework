@@ -6,16 +6,11 @@ namespace Signum.API.Filters;
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = true)]
 public class ProfilerActionSplitterAttribute : Attribute
 {
-    readonly string? requestKey;
+    public string RequestKey { get; }
 
-    public ProfilerActionSplitterAttribute(string? requestKey = null)
+    public ProfilerActionSplitterAttribute(string requestKey)
     {
-        this.requestKey = requestKey;
-    }
-
-    public string? RequestKey 
-    {
-        get { return requestKey; }
+        this.RequestKey = requestKey;
     }
 
     public static string GetActionDescription(FilterContext actionContext)
@@ -24,14 +19,16 @@ public class ProfilerActionSplitterAttribute : Attribute
 
         var action = cad.ControllerName + "." + cad.ActionName;
 
-        //var attr = cad.MethodInfo.GetCustomAttributes(true).OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
-        //if (attr != null)
-        //{
-        //    var obj = attr.RequestKey == null ? null : actionContext.ActionDescriptor.RouteValues.GetOrThrow(attr.RequestKey, "Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
+        var splitter = actionContext.ActionDescriptor.EndpointMetadata.OfType<ProfilerActionSplitterAttribute>().FirstOrDefault();
+        if (splitter != null)
+        {
+            var obj = actionContext.RouteData.Values.TryGetCN(splitter.RequestKey) ??
+                actionContext.HttpContext.Request.Query[splitter.RequestKey].Only() ??
+                throw new InvalidOperationException("Argument '{0}' not found in: " + cad.MethodInfo.MethodSignature());
 
-        //    if (obj != null)
-        //        action += " " + obj.ToString();
-        //}
+            if (obj != null)
+                action += " " + obj.ToString();
+        }
 
         return action;
     }

@@ -294,7 +294,7 @@ public static class AuthLogic
         var result = RetrieveUserByUsername(username);
 
         if (result != null && result.State == UserState.Deactivated)
-            throw new ApplicationException(LoginAuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
+            throw new ApplicationException(LoginAuthMessage.User0IsDeactivated.NiceToString().FormatWith(result.UserName));
 
         return result;
     }
@@ -416,7 +416,7 @@ public static class AuthLogic
 
                         user.Execute(UserOperation.Deactivate);
 
-                        throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
+                        throw new UserLockedException(LoginAuthMessage.User0IsDeactivated.NiceToString()
                             .FormatWith(user.UserName));
                     }
 
@@ -969,9 +969,5 @@ public class InvalidRoleGraphException : Exception
     public InvalidRoleGraphException() { }
     public InvalidRoleGraphException(string message) : base(message) { }
     public InvalidRoleGraphException(string message, Exception inner) : base(message, inner) { }
-    protected InvalidRoleGraphException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context)
-        : base(info, context) { }
 }
 

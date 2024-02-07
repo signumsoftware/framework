@@ -54,8 +54,8 @@ public static class ToolbarLogic
                 Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
                 Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
 
-            UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
-            UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
+            UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
+            UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
 
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
@@ -243,10 +243,10 @@ public static class ToolbarLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tm) => tm.Name);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tm) => tm.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
     }
 
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)

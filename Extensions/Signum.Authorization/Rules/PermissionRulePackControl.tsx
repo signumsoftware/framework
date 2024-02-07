@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 
 import { API } from '../AuthAdminClient'
@@ -97,7 +97,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
-        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
       <table className="table table-sm sf-auth-rules">
         <thead>

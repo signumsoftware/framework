@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 
 namespace Signum.Basics;
 
-public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
+public class PropertyRoute : IEquatable<PropertyRoute>
 {
     Type? type;
     public PropertyRouteType PropertyRouteType { get; private set; }
@@ -589,49 +589,6 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
         }
     }
 
-#pragma warning disable IDE0051 // Remove unused private members
-    PropertyRoute(SerializationInfo info, StreamingContext ctxt)
-#pragma warning restore IDE0051 // Remove unused private members
-    {
-        string rootName = info.GetString("rootType")!;
-
-        Type root = Type.GetType(rootName)!;
-
-        string? route = info.GetString("property");
-
-        if (route == null)
-            this.SetRootType(root);
-        else
-        {
-            string? before = route.TryBeforeLast(".");
-
-            if (before != null)
-            {
-                var parent = Parse(root, before);
-
-                SetParentAndProperty(parent, parent.GetMember(route.AfterLast('.')));
-            }
-            else
-            {
-                var parent = Root(root);
-
-                SetParentAndProperty(parent, parent.GetMember(route));
-            }
-        }
-    }
-
-    public void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        info.AddValue("rootType", RootType.AssemblyQualifiedName);
-
-        string? property =
-            PropertyRouteType == PropertyRouteType.Root ? null :
-            (PropertyRouteType == PropertyRouteType.LiteEntity ? this.Parent!.PropertyString() + ".Entity" :
-            this.PropertyString()).Replace("/", ".Item.").TrimEnd('.');
-
-        info.AddValue("property", property);
-    }
-
     public PropertyRoute? GetMListItemsRoute()
     {
         for (PropertyRoute? r = this; r != null; r = r.Parent)
@@ -649,6 +606,31 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
     public Expression<Func<T, R>> GetLambdaExpression<T, R>(bool safeNullAccess, PropertyRoute? skipBefore = null)
     {
         ParameterExpression pe = Expression.Parameter(typeof(T), "p");
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, typeof(R));
+
+        var selector = Expression.Lambda<Func<T, R>>(exp, pe);
+        return selector;
+    }
+
+    /// <typeparam name="T">The RootType or the type of MListElement</typeparam>
+    /// <typeparam name="R">Result type</typeparam>
+    /// <returns></returns>
+    public LambdaExpression GetLambdaExpression(Type fromType, Type resultType, bool safeNullAccess, PropertyRoute? skipBefore = null)
+    {
+        ParameterExpression pe = Expression.Parameter(fromType, "p");
+        Expression exp = GetBody(safeNullAccess, skipBefore, pe, resultType);
+
+        var selector = Expression.Lambda(exp, pe);
+        return selector;
+    }
+
+    static bool IsPotentiallyNull(Expression exp)
+    {
+        return exp!.Type.IsEmbeddedEntity() || exp is ConditionalExpression /*Conditional Embedded with Mixin*/;
+    }
+
+    Expression GetBody(bool safeNullAccess, PropertyRoute? skipBefore, ParameterExpression pe, Type resultType)
+    {
         Expression exp = null!;
 
         var steps = this.Follow(a => a.Parent).Reverse();
@@ -700,18 +682,10 @@ public class PropertyRoute : IEquatable<PropertyRoute>, ISerializable
             }
         }
 
-        if (exp.Type != typeof(R))
-            exp = Expression.Convert(exp, typeof(R));
-
-        var selector = Expression.Lambda<Func<T, R>>(exp, pe);
-        return selector;
-
-        static bool IsPotentiallyNull(Expression exp)
-        {
-            return exp!.Type.IsEmbeddedEntity() || exp is ConditionalExpression /*Conditional Embedded with Mixin*/;
-        }
+        if (exp.Type != resultType)
+            exp = Expression.Convert(exp, resultType);
+        return exp;
     }
-
 
     public bool IsToStringProperty()
     {

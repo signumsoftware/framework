@@ -38,9 +38,12 @@ import { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded
 import { QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import ChartOmniboxProvider from './ChartOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
-  
+
+  registerChangeLogModule("Signum.Chart", () => import("./Changelog"));
+
   options.routes.push({ path: "/chart/:queryName", element: <ImportComponent onImport={() => import("./Templates/ChartRequestPage")} /> });
 
   AppContext.clearSettingsActions.push(ButtonBarChart.clearOnButtonBarElements);

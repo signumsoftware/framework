@@ -12,7 +12,7 @@ import { useAPI, useForceUpdate, useAPIWithReload, useLock } from '@framework/Ho
 import { EntityLink } from '@framework/Search'
 import { DiffDocumentSimple } from '../../Signum.DiffLog/Templates/DiffDocument'
 import TextArea from '@framework/Components/TextArea'
-import { KeyCodes } from '@framework/Components'
+import { KeyNames } from '@framework/Components'
 import { getTypeInfo } from '@framework/Reflection'
 import { useTitle } from '@framework/AppContext'
 import { TranslationMember, initialElementIf } from '../Code/TranslationTypeTable'
@@ -114,7 +114,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (e.keyCode == KeyCodes.enter) {
+    if (e.key == KeyNames.enter) {
       e.preventDefault();
       p.setFilter(tmpFilter);
     }
@@ -213,7 +213,7 @@ export function TranslationProperty({ property }: { property: PropertyChange }) 
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (e.keyCode == 32 || e.keyCode == 113) { //SPACE OR F2
+    if (e.key == KeyNames.space || e.key == "F2") {
       e.preventDefault();
       setAvoidCombo(true);
     }

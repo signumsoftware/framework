@@ -109,7 +109,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!p.createAsLink && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
 

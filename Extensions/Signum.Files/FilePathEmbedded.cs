@@ -113,18 +113,8 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 
     public PrefixPair GetPrefixPair()
     {
-        if (this._prefixPair != null)
-            return this._prefixPair;
-
-        if (CalculatePrefixPair == null)
-            throw new InvalidOperationException("OnCalculatePrefixPair not set");
-
-        this._prefixPair = CalculatePrefixPair(this);
-
-        return this._prefixPair;
+        return this._prefixPair ??= FilePathEmbeddedLogic.CalculatePrefixPair(this);
     }
-
-    public static Func<FilePathEmbedded, PrefixPair> CalculatePrefixPair;
 
     public string FullPhysicalPath()
     {
@@ -163,9 +153,6 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 
     protected override void PostRetrieving(PostRetrievingContext ctx)
     {
-        if (CalculatePrefixPair == null)
-            throw new InvalidOperationException("OnCalculatePrefixPair not set");
-
         this.GetPrefixPair();
     }
 

@@ -19,7 +19,7 @@ namespace Signum.Word;
 public interface IWordDataTableProvider
 {
     string? Validate(string suffix, WordTemplateEntity template);
-    DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context);
+    DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context, out Dictionary<string, string>? overridenColors);
 }
 
 public static class WordTemplateLogic
@@ -116,6 +116,7 @@ public static class WordTemplateLogic
             
             new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
             {
+                ForReadonlyEntity = true,
                 CanExecute = et =>
                 {
                     if (et.Model != null && WordModelLogic.RequiresExtraParameters(et.Model))

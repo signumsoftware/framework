@@ -114,17 +114,7 @@ public class WorkflowActivityEntity : Entity, IWorkflowNodeEntity, IWithModel
         model.Name = this.Name;
         model.Type = this.Type;
         model.RequiresOpen = this.RequiresOpen;
-        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => new WorkflowEventModel
-        {
-            Name = we.Name,
-            MainEntityType = we.Lane.Pool.Workflow.MainEntityType,
-            Type = we.Type,
-            RunRepeatedly = we.RunRepeatedly,
-            DecisionOptionName = we.DecisionOptionName,
-            Timer = we.Timer,
-            BpmnElementId = we.BpmnElementId
-        }).ToMList());
-
+        model.BoundaryTimers.AssignMList(this.BoundaryTimers.Select(we => (WorkflowEventModel)we.GetModel()).ToMList());
         model.DecisionOptions.AssignMList(this.DecisionOptions);
         model.CustomNextButton = this.CustomNextButton;
         model.EstimatedDuration = this.EstimatedDuration;
@@ -178,17 +168,21 @@ public class ButtonOptionEmbedded : EmbeddedEntity
 
     public BootstrapStyle Style { get; set; }
 
+    public bool WithConfirmation { get; set; }
+
     public void FromXml(XElement elem)
     {
         Name = elem.Attribute("Name")!.Value;
         Style = elem.Attribute("Style")!.Value.ToEnum<BootstrapStyle>();
+        WithConfirmation = elem.Attribute("WithConfirmation") != null ? elem.Attribute("WithConfirmation")!.Value.ToBool()!.Value : false;
     }
 
     public XElement ToXml(string elementName)
     {
         return new XElement(elementName,
                 new XAttribute("Name", Name),
-                new XAttribute("Style", Style.ToString())
+                new XAttribute("Style", Style.ToString()),
+                new XAttribute("WithConfirmation", WithConfirmation.ToString())
             );
     }
 
@@ -198,6 +192,7 @@ public class ButtonOptionEmbedded : EmbeddedEntity
         {
             Name = this.Name,
             Style = this.Style,
+            WithConfirmation = this.WithConfirmation,
         };
     }
 }
@@ -403,4 +398,7 @@ public enum WorkflowActivityMessage
     LocateWorkflowActivityInDiagram,
     Approve,
     Decline,
+    Conformation,
+    [Description("Conformation: {0}")]
+    Conformation0,
 }

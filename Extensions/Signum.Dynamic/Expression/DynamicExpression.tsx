@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
@@ -8,12 +8,13 @@ import { Entity } from '@framework/Signum.Entities'
 import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { Lite } from '@framework/Signum.Entities';
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicExpressionEntity } from '../Signum.Dynamic.Expression'
+import TextArea from '@framework/Components/TextArea'
 
 interface DynamicExpressionComponentProps {
   ctx: TypeContext<DynamicExpressionEntity>;
@@ -40,13 +41,12 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -142,14 +142,14 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(dt => dt.translation)} />
+      <AutoLine ctx={ctx.subCtx(dt => dt.translation)} />
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
+          <AutoLine ctx={ctx.subCtx(dt => dt.format)} labelColumns={4}
             helpText={<span>See <a href="https://docs.microsoft.com/en-us/dotnet/standard/base-types/formatting-types" target="_blank">formatting types</a></span>} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />
+          <AutoLine ctx={ctx.subCtx(dt => dt.unit)} labelColumns={4} />
         </div>
       </div>
       <br />

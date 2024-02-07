@@ -144,8 +144,10 @@ public static partial class TypeAuthLogic
             PrimaryKey[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
             if (notFound.Any())
             {
+                var args = FilterQueryArgs.FromFilter<T>(t => notFound.Contains(t.Id));
+
                 List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
-                    .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
+                    .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface, args)).ToList();
 
                 string details = 
                     debugInfo.Count == 1 ? debugInfo.SingleEx().ErrorMessage! : 
@@ -267,15 +269,15 @@ public static partial class TypeAuthLogic
     }
 
     [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    public static DebugData IsAllowedForDebug(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface)
+    public static DebugData IsAllowedForDebug(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
-        return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((Entity)ident, allowed, inUserInterface);
+        return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((Entity)ident, allowed, inUserInterface, args);
     }
 
-    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
-        new((ii, tab, ec) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec));
+    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, FilterQueryArgs, DebugData>> miIsAllowedForDebugEntity =
+        new((ii, tab, ec, args) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec, args));
     [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface)
+    static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
         where T : Entity
     {
         if (!AuthLogic.IsEnabled)
@@ -285,7 +287,7 @@ public static partial class TypeAuthLogic
             throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
         using (DisableQueryFilter())
-            return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
+            return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface, args)).SingleEx();
     }
 
     class IsAllowedForDebugExpander : IMethodExpander
@@ -596,7 +598,7 @@ public static partial class TypeAuthLogic
         var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
             .Where(gr =>
             {
-                if (gr.Key.s.FieldInfo == null) /*CSBUG*/
+                if (gr.Key.s.FieldInfo == null)
                 {
                     var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
                     if (replacedName == null)

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { EntityLine, TypeContext, FormGroup } from '@framework/Lines'
+import { EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
@@ -10,7 +10,7 @@ import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as Nodes from './Nodes';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
@@ -95,13 +95,12 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     const expression = TypeHelpComponent.getExpression("o", pr, "TypeScript");
     const text = `modules.React.createElement(${node.kind}, { ctx: ctx.subCtx(o => ${expression}) })`;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Mixin Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -245,13 +244,12 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   }
 
   function showPropmt(title: string, text: string) {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: title,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
   const ctx = p.ctx;

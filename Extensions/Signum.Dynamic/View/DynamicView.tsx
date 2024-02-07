@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
 import MessageModal from '@framework/Modals/MessageModal'
@@ -141,7 +141,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     return (
       <div>
-        <ValueLine ctx={ctx.subCtx(dv => dv.viewName)} />
+        <AutoLine ctx={ctx.subCtx(dv => dv.viewName)} />
         <EntityLine ctx={ctx.subCtx(dv => dv.entityType)} onChange={this.handleTypeChange} onRemove={this.handleTypeRemove} />
 
         {this.state.rootNode && this.renderDesigner()}

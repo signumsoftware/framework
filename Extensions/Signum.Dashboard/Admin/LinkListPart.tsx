@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { ValueLine, EntityRepeater, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Dashboard'
 

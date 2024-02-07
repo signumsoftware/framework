@@ -3,7 +3,7 @@ import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute } from '@framework/Reflection'
 import SqlCodeMirror from '../../Signum.CodeMirror/SqlCodeMirror'
@@ -29,8 +29,8 @@ export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComp
     <div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(sm => sm.creationDate)} readOnly={true} />
-          <ValueLine ctx={ctx4.subCtx(sm => sm.executionDate)} readOnly={true} />
+          <AutoLine ctx={ctx4.subCtx(sm => sm.creationDate)} readOnly={true} />
+          <AutoLine ctx={ctx4.subCtx(sm => sm.executionDate)} readOnly={true} />
         </div>
 
         <div className="col-sm-6">
@@ -39,7 +39,7 @@ export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComp
         </div>
       </div>
 
-      <ValueLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
+      <AutoLine ctx={ctx.subCtx(sm => sm.comment)} readOnly={executed} />
       <div className="code-container">
         <SqlCodeMirror script={ctx.value.script ?? ""} onChange={handleScriptChange} isReadOnly={executed} />
       </div>

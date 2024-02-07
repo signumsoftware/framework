@@ -1,12 +1,11 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { classes, Dic } from '@framework/Globals'
-import { ValueLine, EntityLine, EntityCombo } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, TextBoxLine, EnumLine } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as Finder from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
-import { UserAssetMessage } from '../Signum.UserAssets'
 import {
   QueryDescription, SubTokensOptions, FilterConditionOptionParsed,
   isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
@@ -19,8 +18,7 @@ import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
-import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets.Queries'
-import { ValueLineController } from '@framework/Lines/ValueLine'
+import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
 
 interface FilterBuilderEmbeddedProps {
@@ -109,7 +107,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined as any, Binding.create(f, a => a.value));
 
       if (f.filters.some(a => !a.token))
-        return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
+        return <AutoLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={"String"} type={{ name: "string" }} />
 
       if (f.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ctx.value)
         ctx.value = undefined;
@@ -117,10 +115,9 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       var tr = f.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
       var format = (tr && f.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
       var unit = (tr && f.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
-      const vlt = tr && ValueLineController.getValueLineType(tr);
       const ft = tr && getFilterType(tr);
 
-      return <ValueLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} />
+      return <AutoLineOrExpression ctx={ctx} onChange={fc.handleValueChange} filterType={ft ?? "String"} type={tr != null ? tr : { name: "string" }} format={format} unit={unit} />
 
     } else {
 
@@ -146,7 +143,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
       case "Model":
         return <EntityLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
       default:
-        return <ValueLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
+        return <AutoLineOrExpression ctx={ctx} onChange={() => { onChange(); fc.handleValueChange(); }} filterType={token.filterType} type={token.type} mandatory={mandatory} />;
 
     }
   }
@@ -210,7 +207,6 @@ FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed
           filters: toFilterList(gr.elements, indent + 1),
           value: gr.key.valueString ?? undefined,
           frozen: false,
-          expanded: false,
           pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
           dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
         };
@@ -287,13 +283,13 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
   function getSwitchModelButton(isValue: boolean): React.ReactElement<any> {
     return (<a href="#" className={classes("sf-line-button", "sf-remove", "btn input-group-text", p.ctx.readOnly  && "disabled")}
       onClick={e => { e.preventDefault(); liteRef.current = isValue ? undefined : null; forceUpdate() }}
-      title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
+      title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
       <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
     </a>)
   }
 
   if (liteRef.current === undefined)
-    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
+    return <TextBoxLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
@@ -307,12 +303,12 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
   if (p.filterType == "Lite") {
     if (type.name == IsByAll || getTypeInfos(type).some(ti => !ti.isLowPopulation))
-      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+      return <EntityLine ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
     else
-      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+      return <EntityCombo ctx={ctx} type={type} create={false} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else if (p.filterType == "Embedded" || p.filterType == "Model") {
-    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtonsAfter={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+    return <EntityLine ctx={ctx} type={type} create={false} autocomplete={null} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
   else
     throw new Error("Unexpected Filter Type");
@@ -329,7 +325,7 @@ interface ValueLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
+export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
 
   const foceUpdate = useForceUpdate();
   const valueRef = React.useRef<string | number | boolean | null | undefined>(undefined);
@@ -353,13 +349,13 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
           valueRef.current = isValue ? undefined : null;
           foceUpdate();
         }}
-        title={isValue ? UserAssetMessage.SwitchToExpression.niceToString() : UserAssetMessage.SwitchToValue.niceToString()}>
+        title={isValue ? UserAssetQueryMessage.SwitchToExpression.niceToString() : UserAssetQueryMessage.SwitchToValue.niceToString()}>
         <FontAwesomeIcon icon={[isValue ? "far" : "fas", "pen-to-square"]} />
       </a>
     );
   }
   if (valueRef.current === undefined)
-    return <ValueLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
+    return <TextBoxLine ctx={p.ctx} type={{ name: "string" }} onChange={p.onChange} extraButtons={() => getSwitchModelButton(false)} mandatory={p.mandatory} />;
 
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(valueRef, a => a.current));
 
@@ -376,9 +372,9 @@ export function ValueLineOrExpression(p: ValueLineOrExpressionProps) {
     if (!ti)
       throw new Error(`EnumType ${type.name} not found`);
     const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
-  } else {
-    return <ValueLine ctx={ctx} type={type} format={p.format} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
+    return <EnumLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} optionItems={members} mandatory={p.mandatory} />;
+  }else {
+    return <AutoLine ctx={ctx} type={type} unit={p.unit} onChange={handleChangeValue} extraButtons={() => getSwitchModelButton(true)} mandatory={p.mandatory} />;
   }
 }
 

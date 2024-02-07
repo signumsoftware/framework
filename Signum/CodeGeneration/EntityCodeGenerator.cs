@@ -819,7 +819,7 @@ public class EntityCodeGenerator
             SqlDbType.DateTime => typeof(DateTime),
             SqlDbType.DateTime2 => typeof(DateTime),
             SqlDbType.DateTimeOffset => typeof(DateTimeOffset),
-            SqlDbType.Decimal => typeof(Decimal),
+            SqlDbType.Decimal => col.Precision == 0 ? typeof(int) : typeof(Decimal),
             SqlDbType.Float => typeof(double),
             SqlDbType.Image => typeof(byte[]),
             SqlDbType.Int => typeof(int),

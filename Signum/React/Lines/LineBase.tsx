@@ -26,7 +26,6 @@ export interface LineBaseProps extends StyleOptions {
   mandatory?: boolean | "warning";
 }
 
-
 export function useController<C extends LineBaseController<P>, P extends LineBaseProps>(controllerType: new () => C, props: P, ref: React.Ref<C>) : C {
   var controller = React.useMemo<C>(()=> new controllerType(), []);
   controller.init(props);
@@ -133,6 +132,37 @@ export class LineBaseController<P extends LineBaseProps> {
     return this.props.type == null || this.props.visible == false || this.props.hideIfNull && (this.props.ctx.value == undefined || this.props.ctx.value == "");
   }
 }
+
+export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HTMLElement | null) {
+  if (propRef) {
+    if (typeof propRef == "function")
+      propRef(node);
+    else
+      (propRef as React.MutableRefObject<HTMLElement | null>).current = node;
+  }
+}
+
+export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement>) {
+  React.useEffect(() => {
+    if (initiallyFocused) {
+      window.setTimeout(() => {
+        let element = inputElement?.current;
+        if (element) {
+          if (element instanceof HTMLInputElement)
+            element.setSelectionRange(0, element.value.length);
+          else if (element instanceof HTMLTextAreaElement)
+            element.setSelectionRange(0, element.value.length);
+          element.focus();
+        }
+      }, initiallyFocused == true ? 0 : initiallyFocused as number);
+    }
+
+  }, []);
+}
+
+
+
+
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 

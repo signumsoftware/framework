@@ -9,12 +9,13 @@ import * as NodeUtils from './NodeUtils'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import { openModal, IModalProps } from '@framework/Modals';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { Typeahead } from '@framework/Components';
 import { Modal, Tabs, Tab, DropdownButton, Dropdown } from 'react-bootstrap';
 import { ModalFooterButtons, ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { ModulesHelp } from './ModulesHelp';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views'
+import { TextAreaLine } from '@framework/Lines'
 
 export interface ExpressionOrValueProps {
   binding: Binding<any>;
@@ -356,13 +357,12 @@ export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -436,13 +436,12 @@ export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
 
   function handlePropsClick(val: string) {
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `props.${val}`,
-      valueLineType: "TextArea",
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: `${DynamicViewMessage.PropsHelp.niceToString()}.${val}`,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "200px" } },
     });
   }

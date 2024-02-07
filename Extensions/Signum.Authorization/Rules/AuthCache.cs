@@ -110,7 +110,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                         where isEquals.Evaluate(r.Resource, resource)
                         select new { r.Role, r.Allowed }).ToList();
 
-            specificRules = list.ToDictionary(a => a.Role!, a => a.Allowed); /*CSBUG*/
+            specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
 
             this.coercer = coercer;
             this.merger = merger;

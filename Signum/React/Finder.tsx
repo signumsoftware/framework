@@ -159,7 +159,7 @@ export namespace Options {
     return import("./SearchControl/SearchModal");
   }
 
-  export let entityColumnHeader: () => React.ReactChild = () => "";
+  export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
 
   export let tokenCanSetPropery = (qt: QueryToken) =>
     qt.filterType == "Lite" && qt.key != "Entity" ||
@@ -1668,20 +1668,20 @@ export module API {
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
 
-    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
+    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery/" + request.queryKey, signal }, request)
       .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost({ url: "/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "/api/query/queryValue/" + request.queryKey, avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "/api/query/lites" }, request);
+    return ajaxPost({ url: "/api/query/lites/" + request.queryKey }, request);
   }
 
   export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]> {
-    return ajaxPost({ url: "/api/query/entities" }, request);
+    return ajaxPost({ url: "/api/query/entities/" + request.queryKey }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
@@ -2050,7 +2050,7 @@ export interface FormatRule {
 
 export class CellFormatter {
   constructor(
-    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactChild | undefined,
+    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactElement | string | null | undefined,
     public fillWidth: boolean,
     public cellClass?: string) {
   }
@@ -2083,7 +2083,7 @@ export interface EntityFormatRule {
 
 export class EntityFormatter {
   constructor(
-    public formatter: (ctx: CellFormatterContext) => React.ReactChild | undefined,
+    public formatter: (ctx: CellFormatterContext) => React.ReactElement | string | null | undefined,
     public cellClass?: string) {
   }
 }

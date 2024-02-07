@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, TypeContext } from '@framework/Lines'
+import { AutoLine, TypeContext } from '@framework/Lines'
 import { WorkflowScriptRetryStrategyEntity } from '../Signum.Workflow';
 
 export default function WorkflowScriptRetryStrategy(p: { ctx: TypeContext<WorkflowScriptRetryStrategyEntity> }) {
@@ -7,7 +7,7 @@ export default function WorkflowScriptRetryStrategy(p: { ctx: TypeContext<Workfl
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(e => e.rule)} />
+      <AutoLine ctx={ctx.subCtx(e => e.rule)} />
     </div>
   );
 }

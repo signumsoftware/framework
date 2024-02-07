@@ -13,7 +13,6 @@ public static class PredictorCodificationLogic
         var groupKey2Size = ((FieldValue)Schema.Current.Field((PredictorCodificationEntity e) => e.SplitKey2)).Size!.Value;
 
         ctx.ReportProgress($"Saving Codifications");
-#pragma warning disable CS8619 // Nullability of reference types in value doesn't match target type. CSBUG
 
         ctx.Codifications.Select(pc =>
         {
