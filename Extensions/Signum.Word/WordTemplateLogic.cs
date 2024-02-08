@@ -12,6 +12,7 @@ using Signum.Files;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.API;
+using System.Collections.Frozen;
 
 namespace Signum.Word;
 
@@ -26,10 +27,10 @@ public static class WordTemplateLogic
 {
     public static bool AvoidSynchronize = false;
 
-    public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy = null!;
 
-    public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName = null!;
-    public static ResetLazy<Dictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType = null!;
+    public static ResetLazy<FrozenDictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType = null!;
 
     public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
     public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -131,13 +132,13 @@ public static class WordTemplateLogic
             }.Register();
 
             WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-               .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+               .ToFrozenDictionaryEx(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
 
             
 
             TemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return WordTemplatesLazy.Value.Values.SelectCatch(w => KeyValuePair.Create(w.Query.ToQueryName(), w)).GroupToDictionary();
+                return WordTemplatesLazy.Value.Values.SelectCatch(w => KeyValuePair.Create(w.Query.ToQueryName(), w)).GroupToDictionary().ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(WordTemplateEntity)));
 
             TemplatesByEntityType = sb.GlobalLazy(() =>
@@ -146,7 +147,8 @@ public static class WordTemplateLogic
                         where !pair.imp.IsByAll
                         from t in pair.imp.Types
                         select KeyValuePair.Create(t, pair.wr))
-                        .GroupToDictionary();
+                        .GroupToDictionary()
+                        .ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(WordTemplateEntity)));
 
             Schema.Current.Synchronizing += Schema_Synchronize_Tokens;

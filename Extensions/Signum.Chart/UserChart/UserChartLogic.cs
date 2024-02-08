@@ -8,14 +8,15 @@ using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserQueries;
 using Signum.ViewLog;
+using System.Collections.Frozen;
 
 namespace Signum.Chart.UserChart;
 
 public static class UserChartLogic
 {
-    public static ResetLazy<Dictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts = null!;
-    public static ResetLazy<Dictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByType = null!;
-    public static ResetLazy<Dictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
+    public static ResetLazy<FrozenDictionary<Lite<UserChartEntity>, UserChartEntity>> UserCharts = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<Lite<UserChartEntity>>>> UserChartsByType = null!;
+    public static ResetLazy<FrozenDictionary<object, List<Lite<UserChartEntity>>>> UserChartsByQuery = null!;
 
     [AutoExpressionField]
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserChartEntity uc) =>
@@ -147,15 +148,15 @@ public static class UserChartLogic
               Administrator.UnsafeDeletePreCommand(Database.Query<UserChartEntity>().Where(a => a.Query.Is(e)));
 
 
-            UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToDictionary(a => a.ToLite()),
+            UserCharts = sb.GlobalLazy(() => Database.Query<UserChartEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(UserChartEntity)));
 
-            UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KeyValuePair.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary(),
+            UserChartsByQuery = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType == null).SelectCatch(uc => KeyValuePair.Create(uc.Query.ToQueryName(), uc.ToLite())).GroupToDictionary().ToFrozenDictionary(),
                 new InvalidateWith(typeof(UserChartEntity)));
 
             UserChartsByType = sb.GlobalLazy(() => UserCharts.Value.Values.Where(a => a.EntityType != null)
             .SelectCatch(a => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(a.EntityType!.Id), a.ToLite()))
-            .GroupToDictionary(),
+            .GroupToDictionary().ToFrozenDictionary(),
                 new InvalidateWith(typeof(UserChartEntity)));
         }
     }

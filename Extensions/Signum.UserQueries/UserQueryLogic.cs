@@ -10,15 +10,16 @@ using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
+using System.Collections.Frozen;
 using System.Linq.Expressions;
 
 namespace Signum.UserQueries;
 
 public static class UserQueryLogic
 {
-    public static ResetLazy<Dictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
-    public static ResetLazy<Dictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByType = null!;
-    public static ResetLazy<Dictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
+    public static ResetLazy<FrozenDictionary<Lite<UserQueryEntity>, UserQueryEntity>> UserQueries = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<Lite<UserQueryEntity>>>> UserQueriesByType = null!;
+    public static ResetLazy<FrozenDictionary<object, List<Lite<UserQueryEntity>>>> UserQueriesByQuery = null!;
 
     [AutoExpressionField]
     public static IQueryable<CachedQueryEntity> CachedQueries(this UserQueryEntity uq) =>
@@ -131,15 +132,17 @@ public static class UserQueryLogic
 
             sb.Schema.EntityEvents<UserQueryEntity>().Retrieved += UserQueryLogic_Retrieved;
 
-            UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToDictionary(a => a.ToLite()),
+            UserQueries = sb.GlobalLazy(() => Database.Query<UserQueryEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(UserQueryEntity)));
 
-            UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null).SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary(),
+            UserQueriesByQuery = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType == null)
+                .SelectCatch(uq => KeyValuePair.Create(uq.Query.ToQueryName(), uq.ToLite())).GroupToDictionary().ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(UserQueryEntity)));
 
             UserQueriesByType = sb.GlobalLazy(() => UserQueries.Value.Values.Where(a => a.EntityType != null)
-            .SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite()))
-            .GroupToDictionary(), new InvalidateWith(typeof(UserQueryEntity)));
+                .SelectCatch(uq => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(uq.EntityType!.Id), uq.ToLite()))
+                .GroupToDictionary().ToFrozenDictionaryEx(), 
+                new InvalidateWith(typeof(UserQueryEntity)));
 
          		if (sb.WebServerBuilder != null)
             {
