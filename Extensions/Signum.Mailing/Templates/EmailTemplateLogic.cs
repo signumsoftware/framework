@@ -8,6 +8,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 using Signum.API;
 using Signum.Authorization;
+using System.Collections.Frozen;
 
 namespace Signum.Mailing.Templates;
 
@@ -27,8 +28,8 @@ public static class EmailTemplateLogic
     public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se) =>
         As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(se)));
 
-    public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
-    public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
 
 
     public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
@@ -92,12 +93,12 @@ public static class EmailTemplateLogic
                 
 
             EmailTemplatesLazy = sb.GlobalLazy(() =>
-            Database.Query<EmailTemplateEntity>().ToDictionary(et => et.ToLite())
+            Database.Query<EmailTemplateEntity>().ToFrozenDictionaryEx(et => et.ToLite())
             , new InvalidateWith(typeof(EmailTemplateEntity)));
 
             TemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return EmailTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                return EmailTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary().ToFrozenDictionary();
             }, new InvalidateWith(typeof(EmailTemplateEntity)));
 
             EmailModelLogic.Start(sb);

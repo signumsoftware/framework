@@ -1,12 +1,13 @@
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Basics;
 
 public static class SemiSymbolLogic<T>
     where T : SemiSymbol
 {
-    static ResetLazy<Dictionary<string, T>> lazy = null!;
+    static ResetLazy<FrozenDictionary<string, T>> lazy = null!;
     static Func<IEnumerable<T>> getSemiSymbols = null!;
 
     [ThreadStatic]
@@ -45,7 +46,7 @@ public static class SemiSymbolLogic<T>
                       "caching " + typeof(T).Name);
 
                     SemiSymbol.SetFromDatabase<T>(current.ToDictionary(a => a.Key!));
-                    return result.ToDictionary(a => a.Key!);
+                    return result.ToFrozenDictionaryEx(a => a.Key!);
                 }
             },
             new InvalidateWith(typeof(T)),
@@ -117,7 +118,7 @@ public static class SemiSymbolLogic<T>
                 });
     }
 
-    static Dictionary<string, T> AssertStarted()
+    static FrozenDictionary<string, T> AssertStarted()
     {
         if (lazy == null)
             throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".FormatWith(typeof(SemiSymbolLogic<T>).TypeName()));

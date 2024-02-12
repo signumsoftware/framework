@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using DocumentFormat.OpenXml.Packaging;
 using Signum.DynamicQuery.Tokens;
@@ -135,10 +136,10 @@ public static class WordModelLogic
         }
     }
 
-    static ResetLazy<Dictionary<Lite<WordModelEntity>, List<Lite<WordTemplateEntity>>>> WordModelToTemplates = null!;
+    static ResetLazy<FrozenDictionary<Lite<WordModelEntity>, List<Lite<WordTemplateEntity>>>> WordModelToTemplates = null!;
     static Dictionary<Type, WordModelInfo> registeredWordModels = new Dictionary<Type, WordModelInfo>();
-    public static ResetLazy<Dictionary<Type, WordModelEntity>> WordModelTypeToEntity = null!;
-    public static ResetLazy<Dictionary<WordModelEntity, Type>> WordModelEntityToType = null!;
+    public static ResetLazy<FrozenDictionary<Type, WordModelEntity>> WordModelTypeToEntity = null!;
+    public static ResetLazy<FrozenDictionary<WordModelEntity, Type>> WordModelEntityToType = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -167,7 +168,8 @@ public static class WordModelLogic
                 from et in Database.Query<WordTemplateEntity>()
                 where et.Model != null
                 select new { swe = et.Model, et = et.ToLite() })
-                .GroupToDictionary(pair => pair.swe!.ToLite(), pair => pair.et!),
+                .GroupToDictionary(pair => pair.swe!.ToLite(), pair => pair.et!)
+                .ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(WordModelEntity), typeof(WordTemplateEntity)));
 
             WordModelTypeToEntity = sb.GlobalLazy(() =>
@@ -179,12 +181,12 @@ public static class WordModelLogic
                     swr => swr.FullClassName, 
                     type => type.FullName!,
                     (swr, type) => KeyValuePair.Create(type, swr), 
-                    "caching " + nameof(WordModelEntity)).ToDictionary();
+                    "caching " + nameof(WordModelEntity)).ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(WordModelEntity)));
 
             sb.Schema.Initializing += () => WordModelTypeToEntity.Load();
 
-            WordModelEntityToType = sb.GlobalLazy(() => WordModelTypeToEntity.Value.Inverse(),
+            WordModelEntityToType = sb.GlobalLazy(() => WordModelTypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(WordModelEntity)));
         }
     }
