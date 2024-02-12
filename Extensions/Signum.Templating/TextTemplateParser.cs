@@ -6,12 +6,12 @@ namespace Signum.Templating;
 
 public static partial class TextTemplateParser
 {
-    public static BlockNode Parse(string? text, QueryDescription qd, Type? modelType)
+    public static BlockNode Parse(string? text, QueryDescription? qd, Type? modelType)
     {
         return new TextTemplateParserImp(text, qd, modelType).Parse();      
     }
 
-    public static BlockNode TryParse(string? text, QueryDescription qd, Type? modelType, out string errorMessage)
+    public static BlockNode TryParse(string? text, QueryDescription? qd, Type? modelType, out string errorMessage)
     {
         return new TextTemplateParserImp(text, qd, modelType).TryParse(out errorMessage);
     }
@@ -27,12 +27,15 @@ public static partial class TextTemplateParser
 
         public Type? ModelType { get; private set; }
 
-        public QueryDescription QueryDescription { get; private set; }
+        public QueryDescription? QueryDescription { get; private set; }
 
-        public TextTemplateParserImp(string? text, QueryDescription qd, Type? modelType)
+
+        public QueryDescription AssertQueryDescription(string action) => QueryDescription ?? throw new InvalidOperationException("No Query selected! Unable to {0}".FormatWith(action));
+
+        public TextTemplateParserImp(string? text, QueryDescription? qd, Type? modelType)
         {
             this.text = text ?? "";
-            this.QueryDescription = qd ?? throw new ArgumentNullException(nameof(qd));
+            this.QueryDescription = qd;
             this.ModelType = modelType; 
         }
 
@@ -239,6 +242,7 @@ public static partial class TextTemplateParser
                 AddError(true, e.Message);
             }
         }
+
     }
 
     public static string Synchronize(string text, TemplateSynchronizationContext sc)

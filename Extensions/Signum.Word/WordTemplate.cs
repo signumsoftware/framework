@@ -17,7 +17,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
     [StringLengthValidator(Min = 3, Max = 200)]
     public string Name { get; set; }
 
-    public QueryEntity Query { get; set; }
+    public QueryEntity? Query { get; set; }
 
     public WordModelEntity? Model { get; set; }
 
@@ -80,7 +80,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             new XAttribute("Name", Name),
             new XAttribute("Guid", Guid),
             new XAttribute("DisableAuthorization", DisableAuthorization),
-            new XAttribute("Query", Query.Key),
+            Query == null ? null : new XAttribute("Query", Query.Key),
             Model?.Let(m => new XAttribute("Model", m.FullClassName)),
             new XAttribute("Culture", Culture.Name),
             new XAttribute("FileName", FileName),
@@ -103,7 +103,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         Name = element.Attribute("Name")!.Value;
         DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
-        Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+        Query = element.Attribute("Query")?.Let(a => ctx.GetQuery(a.Value));
         Model = element.Attribute("Model")?.Let(at => WordModelLogic.GetWordModelEntity(at.Value));
         Culture =  CultureInfoLogic.GetCultureInfoEntity(element.Attribute("Culture")!.Value);
 
@@ -117,7 +117,8 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
-        ParseData(ctx.GetQueryDescription(Query));
+        if (Query != null)
+            ParseData(ctx.GetQueryDescription(Query));
 
         Template = SyncFile(Template == null ? null : ctx.RetrieveLite(Template), element.Element("Template")!);
     }

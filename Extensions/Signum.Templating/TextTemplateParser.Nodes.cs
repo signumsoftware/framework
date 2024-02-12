@@ -279,7 +279,7 @@ public static partial class TextTemplateParser
         {
             var filtered = this.Condition.GetFilteredRows(p);
 
-            using (filtered is IEnumerable<ResultRow> ? p.OverrideRows((IEnumerable<ResultRow>)filtered) : null)
+            using (filtered is IEnumerable<ResultRow> rr ? p.QueryContext!.OverrideRows(rr) : null)
             {
                 if (filtered.Any())
                 {
@@ -438,8 +438,8 @@ public static partial class TextTemplateParser
 
 public class TextTemplateParameters : TemplateParameters
 {
-    public TextTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows) :
-          base(entity, culture, columns, rows)
+    public TextTemplateParameters(IEntity? entity, CultureInfo culture, QueryContext? qc) :
+          base(entity, culture, qc)
     { }
 
     public StringBuilder StringBuilder = new StringBuilder();

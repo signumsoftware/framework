@@ -10,14 +10,13 @@ namespace Signum.Word;
 class WordTemplateRenderer
 {
     OpenXmlPackage document;
-    QueryDescription queryDescription;
     Entity? entity;
     CultureInfo culture;
     WordTemplateEntity template;
     IWordModel? model;
     TextTemplateParser.BlockNode? fileNameBlock;
 
-    public WordTemplateRenderer(OpenXmlPackage document, QueryDescription queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity, TextTemplateParser.BlockNode? fileNameBlock)
+    public WordTemplateRenderer(OpenXmlPackage document, QueryDescription? queryDescription, CultureInfo culture, WordTemplateEntity template, IWordModel? model, Entity? entity, TextTemplateParser.BlockNode? fileNameBlock)
     {
         this.document = document;
         this.culture = culture;
@@ -28,11 +27,12 @@ class WordTemplateRenderer
         this.fileNameBlock = fileNameBlock;
     }
 
-    ResultTable? table;
-    Dictionary<QueryToken, ResultColumn>? dicTokenColumn;
+    QueryDescription? queryDescription;
+    QueryContext? queryContext;
 
     internal void ExecuteQuery()
     {
+        var qd = this.queryDescription!;
         List<QueryToken> tokens = new List<QueryToken>();
 
         foreach (var root in document.AllRootElements())
@@ -48,19 +48,19 @@ class WordTemplateRenderer
 
         var columns = tokens.NotNull().Distinct().Select(qt => new Signum.DynamicQuery.Column(qt, null)).ToList();
 
-        var filters = model != null ? model.GetFilters(this.queryDescription) :
-            entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", this.queryDescription, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
+        var filters = model != null ? model.GetFilters(qd) :
+            entity != null ? new List<Filter> { new FilterCondition(QueryUtils.Parse("Entity", qd, 0), FilterOperation.EqualTo, this.entity.ToLite()) } :
             throw new InvalidOperationException($"Impossible to create a Word report if '{nameof(entity)}' and '{nameof(model)}' are both null");
         
 
         filters.AddRange(template.Filters.ToFilterList());
 
-        var orders = model?.GetOrders(this.queryDescription) ?? new List<Order>();
+        var orders = model?.GetOrders(qd) ?? new List<Order>();
         orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());
 
-        this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+        var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
         {
-            QueryName = this.queryDescription.QueryName,
+            QueryName = qd.QueryName,
             GroupResults = template.GroupResults,
             Columns = columns,
             Pagination = model?.GetPagination() ?? new Pagination.All(),
@@ -68,14 +68,12 @@ class WordTemplateRenderer
             Orders = orders,
         });
 
-        var dt = this.table.ToDataTable();
-
-        this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
+        this.queryContext = new QueryContext(qd, table);
     }
 
     internal void RenderNodes()
     {
-        var parameters = new WordTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows, template, model, document);
+        var parameters = new WordTemplateParameters(this.entity, this.culture, this.queryContext, template, model, document);
         
         foreach (var part in document.AllParts().Where(p => p.RootElement != null))
         {
@@ -117,6 +115,6 @@ class WordTemplateRenderer
 
     internal string RenderFileName()
     {
-        return this.fileNameBlock!.Print(new TextTemplateParameters(this.entity, this.culture, this.dicTokenColumn!, this.table!.Rows));
+        return this.fileNameBlock!.Print(new TextTemplateParameters(this.entity, this.culture, this.queryContext));
     }
 }

@@ -67,8 +67,18 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(FileToken) && FileToken?.Token != null && !typeof(IFile).IsAssignableFrom(FileToken.Token.Type.CleanType()))
-            return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), "IFile");
+
+        if (pi.Name == nameof(FileToken))
+        {
+            var et = this.TryGetParentEntity<EmailTemplateEntity>();
+            if (et != null && et.Query == null)
+                return ValidationMessage._0IsNotSet.NiceToString(NicePropertyName((EmailTemplateEntity ete) => ete.Query));
+
+
+            if (FileToken?.Token != null && !typeof(IFile).IsAssignableFrom(FileToken.Token.Type.CleanType()))
+                return ValidationMessage._0ShouldBeOfType1.NiceToString(pi.NiceName(), "IFile");
+
+        }
 
         return base.PropertyValidation(pi);
     }
