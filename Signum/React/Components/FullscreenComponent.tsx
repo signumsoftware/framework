@@ -28,7 +28,7 @@ export function FullscreenComponent(p: FullscreenComponentProps) {
       right: 0,
       bottom: 0,
       height: "auto",
-      zIndex: 9,
+      zIndex: 9999,
     })}>
 
       <div key={isFullScreen ? "A" : "B"} style={{ flexGrow: 1, display: "flex", width: "0px" }}>

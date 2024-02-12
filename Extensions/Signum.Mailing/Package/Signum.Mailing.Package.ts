@@ -34,11 +34,18 @@ export interface EmailPackageEntity extends Entities.Entity, Processes.IProcessD
   name: string | null;
 }
 
+export const EmaiTemplateTargetFrom = new EnumType<EmaiTemplateTargetFrom>("EmaiTemplateTargetFrom");
+export type EmaiTemplateTargetFrom =
+  "NoTarget" |
+  "Unique" |
+  "UserQuery";
+
 export const SendEmailTaskEntity = new Type<SendEmailTaskEntity>("SendEmailTask");
 export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEntity {
   Type: "SendEmailTask";
   name: string;
   emailTemplate: Entities.Lite<Templates.EmailTemplateEntity>;
+  targetFrom: EmaiTemplateTargetFrom;
   uniqueTarget: Entities.Lite<Entities.Entity> | null;
   targetsFromUserQuery: Entities.Lite<UserQueries.UserQueryEntity> | null;
   modelConverter: Templating.ModelConverterSymbol | null;

@@ -46,6 +46,7 @@ export interface SearchValueProps {
   htmlAttributes?: React.AllHTMLAttributes<HTMLElement>,
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
   avoidRenderTimeMachineIcon?: boolean;
+  onExplore?: (vsc: SearchValueController) => Promise<boolean>;
 }
 
 export interface SearchValueController {
@@ -387,6 +388,17 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
   function handleClick(e: React.MouseEvent<any>) {
     e.preventDefault();
+
+    if (p.onExplore) {
+      p.onExplore(controller).then(r => {
+        if (r && !p.avoidAutoRefresh) 
+          refreshValue();
+
+        if (p.onExplored)
+          p.onExplored();
+      });
+      return;
+    }
 
     p.htmlAttributes?.onClick?.(e);
 

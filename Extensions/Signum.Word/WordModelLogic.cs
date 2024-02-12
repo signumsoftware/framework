@@ -8,9 +8,8 @@ namespace Signum.Word;
 
 public class WordTemplateParameters : TemplateParameters
 {
-    public WordTemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, 
-        IEnumerable<ResultRow> rows, WordTemplateEntity template, IWordModel? wordModel, OpenXmlPackage document) : 
-          base(entity, culture, columns, rows)
+    public WordTemplateParameters(IEntity? entity, CultureInfo culture,QueryContext? queryContext, WordTemplateEntity template, IWordModel? wordModel, OpenXmlPackage document) : 
+          base(entity, culture, queryContext)
     {
         this.Template = template;
         this.Model = wordModel;

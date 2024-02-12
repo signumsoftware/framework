@@ -39,7 +39,7 @@ public abstract class ConditionBase
     {
         var filter = this.GetResultFilter(p);
 
-        var filtered = p.Rows.Where(filter).ToList();
+        var filtered = p.QueryContext!.CurrentRows.Where(filter).ToList();
 
         return filtered;
     }
@@ -266,7 +266,7 @@ public class ConditionCompare : ConditionBase
 
         if (Operation == null)
         {
-            var column = p.Columns[tvp.ParsedToken.QueryToken!];
+            var column = p.QueryContext!.ResultColumns[tvp.ParsedToken.QueryToken!];
 
             return r => ToBool(r[column]);
         }
@@ -278,7 +278,7 @@ public class ConditionCompare : ConditionBase
 
             Expression value = Expression.Constant(val, type);
 
-            ResultColumn col = p.Columns[tvp.ParsedToken.QueryToken!];
+            ResultColumn col = p.QueryContext!.ResultColumns[tvp.ParsedToken.QueryToken!];
 
             var expression = Signum.Utilities.ExpressionTrees.Linq.Expr((ResultRow rr) => rr[col]);
 

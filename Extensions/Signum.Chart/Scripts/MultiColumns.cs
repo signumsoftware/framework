@@ -25,6 +25,7 @@ public class MultiColumnsChartScript : ChartScript
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Margin)
             {
                 new ChartScriptParameter(ChartParameterMessage.UnitMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 40m } },
+                new ChartScriptParameter(ChartParameterMessage.HorizontalMargin, ChartParameterType.Number) {  ValueDefinition = new NumberInterval { DefaultValue = 2m } },
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.Number)
             {

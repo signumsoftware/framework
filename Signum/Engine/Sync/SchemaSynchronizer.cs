@@ -472,11 +472,18 @@ public static class SchemaSynchronizer
 
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
+                    bool IsColumnRemovedOrModified(DiffIndexColumn c)
+                    {
+                        var newName = dif.Columns.ContainsKey(c.ColumnName) ? c.ColumnName : dif.Columns.SingleEx(a => a.Value.Name == c.ColumnName).Key;
+                        var tc = tab.Columns.TryGetC(newName);
+                        return tc == null || !dif.Columns[newName].ColumnEquals(tc, true, true, true);
+                    }
+
                     var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !(kvp.Value is PrimaryKeyIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix is UniqueTableIndex or FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
-                        removeOld: null,
+                        removeOld: (i, dix) => !dix.IsControlledIndex && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
@@ -495,7 +502,7 @@ public static class SchemaSynchronizer
 
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
-                    var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
+                    var indices = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix is UniqueTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
@@ -503,7 +510,10 @@ public static class SchemaSynchronizer
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
+
+
+
+                    return SqlPreCommand.Combine(Spacing.Simple, indices);
                 });
 
 
@@ -1162,6 +1172,7 @@ public class DiffIndexColumn
 {
     public string ColumnName;
     public bool IsIncluded;
+    public bool IsDescending;
 }
 
 public class DiffIndex

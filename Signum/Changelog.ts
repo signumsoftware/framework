@@ -1,6 +1,7 @@
 import type { ChangeLogDic } from "./React/Basics/ChangeLogClient";
 
 export default {
+  "2024-02-06": ["add onExplore to SearchValueLine"],
   "2024-01-09": ["fix SearchValueLine, hide create button when has value"],
   "2023-12-19": ["fix forGenderAndNumber", "fix dateTimePlaceholder", "fix getChangeLogs"],
   "2023-12-18": "fix SearchValue onClick",

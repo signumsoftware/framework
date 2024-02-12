@@ -36,24 +36,24 @@ public static class SignumServer
 
     public static JsonOptions AddSignumJsonConverters(this JsonOptions jsonOptions)
     {
-        //Signum converters
-        jsonOptions.JsonSerializerOptions.IncludeFields = true;
-        jsonOptions.JsonSerializerOptions.Do(s =>
-        {
-            JsonSerializerOptions = s;
-            s.WriteIndented = true;
-            s.Converters.Add(WebEntityJsonConverterFactory);
-            s.Converters.Add(new LiteJsonConverterFactory());
-            s.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
-            s.Converters.Add(new JsonStringEnumConverter());
-            s.Converters.Add(new ResultTableConverter());
-            s.Converters.Add(new TimeSpanConverter());
-            s.Converters.Add(new DateOnlyConverter());
-            s.Converters.Add(new TimeOnlyConverter());
-
-        });
-
+        jsonOptions.JsonSerializerOptions.AddSignumJsonConverters();
         return jsonOptions;
+    }
+
+    public static void AddSignumJsonConverters(this JsonSerializerOptions jso)
+    {
+        //Signum converters
+        JsonSerializerOptions = jso;
+        jso.IncludeFields = true;
+        jso.WriteIndented = true;
+        jso.Converters.Add(WebEntityJsonConverterFactory);
+        jso.Converters.Add(new LiteJsonConverterFactory());
+        jso.Converters.Add(new MListJsonConverterFactory(WebEntityJsonConverterFactory.AssertCanWrite));
+        jso.Converters.Add(new JsonStringEnumConverter());
+        jso.Converters.Add(new ResultTableConverter());
+        jso.Converters.Add(new TimeSpanConverter());
+        jso.Converters.Add(new DateOnlyConverter());
+        jso.Converters.Add(new TimeOnlyConverter());
     }
 
     public static MvcOptions AddSignumGlobalFilters(this MvcOptions options)

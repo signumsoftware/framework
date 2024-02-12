@@ -106,6 +106,7 @@ public class ReactCodeGenerator
         else
         {
             SafeConsole.WriteLineColor(ConsoleColor.Green, "{0} created".FormatWith(fileName));
+            File.WriteAllText(fileName, content, Encoding.UTF8);
         }
     }
 
