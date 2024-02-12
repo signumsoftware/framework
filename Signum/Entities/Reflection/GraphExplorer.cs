@@ -236,7 +236,7 @@ public static class GraphExplorer
         }).ToList();
 
         string nodes = listNodes.ToString(t => "    {0} [color={1}, fillcolor={2}, shape={3}{4}, label=\"{5}\", tooltip=\"{6}\"]"
-        .FormatWith(modifiables.Comparer.GetHashCode(t.Node! /*CSBUG*/), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label, t.Tooltip), "\r\n");
+        .FormatWith(modifiables.Comparer.GetHashCode(t.Node), t.Color, t.Fillcolor, t.Shape, t.Style, t.Label, t.Tooltip), "\r\n");
 
         string arrows = modifiables.Edges.ToString(e => "    {0} -> {1}".FormatWith(modifiables.Comparer.GetHashCode(e.From), modifiables.Comparer.GetHashCode(e.To)), "\r\n");
 

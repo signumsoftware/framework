@@ -54,8 +54,8 @@ public static class ToolbarLogic
                 Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
                 Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
 
-            UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
-            UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
+            UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
+            UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
 
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);

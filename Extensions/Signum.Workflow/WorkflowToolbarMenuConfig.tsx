@@ -30,7 +30,7 @@ export default class WorkflowToolbarMenuConfig extends ToolbarConfig<PermissionS
     return is(element.content, WorkflowPermission.WorkflowToolbarMenu);
   }
 
-  getMenuItem(res: ToolbarResponse<PermissionSymbol>, isActive: boolean, key: number | string) {
+  getMenuItem(res: ToolbarResponse<PermissionSymbol>, active: ToolbarResponse<any> | null, key: number | string) {
     return <WorkflowDropdownImp key={ key}/>
   }
 

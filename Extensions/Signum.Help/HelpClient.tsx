@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { OperationSymbol } from '@framework/Signum.Operations'
-import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo, tryGetTypeInfo} from '@framework/Reflection'
+import { PropertyRoute, PseudoType, QueryKey, getQueryKey, getTypeName, getTypeInfo, getAllTypes, getQueryInfo, tryGetTypeInfo } from '@framework/Reflection'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Help.css"
 import { NamespaceHelpEntity, TypeHelpEntity, AppendixHelpEntity, HelpPermissions } from './Signum.Help';
@@ -47,11 +47,11 @@ export function taskHelpIcon(lineBase: LineBaseController<any>, state: LineBaseP
 var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|/]*)\]/gi;
 var helpAppRelativeUrl = /href="\//gi;
 
-export function replaceHtmlLinks(txt: string  | null) {
+export function replaceHtmlLinks(txt: string | null) {
   if (txt == null)
     return "";
 
-  function htmlLink(url: string | null, title: string) {
+  function htmlLink(url: string | null | undefined, title: string) {
 
     if (url == null)
       return `<span class="text-danger">${title}</span>`;
@@ -62,8 +62,8 @@ export function replaceHtmlLinks(txt: string  | null) {
   var txt2 = txt.replace(helpLinkRegex, (match: any, letter: string, link: string) => {
     switch (letter) {
       case 't': {
-        const ti = getTypeInfo(link);
-        return htmlLink( Urls.typeUrl(link), ti?.niceName ?? link);
+        const ti = tryGetTypeInfo(link);
+        return htmlLink(ti && Urls.typeUrl(link), ti?.niceName ?? link);
       }
       case 'a': return htmlLink(Urls.appendixUrl(link), link);
       case 'n': return htmlLink(Urls.namespaceUrl(link), link);
@@ -72,12 +72,12 @@ export function replaceHtmlLinks(txt: string  | null) {
         return htmlLink(ti && Urls.operationUrl(ti.name, link), link);
       }
       case 'q': {
-        const ti = getTypeInfo(link);
+        const ti = tryGetTypeInfo(link);
         return htmlLink(ti && Urls.queryUrl(ti.name, link), link);
       }
       case 'p': {
         const type = link.tryBefore(".");
-        const ti = type ? getTypeInfo(type) : null;
+        const ti = type ? tryGetTypeInfo(type) : null;
         return htmlLink(ti && Urls.propertyUrl(ti.name, link.after(".")), link);
       }
       default: throw new Error("Not expected " + letter);
@@ -85,7 +85,7 @@ export function replaceHtmlLinks(txt: string  | null) {
   });
 
   var txt3 = txt2.replace(helpAppRelativeUrl, "href=\"" + AppContext.toAbsoluteUrl("~/"));
-  
+
   return txt3;
 }
 
@@ -136,11 +136,11 @@ export interface NamespaceItemTS {
 
 export interface EntityItem {
   cleanName: string;
-  hasEntity?: boolean; 
+  hasEntity?: boolean;
 }
 
 export interface AppendiceItemTS {
-  title: string ;
+  title: string;
   uniqueName: string;
 }
 

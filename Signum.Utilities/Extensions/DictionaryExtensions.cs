@@ -151,14 +151,6 @@ public static class DictionaryExtensions
         return result;
     }
 
-    public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer)
-        where K : notnull
-    {
-        var result = new Dictionary<K, V>(comparer);
-        result.AddRange<K, V>(collection);
-        return result;
-    }
-
     public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)
         where K : notnull
     {

@@ -116,6 +116,7 @@ public static class WordTemplateLogic
             
             new Graph<WordTemplateEntity>.Execute(WordTemplateOperation.CreateWordReport)
             {
+                ForReadonlyEntity = true,
                 CanExecute = et =>
                 {
                     if (et.Model != null && WordModelLogic.RequiresExtraParameters(et.Model))

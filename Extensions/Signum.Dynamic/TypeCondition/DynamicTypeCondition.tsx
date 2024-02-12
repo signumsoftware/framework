@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AutoLine, EntityLine, TypeContext, FormGroup, ValueLineType } from '@framework/Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
@@ -42,10 +42,9 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 

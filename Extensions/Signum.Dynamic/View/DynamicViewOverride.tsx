@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { EntityLine, TypeContext, FormGroup } from '@framework/Lines'
+import { EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
@@ -98,10 +98,9 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Mixin Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -248,10 +247,9 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
     AutoLineModal.show({
       type: { name: "string" },
       initialValue: text,
-      valueLineType: "TextArea",
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: title,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
   const ctx = p.ctx;

@@ -453,7 +453,7 @@ public class ParsedToken
 
         if (pair != null)
         {
-            return pair.Key + token.RemoveStart(pair.fullKey!.Length); /*CSBUG*/
+            return pair.Key + token.RemoveStart(pair.fullKey.Length);
         }
 
         return token;

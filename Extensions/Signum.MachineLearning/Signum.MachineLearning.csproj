@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.3.3">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -17,7 +17,7 @@
 		<PackageReference Include="Signum.MSBuildTask" Version="8.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="8.0.0" />
 
-		<PackageReference Include="TensorFlow.Keras" Version="0.11.2" />
+		<PackageReference Include="TensorFlow.Keras" Version="0.15.0" />
 	</ItemGroup>
 
 	<ItemGroup>

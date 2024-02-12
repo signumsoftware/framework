@@ -14,8 +14,10 @@ namespace Signum.UserAssets;
 public static class UserAssetServer
 {
 
-        //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
-        //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
+    //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(PinnedQueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx().Pinned));
+    //EntityJsonConverter.DefaultPropertyRoutes.Add(typeof(QueryFilterEmbedded), PropertyRoute.Construct((UserQueryEntity e) => e.Filters.FirstEx()));
+
+    public static HashSet<PermissionSymbol> QueryPermissionSymbols = new HashSet<PermissionSymbol>();
 
     static bool started;
     public static void Start(IApplicationBuilder app)
@@ -26,9 +28,7 @@ public static class UserAssetServer
         started = true;
 
         ReflectionServer.RegisterLike(typeof(UserAssetMessage), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
-        ReflectionServer.RegisterLike(typeof(QueryOrderEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
-        ReflectionServer.RegisterLike(typeof(QueryTokenEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
-        ReflectionServer.RegisterLike(typeof(QueryFilterEmbedded), () => UserAssetPermission.UserAssetsToXML.IsAuthorized());
+        ReflectionServer.RegisterLike(typeof(QueryOrderEmbedded), () => QueryPermissionSymbols.Any(p => p.IsAuthorized()));
 
 
         var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(QueryTokenEmbedded));

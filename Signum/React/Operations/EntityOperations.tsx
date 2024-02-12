@@ -57,6 +57,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: React.cloneElement(
           <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
+            {undefined}
           </DropdownButton>,
           undefined,
           ...groupButtons.map(bbe => bbe.button)
@@ -243,7 +244,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
           {button}
           {buttonAlternatives.map((aos, i) =>
             <Button key={i}
-              variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+              variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
               onClick={() => aos.onClick(eoc)}
               title={aos.text + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>

@@ -8,6 +8,9 @@
     <Member Name="RowId" Description="Zeilen-ID" />
     <Member Name="TranslatedText" Description="Übersetzter Text" />
   </Type>
+  <Type Name="TranslatedInstanceOperation">
+    <Member Name="Delete" Description="Löschen" />
+  </Type>
   <Type Name="TranslationJavascriptMessage">
     <Member Name="RememberChange" Description="Änderung erinnern" />
     <Member Name="RightTranslation" Description="Richtige Übersetzung" />
