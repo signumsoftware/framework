@@ -8,6 +8,7 @@ using Signum.API.Json;
 using System.Linq;
 using Signum.Utilities;
 using System.Collections.Generic;
+using System.Collections.Frozen;
 
 namespace Signum.API;
 
@@ -31,8 +32,7 @@ public static class ReflectionServer
 
     public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = new Dictionary<Assembly, HashSet<string>>();
 
-    public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
-        () => GetTypes().ToDictionaryEx(GetTypeName, "Types"));
+    public static ResetLazy<FrozenDictionary<string, Type>> TypesByName = new (() => GetTypes().ToFrozenDictionaryEx(GetTypeName, "Types"));
 
     public static Dictionary<string, Func<bool>> OverrideIsNamespaceAllowed = new Dictionary<string, Func<bool>>();
 

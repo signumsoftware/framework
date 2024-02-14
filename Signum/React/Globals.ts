@@ -21,7 +21,7 @@ declare global {
     groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
-    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
+    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
@@ -738,7 +738,7 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
 
   function replacePart(textToReplace: string, ...prefixes: string[]): string {
     return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
-      const captures = m.substring(1, m.length - 2).split("|");
+      const captures = m.substring(1, m.length - 1).split("|");
 
       for (let i = 0; i < prefixes.length; i++) {
         const pr = prefixes[i];

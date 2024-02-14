@@ -1,4 +1,4 @@
-using Azure;
+using Signum.Entities;
 using Signum.Security;
 using System.Collections;
 
@@ -107,8 +107,16 @@ public class Graph<T>
                         {
                             using (var tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
-                                log.End = Clock.Now;
+                                OperationLogEntity newLog = new OperationLogEntity //Transaction has been rollbacked
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    User = log.User,
+                                    End = Clock.Now,
+                                    Target = null,
+                                    Exception = exLog.ToLite(),
+                                };
+
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -288,8 +296,16 @@ public class Graph<T>
                         {
                             using (var tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
-                                log.End = Clock.Now;
+                                OperationLogEntity newLog = new OperationLogEntity //Transaction has been rollbacked
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    User = log.User,
+                                    End = Clock.Now,
+                                    Origin = log.Origin,
+                                    Target = null,
+                                    Exception = exLog.ToLite(),
+                                };
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -436,8 +452,15 @@ public class Graph<T>
                         {
                             using (var tr2 = Transaction.ForceNew())
                             {
-                                log.Exception = exLog.ToLite();
-                                log.End = Clock.Now;
+                                OperationLogEntity newLog = new OperationLogEntity //Transaction has been rollbacked
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    User = log.User,
+                                    End = Clock.Now,
+                                    Target = null,
+                                    Exception = exLog.ToLite(),
+                                };
                                 log.SaveLog();
 
                                 tr2.Commit();
@@ -539,7 +562,6 @@ public class Graph<T>
             using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
             {
                 OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
-
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -754,9 +776,15 @@ public class Graph<T>
 
                             using (var tr2 = Transaction.ForceNew())
                             {
-                                log.Target = entity.ToLite();
-                                log.Exception = exLog.ToLite();
-                                log.End = Clock.Now;
+                                OperationLogEntity newLog = new OperationLogEntity //Transaction has been rollbacked
+                                {
+                                    Operation = log.Operation,
+                                    Start = log.Start,
+                                    User = log.User,
+                                    End = Clock.Now,
+                                    Target = log.Target,
+                                    Exception = exLog.ToLite(),
+                                };
                                 log.SaveLog();
 
                                 tr2.Commit();

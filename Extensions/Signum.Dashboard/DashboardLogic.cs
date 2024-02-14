@@ -16,14 +16,15 @@ using Signum.ViewLog;
 using Signum.Toolbar;
 using Signum.API;
 using Signum.Omnibox;
+using System.Collections.Frozen;
 
 namespace Signum.Dashboard;
 
 public static class DashboardLogic
 {
-    public static ResetLazy<Dictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards = null!;
-    public static ResetLazy<Dictionary<Lite<DashboardEntity>, List<CachedQueryEntity>>> CachedQueriesCache = null!;
-    public static ResetLazy<Dictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType = null!;
+    public static ResetLazy<FrozenDictionary<Lite<DashboardEntity>, DashboardEntity>> Dashboards = null!;
+    public static ResetLazy<FrozenDictionary<Lite<DashboardEntity>, List<CachedQueryEntity>>> CachedQueriesCache = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<Lite<DashboardEntity>>>> DashboardsByType = null!;
 
     public static Polymorphic<Func<IPartEntity, PanelPartEmbedded, IEnumerable<CachedQueryDefinition>>> OnGetCachedQueryDefinition = new();
 
@@ -107,15 +108,15 @@ public static class DashboardLogic
             DashboardGraph.Register();
 
 
-            Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToDictionary(a => a.ToLite()),
+            Dashboards = sb.GlobalLazy(() => Database.Query<DashboardEntity>().ToFrozenDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(DashboardEntity)));
 
-            CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard),
+            CachedQueriesCache = sb.GlobalLazy(() => Database.Query<CachedQueryEntity>().GroupToDictionary(a => a.Dashboard).ToFrozenDictionary(),
                 new InvalidateWith(typeof(CachedQueryEntity)));
 
             DashboardsByType = sb.GlobalLazy(() => Dashboards.Value.Values.Where(a => a.EntityType != null)
             .SelectCatch(d => KeyValuePair.Create(TypeLogic.IdToType.GetOrThrow(d.EntityType!.Id), d.ToLite()))
-            .GroupToDictionary(),
+            .GroupToDictionary().ToFrozenDictionary(),
                 new InvalidateWith(typeof(DashboardEntity)));
 
             if (sb.WebServerBuilder != null)

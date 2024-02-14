@@ -1,5 +1,7 @@
 using Signum.Utilities.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace Signum.API.Json;
@@ -59,6 +61,11 @@ public class LambdaToJavascriptConverter
 
             if (ReflectionTools.IsNumber(ce.Type) && ce.Value != null)
                 return ((IFormattable)ce.Value).ToString(null, CultureInfo.InvariantCulture);
+
+            if (expr.Type.IsEnum)
+            {
+                return "\"" + ce.Value + "\"";
+            }
         }
 
         if (expr is MemberExpression me)
@@ -97,6 +104,51 @@ public class LambdaToJavascriptConverter
 
         if (expr is BinaryExpression be)
         {
+            static bool IsEnumConvertToNumber(Expression left, [NotNullWhen(true)]out Expression? enumOperand)
+            {
+                if (left is UnaryExpression ue
+      && ue.NodeType == ExpressionType.Convert && ReflectionTools.IsNumber(ue.Type)
+      && ue.Operand.Type.UnNullify().IsEnum)
+                {
+                    enumOperand = ue.Operand;
+                    return true;
+                }
+
+                enumOperand = null;
+                return false;
+            }
+
+            static bool IsNumberConstant(Expression right, [NotNullWhen(true)]out object? value)
+            {
+                if (right is ConstantExpression c && ReflectionTools.IsNumber(c.Type) && c.Value is object)
+                {
+                    value = c.Value;
+                    return true;
+                }
+
+                value = null;
+                return false;
+
+            }
+
+
+            static string? ToJsOperator(ExpressionType nodeType)
+            {
+                return nodeType switch
+                {
+                    ExpressionType.Add => "+",
+                    ExpressionType.Subtract => "-",
+                    ExpressionType.Equal => "==",
+                    ExpressionType.NotEqual => "!=",
+                    ExpressionType.LessThan => "<",
+                    ExpressionType.LessThanOrEqual => "<",
+                    ExpressionType.GreaterThan => ">",
+                    ExpressionType.GreaterThanOrEqual => ">=",
+                    ExpressionType.Coalesce => "??",
+                    _ => null
+                };
+            }
+
             if (be.NodeType == ExpressionType.Add && be.Type == typeof(string))
             {
 
@@ -114,6 +166,26 @@ public class LambdaToJavascriptConverter
 
                 if (a != null && b != null)
                     return "(" + a + " + " + b + ")";
+            }
+            else if(be.NodeType is ExpressionType.Equal or ExpressionType.NotEqual && IsEnumConvertToNumber(be.Left, out var enumOp) && IsNumberConstant(be.Right, out var num))
+            {
+                var a = ToJavascriptToString(param, enumOp);
+                var b = ToJavascriptToString(param, Expression.Constant(ReflectionTools.ChangeType(num, enumOp.Type.UnNullify())));
+
+                var op = ToJsOperator(be.NodeType);
+
+                if (a != null && op != null && b != null)
+                    return a + op + b;
+            }
+            else if (be.NodeType is ExpressionType.Equal or ExpressionType.NotEqual && IsEnumConvertToNumber(be.Right, out var enumOp2) && IsNumberConstant(be.Left, out var num2))
+            {
+                var a = ToJavascriptToString(param, Expression.Constant(ReflectionTools.ChangeType(num2, enumOp2.Type.UnNullify())));
+                var b = ToJavascriptToString(param, enumOp2);
+
+                var op = ToJsOperator(be.NodeType);
+
+                if (a != null && op != null && b != null)
+                    return a + op + b;
             }
             else
             {
@@ -303,22 +375,8 @@ public class LambdaToJavascriptConverter
         return null;
     }
 
-    private static string? ToJsOperator(ExpressionType nodeType)
-    {
-        return nodeType switch
-        {
-            ExpressionType.Add => "+",
-            ExpressionType.Subtract => "-",
-            ExpressionType.Equal => "==",
-            ExpressionType.NotEqual => "!=",
-            ExpressionType.LessThan => "<",
-            ExpressionType.LessThanOrEqual => "<",
-            ExpressionType.GreaterThan => ">",
-            ExpressionType.GreaterThanOrEqual => ">=",
-            ExpressionType.Coalesce => "??",
-            _ => null
-        };
-    }
+
+  
 
     private static string? ToJavascriptToString(ParameterExpression param, Expression expr, string? format = null)
     {

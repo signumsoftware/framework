@@ -121,6 +121,7 @@ public static class SysTablesSchema
                                                          select new DiffIndexColumn
                                                          {
                                                              ColumnName = c.name,
+															 IsDescending = ic.is_descending_key
                                                              Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
                                                              ic.is_included_column ? DiffIndexColumnType.Included :
                                                              DiffIndexColumnType.Key
@@ -141,6 +142,7 @@ public static class SysTablesSchema
                                                        select new DiffIndexColumn
                                                        {
                                                            ColumnName = c.name,
+                                                           IsDescending = ic.is_descending_key
                                                            Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
                                                            ic.is_included_column ? DiffIndexColumnType.Included :
                                                            DiffIndexColumnType.Key

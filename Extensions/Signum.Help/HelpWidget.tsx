@@ -75,7 +75,7 @@ export function HelpIcon(p: { ctx: TypeContext<any> }) {
   );
 
   return (
-    <OverlayTrigger trigger="click" placement="right" overlay={popover}>
+    <OverlayTrigger trigger="click" rootClose placement="right" overlay={popover}>
       <a href="#" onClick={e => e.preventDefault()} className="ms-1 sf-help-button" title={HelpMessage.Help.niceToString()}>
         <FontAwesomeIcon icon="circle-question" />
       </a>

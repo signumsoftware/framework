@@ -121,7 +121,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                         using (EntityJsonConverterFactory.SetPath(".model"))
                         {
                             var converter = (JsonConverterWithExisting<ModelEntity>)options.GetConverter(typeof(ModelEntity));
-                            model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model, modelTypeStr => Lite.ParseModelType(type!, modelTypeStr));
+                            model = converter.Read(ref reader, typeof(ModelEntity), options, existingValue?.Model as ModelEntity, modelTypeStr => Lite.ParseModelType(type!, modelTypeStr));
                         }
                     }
                     break;

@@ -253,7 +253,7 @@ public static class EmailLogic
                 },
                 Construct = (et, args) =>
                 {
-                    var entity = args.TryGetArgC<ModifiableEntity>() ?? args.GetArg<Lite<Entity>>().RetrieveAndRemember();
+                    var entity = args.TryGetArgC<ModifiableEntity>() ?? args.TryGetArgC<Lite<Entity>>()?.RetrieveAndRemember();
 
                     var emailMessageEntity = et.ToLite().CreateEmailMessage(entity).FirstOrDefault();
                     if (emailMessageEntity == null)

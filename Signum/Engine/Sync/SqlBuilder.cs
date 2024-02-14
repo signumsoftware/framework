@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
@@ -539,6 +540,33 @@ WHERE {primaryKey.Name} NOT IN
         return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where}{partitioning};");
     }
 
+
+
+    internal SqlPreCommand? RecreateDiffIndex(ITable tab, DiffIndex dix)
+    {
+
+        try
+        {
+            if (dix.IsPrimary)
+                throw new InvalidOperationException("Unable to re-create primary-key index");
+
+            if (dix.FullTextIndex != null)
+                throw new InvalidOperationException("Unable to re-create full-text-search index");
+        }
+        catch (Exception e)
+        {
+            return new SqlPreCommandSimple("-- " + e.Message);
+        }   
+
+        var indexType = dix.IsUnique ? "UNIQUE INDEX" : "INDEX";
+        var columns = dix.Columns.Where(a => !a.IsIncluded).ToString(c => c.ColumnName.SqlEscape(isPostgres) + (c.IsDescending?" DESC" :""), ", ");
+        var include = dix.Columns.Where(a => a.IsIncluded).HasItems() ? $" INCLUDE ({dix.Columns.Where(a => a.IsIncluded).ToString(c => c.ColumnName.SqlEscape(isPostgres), ", ")})" : null;
+        var where = dix.FilterDefinition.HasText() ? $" WHERE {dix.FilterDefinition}" : "";
+        var tableName = tab.Name;
+
+        return new SqlPreCommandSimple($"CREATE {indexType} {dix.IndexName.SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where};");
+    }
+
     internal SqlPreCommand UpdateTrim(ITable tab, IColumn tabCol)
     {
         return new SqlPreCommandSimple("UPDATE {0} SET {1} = RTRIM({1});".FormatWith(tab.Name, tabCol.Name)); ;
@@ -860,4 +888,6 @@ CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)}
         return WrapUseDatabase(partSchema.DatabaseName,
             new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
+
+   
 }

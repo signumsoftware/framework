@@ -8,6 +8,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
 using Signum.API;
 using Signum.Authorization;
+using System.Collections.Frozen;
 
 namespace Signum.Mailing.Templates;
 
@@ -27,8 +28,8 @@ public static class EmailTemplateLogic
     public static IQueryable<EmailTemplateEntity> EmailTemplates(this EmailModelEntity se) =>
         As.Expression(() => Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(se)));
 
-    public static ResetLazy<Dictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
-    public static ResetLazy<Dictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<EmailTemplateEntity>, EmailTemplateEntity>> EmailTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<object, List<EmailTemplateEntity>>> TemplatesByQueryName = null!;
 
 
     public static Polymorphic<Action<IAttachmentGeneratorEntity, FillAttachmentTokenContext>> FillAttachmentTokens =
@@ -49,26 +50,20 @@ public static class EmailTemplateLogic
 
     public static Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEmbedded>>> GenerateAttachment =
         new Polymorphic<Func<IAttachmentGeneratorEntity, GenerateAttachmentContext, List<EmailAttachmentEmbedded>>>();
+    
 
     public class GenerateAttachmentContext
     {
-        public QueryDescription QueryDescription;
+        public QueryContext? QueryContext; 
         public EmailTemplateEntity Template;
-        public Dictionary<QueryToken, ResultColumn> ResultColumns;
-        public IEnumerable<ResultRow> CurrentRows;
         public CultureInfo Culture;
         public Type? ModelType;
         public IEntity? Entity;
         public IEmailModel? Model;
 
-        public GenerateAttachmentContext(QueryDescription queryDescription, EmailTemplateEntity template,
-            Dictionary<QueryToken, ResultColumn> resultColumns,
-            IEnumerable<ResultRow> currentRows, CultureInfo culture)
+        public GenerateAttachmentContext(EmailTemplateEntity template, CultureInfo culture)
         {
-            QueryDescription = queryDescription;
             Template = template;
-            ResultColumns = resultColumns;
-            CurrentRows = currentRows;
             Culture = culture;
         }
     }
@@ -98,12 +93,12 @@ public static class EmailTemplateLogic
                 
 
             EmailTemplatesLazy = sb.GlobalLazy(() =>
-            Database.Query<EmailTemplateEntity>().ToDictionary(et => et.ToLite())
+            Database.Query<EmailTemplateEntity>().ToFrozenDictionaryEx(et => et.ToLite())
             , new InvalidateWith(typeof(EmailTemplateEntity)));
 
             TemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return EmailTemplatesLazy.Value.Values.SelectCatch(et => KeyValuePair.Create(et.Query.ToQueryName(), et)).GroupToDictionary();
+                return EmailTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary().ToFrozenDictionary();
             }, new InvalidateWith(typeof(EmailTemplateEntity)));
 
             EmailModelLogic.Start(sb);
@@ -193,13 +188,15 @@ public static class EmailTemplateLogic
 
     static void EmailTemplateLogic_Retrieved(EmailTemplateEntity emailTemplate, PostRetrievingContext ctx)
     {
-        using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+        if (emailTemplate.Query != null)
         {
-            object queryName = QueryLogic.ToQueryName(emailTemplate.Query.Key);
-            QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
-
             using (emailTemplate.DisableAuthorization ? ExecutionMode.Global() : null)
+            {
+                object queryName = emailTemplate.Query!.ToQueryName();
+                QueryDescription? description = QueryLogic.Queries.QueryDescription(queryName);
+
                 emailTemplate.ParseData(description);
+            }
         }
     }
 
@@ -243,10 +240,9 @@ public static class EmailTemplateLogic
     {
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
         {
-            object queryName = QueryLogic.ToQueryName(template.Query.Key);
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+            object? queryName = template.Query?.ToQueryName();
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
-            List<QueryToken> list = new List<QueryToken>();
             return TextTemplateParser.TryParse(text, qd, template.Model?.ToType(), out errorMessage);
         }
     }
@@ -255,10 +251,8 @@ public static class EmailTemplateLogic
     {
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
         {
-            var queryName = QueryLogic.ToQueryName(template.Query.Key);
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
-
-            List<QueryToken> list = new List<QueryToken>();
+            var queryName = template.Query?.ToQueryName();
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
             foreach (var message in template.Messages)
             {
@@ -292,7 +286,8 @@ public static class EmailTemplateLogic
         }
         else
         {
-            entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity");
+            if (modifiableEntity != null)
+                entity = modifiableEntity as Entity ?? throw new InvalidOperationException("Model should be an Entity");
         }
 
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
@@ -365,9 +360,9 @@ public static class EmailTemplateLogic
         Console.Write(".");
         try
         {
-            var queryName = QueryLogic.ToQueryName(et.Query.Key);
+            var queryName = et.Query?.ToQueryName();
 
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
             SqlPreCommand DeleteTemplate()
             {
@@ -387,80 +382,83 @@ public static class EmailTemplateLogic
             }
 
             using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "EmailTemplate: " + et.Name)))
-            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + et.Query.Key)))
+            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + (et.Query?.Key ?? " -- "))))
             {
-                if (et.From != null && et.From.Token != null)
+                if (qd != null)
                 {
-                    QueryTokenEmbedded token = et.From.Token;
-                    switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
+                    if (et.From != null && et.From.Token != null)
                     {
-                        case FixTokenResult.Nothing: break;
-                        case FixTokenResult.DeleteEntity: return DeleteTemplate();
-                        case FixTokenResult.SkipEntity: return null;
-                        case FixTokenResult.Fix: et.From.Token = token; break;
-                        case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
-                        default: break;
-                    }
-                }
-
-                if (et.Recipients.Any(a => a.Token != null))
-                {
-                    using (DelayedConsole.Delay(() => Console.WriteLine(" Recipients:")))
-                    {
-                        foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
+                        QueryTokenEmbedded token = et.From.Token;
+                        switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " From", allowRemoveToken: false, allowReCreate: et.Model != null))
                         {
-                            QueryTokenEmbedded token = item.Token!;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: et.From.Token = token; break;
+                            case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                            default: break;
+                        }
+                    }
+
+                    if (et.Recipients.Any(a => a.Token != null))
+                    {
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Recipients:")))
+                        {
+                            foreach (var item in et.Recipients.Where(a => a.Token != null).ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
-                                case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
-                                default: break;
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Recipient", allowRemoveToken: false, allowReCreate: et.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                                    case FixTokenResult.RemoveToken: et.Recipients.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                                    default: break;
+                                }
                             }
                         }
                     }
-                }
 
-                if (et.Filters.Any())
-                {
-                    using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
+                    if (et.Filters.Any())
                     {
-                        foreach (var item in et.Filters.ToList())
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
                         {
-                            QueryTokenEmbedded token = item.Token!;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: et.Model != null))
+                            foreach (var item in et.Filters.ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
-                                case FixTokenResult.RemoveToken: et.Filters.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
-                                default: break;
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: et.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                                    case FixTokenResult.RemoveToken: et.Filters.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                                    default: break;
+                                }
                             }
                         }
                     }
-                }
 
-                if (et.Orders.Any())
-                {
-                    using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
+                    if (et.Orders.Any())
                     {
-                        foreach (var item in et.Orders.ToList())
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
                         {
-                            QueryTokenEmbedded token = item.Token!;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: et.Model != null))
+                            foreach (var item in et.Orders.ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return DeleteTemplate();
-                                case FixTokenResult.RemoveToken: et.Orders.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
-                                default: break;
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: et.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return DeleteTemplate();
+                                    case FixTokenResult.RemoveToken: et.Orders.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplate();
+                                    default: break;
+                                }
                             }
                         }
                     }

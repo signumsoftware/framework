@@ -20,7 +20,7 @@ public static class SchemaSynchronizer
         Schema s = Schema.Current;
 
         var sqlBuilder = Connector.Current.SqlBuilder;
-        
+
         
 
         Dictionary<string, ITable> modelTables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
@@ -146,9 +146,9 @@ public static class SchemaSynchronizer
                   modelPartitionSchemas,
                   databasePartitionSchemas,
                   createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
-                  removeOld: null,
-                  mergeBoth: null
-                  );
+                removeOld: null,
+                mergeBoth: null
+                );
 
             SqlPreCommand? createSchemas = Synchronizer.SynchronizeScriptReplacing(replacements, "Schemas", Spacing.Double,
                 modelSchemas.ToDictionary(a => a.ToString()),
@@ -520,11 +520,18 @@ public static class SchemaSynchronizer
 
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
+                    bool IsColumnRemovedOrModified(DiffIndexColumn c)
+                    {
+                        var newName = dif.Columns.ContainsKey(c.ColumnName) ? c.ColumnName : dif.Columns.SingleEx(a => a.Value.Name == c.ColumnName).Key;
+                        var tc = tab.Columns.TryGetC(newName);
+                        return tc == null || !dif.Columns[newName].ColumnEquals(tc, true, true, true);
+                    }
+
                     var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
-                        removeOld: null,
+                        removeOld: (i, dix) => !dix.IsControlledIndex && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
@@ -543,7 +550,7 @@ public static class SchemaSynchronizer
 
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
-                    var controlledIndexes = Synchronizer.SynchronizeScript(Spacing.Simple,
+                    var indices = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
@@ -551,7 +558,10 @@ public static class SchemaSynchronizer
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
-                    return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
+
+
+
+                    return SqlPreCommand.Combine(Spacing.Simple, indices);
                 });
 
 
@@ -1123,3 +1133,942 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
     }
 }
 
+}
+
+public class DiffIndex
+{
+    public bool IsUnique;
+    public bool IsPrimary;
+    public FullTextIndex? FullTextIndex; 
+    public string IndexName;
+    public string? ViewName;
+    public string? FilterDefinition;
+    public DiffIndexType? Type;
+
+    public List<DiffIndexColumn> Columns;
+
+    public override string ToString()
+    {
+        return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
+    }
+
+    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix)
+    {
+        if (this.ViewName != (mix as UniqueTableIndex)?.ViewName)
+            return false;
+
+        if (this.ColumnsChanged(dif, mix))
+            return false;
+
+        if (this.IsPrimary != mix is PrimaryKeyIndex)
+            return false;
+
+        if (this.Type != GetIndexType(mix))
+            return false;
+
+        return true;
+    }
+
+    private static DiffIndexType? GetIndexType(TableIndex mix)
+    {
+        if (mix is UniqueTableIndex && ((UniqueTableIndex)mix).ViewName != null)
+            return null;
+
+        if (mix is FullTextTableIndex)
+            return DiffIndexType.FullTextIndex;
+
+        if (mix is PrimaryKeyIndex)
+            return Schema.Current.Settings.IsPostgres ? DiffIndexType.NonClustered : DiffIndexType.Clustered;
+
+        return DiffIndexType.NonClustered;
+    }
+
+    bool ColumnsChanged(DiffTable dif, TableIndex mix)
+    {
+        bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => !a.IsIncluded).ToList());
+        bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.IsIncluded).ToList());
+
+        if (sameCols && sameIncCols)
+            return false;
+
+        return true;
+    }
+
+    private static bool IdenticalColumns(DiffTable dif, IColumn[]? modColumns, List<DiffIndexColumn> diffColumns)
+    {
+        if ((modColumns?.Length ?? 0) != diffColumns.Count)
+            return false;
+
+        if (diffColumns.Count == 0)
+            return true;
+
+        var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
+
+        var perfect = difColumns.ZipOrDefault(modColumns!, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
+        return perfect;
+    }
+
+    public bool IsControlledIndex
+    {
+        get { return IndexName.StartsWith("IX_") || IndexName.StartsWith("UIX_"); }
+    }
+}
+
+public class FullTextIndex
+{
+    public string CatallogName;
+    public string StopList;
+    public string PropertiesList;
+}
+
+public enum DiffIndexType
+{
+    Heap = 0,
+    Clustered = 1,
+    NonClustered = 2,
+    Xml = 3,
+    Spatial = 4,
+    ClusteredColumnstore = 5,
+    NonClusteredColumnstore = 6,
+    NonClusteredHash = 7,
+
+
+    FullTextIndex = 100,
+}
+
+public enum GeneratedAlwaysType
+{
+    None = 0,
+    AsRowStart = 1,
+    AsRowEnd = 2
+}
+
+public class DiffDefaultConstraint
+{
+    public string? Name;
+    public string Definition;
+}
+
+public class DiffColumn
+{
+    public string Name;
+    public AbstractDbType DbType;
+    public string? UserTypeName;
+    public bool Nullable;
+    public string? Collation;
+    public int Length;
+    public int Precision;
+    public int Scale;
+    public bool Identity;
+    public bool PrimaryKey;
+
+    public DiffForeignKey? ForeignKey;
+
+    public DiffDefaultConstraint? DefaultConstraint;
+
+    public DiffCheckConstraint? CheckConstraint;
+
+    public GeneratedAlwaysType GeneratedAlwaysType;
+
+    public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
+    {
+        var result = DbType.Equals(other.DbType)
+            && Collation == other.Collation
+            && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
+            && Nullable == (other.Nullable.ToBool())
+            && SizeEquals(other)
+            && PrecisionEquals(other)
+            && ScaleEquals(other)
+            && (ignoreIdentity || Identity == other.Identity)
+            && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
+            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
+
+        if (!result)
+            return false;
+
+        return result;
+    }
+
+    public bool ScaleEquals(IColumn other)
+    {
+        return (other.Scale == null || other.Scale.Value == Scale);
+    }
+
+    public bool SizeEquals(IColumn other)
+    {
+        return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+    }
+
+    public bool PrecisionEquals(IColumn other)
+    {
+        return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
+    }
+
+    public bool DefaultEquals(IColumn other)
+    {
+        if (other.Default == null && this.DefaultConstraint == null)
+            return true;
+
+        var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
+
+        return result;
+    }
+
+    public bool CheckEquals(IColumn other)
+    {
+        if (other.Check == null && this.CheckConstraint == null)
+            return true;
+
+        var result = this.CheckConstraint?.Definition == other.Check;
+
+        return result;
+    }
+
+    private string? CleanParenthesis(string? p)
+    {
+        if (p == null)
+            return null;
+
+        while (
+            p.StartsWith("(") && p.EndsWith(")") ||
+            p.StartsWith("'") && p.EndsWith("'"))
+            p = p.Substring(1, p.Length - 2);
+
+        return p.ToLower();
+    }
+
+    public DiffColumn Clone()
+    {
+        return new DiffColumn
+        {
+            Name = Name,
+            ForeignKey = ForeignKey,
+            DefaultConstraint = DefaultConstraint?.Let(dc => new DiffDefaultConstraint { Name = dc.Name, Definition = dc.Definition }),
+            Identity = Identity,
+            Length = Length,
+            PrimaryKey = PrimaryKey,
+            Nullable = Nullable,
+            Precision = Precision,
+            Scale = Scale,
+            DbType = DbType,
+            UserTypeName = UserTypeName,
+        };
+    }
+
+    public override string ToString()
+    {
+        return this.Name;
+    }
+
+    internal bool CompatibleTypes(IColumn tabCol)
+    {
+        if (Schema.Current.Settings.IsPostgres)
+            return CompatibleTypes_Postgres(this.DbType.PostgreSql, tabCol.DbType.PostgreSql);
+        else
+            return CompatibleTypes_SqlServer(this.DbType.SqlServer, tabCol.DbType.SqlServer);
+    }
+
+    private bool CompatibleTypes_Postgres(NpgsqlDbType fromType, NpgsqlDbType toType)
+    {
+        return true;
+    }
+
+    private bool CompatibleTypes_SqlServer(SqlDbType fromType, SqlDbType toType)
+    {
+        //https://docs.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql
+        switch (fromType)
+        {
+            //BLACKLIST!!
+            case SqlDbType.Binary:
+            case SqlDbType.VarBinary:
+                switch (toType)
+                {
+                    case SqlDbType.Float:
+                    case SqlDbType.Real:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Char:
+            case SqlDbType.VarChar:
+                return true;
+
+            case SqlDbType.NChar:
+            case SqlDbType.NVarChar:
+                return toType != SqlDbType.Image;
+
+            case SqlDbType.DateTime:
+            case SqlDbType.SmallDateTime:
+                switch (toType)
+                {
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Date:
+                if (toType == SqlDbType.Time)
+                    return false;
+                goto case SqlDbType.DateTime2;
+
+            case SqlDbType.Time:
+                if (toType == SqlDbType.Date)
+                    return false;
+                goto case SqlDbType.DateTime2;
+
+            case SqlDbType.DateTimeOffset:
+            case SqlDbType.DateTime2:
+                switch (toType)
+                {
+                    case SqlDbType.Decimal:
+                    case SqlDbType.Float:
+                    case SqlDbType.Real:
+                    case SqlDbType.BigInt:
+                    case SqlDbType.Int:
+                    case SqlDbType.SmallInt:
+                    case SqlDbType.TinyInt:
+                    case SqlDbType.Money:
+                    case SqlDbType.SmallMoney:
+                    case SqlDbType.Bit:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Decimal:
+            case SqlDbType.Float:
+            case SqlDbType.Real:
+            case SqlDbType.BigInt:
+            case SqlDbType.Int:
+            case SqlDbType.SmallInt:
+            case SqlDbType.TinyInt:
+            case SqlDbType.Money:
+            case SqlDbType.SmallMoney:
+            case SqlDbType.Bit:
+                switch (toType)
+                {
+                    case SqlDbType.Date:
+                    case SqlDbType.Time:
+                    case SqlDbType.DateTimeOffset:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Timestamp:
+                switch (toType)
+                {
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Date:
+                    case SqlDbType.Time:
+                    case SqlDbType.DateTimeOffset:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+            case SqlDbType.Variant:
+                switch (toType)
+                {
+                    case SqlDbType.Timestamp:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            //WHITELIST!!
+            case SqlDbType.UniqueIdentifier:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Variant:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.Image:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.Image:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Timestamp:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.NText:
+            case SqlDbType.Text:
+                switch (toType)
+                {
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.Xml:
+            case SqlDbType.Udt:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return true;
+                    default:
+                        return false;
+                }
+            default:
+                throw new NotImplementedException("Unexpected SqlDbType");
+        }
+    }
+}
+
+public class DiffCheckConstraint
+{
+    public string Name;
+    public string Definition; 
+    public string? ColumnName;
+
+    public override string ToString() => Name;
+}
+
+public class DiffForeignKey
+{
+    public ObjectName Name;
+    public ObjectName TargetTable;
+    public bool IsDisabled;
+    public bool IsNotTrusted;
+    public List<DiffForeignKeyColumn> Columns;
+
+    public override string ToString() => Name.ToString();
+}
+
+public class DiffForeignKeyColumn
+{
+    public string Parent;
+    public string Referenced;
+
+    public override string ToString() => $"{Parent} -> {Referenced}";
+}
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.
+    public bool IsDescending;
+}
+
+public class DiffIndex
+{
+    public bool IsUnique;
+    public bool IsPrimary;
+    public FullTextIndex? FullTextIndex; 
+    public string IndexName;
+    public string? ViewName;
+    public string? FilterDefinition;
+    public DiffIndexType? Type;
+
+    public List<DiffIndexColumn> Columns;
+
+    public override string ToString()
+    {
+        return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
+    }
+
+    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix)
+    {
+        if (this.ViewName != (mix as UniqueTableIndex)?.ViewName)
+            return false;
+
+        if (this.ColumnsChanged(dif, mix))
+            return false;
+
+        if (this.IsPrimary != mix is PrimaryKeyIndex)
+            return false;
+
+        if (this.Type != GetIndexType(mix))
+            return false;
+
+        return true;
+    }
+
+    private static DiffIndexType? GetIndexType(TableIndex mix)
+    {
+        if (mix is UniqueTableIndex && ((UniqueTableIndex)mix).ViewName != null)
+            return null;
+
+        if (mix is FullTextTableIndex)
+            return DiffIndexType.FullTextIndex;
+
+        if (mix is PrimaryKeyIndex)
+            return Schema.Current.Settings.IsPostgres ? DiffIndexType.NonClustered : DiffIndexType.Clustered;
+
+        return DiffIndexType.NonClustered;
+    }
+
+    bool ColumnsChanged(DiffTable dif, TableIndex mix)
+    {
+        bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => !a.IsIncluded).ToList());
+        bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.IsIncluded).ToList());
+
+        if (sameCols && sameIncCols)
+            return false;
+
+        return true;
+    }
+
+    private static bool IdenticalColumns(DiffTable dif, IColumn[]? modColumns, List<DiffIndexColumn> diffColumns)
+    {
+        if ((modColumns?.Length ?? 0) != diffColumns.Count)
+            return false;
+
+        if (diffColumns.Count == 0)
+            return true;
+
+        var difColumns = diffColumns.Select(cn => dif.Columns.Values.SingleOrDefault(dc => dc.Name == cn.ColumnName)).ToList(); //Ny old name
+
+        var perfect = difColumns.ZipOrDefault(modColumns!, (dc, mc) => dc != null && mc != null && dc.ColumnEquals(mc, ignorePrimaryKey: true, ignoreIdentity: true, ignoreGenerateAlways: true)).All(a => a);
+        return perfect;
+    }
+
+    public bool IsControlledIndex
+    {
+        get { return IndexName.StartsWith("IX_") || IndexName.StartsWith("UIX_"); }
+    }
+}
+
+public class FullTextIndex
+{
+    public string CatallogName;
+    public string StopList;
+    public string PropertiesList;
+}
+
+public enum DiffIndexType
+{
+    Heap = 0,
+    Clustered = 1,
+    NonClustered = 2,
+    Xml = 3,
+    Spatial = 4,
+    ClusteredColumnstore = 5,
+    NonClusteredColumnstore = 6,
+    NonClusteredHash = 7,
+
+
+    FullTextIndex = 100,
+}
+
+public enum GeneratedAlwaysType
+{
+    None = 0,
+    AsRowStart = 1,
+    AsRowEnd = 2
+}
+
+public class DiffDefaultConstraint
+{
+    public string? Name;
+    public string Definition;
+}
+
+public class DiffColumn
+{
+    public string Name;
+    public AbstractDbType DbType;
+    public string? UserTypeName;
+    public bool Nullable;
+    public string? Collation;
+    public int Length;
+    public int Precision;
+    public int Scale;
+    public bool Identity;
+    public bool PrimaryKey;
+
+    public DiffForeignKey? ForeignKey;
+
+    public DiffDefaultConstraint? DefaultConstraint;
+
+    public DiffCheckConstraint? CheckConstraint;
+
+    public GeneratedAlwaysType GeneratedAlwaysType;
+
+    public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
+    {
+        var result = DbType.Equals(other.DbType)
+            && Collation == other.Collation
+            && StringComparer.InvariantCultureIgnoreCase.Equals(UserTypeName, other.UserDefinedTypeName)
+            && Nullable == (other.Nullable.ToBool())
+            && SizeEquals(other)
+            && PrecisionEquals(other)
+            && ScaleEquals(other)
+            && (ignoreIdentity || Identity == other.Identity)
+            && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
+            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
+
+        if (!result)
+            return false;
+
+        return result;
+    }
+
+    public bool ScaleEquals(IColumn other)
+    {
+        return (other.Scale == null || other.Scale.Value == Scale);
+    }
+
+    public bool SizeEquals(IColumn other)
+    {
+        return (other.DbType.IsDecimal() || other.Size == null || other.Size.Value == Precision || other.Size.Value == Length || other.Size.Value == int.MaxValue && Length == -1);
+    }
+
+    public bool PrecisionEquals(IColumn other)
+    {
+        return (!other.DbType.IsDecimal() || other.Precision == null || other.Precision == 0 || other.Precision.Value == Precision);
+    }
+
+    public bool DefaultEquals(IColumn other)
+    {
+        if (other.Default == null && this.DefaultConstraint == null)
+            return true;
+
+        var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
+
+        return result;
+    }
+
+    public bool CheckEquals(IColumn other)
+    {
+        if (other.Check == null && this.CheckConstraint == null)
+            return true;
+
+        var result = this.CheckConstraint?.Definition == other.Check;
+
+        return result;
+    }
+
+    private string? CleanParenthesis(string? p)
+    {
+        if (p == null)
+            return null;
+
+        while (
+            p.StartsWith("(") && p.EndsWith(")") ||
+            p.StartsWith("'") && p.EndsWith("'"))
+            p = p.Substring(1, p.Length - 2);
+
+        return p.ToLower();
+    }
+
+    public DiffColumn Clone()
+    {
+        return new DiffColumn
+        {
+            Name = Name,
+            ForeignKey = ForeignKey,
+            DefaultConstraint = DefaultConstraint?.Let(dc => new DiffDefaultConstraint { Name = dc.Name, Definition = dc.Definition }),
+            Identity = Identity,
+            Length = Length,
+            PrimaryKey = PrimaryKey,
+            Nullable = Nullable,
+            Precision = Precision,
+            Scale = Scale,
+            DbType = DbType,
+            UserTypeName = UserTypeName,
+        };
+    }
+
+    public override string ToString()
+    {
+        return this.Name;
+    }
+
+    internal bool CompatibleTypes(IColumn tabCol)
+    {
+        if (Schema.Current.Settings.IsPostgres)
+            return CompatibleTypes_Postgres(this.DbType.PostgreSql, tabCol.DbType.PostgreSql);
+        else
+            return CompatibleTypes_SqlServer(this.DbType.SqlServer, tabCol.DbType.SqlServer);
+    }
+
+    private bool CompatibleTypes_Postgres(NpgsqlDbType fromType, NpgsqlDbType toType)
+    {
+        return true;
+    }
+
+    private bool CompatibleTypes_SqlServer(SqlDbType fromType, SqlDbType toType)
+    {
+        //https://docs.microsoft.com/en-us/sql/t-sql/functions/cast-and-convert-transact-sql
+        switch (fromType)
+        {
+            //BLACKLIST!!
+            case SqlDbType.Binary:
+            case SqlDbType.VarBinary:
+                switch (toType)
+                {
+                    case SqlDbType.Float:
+                    case SqlDbType.Real:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Char:
+            case SqlDbType.VarChar:
+                return true;
+
+            case SqlDbType.NChar:
+            case SqlDbType.NVarChar:
+                return toType != SqlDbType.Image;
+
+            case SqlDbType.DateTime:
+            case SqlDbType.SmallDateTime:
+                switch (toType)
+                {
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Date:
+                if (toType == SqlDbType.Time)
+                    return false;
+                goto case SqlDbType.DateTime2;
+
+            case SqlDbType.Time:
+                if (toType == SqlDbType.Date)
+                    return false;
+                goto case SqlDbType.DateTime2;
+
+            case SqlDbType.DateTimeOffset:
+            case SqlDbType.DateTime2:
+                switch (toType)
+                {
+                    case SqlDbType.Decimal:
+                    case SqlDbType.Float:
+                    case SqlDbType.Real:
+                    case SqlDbType.BigInt:
+                    case SqlDbType.Int:
+                    case SqlDbType.SmallInt:
+                    case SqlDbType.TinyInt:
+                    case SqlDbType.Money:
+                    case SqlDbType.SmallMoney:
+                    case SqlDbType.Bit:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Decimal:
+            case SqlDbType.Float:
+            case SqlDbType.Real:
+            case SqlDbType.BigInt:
+            case SqlDbType.Int:
+            case SqlDbType.SmallInt:
+            case SqlDbType.TinyInt:
+            case SqlDbType.Money:
+            case SqlDbType.SmallMoney:
+            case SqlDbType.Bit:
+                switch (toType)
+                {
+                    case SqlDbType.Date:
+                    case SqlDbType.Time:
+                    case SqlDbType.DateTimeOffset:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            case SqlDbType.Timestamp:
+                switch (toType)
+                {
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Date:
+                    case SqlDbType.Time:
+                    case SqlDbType.DateTimeOffset:
+                    case SqlDbType.DateTime2:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+            case SqlDbType.Variant:
+                switch (toType)
+                {
+                    case SqlDbType.Timestamp:
+                    case SqlDbType.Image:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return false;
+                    default:
+                        return true;
+                }
+
+            //WHITELIST!!
+            case SqlDbType.UniqueIdentifier:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.UniqueIdentifier:
+                    case SqlDbType.Variant:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.Image:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.Image:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Timestamp:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.NText:
+            case SqlDbType.Text:
+                switch (toType)
+                {
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.NText:
+                    case SqlDbType.Text:
+                    case SqlDbType.Xml:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SqlDbType.Xml:
+            case SqlDbType.Udt:
+                switch (toType)
+                {
+                    case SqlDbType.Binary:
+                    case SqlDbType.VarBinary:
+                    case SqlDbType.Char:
+                    case SqlDbType.VarChar:
+                    case SqlDbType.NChar:
+                    case SqlDbType.NVarChar:
+                    case SqlDbType.Xml:
+                    case SqlDbType.Udt:
+                        return true;
+                    default:
+                        return false;
+                }
+            default:
+                throw new NotImplementedException("Unexpected SqlDbType");
+        }
+    }
+}
+
+public class DiffCheckConstraint
+{
+    public string Name;
+    public string Definition; 
+    public string? ColumnName;
+
+    public override string ToString() => Name;
+}
+
+public class DiffForeignKey
+{
+    public ObjectName Name;
+    public ObjectName TargetTable;
+    public bool IsDisabled;
+    public bool IsNotTrusted;
+    public List<DiffForeignKeyColumn> Columns;
+
+    public override string ToString() => Name.ToString();
+}
+
+public class DiffForeignKeyColumn
+{
+    public string Parent;
+    public string Referenced;
+
+    public override string ToString() => $"{Parent} -> {Referenced}";
+}
+#pragma warning restore CS8618 // Non-nullable field is uninitialized.

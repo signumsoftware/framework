@@ -26,7 +26,9 @@ public class PieChartScript : ChartScript
             },
             new ChartScriptParameterGroup(ChartParameterGroupMessage.ShowValue)
             {
-                new ChartScriptParameter(ChartParameterMessage.ValueAsNumberOrPercent, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Number|Percent") },
+                new ChartScriptParameter(ChartParameterMessage.Value, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|OnLabel|OnArc") },
+                new ChartScriptParameter(ChartParameterMessage.Percent, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|OnLabel|OnArc") },
+                new ChartScriptParameter(ChartParameterMessage.Total, ChartParameterType.Enum) {  ValueDefinition = EnumValueList.Parse("No|Yes") },
             }
         };
     }

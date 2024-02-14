@@ -453,16 +453,16 @@
     <Member Name="Every0Minutes" Description="Alle {0} Minuten" />
     <Member Name="Every0Seconds" Description="Alle {0} Sekunden" />
     <Member Name="Hour" Description="Stunde" />
-    <Member Name="HourStart" Description="Start Stunde" />
+    <Member Name="HourStart" Description="Stundenstart" />
     <Member Name="Millisecond" Description="Millisekunde" />
     <Member Name="Minute" Description="Minute" />
-    <Member Name="MinuteStart" Description="Start Minute" />
+    <Member Name="MinuteStart" Description="Minutenstart" />
     <Member Name="Month" Description="Monat" />
-    <Member Name="MonthStart" Description="Monatsbeginn " />
+    <Member Name="MonthStart" Description="Monatsstart" />
     <Member Name="Quarter" Description="Quartal" />
     <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="Second" Description="Sekunde" />
-    <Member Name="SecondStart" Description="Start Sekunde" />
+    <Member Name="SecondStart" Description="Sekundenstart" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />

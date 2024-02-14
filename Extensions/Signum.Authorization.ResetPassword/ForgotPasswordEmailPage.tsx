@@ -14,40 +14,42 @@ export default function ForgotPasswordEmailPage() {
 
   const eMail = React.useRef<HTMLInputElement>(null);
 
-  function handleSubmit(e: React.FormEvent<any>) {
+  async function handleSubmit(e: React.FormEvent<any>) {
 
     e.preventDefault();
 
-    setModelState({ ...validateEmail() }).then(ms => {
-
-      if (ms && Dic.getValues(ms).some(array => array.length > 0))
-        return;
+    if (validateEmail()) {
 
       const request: ResetPasswordClient.API.ForgotPasswordEmailRequest = {
         email: eMail.current!.value,
       };
 
-      ResetPasswordClient.API.forgotPasswordEmail(request)
-        .then(msg => {
+      try {
+        var msg = await ResetPasswordClient.API.forgotPasswordEmail(request);
 
-          setSuccess(msg == undefined);
-          setMessage(msg);
-        })
-        .catch((e: ValidationError) => {
-          if (e.modelState)
-            setModelState(e.modelState);
-        });
-    });
-  }
+        setSuccess(msg == undefined);
+        setMessage(msg);
 
-  function handleMailBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateEmail() });
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          setModelState(e.modelState);
+        }
+        throw e;
+      }
+    }
   }
 
   function validateEmail() {
-    return {
-      eMail: !eMail.current!.value ? [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] : []
+    if (eMail.current?.value) {
+      setModelState({
+        eMail: [LoginAuthMessage.PasswordMustHaveAValue.niceToString()]
+      });
+
+      return true;
     }
+
+    setModelState({  });
+    return false;
   }
 
   function error(field: string): string | undefined {
@@ -80,12 +82,10 @@ export default function ForgotPasswordEmailPage() {
             <h2 className="sf-entity-title">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h2>
             <p>{LoginAuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
 
-            <div className={classes("form-group", error("eMail") && "has-error")}>
-              <div>
-                <input type="texbox" className="form-control" id="eMail" ref={eMail} onBlur={handleMailBlur} placeholder={LoginAuthMessage.EnterYourUserEmail.niceToString()} />
-                {error("eMail") && <span className="help-block">{error("newPassword")}</span>}
-              </div>
-              <label className="col-form-label col-sm-2" style={success === false ? { display: "inline" } : { display: "none" }}>{message}</label>
+            <div className={classes("form-group mb-3", error("eMail") && "has-error")}>
+                <input type="texbox" className="form-control" id="eMail" ref={eMail} onBlur={validateEmail} placeholder={LoginAuthMessage.EnterYourUserEmail.niceToString()} />
+              {error("eMail") && <span className="help-block text-danger">{error("newPassword")}</span>}
+              {message && < div className="form-text text-danger">{message}</div>}
             </div>
 
             <button type="submit" className="btn btn-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>

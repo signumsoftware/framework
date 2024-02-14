@@ -13,19 +13,22 @@ namespace Signum.Word;
 public class WordTemplateParser : ITemplateParser
 {
     public List<TemplateError> Errors = new List<TemplateError>();
-    public QueryDescription QueryDescription { get; private set; }
+    public QueryDescription? QueryDescription { get; private set; }
     public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
     public Type? ModelType { get; private set; }
 
     OpenXmlPackage document;
     WordTemplateEntity template;
 
-    public WordTemplateParser(OpenXmlPackage document, QueryDescription queryDescription, Type? modelType, WordTemplateEntity template)
+    public QueryDescription AssertQueryDescription(string action) => QueryDescription ?? throw new InvalidOperationException("No Query selected! Unable to {0}".FormatWith(action));
+
+
+    public WordTemplateParser(OpenXmlPackage document, WordTemplateEntity template, QueryDescription? queryDescription, Type? modelType)
     {
-        this.QueryDescription = queryDescription;
-        this.ModelType = modelType;
         this.document = document;
         this.template = template;
+        this.QueryDescription = queryDescription;
+        this.ModelType = modelType;
     }
 
     public void ParseDocument()

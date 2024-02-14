@@ -82,6 +82,7 @@ public static class TemplateUtils
         else
         {
             var vpb = ValueProviderBase.TryParse(filter.Groups["token"].Value, variable, parser);
+
             var operation = filter.Groups["operation"].Value;
             var value = filter.Groups["value"].Value;
             return new ConditionCompare(vpb, operation, value, parser.AddError);
@@ -315,11 +316,11 @@ public class TemplateSynchronizationContext
     public Type? ModelType;
     public Replacements Replacements;
     public StringDistance StringDistance;
-    public QueryDescription QueryDescription;
+    public QueryDescription? QueryDescription;
 
     public bool HasChanges;
 
-    public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription queryDescription, Type? modelType)
+    public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
     {
         Variables = new ScopedDictionary<string, ValueProviderBase>(null);
         ModelType = modelType;
@@ -333,6 +334,9 @@ public class TemplateSynchronizationContext
     {
         if (parsedToken.QueryToken == null)
         {
+            if (this.QueryDescription == null)
+                throw new InvalidOperationException("Unable to Sync token without QueryDescription: " + parsedToken);
+
             string tokenString = parsedToken.String;
 
             if (tokenString.StartsWith("$"))

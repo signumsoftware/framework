@@ -1,3 +1,4 @@
+using Signum.Entities.Validation;
 using Signum.Mailing.Templates;
 using Signum.Processes;
 using Signum.Scheduler;
@@ -15,6 +16,8 @@ public class SendEmailTaskEntity : Entity, ITaskEntity
 
     public Lite<EmailTemplateEntity> EmailTemplate { get; set; }
 
+    public EmaiTemplateTargetFrom TargetFrom { get; set; }
+
     [ImplementedByAll]
     public Lite<Entity>? UniqueTarget { get; set; }
 
@@ -22,26 +25,32 @@ public class SendEmailTaskEntity : Entity, ITaskEntity
 
     public ModelConverterSymbol? ModelConverter { get; set; }
 
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(UniqueTarget))
+        {
+            return (pi, UniqueTarget).IsSetOnlyWhen(TargetFrom == EmaiTemplateTargetFrom.Unique);
+        }
+
+        if (pi.Name == nameof(TargetsFromUserQuery))
+        {
+            return (pi, TargetsFromUserQuery).IsSetOnlyWhen(TargetFrom == EmaiTemplateTargetFrom.UserQuery);
+        }
+
+        return base.PropertyValidation(pi); 
+    }
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Name);
 
-    protected override string? PropertyValidation(PropertyInfo pi)
-    {
-        if(pi.Name == nameof(TargetsFromUserQuery) || pi.Name == nameof(UniqueTarget))
-        {
-            if (TargetsFromUserQuery == null && UniqueTarget == null)
-                return ValidationMessage._0Or1ShouldBeSet.NiceToString(
-                    NicePropertyName(() => UniqueTarget),
-                    NicePropertyName(() => TargetsFromUserQuery));
+   
+}
 
-            if (UniqueTarget != null && TargetsFromUserQuery != null)
-                return ValidationMessage._0And1CanNotBeSetAtTheSameTime.NiceToString(
-                    NicePropertyName(() => UniqueTarget),
-                    NicePropertyName(() => TargetsFromUserQuery));
-        }
-
-        return base.PropertyValidation(pi);
-    }
+public enum EmaiTemplateTargetFrom
+{
+    NoTarget,
+    Unique,
+    UserQuery,
 }
 
 [AutoInit]

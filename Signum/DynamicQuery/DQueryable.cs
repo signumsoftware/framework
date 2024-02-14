@@ -180,7 +180,7 @@ public static class DQueryable
 
     static LambdaExpression SelectTupleWithSubQueriesConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
     {
-        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+        string str = tokens.Select(t => new { t, error = QueryUtils.CanColumn(t) }).Where(a => a.error != null).ToString(a => a.t.FullKey() + ": " + a.error, "\r\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
@@ -207,7 +207,7 @@ public static class DQueryable
     {
         var simpleTokens = node.Value.ToList();
 
-        List<Expression> expressions = simpleTokens.Select(t => t.BuildExpression(context)).ToList();
+        List<Expression> expressions = simpleTokens.Select(t => t.BuildExpression(context, searchToArray: true)).ToList();
 
         List<BuildExpressionContext> subContext = new List<BuildExpressionContext>();
         foreach (var child in node.Children)

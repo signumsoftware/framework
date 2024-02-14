@@ -4,7 +4,7 @@ namespace Signum.Templating;
 
 public interface IContainsQuery : IEntity
 {
-    public QueryEntity Query { get; }
+    public QueryEntity? Query { get; }
 }
 
 public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
@@ -17,7 +17,7 @@ public class TemplateApplicableEval : EvalEmbedded<ITemplateApplicable>
         var query = parentEntity is IContainsQuery wt ? wt.Query :
             throw new UnexpectedValueException(parentEntity);
 
-        var entityTypeName = (QueryEntity.GetEntityImplementations(query).Types.Only() ?? typeof(Entity)).Name;
+        var entityTypeName = ((query == null ? null : QueryEntity.GetEntityImplementations(query).Types.Only()) ?? typeof(Entity)).Name;
 
         return Compile(EvalLogic.GetCoreMetadataReferences()
             .Concat(EvalLogic.GetMetadataReferences()), EvalLogic.GetUsingNamespaces() +
