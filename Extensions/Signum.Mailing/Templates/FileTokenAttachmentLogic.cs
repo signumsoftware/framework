@@ -25,9 +25,10 @@ public static class FileTokenAttachmentLogic
         {
             using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
             {
-                var col = ctx.ResultColumns.GetOrThrow(a.FileToken.Token);
+                var qc = ctx.QueryContext!;
+                var col = qc.ResultColumns.GetOrThrow(a.FileToken.Token);
 
-                var files = ctx.CurrentRows.Select(r => r[col]).Distinct().NotNull().Select(v => v is Lite<Entity> lite ? (IFile)lite.Retrieve() : (IFile)v!).ToList();
+                var files = qc.CurrentRows.Select(r => r[col]).Distinct().NotNull().Select(v => v is Lite<Entity> lite ? (IFile)lite.Retrieve() : (IFile)v!).ToList();
 
                 var overridenFileName = !a.FileName.HasText() ? null : GetTemplateString(a.FileName, ref a.FileNameNode, ctx);
 
@@ -46,9 +47,9 @@ public static class FileTokenAttachmentLogic
     private static string GetTemplateString(string title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
     {
         var block = titleNode != null ? (TextTemplateParser.BlockNode)titleNode :
-            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
+            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryContext!.QueryDescription, ctx.ModelType));
 
-        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
+        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.QueryContext) { Model = ctx.Model });
     }
 
     static string? FileTokenAttachmentFileName_StaticPropertyValidation(FileTokenAttachmentEntity WordAttachment, PropertyInfo pi)

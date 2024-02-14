@@ -74,21 +74,30 @@ export function start(options: {
     })));
 
   Operations.addSettings(new EntityOperationSettings(EmailMessageOperation.CreateEmailFromTemplate, {
-    onClick: (ctx) => {
-      var promise: Promise<string | undefined> = ctx.entity.model ? API.getConstructorType(ctx.entity.model) : Promise.resolve(undefined);
-      return promise.then(ct => {
-        if (!ct || isTypeEntity(ct))
-          return Finder.find({ queryName: ctx.entity.query!.key }).then(lite => {
-            if (!lite)
-              return;
-            return Navigator.API.fetch(lite).then(entity => ctx.defaultClick(entity));
-          });
-        else {
-          var s = settings[ct];
-          var promise = (s?.createFromTemplate ? s.createFromTemplate(ctx.entity) : Constructor.constructPack(ct).then(a => a && Navigator.view(a)));
-          return promise.then(model => model && ctx.defaultClick(model));
+    onClick: async (ctx) => {
+      const ct = ctx.entity.model ? await API.getConstructorType(ctx.entity.model) : undefined;
+
+      if (!ct || isTypeEntity(ct)) {
+        if (ctx.entity.query == null)
+          return ctx.defaultClick();
+
+        const lite = await Finder.find({ queryName: ctx.entity.query!.key });
+
+        if (!lite) return;
+
+        const entity = await Navigator.API.fetch(lite);
+        return ctx.defaultClick(entity);
+      } else {
+        const s = settings[ct];
+
+        const model = s?.createFromTemplate
+          ? await s.createFromTemplate(ctx.entity)
+          : await Constructor.constructPack(ct).then(a => a && Navigator.view(a));
+
+        if (model) {
+          return ctx.defaultClick(model);
         }
-      });
+      }
     }
   }));
 

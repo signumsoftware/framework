@@ -15,8 +15,10 @@ export interface AutoLineProps extends LineBaseProps {
 export function AutoLine(p: AutoLineProps): React.ReactElement | null {
   const pr = p.ctx.propertyRoute;
 
-  if (p.type == null && pr == null)
-    return <span className="text-danger">Unable to render AutoLine with type = null and propertyRoute = null</span>;
+  var isHidden = p.type == null && pr == null || p.visible == false || p.hideIfNull && (p.ctx.value == undefined || p.ctx.value == "");
+  if(isHidden)
+    return null;
+
 
   const factory = React.useMemo(() => AutoLine.getComponentFactory(p.type ?? pr!.typeReference(), pr), [pr?.propertyPath(), p.type?.name]);
 

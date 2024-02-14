@@ -21,48 +21,56 @@ export default function ResetPassword() {
   const newPassword2 = React.useRef<HTMLInputElement>(null);
   const code = String(QueryString.parse(location.search).code!);
 
-  function handleSubmit(e: React.FormEvent<any>) {
+  async function handleSubmit(e: React.FormEvent<any>) {
 
     e.preventDefault();
 
-    setModelState({ ...validateNewPassword(true) }).then(ms => {
+    if (validateNewPassword()) {
 
-      if (ms && Dic.getValues(ms).some(array => array.length > 0))
-        return;
+      try {
+        const request: ResetPasswordClient.API.ResetPasswordRequest = {
+          code: code,
+          newPassword: newPassword.current!.value,
+        };
 
-      const request: ResetPasswordClient.API.ResetPasswordRequest = {
-        code: code,
-        newPassword: newPassword.current!.value,
-      };
+        var lr = await ResetPasswordClient.API.resetPassword(request);
 
-      ResetPasswordClient.API.resetPassword(request)
-        .then(lr => {
-          AuthClient.setAuthToken(lr.token, lr.authenticationType);
-          AuthClient.setCurrentUser(lr.userEntity);
+        AuthClient.setAuthToken(lr.token, lr.authenticationType);
+        AuthClient.setCurrentUser(lr.userEntity);
 
-          setSuccess(true);
-          //Navigator.resetUI();
-          AppContext.navigate("/auth/ResetPassword?code=OK");
-        })
-        .catch((e: ValidationError) => {
-          if (e.modelState)
-            setModelState(e.modelState);
-        });
-    });
+        setSuccess(true);
+        //Navigator.resetUI();
+        AppContext.navigate("/auth/ResetPassword?code=OK");
+      } catch (ex) {
+        if (ex instanceof ValidationError) {
+          if (ex.modelState)
+            setModelState(ex.modelState);
+        }
+
+        throw ex;
+      }
+    }
   }
 
-  function handleNewPasswordBlur(event: React.SyntheticEvent<any>) {
-    setModelState({ ...modelState, ...validateNewPassword(event.currentTarget == newPassword2.current) });
-  }
 
-  function validateNewPassword(isSecond: boolean) {
-    return {
-      ["newPassword"]:
-        !isSecond ? [] :
-          !newPassword.current!.value && !newPassword2.current!.value ? [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] :
-            newPassword2.current!.value != newPassword.current!.value ? [LoginAuthMessage.PasswordsAreDifferent.niceToString()] :
-              []
-    };
+  function validateNewPassword(): boolean {
+    if (!newPassword.current!.value) {
+      setModelState({ "newPassword": [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] });
+      return false;
+    }
+    if (!newPassword2.current!.value) {
+      setModelState({ "newPassword2": [LoginAuthMessage.PasswordMustHaveAValue.niceToString()] });
+      return false;
+    }
+    else if (newPassword2.current!.value != null && newPassword2.current!.value != newPassword.current!.value) {
+      setModelState({
+        "newPassword": [LoginAuthMessage.PasswordsAreDifferent.niceToString()],
+        "newPassword2": [LoginAuthMessage.PasswordsAreDifferent.niceToString()]
+      });
+      return false;
+    } 
+    setModelState({});
+    return true;
   }
 
   function error(field: string): string | undefined {
@@ -93,12 +101,12 @@ export default function ResetPassword() {
             <div>
 
               <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
-                <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={handleNewPasswordBlur} placeholder={LoginAuthMessage.EnterTheNewPassword.niceToString()} />
-                {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+                <input type="password" className="form-control" id="newPassword" ref={newPassword} onBlur={validateNewPassword} placeholder={LoginAuthMessage.EnterTheNewPassword.niceToString()} />
+                {error("newPassword") && <span className="help-block text-danger">{error("newPassword")}</span>}
               </div>
               <div className={classes("form-group mb-3", error("newPassword") && "has-error")}>
-                <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={handleNewPasswordBlur} placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} />
-                {error("newPassword") && <span className="help-block">{error("newPassword")}</span>}
+                <input type="password" className="form-control" id="newPassword2" ref={newPassword2} onBlur={validateNewPassword} placeholder={LoginAuthMessage.ConfirmNewPassword.niceToString()} />
+                {error("newPassword") && <span className="help-block text-danger">{error("newPassword2")}</span>}
               </div>
 
             </div>

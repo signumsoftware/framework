@@ -17,7 +17,7 @@ interface TemplateApplicableProps {
 
 export default function TemplateApplicable(p: TemplateApplicableProps) {
 
-  const typeName = useAPI(() => Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] ?? "Entity"), [p.query.key]);
+  const typeName = useAPI(() => p.query && Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] ?? "Entity"), [p.query.key]);
 
   const forceUpdate = useForceUpdate();
 
@@ -55,7 +55,7 @@ export default function TemplateApplicable(p: TemplateApplicableProps) {
           <div className="col-sm-7">
             <div className="code-container">
               <TypeHelpButtonBarComponent typeName={typeName} mode="CSharp" ctx={p.ctx} />
-              <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + typeName + "Entity e)\n{"}</pre>
+              <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + (typeName ? (typeName + "Entity") : "Entity?") + " e)\n{"}</pre>
               <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
               <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
             </div>

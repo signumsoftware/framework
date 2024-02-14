@@ -12,6 +12,7 @@ using Signum.Files;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using Signum.API;
+using System.Collections.Frozen;
 
 namespace Signum.Word;
 
@@ -26,10 +27,10 @@ public static class WordTemplateLogic
 {
     public static bool AvoidSynchronize = false;
 
-    public static ResetLazy<Dictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WordTemplateEntity>, WordTemplateEntity>> WordTemplatesLazy = null!;
 
-    public static ResetLazy<Dictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName = null!;
-    public static ResetLazy<Dictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType = null!;
+    public static ResetLazy<FrozenDictionary<object, List<WordTemplateEntity>>> TemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<WordTemplateEntity>>> TemplatesByEntityType = null!;
 
     public static Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>> Transformers = new Dictionary<WordTransformerSymbol, Action<WordContext, OpenXmlPackage>>();
     public static Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>> Converters = new Dictionary<WordConverterSymbol, Func<WordContext, byte[], byte[]>>();
@@ -131,22 +132,24 @@ public static class WordTemplateLogic
             }.Register();
 
             WordTemplatesLazy = sb.GlobalLazy(() => Database.Query<WordTemplateEntity>()
-               .ToDictionary(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
+               .ToFrozenDictionaryEx(et => et.ToLite()), new InvalidateWith(typeof(WordTemplateEntity)));
 
-            
+
 
             TemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return WordTemplatesLazy.Value.Values.SelectCatch(w => KeyValuePair.Create(w.Query.ToQueryName(), w)).GroupToDictionary();
+                return WordTemplatesLazy.Value.Values.Where(a => a.Query != null).SelectCatch(w => KeyValuePair.Create(w.Query!.ToQueryName(), w)).GroupToDictionary().ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(WordTemplateEntity)));
 
             TemplatesByEntityType = sb.GlobalLazy(() =>
             {
-                return (from pair in WordTemplatesLazy.Value.Values.SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query.ToQueryName()) })
+                return (from pair in WordTemplatesLazy.Value.Values.Where(a => a.Query != null)
+                        .SelectCatch(wr => new { wr, imp = QueryLogic.Queries.GetEntityImplementations(wr.Query!.ToQueryName()) })
                         where !pair.imp.IsByAll
                         from t in pair.imp.Types
                         select KeyValuePair.Create(t, pair.wr))
-                        .GroupToDictionary();
+                        .GroupToDictionary()
+                        .ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(WordTemplateEntity)));
 
             Schema.Current.Synchronizing += Schema_Synchronize_Tokens;
@@ -166,7 +169,7 @@ public static class WordTemplateLogic
 
     public static WordTemplateEntity ParseData(this WordTemplateEntity template)
     {
-        object? queryName = template.Query.ToQueryNameCatch();
+        object? queryName = template.Query?.ToQueryNameCatch();
         if (queryName != null)
         {
             QueryDescription description = QueryLogic.Queries.QueryDescription(queryName);
@@ -250,14 +253,15 @@ public static class WordTemplateLogic
 
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
         {
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
+            var queryName = template.Query?.ToQueryName();
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
             string? error = null;
             template.ProcessOpenXmlPackage(document =>
             {
                 Dump(document, "0.Original.txt");
 
-                var parser = new WordTemplateParser(document, qd, template.Model?.ToType(), template);
+                var parser = new WordTemplateParser(document, template, qd, template.Model?.ToType());
                 parser.ParseDocument(); Dump(document, "1.Match.txt");
                 parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                 parser.AssertClean();
@@ -277,7 +281,8 @@ public static class WordTemplateLogic
 
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
         {
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
+            var queryName = template.Query?.ToQueryName();
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
             TextTemplateParser.TryParse(template.FileName, qd, template.Model?.ToType(), out var errors);
 
@@ -341,7 +346,8 @@ public static class WordTemplateLogic
                 using (template.DisableAuthorization ? ExecutionMode.Global() : null)
                 using (CultureInfoUtils.ChangeBothCultures(template.Culture.ToCultureInfo()))
                 {
-                    QueryDescription qd = QueryLogic.Queries.QueryDescription(template.Query.ToQueryName());
+                    var queryName = template.Query?.ToQueryName();
+                    QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
 
                     using (var p = HeavyProfiler.Log("ProcessOpenXmlPackage"))
                     {
@@ -349,7 +355,7 @@ public static class WordTemplateLogic
                         {
                             Dump(document, "0.Original.txt");
 
-                            var parser = new WordTemplateParser(document, qd, template.Model?.ToType(), template);
+                            var parser = new WordTemplateParser(document, template, qd, template.Model?.ToType());
                             p.Switch("ParseDocument");
                             parser.ParseDocument(); Dump(document, "1.Match.txt");
 
@@ -366,8 +372,11 @@ public static class WordTemplateLogic
 
                             var renderer = new WordTemplateRenderer(document, qd, template.Culture.ToCultureInfo(), template, model, entity, parsedFileName);
 
-                            p.Switch("MakeQuery");
-                            renderer.ExecuteQuery();
+                            if (qd != null)
+                            {
+                                p.Switch("MakeQuery");
+                                renderer.ExecuteQuery();
+                            }
 
                             p.Switch("RenderNodes");
                             renderer.RenderNodes(); Dump(document, "3.Replaced.txt");
@@ -468,9 +477,9 @@ public static class WordTemplateLogic
 
         try
         {
-            var queryName = QueryLogic.ToQueryName(wt.Query.Key);
+            var queryName = wt.Query?.ToQueryName();
 
-            QueryDescription qd = QueryLogic.Queries.QueryDescription(queryName);
+            QueryDescription? qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
             var file = wt.Template.RetrieveAndRemember();
 
             SqlPreCommand DeleteWorkTemplateAndFile()
@@ -510,7 +519,7 @@ public static class WordTemplateLogic
 
             SqlPreCommand? wordTemplateSync;
             using (DelayedConsole.Delay(() => SafeConsole.WriteLineColor(ConsoleColor.White, "WordTemplate: " + wt.Name)))
-            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + wt.Query.Key)))
+            using (DelayedConsole.Delay(() => Console.WriteLine(" Query: " + (wt.Query?.Key ?? "-"))))
             {
                 SqlPreCommand? fileSync;
 
@@ -523,7 +532,7 @@ public static class WordTemplateLogic
                     {
                         Dump(document, "0.Original.txt");
 
-                        var parser = new WordTemplateParser(document, qd, wt.Model?.ToType(), wt);
+                        var parser = new WordTemplateParser(document, wt, qd, wt.Model?.ToType());
                         parser.ParseDocument(); Dump(document, "1.Match.txt");
                         parser.CreateNodes(); Dump(document, "2.BaseNode.txt");
                         parser.AssertClean();
@@ -577,43 +586,46 @@ public static class WordTemplateLogic
                     throw new InvalidOperationException("Unexcpected {0}".FormatWith(ex.Result));
                 }
 
-                if (wt.Filters.Any())
+                if (qd != null)
                 {
-                    using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
+                    if (wt.Filters.Any())
                     {
-                        foreach (var item in wt.Filters.ToList())
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Filters:")))
                         {
-                            QueryTokenEmbedded token = item.Token!;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                            foreach (var item in wt.Filters.ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
-                                case FixTokenResult.RemoveToken: wt.Filters.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
-                                default: break;
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Filters", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
+                                    case FixTokenResult.RemoveToken: wt.Filters.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
+                                    default: break;
+                                }
                             }
                         }
                     }
-                }
 
-                if (wt.Orders.Any())
-                {
-                    using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
+                    if (wt.Orders.Any())
                     {
-                        foreach (var item in wt.Orders.ToList())
+                        using (DelayedConsole.Delay(() => Console.WriteLine(" Orders:")))
                         {
-                            QueryTokenEmbedded token = item.Token!;
-                            switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                            foreach (var item in wt.Orders.ToList())
                             {
-                                case FixTokenResult.Nothing: break;
-                                case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
-                                case FixTokenResult.RemoveToken: wt.Orders.Remove(item); break;
-                                case FixTokenResult.SkipEntity: return null;
-                                case FixTokenResult.Fix: item.Token = token; break;
-                                case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
-                                default: break;
+                                QueryTokenEmbedded token = item.Token!;
+                                switch (QueryTokenSynchronizer.FixToken(replacements, ref token, qd, SubTokensOptions.CanElement, " Orders", allowRemoveToken: false, allowReCreate: wt.Model != null))
+                                {
+                                    case FixTokenResult.Nothing: break;
+                                    case FixTokenResult.DeleteEntity: return DeleteWorkTemplateAndFile();
+                                    case FixTokenResult.RemoveToken: wt.Orders.Remove(item); break;
+                                    case FixTokenResult.SkipEntity: return null;
+                                    case FixTokenResult.Fix: item.Token = token; break;
+                                    case FixTokenResult.RegenerateEntity: return RegenerateTemplateAndFile();
+                                    default: break;
+                                }
                             }
                         }
                     }
