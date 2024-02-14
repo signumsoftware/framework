@@ -908,7 +908,7 @@ public class SchemaBuilder
 
             string columnName = partitionAttr?.Name ?? "PartitionId";
 
-            mlistTable.PartitionId = new FieldPartitionId(route, type, columnName)
+            mlistTable.PartitionId = new FieldPartitionId(null!, type, columnName)
             {
                 DbType = pair.DbType,
                 Collation = Settings.GetCollate(partitionAttr),

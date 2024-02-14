@@ -238,19 +238,19 @@ public static class Lite
         return result;
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id) => Create(type, id);
+    public static Lite<Entity> Create(Type type, PrimaryKey id) => Create(type, id, (int?)null);
     public static Lite<Entity> Create(Type type, PrimaryKey id, int? partitionId)
     {
         return giNewLite.GetInvoker(type, typeof(string))(id, null, partitionId);
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id, object model) => Create(type, id, model);
+    public static Lite<Entity> Create(Type type, PrimaryKey id, object model) => Create(type, id, model, null);
     public static Lite<Entity> Create(Type type, PrimaryKey id, object model, int? partitionId)
     {
         return giNewLite.GetInvoker(type, model.GetType())(id, model, partitionId);
     }
 
-    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType) => Create(type, id, modelType);
+    public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType) => Create(type, id, modelType, null);
     public static Lite<Entity> Create(Type type, PrimaryKey id, Type modelType, int? partitionId)
     {
         return giNewLite.GetInvoker(type, modelType)(id, null, partitionId);
@@ -639,7 +639,8 @@ public static class Lite
 
     static ConstructorInfo CreateLiteConstructor(Type t, Type modelType)
     {
-        return typeof(LiteImp<,>).MakeGenericType(t, modelType).GetConstructor(new[] { typeof(PrimaryKey), modelType })!;
+        return typeof(LiteImp<,>).MakeGenericType(t, modelType).GetConstructor(new[] { typeof(PrimaryKey), modelType, typeof(int?) }) ??
+            throw new InvalidOperationException("No Constructor found");
     }
 
 

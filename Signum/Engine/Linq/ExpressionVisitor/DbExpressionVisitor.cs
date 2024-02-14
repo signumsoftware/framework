@@ -150,8 +150,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     {
         var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
         var externalPeriod = (IntervalExpression?)Visit(ml.ExternalPeriod);
-        if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
-            return new MListExpression(ml.Type, newBackID, externalPeriod, ml.TableMList);
+        var externalPartitionId = Visit(ml.ExternalPartitionId);
+        if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod || externalPartitionId != ml.ExternalPartitionId)
+            return new MListExpression(ml.Type, newBackID, externalPeriod, externalPartitionId, ml.TableMList);
         return ml;
     }
 
@@ -248,10 +249,11 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual EntityContextInfo VisitEntityContextInfo(EntityContextInfo entityContext)
     {
         var entityId = (PrimaryKeyExpression)Visit(entityContext.EntityId);
+        var partitionId = Visit(entityContext.EntityPartitionId);
         var rowId = (PrimaryKeyExpression?)Visit(entityContext.MListRowId);
 
-        if(entityId != entityContext.EntityId || rowId != entityContext.MListRowId)
-            return new EntityContextInfo(entityId, rowId);
+        if(entityId != entityContext.EntityId || partitionId != entityContext.EntityPartitionId ||  rowId != entityContext.MListRowId)
+            return new EntityContextInfo(entityId, partitionId, rowId);
 
         return entityContext;
     }

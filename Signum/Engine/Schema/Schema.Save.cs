@@ -1324,10 +1324,11 @@ public partial class TableMList
             var assigments = new List<Expression>();
 
             BackReference.CreateParameter(trios, assigments, paramIdent, paramForbidden, paramSuffix);
-            if (this.PartitionId != null)
-                PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
+           
             if (this.Order != null)
                 Order.CreateParameter(trios, assigments, paramOrder, paramForbidden, paramSuffix);
+            if (this.PartitionId != null)
+                PartitionId.CreateParameter(trios, assigments, Expression.Field(paramIdent, Table.fiPartitionId), paramForbidden, paramSuffix);
             Field.CreateParameter(trios, assigments, paramItem, paramForbidden, paramSuffix);
 
             result.sqlInsert = (suffixes, output) => "INSERT INTO {0} ({1})\r\n{2}VALUES\r\n{3}{4};".FormatWith(Name,

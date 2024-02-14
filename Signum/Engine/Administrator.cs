@@ -44,8 +44,11 @@ public static class Administrator
         {
             foreach (var db in Schema.Current.DatabaseNames())
             {
-                Connector.Current.CleanDatabase(db);
-                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                if (db == null || SafeConsole.Ask($"Delete {db} as well?"))
+                {
+                    Connector.Current.CleanDatabase(db);
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                }
             }
         }
     }

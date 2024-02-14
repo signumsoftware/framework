@@ -488,8 +488,9 @@ internal static class TranslatorBuilder
                 Type type = tee.TypeValue;
 
                 var model = GetEagerModel(type, out var requiresRequest);
+                var partitionId = Visit(GetPartitionId(type));
 
-                var liteConstructor = Expression.Convert(Lite.NewExpression(type, id, model, GetPartitionId(type)), lite.Type);
+                var liteConstructor = Expression.Convert(Lite.NewExpression(type, id, model, partitionId), lite.Type);
 
                 return Expression.Condition(Expression.NotEqual(id, NullId),
                     requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor),
@@ -502,8 +503,8 @@ internal static class TranslatorBuilder
                     {
                         var visitId = Visit(NullifyColumn(ti.Value));
                         var model = GetEagerModel(ti.Key, out var requiresRequest);
-
-                        var liteConstructor = Lite.NewExpression(ti.Key, visitId, model, GetPartitionId(ti.Key));
+                        var partitonId = Visit(GetPartitionId(ti.Key));
+                        var liteConstructor = Lite.NewExpression(ti.Key, visitId, model, partitonId);
 
                         return Expression.Condition(Expression.NotEqual(visitId, NullId),
                             Expression.Convert(requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor), lite.Type),
@@ -535,9 +536,11 @@ internal static class TranslatorBuilder
                     {
                         var model = GetEagerModel(kvp.Key, out var requiresRequest);
 
+                        var partitionId = Visit(GetPartitionId(kvp.Key));
+
                         var liteExpression = requiresRequest ?
-                                RequestLite(Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Constant(model.Type), GetPartitionId(kvp.Key))) :
-                                PostRetrieving(Expression.Call(miLiteCreateModel, typeFromId, uid, model, GetPartitionId(kvp.Key)));
+                                RequestLite(Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Constant(model.Type), partitionId)) :
+                                PostRetrieving(Expression.Call(miLiteCreateModel, typeFromId, uid, model, partitionId));
 
                         return Expression.Condition(Expression.Equal(tid, Expression.Constant(TypeLogic.TypeToId.GetOrThrow(kvp.Key))),
                             Expression.Convert(liteExpression, lite.Type),

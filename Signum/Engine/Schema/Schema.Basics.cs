@@ -681,7 +681,7 @@ public partial class FieldPartitionId : FieldValue
     public new Type Type { get; set; }
 
     public FieldPartitionId(PropertyRoute route, Type type, string name)
-        : base(route, null, name)
+        : base(route, type, name)
     {
         this.Type = type;
     }

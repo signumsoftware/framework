@@ -33,9 +33,9 @@ public static class SqlServerVersionDetector
         Azure = 5,
     }
 
-    public static SqlServerVersion? Detect(string connectionString)
+    public static SqlServerVersion? Detect(string connectionString, SqlServerVersion fallback)
     {
-        return SqlServerRetry.Retry(() =>
+        try
         {
             using (var con = new SqlConnection(connectionString))
             {
@@ -74,7 +74,12 @@ public static class SqlServerVersionDetector
                     };
                 }
             }
-        });
+        }
+        catch
+        {
+            return fallback;
+        }
+        
     }
 }
 
@@ -545,6 +550,8 @@ public class SqlServerConnector : Connector
         get { return Version >= SqlServerVersion.SqlServer2022; }
     }
 
+    public override bool SupportsPartitioning => true;
+
     public override int MaxNameLength => 128;
 
     public override string ToString() => $"SqlServerConnector({Version}, Database: {this.DatabaseName()}, DataSource: {this.DataSourceName()})";
@@ -723,6 +730,42 @@ open cur
 close cur
 deallocate cur";
 
+    public static readonly string RemoveAllPartitionSchemas=
+@"declare @partScheme nvarchar(128)
+DECLARE @sql nvarchar(255)
+
+declare cur cursor fast_forward for
+select name
+from sys.partition_schemes
+open cur
+    fetch next from cur into @partScheme
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP PARTITION SCHEME [' + @partScheme + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @partScheme
+    end
+close cur
+deallocate cur";
+
+    public static readonly string RemoveAllPartitionFunction =
+@"declare @partFunc nvarchar(128)
+DECLARE @sql nvarchar(255)
+
+declare cur cursor fast_forward for
+select name
+from sys.partition_functions
+open cur
+    fetch next from cur into @partFunc
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP PARTITION FUNCTION [' + @partFunc + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @partFunc
+    end
+close cur
+deallocate cur";
+
     public static readonly string StopSystemVersioning = @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
 
@@ -740,6 +783,8 @@ open cur
     end
 close cur
 deallocate cur";
+
+
 
     public static readonly string RemoveAllFullTextCatallogs =
 @"declare @catallogName nvarchar(128)
@@ -773,6 +818,8 @@ deallocate cur";
             Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
             new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas))),
+            Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionSchemas) : null,
+            Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionFunction) : null,
             Connector.Current.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
             )!;
     }

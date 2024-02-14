@@ -303,8 +303,8 @@ public class SysIndexes : IView
         As.Expression(() => Database.View<SysTables>().Single(a => a.object_id == object_id));
 
     [AutoExpressionField]
-    public SysPartitions? Partition() =>
-        As.Expression(() => Database.View<SysPartitions>().SingleOrDefault(au => au.object_id == object_id && au.index_id == index_id));
+    public IQueryable<SysPartitions> Partitions() =>
+        As.Expression(() => Database.View<SysPartitions>().Where(au => au.object_id == object_id && au.index_id == index_id));
 
     [AutoExpressionField]
     public string? DataSpaceName() =>

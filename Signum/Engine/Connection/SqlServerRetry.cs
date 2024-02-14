@@ -78,6 +78,7 @@ public static class SqlServerRetry
         }
     }
 
+
     public static async Task<T> RetryAsync<T>(Func<Task<T>> action)
     {
         if (Suspended || !IsEnabled())

@@ -600,7 +600,7 @@ public class Schema : IImplementationsFinder
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.PostgresExtensions;
         Generating += SchemaGenerator.PostgresTemporalTableScript;
-        Generating += SchemaGenerator.CreateSchemasScript;
+        Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;

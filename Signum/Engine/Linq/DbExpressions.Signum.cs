@@ -160,11 +160,13 @@ internal class EmbeddedEntityExpression : DbExpression
 internal class EntityContextInfo
 {
     public readonly PrimaryKeyExpression EntityId;
+    public readonly Expression? EntityPartitionId;
     public readonly PrimaryKeyExpression? MListRowId;
 
-    public EntityContextInfo(PrimaryKeyExpression entityId, PrimaryKeyExpression? mlistRowId)
+    public EntityContextInfo(PrimaryKeyExpression entityId, Expression? entityPartitionId, PrimaryKeyExpression? mlistRowId)
     {
         EntityId = entityId;
+        EntityPartitionId = entityPartitionId;
         MListRowId = mlistRowId;
     }
 }
@@ -499,15 +501,17 @@ internal class TypeImplementedByAllExpression : TypeDbExpression
 
 internal class MListExpression : DbExpression
 {
-    public readonly PrimaryKeyExpression BackID; // not readonly
+    public readonly PrimaryKeyExpression BackID;
     public readonly TableMList TableMList;
     public readonly IntervalExpression? ExternalPeriod;
+    public readonly Expression? ExternalPartitionId;
 
-    public MListExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, TableMList tr)
+    public MListExpression(Type type, PrimaryKeyExpression backID, IntervalExpression? externalPeriod, Expression? externalPartitionId, TableMList tr)
         : base(DbExpressionType.MList, type)
     {
         this.BackID = backID;
         this.ExternalPeriod = externalPeriod;
+        this.ExternalPartitionId = externalPartitionId;
         this.TableMList = tr;
     }
 

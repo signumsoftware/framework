@@ -64,10 +64,10 @@ public abstract class Entity : ModifiableEntity, IEntity
     [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal int? partitionId;
     [HiddenProperty]
-    public int? PartitionId
+    public int? PartitionId 
     {
         get { return partitionId; }
-        set { partitionId = value; }
+        set { this.Set(ref partitionId, value); }
     }
 
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)

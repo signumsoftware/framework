@@ -11,9 +11,9 @@ namespace Signum.Engine;
 
 public static class PostgresVersionDetector
 {
-    public static Version Detect(string connectionString)
+    public static Version? Detect(string connectionString, Version? fallback)
     {
-        return SqlServerRetry.Retry(() =>
+        try 
         {
             using (NpgsqlConnection con = new NpgsqlConnection(connectionString))
             {
@@ -31,7 +31,11 @@ public static class PostgresVersionDetector
                     return new Version(version.TryBefore("(") ?? version);
                 }
             }
-        });
+        }
+        catch
+        {
+            return fallback;
+        }
     }
 }
 
@@ -76,6 +80,8 @@ public class PostgreSqlConnector : Connector
     public override bool SupportsDateDifBig => false;
 
     public override bool SupportsFullTextSearch => false;
+
+    public override bool SupportsPartitioning => false; //for now
 
     public override bool AllowsIndexWithWhere(string where) => true;
 

@@ -81,6 +81,7 @@ export interface Lite<T extends Entity> {
   EntityType: string;
   id?: number | string;
   model?: unknown;
+  partitionId?: number;
 
   ModelType?: string;
   entity?: T;
