@@ -111,22 +111,7 @@ public static class ToolbarLogic
         }
     }
 
-    public static void UpdateToolbarIconNameInDB()
-    {
-        Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
 
-        Database.Query<ToolbarMenuEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
-    }
 
     private static void IToolbar_Saving(IToolbarEntity tool)
     {
