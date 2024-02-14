@@ -151,6 +151,8 @@ public class DiffStats
 public class DiffIndexColumn
 {
     public string ColumnName;
+    public bool IsDescending;
+    public bool IsIncluded;
     public DiffIndexColumnType Type;
 }
 

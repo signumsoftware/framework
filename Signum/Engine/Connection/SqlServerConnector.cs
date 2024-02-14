@@ -33,7 +33,7 @@ public static class SqlServerVersionDetector
         Azure = 5,
     }
 
-    public static SqlServerVersion? Detect(string connectionString, SqlServerVersion fallback)
+    public static SqlServerVersion Detect(string connectionString, SqlServerVersion fallback)
     {
         try
         {
@@ -70,7 +70,7 @@ public static class SqlServerVersionDetector
                         "14" => SqlServerVersion.SqlServer2017,
                         "15" => SqlServerVersion.SqlServer2019,
                         "16" => SqlServerVersion.SqlServer2022,
-                        _ => (SqlServerVersion?)null,
+                        var a => throw new UnexpectedValueException(a),
                     };
                 }
             }
