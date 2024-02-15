@@ -348,7 +348,7 @@ function showSetters(o: PropertyOperation) {
   return o == "AddNewElement" || o == "ChangeElements" || o == "CreateNewEntity" || o == "ModifyEntity";
 }
 
-export function createSetterValueControl(ctx: TypeContext<any>, handleValueChange: () => void): React.ReactElement<any> {
+export function createSetterValueControl(ctx: TypeContext<any>, handleValueChange: () => void): React.ReactElement {
   var tr = ctx.propertyRoute!.typeReference();
 
   if (tr.isEmbedded)

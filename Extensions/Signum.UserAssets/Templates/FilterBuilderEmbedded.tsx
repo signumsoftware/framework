@@ -254,7 +254,7 @@ export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
 }
 
 interface EntityLineOrExpressionProps {
-  ctx: TypeContext<string | null | undefined>;
+  ctx: TypeContext<string | null>;
   onChange: () => void;
   type: TypeReference;
   filterType: FilterType;
@@ -316,7 +316,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
 
 interface ValueLineOrExpressionProps {
-  ctx: TypeContext<string | null | undefined>;
+  ctx: TypeContext<string | null>;
   onChange: () => void;
   type: TypeReference;
   format?: string;

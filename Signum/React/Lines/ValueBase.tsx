@@ -2,18 +2,19 @@ import * as React from 'react';
 import { Dic } from '../Globals';
 import { LineBaseController, LineBaseProps, setRefProp, tasks, useInitiallyFocused } from '../Lines/LineBase';
 import { getTimeMachineIcon } from './TimeMachineIcon';
+import { Value } from 'react-widgets/cjs';
 
-export interface ValueBaseProps<C> extends LineBaseProps {
+export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
   format?: string;
   unit?: string;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: C) => React.ReactNode;
-  extraButtonsBefore?: (vl: C) => React.ReactNode;
+  extraButtons?: (vl: ValueBaseController<this, V>) => React.ReactNode;
+  extraButtonsBefore?: (vl: ValueBaseController<this, V>) => React.ReactNode;
   initiallyFocused?: boolean | number;
   valueRef?: React.Ref<HTMLElement>;
 }
 
-export class ValueBaseController<T extends ValueBaseProps<any>> extends LineBaseController<T> {
+export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBaseController<T, V> {
 
   inputElement!: React.RefObject<HTMLElement>;
   init(p: T) {
@@ -88,9 +89,9 @@ export function asString(reactChild: React.ReactNode | undefined): string | unde
 }
 
 tasks.push(taskSetFormat);
-export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBaseProps) {
+export function taskSetFormat(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   if (lineBase instanceof ValueBaseController) {
-    const vProps = state as ValueBaseProps<any>;
+    const vProps = state as ValueBaseProps<unknown>;
 
     if (!vProps.format &&
       state.ctx.propertyRoute &&
@@ -101,7 +102,7 @@ export function taskSetFormat(lineBase: LineBaseController<any>, state: LineBase
 }
 
 tasks.push(taskSetUnit);
-export function taskSetUnit(lineBase: LineBaseController<any>, state: LineBaseProps) {
+export function taskSetUnit(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
 
   if (lineBase instanceof ValueBaseController) {
     const vProps = state as ValueBaseProps<any>;

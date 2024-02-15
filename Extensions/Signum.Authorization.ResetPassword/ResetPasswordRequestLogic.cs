@@ -163,7 +163,7 @@ public static class ResetPasswordRequestLogic
 
             return new ResetPasswordRequestEntity
             {
-                Code = MyRandom.Current.NextString(32),
+                Code = Random.Shared.NextString(32),
                 User = user,
                 RequestDate = Clock.Now,
             }.Save();

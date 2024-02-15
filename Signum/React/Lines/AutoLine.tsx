@@ -4,11 +4,11 @@ import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
 import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityMultiSelect, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextAreaLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
-export interface AutoLineProps extends LineBaseProps {
+export interface AutoLineProps extends LineBaseProps<unknown> {
   unit?: string;
   format?: string;
-  extraButtons?: (vl: any) => React.ReactNode; /* Not always implemented */
-  extraButtonsBefore?: (vl: any) => React.ReactNode; /* Not always implemented */
+  extraButtons?: (vl: LineBaseController<this, unknown>) => React.ReactNode; /* Not always implemented */
+  extraButtonsBefore?: (vl: LineBaseController<this, unknown>) => React.ReactNode; /* Not always implemented */
 }
 
 
@@ -27,7 +27,7 @@ export function AutoLine(p: AutoLineProps): React.ReactElement | null {
 
 export interface AutoLineFactoryRule {
   name: string;
-  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>);
+  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement);
 }
 
 export namespace AutoLine {
@@ -35,11 +35,11 @@ export namespace AutoLine {
     [typeName: string]: AutoLineFactoryRule[];
   } = {};
 
-  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>), name?: string) {
+  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement), name?: string) {
     (customTypeComponent[type] ??= []).push({ name: name ?? type, factory });
   }
 
-  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement<any> {
+  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement {
 
     const customs = customTypeComponent[tr.name]?.map(rule => rule.factory(tr, pr)).notNull().first();
 
@@ -52,81 +52,81 @@ export namespace AutoLine {
 
     if (tr.isCollection) {
       if (tr.name == IsByAll)
-        return p => <EntityStrip {...p} />;
+        return p => <EntityStrip {...p as any} />;
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return p => <EnumCheckboxList {...p} />;
+          return p => <EnumCheckboxList {...p as any} />;
 
         if (tis.length == 1 && (tis.first().entityKind == "Part" || tis.first().entityKind == "SharedPart" || isTypeModel(tis.first())) && !tr.isLite)
-          return p => <EntityTable {...p} />;
+          return p => <EntityTable {...p as any} />;
 
         if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart"))
-          return p => <EntityRepeater {...p} />;
+          return p => <EntityRepeater {...p as any} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return p => <EntityCheckboxList {...p} />; //Alternative <EntityCheckboxList {...p} />
+          return p => <EntityCheckboxList {...p as any} />; //Alternative <EntityCheckboxList {...p} />
 
-        return p => <EntityStrip {...p} />;
+        return p => <EntityStrip {...p as any} />;
       }
 
       if (tr.isEmbedded)
-        return p => <EntityTable {...p} />;
+        return p => <EntityTable {...p as any} />;
 
-      return p => <MultiValueLine {...p} />;
+      return p => <MultiValueLine {...p as any} />;
 
     } else {
 
       if (tr.name == IsByAll)
-        return p => <EntityLine {...p} />;
+        return p => <EntityLine {...p as any} />;
 
       if (tis.length) {
         if (tis.length == 1 && tis.first().kind == "Enum")
-          return p => <EnumLine {...p} />;
+          return p => <EnumLine {...p as any} />;
 
         if (tis.every(t => t.entityKind == "Part" || t.entityKind == "SharedPart") && !tr.isLite)
-          return p => <EntityDetail {...p} />;
+          return p => <EntityDetail {...p as any} />;
 
         if (tis.every(t => t.isLowPopulation == true))
-          return p => <EntityCombo {...p} />;
+          return p => <EntityCombo {...p as any} />;
 
-        return p => <EntityLine {...p} />;
+        return p => <EntityLine {...p as any} />;
       }
 
       if (tr.isEmbedded)
-        return p => <EntityDetail {...p} />;
+        return p => <EntityDetail {...p as any} />;
 
       if (isTypeEnum(tr.name) || tr.name == "boolean" && !tr.isNotNullable)
-        return p => <EnumLine {...p} />;
+        return p => <EnumLine {...p as any} />;
 
       if (tr.name == "boolean")
-        return p => <CheckboxLine {...p} />;
+        return p => <CheckboxLine {...p as any} />;
 
       if (tr.name == "DateTime" || tr.name == "DateTimeOffset" || tr.name == "DateOnly")
-        return p => <DateTimeLine {...p} />;
+        return p => <DateTimeLine {...p as any} />;
 
       if (tr.name == "string") {
         var member = pr == null ? null : pr.propertyRouteType == "MListItem" ? pr.parent?.member : pr.member;
         if (member?.format == "Password")
-          return p => <PasswordLine {...p} />;
+          return p => <PasswordLine {...p as any} />;
 
         if (member?.format == "Color")
-          return p => <ColorLine {...p} />;
+          return p => <ColorLine {...p as any} />;
 
         if (member?.isMultiline)
-          return p => <TextAreaLine {...p} />;
+          return p => <TextAreaLine {...p as any} />;
 
-        return p => <TextBoxLine {...p} />;
+        return p => <TextBoxLine {...p as any} />;
       }
 
       if (tr.name == "Guid")
-        return p => <GuidLine {...p} />;
+        return p => <GuidLine {...p as any} />;
 
       if (tr.name == "number" || tr.name == "decimal")
-        return p => <NumberLine {...p} />;
+        return p => <NumberLine {...p as any} />;
 
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")
-        return p => <TimeLine {...p} />;
+        return p => <TimeLine {...p as any} />;
 
       return p => <span className="text-danger">Not supported type {tr.name} by AutoLine</span>;
     }

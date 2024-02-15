@@ -1,26 +1,26 @@
 import * as React from 'react'
-import { DropdownList, Combobox } from 'react-widgets'
+import { DropdownList, Combobox, Value } from 'react-widgets'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, genericForwardRef, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface EnumLineProps extends ValueBaseProps<EnumLineController> {
+export interface EnumLineProps<V extends string | null> extends ValueBaseProps<V> {
   lineType?:
   "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
   "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
   "RadioGroup";
-  optionItems?: (OptionItem | MemberInfo | string)[];
+  optionItems?: (OptionItem | MemberInfo | V)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   columnCount?: number;
   columnWidth?: number;
 }
 
-export class EnumLineController extends ValueBaseController<EnumLineProps>{
+export class EnumLineController<V extends string | null> extends ValueBaseController<EnumLineProps<V>, V>{
 
 }
 
@@ -29,7 +29,7 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine = React.memo(React.forwardRef(function EnumLine(props: EnumLineProps, ref: React.Ref<EnumLineController>) {
+export const EnumLine = React.memo(genericForwardRef(function EnumLine<V extends string | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
   const c = useController(EnumLineController, props, ref);
 
@@ -44,7 +44,7 @@ export const EnumLine = React.memo(React.forwardRef(function EnumLine(props: Enu
   return LineBaseController.propEquals(prev, next);
 });
 
-function internalDropDownList(vl: EnumLineController) {
+function internalDropDownList<V extends string | null>(vl: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(vl);
 
@@ -132,7 +132,7 @@ function internalDropDownList(vl: EnumLineController) {
   }
 }
 
-function internalComboBoxText(el: EnumLineController) {
+function internalComboBoxText<V extends string | null>(el: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(el);
 
@@ -184,7 +184,7 @@ function internalComboBoxText(el: EnumLineController) {
   );
 }
 
-function internalRadioGroup(elc: EnumLineController) {
+function internalRadioGroup<V extends string | null>(elc: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(elc);
 
@@ -235,7 +235,7 @@ function internalRadioGroup(elc: EnumLineController) {
 }
 
 
-function getOptionsItems(el: EnumLineController): OptionItem[] {
+function getOptionsItems(el: EnumLineController<any>): OptionItem[] {
 
   var ti = tryGetTypeInfo(el.props.type!.name);
 

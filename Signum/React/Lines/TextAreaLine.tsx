@@ -15,14 +15,13 @@ import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { TypeContext } from '../Lines'
 import { useForceUpdate } from '../Hooks'
 
-export interface TextAreaLineProps extends ValueBaseProps<TextAreaLineController> {
-  ctx: TypeContext<string | undefined | null>;
+export interface TextAreaLineProps extends ValueBaseProps<string | null> {
   autoFixString?: boolean;
   autoTrimString?: boolean;
   charCounter?: true | ((length: number) => React.ReactElement | string);
 }
 
-export class TextAreaLineController extends ValueBaseController<TextAreaLineProps>{
+export class TextAreaLineController extends ValueBaseController<TextAreaLineProps, string | null>{
   init(p: TextAreaLineProps) {
     super.init(p);
     this.assertType("TextAreaLine", ["string"]);
@@ -64,7 +63,7 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
       const input = e.currentTarget as HTMLInputElement;
       var fixed = TextAreaLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
       if (fixed != input.value)
-        c.setValue(fixed, e);
+        c.setValue(fixed!, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);
@@ -151,7 +150,7 @@ function ChartCounter(p: { children: (length: number) => React.ReactElement | st
 export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
-export function taskSetHtmlProperties(lineBase: LineBaseController<any>, state: LineBaseProps) {
+export function taskSetHtmlProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   const vl = lineBase instanceof TextBoxLineController || lineBase instanceof TextAreaLineController ? lineBase : undefined;
   const pr = state.ctx.propertyRoute;
   const s = state as TextAreaLineProps;

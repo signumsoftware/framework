@@ -76,7 +76,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
   return (
     <EntityTable ctx={ctx} view
       onCreate={() => Promise.resolve(ToolbarElementEmbedded.New({ type: "Item" }))}
-      columns={EntityTable.typedColumns<ToolbarElementEmbedded>([
+      columns={[
         {
           header: "Icon",
           headerHtmlAttributes: { style: { width: "5%" } },
@@ -98,7 +98,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
         },
       { property: a => a.label, headerHtmlAttributes: { style: { width: "25%" } }, template: ctx => <AutoLine ctx={ctx.subCtx(a => a.label)} /> },
       { property: a => a.url, headerHtmlAttributes: { style: { width: "25%" } }, template: ctx => <AutoLine ctx={ctx.subCtx(a => a.url)} /> },
-    ])} />
+    ]} />
   );
 
 }

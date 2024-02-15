@@ -138,7 +138,7 @@ interface OperationButtonProps extends ButtonProps {
 }
 
 export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color,
-  avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement<any> | null {
+  avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement | null {
 
   if (eocOrNull == null)
     return null;

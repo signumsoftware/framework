@@ -1,20 +1,19 @@
 import * as React from 'react'
 import { Dic, addClass, classes } from '../Globals'
-import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, genericForwardRef, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { TypeContext } from '../Lines'
 
-export interface TextBoxLineProps extends ValueBaseProps<TextBoxLineController> {
-  ctx: TypeContext<string | undefined | null>;
+export interface TextBoxLineProps extends ValueBaseProps<string | null> {
   autoTrimString?: boolean;
   autoFixString?: boolean;
   datalist?: string[];
 }
 
-export class TextBoxLineController extends ValueBaseController<TextBoxLineProps>{
+export class TextBoxLineController extends ValueBaseController<TextBoxLineProps, string | null>{
   init(p: TextBoxLineProps) {
     super.init(p);
     this.assertType("TextBoxLine", ["string"]);
@@ -36,14 +35,14 @@ export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(prop
   return LineBaseController.propEquals(prev, next);
 });
 
-export class PasswordLineController extends ValueBaseController<TextBoxLineProps>{
+export class PasswordLineController extends ValueBaseController<TextBoxLineProps, string | null>{
   init(p: TextBoxLineProps) {
     super.init(p);
     this.assertType("PasswordLine", ["string"]);
   }
 }
 
-export const PasswordLine = React.memo(React.forwardRef(function PasswordLine(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+export const PasswordLine = React.memo(genericForwardRef(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
 
   const c = useController(PasswordLineController, props, ref);
 
@@ -58,14 +57,14 @@ export const PasswordLine = React.memo(React.forwardRef(function PasswordLine(pr
   return LineBaseController.propEquals(prev, next);
 });
 
-export class GuidLineController extends ValueBaseController<TextBoxLineProps>{
+export class GuidLineController extends ValueBaseController<TextBoxLineProps, string | null>{
   init(p: TextBoxLineProps) {
     super.init(p);
     this.assertType("TextBoxLine", ["Guid"]);
   }
 }
 
-export const GuidLine = React.memo(React.forwardRef(function GuidLine(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+export const GuidLine = React.memo(genericForwardRef(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
 
   const c = useController(GuidLineController, props, ref);
 
@@ -80,7 +79,7 @@ export const GuidLine = React.memo(React.forwardRef(function GuidLine(props: Tex
   return LineBaseController.propEquals(prev, next);
 });
 
-export const ColorLine = React.memo(React.forwardRef(function ColorLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const ColorLine = React.memo(genericForwardRef(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 
@@ -96,7 +95,7 @@ export const ColorLine = React.memo(React.forwardRef(function ColorLine(props: T
 });
 
 
-function internalTextBox(vl: TextBoxLineController, type: "password" | "color" | "text" | "guid") {
+function internalTextBox<V extends string | null>(vl: TextBoxLineController, type: "password" | "color" | "text" | "guid") {
 
   const s = vl.props;
 
@@ -113,7 +112,7 @@ function internalTextBox(vl: TextBoxLineController, type: "password" | "color" |
 
   const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    vl.setValue(input.value, e);
+    vl.setValue(input.value as V, e);
   };
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
@@ -122,7 +121,7 @@ function internalTextBox(vl: TextBoxLineController, type: "password" | "color" |
       const input = e.currentTarget as HTMLInputElement;
       var fixed = TextBoxLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true, type == "guid");
       if (fixed != input.value)
-        vl.setValue(fixed, e);
+        vl.setValue(fixed as V, e);
 
       if (htmlAtts?.onBlur)
         htmlAtts.onBlur(e);

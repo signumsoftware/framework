@@ -4,7 +4,7 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
-import { useController } from './LineBase'
+import { genericForwardRef, useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
@@ -12,8 +12,7 @@ import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
 
-export interface EntityDetailProps extends EntityBaseProps {
-  ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
+export interface EntityDetailProps<V extends Entity | Lite<Entity>> extends EntityBaseProps<V> {
   avoidFieldSet?: boolean | HeaderType;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
@@ -21,15 +20,15 @@ export interface EntityDetailProps extends EntityBaseProps {
 }
 
 
-export class EntityDetailController extends EntityBaseController<EntityDetailProps> {
-  getDefaultProps(p: EntityDetailProps) {
+export class EntityDetailController<V extends Entity | Lite<Entity>> extends EntityBaseController<EntityDetailProps<V>, V> {
+  getDefaultProps(p: EntityDetailProps<V>) {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
   }
 }
 
-export const EntityDetail = React.forwardRef(function EntityDetail(props: EntityDetailProps, ref: React.Ref<EntityDetailController>) {
+export const EntityDetail = genericForwardRef(function EntityDetail<V extends Entity | Lite<Entity>>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
 
   const c = useController(EntityDetailController, props, ref);
   const p = c.props;
@@ -129,8 +128,8 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!hasValue && c.renderCreateButton(false)}
         {!hasValue && c.renderFindButton(false)}
-        {hasValue && c.renderViewButton(false, p.ctx.value!)}
-        {hasValue && c.renderRemoveButton(false, p.ctx.value!)}
+        {hasValue && c.renderViewButton(false)}
+        {hasValue && c.renderRemoveButton(false)}
         {p.extraButtons && p.extraButtons(c)}
       </span>
     );

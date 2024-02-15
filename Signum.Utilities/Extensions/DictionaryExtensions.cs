@@ -195,7 +195,7 @@ public static class DictionaryExtensions
     }
 
     public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
-        where K : notnull => collection.ToDictionaryEx(errorContext).ToFrozenDictionaryEx();
+        where K : notnull => collection.ToDictionaryEx(errorContext).ToFrozenDictionary();
 
 
     public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)

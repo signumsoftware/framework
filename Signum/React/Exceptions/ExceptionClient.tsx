@@ -13,6 +13,6 @@ export function start(options: { routes: RouteObject[] }) {
     if (tr.isCollection)
       return undefined;
 
-    return ({ ctx, ...rest }) => <TextAreaLine ctx={(ctx as TypeContext<BigStringEmbedded>).subCtx(a => a.text)}  {...rest} readOnly />;
+    return ({ ctx, ...rest }) => <TextAreaLine ctx={(ctx as TypeContext<BigStringEmbedded>).subCtx(a => a.text)}  {...rest as any} readOnly />;
   });
 }
