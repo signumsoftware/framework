@@ -8,16 +8,18 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
-export module AuthEmailMessage {
-  export const YouRecentlyRequestedANewPassword = new MessageKey("AuthEmailMessage", "YouRecentlyRequestedANewPassword");
-  export const YourUsernameIs = new MessageKey("AuthEmailMessage", "YourUsernameIs");
-  export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("AuthEmailMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
-  export const ResetPasswordRequestSubject = new MessageKey("AuthEmailMessage", "ResetPasswordRequestSubject");
-  export const YourResetPasswordRequestHasExpired = new MessageKey("AuthEmailMessage", "YourResetPasswordRequestHasExpired");
-  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("AuthEmailMessage", "WeHaveSendYouAnEmailToResetYourPassword");
-  export const EmailNotFound = new MessageKey("AuthEmailMessage", "EmailNotFound");
-  export const YourAccountHasBeenLockedDueToSeveralFailedLogins = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
-  export const YourAccountHasBeenLocked = new MessageKey("AuthEmailMessage", "YourAccountHasBeenLocked");
+export module ResetPasswordMessage {
+  export const YouRecentlyRequestedANewPassword = new MessageKey("ResetPasswordMessage", "YouRecentlyRequestedANewPassword");
+  export const YourUsernameIs = new MessageKey("ResetPasswordMessage", "YourUsernameIs");
+  export const YouCanResetYourPasswordByFollowingTheLinkBelow = new MessageKey("ResetPasswordMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
+  export const ResetPasswordRequestSubject = new MessageKey("ResetPasswordMessage", "ResetPasswordRequestSubject");
+  export const YourResetPasswordRequestHasExpired = new MessageKey("ResetPasswordMessage", "YourResetPasswordRequestHasExpired");
+  export const WeHaveSendYouAnEmailToResetYourPassword = new MessageKey("ResetPasswordMessage", "WeHaveSendYouAnEmailToResetYourPassword");
+  export const EmailNotFound = new MessageKey("ResetPasswordMessage", "EmailNotFound");
+  export const YourAccountHasBeenLockedDueToSeveralFailedLogins = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLockedDueToSeveralFailedLogins");
+  export const YourAccountHasBeenLocked = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLocked");
+  export const TheCodeOfYourLinkIsIncorrect = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkIsIncorrect");
+  export const TheCodeOfYourLinkHasAlreadyBeenUsed = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkHasAlreadyBeenUsed");
 }
 
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");

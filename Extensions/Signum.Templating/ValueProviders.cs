@@ -11,7 +11,8 @@ namespace Signum.Templating;
 public interface ITemplateParser
 {
     Type? ModelType { get; }
-    QueryDescription QueryDescription { get; }
+    QueryDescription AssertQueryDescription(string action);
+    QueryDescription? QueryDescription { get; }
     ScopedDictionary<string, ValueProviderBase> Variables { get; }
     void AddError(bool fatal, string error);
 }
@@ -139,7 +140,7 @@ public abstract class ValueProviderBase
                     if (ConstantValueProvider.TryParseConstantValue(token, out var val))
                         return new ConstantValueProvider(val, tp) { Variable = variable };
 
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.QueryDescription, tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
 
                     AssertNoColectionToken(result);
 
@@ -150,13 +151,13 @@ public abstract class ValueProviderBase
                 }
             case "q":
                 {
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.QueryDescription, tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement | SubTokensOptions.CanToArray, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
                     AssertNoColectionToken(result);
                     return new TokenValueProvider(result, true) { Variable = variable };
                 }
             case "t":
                 {
-                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.QueryDescription, tp.Variables, tp.AddError);
+                    ParsedToken result = ParsedToken.TryParseToken(token, SubTokensOptions.CanElement, tp.AssertQueryDescription("parse " + token), tp.Variables, tp.AddError);
                     AssertNoColectionToken(result);
                     return new TranslateInstanceValueProvider(result, true, tp) { Variable = variable };
                 }
@@ -184,31 +185,47 @@ public abstract class ValueProviderBase
     }
 }
 
+public class QueryContext
+{
+    public QueryContext(QueryDescription qd, ResultTable rt) 
+    {
+        this.QueryDescription = qd;
+        this.ResultTable = rt;
+        this.ResultColumns = rt.Columns.ToDictionary(a => a.Column.Token);
+        this.CurrentRows = rt.Rows;
+    }
+
+    public readonly QueryDescription QueryDescription;
+    public readonly ResultTable ResultTable;
+    public readonly Dictionary<QueryToken, ResultColumn> ResultColumns;
+    public IEnumerable<ResultRow> CurrentRows { get; private set; }
+
+    public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
+    {
+        var old = this.CurrentRows;
+        this.CurrentRows = rows;
+        return new Disposable(() => this.CurrentRows = old);
+    }
+}
+
 public abstract class TemplateParameters
 {
-    public TemplateParameters(IEntity? entity, CultureInfo culture, Dictionary<QueryToken, ResultColumn> columns, IEnumerable<ResultRow> rows)
+    public TemplateParameters(IEntity? entity, CultureInfo culture, QueryContext? queryContext)
     {
         this.Entity = entity;
         this.Culture = culture;
-        this.Columns = columns;
-        this.Rows = rows;
+        this.QueryContext = queryContext;
     }
 
     public readonly IEntity? Entity;
     public readonly CultureInfo Culture;
-    public readonly Dictionary<QueryToken, ResultColumn> Columns;
-    public IEnumerable<ResultRow> Rows { get; private set; }
+    public readonly QueryContext? QueryContext;
 
     public ScopedDictionary<string, object?> RuntimeVariables = new ScopedDictionary<string, object?>(null);
 
     public abstract object GetModel();
 
-    public IDisposable OverrideRows(IEnumerable<ResultRow> rows)
-    {
-        var old = this.Rows;
-        this.Rows = rows;
-        return new Disposable(() => this.Rows = old);
-    }
+   
 
     internal IDisposable Scope()
     {
@@ -237,10 +254,12 @@ public class TokenValueProvider : ValueProviderBase
 
     public override object? GetValue(TemplateParameters p)
     {
-        if (p.Rows.IsEmpty())
+        var qc = p.QueryContext!;
+
+        if (qc.CurrentRows.IsEmpty())
             return null;
 
-        var value = p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!]);
+        var value = qc.CurrentRows.DistinctSingle(qc.ResultColumns[ParsedToken.QueryToken!]);
 
         if(ParsedToken.QueryToken is CollectionToArrayToken ctat)
         {
@@ -256,11 +275,12 @@ public class TokenValueProvider : ValueProviderBase
 
     public override void Foreach(TemplateParameters p, Action forEachElement)
     {
-        var col = p.Columns[ParsedToken.QueryTokenOrRowId!];
+        var qc = p.QueryContext!;
+        var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
 
-        foreach (var group in p.Rows.GroupByColumn(col))
+        foreach (var group in qc.CurrentRows.GroupByColumn(col))
         {
-            using (p.OverrideRows(group))
+            using (qc.OverrideRows(group))
                 forEachElement();
         }
     }
@@ -321,8 +341,9 @@ public class TranslateInstanceValueProvider : ValueProviderBase
 
     public override object? GetValue(TemplateParameters p)
     {
-        var entity = (Lite<Entity>)p.Rows.DistinctSingle(p.Columns[EntityToken!])!;
-        var fallback = (string)p.Rows.DistinctSingle(p.Columns[ParsedToken.QueryToken!])!;
+        var qc = p.QueryContext!;
+        var entity = (Lite<Entity>)qc.CurrentRows.DistinctSingle(qc.ResultColumns[EntityToken!])!;
+        var fallback = (string)qc.CurrentRows.DistinctSingle(qc.ResultColumns[ParsedToken.QueryToken!])!;
 
         return entity == null ? null : PropertyRouteTranslationLogic.TranslatedField(entity, Route!, fallback);
     }

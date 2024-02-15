@@ -1,6 +1,7 @@
 using Signum.API;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Basics;
 
@@ -10,7 +11,7 @@ public static class PropertyRouteLogic
     public static bool IsPropertyRoute(this PropertyRouteEntity prdn, PropertyRoute pr) =>
         As.Expression(() => prdn.RootType.Is(pr.RootType.ToTypeEntity()) && prdn.Path == pr.PropertyString());
 
-    public static ResetLazy<Dictionary<TypeEntity, Dictionary<string, PropertyRouteEntity>>> Properties = null!;
+    public static ResetLazy<FrozenDictionary<TypeEntity, FrozenDictionary<string, PropertyRouteEntity>>> Properties = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -28,7 +29,7 @@ public static class PropertyRouteLogic
 
             sb.Schema.Synchronizing += SynchronizeProperties;
 
-            Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToDictionary(a => a.Path)),
+            Properties = sb.GlobalLazy(() => Database.Query<PropertyRouteEntity>().AgGroupToDictionary(a => a.RootType, gr => gr.ToFrozenDictionaryEx(a => a.Path)).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(PropertyRouteEntity)), Schema.Current.InvalidateMetadata);
 
             PropertyRouteEntity.ToPropertyRouteFunc = ToPropertyRouteImplementation;

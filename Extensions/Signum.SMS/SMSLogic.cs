@@ -346,7 +346,7 @@ public static class SMSLogic
             return new SMSMessageEntity
             {
                 Template = t.ToLite(),
-                Message = node.Print(new TextTemplateParameters(entity, ci, columnTokens, table.Rows) { Model = model }),
+                Message = node.Print(new TextTemplateParameters(entity, ci, new QueryContext(qd, table)) { Model = model }),
                 From = t.From,
                 EditableMessage = t.EditableMessage,
                 State = SMSMessageState.Created,

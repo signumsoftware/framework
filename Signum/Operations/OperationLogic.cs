@@ -5,6 +5,7 @@ using System.Collections;
 using Signum.DynamicQuery.Tokens;
 using Signum.Security;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Operations;
 
@@ -29,12 +30,12 @@ public static class OperationLogic
 
     static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
-    static ResetLazy<Dictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<OperationSymbol, List<Type>>>(() =>
+    static ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>>(() =>
     {
         return (from t in operations.OverridenTypes
                 from d in operations.GetDefinition(t)!.Keys
                 group t by d into g
-                select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
+                select KeyValuePair.Create(g.Key, g.ToList())).ToFrozenDictionaryEx();
     });
 
 

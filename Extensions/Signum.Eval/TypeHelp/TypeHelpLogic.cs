@@ -1,5 +1,6 @@
 using Signum.API;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,8 +11,8 @@ namespace Signum.Eval.TypeHelp;
 
 public static class TypeHelpLogic
 {
-    public static ResetLazy<HashSet<Type>> AvailableEmbeddedEntities = null!;
-    public static ResetLazy<HashSet<Type>> AvailableModelEntities = null!;
+    public static ResetLazy<FrozenSet<Type>> AvailableEmbeddedEntities = null!;
+    public static ResetLazy<FrozenSet<Type>> AvailableModelEntities = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -25,7 +26,7 @@ public static class TypeHelpLogic
                 .Distinct()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => typeof(EmbeddedEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToHashSet();
+                .ToFrozenSet();
 
             }, new InvalidateWith());
 
@@ -37,7 +38,7 @@ public static class TypeHelpLogic
                 .Distinct()
                 .SelectMany(a => a.GetTypes())
                 .Where(t => typeof(ModelEntity).IsAssignableFrom(t) && namespaces.Contains(t.Namespace!))
-                .ToHashSet();
+                .ToFrozenSet();
 
             }, new InvalidateWith());
 

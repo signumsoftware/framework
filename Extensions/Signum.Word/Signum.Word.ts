@@ -38,7 +38,7 @@ export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAss
   Type: "WordTemplate";
   guid: string /*Guid*/;
   name: string;
-  query: Basics.QueryEntity;
+  query: Basics.QueryEntity | null;
   model: WordModelEntity | null;
   culture: Basics.CultureInfoEntity;
   groupResults: boolean;

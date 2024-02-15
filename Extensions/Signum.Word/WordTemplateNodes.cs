@@ -917,7 +917,7 @@ public class AnyNode : BlockContainerNode
     {
         var filtered = this.Condition.GetFilteredRows(p);
 
-        using (filtered is IEnumerable<ResultRow> ? p.OverrideRows((IEnumerable<ResultRow>)filtered) : null)
+        using (filtered is IEnumerable<ResultRow> rr ? p.QueryContext!.OverrideRows(rr) : null)
         {
             if (filtered.Any())
             {

@@ -61,7 +61,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   name: string;
   editableMessage: boolean;
   disableAuthorization: boolean;
-  query: Basics.QueryEntity;
+  query: Basics.QueryEntity | null;
   model: Mailing.EmailModelEntity | null;
   from: EmailTemplateFromEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;

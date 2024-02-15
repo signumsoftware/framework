@@ -7,15 +7,17 @@ using Signum.Authorization;
 
 namespace Signum.Mailing.Templates;
 
+
 class EmailMessageBuilder
 {
     EmailTemplateEntity template;
     Entity? entity;
     IEmailModel? model;
-    object queryName;
-    QueryDescription qd;
     EmailSenderConfigurationEntity? emailSenderConfig;
     CultureInfo? cultureInfo;
+
+    QueryDescription? qd;
+    QueryContext? queryContext;
 
     public EmailMessageBuilder(EmailTemplateEntity template, Entity? entity, IEmailModel? systemEmail, CultureInfo? cultureInfo)
     {
@@ -23,20 +25,19 @@ class EmailMessageBuilder
         this.entity = entity;
         this.model = systemEmail;
 
-        this.queryName = QueryLogic.ToQueryName(template.Query.Key);
-        this.qd = QueryLogic.Queries.QueryDescription(queryName);
+        var queryName = template.Query?.ToQueryName();
+        this.qd = queryName == null ? null : QueryLogic.Queries.QueryDescription(queryName);
         this.emailSenderConfig = EmailTemplateLogic.GetSmtpConfiguration?.Invoke(template, (systemEmail?.UntypedEntity as Entity)?.ToLiteFat(), null);
         this.cultureInfo = cultureInfo;
     }
 
-    ResultTable table = null!;
-    Dictionary<QueryToken, ResultColumn> dicTokenColumn = null!;
-    IEnumerable<ResultRow> currentRows = null!;
+
 
 
     public IEnumerable<EmailMessageEntity> CreateEmailMessageInternal()
     {
-        ExecuteQuery();
+        if (this.qd != null)
+            ExecuteQuery();
 
         foreach (EmailFromEmbedded from in GetFrom())
         {
@@ -59,8 +60,9 @@ class EmailMessageBuilder
                 recipients.Where(a => a.Kind == EmailRecipientKind.To).Select(a => a.OwnerData.CultureInfo).FirstOrDefault()?.ToCultureInfo() ??
                 EmailLogic.Configuration.DefaultCulture.ToCultureInfo();
 
-            var context = new EmailTemplateLogic.GenerateAttachmentContext(this.qd, template, dicTokenColumn, currentRows, ci)
+            var context = new EmailTemplateLogic.GenerateAttachmentContext(template, ci)
             {
+                QueryContext = this.queryContext,
                 ModelType = template.Model?.ToType(),
                 Model = model,
                 Entity = entity,
@@ -68,7 +70,7 @@ class EmailMessageBuilder
 
             email = new EmailMessageEntity
             {
-                Target = entity?.ToLite() ?? (this.model!.UntypedEntity as Entity)?.ToLite(),
+                Target = entity?.ToLite() ?? (this.model?.UntypedEntity as Entity)?.ToLite(),
                 Recipients = recipients.Select(r => new EmailRecipientEmbedded(r.OwnerData) { Kind = r.Kind }).ToMList(),
                 From = from,
                 IsBodyHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
@@ -89,14 +91,14 @@ class EmailMessageBuilder
             using (CultureInfoUtils.ChangeBothCultures(ci))
             {
                 email.Subject = SubjectNode(message).Print(
-                    new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                    new TextTemplateParameters(entity, ci, queryContext)
                     {
                         IsHtml = false,
                         Model = model
                     });
 
                 email.Body = new BigStringEmbedded(TextNode(message).Print(
-                    new TextTemplateParameters(entity, ci, dicTokenColumn, currentRows)
+                    new TextTemplateParameters(entity, ci, queryContext)
                     {
                         IsHtml = template.MessageFormat == EmailMessageFormat.HtmlComplex || template.MessageFormat == EmailMessageFormat.HtmlSimple,
                         Model = model,
@@ -161,8 +163,9 @@ class EmailMessageBuilder
         {
             if (template.From.AddressSource == EmailAddressSource.QueryToken)
             {
-                ResultColumn owner = dicTokenColumn.GetOrThrow(template.From.Token!.Token);
-                var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
+                var qc = this.queryContext!;
+                ResultColumn owner = qc.ResultColumns.GetOrThrow(template.From.Token!.Token);
+                var groups = qc.CurrentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
                 var groupsWithEmail = groups.Where(a => a.Key.Email.HasText()).ToList();
 
@@ -195,12 +198,10 @@ class EmailMessageBuilder
 
                     foreach (var gr in groupsWithEmail)
                     {
-                        var old = currentRows;
-                        currentRows = gr;
-
-                        yield return new EmailFromEmbedded(gr.Key);
-
-                        currentRows = old;
+                        using (this.queryContext!.OverrideRows(gr))
+                        {
+                            yield return new EmailFromEmbedded(gr.Key);
+                        }
                     }
                 }
             }
@@ -287,9 +288,10 @@ class EmailMessageBuilder
         {
             EmailTemplateRecipientEmbedded tr = tokenRecipients[pos];
 
-            ResultColumn owner = dicTokenColumn.GetOrThrow(tr.Token!.Token);
+            var qc = this.queryContext!;
+            ResultColumn owner = qc.ResultColumns.GetOrThrow(tr.Token!.Token);
 
-            var groups = currentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
+            var groups = qc.CurrentRows.GroupBy(r => (EmailOwnerData)r[owner]!).ToList();
 
             var groupsWithEmail = groups.Where(a => a.Key != null && a.Key.Email.HasText()).ToList();
 
@@ -321,16 +323,15 @@ class EmailMessageBuilder
                     {
                         var rec = new EmailOwnerRecipientData(gr.Key) { Kind = tr.Kind };
 
-                        var old = currentRows;
-                        currentRows = gr;
-
-                        foreach (var list in TokenRecipientsCrossProduct(tokenRecipients, pos + 1))
+                        using (this.queryContext!.OverrideRows(gr))
                         {
-                            var result = list.ToList();
-                            result.Insert(0, rec);
-                            yield return result;
+                            foreach (var list in TokenRecipientsCrossProduct(tokenRecipients, pos + 1))
+                            {
+                                var result = list.ToList();
+                                result.Insert(0, rec);
+                                yield return result;
+                            }
                         }
-                        currentRows = old;
                     }
                 }
                 else if (tr.WhenMany == WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients)
@@ -354,6 +355,7 @@ class EmailMessageBuilder
 
     void ExecuteQuery()
     {
+        var qd = this.qd!;
         using (this.template.DisableAuthorization ? ExecutionMode.Global() : null)
         {
             List<QueryToken> tokens = new List<QueryToken>();
@@ -371,7 +373,7 @@ class EmailMessageBuilder
 
             foreach (var a in template.Attachments)
             {
-                EmailTemplateLogic.FillAttachmentTokens.Invoke(a, new EmailTemplateLogic.FillAttachmentTokenContext(qd, tokens)
+                EmailTemplateLogic.FillAttachmentTokens.Invoke(a, new EmailTemplateLogic.FillAttachmentTokenContext(qd!, tokens)
                 {
                     ModelType = template.Model?.ToType(),
                 });
@@ -388,9 +390,9 @@ class EmailMessageBuilder
             var orders = model?.GetOrders(qd) ?? new List<Order>();
             orders.AddRange(template.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList());
 
-            this.table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
+            var table = QueryLogic.Queries.ExecuteQuery(new QueryRequest
             {
-                QueryName = queryName,
+                QueryName = qd.QueryName,
                 GroupResults = template.GroupResults,
                 Columns = columns,
                 Pagination = model?.GetPagination() ?? new Pagination.All(),
@@ -398,9 +400,7 @@ class EmailMessageBuilder
                 Orders = orders,
             });
 
-            this.dicTokenColumn = table.Columns.ToDictionary(rc => rc.Column.Token);
-
-            this.currentRows = table.Rows;
+            this.queryContext = new QueryContext(qd, table);
         }
     }
 }

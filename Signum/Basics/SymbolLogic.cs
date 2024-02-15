@@ -1,5 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Basics;
 
@@ -24,7 +25,7 @@ public static class SymbolLogic
 public static class SymbolLogic<T>
     where T : Symbol
 {
-    static ResetLazy<Dictionary<string, T>> lazy = null!;
+    static ResetLazy<FrozenDictionary<string, T>> lazy = null!;
     static Func<IEnumerable<T>> getSymbols = null!;
 
     [ThreadStatic]
@@ -72,7 +73,7 @@ public static class SymbolLogic<T>
                         "caching " + typeof(T).Name);
 
                     Symbol.SetSymbolIds<T>(current.ToDictionary(a => a.Key, a => a.Id));
-                    return result.ToDictionary(a => a.Key);
+                    return result.ToFrozenDictionaryEx(a => a.Key);
                 }
             },
             new InvalidateWith(typeof(T)),
@@ -138,7 +139,7 @@ public static class SymbolLogic<T>
                 });
     }
 
-    static Dictionary<string, T> AssertStarted()
+    static FrozenDictionary<string, T> AssertStarted()
     {
         if (lazy == null)
             throw new InvalidOperationException("{0} has not been started. Someone should have called {0}.Start before".FormatWith(typeof(SymbolLogic<T>).TypeName()));

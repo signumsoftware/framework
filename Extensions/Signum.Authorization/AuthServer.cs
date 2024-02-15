@@ -11,6 +11,7 @@ using Signum.API.Json;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Collections.Frozen;
 
 namespace Signum.Authorization;
 
@@ -264,8 +265,8 @@ public static class AuthServer
 
     }
 
-    public static ResetLazy<Dictionary<string, List<Type>>> entitiesByNamespace =
-        new ResetLazy<Dictionary<string, List<Type>>>(() => Schema.Current.Tables.Keys.Where(t => !EnumEntity.IsEnumEntity(t)).GroupToDictionary(t => t.Namespace!));
+    public static ResetLazy<FrozenDictionary<string, List<Type>>> entitiesByNamespace =
+        new(() => Schema.Current.Tables.Keys.Where(t => !EnumEntity.IsEnumEntity(t)).GroupToDictionary(t => t.Namespace!).ToFrozenDictionary());
 
     public static ConcurrentDictionary<string, bool> NamespaceNoLoaded = new ConcurrentDictionary<string, bool>();
 

@@ -444,19 +444,23 @@ public class UserQueryDataTableProvider : IWordDataTableProvider
         if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
             return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
 
-        var uc = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+        var uq = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
 
-        if (uc == null)
+        if (uq == null)
             return "No UserQuery with GUID={0} found".FormatWith(guid);
 
-        if (uc.EntityType != null)
+        if (uq.EntityType != null)
         {
+
+            if (template.Query == null)
+                return "The UserQuery {0} has EntityType {1} but the template {2} has no query".FormatWith(uq.UQ, uq.EntityType, template.Name);
+
             var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
 
-            var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);
+            var type = TypeLogic.GetType(uq.EntityType.Retrieve().CleanName);
 
             if (imp.Types.Contains(type))
-                return "No UserQuery {0} (GUID={1}) is not compatible with ".FormatWith(uc.UQ, guid, imp);
+                return "No UserQuery {0} (GUID={1}) is not compatible with ".FormatWith(uq.UQ, guid, imp);
         }
 
         return null;
@@ -515,6 +519,9 @@ public class UserChartDataTableProvider : IWordDataTableProvider
 
         if(uc.EntityType != null)
         {
+            if (template.Query == null)
+                return "The UserChart {0} has EntityType {1} but the template {2} has no query".FormatWith(uc.UC, uc.EntityType, template.Name);
+
             var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
 
             var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);

@@ -10,6 +10,7 @@ using Signum.Basics;
 using Signum.Engine.Sync;
 using Signum.Excel;
 using Signum.UserAssets;
+using System.Collections.Frozen;
 
 namespace Signum.Translation.Instances;
 
@@ -18,7 +19,7 @@ public static class TranslatedInstanceLogic
     static Func<CultureInfo> getDefaultCulture = null!;
     public static CultureInfo DefaultCulture { get { return getDefaultCulture(); } }
 
-    static ResetLazy<Dictionary<CultureInfo, Dictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache = null!;
+    static ResetLazy<FrozenDictionary<CultureInfo, FrozenDictionary<LocalizedInstanceKey, TranslatedInstanceEntity>>> LocalizationCache = null!;
 
     public static void Start(SchemaBuilder sb, Func<CultureInfo> defaultCulture)
     {
@@ -60,7 +61,8 @@ public static class TranslatedInstanceLogic
 
                         return gr.Select(ti => KeyValuePair.Create(new LocalizedInstanceKey(pr, ti.Instance, new PrimaryKey((IComparable)ReflectionTools.Parse(ti.RowId!, type)!)), ti));
 
-                    }).ToDictionary())
+                    }).ToFrozenDictionaryEx())
+                .ToFrozenDictionaryEx()
                     , new InvalidateWith(typeof(TranslatedInstanceEntity)));
 
             PropertyRouteTranslationLogic.TranslatedFieldFunc = (Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, string? fallbackString) =>
