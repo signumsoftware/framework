@@ -34,24 +34,26 @@ internal class EntityCompleter : DbExpressionVisitor
 
         var typeId = binder.GetEntityType(lite.Reference);
 
-        if (lite.CustomModelExpression != null)
-            return new LiteValueExpression(lite.Type, typeId, id, lite.CustomModelExpression, null);
+        var partitionIds = GetPartitionIds(lite);
 
-        var models = GetModels(lite, typeId);
+        if (lite.CustomModelExpression != null)
+            return new LiteValueExpression(lite.Type, typeId, id, lite.CustomModelExpression, null, partitionIds?.ToReadOnly());
+
+        var models = GetModels(lite);
 
         //var model2 = Visit(model); //AdditionalBinding in embedded requires it, but makes problems in many other lites in Nominator
 
-        return new LiteValueExpression(lite.Type, typeId, id, null, models.ToReadOnly());
+        return new LiteValueExpression(lite.Type, typeId, id, null, models?.ToReadOnly(), partitionIds?.ToReadOnly());
     }
 
-    private Dictionary<Type, ExpressionOrType> GetModels(LiteReferenceExpression lite, Expression typeId)
+    private Dictionary<Type, ExpressionOrType>? GetModels(LiteReferenceExpression lite)
     {
         if (lite.Reference is ImplementedByAllExpression iba)
         {
             if (lite.CustomModelTypes != null)
                 return lite.CustomModelTypes.ToDictionary(a => a.Key, a => new ExpressionOrType(a.Value));
 
-            return new Dictionary<Type, ExpressionOrType>();
+            return null;
         }
 
         if (lite.Reference is EntityExpression entityExp)
@@ -75,6 +77,49 @@ internal class EntityCompleter : DbExpressionVisitor
         }
 
         return new Dictionary<Type, ExpressionOrType>(); //Could be more accurate to preserve model in liteA ?? liteB  or condition ? liteA : liteB 
+    }
+
+    private Dictionary<Type, Expression>? GetPartitionIds(LiteReferenceExpression lite)
+    {
+        if (lite.LazyModel)
+            return null;
+
+        if (lite.Reference is ImplementedByAllExpression iba)
+        {
+            return null;
+        }
+
+        if (lite.Reference is EntityExpression entityExp)
+        {
+            var modelType = lite.CustomModelTypes?.TryGetC(entityExp.Type) ?? Lite.DefaultModelType(entityExp.Type);
+
+            if (entityExp.AvoidExpandOnRetrieving)
+                return null;
+
+            var partition = entityExp.GetPartitionId();
+
+            if (partition != null)
+                return new Dictionary<Type, Expression>
+                {
+                    { entityExp.Type,  partition}
+                };
+
+            return null;
+        }
+
+        if (lite.Reference is ImplementedByExpression ibe)
+        {
+            if (lite.LazyModel)
+                return null;
+
+            return (from imp in ibe.Implementations.Values
+                    where !imp.AvoidExpandOnRetrieving
+                    let pid = imp.GetPartitionId()
+                    where pid != null
+                    select KeyValuePair.Create(imp.Type, pid)).ToDictionary();
+        }
+
+        return new Dictionary<Type, Expression>(); //Could be more accurate to preserve model in liteA ?? liteB  or condition ? liteA : liteB 
     }
 
     private Expression GetModel(EntityExpression entityExp, Type modelType)

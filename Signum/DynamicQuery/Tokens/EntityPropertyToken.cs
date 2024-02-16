@@ -10,10 +10,15 @@ public class EntityPropertyToken : QueryToken
     public PropertyRoute PropertyRoute { get; private set; }
 
     static readonly PropertyInfo piId = ReflectionTools.GetPropertyInfo((Entity e) => e.Id);
-
     public static QueryToken IdProperty(QueryToken parent)
     {
         return new EntityPropertyToken(parent, piId, PropertyRoute.Root(parent.Type.CleanType()).Add(piId)) { Priority = 10 };
+    }
+
+    static readonly PropertyInfo partitionId = ReflectionTools.GetPropertyInfo((Entity e) => e.PartitionId);
+    public static QueryToken PartitionIdProperty(QueryToken parent)
+    {
+        return new EntityPropertyToken(parent, partitionId, PropertyRoute.Root(parent.Type.CleanType()).Add(partitionId)) { Priority = 9 };
     }
 
     QueryToken parent;

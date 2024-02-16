@@ -84,8 +84,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
             return eos;
         });
 
-        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models)
-            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models);
+        var partitionIds = lite.PartitionIds == null ? null : Visit(lite.PartitionIds, pid => Visit(pid));
+        if (newTypeId != lite.TypeId || newId != lite.Id || customModelExpression != lite.CustomModelExpression || models != lite.Models || partitionIds != lite.PartitionIds)
+            return new LiteValueExpression(lite.Type, newTypeId, newId, customModelExpression, models, partitionIds);
         return lite;
     }
 
@@ -149,8 +150,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     {
         var newBackID = (PrimaryKeyExpression)Visit(ml.BackID);
         var externalPeriod = (IntervalExpression?)Visit(ml.ExternalPeriod);
-        if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod)
-            return new MListExpression(ml.Type, newBackID, externalPeriod, ml.TableMList);
+        var externalPartitionId = Visit(ml.ExternalPartitionId);
+        if (newBackID != ml.BackID || externalPeriod != ml.ExternalPeriod || externalPartitionId != ml.ExternalPartitionId)
+            return new MListExpression(ml.Type, newBackID, externalPeriod, externalPartitionId, ml.TableMList);
         return ml;
     }
 
@@ -167,10 +169,11 @@ internal class DbExpressionVisitor : ExpressionVisitor
         var rowId = (PrimaryKeyExpression)Visit(mle.RowId);
         var parent = (EntityExpression)Visit(mle.Parent);
         var order = Visit(mle.Order);
+        var partitionId = Visit(mle.PartitionId);
         var element = Visit(mle.Element);
         var period = (IntervalExpression?)Visit(mle.TablePeriod);
-        if (rowId != mle.RowId || parent != mle.Parent || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
-            return new MListElementExpression(rowId, parent, order, element, period, mle.Table, mle.Alias);
+        if (rowId != mle.RowId || parent != mle.Parent || partitionId != mle.PartitionId || order != mle.Order || element != mle.Element || period != mle.TablePeriod)
+            return new MListElementExpression(rowId, parent, order, partitionId, element, period, mle.Table, mle.Alias);
         return mle;
     }
 
@@ -246,10 +249,11 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual EntityContextInfo VisitEntityContextInfo(EntityContextInfo entityContext)
     {
         var entityId = (PrimaryKeyExpression)Visit(entityContext.EntityId);
+        var partitionId = Visit(entityContext.EntityPartitionId);
         var rowId = (PrimaryKeyExpression?)Visit(entityContext.MListRowId);
 
-        if(entityId != entityContext.EntityId || rowId != entityContext.MListRowId)
-            return new EntityContextInfo(entityId, rowId);
+        if(entityId != entityContext.EntityId || partitionId != entityContext.EntityPartitionId ||  rowId != entityContext.MListRowId)
+            return new EntityContextInfo(entityId, partitionId, rowId);
 
         return entityContext;
     }

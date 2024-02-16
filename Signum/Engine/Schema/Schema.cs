@@ -114,6 +114,8 @@ public class Schema : IImplementationsFinder
     {
         AssertAllowed(entity.GetType(), inUserInterface: false);
 
+        
+
         IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
         if (ee != null)
@@ -598,6 +600,7 @@ public class Schema : IImplementationsFinder
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.PostgresExtensions;
         Generating += SchemaGenerator.PostgresTemporalTableScript;
+        Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -619,6 +622,8 @@ public class Schema : IImplementationsFinder
     {
         get { return Connector.Current.Schema; }
     }
+
+    public List<SqlPartitionScheme> PartitionSchemes { get; } = new List<SqlPartitionScheme>();
 
     public Table Table<T>() where T : Entity
     {
@@ -851,6 +856,8 @@ public class Schema : IImplementationsFinder
 
         return field is IColumn c && fullTextIndex.Columns.Contains(c);
     }
+
+
 }
 
 public class RelationInfo

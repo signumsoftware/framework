@@ -73,6 +73,7 @@ export interface OperationInfo {
   operationType: OperationType;
   canBeNew?: boolean;
   canBeModified?: boolean;
+  resultIsSaved?: boolea;
   forReadonlyEntity?: boolean;
   hasCanExecute?: boolean;
   hasCanExecuteExpression?: boolean;

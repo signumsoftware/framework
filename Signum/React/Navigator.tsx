@@ -861,17 +861,17 @@ export module API {
     if (lite.id == null)
       throw new Error("Lite has no Id");
 
-    return fetchEntity(lite.EntityType, lite.id) as Promise<T>;
+    return fetchEntity(lite.EntityType, lite.id, lite.partitionId) as Promise<T>;
   }
 
-  export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
-  export function fetchEntity(type: PseudoType, id: number | string): Promise<Entity>;
-  export function fetchEntity(type: PseudoType, id?: number | string): Promise<Entity> {
+  export function fetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number): Promise<T>;
+  export function fetchEntity(type: PseudoType, id: number | string, partitionId?: number): Promise<Entity>;
+  export function fetchEntity(type: PseudoType, id?: number | string, partitionId?: number): Promise<Entity> {
 
     const typeName = getTypeName(type);
     let idVal = id;
 
-    return ajaxGet({ url: "/api/entity/" + typeName + "/" + id });
+    return ajaxGet({ url: "/api/entity/" + typeName + "/" + id + (partitionId ? "?partitionId=" + partitionId : "") });
   }
 
   export function exists<T extends Entity>(lite: Lite<T>): Promise<boolean>;
@@ -897,14 +897,14 @@ export module API {
 
 
   export function fetchEntityPack<T extends Entity>(lite: Lite<T>): Promise<EntityPack<T>>;
-  export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
-  export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
-  export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
+  export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string, partitionId?: number): Promise<EntityPack<T>>;
+  export function fetchEntityPack(type: PseudoType, id: number | string, partitionId?: number): Promise<EntityPack<Entity>>;
+  export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any, partitionId?: number): Promise<EntityPack<Entity>> {
 
     const typeName = (typeOrLite as Lite<any>).EntityType ?? getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
-
-    return ajaxGet({ url: "/api/entityPack/" + typeName + "/" + idVal });
+    let pId = (typeOrLite as Lite<any>)?.partitionId ?? partitionId;
+    return ajaxGet({ url: "/api/entityPack/" + typeName + "/" + idVal + (pId ? "?partitionId=" + pId : "") });
   }
 
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {

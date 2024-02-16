@@ -138,8 +138,9 @@ public static class SchemaMap
                         new ObjectName(new SchemaName(dbName, t.Schema().name, isPostgres), t.name, isPostgres),
                         new RuntimeStats
                         {
-                            rows = ((int?)t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered)!.Partition()!.rows) ?? 0,
-                            total_size_kb = t.Indices().SelectMany(i => i.Partition()!.AllocationUnits()).Sum(a => a.total_pages) * 8
+                            rows = t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered)!.Partitions().Sum(a=>a.rows),
+                            total_size_kb = t.Indices().SelectMany(i => i.Partitions()).SelectMany(p => p!.AllocationUnits()).Sum(a => a.total_pages) * 8,
+                            partitions = t.Indices().SingleOrDefault(a => a.type == (int)DiffIndexType.Clustered)!.Partitions().Count(),
                         })).ToDictionary();
 
                     result.AddRange(dic);
@@ -153,9 +154,8 @@ public static class SchemaMap
     {
         public int rows;
         public int total_size_kb;
+        public int partitions;
     }
-
-
 }
 
 public class RelationInfo

@@ -256,7 +256,7 @@ internal class CachedTableConstructor
                         var modelType = customLiteModelType ?? Lite.DefaultModelType(type);
 
                         lite = Expression.Call(retriever, miRequestLite.MakeGenericMethod(type),
-                            Expression.New(Lite.GetLiteConstructorFromCache(type, modelType), NewPrimaryKey(id.UnNullify()), Expression.Constant(null, modelType)));
+                            Expression.New(Lite.GetLiteConstructorFromCache(type, modelType), NewPrimaryKey(id.UnNullify()), Expression.Constant(null, modelType), Expression.Constant(null, typeof(int?))));
 
                         lite = Expression.Call(retriever, miModifiablePostRetrieving.MakeGenericMethod(typeof(LiteImp)), lite.TryConvert(typeof(LiteImp))).TryConvert(lite.Type);
 

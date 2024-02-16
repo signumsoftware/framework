@@ -8,6 +8,7 @@ public interface IConstructOperation : IOperation
 public interface IConstructorFromOperation : IEntityOperation
 {
     IEntity Construct(IEntity entity, params object?[]? parameters);
+    bool ResultIsSaved { get; }
 }
 
 public interface IConstructorFromManyOperation : IOperation

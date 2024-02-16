@@ -287,7 +287,7 @@ export class ContextualOperationContext<T extends Entity> {
     if ((cos?.settersConfig ?? Defaults.defaultSetterConfig)(this) == "NoButton")
       return false;
 
-    if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1)
+    if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1 && !oi.resultIsSaved)
       return false;
 
     const eos = this.entityOperationSettings;

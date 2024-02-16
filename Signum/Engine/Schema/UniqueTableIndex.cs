@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Signum.Engine.Sync;
 
 namespace Signum.Engine.Maps;
@@ -34,11 +35,33 @@ public class TableIndex
         this.Columns = columns;
     }
 
+    public bool Clustered { get; set; }
+    public bool Unique { get; set; }
+    public bool PrimaryKey { get; set; }
+    public bool Partitioned { get; set; }
+
+    public string? PartitionColumnName => Partitioned ? Table.Columns.Values.OfType<FieldPartitionId>().SingleEx().Name : null;
+    public string? PartitionSchemeName => Partitioned ? Table.PartitionScheme!.Name : null;
+
     public virtual string GetIndexName(ObjectName tableName)
     {
+        if (PrimaryKey)
+            return GetPrimaryKeyName(tableName);
+
         int maxLength = MaxNameLength();
 
+        if (Unique)
+            return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+    
+        if(Clustered)
+            return StringHashEncoder.ChopHash("CIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+
         return StringHashEncoder.ChopHash("IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+    }
+
+    internal static string GetPrimaryKeyName(ObjectName tableName)
+    {
+        return "PK_" + tableName.Schema.Name + "_" + tableName.Name;
     }
 
     protected static int MaxNameLength()
@@ -63,51 +86,13 @@ public class TableIndex
         return "__" + StringHashEncoder.Codify(Where + includeColumns);
     }
 
-    public override string ToString()
-    {
-        return IndexName;
-    }
-
-    public string HintText()
-    {
-        return $"INDEX([{this.IndexName}])";
-    }
-}
-
-public class PrimaryKeyIndex : TableIndex
-{
-    public PrimaryKeyIndex(ITable table) : base(table, new[] { table.PrimaryKey })
-    {
-
-    }
-
-    public override string GetIndexName(ObjectName tableName) => GetPrimaryKeyName(tableName);
-
-    public static string GetPrimaryKeyName(ObjectName tableName)
-    {
-        return "PK_" + tableName.Schema.Name + "_" + tableName.Name;
-    }
-}
-
-public class UniqueTableIndex : TableIndex
-{
-    public UniqueTableIndex(ITable table, IColumn[] columns) 
-        : base(table, columns) 
-    { 
-    }
-
-
-    public override string GetIndexName(ObjectName tableName)
-    {
-        var maxSize = MaxNameLength();
-
-        return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxSize) + WhereSignature();
-    }
-
     public string? ViewName
     {
         get
         {
+            if (!Unique)
+                return null;
+
             if (!Where.HasText())
                 return null;
 
@@ -121,6 +106,16 @@ public class UniqueTableIndex : TableIndex
     }
 
     public bool AvoidAttachToUniqueIndexes { get; set; }
+
+    public override string ToString()
+    {
+        return IndexName;
+    }
+
+    public string HintText()
+    {
+        return $"INDEX([{this.IndexName}])";
+    }
 }
 
 public class FullTextTableIndex : TableIndex
@@ -396,7 +391,7 @@ public class IndexWhereExpressionVisitor : ExpressionVisitor
             if (field is IColumn)
             {
                 return ((IColumn)field).Name.SqlEscape(isPostgres) +
-                    (equals ? " = " : " <> ") + SqlPreCommandSimple.Encode(value);
+                    (equals ? " = " : " <> ") + SqlPreCommandSimple.LiteralValue(value);
             }
 
             throw new NotSupportedException("Impossible to compare {0} to {1}".FormatWith(field, value));

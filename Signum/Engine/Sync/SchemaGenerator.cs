@@ -22,6 +22,28 @@ public static class SchemaGenerator
             .Combine(Spacing.Simple);
     }
 
+    public static SqlPreCommand? CreatePartitioningFunctionScript()
+    {
+        Schema s = Schema.Current;
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        var defaultSchema = SchemaName.Default(s.Settings.IsPostgres);
+
+        var schemes = s.GetDatabaseTables().Where(a => a.PartitionScheme != null).Select(a => (a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct();
+
+        return SqlPreCommand.Combine(Spacing.Double,
+
+            schemes
+            .Select(a => (a.Database, a.scheme.PartitionFunction))
+            .Distinct()
+            .Select(a => sqlBuilder.CreateSqlPartitionFunction(a.PartitionFunction, a.Database))
+            .Combine(Spacing.Simple),
+
+            schemes
+            .Select(a => sqlBuilder.CreateSqlPartitionScheme(a.scheme, a.Database))
+            .Combine(Spacing.Simple)
+        );
+    }
+
     public static SqlPreCommand? CreateTablesScript()
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
@@ -57,7 +79,7 @@ public static class SchemaGenerator
 
         SqlPreCommand? indices = tables.Select(t =>
         {
-            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex));
+            var allIndexes = t.AllIndexes().Where(a => !a.PrimaryKey);
 
             fullTextSearchCatallogs.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.CatallogName));
 
