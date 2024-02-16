@@ -13,7 +13,6 @@ import { KeyNames } from '../Components'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 import { AutoLine } from './AutoLine'
-import { TSSettings } from 'luxon'
 
 
 export interface EntityTableProps<V extends ModifiableEntity, RS> extends EntityListBaseProps<V> {
