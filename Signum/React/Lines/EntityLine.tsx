@@ -9,7 +9,7 @@ import { Aprox, EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
-import { genericForwardRef, useController } from './LineBase'
+import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
@@ -122,7 +122,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 }
 
 
-export const EntityLine = React.memo(genericForwardRef(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
+export const EntityLine = genericForwardRefWithMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
 
@@ -245,4 +245,4 @@ export const EntityLine = React.memo(genericForwardRef(function EntityLine<V ext
     }
     c.focusNext.current = false;
   }
-}), (prev, next) => EntityBaseController.propEquals(prev, next));
+}, (prev, next) => EntityBaseController.propEquals(prev, next));

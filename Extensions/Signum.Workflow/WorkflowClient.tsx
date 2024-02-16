@@ -635,7 +635,7 @@ export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActiv
 }
 
 
-export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
+export function viewCase(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | CaseEntityPack, options?: { readOnly?: boolean }): Promise<CaseActivityEntity | undefined> {
   return import("./Case/CaseFrameModal")
     .then(NP => NP.CaseFrameModalManager.openView(entityOrPack, options));
 

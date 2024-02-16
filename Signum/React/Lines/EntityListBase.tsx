@@ -35,9 +35,7 @@ export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> 
 
   getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
   getViewPromise?: (entity: AsEntity<V>) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
-
-  extraButtonsBefore?: (ec: EntityListBaseController<this, V>) => React.ReactNode;
-  extraButtons?: (ec: EntityListBaseController<this, V>) => React.ReactNode;
+  
   fatLite?: boolean;
 
   filterRows?: (ctxs: TypeContext<V>[]) => TypeContext<V>[]; /*Not only filter, also order, skip, take is supported*/

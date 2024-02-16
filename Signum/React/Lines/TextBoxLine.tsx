@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, addClass, classes } from '../Globals'
-import { LineBaseController, LineBaseProps, genericForwardRef, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, genericForwardRef, genericForwardRefWithMemo, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { getTimeMachineIcon } from './TimeMachineIcon'
@@ -42,7 +42,7 @@ export class PasswordLineController extends ValueBaseController<TextBoxLineProps
   }
 }
 
-export const PasswordLine = React.memo(genericForwardRef(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+export const PasswordLine = genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
 
   const c = useController(PasswordLineController, props, ref);
 
@@ -50,7 +50,7 @@ export const PasswordLine = React.memo(genericForwardRef(function PasswordLine<V
     return null;
 
   return internalTextBox(c, "password");
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 
@@ -64,7 +64,7 @@ export class GuidLineController extends ValueBaseController<TextBoxLineProps, st
   }
 }
 
-export const GuidLine = React.memo(genericForwardRef(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+export const GuidLine = genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
 
   const c = useController(GuidLineController, props, ref);
 
@@ -72,14 +72,14 @@ export const GuidLine = React.memo(genericForwardRef(function GuidLine<V extends
     return null;
 
   return internalTextBox(c, "guid");
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 
   return LineBaseController.propEquals(prev, next);
 });
 
-export const ColorLine = React.memo(genericForwardRef(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const ColorLine = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 
@@ -87,7 +87,7 @@ export const ColorLine = React.memo(genericForwardRef(function ColorLine<V exten
     return null;
 
   return internalTextBox(c, "color");
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 

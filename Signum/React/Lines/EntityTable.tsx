@@ -19,14 +19,14 @@ import { TSSettings } from 'luxon'
 export interface EntityTableProps<V extends ModifiableEntity, RS> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityTableController<V, RS>) => React.ReactElement);
   firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
-  rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>) => RS;
-  columns?: EntityTableColumn<V, RS>[],
-  onRowHtmlAttributes?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+  rowHooks?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>) => RS;
+  columns?: (EntityTableColumn<V, RS> | false | null | undefined)[],
+  onRowHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean | HeaderType;
   avoidEmptyTable?: boolean;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   scrollable?: boolean;
-  rowSubContext?: (ctx: TypeContext<V>) => TypeContext<V>;
+  rowSubContext?: NoInfer<(ctx: TypeContext<V>) => TypeContext<V>>;
   tableClasses?: string;
   theadClasses?: string;
   createMessage?: string;
@@ -44,6 +44,8 @@ export interface EntityTableColumn<V extends ModifiableEntity, RS> {
   footer?: React.ReactNode | null;
   footerHtmlAttributes?: React.ThHTMLAttributes<any>;
 }
+
+
 
 export class EntityTableController<V extends ModifiableEntity, RS> extends EntityListBaseController<EntityTableProps<V, RS>, V> {
   containerDiv!: React.RefObject<HTMLDivElement>;
@@ -89,11 +91,11 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
           }) as EntityTableColumn<V, RS>);
       }
       else {
-        state.columns = state.columns.filter(c => c.property == null ||
-          (c.property == "string" ? pr.addMember("Member", c.property, false) : pr.tryAddLambda(c.property!)) != null);
+        state.columns = state.columns.filter(c => c && (c.property == null ||
+          (c.property == "string" ? pr.addMember("Member", c.property, false) : pr.tryAddLambda(c.property!)) != null));
       }
 
-      state.columns.forEach(c => {
+      (state.columns as EntityTableColumn<V, RS>[]).forEach(c => {
         if (c.template === undefined) {
           if (c.property == null)
             throw new Error("Column has no property and no template");
@@ -234,7 +236,8 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
     var firstColumnVisible = !(p.readOnly || p.remove == false && p.move == false && p.view == false);
 
     var showCreateRow = p.createAsLink && p.create && !readOnly;
-    var hasFooters = p.columns!.some(a => a.footer != null);
+    var cleanColumns = p.columns as EntityTableColumn<V, RS>[];
+    var hasFooters = cleanColumns.some(a => a.footer != null);
 
     return (
       <div ref={c.containerDiv}
@@ -247,7 +250,7 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
               <tr className={p.theadClasses ?? "bg-light"}>
                 {firstColumnVisible && <th {...p.firstColumnHtmlAttributes}></th>}
                 {
-                  p.columns!.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
+                  cleanColumns.map((c, i) => <th key={i} {...c.headerHtmlAttributes}>
                     {c.header === undefined && c.property ? elementPr.addLambda(c.property).member!.niceName : c.header}
                   </th>)
                 }
@@ -268,7 +271,7 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
                   onView={c.canView(mlec.value) ? e => c.handleViewElement(e, mlec.index!) : undefined}
                   move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
                   drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-                  columns={p.columns!}
+                  columns={cleanColumns}
                   onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
                   onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
                 />
@@ -292,8 +295,8 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
               }
               {
                 hasFooters && <tr>
-                  {firstColumnVisible && <td></td>}
-                  {p.columns!.map((c, i) =>
+                    {firstColumnVisible && <td></td>}
+                  {cleanColumns.map((c, i) =>
                     <td key={i} {...c.footerHtmlAttributes}>{c.footer}</td>)}
                 </tr>
               }

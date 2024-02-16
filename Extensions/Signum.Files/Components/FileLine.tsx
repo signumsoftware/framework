@@ -10,7 +10,7 @@ import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from '
 import { FileUploader }  from './FileUploader'
 
 import "./Files.css"
-import { genericForwardRef, useController } from '@framework/Lines/LineBase'
+import { genericForwardRef, genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
 
 export { FileTypeSymbol };
 
@@ -54,7 +54,7 @@ export class FileLineController<V extends ModifiableEntity & IFile | Lite<IFile 
   }
 }
 
-export const FileLine = React.memo(genericForwardRef(function FileLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileLineProps<V>, ref: React.Ref<FileLineController<V>>) {
+export const FileLine = genericForwardRefWithMemo(function FileLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileLineProps<V>, ref: React.Ref<FileLineController<V>>) {
   const c = useController(FileLineController, props, ref);
   const p = c.props;
 
@@ -117,7 +117,7 @@ export const FileLine = React.memo(genericForwardRef(function FileLine<V extends
       </div>
     );
   }
-}), (prev, next) => FileLineController.propEquals(prev, next));
+}, (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
   download: "ViewOrSave",

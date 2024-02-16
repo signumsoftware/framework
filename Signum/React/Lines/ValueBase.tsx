@@ -8,8 +8,6 @@ export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
   format?: string;
   unit?: string;
   valueHtmlAttributes?: React.AllHTMLAttributes<any>;
-  extraButtons?: (vl: ValueBaseController<this, V>) => React.ReactNode;
-  extraButtonsBefore?: (vl: ValueBaseController<this, V>) => React.ReactNode;
   initiallyFocused?: boolean | number;
   valueRef?: React.Ref<HTMLElement>;
 }

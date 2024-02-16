@@ -11,8 +11,10 @@ export interface ChangeEvent {
   originalEvent?: React.SyntheticEvent; 
 }
 
-export interface LineBaseProps<T = unknown> extends StyleOptions {
-  ctx: TypeContext<T>;
+export interface LineBaseProps<V = unknown> extends StyleOptions {
+  ctx: TypeContext<V>;
+  unit?: string;
+  format?: string;
   type?: TypeReference;
   label?: React.ReactNode;
   labelIcon?: React.ReactNode;
@@ -20,6 +22,8 @@ export interface LineBaseProps<T = unknown> extends StyleOptions {
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
+  extraButtons?: (vl: LineBaseController<this, V>) => React.ReactNode;
+  extraButtonsBefore?: (vl: LineBaseController<this, V>) => React.ReactNode;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
   helpText?: React.ReactNode | null;
@@ -90,7 +94,7 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
 
     this.getDefaultProps(p);
     this.overrideProps(p, otherProps as P);
-    runTasks(this, p, props);
+    runTasks(this as any, p as any, props as any);
 
     return p;
   }
@@ -163,6 +167,10 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
 
 export function genericForwardRef<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
   return React.forwardRef(render) as any;
+}
+
+export function genericForwardRefWithMemo<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
+  return React.memo(React.forwardRef(render), propsAreEqual as any) as any;
 }
 
 

@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, EntityRepeater, EntityTable } from '@framework/Li
 import { TypeContext } from '@framework/TypeContext'
 import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Signum.Toolbar'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { MList } from '@framework/Signum.Entities';
+import { Entity, MList } from '@framework/Signum.Entities';
 import { parseIcon } from '@framework/Components/IconTypeahead';
 import * as ToolbarClient from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
@@ -93,7 +93,7 @@ export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarEle
         {
           property: a => a.content, headerHtmlAttributes: { style: { width: "30%" } }, template: ctx => <EntityLine ctx={ctx.subCtx(a => a.content)}
             onFind={() => selectContentType(ti => Navigator.isFindable(ti)).then(ti => ti && Finder.find({ queryName: ti.name }))}
-            onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name))}
+            onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name) as Promise<Entity>)}
           />
         },
       { property: a => a.label, headerHtmlAttributes: { style: { width: "25%" } }, template: ctx => <AutoLine ctx={ctx.subCtx(a => a.label)} /> },

@@ -12,7 +12,7 @@ import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
 
-export interface EntityDetailProps<V extends Entity | Lite<Entity>> extends EntityBaseProps<V> {
+export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidFieldSet?: boolean | HeaderType;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
@@ -20,7 +20,7 @@ export interface EntityDetailProps<V extends Entity | Lite<Entity>> extends Enti
 }
 
 
-export class EntityDetailController<V extends Entity | Lite<Entity>> extends EntityBaseController<EntityDetailProps<V>, V> {
+export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityDetailProps<V>, V> {
   getDefaultProps(p: EntityDetailProps<V>) {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
@@ -28,7 +28,7 @@ export class EntityDetailController<V extends Entity | Lite<Entity>> extends Ent
   }
 }
 
-export const EntityDetail = genericForwardRef(function EntityDetail<V extends Entity | Lite<Entity>>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
+export const EntityDetail = genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
 
   const c = useController(EntityDetailController, props, ref);
   const p = c.props;

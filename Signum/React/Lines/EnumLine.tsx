@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DropdownList, Combobox, Value } from 'react-widgets'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, tryGetTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, genericForwardRef, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { LineBaseController, LineBaseProps, genericForwardRef, genericForwardRefWithMemo, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum } from '../Signum.Entities'
@@ -29,7 +29,7 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine = React.memo(genericForwardRef(function EnumLine<V extends string | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
+export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
   const c = useController(EnumLineController, props, ref);
 
@@ -37,7 +37,7 @@ export const EnumLine = React.memo(genericForwardRef(function EnumLine<V extends
     return null;
 
   return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) : props.lineType == 'RadioGroup' ? internalRadioGroup(c) : internalDropDownList(c);
-}), (prev, next) => {
+}, (prev, next) => {
   if (next.extraButtons || prev.extraButtons)
     return false;
 

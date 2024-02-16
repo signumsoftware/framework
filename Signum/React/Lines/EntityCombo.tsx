@@ -9,7 +9,7 @@ import { FormGroup } from './FormGroup'
 import * as Navigator from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
-import { genericForwardRef, useController } from './LineBase'
+import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'
 import { useMounted } from '../Hooks'
 import { DropdownList } from 'react-widgets'
 import { ResultTable } from '../Search'
@@ -70,7 +70,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   }
 }
 
-export const EntityCombo = React.memo(genericForwardRef(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
+export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
 
   const c = useController(EntityComboController, props, ref);
   const p = c.props;
@@ -145,7 +145,7 @@ export const EntityCombo = React.memo(genericForwardRef(function EntityCombo<V e
       </div>}
     </FormGroup>
   );
-}), (prev, next) => EntityBaseController.propEquals(prev, next));
+}, (prev, next) => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity> | null> {
   ctx: TypeContext<V>;

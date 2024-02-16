@@ -17,7 +17,7 @@ import { toAbsoluteUrl } from '../AppContext'
 import { To } from 'react-router'
 
 export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseProps<V> {
-  view?: boolean | ((item: any/*T*/) => boolean);
+  view?: boolean;
   viewOnCreate?: boolean;
   create?: boolean;
   createOnFind?: boolean;
@@ -25,14 +25,12 @@ export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | nul
   remove?: boolean;
   paste?: boolean;
 
-  onView?: (entity:  V, pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
+  onView?: (entity: NN<V>, pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
   onCreate?: (pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
   onFind?: () => Promise<Aprox<V> | undefined> | undefined;
-  onRemove?: (entity: V) => Promise<boolean>;
+  onRemove?: (entity: NN<V>) => Promise<boolean>;
   findOptions?: FindOptions;
   findOptionsDictionary?: { [typeName: string]: FindOptions };
-  extraButtonsBefore?: (ec: EntityBaseController<this, V>) => React.ReactNode;
-  extraButtons?: (ec: EntityBaseController<this, V>) => React.ReactNode;
   liteToString?: (e: AsEntity<V>) => string;
 
   getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
@@ -41,21 +39,23 @@ export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | nul
   fatLite?: boolean;
 }
 
-export type Aprox<T> =
+export type NN<T> = NoInfer<NonNullable<T>>;
+
+export type Aprox<T> = NoInfer<
   T extends Entity ? T | Lite<T> :
   T extends Lite<infer E> ? E | Lite<E> :
   T extends ModifiableEntity ? T :
-  never;
+  never>;
 
-export type AsEntity<T> =
+export type AsEntity<T> = NoInfer<
   T extends ModifiableEntity ? T :
   T extends Lite<infer E> ? E :
-  never;
+  never>;
 
-export type AsLite<T> =
+export type AsLite<T> = NoInfer<
   T extends Entity ? Lite<T> :
   T extends Lite<infer E> ? T :
-  never;
+  never>;
 
 export class EntityBaseController<P extends EntityBaseProps<V>, V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseController<P, V>{
 
@@ -149,12 +149,12 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   doView(entity: V): Promise<Aprox<V> | undefined> | undefined {
     const pr = this.props.ctx.propertyRoute!;
     return this.props.onView ?
-      this.props.onView(entity, pr) :
-      this.defaultView(entity, pr);
+      this.props.onView(entity!, pr) :
+      this.defaultView(entity!, pr);
   }
 
 
-  defaultView(value: V, propertyRoute: PropertyRoute): Promise<Aprox<V> | undefined> {
+  defaultView(value: NonNullable<V>, propertyRoute: PropertyRoute): Promise<Aprox<V> | undefined> {
     return Navigator.view(value!, {
       propertyRoute: propertyRoute,
       getViewPromise: this.getGetViewPromise() as (undefined | ((entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>)),
@@ -411,7 +411,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
 
     event.preventDefault();
 
-    (this.props.onRemove ? this.props.onRemove(this.props.ctx.value) : Promise.resolve(true))
+    (this.props.onRemove ? this.props.onRemove(this.props.ctx.value!) : Promise.resolve(true))
       .then(result => {
         if (result == false)
           return;
@@ -421,7 +421,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   };
 
   renderRemoveButton(btn: boolean) {
-    if (!this.props.create || this.props.ctx.readOnly)
+    if (!this.props.remove || this.props.ctx.readOnly)
       return undefined;
 
     return (

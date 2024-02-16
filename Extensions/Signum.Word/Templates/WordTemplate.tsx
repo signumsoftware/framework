@@ -78,7 +78,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctx.value.query!.key}/>
-            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
               {
                 property: a => a.token,
                 template: ctx => <QueryTokenEmbeddedBuilder
@@ -87,7 +87,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
                   subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
               },
               { property: a => a.orderType }
-            ])} />
+            ]} />
           </Tab>
           <Tab eventKey="applicable" title={
             <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
