@@ -23,7 +23,7 @@ class Upgrade_20240215_GenericLines : CodeUpgradeBase
             file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "5.4.0-beta");
         });
 
-        uctx.ChangeCodeFile("Southwind.React/package.json", file =>
+        uctx.ChangeCodeFile("Southwind/package.json", file =>
         {
             file.UpdateNpmPackage("typescript", "5.4.0-beta");
         });

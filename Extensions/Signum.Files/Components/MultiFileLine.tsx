@@ -27,7 +27,7 @@ interface MultiFileLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFi
   configuration?: FileDownloaderConfiguration<IFile>;
   maxSizeInBytes?: number;
   getFileFromElement?: (ectx: V) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<V>;
+  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<V | undefined>;
 }
 
 export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileLineProps<V>, V> {
