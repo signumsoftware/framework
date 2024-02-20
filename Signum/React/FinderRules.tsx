@@ -367,14 +367,18 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
     return [];
   }
 
+  function isNegative(fo: FilterOperation) {
+    return fo == "NotStartsWith" || fo == "NotContains" || fo == "NotEndsWith" || fo == "NotLike" || fo == "IsNotIn";
+  }
 
   function getFiltersKeywords(fo: FilterOptionParsed): string[] {
+
     if (isFilterGroup(fo)) {
       if (fo.value && fo.pinned && typeof fo.value == "string") {
 
         var filterConditions = fo.filters.filter(sf => sf.token != null && isFilterCondition(sf)) as FilterConditionOptionParsed[];
 
-        var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation != undefined)
+        var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation && !isNegative(sf.operation))
           .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitValue, sf.operation!));
 
         return filters;
@@ -383,7 +387,7 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
       }
     }
     else {
-      if (fo.token && fo.operation && similarTokenToStr(fo.token, token)) {
+      if (fo.token && fo.operation && !isNegative(fo.operation) && similarTokenToStr(fo.token, token)) {
         return splitTokens(fo.value, fo.pinned?.splitValue, fo.operation);
       } else {
         return [];

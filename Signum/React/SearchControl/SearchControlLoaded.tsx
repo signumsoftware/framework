@@ -1822,7 +1822,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return resultTable.rows.map((row, i) => {
       const markIcon = this.getRowMarketIcon(row, i);
-      var ra = this.getRowAttributes(row);
+      const ra = this.getRowAttributes(row);
 
       var fctx: Finder.CellFormatterContext = {
         refresh: () => this.dataChanged(),
