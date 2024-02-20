@@ -5,19 +5,18 @@ import { FormGroup } from '@framework/Lines/FormGroup'
 import * as Services from '@framework/Services'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from '../Signum.Files'
-import { EntityBaseProps, EntityBaseController } from '@framework/Lines/EntityBase'
+import { EntityBaseProps, EntityBaseController, Aprox, AsEntity } from '@framework/Lines/EntityBase'
 import { FileDownloaderConfiguration } from './FileDownloader'
 import { FileUploader } from './FileUploader'
 import { FileImage } from './FileImage';
 import "./Files.css"
 import { FetchAndRemember } from '@framework/Lines'
-import { useController } from '@framework/Lines/LineBase'
+import { genericForwardRef, useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
 
 export { FileTypeSymbol };
 
-export interface FileImageLineProps extends EntityBaseProps {
-  ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
+export interface FileImageLineProps<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseProps<V> {
   dragAndDrop?: boolean;
   dragAndDropMessage?: string;
   fileType?: FileTypeSymbol;
@@ -29,9 +28,9 @@ export interface FileImageLineProps extends EntityBaseProps {
 }
 
 
-export class FileImageLineController extends EntityBaseController<FileImageLineProps> {
+export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileImageLineProps<V>, V>{
 
-  getDefaultProps(state: FileImageLineProps) {
+  getDefaultProps(state: FileImageLineProps<V>) {
 
     super.getDefaultProps(state);
 
@@ -49,13 +48,13 @@ export class FileImageLineController extends EntityBaseController<FileImageLineP
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) =>{
-    this.convert(file)
+  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+    this.convert(file as Aprox<V>)
       .then(f => this.setValue(f));
   }
 }
 
-export const FileImageLine = React.forwardRef(function FileImageLine(props: FileImageLineProps, ref: React.Ref<FileImageLineController>) {
+export const FileImageLine = genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
   const c = useController(FileImageLineController, props, ref);
   const p = c.props;
 
@@ -94,7 +93,7 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
       <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
 
-    const removeButton = c.renderRemoveButton(true, val);
+    const removeButton = c.renderRemoveButton(true);
 
     if (removeButton == null)
       return content;
@@ -108,8 +107,8 @@ export const FileImageLine = React.forwardRef(function FileImageLine(props: File
   }
 });
 
-FileImageLine.defaultProps = {
+(FileImageLine as any).defaultProps = {
   accept: "image/*",
   dragAndDrop: true
-};
+} as FileImageLineProps<any>;
 

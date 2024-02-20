@@ -74,7 +74,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               queryKey={ctxxs.value.query!.key}
             showPinnedFilterOptions={true} />
           <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
-            <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<QueryColumnEmbedded>([
+            <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={[
               {
                 property: a => a.token,
                 template: (ctx, row) =>
@@ -115,8 +115,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                    }
                 />
               },
-            ])} />
-            <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+            ]} />
+            <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={[
               {
                 property: a => a.token,
                 template: ctx => <QueryTokenEmbeddedBuilder
@@ -125,7 +125,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                   subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate} />
               },
               { property: a => a.orderType }
-            ])} />
+            ]} />
           </div>
           <div className="row">
             <div className="col-sm-6">

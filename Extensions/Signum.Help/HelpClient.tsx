@@ -35,7 +35,7 @@ export function start(options: { routes: RouteObject[] }) {
 
 }
 
-export function taskHelpIcon(lineBase: LineBaseController<any>, state: LineBaseProps) {
+export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   if (state.labelIcon === undefined &&
     state.ctx.propertyRoute &&
     state.ctx.frame?.pack.typeHelp

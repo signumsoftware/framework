@@ -28,6 +28,12 @@ public class MListElementPropertyToken : QueryToken
         return new MListElementPropertyToken(parent, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 };
     }
 
+    public static MListElementPropertyToken PartitionId(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowPartitionId")!, ept.PropertyRoute, "RowPartitionId", () => QueryTokenMessage.PartitionId.NiceToString()) { Priority = -6 };
+    }
+
     internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));

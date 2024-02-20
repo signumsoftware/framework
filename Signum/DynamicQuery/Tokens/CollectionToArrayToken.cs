@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.ComponentModel;
 
@@ -46,8 +47,12 @@ public class CollectionToArrayToken : QueryToken
         {
             st.Add(MListElementPropertyToken.RowId(this, ept));
 
-            if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
+            var fm = (FieldMList)Schema.Current.Field(ept.PropertyRoute);
+            if (fm.TableMList.Order != null)
                 st.Add(MListElementPropertyToken.RowOrder(this, ept));
+
+            if (fm.TableMList.PartitionId != null)
+                st.Add(MListElementPropertyToken.PartitionId(this, ept));
         }
 
         return st;

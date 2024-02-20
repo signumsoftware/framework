@@ -96,7 +96,7 @@ public static class MigrationLogic
 
                 sqlBuilder.CreateTableSql(table).ExecuteLeaves();
 
-                foreach (var i in table.GeneratAllIndexes().Where(i => !(i is PrimaryKeyIndex)))
+                foreach (var i in table.AllIndexes().Where(i => !i.PrimaryKey))
                 {
                     sqlBuilder.CreateIndex(i, checkUnique: null).ExecuteLeaves();
                 }

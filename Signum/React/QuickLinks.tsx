@@ -169,7 +169,7 @@ export function setIgnoreErrors(value: boolean) {
 }
 
 
-export function getQuickLinkWidget(wc: WidgetContext<ModifiableEntity>): React.ReactElement<any> | undefined {
+export function getQuickLinkWidget(wc: WidgetContext<ModifiableEntity>): React.ReactElement | undefined {
 
   var entity = wc.ctx.value;
 

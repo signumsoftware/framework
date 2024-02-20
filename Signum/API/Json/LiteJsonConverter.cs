@@ -33,6 +33,12 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         writer.WritePropertyName("id");
         JsonSerializer.Serialize(writer, lite.IdOrNull?.Object, lite.IdOrNull?.Object.GetType() ?? typeof(object), options);
 
+        if (value.PartitionId != null)
+        {
+            writer.WritePropertyName("partitionId");
+            writer.WriteNumberValue(value.PartitionId.Value);
+        }
+
         if (lite.Model != null)
         {
             if (lite.Model is string str)
@@ -70,6 +76,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         object? model = null;
         string? idObj = null;
+        int? partitionId = null;
         Type? type = null;
         string? modelTypeStr = null;
         Entity? entity = null;
@@ -90,6 +97,16 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                             reader.TokenType == JsonTokenType.Number ? reader.GetInt64().ToString() :
                             reader.TokenType == JsonTokenType.True ? true.ToString() :
                             reader.TokenType == JsonTokenType.False ? false.ToString() :
+                            throw new UnexpectedValueException(reader.TokenType);
+
+                        break;
+                    }
+                case "partitionId":
+                    {
+                        reader.Read();
+                        partitionId =
+                            reader.TokenType == JsonTokenType.Null ? null :
+                            reader.TokenType == JsonTokenType.Number ? reader.GetInt32() :
                             throw new UnexpectedValueException(reader.TokenType);
 
                         break;
@@ -135,8 +152,8 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         if (entity == null)
         {
             return model != null ?
-                (Lite<T>)Lite.Create(type!, idOrNull!.Value, model) :
-                (Lite<T>)Lite.Create(type!, idOrNull!.Value, getModelType());
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, model, partitionId) :
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, getModelType(), partitionId);
         }
 
         var result = model != null ?

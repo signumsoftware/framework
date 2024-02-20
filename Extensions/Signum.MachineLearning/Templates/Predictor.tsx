@@ -189,7 +189,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
                 <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                   queryKey={queryKey}
                   subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}/>
-                <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={[
                   { property: a => a.usage },
                   {
                     property: a => a.token,
@@ -202,7 +202,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
                   },
                   { property: a => a.encoding },
                   { property: a => a.nullHandling },
-                ])} />
+                ]} />
                 {ctxmq.value.query && <a href="#" onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
               </div>}
 

@@ -155,6 +155,8 @@ public abstract class Connector
     public abstract bool RequiresRetry { get; }
 
     public abstract bool SupportsDateDifBig { get; }
+
+    public abstract bool SupportsPartitioning { get; }
 }
 
 public abstract class ParameterBuilder

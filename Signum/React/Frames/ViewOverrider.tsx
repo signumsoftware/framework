@@ -12,7 +12,7 @@ export function ViewOverrider<T extends ModifiableEntity>(p: { ctx: TypeContext<
     throw new Error("The child should be a react element");
 
   if (!p.viewOverride)
-    return child as React.ReactElement<any>;
+    return child as React.ReactElement;
 
   var component = child.type as React.ComponentClass<{ ctx: TypeContext<T> }> | React.FunctionComponent<{ ctx: TypeContext<T> }>;
   if (component.prototype.render) {

@@ -26,10 +26,10 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
       </Tab>
       <Tab eventKey="props" title="Props">
         <EntityTable ctx={ctx.subCtx(a => a.props)} onChange={handleChange}
-          columns={EntityTable.typedColumns<DynamicViewPropEmbedded>([
+          columns={[
             { property: a => a.name, template: sctx => <AutoLine ctx={sctx.subCtx(a => a.name)} onChange={handleChange} /> },
             { property: a => a.type, template: sctx => <AutoLine ctx={sctx.subCtx(a => a.type)} onChange={handleChange} /> },
-          ])} />
+          ]} />
       </Tab>
       <Tab eventKey="locals" title="Locals">
         <div className="code-container">

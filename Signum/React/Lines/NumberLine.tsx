@@ -1,6 +1,5 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import { DatePicker, DropdownList, Combobox } from 'react-widgets'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { Dic, addClass, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
@@ -10,16 +9,14 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { BooleanEnum, JavascriptMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { KeyNames } from '../Components/Basic';
-import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { TypeContext } from '../Lines'
 
-export interface NumberLineProps extends ValueBaseProps<NumberLineController> {
-  ctx: TypeContext<number | undefined | null>;
+export interface NumberLineProps extends ValueBaseProps<number | null> {
   incrementWithArrow?: boolean | number;
 }
 
-export class NumberLineController extends ValueBaseController<NumberLineProps>{
+export class NumberLineController extends ValueBaseController<NumberLineProps, number | null>{
 }
 
 export const NumberLine = React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {

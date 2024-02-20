@@ -33,7 +33,7 @@ interface FilterBuilderProps {
   onHeightChanged?: () => void;
   readOnly?: boolean;
   title?: React.ReactNode;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions?: boolean;
   showPinnedFiltersOptionsButton?: boolean;
   showDashboardBehaviour?: boolean;
@@ -223,7 +223,7 @@ export interface FilterGroupComponentsProps {
   onFilterChanged: () => void;
   onHeightChanged: () => void;
   lastToken: QueryToken | undefined;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   disableValue: boolean;
@@ -478,7 +478,7 @@ export interface FilterConditionComponentProps {
   subTokensOptions: SubTokensOptions;
   onTokenChanged?: (token: QueryToken | undefined) => void;
   onFilterChanged: () => void;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;

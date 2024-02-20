@@ -142,16 +142,6 @@ public static class DashboardLogic
         return part;
     }
 
-    public static void UpdateDashboardIconNameInDB()
-    {
-        Database.Query<DashboardEntity>().Where(db => db.Parts.Any(p => p.IconName.HasText())).ToList().ForEach(db => {
-            db.Parts.Where(p => p.IconName.HasText()).ToList().ForEach(p => {
-                p.IconName = FontAwesomeV6Upgrade.UpdateIconName(p.IconName!);
-            });
-            db.Save();
-        });
-    }
-
     private static void DashboardLogic_Retrieved(DashboardEntity db, PostRetrievingContext ctx)
     {
         db.ParseData(query =>

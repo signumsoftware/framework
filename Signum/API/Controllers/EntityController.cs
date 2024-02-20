@@ -8,13 +8,13 @@ namespace Signum.API.ApiControllers;
 public class EntitiesController : ControllerBase
 {
     [HttpGet("api/entity/{type}/{id}"), ProfilerActionSplitter("type")]
-    public Entity GetEntity(string type, string id)
+    public Entity GetEntity(string type, string id, [FromQuery]int? partitionId)
     {
         var entityType = TypeLogic.GetType(type);
 
         var primaryKey = PrimaryKey.Parse(id, entityType);
 
-        var entity = Database.Retrieve(entityType, primaryKey);
+        var entity = Database.Retrieve(entityType, primaryKey, partitionId);
         using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntity"))
         {
             return entity;
@@ -23,13 +23,13 @@ public class EntitiesController : ControllerBase
     }
 
     [HttpGet("api/entityPack/{type}/{id}"), ProfilerActionSplitter("type")]
-    public EntityPackTS GetEntityPack(string type, string id)
+    public EntityPackTS GetEntityPack(string type, string id, [FromQuery] int? partitionId)
     {
         var entityType = TypeLogic.GetType(type);
 
         var primaryKey = PrimaryKey.Parse(id, entityType);
 
-        var entity = Database.Retrieve(entityType, primaryKey);
+        var entity = Database.Retrieve(entityType, primaryKey, partitionId);
         using (ExecutionMode.ApiRetrievedScope(entity, "EntitiesController.GetEntityPack"))
         {
             return SignumServer.GetEntityPack(entity);

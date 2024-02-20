@@ -7,7 +7,7 @@ import { Dropdown } from 'react-bootstrap';
 
 export interface MenuItemBlock {
   header: string;
-  menuItems: React.ReactElement<any>[];
+  menuItems: React.ReactElement[];
 }
 
 export interface ContextualItemsContext<T extends Entity> {
@@ -33,13 +33,13 @@ export function clearContextualItems() {
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
 
-export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement<any>[]> {
+export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement[]> {
 
   const blockPromises = onContextualItems.map(func => func(ctx));
 
   return Promise.all(blockPromises).then(blocks => {
 
-    const result: React.ReactElement<any>[] = []
+    const result: React.ReactElement[] = []
     blocks.forEach(block => {
 
       if (block == undefined || block.menuItems == undefined || block.menuItems.length == 0)

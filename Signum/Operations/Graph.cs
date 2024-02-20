@@ -170,6 +170,8 @@ public class Graph<T>
         bool IEntityOperation.HasCanExecute { get { return CanConstruct != null; } }
 
         public bool CanBeNew { get; set; }
+        public bool ResultIsSaved { get; set; }
+
 
         public Func<F, string?>? CanConstruct { get; set; }
 
@@ -319,6 +321,8 @@ public class Graph<T>
 
         protected virtual void AssertEntity(T entity)
         {
+            if (ResultIsSaved && entity.IsNew)
+                throw new InvalidOperationException("After executing {0} the entity should be saved".FormatWith(this.operationSymbol));
         }
 
         public virtual void AssertIsValid()

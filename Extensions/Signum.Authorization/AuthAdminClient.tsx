@@ -225,7 +225,7 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
   return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
-export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
+export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
 

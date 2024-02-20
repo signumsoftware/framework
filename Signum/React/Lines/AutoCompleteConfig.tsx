@@ -386,9 +386,16 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 }
 
-export function TypeBadge(p: { entity: Lite<Entity> | Entity }) {
+export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }) {
 
-  const ti = getTypeInfo(isEntity(p.entity) ? p.entity.Type : p.entity.EntityType);
+  var typeName = isEntity(p.entity) ? p.entity.Type :
+    isLite(p.entity) ? p.entity.EntityType :
+      null;
+
+  if (typeName == null)
+    return <span className="text-danger">Embedded?</span>;
+
+  const ti = getTypeInfo(typeName);
 
   return <span className="sf-type-badge ms-1">{ti.niceName}</span>;
 }

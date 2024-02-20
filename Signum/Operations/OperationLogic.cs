@@ -402,6 +402,7 @@ Consider the following options:
             CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
             ForReadonlyEntity = (oper as IExecuteOperation)?.ForReadonlyEntity,
+            ResultIsSaved = (oper as IConstructorFromOperation)?.ResultIsSaved,
             BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
         };
     }
@@ -790,7 +791,7 @@ Consider the following options:
         var states = lites.Chunk(200).SelectMany(list =>
             Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
-        return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
+        return (from o in operations.OfType<Graph<E, S>.IGraphFromStatesOperation>()
                 let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                 where invalid.Any()
                 select KeyValuePair.Create(o.OperationSymbol,

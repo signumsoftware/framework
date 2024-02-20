@@ -701,7 +701,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
 
 export interface MultiValueProps {
   values: any[],
-  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement;
   readOnly: boolean;
   onChange: () => void;
 }

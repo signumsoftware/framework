@@ -2,11 +2,11 @@ import * as React from 'react'
 import { ResultTable } from '../Search';
 import { Entity, is, isEntity, isLite, isMListElement, Lite, liteKey, MList, MListElement, ModifiableEntity, newMListElement, toLite, toMList } from '../Signum.Entities';
 import { AutocompleteConfig } from './AutoCompleteConfig';
-import { EntityBaseController } from './EntityBase';
+import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
 import * as Navigator from '../Navigator'
 import { Multiselect } from 'react-widgets/cjs';
-import { useController } from './LineBase';
+import { genericForwardRef, useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
 import * as Finder from '../Finder'
@@ -17,7 +17,7 @@ import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
 import Input from 'react-widgets/cjs/Input';
 
-export interface EntityMultiSelectProps extends EntityListBaseProps {
+export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {
   vertical?: boolean;
   onRenderItem?: (item: ResultRow) => React.ReactNode;
   showType?: boolean;
@@ -34,8 +34,8 @@ export interface EntityMultiSelectHandle {
 }
 
 
-export class EntityMultiSelectController extends EntityListBaseController<EntityMultiSelectProps> {
-  overrideProps(p: EntityMultiSelectProps, overridenProps: EntityMultiSelectProps) {
+export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
+  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>) {
     super.overrideProps(p, overridenProps);
 
     if (p.type) {
@@ -44,8 +44,8 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
     }
   }
 
-  handleOnSelect = (lites: (Lite<Entity> | Entity)[]) => {
-    var current = this.props.ctx.value as MList<Lite<Entity> | Entity>;
+  handleOnSelect = (lites: Aprox<V>[]) => {
+    var current = this.props.ctx.value;
 
     lites.filter(lite => !current.some(mle => is(mle.element, lite))).forEach(lite => {
       this.convert(lite)
@@ -62,7 +62,7 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
   }
 }
 
-export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(props: EntityMultiSelectProps, ref: React.Ref<EntityMultiSelectController>) {
+export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
   const c = useController(EntityMultiSelectController, props, ref);
   const p = c.props;
 

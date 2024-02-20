@@ -499,6 +499,7 @@ internal class DbExpressionComparer : ExpressionComparer
             && Compare(a.RowId, b.RowId)
             && Compare(a.Element, b.Element)
             && Compare(a.Order, b.Order)
+            && Compare(a.PartitionId, b.PartitionId)
             && Compare(a.Parent, b.Parent);
     }
 

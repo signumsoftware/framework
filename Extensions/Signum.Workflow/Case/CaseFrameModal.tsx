@@ -333,7 +333,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 const CaseFrameModalExt = CaseFrameModal;
 
 export namespace CaseFrameModalManager {
-  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
+  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: { readOnly?: boolean }): Promise<CaseActivityEntity | undefined> {
 
     return openModal<CaseActivityEntity>(<CaseFrameModal
       entityOrPack={entityOrPack}

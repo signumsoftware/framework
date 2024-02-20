@@ -8,7 +8,7 @@ import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig }
 import { RenderEntity } from './RenderEntity'
 import { newMListElement } from '../Signum.Entities';
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
-import { useController } from './LineBase'
+import { genericForwardRef, useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { Accordion } from 'react-bootstrap'
 import { useForceUpdate } from '../Hooks'
@@ -16,19 +16,19 @@ import { AccordionEventKey } from 'react-bootstrap/esm/AccordionContext'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
-export interface EntityAccordionProps extends EntityListBaseProps {
-  createAsLink?: boolean | ((er: EntityAccordionController) => React.ReactElement<any>);
+export interface EntityAccordionProps<V extends ModifiableEntity> extends EntityListBaseProps<V> {
+  createAsLink?: boolean | ((er: EntityAccordionController<V>) => React.ReactElement);
   avoidFieldSet?: boolean | HeaderType;
   createMessage?: string;
-  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
-  itemExtraButtons?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.ReactElement<any>;
-  itemHtmlAttributes?: (er: EntityListBaseController<EntityListBaseProps>, index: number) => React.HTMLAttributes<any>;
+  getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
+  itemExtraButtons?: (er: EntityAccordionController<V>, index: number) => React.ReactElement;
+  itemHtmlAttributes?: (er: EntityAccordionController<V>, index: number) => React.HTMLAttributes<any>;
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
 }
 
-function isControlled(p: EntityAccordionProps) {
+function isControlled(p: EntityAccordionProps<any>) {
 
   if ((p.selectedIndex !== undefined) != (p.onSelectTab !== undefined))
     throw new Error("selectedIndex and onSelectTab should be set together");
@@ -36,13 +36,13 @@ function isControlled(p: EntityAccordionProps) {
   return p.selectedIndex != null;
 }
 
-export class EntityAccordionController extends EntityListBaseController<EntityAccordionProps> {
+export class EntityAccordionController<V extends ModifiableEntity> extends EntityListBaseController<EntityAccordionProps<V>, V> {
 
   selectedIndex!: number | null;
   setSelectedIndex!: (index: number | null) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityAccordionProps) {
+  init(p: EntityAccordionProps<V>) {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -58,13 +58,13 @@ export class EntityAccordionController extends EntityListBaseController<EntityAc
     }
   }
 
-  getDefaultProps(p: EntityAccordionProps) {
+  getDefaultProps(p: EntityAccordionProps<V>) {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.createAsLink = true;
   }
 
-  addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
+  addElement(entityOrLite: V) {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -77,8 +77,8 @@ export class EntityAccordionController extends EntityListBaseController<EntityAc
 }
 
 
-export const EntityAccordion = React.forwardRef(function EntityAccordion(props: EntityAccordionProps, ref: React.Ref<EntityAccordionController>) {
-  var c = useController(EntityAccordionController, props, ref);
+export const EntityAccordion = genericForwardRef(function EntityAccordion<V extends ModifiableEntity>(props: EntityAccordionProps<V>, ref: React.Ref<EntityAccordionController<V>>) {
+  var c = useController(EntityAccordionController<V>, props, ref);
   var p = c.props;
 
   if (c.isHidden)
@@ -122,14 +122,14 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
           c.getMListItemContext(ctx).map((mlec, i) => (
-            <EntityAccordionElement key={i}              
+            <EntityAccordionElement<V> key={i}              
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
               drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
               itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
-              getComponent={p.getComponent}
-              getViewPromise={p.getViewPromise}
+              getComponent={p.getComponent as (ctx: TypeContext<V>) => React.ReactElement}
+              getViewPromise={p.getViewPromise as (entity: V) => undefined | string | Navigator.ViewPromise<V>}
               getTitle={p.getTitle}
               htmlAttributes={p.itemHtmlAttributes?.(c, mlec.index!)}
               title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
@@ -149,20 +149,20 @@ export const EntityAccordion = React.forwardRef(function EntityAccordion(props: 
 });
 
 
-export interface EntityAccordionElementProps {
-  ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-  getComponent?: (ctx: TypeContext<ModifiableEntity>) => React.ReactElement<any>;
-  getViewPromise?: (entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
-  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
+export interface EntityAccordionElementProps<V extends ModifiableEntity> {
+  ctx: TypeContext<V>;
+  getComponent?: (ctx: TypeContext<V>) => React.ReactElement;
+  getViewPromise?: (entity: V) => undefined | string | Navigator.ViewPromise<V>;
+  getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;
   drag?: DragConfig;
-  title?: React.ReactElement<any>;
-  itemExtraButtons?: () => React.ReactElement<any>;
+  title?: React.ReactElement;
+  itemExtraButtons?: () => React.ReactElement;
   htmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes }: EntityAccordionElementProps)
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes }: EntityAccordionElementProps<V>)
 {
 
   const forceUpdate = useForceUpdate();
@@ -189,13 +189,13 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
 
-      <Accordion.Header {...EntityListBaseController.entityHtmlAttributes(ctx.value)}>
+      <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)}>
         <div className="d-flex align-items-center flex-grow-1">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
           {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
             onClick={onRemove}
             title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-            {EntityListBaseController.getRemoveIcon()}
+            {EntityBaseController.getRemoveIcon()}
           </a>}
           &nbsp;
           {move?.renderMoveUp()}
@@ -206,7 +206,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
             onDragEnd={drag.onDragEnd}
             onKeyDown={drag.onKeyDown}
             title={drag.title}>
-            {EntityListBaseController.getMoveIcon()}
+            {EntityBaseController.getMoveIcon()}
           </a>}
           {itemExtraButtons && itemExtraButtons()}
           {'\xa0'}
@@ -214,7 +214,7 @@ export function EntityAccordionElement({ ctx, getComponent, getViewPromise, onRe
         </div>
       </Accordion.Header>
       <Accordion.Body>
-        <RenderEntity ctx={ctx} getComponent={getComponent} getViewPromise={getViewPromise} onRefresh={forceUpdate} />
+        <RenderEntity ctx={ctx} getComponent={getComponent as any} getViewPromise={getViewPromise as any} onRefresh={forceUpdate} />
       </Accordion.Body>
     </Accordion.Item>
   );

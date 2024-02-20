@@ -8,7 +8,7 @@ export interface ContextMenuPosition {
   left: number;
   top: number;
   width: number; //Necessary for RTL
-  children: React.ReactElement<any>[]
+  children: React.ReactElement[]
 }
 
 export interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {

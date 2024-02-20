@@ -107,6 +107,8 @@ public class Graph<T, S>
         public List<S> ToStates { get; private set; } = new List<S>();
         IList? IOperation.UntypedToStates => ToStates;
         Type? IOperation.StateType => typeof(S);
+
+
         LambdaExpression? IOperation.GetStateExpression() => GetState;
 
         public ConstructFrom(ConstructSymbol<T>.From<F> symbol)
@@ -127,6 +129,7 @@ public class Graph<T, S>
 
         protected override void AssertEntity(T result)
         {
+            base.AssertEntity(result);
             Graph<T, S>.AssertToState(result, this);
         }
 

@@ -8,10 +8,10 @@ public partial class Table
 {
     internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder, bool disableAssertAllowed = false)
     {
-        Expression? id = GetIdExpression(tableAlias);
 
         if (IsView)
         {
+            Expression? id = GetIdExpression(tableAlias);
             var bindings = this.Fields.Values.Select(ef =>
             {
                 var exp = ef.Field.GetExpression(tableAlias, binder, id!, null, null);
@@ -25,16 +25,19 @@ public partial class Table
         }
         else
         {
-            if(!disableAssertAllowed)
+            var id = (PrimaryKeyExpression)GetIdExpression(tableAlias)!;
+
+            if (!disableAssertAllowed)
                 Schema.Current.AssertAllowed(Type, inUserInterface: false);
 
-            var entityContext = new EntityContextInfo((PrimaryKeyExpression)id!, null);
+            var partitionId = this.PartitionId?.GetExpression(tableAlias, binder, id, null, null);
+            var entityContext = new EntityContextInfo(id, partitionId, null);
 
             var period = GenerateSystemPeriod(tableAlias, binder);
             var bindings = GenerateBindings(tableAlias, binder, id!, period, entityContext);
             var mixins = GenerateMixins(tableAlias, binder, id!, period, entityContext);
 
-            var result = new EntityExpression(this.Type, (PrimaryKeyExpression)id!, period, tableAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
+            var result = new EntityExpression(this.Type, id, period, tableAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
             return result;
         }
@@ -45,7 +48,10 @@ public partial class Table
         return this.SystemVersioned != null && (force || binder.systemTime is SystemTime.Interval) ? this.SystemVersioned.IntervalExpression(tableAlias) : null;
     }
 
-
+    internal ColumnExpression PartitionIdExpression(Alias tableAlias)
+    {
+        return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PartitionId!).Name);
+    }
 
     internal ReadOnlyCollection<FieldBinding> GenerateBindings(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
     {
@@ -60,6 +66,11 @@ public partial class Table
 
             if (!ReflectionTools.FieldEquals(fi, fiId))
                 result.Add(new FieldBinding(fi, ef.Field.GetExpression(tableAlias, binder, id, period, entityContext)));
+        }
+
+        if(this.PartitionId != null)
+        {
+            result.Add(new FieldBinding(fiOldPartitionId, this.PartitionId.GetExpression(tableAlias, binder, id, period, entityContext)));
         }
 
         if (this.Type.IsEntity() && entityContext != null)
@@ -128,11 +139,16 @@ public partial class TableMList
         return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.Order!).Name);
     }
 
+    internal ColumnExpression PartitionIdExpression(Alias tableAlias)
+    {
+        return new ColumnExpression(typeof(int), tableAlias, ((IColumn)this.PartitionId!).Name);
+    }
+
     internal Expression FieldExpression(Alias tableAlias, QueryBinder binder, IntervalExpression? externalPeriod, bool withRowId)
     {
         var rowId = RowIdExpression(tableAlias);
         var parentId = new PrimaryKeyExpression(new ColumnExpression(this.BackReference.Type.Nullify(), tableAlias, this.BackReference.Name));
-        var entityContext = new EntityContextInfo(parentId, rowId);
+        var entityContext = new EntityContextInfo(parentId, null, rowId);
 
         var exp = Field.GetExpression(tableAlias, binder, rowId, externalPeriod, entityContext);
 
@@ -148,24 +164,23 @@ public partial class TableMList
         return Expression.New(ci, exp, rowId.UnNullify(), order);
     }
 
-    internal Expression GetProjectorExpression(Alias tableAlias, QueryBinder binder, bool disableAssertAllowed = false)
+    internal MListElementExpression GetMListElementExpression(Alias tableAlias, QueryBinder binder, bool disableAssertAllowed = false)
     {
         if (!disableAssertAllowed)
             Schema.Current.AssertAllowed(this.BackReference.ReferenceTable.Type, inUserInterface: false);
-
-        Type elementType = typeof(MListElement<,>).MakeGenericType(BackReference.FieldType, Field.FieldType);
 
         var rowId = RowIdExpression(tableAlias);
 
         IntervalExpression? period = GenerateSystemPeriod(tableAlias, binder);
 
         var backReference = (EntityExpression)this.BackReference.GetExpression(tableAlias, binder, null!, period, null);
-        var entityContext = new EntityContextInfo(backReference.ExternalId, rowId);
+        var entityContext = new EntityContextInfo(backReference.ExternalId, null, rowId);
 
         return new MListElementExpression(
             rowId,
             backReference,
             this.Order == null ? null : OrderExpression(tableAlias),
+            this.PartitionId == null ? null : PartitionIdExpression(tableAlias),
             this.Field.GetExpression(tableAlias, binder, rowId, period, entityContext),
             period,
             this,
@@ -266,7 +281,7 @@ public partial class FieldMList
 {
     internal override Expression GetExpression(Alias tableAlias, QueryBinder binder, Expression id, IntervalExpression? period, EntityContextInfo? entityContext)
     {
-        return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, TableMList); // keep back id empty for some seconds
+        return new MListExpression(FieldType, (PrimaryKeyExpression)id, period, entityContext?.EntityPartitionId, TableMList); // keep back id empty for some seconds
     }
 }
 

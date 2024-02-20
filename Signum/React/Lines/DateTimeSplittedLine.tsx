@@ -14,15 +14,14 @@ import { defaultRenderDay, trimDateToFormat } from './DateTimeLine'
 import { TimeTextBox, isDurationKey } from './TimeLine'
 import { TypeContext } from '../TypeContext'
 
-export interface DateTimeSplittedLineProps extends ValueBaseProps<DateTimeSplittedLineController> {
-  ctx: TypeContext<string /*Date or DateTime*/ | undefined | null>;
+export interface DateTimeSplittedLineProps extends ValueBaseProps<string /*Date or DateTime*/ | null> {
   minDate?: Date;
   maxDate?: Date;
   calendarProps?: Partial<CalendarProps>;
   initiallyShowOnly?: "Date" | "Time";
 }
 
-export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps>{
+export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps, string /*Date or DateTime*/ | null >{
   init(p: DateTimeSplittedLineProps) {
     super.init(p);
     this.assertType("DateTimeSplittedLine", ["DateOnly", "DateTime"]);

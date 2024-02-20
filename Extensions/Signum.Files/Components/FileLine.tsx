@@ -1,35 +1,34 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
-import { getSymbol } from '@framework/Reflection'
+import { Type, getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, getToString, } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from '../Signum.Files'
-import { EntityBaseProps, EntityBaseController } from '@framework/Lines/EntityBase'
+import { EntityBaseProps, EntityBaseController, AsEntity, Aprox } from '@framework/Lines/EntityBase'
 import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
 import { FileUploader }  from './FileUploader'
 
 import "./Files.css"
-import { useController } from '@framework/Lines/LineBase'
+import { genericForwardRef, genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
 
 export { FileTypeSymbol };
 
-export interface FileLineProps extends EntityBaseProps {
-  ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>;
+export interface FileLineProps<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseProps<V> {
   download?: DownloadBehaviour;
   showFileIcon?: boolean;
   dragAndDrop?: boolean;
   dragAndDropMessage?: string;
   fileType?: FileTypeSymbol;
   accept?: string;
-  configuration?: FileDownloaderConfiguration<IFile>;
+  configuration?: FileDownloaderConfiguration<AsEntity<V>>;
   maxSizeInBytes?: number;
 }
 
 
-export class FileLineController extends EntityBaseController<FileLineProps>{
+export class FileLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileLineProps<V>, V>{
 
-  getDefaultProps(state: FileLineProps) {
+  getDefaultProps(state: FileLineProps<V>) {
 
     super.getDefaultProps(state);
 
@@ -50,12 +49,12 @@ export class FileLineController extends EntityBaseController<FileLineProps>{
 
   handleFileLoaded = (file: IFile & ModifiableEntity) => {
 
-    this.convert(file)
+    this.convert(file as Aprox<V>)
       .then(f => this.setValue(f));
   }
 }
 
-export const FileLine = React.memo(React.forwardRef(function FileLine(props: FileLineProps, ref: React.Ref<FileLineController>) {
+export const FileLine = genericForwardRefWithMemo(function FileLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileLineProps<V>, ref: React.Ref<FileLineController<V>>) {
   const c = useController(FileLineController, props, ref);
   const p = c.props;
 
@@ -95,7 +94,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
     const content = p.download == "None" ?
       <span className={classes(ctx.formControlClass, "file-control")} > {getToString(val)}</span > :
       <FileDownloader
-        configuration={p.configuration}
+        configuration={p.configuration as FileDownloaderConfiguration<IFile>}
         download={p.download}
         showFileIcon={p.showFileIcon}
         entityOrLite={val}
@@ -104,7 +103,7 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
     const buttons =
       <>
         {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
-        {c.renderRemoveButton(true, val)}
+        {c.renderRemoveButton(true)}
         {c.props.extraButtons && c.props.extraButtons(c)}
       </>;
 
@@ -118,10 +117,10 @@ export const FileLine = React.memo(React.forwardRef(function FileLine(props: Fil
       </div>
     );
   }
-}), (prev, next) => FileLineController.propEquals(prev, next));
+}, (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
   download: "ViewOrSave",
   dragAndDrop: true,
   showFileIcon: true
-} as FileLineProps;
+} as FileLineProps<any>;

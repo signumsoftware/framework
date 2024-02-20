@@ -12,8 +12,7 @@ import { ValueBaseProps, ValueBaseController } from './ValueBase';
 import { TypeContext } from '../Lines';
 import Exception from '../Exceptions/Exception';
 
-export interface DateTimeLineProps extends ValueBaseProps<DateTimeLineController> {
-  ctx: TypeContext<string /*Date or DateTime*/ | undefined | null>;
+export interface DateTimeLineProps extends ValueBaseProps<string | null> {
   showTimeBox?: boolean;
   minDate?: Date;
   maxDate?: Date;
@@ -21,7 +20,7 @@ export interface DateTimeLineProps extends ValueBaseProps<DateTimeLineController
   calendarAlignEnd?: boolean;
 }
 
-export class DateTimeLineController extends ValueBaseController<DateTimeLineProps>{
+export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
   init(p: DateTimeLineProps) {
     super.init(p);
     this.assertType("DateTimeLine", ["DateOnly", "DateTime"]);

@@ -4,11 +4,7 @@ import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
 import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityMultiSelect, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextAreaLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
-export interface AutoLineProps extends LineBaseProps {
-  unit?: string;
-  format?: string;
-  extraButtons?: (vl: any) => React.ReactNode; /* Not always implemented */
-  extraButtonsBefore?: (vl: any) => React.ReactNode; /* Not always implemented */
+export interface AutoLineProps extends LineBaseProps<any> {
 }
 
 
@@ -27,7 +23,7 @@ export function AutoLine(p: AutoLineProps): React.ReactElement | null {
 
 export interface AutoLineFactoryRule {
   name: string;
-  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>);
+  factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement);
 }
 
 export namespace AutoLine {
@@ -35,11 +31,11 @@ export namespace AutoLine {
     [typeName: string]: AutoLineFactoryRule[];
   } = {};
 
-  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement<any>), name?: string) {
+  export function registerComponent(type: string, factory: (tr: TypeReference, pr?: PropertyRoute) => undefined | ((p: AutoLineProps) => React.ReactElement), name?: string) {
     (customTypeComponent[type] ??= []).push({ name: name ?? type, factory });
   }
 
-  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement<any> {
+  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement {
 
     const customs = customTypeComponent[tr.name]?.map(rule => rule.factory(tr, pr)).notNull().first();
 

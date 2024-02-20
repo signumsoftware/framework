@@ -21,7 +21,7 @@ export interface TypeaheadProps {
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
   itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLElement>;
   noResultsMessage?: string;
-  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>;
+  renderInput?: (input: React.ReactElement) => React.ReactElement;
   inputId?: string;
 }
 
@@ -332,7 +332,7 @@ export class TextHighlighter {
       this.regex = new RegExp(this.parts.map(p => RegExp.escape(p)).join("|"), "gi");
   }
 
-  highlight(text: string): React.ReactChild {
+  highlight(text: string): React.ReactElement | string {
     if (!text || !this.regex)
       return text;
 

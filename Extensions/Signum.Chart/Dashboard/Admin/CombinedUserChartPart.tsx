@@ -11,7 +11,7 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
 
   return (
     <div >
-      <EntityTable ctx={ctx.subCtx(p => p.userCharts)} columns={EntityTable.typedColumns<CombinedUserChartElementEmbedded>([
+      <EntityTable ctx={ctx.subCtx(p => p.userCharts)} columns={[
         {
           property: p => p.userChart,
           template: (ectx) => <EntityLine ctx={ectx.subCtx(p => p.userChart)} findOptions={{
@@ -28,7 +28,7 @@ export default function CombinedUserChartPart(p: { ctx: TypeContext<CombinedUser
           headerHtmlAttributes: { style: { width: "30%" } },
           template: ectx => <IsQueryCachedLine ctx={ectx.subCtx(p => p.isQueryCached)} />,
         },
-      ])}
+      ]}
       />
 
       <div className="row">
