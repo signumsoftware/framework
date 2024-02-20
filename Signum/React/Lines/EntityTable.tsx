@@ -38,7 +38,7 @@ export interface EntityTableColumn<V extends ModifiableEntity, RS> {
   header?: React.ReactNode | null;
   headerHtmlAttributes?: React.ThHTMLAttributes<any>;
   cellHtmlAttributes?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.TdHTMLAttributes<any> | null | undefined;
-  template?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | null | undefined | false;
+  template?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | string | number | null | undefined | false;
   mergeCells?: (boolean | ((a: V) => any) | string);
   footer?: React.ReactNode | null;
   footerHtmlAttributes?: React.ThHTMLAttributes<any>;
@@ -328,7 +328,7 @@ export interface EntityTableRowProps<V extends ModifiableEntity, RS> {
   onKeyDown?: (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>) => void;
 }
 
-export interface EntityTableRowHandle<V extends ModifiableEntity, RS> {
+export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> {
   props: EntityTableRowProps<V, RS>;
   rowState?: RS;
   forceUpdate(): void;
@@ -421,7 +421,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
     </tr>
   );
 
-  function getTemplate(col: EntityTableColumn<V, RS>): React.ReactElement | string | undefined | null | false {
+  function getTemplate(col: EntityTableColumn<V, RS>): React.ReactElement | string | number | undefined | null | false {
 
     if (col.template === null)
       return null;
