@@ -89,7 +89,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
         tryGetTypeInfos(type).some(ti => ti && Navigator.isFindable(ti));
   }
 
-  static propEqual<V extends ModifiableEntity | Lite<Entity>>(prevProps: EntityBaseProps<V>, nextProps: EntityBaseProps<V>): boolean {
+  static propEquals(prevProps: EntityBaseProps<any>, nextProps: EntityBaseProps<any>): boolean {
     if (
       nextProps.getComponent || prevProps.getComponent ||
       nextProps.extraButtons || prevProps.extraButtons ||
@@ -141,7 +141,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       const entity = entityOrLite as Entity;
       const ti = getTypeInfo(entity.Type);
       const toStr = this.props.liteToString && this.props.liteToString(entity as AsEntity<V>);
-      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart");
+      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart" || entityOrLite.isNew);
       return toLite(entity, fatLite, toStr) as V;
     }
   }
