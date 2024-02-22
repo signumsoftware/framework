@@ -39,8 +39,15 @@ public class UserAssetController : ControllerBase
     [HttpPost("api/userAssets/parseDate")]
     public DateTime ParseDate([Required, FromBody] string dateExpression)
     {
-        return (DateTime)FilterValueConverter.Parse(dateExpression, typeof(string), false)!;
+        return (DateTime)FilterValueConverter.Parse(dateExpression, typeof(DateTime), false)!;
     }
+
+    [HttpPost("api/userAssets/stringifyDate")]
+    public string StringifyDate([Required, FromBody] DateTime dateValue)
+    {
+        return FilterValueConverter.ToString(dateValue, typeof(DateTime))!;
+    }
+
 
     static List<FilterNode> ParseFilterInternal(IEnumerable<QueryFilterItem> filters, QueryDescription qd, SubTokensOptions options, int indent)
     {

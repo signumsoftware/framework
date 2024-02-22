@@ -450,4 +450,5 @@ public enum UserQueryMessage
     [Description("the selected {0}")]
     TheSelected0,
     Date,
+    Pagination,
 }

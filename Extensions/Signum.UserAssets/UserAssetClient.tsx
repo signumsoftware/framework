@@ -232,8 +232,13 @@ export module API {
     indentation?: number;
   }
 
-  export function parseDate(dateExpression: string): Promise<string> {
+  export function parseDate(dateExpression: string): Promise<string /*DateTime*/> {
     return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
+  }
+
+
+  export function stringifyDate(dateValue: string): Promise<string> {
+    return ajaxPost({ url: "/api/userAssets/stringifyDate/" }, dateValue);
   }
 
 

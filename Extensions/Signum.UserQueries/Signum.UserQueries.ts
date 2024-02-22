@@ -69,6 +69,7 @@ export module UserQueryMessage {
   export const MakesThe0AvailableAsAQuickLinkOf1 = new MessageKey("UserQueryMessage", "MakesThe0AvailableAsAQuickLinkOf1");
   export const TheSelected0 = new MessageKey("UserQueryMessage", "TheSelected0");
   export const Date = new MessageKey("UserQueryMessage", "Date");
+  export const Pagination = new MessageKey("UserQueryMessage", "Pagination");
 }
 
 export module UserQueryOperation {

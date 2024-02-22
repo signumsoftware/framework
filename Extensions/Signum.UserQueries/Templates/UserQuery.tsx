@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
+import { SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
 import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
@@ -30,7 +30,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
 
   var qs = Finder.querySettings[query.key];
 
-  var hasSystemTime = qs.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
+  var hasSystemTime = qs?.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
 
   return (
     <div>
@@ -69,16 +69,21 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             <div className="col-sm-6">
               <AutoLine ctx={ctx4.subCtx(e => e.refreshMode)} />
               <AutoLine ctx={ctx4.subCtx(e => e.includeDefaultFilters)} />
+              <EntityStrip ctx={ctx4.subCtx(e => e.customDrilldowns)}
+                findOptions={getCustomDrilldownsFindOptions()}
+                avoidDuplicates={true}
+                vertical={true}
+                iconStart={true} />
             </div>
           </div>
 
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
+              avoidFieldSet="h5"
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctxxs.value.query!.key}
               showPinnedFilterOptions={true} />
-            <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
-            <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={[
+            <EntityTable ctx={ctxxs.subCtx(e => e.columns)} avoidFieldSet="h5" columns={[
               {
                 property: a => a.token,
                 template: (ctx, row) =>
@@ -120,7 +125,9 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                 />
               },
             ]} />
-            <EntityTable ctx={ctxxs.subCtx(e => e.orders)} columns={[
+            <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
+
+            <EntityTable ctx={ctxxs.subCtx(e => e.orders)} avoidFieldSet="h5" columns={[
               {
                 property: a => a.token,
                 template: ctx => <QueryTokenEmbeddedBuilder
@@ -131,41 +138,18 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               { property: a => a.orderType }
             ]} />
           </div>
+          <h5 className="mt-2">{UserQueryMessage.Pagination.niceToString()}</h5>
           <div className="row">
             <div className="col-sm-6">
-              <AutoLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} />
+              <AutoLine ctx={ctxxs.subCtx(e => e.paginationMode, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
             </div>
             <div className="col-sm-6">
-              <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
+              <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} formGroupStyle="Basic" />
             </div>
           </div>
 
-          {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} getComponent={st => <div>
-            <div className="row">
-              <div className="col-sm-3">
-                <AutoLine ctx={st.subCtx(e => e.mode)} onChange={() => {
-                  st.value.startDate = st.value.mode == "" ? null : st.value.mod;
-
-                }} />
-              </div>
-              <div className="col-sm-3">
-                <AutoLine ctx={st.subCtx(e => e.startDate)} mandatory />
-              </div>
-              <div className="col-sm-3">
-                <AutoLine ctx={st.subCtx(e => e.endDate)} mandatory />
-              </div>
-              <div className="col-sm-3">
-                <AutoLine ctx={st.subCtx(e => e.joinMode)} mandatory />
-              </div>
-            </div>
-          </div>
-          } />}
-
-          <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
-            findOptions={getCustomDrilldownsFindOptions()}
-            avoidDuplicates={true}
-            vertical={true}
-            iconStart={true} />
+          {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} avoidFieldSet="h5"
+            getComponent={st => <SystemTime ctx={st} />} />}
         </div>)
       }
     </div>
@@ -200,4 +184,28 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   }
 }
 
-
+function SystemTime(p: { ctx: TypeContext<SystemTimeEmbedded> }) {
+  const forceUpdate = useForceUpdate();
+  const ctx = p.ctx.subCtx({ formSize: "xs", formGroupStyle: "Basic" });
+  return (
+    <div className="row">
+      <div className="col-sm-3">
+        <AutoLine ctx={ctx.subCtx(e => e.mode)} onChange={() => {
+          ctx.value.startDate = ctx.value.mode == "All" ? null : ctx.value.startDate;
+          ctx.value.endDate = ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : ctx.value.endDate;
+          ctx.value.joinMode = ctx.value.mode == "AsOf" ? null : (ctx.value.joinMode ?? "FirstCompatible");
+          forceUpdate();
+        }} />
+      </div>
+      <div className="col-sm-3">
+        {ctx.value.mode == "All" ? null : <AutoLine ctx={ctx.subCtx(e => e.startDate)} label={ctx.value.mode == "AsOf" ? UserQueryMessage.Date.niceToString() : undefined} mandatory />}
+      </div>
+      <div className="col-sm-3">
+        {ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.endDate)} mandatory />}
+      </div>
+      <div className="col-sm-3">
+        {ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.joinMode)} mandatory />}
+      </div>
+    </div>
+  );
+}

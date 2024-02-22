@@ -137,7 +137,7 @@ export function start(options: { routes: RouteObject[] }) {
             }));
 
       }} />
-}
+    }
   });
 }
 
@@ -288,7 +288,7 @@ export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity,
 
 export module Converter {
 
-  export async  function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
+  export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
     var query = uq.query!;
 
@@ -303,52 +303,48 @@ export module Converter {
 
 
 
-      fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
-      fo.columnOptionsMode = uq.columnsMode;
+    fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
+    fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
+    fo.columnOptionsMode = uq.columnsMode;
 
-      fo.columnOptions = (uq.columns ?? []).map(f => ({
-        token: f.element.token.tokenString,
-        displayName: translated(f.element, c => c.displayName),
-        summaryToken: f.element.summaryToken?.tokenString,
-        hiddenColumn: f.element.hiddenColumn,
-        combineRows: f.element.combineRows,
-      }) as ColumnOption);
+    fo.columnOptions = (uq.columns ?? []).map(f => ({
+      token: f.element.token.tokenString,
+      displayName: translated(f.element, c => c.displayName),
+      summaryToken: f.element.summaryToken?.tokenString,
+      hiddenColumn: f.element.hiddenColumn,
+      combineRows: f.element.combineRows,
+    }) as ColumnOption);
 
-      fo.orderOptions = (uq.orders ?? []).map(f => ({
-        token: f.element.token!.tokenString,
-        orderType: f.element.orderType
-      }) as OrderOption);
+    fo.orderOptions = (uq.orders ?? []).map(f => ({
+      token: f.element.token!.tokenString,
+      orderType: f.element.orderType
+    }) as OrderOption);
 
+    fo.pagination = uq.paginationMode == undefined ? undefined : {
+      mode: uq.paginationMode,
+      currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
+      elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
+    } as Pagination;
 
-      const qs = Finder.querySettings[query.key];
+    async function parseDate(dateExpression: string | null): Promise<string | undefined> {
+      if (dateExpression == null)
+        return undefined;
 
-      fo.pagination = uq.paginationMode == undefined ? undefined : {
-          mode: uq.paginationMode,
-          currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
-          elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
-        } as Pagination;
+      var date = await UserAssetsClient.API.parseDate(dateExpression);
 
-
-      async function parseDate(dateExpression: string | null) : Promise<string | undefined>{
-        if(dateExpression == null)
-          return undefined;
-
-          var date = await UserAssetsClient.API.parseDate(dateExpression);
-
-          return date;
-      }
-
-      fo.systemTime = uq.systemTime == null ? undefined : {
-        mode: uq.systemTime.mode ?? undefined,
-        startDate: await parseDate(uq.systemTime.startDate),
-        endDate: await parseDate(uq.systemTime.endDate),
-        joinMode: uq.systemTime.joinMode ?? undefined,
-      };
-
-      return fo;
-
+      return date;
     }
+
+    fo.systemTime = uq.systemTime == null ? undefined : {
+      mode: uq.systemTime.mode ?? undefined,
+      startDate: await parseDate(uq.systemTime.startDate),
+      endDate: await parseDate(uq.systemTime.endDate),
+      joinMode: uq.systemTime.joinMode ?? undefined,
+    };
+
+    return fo;
+
+  }
 
   export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     return toFindOptions(uq, entity)
@@ -361,6 +357,7 @@ export module Converter {
         fop.orderOptions = fop2.orderOptions;
         fop.columnOptions = fop2.columnOptions;
         fop.pagination = fop2.pagination;
+        fop.systemTime = fop2.systemTime;
         return fop;
       });
   }
