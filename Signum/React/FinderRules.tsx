@@ -191,7 +191,7 @@ export function initFormatRules(): FormatRule[] {
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
-              {c.toFormat(luxonFormat)}
+              {toFormatWithFixes(c, luxonFormat)}
             </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -211,7 +211,7 @@ export function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(c, luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },

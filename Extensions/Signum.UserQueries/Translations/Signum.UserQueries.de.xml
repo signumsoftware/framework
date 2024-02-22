@@ -58,7 +58,7 @@
   </Type>
   <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrage Teil Rendermodus">
     <Member Name="BigValue" Description="Großer Wert" />
-    <Member Name="SearchControl" Description="Suchsteuerung" />
+    <Member Name="SearchControl" Description="Suchliste Komponente" />
   </Type>
   <Type Name="UserQueryPermission">
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />
