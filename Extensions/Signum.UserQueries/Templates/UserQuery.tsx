@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
-import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
@@ -28,38 +28,42 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
   if (!qd)
     return null;
 
+  var qs = Finder.querySettings[query.key];
+
+  var hasSystemTime = qs.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
+
   return (
     <div>
       <EntityLine ctx={ctx.subCtx(e => e.owner)} />
       <AutoLine ctx={ctx.subCtx(e => e.displayName)} />
       <FormGroup ctx={ctx.subCtx(e => e.query)}>
         {() => query && (
-            Finder.isFindable(query.key, true) ?
-              <a className="form-control-static" href={Finder.findOptionsPath({ queryName: query.key })}>{getQueryNiceName(query.key)}</a> :
-              <span>{getQueryNiceName(query.key)}</span>)
+          Finder.isFindable(query.key, true) ?
+            <a className="form-control-static" href={Finder.findOptionsPath({ queryName: query.key })}>{getQueryNiceName(query.key)}</a> :
+            <span>{getQueryNiceName(query.key)}</span>)
         }
       </FormGroup>
 
       {query &&
         (<div>
           <EntityLine ctx={ctx.subCtx(e => e.entityType)} readOnly={ctx.value.appendFilters} onChange={() => forceUpdate()}
-          helpText={
-            <div>
-              {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
-              {p.ctx.value.entityType && <br />}
-              {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
-              {p.ctx.value.entityType && <br />}
-              {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
-            </div>
-          } />
+            helpText={
+              <div>
+                {UserQueryMessage.MakesThe0AvailableAsAQuickLinkOf1.niceToString(UserQueryEntity.niceName(), ctx.value.entityType ? getToString(ctx.value.entityType) : UserQueryMessage.TheSelected0.niceToString(ctx.niceName(a => a.entityType)))}
+                {p.ctx.value.entityType && <br />}
+                {p.ctx.value.entityType && UserQueryMessage.Use0ToFilterCurrentEntity.niceToString().formatHtml(<code style={{ display: "inline" }}><strong>{CurrentEntityKey}</strong></code>)}
+                {p.ctx.value.entityType && <br />}
+                {p.ctx.value.entityType && <CheckboxLine ctx={ctx.subCtx(e => e.hideQuickLink)} inlineCheckbox />}
+              </div>
+            } />
 
 
 
           <div className="row">
-          <div className="col-sm-6">
-            <AutoLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
-            <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
-              helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
+            <div className="col-sm-6">
+              <AutoLine ctx={ctx4.subCtx(e => e.groupResults)} onChange={handleOnGroupResultsChange} />
+              <AutoLine ctx={ctx4.subCtx(e => e.appendFilters)} readOnly={ctx.value.entityType != null} onChange={() => forceUpdate()}
+                helpText={UserQueryMessage.MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0.niceToString(UserQueryEntity.niceName(), query?.key)} />
 
             </div>
             <div className="col-sm-6">
@@ -72,8 +76,8 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctxxs.value.query!.key}
-            showPinnedFilterOptions={true} />
-          <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
+              showPinnedFilterOptions={true} />
+            <AutoLine ctx={ctxxs.subCtx(e => e.columnsMode)} valueColumns={4} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={[
               {
                 property: a => a.token,
@@ -83,7 +87,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                       ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                       queryKey={p.ctx.value.query!.key}
                       onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
-                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation  | SubTokensOptions.CanManual)} />
+                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual)} />
 
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
@@ -112,7 +116,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
                       <AutoLine ctx={ctx.subCtx(a => a.combineRows)} readOnly={ctx.value.hiddenColumn} />
                       <CheckboxLine ctx={ctx.subCtx(a => a.hiddenColumn)} inlineCheckbox="block" onChange={() => { ctx.value.summaryToken = null; ctx.value.displayName = null; ctx.value.combineRows = null; row.forceUpdate(); }} />
                     </div>
-                   }
+                  }
                 />
               },
             ]} />
@@ -135,6 +139,28 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
               <AutoLine ctx={ctxxs.subCtx(e => e.elementsPerPage, { labelColumns: { sm: 4 } })} />
             </div>
           </div>
+
+          {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} getComponent={st => <div>
+            <div className="row">
+              <div className="col-sm-3">
+                <AutoLine ctx={st.subCtx(e => e.mode)} onChange={() => {
+                  st.value.startDate = st.value.mode == "" ? null : st.value.mod;
+
+                }} />
+              </div>
+              <div className="col-sm-3">
+                <AutoLine ctx={st.subCtx(e => e.startDate)} mandatory />
+              </div>
+              <div className="col-sm-3">
+                <AutoLine ctx={st.subCtx(e => e.endDate)} mandatory />
+              </div>
+              <div className="col-sm-3">
+                <AutoLine ctx={st.subCtx(e => e.joinMode)} mandatory />
+              </div>
+            </div>
+          </div>
+          } />}
+
           <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
             findOptions={getCustomDrilldownsFindOptions()}
             avoidDuplicates={true}

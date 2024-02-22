@@ -120,16 +120,16 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
+            EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
             new XAttribute("HideQuickLink", HideQuickLink),
-            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
-            IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
+            Owner == null ? null : new XAttribute("Owner", Owner.KeyLong()),
+            IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
             new XAttribute("ChartScript", ChartScript.Key),
-            MaxRows == null ? null! : new XAttribute("MaxRows", MaxRows.Value),
-            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+            MaxRows == null ? null : new XAttribute("MaxRows", MaxRows.Value),
+            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             new XElement("Columns", Columns.Select(f => f.ToXml(ctx)).ToList()),
-            Parameters.IsNullOrEmpty() ? null! : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
-            CustomDrilldowns.IsNullOrEmpty() ? null! : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
+            Parameters.IsNullOrEmpty() ? null : new XElement("Parameters", Parameters.Select(f => f.ToXml(ctx)).ToList()),
+            CustomDrilldowns.IsNullOrEmpty() ? null : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -266,9 +266,9 @@ public class UserChartPartEntity : Entity, IPartEntity
             ShowData ? new XAttribute(nameof(ShowData), ShowData) : null,
             AllowChangeShowData ? new XAttribute(nameof(AllowChangeShowData), AllowChangeShowData) : null,
             IsQueryCached ? new XAttribute(nameof(IsQueryCached), IsQueryCached) : null,
-            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null!,
-            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null!,
-            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight.Value) : null!
+            CreateNew ? new XAttribute(nameof(CreateNew), CreateNew) : null,
+            AutoRefresh ? new XAttribute(nameof(AutoRefresh), AutoRefresh) : null,
+            MinHeight.HasValue ? new XAttribute(nameof(MinHeight), MinHeight.Value) : null
             );
     }
 

@@ -6,6 +6,7 @@ using System.Text.Json;
 using Signum.API.Controllers;
 using Signum.API;
 using Signum.API.Filters;
+using Signum.DynamicQuery;
 
 namespace Signum.UserAssets;
 
@@ -33,6 +34,12 @@ public class UserAssetController : ControllerBase
 
             return result;
         }
+    }
+
+    [HttpPost("api/userAssets/parseDate")]
+    public DateTime ParseDate([Required, FromBody] string dateExpression)
+    {
+        return (DateTime)FilterValueConverter.Parse(dateExpression, typeof(string), false)!;
     }
 
     static List<FilterNode> ParseFilterInternal(IEnumerable<QueryFilterItem> filters, QueryDescription qd, SubTokensOptions options, int indent)

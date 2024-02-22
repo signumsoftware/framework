@@ -232,6 +232,10 @@ export module API {
     indentation?: number;
   }
 
+  export function parseDate(dateExpression: string): Promise<string> {
+    return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
+  }
+
 
   export function exportAsset(entity: Lite<IUserAssetEntity>[]) {
     ajaxPostRaw({ url: "/api/userAssets/export" }, entity)

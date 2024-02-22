@@ -288,20 +288,20 @@ export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity,
 
 export module Converter {
 
-  export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
+  export async  function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
     var query = uq.query!;
 
     var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;
 
-    const convertedFilters = UserAssetsClient.API.parseFilters({
+    const filters = await UserAssetsClient.API.parseFilters({
       queryKey: query.key,
       canAggregate: uq.groupResults || false,
       entity: entity,
       filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
-    return convertedFilters.then(filters => {
+
 
       fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
       fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
@@ -329,9 +329,26 @@ export module Converter {
           elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
         } as Pagination;
 
+
+      async function parseDate(dateExpression: string | null) : Promise<string | undefined>{
+        if(dateExpression == null)
+          return undefined;
+
+          var date = await UserAssetsClient.API.parseDate(dateExpression);
+
+          return date;
+      }
+
+      fo.systemTime = uq.systemTime == null ? undefined : {
+        mode: uq.systemTime.mode ?? undefined,
+        startDate: await parseDate(uq.systemTime.startDate),
+        endDate: await parseDate(uq.systemTime.endDate),
+        joinMode: uq.systemTime.joinMode ?? undefined,
+      };
+
       return fo;
-    });
-  }
+
+    }
 
   export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
     return toFindOptions(uq, entity)
