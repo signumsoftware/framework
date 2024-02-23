@@ -2,14 +2,15 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
+using System.Collections.Frozen;
 using System.Text.Json.Serialization;
 
 namespace Signum.Toolbar;
 
 public static class ToolbarLogic
 {
-    public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
-    public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
+    public static ResetLazy<FrozenDictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
+    public static ResetLazy<FrozenDictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
 
     public static Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>> CustomPermissionResponse = 
         new Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>>();
@@ -103,30 +104,15 @@ public static class ToolbarLogic
             //{ typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
 
 
-            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToDictionary(a => a.ToLite()),
+            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarEntity)));
 
-            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToDictionary(a => a.ToLite()),
+            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarMenuEntity)));
         }
     }
 
-    public static void UpdateToolbarIconNameInDB()
-    {
-        Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
 
-        Database.Query<ToolbarMenuEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
-    }
 
     private static void IToolbar_Saving(IToolbarEntity tool)
     {

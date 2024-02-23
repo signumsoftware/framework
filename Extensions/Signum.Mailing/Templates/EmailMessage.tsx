@@ -54,11 +54,11 @@ export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }
           </span>
           }
           onChange={() => forceUpdate()} />
-        <EntityTable ctx={ctx.subCtx(p => p.attachments)} hideIfNull columns={EntityTable.typedColumns<EmailAttachmentEmbedded>([
+        <EntityTable ctx={ctx.subCtx(p => p.attachments)} hideIfNull columns={[
           { property: p => p.file },
           { property: p => p.type },
           { property: p => p.contentId }
-        ])} />
+        ]} />
 
         <AutoLine ctx={ctx.subCtx(f => f.subject, { labelColumns: 1 })} />
         <CheckboxLine ctx={ctx.subCtx(f => f.isBodyHtml)} inlineCheckbox={true} onChange={() => forceUpdate()} />

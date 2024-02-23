@@ -205,6 +205,7 @@ public class OperationInfo
     public bool? CanBeModified { get; internal set; }
     public bool? CanBeNew { get; internal set; }
     public bool? ForReadonlyEntity { get; internal set; }
+    public bool? ResultIsSaved { get; internal set; }
     public bool? HasStates { get; internal set; }
     public bool? HasCanExecute { get; internal set; }
     public bool? HasCanExecuteExpression { get; internal set; }

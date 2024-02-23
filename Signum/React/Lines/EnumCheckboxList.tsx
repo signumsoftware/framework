@@ -2,33 +2,30 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { getTypeInfo } from '../Reflection'
-import { LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
+import { genericForwardRef, LineBaseController, LineBaseProps, useController } from '../Lines/LineBase'
 import { MList, newMListElement } from '../Signum.Entities'
-import { EntityCheckboxList } from './EntityCheckboxList'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
-export interface EnumCheckboxListProps extends LineBaseProps {
-  data?: string[];
-  ctx: TypeContext<MList<string>>;
+export interface EnumCheckboxListProps<V extends string> extends LineBaseProps<MList<V>> {
+  data?: V[];
   columnCount?: number;
   columnWidth?: number;
   avoidFieldSet?: boolean | HeaderType;
 }
 
-export class EnumCheckboxListController extends LineBaseController<EnumCheckboxListProps> {
+export class EnumCheckboxListController<V extends string> extends LineBaseController<EnumCheckboxListProps<V>, MList<V>> {
 
-  getDefaultProps(p: EnumCheckboxListProps) {
+  getDefaultProps(p: EnumCheckboxListProps<V>) {
     super.getDefaultProps(p);
     p.columnWidth = 200;
     if (p.type) {
       const ti = getTypeInfo(p.type.name);
-      p.data = Dic.getKeys(ti.members);
+      p.data = Dic.getKeys(ti.members) as V[];
     }
   }
 
-  handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: string) => {
-    const current = event.currentTarget;
+  handleOnChange = (event: React.ChangeEvent<HTMLInputElement>, val: V) => {
 
     var list = this.props.ctx.value;
     var toRemove = list.filter(mle => mle.element == val)
@@ -45,7 +42,7 @@ export class EnumCheckboxListController extends LineBaseController<EnumCheckboxL
 
 }
 
-export const EnumCheckboxList = React.forwardRef(function EnumCheckboxList(props: EnumCheckboxListProps, ref: React.Ref<EnumCheckboxListController>) {
+export const EnumCheckboxList = genericForwardRef(function EnumCheckboxList<V extends string>(props: EnumCheckboxListProps<V>, ref: React.Ref<EnumCheckboxListController<V>>) {
   const c = useController(EnumCheckboxListController, props, ref);
   const p = c.props;
 

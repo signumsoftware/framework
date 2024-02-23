@@ -178,7 +178,7 @@ public class EntityCache: IDisposable
         return Current.NewRetriever();
     }
 
-    public static T Construct<T>(PrimaryKey id) where T : Entity
+    internal static T Construct<T>(PrimaryKey id) where T : Entity
     {
         var result = Constructor<T>.Call();
         result.id = id;

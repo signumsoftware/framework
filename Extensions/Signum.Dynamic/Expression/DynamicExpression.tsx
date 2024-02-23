@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityCombo, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import * as Navigator from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
@@ -25,7 +25,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
 
 
-  const exampleEntity = React.useRef<Entity | undefined>(undefined);
+  const exampleEntity = React.useRef<Entity | null>(null);
   const [response, setResponse] = React.useState<DynamicExpressionTestResponse | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
@@ -108,16 +108,16 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntity, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntity, s => s.current));
 
     return (
-      <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
+      <EntityCombo ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
         type={{ name: typeName }} label="Example Entity" />
     );
   }
 
-  function handleOnView(exampleEntity: ModifiableEntity | Lite<Entity>) {
-    return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
+  function handleOnView(exampleEntity: Entity) {
+    return Navigator.view<Entity>(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
   function renderMessage(res: DynamicExpressionTestResponse) {

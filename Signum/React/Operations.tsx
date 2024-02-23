@@ -287,7 +287,7 @@ export class ContextualOperationContext<T extends Entity> {
     if ((cos?.settersConfig ?? Defaults.defaultSetterConfig)(this) == "NoButton")
       return false;
 
-    if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1)
+    if (oi.operationType == "ConstructorFrom" && this.context.lites.length > 1 && !oi.resultIsSaved)
       return false;
 
     const eos = this.entityOperationSettings;
@@ -479,7 +479,7 @@ export class EntityOperationContext<T extends Entity> {
     return EntityOperationContext.fromEntityPack(ctx.frame, ctx.frame.pack! as EntityPack<T>, operation);
   }
 
-  static fromEntityPack<T extends Entity>(frame: EntityFrame, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
+  static fromEntityPack<T extends Entity>(frame: EntityFrame<any>, pack: EntityPack<T>, operation: ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T> | string): EntityOperationContext<T> | undefined {
     const operationKey = (operation as OperationSymbol).key || operation as string;
 
     const oi = getTypeInfo(pack.entity.Type).operations![operationKey];

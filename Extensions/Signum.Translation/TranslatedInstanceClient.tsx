@@ -35,7 +35,7 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 tasks.push(taskSetTranslatableIcon)
-export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state: LineBaseProps) {
+export function taskSetTranslatableIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   if (lineBase instanceof TextBoxLineController) {
     const vProps = state as TextBoxLineProps;
 
@@ -44,7 +44,7 @@ export function taskSetTranslatableIcon(lineBase: LineBaseController<any>, state
       state.ctx.propertyRoute.member!.translatable && 
       AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances)) {
       if (!vProps.extraButtons)
-        vProps.extraButtons = vlc => <TranslateButton controller={vlc} />;
+        vProps.extraButtons = vlc => <TranslateButton controller={vlc as TextBoxLineController} />;
 
       if (!vProps.helpText) {
         var binding = (vProps.ctx.binding as Binding<string>);

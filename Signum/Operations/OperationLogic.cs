@@ -5,6 +5,7 @@ using System.Collections;
 using Signum.DynamicQuery.Tokens;
 using Signum.Security;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Operations;
 
@@ -29,12 +30,12 @@ public static class OperationLogic
 
     static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
-    static ResetLazy<Dictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<OperationSymbol, List<Type>>>(() =>
+    static ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>>(() =>
     {
         return (from t in operations.OverridenTypes
                 from d in operations.GetDefinition(t)!.Keys
                 group t by d into g
-                select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
+                select KeyValuePair.Create(g.Key, g.ToList())).ToFrozenDictionaryEx();
     });
 
 
@@ -401,6 +402,7 @@ Consider the following options:
             CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
             ForReadonlyEntity = (oper as IExecuteOperation)?.ForReadonlyEntity,
+            ResultIsSaved = (oper as IConstructorFromOperation)?.ResultIsSaved,
             BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
         };
     }
@@ -789,7 +791,7 @@ Consider the following options:
         var states = lites.Chunk(200).SelectMany(list =>
             Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
-        return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
+        return (from o in operations.OfType<Graph<E, S>.IGraphFromStatesOperation>()
                 let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                 where invalid.Any()
                 select KeyValuePair.Create(o.OperationSymbol,

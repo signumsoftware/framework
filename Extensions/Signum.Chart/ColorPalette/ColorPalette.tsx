@@ -117,7 +117,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
             onClick={handleMagicWand}>
             <FontAwesomeIcon icon="wand-magic-sparkles" />
           </a>}
-          columns={EntityTable.typedColumns<SpecificColorEmbedded>([
+          columns={[
             {
               property: p => p.entity,
               template: (ectx) =>
@@ -131,7 +131,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
               template: (ectx) => <ColorSelector ctx={ectx.subCtx(a => a.color)} colors={colors as (string[] | null)} />,
               headerHtmlAttributes: { style: { width: "40%" } },
             },
-          ])}
+          ]}
         />
       }
     </div>

@@ -122,7 +122,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
         <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
           subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
           />
-          <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorSubQueryColumnEmbedded>([
+          <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={[
             {
               property: a => a.usage, template: colCtx => <AutoLine ctx={colCtx.subCtx(a => a.usage)} onChange={() => handleChangeUsage(colCtx)} />
             },
@@ -139,7 +139,7 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
             },
             { property: a => a.encoding, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.encoding)} /> },
             { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
-          ])} />
+          ]} />
 
           {ctx.value.query && <a href="#" onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</a>}
         </div>}

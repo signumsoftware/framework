@@ -5,24 +5,23 @@ import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
-import { LineBaseProps, LineBaseController, useController } from "./LineBase";
+import { LineBaseProps, LineBaseController, useController, genericForwardRef } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
 
-interface MultiValueLineProps extends LineBaseProps {
-  ctx: TypeContext<MList<any>>;
-  onRenderItem?: (p: AutoLineProps) => React.ReactElement<any>;
+interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
+  onRenderItem?: (p: AutoLineProps) => React.ReactElement;
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
   valueColumClass?: string;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
 }
 
-export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
+export class MultiValueLineController<V> extends LineBaseController<MultiValueLineProps<V>, MList<V>> {
 
   keyGenerator = new KeyGenerator();
 
-  getDefaultProps(p: MultiValueLineProps) {
+  getDefaultProps(p: MultiValueLineProps<V>) {
     if (p.ctx.value == undefined)
       p.ctx.value = [];
 
@@ -61,7 +60,7 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
     return Promise.resolve(null);
   }
 
-  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+  getMListItemContext(ctx: TypeContext<MList<V>>): TypeContext<V>[] {
     var rows = mlistItemContext(ctx);
 
     if (this.props.filterRows)
@@ -71,8 +70,8 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   }
 }
 
-export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
-  const c = useController(MultiValueLineController, props, ref);
+export const MultiValueLine = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
+  const c = useController(MultiValueLineController<V>, props, ref);
   const p = c.props;
 
   var renderItem = React.useMemo(() => {
@@ -126,7 +125,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
   onRemove: (event: React.MouseEvent<any>) => void;
-  onRenderItem: (p: AutoLineProps) => React.ReactElement<any>;
+  onRenderItem: (p: AutoLineProps) => React.ReactElement;
   valueColumClass: string;
 }
 

@@ -185,7 +185,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
             <div>
               <EnumLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />
-              <EntityTable ctx={ctxGr.subCtx(p => p.tokenEquivalences)} avoidFieldSet columns={EntityTable.typedColumns<TokenEquivalenceEmbedded>([
+              <EntityTable ctx={ctxGr.subCtx(p => p.tokenEquivalences)} avoidFieldSet columns={[
                 {
                   property: p => p.query,
                   template: (ectx, row) => <EntityCombo ctx={ectx.subCtx(p => p.query)} data={allQueryNames} onChange={row.forceUpdate} />,
@@ -197,7 +197,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
                     queryKey={ectx.value.query.key} subTokenOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll} />,
                   headerHtmlAttributes: { style: { width: "100%" } },
                 },
-              ])}
+              ]}
               />
             </div>
           }/>

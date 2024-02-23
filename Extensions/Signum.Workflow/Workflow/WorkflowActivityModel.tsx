@@ -218,7 +218,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
             <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
               {() => <EntityTable avoidFieldSet
                 ctx={ctx.subCtx(d => d.viewNameProps)}
-                columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
+                columns={[
                   {
                     property: a => a.name,
                     template: ctx => <AutoLine ctx={ctx.subCtx(a => a.name)} />
@@ -229,7 +229,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
                       <AutoLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
                       />
                   }
-                ])} />}
+                ]} />}
             </FormGroup>
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}

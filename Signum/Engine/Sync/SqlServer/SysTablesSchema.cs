@@ -106,18 +106,26 @@ public static class SysTablesSchema
                                              }).ToList(),
 
                          SimpleIndices = (from i in t.Indices()
-                                          where /*!i.is_primary_key && */i.type != 0  /*heap indexes*/
+                                          //where /*!i.is_primary_key && */i.type != 0  /*heap indexes*/
                                           select new DiffIndex
                                           {
                                               IsUnique = i.is_unique,
                                               IsPrimary = i.is_primary_key,
-                                              IndexName = i.name,
+                                              IndexName = i.name ?? "HEAP",
+                                              DataSpaceName = i.DataSpaceName(),
                                               FilterDefinition = i.filter_definition,
                                               Type = (DiffIndexType)i.type,
                                               Columns = (from ic in i.IndexColumns()
                                                          join c in t.Columns() on ic.column_id equals c.column_id
                                                          orderby ic.index_column_id
-                                                         select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column, IsDescending = ic.is_descending_key}).ToList()
+                                                         select new DiffIndexColumn
+                                                         {
+                                                             ColumnName = c.name,
+															 IsDescending = ic.is_descending_key,
+                                                             Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
+                                                             ic.is_included_column ? DiffIndexColumnType.Included :
+                                                             DiffIndexColumnType.Key
+                                                         }).ToList()
                                           }).ToList(),
 
                          ViewIndices = (from v in Database.View<SysViews>()
@@ -128,10 +136,18 @@ public static class SysTablesSchema
                                             IsUnique = i.is_unique,
                                             ViewName = v.name,
                                             IndexName = i.name,
+                                            DataSpaceName = i.DataSpaceName(),
                                             Columns = (from ic in i.IndexColumns()
                                                        join c in v.Columns() on ic.column_id equals c.column_id
                                                        orderby ic.index_column_id
-                                                       select new DiffIndexColumn { ColumnName = c.name, IsIncluded = ic.is_included_column, IsDescending = ic.is_descending_key }).ToList()
+                                                       select new DiffIndexColumn
+                                                       {
+                                                           ColumnName = c.name,
+                                                           IsDescending = ic.is_descending_key,
+                                                           Type = ic.partition_ordinal > 0 ? DiffIndexColumnType.Partition :
+                                                           ic.is_included_column ? DiffIndexColumnType.Included :
+                                                           DiffIndexColumnType.Key
+                                                       }).ToList()
 
                                         }).ToList(),
 
@@ -202,6 +218,53 @@ public static class SysTablesSchema
                 var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemas);
 
                 result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
+            }
+        }
+        return result;
+    }
+
+    public static List<DiffPartitionFunction> GetPartitionFunctions(List<DatabaseName?> list)
+    {
+        var result = new List<DiffPartitionFunction>();
+        foreach (var db in list)
+        {
+            using (Administrator.OverrideDatabaseInSysViews(db))
+            {
+                var functions = Database.View<SysPartitionFunction>().Select(f => new DiffPartitionFunction
+                {
+                    DatabaseName = db,
+                    FunctionName = f.name,
+                    Fanout = f.fanout,
+                    Values = Database.View<SysPartitionRangeValues>().Where(a => a.function_id == f.function_id).Select(a => a.value).ToArray()
+
+                });
+
+                result.AddRange(functions);
+            }
+        }
+        return result;
+    }
+
+    public static List<DiffPartitionScheme> GetPartitionSchemes(List<DatabaseName?> list)
+    {
+        var result = new List<DiffPartitionScheme>();
+        foreach (var db in list)
+        {
+            using (Administrator.OverrideDatabaseInSysViews(db))
+            {
+                var functions = Database.View<SysPartitionSchemes>().Select(s => new DiffPartitionScheme
+                {
+                    DatabaseName = db,
+                    SchemeName = s.name,
+                    FunctionName = Database.View<SysPartitionFunction>().SingleEx(f => f.function_id ==  s.function_id).name,
+                    FileGroups = Database.View<SysDestinationDataSpaces>()
+                    .Where(a => a.partition_scheme_id == s.data_space_id)
+                    .Select(a => Database.View<SysFileGroups>().SingleEx(fg => fg.data_space_id == a.data_space_id).name)
+                    .ToArray()
+
+                });
+
+                result.AddRange(functions);
             }
         }
         return result;

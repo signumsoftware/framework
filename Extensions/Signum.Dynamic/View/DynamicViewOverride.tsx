@@ -34,7 +34,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
 
   const forceUpdate = useForceUpdate();
 
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const componentTypeRef = React.useRef<React.ComponentType<{ ctx: TypeContext<Entity> }> | null>(null);
   function setComponentType(ct: React.ComponentType<{ ctx: TypeContext<Entity> }> | null) {
     componentTypeRef.current = ct;
@@ -127,7 +127,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <div className="code-container">

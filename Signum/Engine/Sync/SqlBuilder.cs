@@ -49,9 +49,10 @@ public class SqlBuilder
     public SqlPreCommand CreateTableSql(ITable t, ObjectName? tableName = null, bool avoidSystemVersioning = false, bool forHistoryTable = false)
     {
         var primaryKeyConstraint = t.PrimaryKey == null || t.SystemVersioned != null && tableName != null && t.SystemVersioned.TableName.Equals(tableName) ? null :
+            t.AllIndexes().SingleEx(a => a.PrimaryKey).Let(pk =>
             isPostgres ?
-            "CONSTRAINT {0} PRIMARY KEY ({1})".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres)) :
-            "CONSTRAINT {0} PRIMARY KEY CLUSTERED ({1} ASC)".FormatWith(PrimaryKeyIndex.GetPrimaryKeyName(t.Name).SqlEscape(isPostgres), t.PrimaryKey.Name.SqlEscape(isPostgres));
+            $"CONSTRAINT {pk.IndexName.SqlEscape(isPostgres)} PRIMARY KEY ({t.PrimaryKey.Name.SqlEscape(isPostgres)})" :
+            $"CONSTRAINT {pk.IndexName.SqlEscape(isPostgres)} PRIMARY KEY {(pk.Clustered ? "CLUSTERED" : "NONCLUSTERED")} ({t.PrimaryKey.Name.SqlEscape(isPostgres)} ASC)");
 
         var systemPeriod = t.SystemVersioned == null || IsPostgres || forHistoryTable || avoidSystemVersioning ? null : Period(t.SystemVersioned);
 
@@ -367,43 +368,54 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                 .FormatWith(objectName.Schema.Database.ToString().SqlEscape(isPostgres), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));
     }
 
+    public SqlPreCommand DisconnectTableFromPartitionSchema(DiffTable table)
+    {
+        var pk = table.Columns.Values.SingleEx(a => a.PrimaryKey);
+        string indexName = $"TEMP_PK_{table.Name.Name}";
+        return new[]
+        {
+            new SqlPreCommandSimple($"CREATE CLUSTERED INDEX {indexName} ON {table.Name}({pk.Name}) ON [Primary]; -- Necessary to disconnect table from Partition Schema https://stackoverflow.com/a/55750977/38670"),
+            new SqlPreCommandSimple($"DROP INDEX {indexName} ON {table.Name}"),
+        }.Combine(Spacing.Simple)!;
+    }
+
     public SqlPreCommand CreateIndex(TableIndex index, Replacements? checkUnique)
     {
-        if (index is PrimaryKeyIndex)
+        if (index.PrimaryKey)
         {
             var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
-            return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName.SqlEscape(isPostgres)} PRIMARY KEY CLUSTERED({columns});");
+            return new SqlPreCommandSimple($"ALTER TABLE {index.Table.Name} ADD CONSTRAINT {index.IndexName.SqlEscape(isPostgres)} PRIMARY KEY {(index.Clustered? "CLUSTERED" : "NONCLUSTERED")}({columns}){(index.Partitioned ? $" ON {index.PartitionSchemeName} ({index.PartitionColumnName})" : null)};");
         }
 
-        if (index is UniqueTableIndex uIndex)
+        if (index.Unique)
         {
-            if (uIndex.ViewName != null)
+            if (index.ViewName != null)
             {
-                ObjectName viewName = new ObjectName(uIndex.Table.Name.Schema, uIndex.ViewName, isPostgres);
-
+                ObjectName viewName = new ObjectName(index.Table.Name.Schema, index.ViewName, isPostgres);
+                
                 var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
-                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {uIndex.Table.Name} WHERE {uIndex.Where};")
+                SqlPreCommandSimple viewSql = new SqlPreCommandSimple($"CREATE VIEW {viewName} WITH SCHEMABINDING AS SELECT {columns} FROM {index.Table.Name} WHERE {index.Where};")
                 { GoBefore = true, GoAfter = true };
 
-                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {uIndex.IndexName.SqlEscape(isPostgres)} ON {viewName}({columns});");
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple($"CREATE UNIQUE CLUSTERED INDEX {index.IndexName.SqlEscape(isPostgres)} ON {viewName}({columns});");
 
                 return SqlPreCommand.Combine(Spacing.Simple,
-                    checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
+                    checkUnique != null ? RemoveDuplicatesIfNecessary(index, checkUnique) : null,
                     viewSql,
                     indexSql)!;
             }
             else
             {
                 return SqlPreCommand.Combine(Spacing.Double,
-                    checkUnique != null ? RemoveDuplicatesIfNecessary(uIndex, checkUnique) : null,
+                    checkUnique != null ? RemoveDuplicatesIfNecessary(index, checkUnique) : null,
                     CreateIndexBasic(index, forHistoryTable: false))!;
             }
         }
         else if(index is FullTextTableIndex ftindex)
         {
-            var pk = ftindex.Table.GeneratAllIndexes().OfType<PrimaryKeyIndex>().SingleEx();
+            var pk = ftindex.Table.AllIndexes().SingleEx(a => a.PrimaryKey);
 
             var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
 
@@ -441,7 +453,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         _ => throw new UnexpectedValueException(changeTraking)
     };
 
-    public int DuplicateCount(UniqueTableIndex uniqueIndex, Replacements rep)
+    public int DuplicateCount(TableIndex uniqueIndex, Replacements rep)
     {
         var primaryKey = uniqueIndex.Table.Columns.Values.Where(a => a.PrimaryKey).Only();
 
@@ -464,10 +476,10 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))};")!);
+){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
     }
 
-    public SqlPreCommand? RemoveDuplicatesIfNecessary(UniqueTableIndex uniqueIndex, Replacements rep)
+    public SqlPreCommand? RemoveDuplicatesIfNecessary(TableIndex uniqueIndex, Replacements rep)
     {
         try
         {
@@ -503,7 +515,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
         }
     }
 
-    private SqlPreCommand RemoveDuplicates(UniqueTableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
+    private SqlPreCommand RemoveDuplicates(TableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
     {
         return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
@@ -517,14 +529,15 @@ WHERE {primaryKey.Name} NOT IN
 
     public SqlPreCommand CreateIndexBasic(TableIndex index, bool forHistoryTable)
     {
-        var indexType = index is UniqueTableIndex ? "UNIQUE INDEX" : "INDEX";
+        var indexType = " ".Combine(index.Unique ? "UNIQUE" : null, index.Clustered ? "CLUSTERED" : null, "INDEX");
+        var tableName = forHistoryTable ? index.Table.SystemVersioned!.TableName : index.Table.Name;
+        
         var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
         var include = index.IncludeColumns.HasItems() ? $" INCLUDE ({index.IncludeColumns.ToString(c => c.Name.SqlEscape(isPostgres), ", ")})" : null;
-        var where = index.Where.HasText() ? $" WHERE {index.Where}" : "";
+        var where = index.Where.HasText() ? $" WHERE {index.Where}" : null;
+        var partitioning = index.Partitioned ? $" ON {index.PartitionSchemeName}({index.PartitionColumnName})" : " ON 'PRIMARY'";
 
-        var tableName = forHistoryTable ? index.Table.SystemVersioned!.TableName : index.Table.Name;
-
-        return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where};");
+        return new SqlPreCommandSimple($"CREATE {indexType} {index.GetIndexName(tableName).SqlEscape(isPostgres)} ON {tableName}({columns}){include}{where}{partitioning};");
     }
 
 
@@ -755,6 +768,8 @@ FROM {1} as [table];".FormatWith(
             return new SqlPreCommandSimple($"EXEC('use {schemaName.Database}; EXEC sp_executesql N''CREATE SCHEMA {schemaName.Name}'' ');");
     }
 
+
+
     public SqlPreCommand DropSchema(SchemaName schemaName)
     {
         return new SqlPreCommandSimple("DROP SCHEMA {0};".FormatWith(schemaName)) { GoAfter = true, GoBefore = true };
@@ -812,40 +827,66 @@ EXEC DB.dbo.sp_executesql @sql"
 
     public SqlPreCommand TruncateTable(ObjectName tableName) => new SqlPreCommandSimple($"TRUNCATE TABLE {tableName};");
 
+    public SqlPreCommand? CreateFullTextCatallog(FullTextCatallogName newSN) => WrapUseDatabase(newSN.Database, CreateFullTextCatallog(newSN.Name));
     public SqlPreCommand CreateFullTextCatallog(string catallogName)
     {
         return new SqlPreCommandSimple("CREATE FULLTEXT CATALOG " + catallogName);
     }
 
-    public SqlPreCommand? CreateFullTextCatallog(FullTextCatallogName newSN)
-    {
-        if (newSN.Database == null)
-            return CreateFullTextCatallog(newSN.Name);
-
-        return new[]
-        {
-            UseDatabase(newSN.Database!.Name),
-            CreateFullTextCatallog(newSN.Name),
-            UseDatabase(null),
-        }.Combine(Spacing.Simple);
-    }
-
+    public SqlPreCommand? DropFullTextCatallog(FullTextCatallogName newSN) => WrapUseDatabase(newSN.Database, DropFullTextCatallog(newSN.Name));
     public SqlPreCommand DropFullTextCatallog(string catallogName)
     {
         return new SqlPreCommandSimple("DROP FULLTEXT CATALOG " + catallogName);
     }
 
-    public SqlPreCommand? DropFullTextCatallog(FullTextCatallogName newSN)
+    
+    SqlPreCommand WrapUseDatabase(DatabaseName? db, SqlPreCommand command)
     {
-        if (newSN.Database == null)
-            return DropFullTextCatallog(newSN.Name);
+        if (db == null)
+            return command;
 
         return new[]
         {
-            UseDatabase(newSN.Database!.Name),
-            DropFullTextCatallog(newSN.Name),
+            UseDatabase(db.Name),
+            command,
             UseDatabase(null),
-        }.Combine(Spacing.Simple);
+        }.Combine(Spacing.Simple)!;
+    }
+
+
+
+
+    public SqlPreCommand CreateSqlPartitionFunction(SqlPartitionFunction partFunction, DatabaseName? dbName)
+    {
+        return WrapUseDatabase(dbName, new SqlPreCommandSimple($"""
+CREATE PARTITION FUNCTION {partFunction.Name.SqlEscape(isPostgres: false)} ({partFunction.DbType.ToString(isPostgres: false)})
+    AS RANGE LEFT FOR VALUES ({partFunction.Points.Select(p => SqlPreCommandSimple.LiteralValue(p, simple: true)).ToString(", ")});
+"""));
+    }
+
+    public SqlPreCommand DropSqlPartitionFunction(DiffPartitionFunction partFunction)
+    {
+        return WrapUseDatabase(partFunction.DatabaseName,
+            new SqlPreCommandSimple($"""DROP PARTITION FUNCTION {partFunction.FunctionName.SqlEscape(isPostgres: false)}"""));
+    }
+
+    public SqlPreCommand CreateSqlPartitionScheme(SqlPartitionScheme partScheme, DatabaseName? dbName)
+    {
+        var isPostgres = false;
+        return WrapUseDatabase(dbName, new SqlPreCommandSimple($"""
+CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)} 
+    AS PARTITION {partScheme.PartitionFunction.Name.SqlEscape(isPostgres)}
+    {(partScheme.FileGroupNames is string s ? $"ALL TO ({s.SqlEscape(isPostgres)})" :
+    partScheme.FileGroupNames is string[] ss ? $"TO ({ss.ToString(s => s.SqlEscape(isPostgres), ", ")})" :
+    throw new UnexpectedValueException(partScheme.FileGroupNames)
+    )}
+"""));
+    }
+
+    public SqlPreCommand DropSqlPartitionScheme(DiffPartitionScheme partSchema)
+    {
+        return WrapUseDatabase(partSchema.DatabaseName,
+            new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
 
    

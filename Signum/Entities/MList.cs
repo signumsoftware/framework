@@ -615,13 +615,13 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     {
         this.SetSelfModified();
 
-        if (newItems != null)
-            foreach (var item in newItems)
-                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
-
         if (oldItems != null)
             foreach (var item in oldItems)
                 OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, item));
+
+        if (newItems != null)
+            foreach (var item in newItems)
+                OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, item));
     }
 
     void IMListPrivate.SetRowId(int index, PrimaryKey rowId)
@@ -757,6 +757,7 @@ public class MListElement<E, V> where E : Entity
 {
     public PrimaryKey RowId { get; set; }
     public int RowOrder { get; set; }
+    public int RowPartitionId { get; set; }
     public E Parent { get; set; }
     public V Element { get; set; }
 

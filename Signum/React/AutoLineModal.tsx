@@ -109,9 +109,9 @@ export interface AutoLineModalOptions {
   member?: MemberInfo;
   type?: TypeReference;
   initialValue?: any;
-  title?: React.ReactChild;
-  message?: React.ReactChild;
-  label?: React.ReactChild;
+  title?: React.ReactElement | string | null;
+  message?: React.ReactElement | string | null;
+  label?: React.ReactElement | string | null;
   customComponent?: (p: AutoLineProps) => React.ReactElement;
   validateValue?: (val: any) => string | undefined;
   format?: string;

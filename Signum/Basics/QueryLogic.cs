@@ -2,16 +2,17 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Basics;
 
 public static class QueryLogic
 {
-    static ResetLazy<Dictionary<string, object>> queryNamesLazy = null!;
-    public static Dictionary<string, object> QueryNames => queryNamesLazy.Value;
+    static ResetLazy<FrozenDictionary<string, object>> queryNamesLazy = null!;
+    public static FrozenDictionary<string, object> QueryNames => queryNamesLazy.Value;
 
-    static ResetLazy<Dictionary<object, QueryEntity>> queryNameToEntityLazy = null!;
-    public static Dictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
+    static ResetLazy<FrozenDictionary<object, QueryEntity>> queryNameToEntityLazy = null!;
+    public static FrozenDictionary<object, QueryEntity> QueryNameToEntity => queryNameToEntityLazy.Value;
 
     public static DynamicQueryContainer Queries { get; } = new DynamicQueryContainer();
     public static ExpressionContainer Expressions { get; } = new ExpressionContainer();
@@ -20,21 +21,23 @@ public static class QueryLogic
     {
         FilterFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
         FilterFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
-        QueryToken.StaticEntityExtensions = parent => Expressions.GetExtensionsTokens(parent);
-        QueryToken.DynamicEntityExtensions = parent => Expressions.GetExtensionsWithParameterTokens(parent);      
 
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
-        QueryToken.ImplementedByAllSubTokens = GetImplementedByAllSubTokens;
-        QueryToken.IsSystemVersioned = IsSystemVersioned;
     }
 
-    static bool IsSystemVersioned(Type type)
+    public static bool IsSystemVersioned(Type type)
     {
         var table = Schema.Current.Tables.TryGetC(type);
         return table != null && table.SystemVersioned != null;
     }
 
-    static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)
+    public static bool HasPartitionId(Type onlyType)
+    {
+        var table = Schema.Current.Tables.TryGetC(onlyType);
+        return table != null && table.PartitionId != null;
+    }
+
+    public static List<QueryToken> GetImplementedByAllSubTokens(QueryToken queryToken, Type type, SubTokensOptions options)
     {
         var cleanType = type.CleanType();
         return Schema.Current.Tables.Keys
@@ -85,7 +88,7 @@ public static class QueryLogic
                     q => q.Key,
                     kvp => kvp.Key,
                     (q, kvp) => KeyValuePair.Create(kvp.Value, q),
-                    "caching " + nameof(QueryEntity)).ToDictionary(),
+                    "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(QueryEntity)),
                 Schema.Current.InvalidateMetadata);
         }
@@ -121,9 +124,9 @@ public static class QueryLogic
         return QueryNames.TryGetC(queryKey);
     }
 
-    private static Dictionary<string, object> CreateQueryNames()
+    private static FrozenDictionary<string, object> CreateQueryNames()
     {
-        return Queries.GetQueryNames().ToDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
+        return Queries.GetQueryNames().ToFrozenDictionaryEx(qn => QueryUtils.GetKey(qn), "queryName");
     }
 
     static IEnumerable<QueryEntity> GenerateQueries()
@@ -181,4 +184,6 @@ public static class QueryLogic
     {
         return QueryNameToEntity.GetOrThrow(queryName, "QueryName {0} not found on the database");
     }
+
+
 }

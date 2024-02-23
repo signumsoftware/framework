@@ -72,7 +72,7 @@ export interface SearchControlLoadedProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
-  selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+  selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -107,7 +107,7 @@ export interface SearchControlLoadedProps {
   extraOptions: any;
 
 
-  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement | undefined;
   enableAutoFocus: boolean;
   //Return "no_change" to prevent refresh. Navigator.view won't be called by search control, but returning an entity allows to return it immediatly in a SearchModal in find mode.  
   onCreate?: (scl: SearchControlLoaded) => Promise<undefined | void | EntityPack<any> | ModifiableEntity | "no_change">;
@@ -129,7 +129,7 @@ export interface SearchControlLoadedProps {
 export interface SearchControlLoadedState {
   resultTable?: ResultTable;
   summaryResultTable?: ResultTable;
-  simpleFilterBuilder?: React.ReactElement<any>;
+  simpleFilterBuilder?: React.ReactElement;
   selectedRows?: ResultRow[];
   markedRows?: MarkedRowsDictionary;
   isSelectOpen: boolean;
@@ -138,7 +138,7 @@ export interface SearchControlLoadedState {
   dragColumnIndex?: number,
   dropBorderIndex?: number,
   showHiddenColumns?: boolean,
-  currentMenuItems?: React.ReactElement<any>[];
+  currentMenuItems?: React.ReactElement[];
   dataChanged?: boolean;
 
   contextualMenu?: {
@@ -1082,7 +1082,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return token && !hasOperation(token) && !hasToArray(token);
     }
 
-    const menuItems: React.ReactElement<any>[] = [];
+    const menuItems: React.ReactElement[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
       menuItems.push(<Dropdown.Header>{SearchMessage.Filters.niceToString()}</Dropdown.Header>);
       menuItems.push(<Dropdown.Item className="sf-quickfilter-header" onClick={this.handleQuickFilter}>
@@ -1822,7 +1822,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return resultTable.rows.map((row, i) => {
       const markIcon = this.getRowMarketIcon(row, i);
-      var ra = this.getRowAttributes(row);
+      const ra = this.getRowAttributes(row);
 
       var fctx: Finder.CellFormatterContext = {
         refresh: () => this.dataChanged(),
