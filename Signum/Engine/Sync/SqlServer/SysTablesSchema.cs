@@ -136,6 +136,7 @@ public static class SysTablesSchema
                                             IsUnique = i.is_unique,
                                             ViewName = v.name,
                                             IndexName = i.name,
+                                            DataSpaceName = i.DataSpaceName(),
                                             Columns = (from ic in i.IndexColumns()
                                                        join c in v.Columns() on ic.column_id equals c.column_id
                                                        orderby ic.index_column_id

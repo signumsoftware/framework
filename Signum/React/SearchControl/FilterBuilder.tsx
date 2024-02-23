@@ -22,6 +22,7 @@ import { isNumberKey, NumberBox } from '../Lines/NumberLine'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { FilterHelp } from './SearchControlVisualTips'
+import { GroupHeader, HeaderType } from '../Lines/GroupHeader'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -33,6 +34,7 @@ interface FilterBuilderProps {
   onHeightChanged?: () => void;
   readOnly?: boolean;
   title?: React.ReactNode;
+  avoidFieldSet?: boolean | HeaderType;
   renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions?: boolean;
   showPinnedFiltersOptionsButton?: boolean;
@@ -117,9 +119,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
       </div>
       }
-      <fieldset className="form-xs">
-
-        {p.title && <legend>{p.title}</legend>}
+      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet}>
         <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
           <table className="table-sm">
             <thead>
@@ -200,7 +200,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             </tbody>
           </table>
         </div>
-      </fieldset>
+      </GroupHeader>
     </>
   );
 }

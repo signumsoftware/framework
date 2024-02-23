@@ -226,7 +226,7 @@ export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V 
           .then(data => setData(data));
       }
     }
-  }, [normalizeEmptyArray(p.data), p.type.name, p.deps, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions)]);
+  }, [normalizeEmptyArray(p.data), p.type.name, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions), ...(p.deps ?? [])]);
 
   const lite = getLite();
 
