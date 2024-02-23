@@ -185,7 +185,7 @@ export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promi
 }
 
 
-export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+export function findMany<T extends Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
