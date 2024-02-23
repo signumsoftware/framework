@@ -18,7 +18,7 @@ import { AutoLine } from './AutoLine'
 export interface EntityTableProps<V extends ModifiableEntity, RS> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityTableController<V, RS>) => React.ReactElement);
   firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
-  rowHooks?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>) => RS;
+  rowHooks?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, unknown>) => RS;
   columns?: (EntityTableColumn<V, RS> | false | null | undefined)[],
   onRowHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean | HeaderType;
@@ -322,7 +322,7 @@ export interface EntityTableRowProps<V extends ModifiableEntity, RS> {
   onView?: (event: React.MouseEvent<any>) => void;
   drag?: DragConfig;
   move?: MoveConfig;
-  rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>) => RS;
+  rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, unknown>) => RS;
   onRowHtmlAttributes?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => void;
   onKeyDown?: (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>) => void;
@@ -337,7 +337,7 @@ export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> 
 export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>) {
   const forceUpdate = useForceUpdate();
 
-  const rowState = p.rowHooks?.(p.ctx, { props: p, forceUpdate })!;
+  const rowState = p.rowHooks?.(p.ctx, { props: p as EntityTableRowProps<V, unknown>, forceUpdate })!;
 
   const rowHandle = { props: p, rowState, forceUpdate } as EntityTableRowHandle<V, RS>;
 
