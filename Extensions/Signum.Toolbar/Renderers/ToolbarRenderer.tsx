@@ -110,7 +110,7 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
         var icon = ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor);
 
         return (
-          <ToolbarDropdown parentTitle={title} icon={icon} key={key} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}>
+          <ToolbarDropdown parentTitle={title} icon={icon} key={key} toolbarMenuId={res.content?.id} extraIcons={renderExtraIcons(res.extraIcons, active, onAutoClose)}>
             {res.elements && res.elements.map((sr, i) => renderNavItem(sr, active, i, onRefresh, onAutoClose))}
           </ToolbarDropdown>
         );
@@ -164,12 +164,22 @@ export function renderNavItem(res: ToolbarClient.ToolbarResponse<any>, active: T
   }
 }
 
-function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, children: any, extraIcons: React.ReactElement | undefined }) {
-  var [show, setShow] = React.useState(false);
+function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, children: any, toolbarMenuId: string | number | undefined, extraIcons: React.ReactElement | undefined }) {
+  var [show, setShow] = React.useState(localStorage.getItem("toolbar-menu-" + p.toolbarMenuId) != null);
+
+  function handleSetShow(value: boolean) {
+    if (value)
+      localStorage.setItem("toolbar-menu-" + p.toolbarMenuId, "1");
+    else
+      localStorage.removeItem("toolbar-menu-" + p.toolbarMenuId);
+
+    setShow(value);
+  }
+
 
   return (
     <div>
-      <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => setShow(!show)}
+      <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
         icon={
           <div style={{ display: 'inline-block', position: 'relative' }}>
             <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
