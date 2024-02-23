@@ -635,7 +635,7 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 
     private static SqlPreCommand AlterTableAddColumnDefault(SqlBuilder sqlBuilder, ITable table, IColumn column, Replacements rep, string? forceDefaultValue, bool avoidDefault, HashSet<FieldEmbedded.EmbeddedHasValueColumn> hasValueFalse)
     {
-        if (table.Name.Name == "EmailTemplate" && column.Name == "From_SourceID") // Delete this if after 1.4.2024
+        if (table.Name.Name == "EmailTemplate" && column.Name == "From_AddressSourceID") // Delete this if after 1.4.2024
         {
             return  SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
@@ -644,7 +644,7 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
 WHERE From_HasValue = 1"))!;
         }
 
-        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "SourceID") // Delete this if after 1.4.2024
+        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "AddressSourceID") // Delete this if after 1.4.2024
         {
             var tempDefault = new SqlBuilder.DefaultConstraint(
                 columnName: column.Name,

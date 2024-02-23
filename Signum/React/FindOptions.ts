@@ -76,6 +76,7 @@ export function isFilterCondition(fo: FilterOptionParsed | FilterOption | Filter
 export interface FilterConditionOption {
   token: string | QueryTokenString<any>;
   frozen?: boolean;
+  removeElementWarning?: boolean;
   operation?: FilterOperation;
   value?: any;
   pinned?: PinnedFilter;
@@ -87,6 +88,7 @@ export interface FilterGroupOption {
   groupOperation: FilterGroupOperation;
   filters: (FilterOption | null | undefined)[];
   pinned?: PinnedFilter;
+  frozen?: boolean;
   dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
@@ -118,6 +120,7 @@ export function isCheckBox(active: PinnedFilterActive | undefined) {
 export interface FilterConditionOptionParsed {
   token?: QueryToken;
   frozen: boolean;
+  removeElementWarning?: boolean;
   operation?: FilterOperation;
   value: any;
   pinned?: PinnedFilterParsed;

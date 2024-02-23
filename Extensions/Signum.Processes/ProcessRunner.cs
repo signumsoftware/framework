@@ -231,7 +231,11 @@ public static class ProcessRunner
                                                 {
                                                     try
                                                     {
-                                                        executingProcess.Execute();
+                                                        using (ProcessLogic.OnApplySession(executingProcess.CurrentProcess))
+                                                        {
+                                                            executingProcess.Execute();
+                                                        }
+                                                       
                                                     }
                                                     catch (Exception ex)
                                                     {
