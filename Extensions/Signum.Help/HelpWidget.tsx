@@ -38,14 +38,14 @@ export function HelpWidget(p: HelpWidgetProps) {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any> }) {
+export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }) {
 
   //debugger;
 
   if (p.ctx.propertyRoute == null)
     return undefined;
 
-  var typeHelp = p.ctx.frame?.pack.typeHelp;
+  var typeHelp = p.typeHelp ?? p.ctx.frame?.pack.typeHelp;
 
   const pr = p.ctx.propertyRoute;
 
@@ -80,3 +80,4 @@ export function HelpIcon(p: { ctx: TypeContext<any> }) {
     </OverlayTrigger>
   );
 }
+
