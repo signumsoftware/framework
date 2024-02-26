@@ -16,13 +16,11 @@ export interface HelpWidgetProps {
   wc: WidgetContext<Entity>
 }
 
-const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {}; 
-
 export function HelpWidget(p: HelpWidgetProps) {
 
   const entity = p.wc.ctx.value;
 
-  var typeHelp = useAPI(() => cache[entity.Type] ?? HelpClient.API.type(entity.Type), [entity.Type]);
+  var typeHelp = useAPI(() => HelpClient.API.type(entity.Type), [entity.Type]);
 
   var hasContent = Boolean(typeHelp && !typeHelp!.isNew);
 
