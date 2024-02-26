@@ -294,6 +294,7 @@
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
+    <Member Name="PartitionId" Description="Partition Id" />
   </Type>
   <Type Name="ImmutableEntity" Description="Unveränderliche Entität" PluralDescription="Unveränderlichen Entitäten">
     <Member Name="AllowChange" Description="Änderungen erlauben" />
@@ -509,6 +510,7 @@
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />
+    <Member Name="PartitionId" Description="Partition Id" />
     <Member Name="RowId" Description="RowID" />
     <Member Name="RowOrder" Description="RowOrder" />
     <Member Name="SnippetOf0" Description="Snippet für {0}" />
