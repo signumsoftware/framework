@@ -10,7 +10,7 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
       <AutoLine ctx={sc.subCtx(s => s.deliveryFormat)} />
       <AutoLine ctx={sc.subCtx(s => s.deliveryMethod)} />
       <AutoLine ctx={sc.subCtx(s => s.pickupDirectoryLocation)} />
-      <EntityDetail ctx={sc.subCtx(s => s.network)} getComponent={(net: TypeContext<SmtpNetworkDeliveryEmbedded>) =>
+      <EntityDetail ctx={sc.subCtx(s => s.network)} getComponent={net =>
         <div>
           <AutoLine ctx={net.subCtx(s => s.port)} />
           <AutoLine ctx={net.subCtx(s => s.host)} />
@@ -19,7 +19,7 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
           <PasswordLine ctx={net.subCtx(s => s.password)} />
 		  <PasswordLine ctx={net.subCtx(s => s.newPassword)} />
           <AutoLine ctx={net.subCtx(s => s.enableSSL)} />
-          <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
+          <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={cert =>
             <div>
               <AutoLine ctx={cert.subCtx(s => s.certFileType)} />
               <AutoLine ctx={cert.subCtx(s => s.fullFilePath)} />

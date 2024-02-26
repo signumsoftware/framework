@@ -155,7 +155,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
       <EntityDetail ctx={ctxBasic.subCtx(cp => cp.cacheQueryConfiguration)}
         onChange={forceUpdate}
         onCreate={() => Promise.resolve(CacheQueryConfigurationEmbedded.New({ timeoutForQueries: 5 * 60, maxRows: 1000 * 1000 }))}
-        getComponent={(ectx: TypeContext<CacheQueryConfigurationEmbedded>) => <div className="row">
+        getComponent={ectx => <div className="row">
           <div className="col-sm-2">
             <AutoLine ctx={ectx.subCtx(cp => cp.timeoutForQueries)} />
           </div>
@@ -181,7 +181,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
           </div>
         </Tab>
         <Tab title={ctxBasic.niceName(a => a.tokenEquivalencesGroups)} eventKey="equivalences">
-          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={(ctxGr: TypeContext<TokenEquivalenceGroupEntity>) => 
+          <EntityRepeater ctx={ctx.subCtx(a => a.tokenEquivalencesGroups, { formSize: "xs" })} avoidFieldSet getComponent={ctxGr => 
             <div>
               <EnumLine ctx={ctxGr.subCtx(pp => pp.interactionGroup)}
                 onRenderDropDownListItem={(io) => <span><span className="sf-dot" style={{ backgroundColor: colors[InteractionGroup.values().indexOf(io.value)] }} />{io.label}</span>} />

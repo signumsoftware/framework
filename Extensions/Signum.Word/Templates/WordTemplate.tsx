@@ -94,7 +94,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
               {ctx.niceName(a => a.applicable)}
             </span>}>
             <EntityDetail ctx={ctx.subCtx(e => e.applicable)} onChange={forceUpdate}
-              getComponent={(ctx2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ctx2} query={ctx.value.query!} />} />
+              getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
           </Tab>
         </Tabs>
       }
