@@ -20,9 +20,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
+import { HeaderType } from '@framework/Lines/GroupHeader'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
+  avoidFieldSet?: boolean | HeaderType;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
@@ -153,6 +155,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         qd != null &&
         <FilterBuilder
           title={p.ctx.niceName()}
+          avoidFieldSet={p.avoidFieldSet}
           queryDescription={qd}
           filterOptions={filterOptions ?? []}
           subTokensOptions={p.subTokenOptions}

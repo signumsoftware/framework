@@ -9,7 +9,7 @@ import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
-import { GroupHeader, HeaderType } from './GroupHeader'
+import { GroupHeader, HeaderType, Title } from './GroupHeader'
 
 
 export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
@@ -53,23 +53,25 @@ export const EntityDetail = genericForwardRef(function EntityDetail<V extends Mo
     }
 
   }
+  
 
-  if (p.avoidFieldSet == true)
+  if (p.avoidFieldSet)
     return (
       <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
         {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
         {getTimeMachineIcon({ ctx: p.ctx})}
         {showAsCheckBox ?
-          <label className="lead">
+          <label><Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
             {renderCheckBox()}
             {p.label} {renderType()}
             {p.extraButtons && p.extraButtons(c)}
+          </Title>
           </label>
           :
-          <div className="lead">
+          <Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
             <span>{p.label} {renderType()}</span>
             {renderButtons()}
-          </div>
+          </Title>
         }
         <div className="ms-4 mt-2">
           <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />

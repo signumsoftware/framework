@@ -54,7 +54,7 @@ public class SystemTimeToken : QueryToken
 
     public override string? Format
     {
-        get { return "o"; }
+        get { return "G"; }
     }
 
     public override string? Unit

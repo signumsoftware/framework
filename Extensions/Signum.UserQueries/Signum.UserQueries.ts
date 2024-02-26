@@ -18,6 +18,15 @@ export type AutoUpdate =
   "InteractionGroup" |
   "Dashboard";
 
+export const SystemTimeEmbedded = new Type<SystemTimeEmbedded>("SystemTimeEmbedded");
+export interface SystemTimeEmbedded extends Entities.EmbeddedEntity {
+  Type: "SystemTimeEmbedded";
+  mode: DynamicQuery.SystemTimeMode;
+  startDate: string | null;
+  endDate: string | null;
+  joinMode: DynamicQuery.SystemTimeJoinMode | null;
+}
+
 export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserQuery";
@@ -36,6 +45,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   columns: Entities.MList<Queries.QueryColumnEmbedded>;
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
+  systemTime: SystemTimeEmbedded | null;
   customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
   guid: string /*Guid*/;
 }
@@ -58,6 +68,8 @@ export module UserQueryMessage {
   export const MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0 = new MessageKey("UserQueryMessage", "MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0");
   export const MakesThe0AvailableAsAQuickLinkOf1 = new MessageKey("UserQueryMessage", "MakesThe0AvailableAsAQuickLinkOf1");
   export const TheSelected0 = new MessageKey("UserQueryMessage", "TheSelected0");
+  export const Date = new MessageKey("UserQueryMessage", "Date");
+  export const Pagination = new MessageKey("UserQueryMessage", "Pagination");
 }
 
 export module UserQueryOperation {
