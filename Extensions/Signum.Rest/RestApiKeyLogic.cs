@@ -28,7 +28,7 @@ public class RestApiKeyLogic
 
             RestApiKeyCache = sb.GlobalLazy(() =>
             {
-                return Database.Query<RestApiKeyEntity>().ToDictionaryEx(rak => rak.ApiKey);
+                return Database.Query<RestApiKeyEntity>().ToFrozenDictionaryEx(rak => rak.ApiKey);
             }, new InvalidateWith(typeof(RestApiKeyEntity)));
         }
     }

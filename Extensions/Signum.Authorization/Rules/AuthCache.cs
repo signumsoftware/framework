@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -137,7 +138,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         return Database.Query<RT>().Any(rt => rt.Role.Is(role));
     }
 
-    Dictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
+    FrozenDictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
     {
         List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder(includeTrivialMerge: true).ToList();
 
@@ -161,7 +162,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                 coercer.GetCoerceValue(role)));
         }
 
-        return newRules;
+        return newRules.ToFrozenDictionary();
     }
 
     internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)

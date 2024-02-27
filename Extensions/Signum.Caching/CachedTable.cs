@@ -2,6 +2,8 @@ using System.Collections.Concurrent;
 using Signum.Engine.Linq;
 using System.Data;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
+using System.Linq;
 
 namespace Signum.Cache;
 
@@ -11,7 +13,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
 
     ResetLazy<FrozenDictionary<PrimaryKey, object>> rows;
 
-    public Dictionary<PrimaryKey, object> GetRows()
+    public IDictionary<PrimaryKey, object> GetRows()
     {
         return rows.Value;
     }
@@ -92,7 +94,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
                     tr.Commit();
                 }
 
-                return result;
+                return result.ToFrozenDictionary();
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -145,8 +147,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public object GetRow(PrimaryKey id)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().TryGetValue(id, out var origin))
             throw new EntityNotFoundException(typeof(T), id);
 
         return origin;
@@ -160,8 +161,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public object? TryGetLiteModel(PrimaryKey id, Type modelType, IRetriever retriever)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().ContainsKey(id))
             return null;
 
         return this.liteModelConstructors.GetOrThrow(modelType).GetModel(id, retriever);
@@ -170,8 +170,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public bool Exists(PrimaryKey id)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().ContainsKey(id))
             return false;
 
         return true;
@@ -181,8 +180,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     {
         Interlocked.Increment(ref hits);
 
-        var origin = this.GetRows().TryGetC(entity.Id);
-        if (origin == null)
+        if (!this.GetRows().TryGetValue(entity.Id, out var origin))
             throw new EntityNotFoundException(typeof(T), entity.Id);
 
         completer(origin, retriever, entity);
@@ -226,7 +224,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     ConcurrentDictionary<LambdaExpression, ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries =
         new ConcurrentDictionary<LambdaExpression, ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
 
-    internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>?>> backReference)
+    internal FrozenDictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>?>> backReference)
         where R : Entity
     {
         var lazy = BackReferenceDictionaries.GetOrAdd(backReference, br =>
@@ -243,7 +241,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
                 {
                     return this.rows.Value.Values
                     .Where(a => backReferenceGetter(a) != null)
-                    .GroupToDictionary(a => backReferenceGetter(a)!.Value, a => idGetter(a));
+                    .GroupToFrozenDictionary(a => backReferenceGetter(a)!.Value, a => idGetter(a));
                 }, LazyThreadSafetyMode.ExecutionAndPublication);
             }
             else
@@ -252,7 +250,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
                 return new ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>(() =>
                 {
                     return this.rows.Value.Values
-                    .GroupToDictionary(a => backReferenceGetter(a), a => idGetter(a));
+                    .GroupToFrozenDictionary(a => backReferenceGetter(a), a => idGetter(a));
                 }, LazyThreadSafetyMode.ExecutionAndPublication);
             }
         });

@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using System.Data;
 using Signum.Entities.Internal;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Cache;
 
@@ -19,11 +20,11 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
     Func<FieldReader, object> rowReader = null!;
     ResetLazy<FrozenDictionary<PrimaryKey, object>> rows = null!;
     Func<object, PrimaryKey> idGetter;
-    Dictionary<Type, ICachedLiteModelConstructor> liteModelConstructors = null!;
+    FrozenDictionary<Type, ICachedLiteModelConstructor> liteModelConstructors = null!;
 
     SemiCachedController<T>? semiCachedController;
 
-    public Dictionary<PrimaryKey, object> GetRows()
+    public IDictionary<PrimaryKey, object> GetRows()
     {
         return rows.Value;
     }
@@ -92,7 +93,7 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
                     tr.Commit();
                 }
 
-                return result;
+                return result.ToFrozenDictionary();
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
 
@@ -105,7 +106,7 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
     public override void SchemaCompleted()
     {
         this.liteModelConstructors = Lite.GetAllLiteModelTypes(typeof(T))
-          .ToDictionary(modelType => modelType, modelType =>
+          .ToFrozenDictionaryEx(modelType => modelType, modelType =>
           {
               var modelConstructor = Lite.GetModelConstructorExpression(typeof(T), modelType);
               var cachedModelConstructor = LiteModelExpressionVisitor.giGetCachedLiteModelConstructor.GetInvoker(typeof(T), modelType)(this.Constructor, modelConstructor);

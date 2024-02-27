@@ -238,7 +238,7 @@ public static class WorkflowLogic
 
             EvalLogic.GetCustomErrors += GetCustomErrors;
 
-            Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToDictionary(a => a.ToLite()),
+            Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToFrozenDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(WorkflowEntity)));
 
 
@@ -391,7 +391,7 @@ public static class WorkflowLogic
                     var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
                     var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
 
-                    var result = Database.RetrieveAll<WorkflowEntity>().ToDictionary(workflow => workflow.ToLite(), workflow =>
+                    var result = Database.RetrieveAll<WorkflowEntity>().ToFrozenDictionary(workflow => workflow.ToLite(), workflow =>
                     {
                         var w = workflow.ToLite();
                         var nodeGraph = new WorkflowNodeGraph
@@ -505,7 +505,7 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        TimerConditions = sb.GlobalLazy(() => Database.Query<WorkflowTimerConditionEntity>().ToDictionary(a => a.ToLite()),
+        TimerConditions = sb.GlobalLazy(() => Database.Query<WorkflowTimerConditionEntity>().ToFrozenDictionary(a => a.ToLite()),
              new InvalidateWith(typeof(WorkflowTimerConditionEntity)));
     }
 
@@ -571,7 +571,7 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
+        Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowActionEntity)));
     }
 
@@ -638,7 +638,7 @@ public static class WorkflowLogic
         }.Register();
 
 
-        Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
+        Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowConditionEntity)));
     }
 
@@ -691,7 +691,7 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
+        Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowScriptEntity)));
 
         sb.Include<WorkflowScriptRetryStrategyEntity>()

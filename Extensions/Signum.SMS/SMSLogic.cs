@@ -91,12 +91,12 @@ public static class SMSLogic
                     .Where(a => a.Model.Is(e)));
 
             SMSTemplatesLazy = sb.GlobalLazy(() =>
-                Database.Query<SMSTemplateEntity>().ToDictionary(et => et.ToLite())
+                Database.Query<SMSTemplateEntity>().ToFrozenDictionary(et => et.ToLite())
                 , new InvalidateWith(typeof(SMSTemplateEntity)));
 
             SMSTemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToFrozenDictionary();
             }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 

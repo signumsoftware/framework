@@ -94,7 +94,7 @@ public static class SMSModelLogic
                 from et in Database.Query<SMSTemplateEntity>()
                 where et.Model != null
                 select KeyValuePair.Create(et.Model!.ToLite(), et))
-                .GroupToDictionary(),
+                .GroupToFrozenDictionary(),
                 new InvalidateWith(typeof(SMSTemplateEntity), typeof(SMSModelEntity)));
 
             typeToEntity = sb.GlobalLazy(() =>
@@ -107,13 +107,13 @@ public static class SMSModelLogic
                     type => type.FullName!,
                     (entity, type) => KeyValuePair.Create(type, entity),
                     "caching " + nameof(SMSModelEntity))
-                    .ToDictionary();
+                    .ToFrozenDictionary();
             }, new InvalidateWith(typeof(SMSModelEntity)));
 
 
             sb.Schema.Initializing += () => typeToEntity.Load();
 
-            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse(),
+            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse().ToFrozenDictionary(),
                 new InvalidateWith(typeof(SMSModelEntity)));
         }
     }

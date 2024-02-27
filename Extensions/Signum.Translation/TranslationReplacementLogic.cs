@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Signum.Translation;
@@ -35,7 +36,7 @@ public static class TranslationReplacementLogic
                     var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 
                     return new TranslationReplacementPack(dic, regex);
-                }),
+                }).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(TranslationReplacementEntity)));
 
         }

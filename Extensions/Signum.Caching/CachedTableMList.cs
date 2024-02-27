@@ -1,5 +1,6 @@
 using Signum.Engine.Linq;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 using System.Data;
 
 namespace Signum.Cache;
@@ -97,7 +98,7 @@ class CachedTableMList<T> : CachedTableBase
                     tr.Commit();
                 }
 
-                return result;
+                return result.ToFrozenDictionary();
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
     }

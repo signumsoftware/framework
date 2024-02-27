@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
@@ -155,7 +156,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
 
     }
 
-    Dictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
+    FrozenDictionary<Lite<RoleEntity>, RoleAllowedCache> NewCache()
     {
         using (AuthLogic.Disable())
         using (new EntityCache(EntityCacheType.ForceNewSealed))
@@ -181,7 +182,7 @@ class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
                 newRules.Add(role, new RoleAllowedCache(role, merger, related.Select(r => newRules.GetOrThrow(r)).ToList(), realRules.TryGetC(role)));
             }
 
-            return newRules;
+            return newRules.ToFrozenDictionary();
         }
     }
 
