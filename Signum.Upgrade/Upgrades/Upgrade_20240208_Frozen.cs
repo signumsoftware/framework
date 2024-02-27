@@ -13,9 +13,9 @@ class Upgrade_20240208_Frozen : CodeUpgradeBase
     {
         uctx.ForeachCodeFile(@"*.cs", file =>
         {
-            file.Replace("ResetLazy<FrozenDictionary<", "ResetLazy<FrozenDictionary<");
-            file.Replace("ResetLazy<FrozenSet<", "ResetLazy<FrozenSet<");
-            file.Replace("Random.Shared", "Random.Shared");
+            file.Replace("ResetLazy<Dictionary<", "ResetLazy<FrozenDictionary<");
+            file.Replace("ResetLazy<HashSet<", "ResetLazy<FrozenSet<");
+            file.Replace("MyRandom.Current", "Random.Shared");
         });
     }
 }

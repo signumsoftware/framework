@@ -2,7 +2,7 @@ namespace Signum.Dynamic.Views;
 
 public static class DynamicViewLogic
 {
-    public static ResetLazy<FrozenDictionary<Type, Dictionary<string, DynamicViewEntity>>> DynamicViews = null!;
+    public static ResetLazy<FrozenDictionary<Type, FrozenDictionary<string, DynamicViewEntity>>> DynamicViews = null!;
     public static ResetLazy<FrozenDictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors = null!;
     public static ResetLazy<FrozenDictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides = null!;
 
