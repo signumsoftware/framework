@@ -13,7 +13,7 @@ public static class WorkflowLogic
 {
     public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
-    public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
 
     [AutoExpressionField]
     public static bool HasExpired(this WorkflowEntity w) =>
@@ -115,7 +115,7 @@ public static class WorkflowLogic
     }
 
 
-    public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy = null!;
 
     public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
     {
@@ -444,7 +444,7 @@ public static class WorkflowLogic
     }
 
 
-    public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
     public static bool Evaluate(this Lite<WorkflowTimerConditionEntity> wc, CaseActivityEntity ca, DateTime now)
     {
         var tc = TimerConditions.Value.GetOrThrow(wc);
@@ -509,7 +509,7 @@ public static class WorkflowLogic
              new InvalidateWith(typeof(WorkflowTimerConditionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
     public static void Execute(this Lite<WorkflowActionEntity> wa, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
     {
         var waEntity = Actions.Value.GetOrThrow(wa);
@@ -575,7 +575,7 @@ public static class WorkflowLogic
             new InvalidateWith(typeof(WorkflowActionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
     public static bool Evaluate(this Lite<WorkflowConditionEntity> wc, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
     {
         var wcEntity = Conditions.Value.GetOrThrow(wc);
@@ -642,7 +642,7 @@ public static class WorkflowLogic
             new InvalidateWith(typeof(WorkflowConditionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts = null!;
     public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws) => Scripts.Value.GetOrThrow(ws);
     private static void StartWorkflowScript(SchemaBuilder sb)
     {

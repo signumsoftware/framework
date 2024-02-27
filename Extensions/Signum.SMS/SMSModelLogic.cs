@@ -65,10 +65,10 @@ public static class SMSModelLogic
         }
     }
 
-    static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
+    static ResetLazy<FrozenDictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
     static Dictionary<Type, SMSModelInfo> registeredModels = new Dictionary<Type, SMSModelInfo>();
-    static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity = null!;
-    static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType = null!;
+    static ResetLazy<FrozenDictionary<Type, SMSModelEntity>> typeToEntity = null!;
+    static ResetLazy<FrozenDictionary<SMSModelEntity, Type>> entityToType = null!;
 
     public static void Start(SchemaBuilder sb)
     {

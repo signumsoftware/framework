@@ -8,7 +8,7 @@ public class RestApiKeyLogic
     public readonly static string ApiKeyQueryParameter = "apiKey";
     public readonly static string ApiKeyHeader = "X-ApiKey";
 
-    public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
+    public static ResetLazy<FrozenDictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
     public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
     public static void Start(SchemaBuilder sb)

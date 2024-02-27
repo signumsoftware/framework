@@ -17,7 +17,7 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
     string? remainingJoins;
 
     Func<FieldReader, object> rowReader = null!;
-    ResetLazy<Dictionary<PrimaryKey, object>> rows = null!;
+    ResetLazy<FrozenDictionary<PrimaryKey, object>> rows = null!;
     Func<object, PrimaryKey> idGetter;
     Dictionary<Type, ICachedLiteModelConstructor> liteModelConstructors = null!;
 
@@ -69,7 +69,7 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
             idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
         }
 
-        rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
+        rows = new ResetLazy<FrozenDictionary<PrimaryKey, object>>(() =>
         {
             return SqlServerRetry.Retry(() =>
             {

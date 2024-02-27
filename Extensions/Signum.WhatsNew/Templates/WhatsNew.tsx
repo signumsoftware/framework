@@ -43,7 +43,7 @@ export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
         onFind={() => selectContentType(ti => Navigator.isFindable(ti)).then(ti => ti && Finder.find({ queryName: ti.name }))}
         onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name) as Promise<Entity | undefined>)}
       />
-      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<WhatsNewMessageEmbedded>) =>
+      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={ctx =>
         <WhatsNewMessageComponent ctx={ctx} invalidate={() => forceUpdate} />} />
     </div>
   );

@@ -38,8 +38,8 @@ public static class SMSLogic
 
     public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
-    public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
-    public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
 
     public static void AssertStarted(SchemaBuilder sb)
     {

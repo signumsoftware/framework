@@ -15,7 +15,7 @@ public static class DynamicValidationLogic
         }
     }
 
-    static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!;
+    static ResetLazy<FrozenDictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!;
 
     public static void Start(SchemaBuilder sb)
     {

@@ -4,7 +4,7 @@ namespace Signum.Authorization.Rules;
 
 class TypeAuthCache : IManualAuth<Type, TypeAllowedAndConditions>
 {
-    readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
+    readonly ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
     IMerger<Type, TypeAllowedAndConditions> merger;
 

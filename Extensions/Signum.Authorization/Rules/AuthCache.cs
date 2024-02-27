@@ -29,7 +29,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     where R : class
     where K : notnull
 {
-    readonly ResetLazy<Dictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
+    readonly ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
     Func<R, K> ToKey;
     Func<K, R> ToEntity;

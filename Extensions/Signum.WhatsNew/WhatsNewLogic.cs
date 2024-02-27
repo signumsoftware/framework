@@ -8,7 +8,7 @@ namespace Signum.WhatsNew;
 public static class WhatsNewLogic
 {
 
-    static ResetLazy<Dictionary<Lite<WhatsNewEntity>, WhatsNewEntity>> WhatsNews = null!; //remove 
+    static ResetLazy<FrozenDictionary<Lite<WhatsNewEntity>, WhatsNewEntity>> WhatsNews = null!; //remove 
     static Dictionary<Type, IRelatedConfig> RelatedConfigDictionary = new Dictionary<Type, IRelatedConfig>();
 
     [AutoExpressionField]

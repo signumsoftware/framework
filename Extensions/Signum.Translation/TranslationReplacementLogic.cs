@@ -6,7 +6,7 @@ namespace Signum.Translation;
 
 public static class TranslationReplacementLogic
 {
-    public static ResetLazy<Dictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy = null!;
+    public static ResetLazy<FrozenDictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy = null!;
 
     public static void Start(SchemaBuilder sb)
     {

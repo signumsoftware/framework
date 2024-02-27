@@ -10,7 +10,7 @@ class CachedTableMList<T> : CachedTableBase
 
     TableMList table;
 
-    ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
+    ResetLazy<FrozenDictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
 
     static ParameterExpression result = Expression.Parameter(typeof(T));
 
@@ -69,7 +69,7 @@ class CachedTableMList<T> : CachedTableBase
             rowIdGetter = ctr.GetPrimaryKeyGetter(table.PrimaryKey);
         }
 
-        relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
+        relationalRows = new ResetLazy<FrozenDictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
         {
             return SqlServerRetry.Retry(() =>
             {

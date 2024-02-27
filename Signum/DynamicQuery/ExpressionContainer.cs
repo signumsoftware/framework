@@ -167,10 +167,10 @@ public class ExpressionContainer
     }
 
 
-    private ResetLazy<HashSet<K>> GetAllKeysLazy<K>()
+    private ResetLazy<FrozenSet<K>> GetAllKeysLazy<K>()
     {
         if (typeof(K).IsEnum)
-            return new ResetLazy<HashSet<K>>(() => EnumExtensions.GetValues<K>().ToHashSet());
+            return new ResetLazy<FrozenSet<K>>(() => EnumExtensions.GetValues<K>().ToHashSet());
 
         if (typeof(K).IsLite())
             return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToHashSet());

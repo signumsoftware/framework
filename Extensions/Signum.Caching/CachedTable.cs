@@ -9,7 +9,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
 {
     Table table;
 
-    ResetLazy<Dictionary<PrimaryKey, object>> rows;
+    ResetLazy<FrozenDictionary<PrimaryKey, object>> rows;
 
     public Dictionary<PrimaryKey, object> GetRows()
     {
@@ -68,7 +68,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
             idGetter = ctr.GetPrimaryKeyGetter((IColumn)table.PrimaryKey);
         }
 
-        rows = new ResetLazy<Dictionary<PrimaryKey, object>>(() =>
+        rows = new ResetLazy<FrozenDictionary<PrimaryKey, object>>(() =>
         {
             return SqlServerRetry.Retry(() =>
             {
@@ -223,8 +223,8 @@ class CachedTable<T> : CachedTableBase where T : Entity
         return this.GetRows().ContainsKey(primaryKey);
     }
 
-    ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries =
-        new ConcurrentDictionary<LambdaExpression, ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
+    ConcurrentDictionary<LambdaExpression, ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>> BackReferenceDictionaries =
+        new ConcurrentDictionary<LambdaExpression, ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>>(ExpressionComparer.GetComparer<LambdaExpression>(false));
 
     internal Dictionary<PrimaryKey, List<PrimaryKey>> GetBackReferenceDictionary<R>(Expression<Func<T, Lite<R>?>> backReference)
         where R : Entity
@@ -239,7 +239,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
             {
                 var backReferenceGetter = this.Constructor.GetPrimaryKeyNullableGetter(column);
 
-                return new ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>(() =>
+                return new ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>(() =>
                 {
                     return this.rows.Value.Values
                     .Where(a => backReferenceGetter(a) != null)
@@ -249,7 +249,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
             else
             {
                 var backReferenceGetter = this.Constructor.GetPrimaryKeyGetter(column);
-                return new ResetLazy<Dictionary<PrimaryKey, List<PrimaryKey>>>(() =>
+                return new ResetLazy<FrozenDictionary<PrimaryKey, List<PrimaryKey>>>(() =>
                 {
                     return this.rows.Value.Values
                     .GroupToDictionary(a => backReferenceGetter(a), a => idGetter(a));

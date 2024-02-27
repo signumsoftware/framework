@@ -209,7 +209,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
             </fieldset>
             {queryKey && <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={handleCreate}
               getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
-              getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
+              getComponent={mctx =>
                 <div>
                   {!queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={queryDescription} />}
                 </div>
