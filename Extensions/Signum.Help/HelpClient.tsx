@@ -89,6 +89,9 @@ export function replaceHtmlLinks(txt: string | null) {
   return txt3;
 }
 
+
+const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {}; 
+
 export module API {
 
   export function index(): Promise<HelpIndexTS> {
@@ -104,7 +107,7 @@ export module API {
   }
 
   export function type(cleanName: string): Promise<TypeHelpEntity> {
-    return ajaxGet({ url: "/api/help/type/" + cleanName });
+    return cache[cleanName] ??= ajaxGet({ url: "/api/help/type/" + cleanName });
   }
 
   export function saveType(typeHelp: TypeHelpEntity): Promise<void> {

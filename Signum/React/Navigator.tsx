@@ -683,15 +683,11 @@ export interface ViewOptions<T extends ModifiableEntity> {
   extraProps?: {};
 }
 
-export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined>;
-export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions<T>): Promise<T | undefined>;
-export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined>
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions<ModifiableEntity>): Promise<ModifiableEntity | undefined>;
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions<ModifiableEntity>): Promise<ModifiableEntity | undefined> {
+export function view<T extends ModifiableEntity>(entityOrPack: Lite<T & Entity> | T | EntityPack<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined> {
 
   const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
 
-  const es = getSettings(typeName);
+  const es = getSettings(typeName) as EntitySettings<T> | undefined;
 
   if (es?.onView)
     return es.onView(entityOrPack, viewOptions);
@@ -699,7 +695,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
     return viewDefault(entityOrPack, viewOptions);
 }
 
-export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions<ModifiableEntity>) {
+export function viewDefault<T extends ModifiableEntity>(entityOrPack: Lite<T & Entity> | T | EntityPack<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined> {
   return NavigatorManager.getFrameModal()
     .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
@@ -1007,7 +1003,7 @@ export function getAutocompleteConstructors(tr: TypeReference, str: string, aac:
     if (typeof es.autocompleteConstructor == "string")
       return softCast<AutocompleteConstructor<ModifiableEntity>>({
         type: ti.name,
-        onClick: () => Constructor.construct(ti.name, { [es!.autocompleteConstructor as string]: str }).then(a=>a && view(a))
+        onClick: () => Constructor.construct(ti.name, { [es!.autocompleteConstructor as string]: str }).then(a => a && view(a))
       });
 
     return es.autocompleteConstructor(str, aac);
