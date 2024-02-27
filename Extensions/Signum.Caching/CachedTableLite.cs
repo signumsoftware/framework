@@ -24,7 +24,7 @@ class CachedTableLite<T> : CachedTableBase where T : Entity
 
     SemiCachedController<T>? semiCachedController;
 
-    public FrozenDictionary<PrimaryKey, object> GetRows()
+    public IDictionary<PrimaryKey, object> GetRows()
     {
         return rows.Value;
     }

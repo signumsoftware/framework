@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import { FilterOption, FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
-import { Aprox, EntityBaseController, EntityBaseProps, AsEntity } from './EntityBase'
+import { Aprox, EntityBaseController, EntityBaseProps, AsEntity, NN } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { getTypeInfo, IsByAll, PropertyRoute, tryGetTypeInfos } from '../Reflection'
@@ -14,14 +14,14 @@ import { isRtl, toAbsoluteUrl } from '../AppContext'
 import { KeyNames } from '../Components'
 
 export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> extends LineBaseProps<MList<V>> {
-  view?: boolean | ((item: V) => boolean);
+  view?: boolean | ((item: NoInfer<V>) => boolean);
   viewOnCreate?: boolean;
   create?: boolean;
   createOnFind?: boolean;
   find?: boolean;
-  remove?: boolean | ((item: V) => boolean);
+  remove?: boolean | ((item: NoInfer<V>) => boolean);
   paste?: boolean;
-  move?: boolean | ((item: V) => boolean);
+  move?: boolean | ((item: NoInfer<V>) => boolean);
   moveMode?: "DragIcon" | "MoveIcons";
 
   onView?: (entity: V, pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;

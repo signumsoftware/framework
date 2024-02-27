@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using System.Data;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
+using System.Linq;
 
 namespace Signum.Cache;
 
@@ -12,7 +13,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
 
     ResetLazy<FrozenDictionary<PrimaryKey, object>> rows;
 
-    public FrozenDictionary<PrimaryKey, object> GetRows()
+    public IDictionary<PrimaryKey, object> GetRows()
     {
         return rows.Value;
     }
@@ -146,8 +147,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public object GetRow(PrimaryKey id)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().TryGetValue(id, out var origin))
             throw new EntityNotFoundException(typeof(T), id);
 
         return origin;
@@ -161,8 +161,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public object? TryGetLiteModel(PrimaryKey id, Type modelType, IRetriever retriever)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().ContainsKey(id))
             return null;
 
         return this.liteModelConstructors.GetOrThrow(modelType).GetModel(id, retriever);
@@ -171,8 +170,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     public bool Exists(PrimaryKey id)
     {
         Interlocked.Increment(ref hits);
-        var origin = this.GetRows().TryGetC(id);
-        if (origin == null)
+        if (!this.GetRows().ContainsKey(id))
             return false;
 
         return true;
@@ -182,8 +180,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     {
         Interlocked.Increment(ref hits);
 
-        var origin = this.GetRows().TryGetC(entity.Id);
-        if (origin == null)
+        if (!this.GetRows().TryGetValue(entity.Id, out var origin))
             throw new EntityNotFoundException(typeof(T), entity.Id);
 
         completer(origin, retriever, entity);
