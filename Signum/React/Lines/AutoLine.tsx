@@ -5,6 +5,7 @@ import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCh
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
 
 export interface AutoLineProps extends LineBaseProps<any> {
+  propertyRoute?: PropertyRoute; //For AutoLineModal
 }
 
 
@@ -16,7 +17,7 @@ export function AutoLine(p: AutoLineProps): React.ReactElement | null {
     return null;
 
 
-  const factory = React.useMemo(() => AutoLine.getComponentFactory(p.type ?? pr!.typeReference(), pr), [pr?.propertyPath(), p.type?.name]);
+  const factory = React.useMemo(() => AutoLine.getComponentFactory(p.type ?? pr!.typeReference(), p.propertyRoute ?? pr), [(p.propertyRoute ?? pr)?.propertyPath(), p.type?.name]);
 
   return factory(p);
 }
@@ -35,7 +36,7 @@ export namespace AutoLine {
     (customTypeComponent[type] ??= []).push({ name: name ?? type, factory });
   }
 
-  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute): (props: AutoLineProps) => React.ReactElement {
+  export function getComponentFactory(tr: TypeReference, pr?: PropertyRoute, options?: { format?: string, multiLine?: boolean }): (props: AutoLineProps) => React.ReactElement {
 
     const customs = customTypeComponent[tr.name]?.map(rule => rule.factory(tr, pr)).notNull().first();
 
