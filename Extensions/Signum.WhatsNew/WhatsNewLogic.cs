@@ -1,6 +1,7 @@
 using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Files;
+using System.Collections.Frozen;
 using System.Globalization;
 
 namespace Signum.WhatsNew;
