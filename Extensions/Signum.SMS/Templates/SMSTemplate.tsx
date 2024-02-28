@@ -39,7 +39,7 @@ export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) 
       </div>
 
       {ctx.value.query &&
-        <EntityTabRepeater ctx={ctx.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={(sc: TypeContext<SMSTemplateMessageEmbedded>) =>
+        <EntityTabRepeater ctx={ctx.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={sc =>
         <SMSTemplateMessageComponent ctx={sc} queryKey={ctx.value.query!.key!} removeNoSMSCharacters={ctx.value.removeNoSMSCharacters} invalidate={() => forceUpdate()} />
       }/>
       }

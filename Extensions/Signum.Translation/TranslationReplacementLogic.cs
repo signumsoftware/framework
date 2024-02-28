@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Signum.Translation;
@@ -6,7 +7,7 @@ namespace Signum.Translation;
 
 public static class TranslationReplacementLogic
 {
-    public static ResetLazy<Dictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy = null!;
+    public static ResetLazy<FrozenDictionary<CultureInfo, TranslationReplacementPack>> ReplacementsLazy = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -35,7 +36,7 @@ public static class TranslationReplacementLogic
                     var regex = new Regex(dic.Keys.ToString(Regex.Escape, "|"), RegexOptions.IgnoreCase);
 
                     return new TranslationReplacementPack(dic, regex);
-                }),
+                }).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(TranslationReplacementEntity)));
 
         }

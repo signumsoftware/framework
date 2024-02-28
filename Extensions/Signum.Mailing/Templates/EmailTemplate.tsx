@@ -98,7 +98,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
                 {ctx.niceName(a => a.applicable)}
               </span>}>
               <EntityDetail ctx={ctx3.subCtx(e => e.applicable)} onChange={forceUpdate}
-                getComponent={(ec2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />
+                getComponent={ec2 => <TemplateApplicable ctx={ec2} query={ctx.value.query!} />} />
             </Tab>
             
           </Tabs>
@@ -114,8 +114,8 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
         </div>
         <EntityLine ctx={ec.subCtx(e => e.masterTemplate, { labelColumns: 2 })} />
         <div className="sf-email-replacements-container">
-          <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailTemplateMessageEmbedded>) =>
-            <EmailTemplateMessageComponent ctx={ctx} queryKey={ec.value.query?.key} messageFormat={ec.value.messageFormat} invalidate={() => forceUpdate()} />} />
+          <EntityTabRepeater ctx={ec.subCtx(a => a.messages)} onChange={() => forceUpdate()} getComponent={ctxMsg =>
+            <EmailTemplateMessageComponent ctx={ctxMsg} queryKey={ec.value.query?.key} messageFormat={ec.value.messageFormat} invalidate={() => forceUpdate()} />} />
         </div>
       </div>
     </div>

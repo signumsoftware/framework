@@ -25,6 +25,7 @@ export interface RenderCheckboxItemContext<V extends ModifiableEntity | Lite<Ent
   controller: EntityCheckboxListController<V>;
   resultTable?: ResultTable;
   ectx: TypeContext<V> | null;
+  oldCtx: TypeContext<V> | null;
 }
 
 export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
@@ -245,7 +246,8 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
         checked: ectx != null,
         controller: c,
         resultTable: resultTable,
-        ectx: ectx
+        ectx: ectx,
+        oldCtx: oldCtx
       };
 
       if (p.onRenderCheckbox)

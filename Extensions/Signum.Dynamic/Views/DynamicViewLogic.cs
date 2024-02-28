@@ -2,9 +2,9 @@ namespace Signum.Dynamic.Views;
 
 public static class DynamicViewLogic
 {
-    public static ResetLazy<Dictionary<Type, Dictionary<string, DynamicViewEntity>>> DynamicViews = null!;
-    public static ResetLazy<Dictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors = null!;
-    public static ResetLazy<Dictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides = null!;
+    public static ResetLazy<FrozenDictionary<Type, FrozenDictionary<string, DynamicViewEntity>>> DynamicViews = null!;
+    public static ResetLazy<FrozenDictionary<Type, DynamicViewSelectorEntity>> DynamicViewSelectors = null!;
+    public static ResetLazy<FrozenDictionary<Type, List<DynamicViewOverrideEntity>>> DynamicViewOverrides = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -49,7 +49,7 @@ public static class DynamicViewLogic
 
             DynamicViews = sb.GlobalLazy(() =>
                 Database.Query<DynamicViewEntity>().SelectCatch(dv => new { Type = dv.EntityType.ToType(), dv })
-                .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToDictionaryEx(a => a.ViewName)),
+                .AgGroupToDictionary(a => a.Type!, gr => gr.Select(a => a.dv!).ToFrozenDictionaryEx(a => a.ViewName)).ToFrozenDictionary(),
                 new InvalidateWith(typeof(DynamicViewEntity)));
 
             sb.Include<DynamicViewSelectorEntity>()
@@ -63,7 +63,7 @@ public static class DynamicViewLogic
                 });
 
             DynamicViewSelectors = sb.GlobalLazy(() =>
-                Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KeyValuePair.Create(dvs.EntityType.ToType(), dvs)).ToDictionaryEx(),
+                Database.Query<DynamicViewSelectorEntity>().SelectCatch(dvs => KeyValuePair.Create(dvs.EntityType.ToType(), dvs)).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(DynamicViewSelectorEntity)));
 
             sb.Include<DynamicViewOverrideEntity>()
@@ -78,7 +78,7 @@ public static class DynamicViewLogic
                });
 
             DynamicViewOverrides = sb.GlobalLazy(() =>
-             Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KeyValuePair.Create(dvo.EntityType.ToType(), dvo)).GroupToDictionary(kvp => kvp.Key, kvp => kvp.Value),
+             Database.Query<DynamicViewOverrideEntity>().SelectCatch(dvo => KeyValuePair.Create(dvo.EntityType.ToType(), dvo)).GroupToFrozenDictionary(kvp => kvp.Key, kvp => kvp.Value),
              new InvalidateWith(typeof(DynamicViewOverrideEntity)));
 
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type => Administrator.UnsafeDeletePreCommand(Database.Query<DynamicViewEntity>().Where(dv => dv.EntityType.Is(type)));
