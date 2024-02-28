@@ -8,7 +8,7 @@ namespace Signum.WhatsNew;
 public static class WhatsNewLogic
 {
 
-    static ResetLazy<Dictionary<Lite<WhatsNewEntity>, WhatsNewEntity>> WhatsNews = null!; //remove 
+    static ResetLazy<FrozenDictionary<Lite<WhatsNewEntity>, WhatsNewEntity>> WhatsNews = null!; //remove 
     static Dictionary<Type, IRelatedConfig> RelatedConfigDictionary = new Dictionary<Type, IRelatedConfig>();
 
     [AutoExpressionField]
@@ -52,7 +52,7 @@ public static class WhatsNewLogic
 
             sb.Schema.EntityEvents<WhatsNewEntity>().PreUnsafeDelete += WhatsNewLogic_PreUnsafeDelete;
 
-            WhatsNews = sb.GlobalLazy(() => Database.Query<WhatsNewEntity>().ToDictionary(a => a.ToLite()),
+            WhatsNews = sb.GlobalLazy(() => Database.Query<WhatsNewEntity>().ToFrozenDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(WhatsNewEntity)));
 
             FileTypeLogic.Register(WhatsNewFileType.WhatsNewAttachmentFileType, previewFileTypeAlgorithm);
