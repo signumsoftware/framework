@@ -30,6 +30,7 @@ table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
     cursor: pointer;
+    background-color: unset;  /*Compenesate boostrap white */
 }
 
     table.sf-search-results > tbody > tr > td > * {

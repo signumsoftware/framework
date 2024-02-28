@@ -1,5 +1,6 @@
 using Signum.Engine.Linq;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 using System.Data;
 
 namespace Signum.Cache;
@@ -10,7 +11,7 @@ class CachedTableMList<T> : CachedTableBase
 
     TableMList table;
 
-    ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
+    ResetLazy<FrozenDictionary<PrimaryKey, Dictionary<PrimaryKey, object>>> relationalRows;
 
     static ParameterExpression result = Expression.Parameter(typeof(T));
 
@@ -69,7 +70,7 @@ class CachedTableMList<T> : CachedTableBase
             rowIdGetter = ctr.GetPrimaryKeyGetter(table.PrimaryKey);
         }
 
-        relationalRows = new ResetLazy<Dictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
+        relationalRows = new ResetLazy<FrozenDictionary<PrimaryKey, Dictionary<PrimaryKey, object>>>(() =>
         {
             return SqlServerRetry.Retry(() =>
             {
@@ -97,7 +98,7 @@ class CachedTableMList<T> : CachedTableBase
                     tr.Commit();
                 }
 
-                return result;
+                return result.ToFrozenDictionary();
             });
         }, mode: LazyThreadSafetyMode.ExecutionAndPublication);
     }

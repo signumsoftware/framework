@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";

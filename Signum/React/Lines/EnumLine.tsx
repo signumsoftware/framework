@@ -9,7 +9,7 @@ import { BooleanEnum } from '../Signum.Entities'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 
-export interface EnumLineProps<V extends string | number | null> extends ValueBaseProps<V> {
+export interface EnumLineProps<V extends string | number | boolean | null> extends ValueBaseProps<V> {
   lineType?:
   "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
   "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
@@ -20,7 +20,7 @@ export interface EnumLineProps<V extends string | number | null> extends ValueBa
   columnWidth?: number;
 }
 
-export class EnumLineController<V extends string | number | null> extends ValueBaseController<EnumLineProps<V>, V>{
+export class EnumLineController<V extends string | number | boolean | null> extends ValueBaseController<EnumLineProps<V>, V>{
 
 }
 
@@ -29,9 +29,9 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | number | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
+export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
-  const c = useController(EnumLineController, props, ref);
+  const c = useController(EnumLineController<V>, props, ref);
 
   if (c.isHidden)
     return null;
@@ -44,7 +44,7 @@ export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends st
   return LineBaseController.propEquals(prev, next);
 });
 
-function internalDropDownList<V extends string | number | null>(vl: EnumLineController<V>) {
+function internalDropDownList<V extends string | number | boolean | null>(vl: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(vl);
 
@@ -132,7 +132,7 @@ function internalDropDownList<V extends string | number | null>(vl: EnumLineCont
   }
 }
 
-function internalComboBoxText<V extends string | number | null>(el: EnumLineController<V>) {
+function internalComboBoxText<V extends string | number | boolean | null>(el: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(el);
 
@@ -184,7 +184,7 @@ function internalComboBoxText<V extends string | number | null>(el: EnumLineCont
   );
 }
 
-function internalRadioGroup<V extends string | number | null>(elc: EnumLineController<V>) {
+function internalRadioGroup<V extends string | number | boolean | null>(elc: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(elc);
 

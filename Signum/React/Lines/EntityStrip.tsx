@@ -8,7 +8,7 @@ import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Aprox, EntityBaseController } from './EntityBase';
+import { Aprox, EntityBaseController, NN } from './EntityBase';
 import { genericForwardRef, LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FindOptions } from '../Search'
@@ -21,10 +21,10 @@ export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> ext
   vertical?: boolean;
   iconStart?: boolean;
   autocomplete?: AutocompleteConfig<any> | null;
-  onRenderItem?: (item: V) => React.ReactNode;
+  onRenderItem?: (item: NoInfer<V>) => React.ReactNode;
   showType?: boolean;
-  onItemHtmlAttributes?: (item: V) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  onItemContainerHtmlAttributes?: (item: V) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   avoidDuplicates?: boolean;
   groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;

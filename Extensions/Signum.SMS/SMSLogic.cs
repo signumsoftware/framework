@@ -38,8 +38,8 @@ public static class SMSLogic
 
     public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
-    public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
-    public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -91,12 +91,12 @@ public static class SMSLogic
                     .Where(a => a.Model.Is(e)));
 
             SMSTemplatesLazy = sb.GlobalLazy(() =>
-                Database.Query<SMSTemplateEntity>().ToDictionary(et => et.ToLite())
+                Database.Query<SMSTemplateEntity>().ToFrozenDictionary(et => et.ToLite())
                 , new InvalidateWith(typeof(SMSTemplateEntity)));
 
             SMSTemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToFrozenDictionary();
             }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 

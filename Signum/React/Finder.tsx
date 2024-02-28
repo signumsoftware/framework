@@ -185,7 +185,7 @@ export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promi
 }
 
 
-export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+export function findMany<T extends Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
@@ -1273,7 +1273,7 @@ export class TokenCompleter {
       const cd = this.queryDescription.columns[fullKey];
 
       if (cd == undefined)
-        throw new Error(`Column '${fullKey}' is not a column of query '${this.queryDescription.queryKey}'. Maybe use 'Entity.${fullKey}' instead?`);
+        throw new Error(`No column with name '${fullKey}' found in query '${this.queryDescription.queryKey}'.\nMaybe use '${(fullKey ? ("Entity." + fullKey) : "Entity")}'`);
 
       return toQueryToken(cd);
     }

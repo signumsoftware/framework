@@ -216,12 +216,14 @@ ul.sf-strip-vertical > li {
     margin-left: 4px;
 }
 
-label.sf-checkbox-element {
+.sf-checkbox-element {
     display: block;
+    break-inside: avoid-column;
 }
 
-label.sf-radio-element {
+.sf-radio-element {
     display: block;
+    break-inside: avoid-column;
 }
 
 .sf-strip-link {

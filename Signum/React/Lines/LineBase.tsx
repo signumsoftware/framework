@@ -22,8 +22,8 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
-  extraButtons?: (vl: LineBaseController<this, V>) => React.ReactNode;
-  extraButtonsBefore?: (vl: LineBaseController<this, V>) => React.ReactNode;
+  extraButtons?: (vl: LineBaseController<any, V>) => React.ReactNode;
+  extraButtonsBefore?: (vl: LineBaseController<any, V>) => React.ReactNode;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
   helpText?: React.ReactNode | null;

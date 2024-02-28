@@ -21,8 +21,9 @@ export interface EntityAccordionProps<V extends ModifiableEntity> extends Entity
   avoidFieldSet?: boolean | HeaderType;
   createMessage?: string;
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
-  itemExtraButtons?: (er: EntityAccordionController<V>, index: number) => React.ReactElement;
-  itemHtmlAttributes?: (er: EntityAccordionController<V>, index: number) => React.HTMLAttributes<any>;
+  itemExtraButtons?: (ctx: TypeContext<V>, er: EntityAccordionController<V>) => React.ReactElement;
+  itemHtmlAttributes?: (ctx: TypeContext<V>, er: EntityAccordionController<V>) => React.HTMLAttributes<any>;
+  headerHtmlAttributes?: (ctx: TypeContext<V>, er: EntityAccordionController<V>) => React.HTMLAttributes<any>;
   initialSelectedIndex?: number | null;
   selectedIndex?: number | null;
   onSelectTab?: (newIndex: number | null) => void;
@@ -56,6 +57,11 @@ export class EntityAccordionController<V extends ModifiableEntity> extends Entit
       this.selectedIndex = p.selectedIndex!;
       this.setSelectedIndex = p.onSelectTab!;
     }
+
+    React.useEffect(() => {
+      if (!this.initialIsControlled && p.initialSelectedIndex)
+        this.setSelectedIndex(p.initialSelectedIndex);
+    }, [p.initialSelectedIndex]);
   }
 
   getDefaultProps(p: EntityAccordionProps<V>) {
@@ -127,11 +133,12 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
               ctx={mlec}
               move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
               drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
-              itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
+              itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(mlec, c)) : undefined}
               getComponent={p.getComponent as (ctx: TypeContext<V>) => React.ReactElement}
               getViewPromise={p.getViewPromise as (entity: V) => undefined | string | Navigator.ViewPromise<V>}
               getTitle={p.getTitle}
-              htmlAttributes={p.itemHtmlAttributes?.(c, mlec.index!)}
+              htmlAttributes={p.itemHtmlAttributes?.(mlec, c)}
+              headerHtmlAttributes={p.headerHtmlAttributes?.(mlec, c)}
               title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
         {
@@ -160,9 +167,10 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   title?: React.ReactElement;
   itemExtraButtons?: () => React.ReactElement;
   htmlAttributes?: React.HTMLAttributes<any>;
+  headerHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes }: EntityAccordionElementProps<V>)
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes }: EntityAccordionElementProps<V>)
 {
 
   const forceUpdate = useForceUpdate();
@@ -189,7 +197,7 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>
 
-      <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)}>
+      <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)} {...headerHtmlAttributes}>
         <div className="d-flex align-items-center flex-grow-1">
           {getTimeMachineIcon({ ctx: ctx, isContainer: true })}
           {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
