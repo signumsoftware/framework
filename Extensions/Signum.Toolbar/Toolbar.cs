@@ -17,7 +17,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Max = 100)]
     public string Name { get; set; }
 
     public ToolbarLocation Location { get; set; }
@@ -193,7 +193,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Max = 100)]
     public string Name { get; set; }
 
     [PreserveOrder]
