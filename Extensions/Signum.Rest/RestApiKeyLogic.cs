@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 
