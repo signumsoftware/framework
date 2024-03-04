@@ -9,6 +9,7 @@ using Signum.Utilities;
 using System.Runtime.ConstrainedExecution;
 using Signum.DynamicQuery.Tokens;
 using System.Runtime.CompilerServices;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.DynamicQuery;
 
@@ -191,11 +192,15 @@ public static class DQueryable
             if (gr.Key == null)
                 return null;
 
-            var parentKey = gr.Key.Parent!.Follow(a => a.Parent).OfType<CollectionElementToken>().FirstOrDefault();
+            foreach (var parentKey in gr.Key.Parent!.Follow(a => a.Parent).OfType<CollectionElementToken>())
+            {
+                var groups = tokenGroups.SingleOrDefault(a => object.Equals(a.Key, parentKey));
+                if (groups != null)
+                    return groups;
+            }
 
-            var grParent = tokenGroups.SingleEx(a => object.Equals(a.Key, parentKey));
+            return tokenGroups.SingleEx(a => a.Key == null);
 
-            return grParent;
         }).SingleEx();
 
         return SubQueryConstructor(context, tree, out newContext);
@@ -215,10 +220,7 @@ public static class DQueryable
             var cet = child.Value.Key!;
 
             var collectionToken = cet.Parent!;
-            var eptML = MListElementPropertyToken.AsMListEntityProperty(collectionToken);
-
-            var colExpre = eptML != null ? MListElementPropertyToken.BuildMListElements(eptML, context) :
-                collectionToken.BuildExpression(context);
+            var colExpre = GetCollectionExpression(context, collectionToken, out EntityPropertyToken? eptML);
 
             var elementType = colExpre.Type.ElementType()!;
 
@@ -226,13 +228,10 @@ public static class DQueryable
 
             var subQueryCtx = new BuildExpressionContext(pe2.Type, pe2, new Dictionary<QueryToken, ExpressionBox>
             {
-                {
-                    cet,
-                    new ExpressionBox(
-                        pe2.BuildLiteNullifyUnwrapPrimaryKey(new []{ cet.GetPropertyRoute() }.NotNull().ToArray()),
+                [cet] = new ExpressionBox(
+                        pe2.BuildLiteNullifyUnwrapPrimaryKey(new[] { cet.GetPropertyRoute() }.NotNull().ToArray()),
                         mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
                     )
-                }
             }, context.Filters);
 
             var subQueryExp = SubQueryConstructor(subQueryCtx, child, out var newSubContext);
@@ -271,6 +270,48 @@ public static class DQueryable
         return Expression.Lambda(ctor, context.Parameter);
     }
 
+    static MethodInfo miSelectMany = ReflectionTools.GetMethodInfo(() => Enumerable.SelectMany<string, char>(null!, a => a)).GetGenericMethodDefinition();
+    private static Expression GetCollectionExpression(BuildExpressionContext context, QueryToken collectionToken, out EntityPropertyToken? eptML)
+    {
+        var cetParent = collectionToken.Follow(a => a.Parent).OfType<CollectionElementToken>().FirstOrDefault();
+
+        if (cetParent == null || context.Replacements.ContainsKey(cetParent))
+        {
+            eptML = MListElementPropertyToken.AsMListEntityProperty(collectionToken);
+
+            var colExpre = eptML != null ? MListElementPropertyToken.BuildMListElements(eptML, context) :
+                collectionToken.BuildExpression(context);
+
+            return colExpre;
+        }
+        else //Like Entity.Invoices.Element.InvoiceLine.Element.Product without shouwing any other token of the InvoiceLine 
+        {
+            var subCollection = GetCollectionExpression(context, cetParent.Parent!, out EntityPropertyToken? otherEptMl);
+
+            var elementType = subCollection.Type.ElementType()!;
+
+            var pe = Expression.Parameter(elementType, elementType.CleanType().Name.Substring(0, 1).ToLower());
+
+            var subQueryCtx = new BuildExpressionContext(pe.Type, pe, new Dictionary<QueryToken, ExpressionBox>
+            {
+                [cetParent] = new ExpressionBox(
+                    pe.BuildLiteNullifyUnwrapPrimaryKey(new[] { cetParent.GetPropertyRoute() }.NotNull().ToArray()),
+                    mlistElementRoute: otherEptMl != null ? cetParent.GetPropertyRoute() : null
+                )
+            }, context.Filters);
+
+            eptML = MListElementPropertyToken.AsMListEntityProperty(collectionToken);
+
+            var colExpre = eptML != null ? MListElementPropertyToken.BuildMListElements(eptML, subQueryCtx) :
+                collectionToken.BuildExpression(subQueryCtx);
+
+            var lambda = Expression.Lambda(colExpre, pe);
+
+            var selectMany = Expression.Call(miSelectMany.MakeGenericMethod(elementType, colExpre.Type.ElementType()!), subCollection, lambda);
+
+            return selectMany;
+        }
+    }
 
     public static DEnumerable<T> Concat<T>(this DEnumerable<T> collection, DEnumerable<T> other)
     {

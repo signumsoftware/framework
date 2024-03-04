@@ -18,6 +18,7 @@ import { useForceUpdate } from '../Hooks'
 export interface TextAreaLineProps extends ValueBaseProps<string | null> {
   autoFixString?: boolean;
   autoTrimString?: boolean;
+  autoResize?: boolean;
   charCounter?: true | ((length: number) => React.ReactElement | string);
 }
 
@@ -38,7 +39,7 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
   const s = c.props;
 
   var htmlAtts = c.props.valueHtmlAttributes;
-  var autoResize = htmlAtts?.style?.height == null && htmlAtts?.rows == null;
+  var autoResize = s.autoResize ?? (htmlAtts?.style?.height == null && htmlAtts?.rows == null);
 
   if (s.ctx.readOnly)
     return (

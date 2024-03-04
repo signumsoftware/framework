@@ -150,7 +150,7 @@ public class CollectionToArrayToken : QueryToken
             var param = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
             subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>
             {
-                { cta, new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute()) }
+                [cta] = new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute())
             }, context.Filters);
         }
         else
@@ -161,7 +161,7 @@ public class CollectionToArrayToken : QueryToken
             var param = Expression.Parameter(elemeType, elemeType.Name.Substring(0, 1).ToLower());
             subCtx = new BuildExpressionContext(elemeType, param, new Dictionary<QueryToken, ExpressionBox>()
             {
-                { cta, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))}
+                [cta] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))
             }, context.Filters);
         }
 
@@ -177,7 +177,7 @@ public class CollectionToArrayToken : QueryToken
                 var param = Expression.Parameter(mleType, mleType.Name.Substring(0, 1).ToLower());
                 subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
-                    { ce, new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())}
+                    [ce] = new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())
                 }, context.Filters);
             }
             else
@@ -189,7 +189,7 @@ public class CollectionToArrayToken : QueryToken
                 var param = Expression.Parameter(elementType, elementType.Name.Substring(0, 1).ToLower());
                 subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
-                    { ce, new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))}
+                    [ce] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))
                 }, context.Filters);
             }
         }

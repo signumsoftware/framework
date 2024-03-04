@@ -48,13 +48,12 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
         </div>
       </div>
 
-      {ctx.value.query &&
         <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
           <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
             <AutoLine ctx={ctx.subCtx(f => f.fileName)} />
             <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
             <div className="card-header" style={{ padding: "5px" }}>
-                <TemplateControls queryKey={ctx.value.query.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
+              <TemplateControls queryKey={ctx.value.query?.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
                   {UserChartEntity.tryTypeInfo() && qd && <UserChartTemplateButton qd={qd} />}
                   {UserQueryEntity.tryTypeInfo() && qd && <UserQueryTemplateButton qd={qd} />}
                 </div>} />
@@ -62,6 +61,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             </div>
             <FileLine ctx={ctx.subCtx(e => e.template)} />
           </Tab>
+        {ctx.value.query &&
           <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
             {ctx.niceName(a => a.query)}
           </span>}>
@@ -89,6 +89,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
               { property: a => a.orderType }
             ]} />
           </Tab>
+        }
           <Tab eventKey="applicable" title={
             <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
               {ctx.niceName(a => a.applicable)}
@@ -97,7 +98,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
               getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
           </Tab>
         </Tabs>
-      }
+
     </div>
   );
 }
