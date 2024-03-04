@@ -151,6 +151,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
                      rec.DisplayName.HasText() ? new XAttribute("DisplayName", rec.DisplayName) : null!,
                      rec.EmailAddress.HasText() ? new XAttribute("EmailAddress", rec.EmailAddress) : null!,
                      new XAttribute("Kind", rec.Kind),
+                     new XAttribute("AddressSource", rec.AddressSource),
                      rec.Token != null ? new XAttribute("Token", rec.Token?.Token.FullKey()!) : null!,
                      new XAttribute("WhenMany", rec.WhenMany),
                      new XAttribute("WhenNone", rec.WhenNone)
@@ -201,6 +202,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             rep.DisplayName = xml.Attribute("DisplayName")?.Value;
             rep.EmailAddress = xml.Attribute("EmailAddress")?.Value;
             rep.Kind = xml.Attribute("Kind")!.Value.ToEnum<EmailRecipientKind>();
+            rep.AddressSource = xml.Attribute("AddressSource")?.Value.ToEnum<EmailAddressSource>() ?? (rep.EmailAddress.HasText() ? EmailAddressSource.HardcodedAddress : EmailAddressSource.QueryToken);
             rep.Token = xml.Attribute("Token")?.Let(a => new QueryTokenEmbedded(a.Value));
             rep.WhenMany = xml.Attribute("WhenMany")?.Value?.ToEnum<WhenManyRecipiensBehaviour>() ?? WhenManyRecipiensBehaviour.KeepOneMessageWithManyRecipients;
             rep.WhenNone = xml.Attribute("WhenNone")?.Value?.ToEnum<WhenNoneRecipientsBehaviour>() ?? WhenNoneRecipientsBehaviour.ThrowException;
