@@ -18,9 +18,9 @@ import { AutoLine } from './AutoLine'
 export interface EntityTableProps<V extends ModifiableEntity, RS> extends EntityListBaseProps<V> {
   createAsLink?: boolean | ((er: EntityTableController<V, RS>) => React.ReactElement);
   firstColumnHtmlAttributes?: React.ThHTMLAttributes<any>;
-  rowHooks?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>) => RS;
-  columns?: (EntityTableColumn<V, RS> | false | null | undefined)[],
-  onRowHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: any) => React.HTMLAttributes<any> | null | undefined;
+  rowHooks?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, unknown>) => RS;
+  columns?: (EntityTableColumn<V, NoInfer<RS>> | false | null | undefined)[],
+  onRowHtmlAttributes?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: any) => React.HTMLAttributes<any> | null | undefined;
   avoidFieldSet?: boolean | HeaderType;
   avoidEmptyTable?: boolean;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
@@ -31,6 +31,8 @@ export interface EntityTableProps<V extends ModifiableEntity, RS> extends Entity
   createMessage?: string;
   createOnBlurLastRow?: boolean;
   responsive?: boolean;
+  afterView?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
+  afterRow?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
 }
 
 export interface EntityTableColumn<V extends ModifiableEntity, RS> {
@@ -259,7 +261,7 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
           <tbody>
             {
               elementCtxs
-                .map((mlec, i, array) => <EntityTableRow key={i}
+                .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
                   ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                   array={array}
                   index={i}
@@ -273,6 +275,8 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
                   columns={cleanColumns}
                   onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
                   onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
+                  afterRow={p.afterRow}
+                  afterView={p.afterView}
                 />
                 )
             }
@@ -322,10 +326,12 @@ export interface EntityTableRowProps<V extends ModifiableEntity, RS> {
   onView?: (event: React.MouseEvent<any>) => void;
   drag?: DragConfig;
   move?: MoveConfig;
-  rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>) => RS;
+  rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, unknown>) => RS;
   onRowHtmlAttributes?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
   onBlur?: (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => void;
   onKeyDown?: (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>) => void;
+  afterView?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | boolean | null | undefined;
+  afterRow?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | boolean | null | undefined;
 }
 
 export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> {
@@ -337,7 +343,7 @@ export interface EntityTableRowHandle<V extends ModifiableEntity, RS = unknown> 
 export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRowProps<V, RS>) {
   const forceUpdate = useForceUpdate();
 
-  const rowState = p.rowHooks?.(p.ctx, { props: p, forceUpdate })!;
+  const rowState = p.rowHooks?.(p.ctx, { props: p as EntityTableRowProps<V, unknown>, forceUpdate })!;
 
   const rowHandle = { props: p, rowState, forceUpdate } as EntityTableRowHandle<V, RS>;
 
@@ -351,7 +357,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
   }
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.drag;
-  return (
+  var row =  (
     <tr {...rowAtts}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
@@ -384,6 +390,7 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
             title={ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
             {EntityBaseController.getViewIcon()}
           </a>}
+          {p.afterView?.(p.ctx, rowHandle, rowState)}
         </div>
       </td>}      
       {p.columns.map((c, i) => {
@@ -420,6 +427,17 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
       })}
     </tr>
   );
+
+  if (!p.afterRow)
+    return row;
+  else
+    return (
+      <>
+        {row}
+        {p.afterRow(p.ctx, rowHandle, rowState)}
+      </>
+    );
+
 
   function getTemplate(col: EntityTableColumn<V, RS>): React.ReactElement | string | number | undefined | null | false {
 

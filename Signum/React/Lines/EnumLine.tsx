@@ -31,7 +31,7 @@ export interface OptionItem {
 
 export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
-  const c = useController(EnumLineController, props, ref);
+  const c = useController(EnumLineController<V>, props, ref);
 
   if (c.isHidden)
     return null;

@@ -116,7 +116,7 @@ public static class ToolbarLogic
 
     private static void IToolbar_Saving(IToolbarEntity tool)
     {
-        if (tool.Elements.First().Type == ToolbarElementType.ExtraIcon)
+        if (tool.Elements.FirstOrDefault()?.Type == ToolbarElementType.ExtraIcon)
             throw new InvalidOperationException(ToolbarMessage.FirstElementCanNotBeExtraIcon.NiceToString());
 
         if(tool.Elements.GroupWhen(e => e.Type != ToolbarElementType.ExtraIcon).Any(gr => gr.Count() > 0 && gr.Key.Type == ToolbarElementType.Divider))
@@ -140,30 +140,21 @@ public static class ToolbarLogic
         }
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(UserEntity));
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, owner => owner.Is(UserEntity.Current));
 
-        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-            t => t.Owner.Is(UserEntity.Current));
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
-        sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(UserEntity));
-
-        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-            t => t.Owner.Is(UserEntity.Current));
-    }
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
         sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-            t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
+        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
 
         sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-            t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
+        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
     }
 
     public static void RegisterDelete<T>(SchemaBuilder sb, Expression<Func<T, QueryEntity>>? querySelectorForSync = null) where T : Entity

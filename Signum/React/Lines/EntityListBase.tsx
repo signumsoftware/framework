@@ -6,7 +6,7 @@ import * as Navigator from '../Navigator'
 import * as Constructor from '../Constructor'
 import { FilterOption, FindOptions } from '../FindOptions'
 import { TypeContext, mlistItemContext } from '../TypeContext'
-import { Aprox, EntityBaseController, EntityBaseProps, AsEntity } from './EntityBase'
+import { Aprox, EntityBaseController, EntityBaseProps, AsEntity, NN } from './EntityBase'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { LineBaseController, LineBaseProps, tasks } from './LineBase'
 import { getTypeInfo, IsByAll, PropertyRoute, tryGetTypeInfos } from '../Reflection'
@@ -14,20 +14,21 @@ import { isRtl, toAbsoluteUrl } from '../AppContext'
 import { KeyNames } from '../Components'
 
 export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> extends LineBaseProps<MList<V>> {
-  view?: boolean | ((item: V) => boolean);
+  view?: boolean | ((item: NoInfer<V>) => boolean);
   viewOnCreate?: boolean;
   create?: boolean;
   createOnFind?: boolean;
   find?: boolean;
-  remove?: boolean | ((item: V) => boolean);
+  remove?: boolean | ((item: NoInfer<V>) => boolean);
   paste?: boolean;
-  move?: boolean | ((item: V) => boolean);
+  move?: boolean | ((item: NoInfer<V>) => boolean);
   moveMode?: "DragIcon" | "MoveIcons";
 
-  onView?: (entity: V, pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
-  onCreate?: (pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
+  onView?: (entity: NoInfer<V>, pr: PropertyRoute) => Promise<Aprox<V> | undefined> | undefined;
+  onCreate?: (pr: PropertyRoute) => Promise<Aprox<V> | undefined> | Aprox<V> | undefined;
   onFindMany?: () => Promise<Aprox<V>[] | undefined> | undefined;
-  onRemove?: (entity: V) => Promise<boolean>;
+  onRemove?: (entity: NoInfer<V>) => Promise<boolean>;
+  onMove?: (list: NoInfer<MList<V>>, oldIndex: number, newIndex: IndexWithOffset) => void;
   findOptions?: FindOptions;
   findOptionsDictionary?: { [typeName: string]: FindOptions };
 
@@ -42,17 +43,22 @@ export interface EntityListBaseProps<V extends ModifiableEntity | Lite<Entity>> 
   onAddElement?: (list: MList<V>, newItem: V) => void,
 }
 
+interface IndexWithOffset {
+  index: number; 
+  offset: 0 | 1;
+}
+
 export abstract class EntityListBaseController<P extends EntityListBaseProps<V>, V extends ModifiableEntity | Lite<Entity>> extends LineBaseController<P, MList<V>>
 {
   dragIndex!: number | undefined;
   setDragIndex!: React.Dispatch<number | undefined>;
-  dropBorderIndex!: number | undefined
-  setDropBorderIndex!: React.Dispatch<number | undefined>;
+  dropBorderIndex!: IndexWithOffset | undefined
+  setDropBorderIndex!: React.Dispatch<IndexWithOffset | undefined>;
 
   init(p: P) {
     super.init(p);
     [this.dragIndex, this.setDragIndex] = React.useState<number | undefined>(undefined);
-    [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<number | undefined>(undefined);
+    [this.dropBorderIndex, this.setDropBorderIndex] = React.useState<IndexWithOffset | undefined>(undefined);
   }
 
   keyGenerator = new KeyGenerator();
@@ -493,9 +499,10 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       this.getOffsetVertical((de.nativeEvent as DragEvent), th.getBoundingClientRect()) :
       this.getOffsetHorizontal((de.nativeEvent as DragEvent), th.getBoundingClientRect());
 
-    let dropBorderIndex = offset == undefined ? undefined : index + offset;
+    let dropBorderIndex: IndexWithOffset | undefined = offset == undefined ? undefined :
+      { index, offset };
 
-    if (dropBorderIndex == this.dragIndex || dropBorderIndex == this.dragIndex! + 1)
+    if (dropBorderIndex != null && dropBorderIndex.index == this.dragIndex)
       dropBorderIndex = undefined;
 
     if (this.dropBorderIndex != dropBorderIndex) {
@@ -530,9 +537,25 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   dropClass(index: number, orientation: "h" | "v") {
     const dropBorderIndex = this.dropBorderIndex;
 
-    return dropBorderIndex != null && index == dropBorderIndex ? (orientation == "h" ? "drag-left" : "drag-top") :
-      dropBorderIndex != null && index == dropBorderIndex - 1 ? (orientation == "h" ? "drag-right" : "drag-bottom") :
-        undefined;
+
+    if (dropBorderIndex != null) {
+
+      if (index == dropBorderIndex.index) {
+        if (dropBorderIndex.offset == 0)
+          return (orientation == "h" ? "drag-left" : "drag-top");
+        else
+          return (orientation == "h" ? "drag-right" : "drag-bottom")
+      }
+
+      if (!this.props.filterRows) {
+        if (dropBorderIndex.index == (index  -1) && dropBorderIndex.offset == 1)
+          return (orientation == "h" ? "drag-left" : "drag-top");
+        else if (dropBorderIndex.index == (index + 1) && dropBorderIndex.offset == 0)
+          return (orientation == "h" ? "drag-right" : "drag-bottom")
+      }
+    }
+
+    return undefined;
   }
 
   canRemove(item: V): boolean | undefined {
@@ -565,25 +588,13 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   handleMoveKeyDown = (ke: React.KeyboardEvent<any>, index : number) => {
 
     if (ke.ctrlKey) {
-      var direction =
-        ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight ? +1 :
-          ke.key == KeyNames.arrowUp || ke.key == KeyNames.arrowLeft ? -1 :
-            null;
 
-      if (direction != null) {
+      if (ke.key == KeyNames.arrowDown || ke.key == KeyNames.arrowRight) {
         ke.preventDefault();
-        const list = this.props.ctx.value!;
-        if (index + direction < 0 || list.length <= index + direction)
-          return;
-
-        var temp = list[index + direction];
-        list[index + direction] = list[index];
-        list[index] = temp;
-
-        this.setValue(list);
-        this.setDropBorderIndex(undefined);
-        this.setDragIndex(undefined);
-        this.forceUpdate();
+        this.onMoveElement(index, ({ index: index + 1, offset: 1 }));
+      } else {
+        ke.preventDefault();
+        this.onMoveElement(index, ({ index: index - 1, offset : 0}));
       }
     }
   }
@@ -591,16 +602,27 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
   handleDrop = (de: React.DragEvent<any>) => {
 
     de.preventDefault();
-    const dropBorderIndex = this.dropBorderIndex!;
-    if (dropBorderIndex == null)
+    const dropBorderIndex = this.dropBorderIndex;
+    const dragIndex = this.dragIndex;
+    if (dropBorderIndex == null || dragIndex == null)
       return;
 
-    const dragIndex = this.dragIndex!;
+    this.onMoveElement(dragIndex, dropBorderIndex);
+  }
+
+  onMoveElement(oldIndex: number, newIndex: IndexWithOffset) {
     const list = this.props.ctx.value!;
-    const temp = list[dragIndex!];
-    list.removeAt(dragIndex!);
-    const rebasedDropIndex = dropBorderIndex > dragIndex ? dropBorderIndex - 1 : dropBorderIndex;
-    list.insertAt(rebasedDropIndex, temp);
+
+    if (this.props.onMove) {
+      this.props.onMove(list, oldIndex, newIndex);
+    }
+    else {
+      const temp = list[oldIndex];
+      list.removeAt(oldIndex);
+      var completeNewIndex = newIndex.index + newIndex.offset;
+      const rebasedDropIndex = newIndex.index > oldIndex ? completeNewIndex - 1 : completeNewIndex;
+      list.insertAt(rebasedDropIndex, temp);
+    }
 
     this.setValue(list);
     this.setDropBorderIndex(undefined);
