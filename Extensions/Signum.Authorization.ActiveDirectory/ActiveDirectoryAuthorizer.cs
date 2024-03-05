@@ -150,8 +150,11 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                             {
                                 UpdateUser(user, dsacuCtx);
 
-                                AuthLogic.OnUserLogingIn(user);
 
+                                if (user.State == UserState.Deactivated)
+                                    throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
+
+                                AuthLogic.OnUserLogingIn(user);
                                 return user;
                             }
                             else
@@ -160,6 +163,10 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                                     throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
 
                                 user = OnCreateUser(dsacuCtx);
+
+                                if (user.State == UserState.Deactivated)
+                                    throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
+
                                 AuthLogic.OnUserLogingIn(user);
                                 return user;
                             }
@@ -243,7 +250,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
         else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
         {
-            var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().AllowMatchUsersBySimpleUserName ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
+            var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
                 AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
 
             var roles = config.RoleMapping.Where(m =>
