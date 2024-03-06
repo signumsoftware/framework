@@ -7,7 +7,7 @@ import { OverlayTrigger, Popover } from 'react-bootstrap';
 import { Entity, getToString, Lite, liteKey, toLite } from '@framework/Signum.Entities'
 import { useAPI, useForceUpdate, useUpdatedRef } from '@framework/Hooks'
 import { GraphExplorer } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '@framework/Globals';
 import MessageModal from '@framework/Modals/MessageModal'

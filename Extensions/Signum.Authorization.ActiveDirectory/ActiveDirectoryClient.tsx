@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { UserEntity, UserLiteModel} from '../Signum.Authorization/Signum.Authorization'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -103,7 +102,7 @@ export function start(options: { routes: RouteObject[], adGroups: boolean, cache
   });
 
   if (options.adGroups) {
-    Navigator.addSettings(new Navigator.EntitySettings(ADGroupEntity, e => import('./ADGroup'), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(ADGroupEntity, e => import('./ADGroup'), { isCreable: "Never" }));
     Finder.addSettings({
       queryName: AzureADQuery.ActiveDirectoryUsers,
       defaultFilters: [

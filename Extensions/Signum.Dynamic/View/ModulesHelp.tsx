@@ -125,7 +125,7 @@ modules.SelectorModal.default.chooseType(/*options:*/ ["${p.cleanName}", ....].m
     [name: string]: string;
   } = {};
   if (p.clientCode) {
-    clientModules["Navigator"] = `modules.Navigator.addSettings(modules.Navigator.EntitySettings("${p.cleanName}", undefined, {...} /*: EntitySettingsOptions<${p.cleanName}>*/)
+    clientModules["Navigator"] = `modules.Navigator.addSettings(modules.EntitySettings("${p.cleanName}", undefined, {...} /*: EntitySettingsOptions<${p.cleanName}>*/)
 modules.Navigator.getSettings("${p.cleanName}") /*: EntitySettingsOptions<${p.cleanName}>*/)
 modules.Navigator.getOrAddSettings("${p.cleanName}") /*: EntitySettingsOptions<${p.cleanName}>*/)
 
@@ -234,7 +234,7 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 //  entityFormatter?: EntityFormatter;
 //  inPlaceNavigation?: boolean;
 //  showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
-//  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+//  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
 //  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
 //  simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
 //  onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;

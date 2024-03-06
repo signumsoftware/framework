@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as ChartClient from '../ChartClient';

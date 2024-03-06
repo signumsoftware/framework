@@ -1,8 +1,7 @@
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as React from 'react';
 import { RouteObject } from 'react-router'
-import * as Navigator from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as ColorUtils from './ColorUtils'
 import { PseudoType, getTypeName } from '@framework/Reflection';

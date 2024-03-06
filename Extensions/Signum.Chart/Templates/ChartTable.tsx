@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed, withoutAggregate } from '@framework/FindOptions'
 import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'

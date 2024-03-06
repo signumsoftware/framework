@@ -12,7 +12,7 @@ import {
 	getFilterGroupUnifiedFilterType, getFilterType, isFilterGroup
 } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
-import * as Navigator from "@framework/Navigator";
+import { Navigator } from "@framework/Navigator";
 import FilterBuilder, { RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
 import { TokenCompleter } from '@framework/Finder';

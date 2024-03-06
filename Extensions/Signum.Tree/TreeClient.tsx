@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
@@ -153,7 +152,7 @@ function getQuerySetting(typeName: string) {
 function getEntitySetting(typeName: string) {
   var es = Navigator.getSettings(typeName);
   if (!es) {
-    es = new Navigator.EntitySettings(typeName);
+    es = new EntitySettings(typeName);
     Navigator.addSettings(es);
   }
   return es;

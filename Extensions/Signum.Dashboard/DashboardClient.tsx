@@ -3,8 +3,7 @@ import { RouteObject } from 'react-router'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import * as Constructor from '@framework/Constructor';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder'
 import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Workflow'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';

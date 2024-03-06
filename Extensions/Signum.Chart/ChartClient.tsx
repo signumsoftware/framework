@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { DateTime } from 'luxon'
 import { ajaxGet } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import * as Constructor from '@framework/Constructor'

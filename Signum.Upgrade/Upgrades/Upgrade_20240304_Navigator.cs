@@ -1,7 +1,9 @@
+using LibGit2Sharp;
 using Signum.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Runtime;
 using System.Text;
@@ -34,22 +36,24 @@ class Upgrade_20240304_Navigator : CodeUpgradeBase
             var nvs = ReplaceIfNecessary("Navigator.NamedViewSettings", "NamedViewSettings");
             var vp = ReplaceIfNecessary("Navigator.ViewPromise", "ViewPromise");
             var es = ReplaceIfNecessary("Navigator.EntitySettings", "EntitySettings");
+            var enc = ReplaceIfNecessary("Navigator.EnumConverter", "EnumConverter");
 
-            file.ReplaceLine(a => a.StartsWith("import") && (a.EndsWith("/Navigator'")  || a.EndsWith("/Navigator\"")), line =>
+            file.ReplaceTypeScriptImports(path => path.EndsWith("/Navigator"), parts =>
             {
-                var importPart = line.After("import").Before("from").Trim();
+                var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
+                if (ask.Any())
+                {
+                    ask.ForEach(a => parts.Remove(a));
+                    parts.Add("Navigator");
+                }
 
-                var imports = importPart.Contains('*') ? new List<string> { "Navigator" } : importPart.Between("{", "}").SplitNoEmpty(",").Select(a => a.Trim()).ToList();
 
-                imports.RemoveAll(navigatorHooks.Contains);
+                parts.AddRange(new[] { nvs, vp, es, enc }.NotNull());
+                parts.RemoveWhere(navigatorHooks.Contains);
 
-                imports.AddRange(new[] { nvs, vp, es }.NotNull());
-
-                return "import { " + imports.ToString(", ") + " } from" + line.After("from"); 
-
+                return parts.OrderByDescending(a => a == "Navigator").ToHashSet();
             });
 
-            //file.Replace(regexImport, $"import {{ {new[] { "Navigator", nvs, vp, es }.NotNull().ToString(", ")} }} from");
 
             file.Replace(regexHooksNavigator,  m => "Navigator." +  m.Value);
 

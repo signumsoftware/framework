@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router'
 import { DateTime } from 'luxon'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { SearchControl, SearchValueLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import * as Operations from '@framework/Operations'

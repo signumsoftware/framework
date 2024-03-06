@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
 import { AutoLine } from '@framework/Lines/AutoLine'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'

@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import { EntitySettings } from '@framework/Navigator';
 import { RecipientEmbedded, RemoteEmailFolderModel, RemoteEmailMessageModel, RemoteEmailMessageQuery } from './Signum.Mailing.MicrosoftGraph.RemoteEmails';
 import { EntityOperationSettings } from '@framework/Operations'
 import { EmailMessageEntity } from '../../Signum.Mailing/Signum.Mailing'

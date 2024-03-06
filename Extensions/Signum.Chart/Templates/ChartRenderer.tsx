@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ChartRequestModel} from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
 

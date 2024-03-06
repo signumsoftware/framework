@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { AbortableRequest } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { Typeahead, ErrorBoundary } from '@framework/Components'
 import * as OmniboxClient from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Omnibox'

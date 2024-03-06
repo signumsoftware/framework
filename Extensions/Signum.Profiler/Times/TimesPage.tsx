@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, HeavyProfilerEntry, TimeTrackerEntry, TimeTrackerTime } from '../ProfilerClient'
 import { useLocation, useParams } from "react-router";
 

@@ -6,7 +6,7 @@ import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPI, useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as WhatsNewClient from '../WhatsNewClient'
 import "./WhatsNewDropdown.css"

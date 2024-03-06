@@ -2,8 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import * as Constructor from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, toLite } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'

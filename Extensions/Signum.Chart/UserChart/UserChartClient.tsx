@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import * as Constructor from '@framework/Constructor'
 import * as Finder from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'

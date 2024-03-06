@@ -2,7 +2,7 @@ import { DateTime, Duration } from 'luxon'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";

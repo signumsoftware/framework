@@ -4,7 +4,7 @@ import { AutoLine, Binding, ColorLine, EntityBaseController, EntityCombo, Entity
 import { TypeContext } from '@framework/TypeContext'
 import { colorSchemes } from './ColorUtils';
 import { classes, Dic } from '@framework/Globals';
-import * as Navigator from '@framework/Navigator';
+import { Navigator, EnumConverter } from '@framework/Navigator';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as Finder from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
@@ -178,9 +178,9 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 class ConvertBinding implements IBinding<string | null> {
 
   parent: IBinding<Lite<Entity> | null>;
-  converter: Navigator.EnumConverter<string>;
+  converter: EnumConverter<string>;
 
-  constructor(binding: IBinding<Lite<Entity>>, enumEntities: Navigator.EnumConverter<string>) {
+  constructor(binding: IBinding<Lite<Entity>>, enumEntities: EnumConverter<string>) {
     this.parent = binding;
     this.suffix = this.parent.suffix;
     this.converter = enumEntities;

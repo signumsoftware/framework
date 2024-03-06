@@ -10,7 +10,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
 import { IconColor } from '../ToolbarConfig';

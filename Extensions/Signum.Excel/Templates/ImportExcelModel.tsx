@@ -6,7 +6,7 @@ import { CollectionElementEmbedded, ImportExcelMode, ImportExcelModel, ImportFro
 import * as Finder from '@framework/Finder'
 import { getTypeInfo, getTypeInfos, PseudoType } from '@framework/Reflection'
 import { SearchControlLoaded } from '@framework/Search'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as ExcelClient from '../ExcelClient'
 import { Dic, softCast } from '@framework/Globals'
 import { FindOptionsParsed, getTokenParents, hasElement, QueryToken } from '@framework/FindOptions'

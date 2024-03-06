@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { CaseActivityEntity, WorkflowActivityMessage } from '../Signum.Workflow'
 
 interface CaseFlowButtonProps {

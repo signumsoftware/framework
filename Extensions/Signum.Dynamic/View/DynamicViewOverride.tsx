@@ -5,7 +5,7 @@ import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'

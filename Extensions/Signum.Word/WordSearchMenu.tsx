@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getToString, Lite } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Word'
 import * as WordClient from './WordClient'

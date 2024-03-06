@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { API } from './UserAssetClient'

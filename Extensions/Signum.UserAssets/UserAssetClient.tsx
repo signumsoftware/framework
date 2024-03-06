@@ -17,7 +17,7 @@ import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.Dyna
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';

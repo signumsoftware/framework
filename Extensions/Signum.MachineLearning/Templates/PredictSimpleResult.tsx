@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AutoLine, EntityLine, IRenderButtons } from '@framework/Lines'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'

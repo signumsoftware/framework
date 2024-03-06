@@ -6,7 +6,7 @@ import { Toast } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@framework/Hooks';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"

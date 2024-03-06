@@ -8,7 +8,7 @@ import './Toolbar.css'
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useUpdatedRef, useWindowEvent, useAPIWithReload } from '@framework/Hooks'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
 import { parseIcon } from '@framework/Components/IconTypeahead'

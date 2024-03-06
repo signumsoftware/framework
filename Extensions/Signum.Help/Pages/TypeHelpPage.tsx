@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams, Link, useLocation } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'

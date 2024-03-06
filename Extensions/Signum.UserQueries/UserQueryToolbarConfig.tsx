@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Location } from 'react-router'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, liteKey } from '@framework/Signum.Entities'
 import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
@@ -9,7 +9,6 @@ import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
 import { useAPI } from '@framework/Hooks';
 import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbarConfig';
-import { useFetchInState } from '@framework/Navigator'
 import { ShowCount } from '../Signum.Toolbar/Signum.Toolbar'
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
@@ -77,7 +76,7 @@ interface CountUserQueryIconProps {
 
 export function SearchUserQueryCount(p: CountUserQueryIconProps) {
 
-  var userQuery = useFetchInState(p.userQuery)
+  var userQuery = Navigator.useFetchInState(p.userQuery)
   var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);
 
   if (findOptions == null)

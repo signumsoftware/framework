@@ -3,9 +3,8 @@ import { RouteObject } from 'react-router'
 import { DateTime } from 'luxon'
 import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'

@@ -10,7 +10,7 @@ import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/Fin
 import { StyleContext, TypeContext } from '@framework/TypeContext'
 import { SearchMessage } from '@framework/Signum.Entities'
 import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import { ValidationErrors } from '@framework/Frames/ValidationErrors'
 import { ChartRequestModel, ChartMessage } from '../Signum.Chart'

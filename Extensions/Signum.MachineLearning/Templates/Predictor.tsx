@@ -7,7 +7,7 @@ import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeCo
 import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.MachineLearning'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';

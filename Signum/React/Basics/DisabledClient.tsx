@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { EntitySettings } from '../Navigator'
-import { Navigator } from '../Navigator'
+import { Navigator, EntitySettings } from '../Navigator'
 import * as Finder from '../Finder'
 import { EntityOperationSettings } from '../Operations'
 import * as Operations from '../Operations'

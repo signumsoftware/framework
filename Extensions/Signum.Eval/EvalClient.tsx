@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { QueryEntitiesRequest } from "@framework/FindOptions";
 import { ajaxPost } from "@framework/Services";

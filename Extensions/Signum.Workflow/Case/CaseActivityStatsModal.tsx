@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
 import { timeToString, toNumberFormat } from '@framework/Reflection';
 import * as Finder from '@framework/Finder';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { CaseActivityStats, formatDuration } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
