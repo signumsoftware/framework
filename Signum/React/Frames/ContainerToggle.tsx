@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import * as AppContext from '../AppContext'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { ErrorBoundary } from "../Components/ErrorBoundary";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useUpdatedRef } from '../Hooks';

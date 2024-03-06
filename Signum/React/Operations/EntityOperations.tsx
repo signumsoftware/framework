@@ -3,7 +3,7 @@ import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, Norma
 import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {

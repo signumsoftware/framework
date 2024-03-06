@@ -6,7 +6,7 @@ import { TypeContext } from '../TypeContext'
 import { getTypeInfos, tryGetTypeInfos, TypeReference } from '../Reflection'
 import { EntityBaseController, EntityBaseProps, AsLite, AsEntity } from './EntityBase'
 import { FormGroup } from './FormGroup'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
 import { classes } from '../Globals';
 import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'

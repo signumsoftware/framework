@@ -8,7 +8,7 @@ import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarE
 import * as AppContext from './AppContext';
 import * as Finder from './Finder';
 import * as QuickLinks from './QuickLinks';
-import * as Navigator from './Navigator';
+import { Navigator } from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';

@@ -2,7 +2,7 @@ import * as React from "react";
 import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
-import * as Navigator from "./Navigator"
+import { Navigator, ViewPromise } from "./Navigator"
 import { Dic, classes, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
@@ -1983,7 +1983,7 @@ export interface QuerySettings {
   showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
   allowCreate?: boolean;
   allowSelection?: boolean;
-  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
   simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;

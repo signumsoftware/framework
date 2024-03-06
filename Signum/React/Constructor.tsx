@@ -3,8 +3,7 @@ import { Entity, ModifiableEntity, SelectorMessage, EntityPack, isEntityPack } f
 import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute, tryGetTypeInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
 import * as Operations from './Operations';
-import * as Navigator from './Navigator';
-import {API} from "./Navigator";
+import { Navigator } from './Navigator';
 
 export const customConstructors: { [typeName: string]: (props?: any, pr?: PropertyRoute) => ModifiableEntity | Promise<ModifiableEntity | EntityPack<ModifiableEntity> | undefined> } = {}
 

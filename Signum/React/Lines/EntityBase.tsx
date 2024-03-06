@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, classes } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import * as Constructor from '../Constructor'
 import * as Finder from '../Finder'
 import { FindOptions } from '../FindOptions'
@@ -34,7 +34,7 @@ export interface EntityBaseProps<V extends ModifiableEntity | Lite<Entity> | nul
   liteToString?: (e: AsEntity<V>) => string;
 
   getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
-  getViewPromise?: (entity: AsEntity<V>) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+  getViewPromise?: (entity: AsEntity<V>) => undefined | string | ViewPromise<ModifiableEntity>;
 
   fatLite?: boolean;
 }
@@ -157,15 +157,15 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   defaultView(value: NonNullable<V>, propertyRoute: PropertyRoute): Promise<Aprox<V> | undefined> {
     return Navigator.view(value!, {
       propertyRoute: propertyRoute,
-      getViewPromise: this.getGetViewPromise() as (undefined | ((entity: ModifiableEntity) => undefined | string | Navigator.ViewPromise<ModifiableEntity>)),
+      getViewPromise: this.getGetViewPromise() as (undefined | ((entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>)),
       allowExchangeEntity: false,
     }) as Promise<Aprox<V> | undefined>;
   }
 
-  getGetViewPromise(): undefined | ((entity: AsEntity<V>) => undefined | string | Navigator.ViewPromise<AsEntity<V>>) {
+  getGetViewPromise(): undefined | ((entity: AsEntity<V>) => undefined | string | ViewPromise<AsEntity<V>>) {
     var getComponent = this.props.getComponent;
     if (getComponent)
-      return e => Navigator.ViewPromise.resolve(getComponent!);
+      return e => ViewPromise.resolve(getComponent!);
 
     var getViewPromise = this.props.getViewPromise;
     if (getViewPromise)

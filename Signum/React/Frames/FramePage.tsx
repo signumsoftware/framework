@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as AppContext from '../AppContext'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import * as Constructor from '../Constructor'
 import { useLocation, useParams, unstable_useBlocker } from "react-router-dom"
 import * as Finder from '../Finder'
@@ -88,7 +88,7 @@ export default function FramePage() {
     loadEntity()
       .then(a => {
         if (a == undefined) {
-          Navigator.NavigatorManager.onFramePageCreationCancelled();
+          Navigator.onFramePageCreationCancelled();
         }
         else {
 
@@ -121,11 +121,11 @@ export default function FramePage() {
       buttonBar.current.handleKeyDown(e);
   }
 
-  async function loadComponent(pack: EntityPack<Entity>, forceViewName?: string | Navigator.ViewPromise<ModifiableEntity>): Promise<{
+  async function loadComponent(pack: EntityPack<Entity>, forceViewName?: string | ViewPromise<ModifiableEntity>): Promise<{
     viewName?: string;
     getComponent: (ctx: TypeContext<Entity>) => React.ReactElement;
   }> {
-    if (forceViewName instanceof Navigator.ViewPromise) {
+    if (forceViewName instanceof ViewPromise) {
       var getComponent = await forceViewName.promise;
       return { viewName: undefined, getComponent: getComponent };
     } else {

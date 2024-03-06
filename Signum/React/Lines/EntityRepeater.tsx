@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage } from '../Signum.Entities'
 import { AsEntity, EntityBaseController } from './EntityBase'
@@ -98,7 +98,7 @@ export const EntityRepeater = genericForwardRef(function EntityRepeater<V extend
 export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<Entity>> {
   ctx: TypeContext<V>;
   getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
-  getViewPromise?: (entity: AsEntity<V>) => undefined | string | Navigator.ViewPromise<AsEntity<V>>;
+  getViewPromise?: (entity: AsEntity<V>) => undefined | string | ViewPromise<AsEntity<V>>;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;
   drag?: DragConfig;

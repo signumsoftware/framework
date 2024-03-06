@@ -1,9 +1,8 @@
 import * as React from 'react'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
-import { ViewPromise, useFetchAndRemember } from "../Navigator";
 import { ErrorBoundary } from '../Components';
 import { useAPI, useForceUpdate } from '../Hooks'
 import { FunctionalAdapter } from '../Modals'
@@ -12,7 +11,7 @@ import { AsEntity } from './EntityBase'
 export interface RenderEntityProps<V extends ModifiableEntity | Lite<Entity> | null> {
   ctx: TypeContext<V>;
   getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
-  getViewPromise?: (e: AsEntity<V>) => undefined | string | Navigator.ViewPromise<AsEntity<V>>;
+  getViewPromise?: (e: AsEntity<V>) => undefined | string | ViewPromise<AsEntity<V>>;
   onRefresh?: () => void;
   onEntityLoaded?: () => void;
   extraProps?: any;
@@ -29,7 +28,7 @@ export function RenderEntity<V extends ModifiableEntity | Lite<Entity> | null>(p
 
   var e = p.ctx.value
 
-  useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
+  Navigator.useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
   var entity = (isLite(e) ? e.entity : e) as AsEntity<V>;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
@@ -114,6 +113,6 @@ export function RenderEntity<V extends ModifiableEntity | Lite<Entity> | null>(p
 }
 
 const Anonymous = "__Anonymous__";
-function toViewName(result: undefined | string | Navigator.ViewPromise<any>): string | undefined {
+function toViewName(result: undefined | string | ViewPromise<any>): string | undefined {
   return (result instanceof ViewPromise ? Anonymous : result);
 }

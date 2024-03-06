@@ -1,6 +1,6 @@
 import * as React from "react";
 import { DateTime, Duration } from 'luxon'
-import * as Navigator from "./Navigator"
+import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
   FilterOptionParsed, 

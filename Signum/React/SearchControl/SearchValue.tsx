@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { classes } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import * as Finder from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest, QueryDescription } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'

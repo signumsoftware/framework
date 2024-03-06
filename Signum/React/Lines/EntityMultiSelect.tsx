@@ -4,7 +4,7 @@ import { Entity, is, isEntity, isLite, isMListElement, Lite, liteKey, MList, MLi
 import { AutocompleteConfig } from './AutoCompleteConfig';
 import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { Multiselect } from 'react-widgets/cjs';
 import { genericForwardRef, useController } from './LineBase';
 import { number } from 'prop-types';

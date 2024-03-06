@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { EntitySettings } from '../Navigator'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext';
 import { ExceptionEntity } from '../Signum.Basics';
 import { BigStringEmbedded } from '../Signum.Entities';

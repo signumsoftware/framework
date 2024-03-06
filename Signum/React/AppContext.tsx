@@ -7,7 +7,6 @@ import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName, tryGetTypeInfo } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
-import { navigateRoute } from "./Navigator";
 
 Dic.skipClasses.push(React.Component);
 

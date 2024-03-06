@@ -5,7 +5,7 @@ import * as Constructor from '../Constructor'
 import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import { StyleContext, TypeContext } from '../TypeContext'
 import SearchValue, { renderTimeMachineIcon, SearchValueController } from './SearchValue'
 import { FormGroup } from '../Lines/FormGroup'
@@ -42,7 +42,7 @@ export interface SearchValueLineProps {
   extraButtons?: (vscc: SearchValueController) => React.ReactNode;
   create?: boolean | "ifNull" ;
   onCreate?: () => Promise<any>;
-  getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
+  getViewPromise?: (e: any /*Entity*/) => undefined | string | ViewPromise<any /*Entity*/>;
   searchControlProps?: Partial<SearchControlProps>;
   modalSize?: BsSize;
   onExplored?: () => void;

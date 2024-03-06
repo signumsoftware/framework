@@ -9,7 +9,7 @@ import {
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
 import * as Constructor from '../Constructor'
@@ -74,7 +74,7 @@ export interface SearchControlLoadedProps {
   entityFormatter?: EntityFormatter;
   selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
-  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
 

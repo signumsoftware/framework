@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
 import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
 import { Type } from '../Reflection';

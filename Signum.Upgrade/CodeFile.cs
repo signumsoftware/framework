@@ -329,6 +329,24 @@ public class CodeFile
         });
     }
 
+    public void ReplaceLine(Expression<Predicate<string>> condition, Func<string, string> text)
+    {
+        ProcessLines(lines =>
+        {
+            var pos = lines.FindIndex(condition.Compile());
+            if (pos == -1)
+            {
+                Warning($"Unable to find a line where {condition} to replace it by {text}");
+                return false;
+            }
+            var indent = GetIndent(lines[pos]);
+            var oldLine = lines[pos].After(indent);
+            lines.RemoveRange(pos, 1);
+            lines.InsertRange(pos, text(oldLine).Lines().Select(a => IndentAndReplace(a, indent)));
+            return true;
+        });
+    }
+
     public void InsertBeforeFirstLine(Expression<Predicate<string>> condition, string text)
     {
         ProcessLines(lines =>

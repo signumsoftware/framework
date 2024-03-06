@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, getToString } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import {
   operationInfos, getSettings, notifySuccess, API, Defaults, CellOperationContext, EntityOperationSettings

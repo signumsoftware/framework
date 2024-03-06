@@ -4,7 +4,7 @@ import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
@@ -26,7 +26,7 @@ export interface SearchControlProps {
   selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
 
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
-  getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
+  getViewPromise?: (e: any /*Entity*/) => undefined | string | ViewPromise<any /*Entity*/>;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
   searchOnLoad?: boolean;

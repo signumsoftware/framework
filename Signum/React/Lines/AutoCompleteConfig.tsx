@@ -7,7 +7,7 @@ import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToStri
 import { toFilterRequests } from '../Finder';
 import { TextHighlighter, TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { AutocompleteConstructor } from '../Navigator';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import { Dic } from '../Globals'
 
 export interface AutocompleteConfig<T> {
