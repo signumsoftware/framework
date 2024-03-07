@@ -18,9 +18,12 @@ class Upgrade_20240304_Navigator : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var regexImport = new Regex(@"import\s+\*\s+as\s+Navigator\s+from", RegexOptions.Singleline);
-        var regexHooksNavigator = new Regex(@"(?<!\.)(useFetchAndRemember|useFetchInState|useFetchInStateWithReload|useFetchAll|useLiteToString|useEntityChanged)\b", RegexOptions.Singleline);
-        var navigatorHooks = "useFetchAndRemember|useFetchInState|useFetchInStateWithReload|useFetchAll|useLiteToString|useEntityChanged".Split("|");
+        var simpleExports = "useFetchAndRemember|useFetchInState|useFetchInStateWithReload|useFetchAll|useLiteToString|useEntityChanged";
+
+        var regexSipleNavigator = new Regex($@"(?<!\.)({simpleExports})\b", RegexOptions.Singleline);
+        var simpleExportsArray = simpleExports.Split("|");
+
+        
 
         uctx.ForeachCodeFile(@"*.tsx", file =>
         {
@@ -49,13 +52,15 @@ class Upgrade_20240304_Navigator : CodeUpgradeBase
 
 
                 parts.AddRange(new[] { nvs, vp, es, enc }.NotNull());
-                parts.RemoveWhere(navigatorHooks.Contains);
+
+                if (parts.RemoveWhere(simpleExportsArray.Contains) > 0)
+                    parts.Add("Navigator");
 
                 return parts.OrderByDescending(a => a == "Navigator").ToHashSet();
             });
 
 
-            file.Replace(regexHooksNavigator,  m => "Navigator." +  m.Value);
+            file.Replace(regexSipleNavigator,  m => "Navigator." +  m.Value);
 
         });
     }
