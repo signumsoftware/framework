@@ -21,7 +21,7 @@ import { FilterOperation } from "./Signum.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
 import { isActive } from "./FindOptions";
-import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperation";
+import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperationButton";
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
 
