@@ -19,8 +19,12 @@ import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+
+  registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
+
   Navigator.addSettings(new EntitySettings(ProcessEntity, e => import('./Templates/Process'), { isCreable: "Never" }));
 
   if (options.packages || options.packageOperations) {
@@ -38,7 +42,7 @@ export function start(options: { routes: RouteObject[], packages: boolean, packa
   options.routes.push({ path: "/processes/view", element: <ImportComponent onImport={() => import("./ProcessPanelPage")} /> });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
+    allowed: () => AppContext.isPermissionAuthorized(ProcessPermission.ViewProcessPanel),
     key: "ProcessPanel",
     onClick: () => Promise.resolve("/processes/view")
   });
@@ -149,7 +153,7 @@ export module API {
 
   export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
     GraphExplorer.propagateAll(lites, args);
-    return ajaxPost({ url: "/api/processes/constructFromMany" }, { lites: lites, operationKey: Operations.API.getOperationKey(operationKey), args: args } as Operations.API.MultiOperationRequest);
+    return ajaxPost({ url: "/api/processes/constructFromMany/" + Operations.API.getOperationKey(operationKey) }, { lites: lites, args: args } as Operations.API.MultiOperationRequest);
   }
 
   export function start(): Promise<void> {

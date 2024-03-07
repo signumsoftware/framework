@@ -13,6 +13,12 @@ import * as Mailing from './Signum.Mailing'
 import * as Files from '../Signum.Files/Signum.Files'
 
 
+export const EmailAddressSource = new EnumType<EmailAddressSource>("EmailAddressSource");
+export type EmailAddressSource =
+  "QueryToken" |
+  "HardcodedAddress" |
+  "CurrentUser";
+
 export const EmailMasterTemplateEntity = new Type<EmailMasterTemplateEntity>("EmailMasterTemplate");
 export interface EmailMasterTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "EmailMasterTemplate";
@@ -42,6 +48,7 @@ export type EmailMessageFormat =
   "HtmlSimple";
 
 export interface EmailTemplateAddressEmbedded extends Entities.EmbeddedEntity {
+  addressSource: EmailAddressSource;
   emailAddress: string | null;
   displayName: string | null;
   token: Queries.QueryTokenEmbedded | null;
@@ -54,7 +61,7 @@ export interface EmailTemplateEntity extends Entities.Entity, UserAssets.IUserAs
   name: string;
   editableMessage: boolean;
   disableAuthorization: boolean;
-  query: Basics.QueryEntity;
+  query: Basics.QueryEntity | null;
   model: Mailing.EmailModelEntity | null;
   from: EmailTemplateFromEmbedded | null;
   recipients: Entities.MList<EmailTemplateRecipientEmbedded>;

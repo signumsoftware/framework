@@ -40,16 +40,16 @@ public static class MusicStarter
 
     public static void Start(string connectionString)
     {
-        SchemaBuilder sb = new SchemaBuilder(true);
+        SchemaBuilder sb = new SchemaBuilder();
 
         if (connectionString.Contains("Data Source"))
         {
-            var sqlVersion = SqlServerVersionDetector.Detect(connectionString);
-            Connector.Default = new SqlServerConnector(connectionString, sb.Schema, sqlVersion ?? SqlServerVersion.SqlServer2017);
+            var sqlVersion = SqlServerVersionDetector.Detect(connectionString, SqlServerVersion.SqlServer2017);
+            Connector.Default = new SqlServerConnector(connectionString, sb.Schema, sqlVersion);
         }
         else
         {
-            var postgreeVersion = PostgresVersionDetector.Detect(connectionString);
+            var postgreeVersion = PostgresVersionDetector.Detect(connectionString, null);
             Connector.Default = new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion);
         }
 

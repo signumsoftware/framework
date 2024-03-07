@@ -1,4 +1,4 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
@@ -76,6 +76,7 @@ export function isFilterCondition(fo: FilterOptionParsed | FilterOption | Filter
 export interface FilterConditionOption {
   token: string | QueryTokenString<any>;
   frozen?: boolean;
+  removeElementWarning?: boolean;
   operation?: FilterOperation;
   value?: any;
   pinned?: PinnedFilter;
@@ -87,12 +88,13 @@ export interface FilterGroupOption {
   groupOperation: FilterGroupOperation;
   filters: (FilterOption | null | undefined)[];
   pinned?: PinnedFilter;
+  frozen?: boolean;
   dashboardBehaviour?: DashboardBehaviour;
   value?: string; /*For search in multiple columns*/
 }
 
 export interface PinnedFilter {
-  label?: string | (() => string);
+  label?: (() => string) | string;
   row?: number;
   column?: number;
   colSpan?: number;
@@ -118,6 +120,7 @@ export function isCheckBox(active: PinnedFilterActive | undefined) {
 export interface FilterConditionOptionParsed {
   token?: QueryToken;
   frozen: boolean;
+  removeElementWarning?: boolean;
   operation?: FilterOperation;
   value: any;
   pinned?: PinnedFilterParsed;
@@ -147,7 +150,6 @@ export function toPinnedFilterParsed(pf: PinnedFilter): PinnedFilterParsed {
 export interface FilterGroupOptionParsed {
   groupOperation: FilterGroupOperation;
   frozen: boolean;
-  expanded: boolean;
   token?: QueryToken;
   filters: FilterOptionParsed[];
   pinned?: PinnedFilterParsed;

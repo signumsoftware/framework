@@ -30,7 +30,7 @@ public class EntityTypeToken : QueryToken
         get { return "[EntityType]"; }
     }
 
-    static MethodInfo miTypeEntity = ReflectionTools.GetMethodInfo(() => TypeEntityExtensions.ToTypeEntity(null!));
+    static MethodInfo miTypeEntity = ReflectionTools.GetMethodInfo(() => TypeLogic.ToTypeEntity(null!));
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {

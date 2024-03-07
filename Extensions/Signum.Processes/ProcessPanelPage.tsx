@@ -42,7 +42,7 @@ export default function ProcessPanelPage() {
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon={["fas", "gears"]} /> Process Panel</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon={"gears"} /> Process Panel</h2>
       <div className="btn-toolbar mt-3">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
@@ -86,7 +86,7 @@ export default function ProcessPanelPage() {
             </tr>
             {s.executing.map((item, i) =>
               <tr key={i}>
-                <td> <EntityLink lite={item.process} inSearch={true} /> </td>
+                <td> <EntityLink lite={item.process} inSearch="main" /> </td>
                 <td> {item.state} </td>
                 <td style={{ verticalAlign: "middle" }}>  <ProcessProgressBar state={item.state} progress={item.progress} /></td>
                 <td> {item.machineName} </td>

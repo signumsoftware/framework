@@ -9,7 +9,7 @@ import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as Operations from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
-import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel } from './Signum.Tree'
+import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
 import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
@@ -257,7 +257,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     let type = this.props.typeName;
 
     var menuItems = [
-      Navigator.isViewable(type, { isSearch: true }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
+      Navigator.isViewable(type, { isSearch: "main" }) && <Dropdown.Item onClick={this.handleView} className="btn-danger"><FontAwesomeIcon icon="arrow-right" />&nbsp;{EntityControlMessage.View.niceToString()}</Dropdown.Item >,
       tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="square-caret-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="square-caret-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
       <Dropdown.Item onClick={this.handleCopyClick}><FontAwesomeIcon icon="copy" />&nbsp;{SearchMessage.Copy.niceToString()}</Dropdown.Item>,
@@ -428,7 +428,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
                 menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
-        <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {SearchMessage.Explore.niceToString()}</button>
+        <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {TreeMessage.ListView.niceToString()}</button>
       </div>
     );
   }

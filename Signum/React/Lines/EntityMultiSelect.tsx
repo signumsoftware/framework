@@ -2,11 +2,11 @@ import * as React from 'react'
 import { ResultTable } from '../Search';
 import { Entity, is, isEntity, isLite, isMListElement, Lite, liteKey, MList, MListElement, ModifiableEntity, newMListElement, toLite, toMList } from '../Signum.Entities';
 import { AutocompleteConfig } from './AutoCompleteConfig';
-import { EntityBaseController } from './EntityBase';
+import { Aprox, EntityBaseController } from './EntityBase';
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase';
 import * as Navigator from '../Navigator'
 import { Multiselect } from 'react-widgets/cjs';
-import { useController } from './LineBase';
+import { genericForwardRef, useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
 import * as Finder from '../Finder'
@@ -17,7 +17,7 @@ import { classes } from '../Globals';
 import { getTimeMachineIcon } from './TimeMachineIcon';
 import Input from 'react-widgets/cjs/Input';
 
-export interface EntityMultiSelectProps extends EntityListBaseProps {
+export interface EntityMultiSelectProps<V extends Lite<Entity> | Entity> extends EntityListBaseProps<V> {
   vertical?: boolean;
   onRenderItem?: (item: ResultRow) => React.ReactNode;
   showType?: boolean;
@@ -34,8 +34,8 @@ export interface EntityMultiSelectHandle {
 }
 
 
-export class EntityMultiSelectController extends EntityListBaseController<EntityMultiSelectProps> {
-  overrideProps(p: EntityMultiSelectProps, overridenProps: EntityMultiSelectProps) {
+export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
+  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>) {
     super.overrideProps(p, overridenProps);
 
     if (p.type) {
@@ -44,8 +44,8 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
     }
   }
 
-  handleOnSelect = (lites: Lite<Entity>[]) => {
-    var current = this.props.ctx.value as MList<Lite<Entity> | Entity>;
+  handleOnSelect = (lites: Aprox<V>[]) => {
+    var current = this.props.ctx.value;
 
     lites.filter(lite => !current.some(mle => is(mle.element, lite))).forEach(lite => {
       this.convert(lite)
@@ -62,7 +62,7 @@ export class EntityMultiSelectController extends EntityListBaseController<Entity
   }
 }
 
-export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(props: EntityMultiSelectProps, ref: React.Ref<EntityMultiSelectController>) {
+export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
   const c = useController(EntityMultiSelectController, props, ref);
   const p = c.props;
 
@@ -112,20 +112,20 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
   //TODO add TimeMachineIcon
   return (
     <FormGroup ctx={p.ctx!}
-      label={p.label}
+      label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
-        <Multiselect
+        <Multiselect<any>
           id={inputId}
           readOnly={p.ctx.readOnly}
           dataKey={item => isMListElement(item) ? liteKey(getLite(item.element)) : liteKey((item as ResultRow).entity!)}
           textField="name"
           value={p.ctx.value}
-          data={optionsRows}
-          onChange={(value => c.handleOnSelect(value.map(e => e.entity!)))}
-          renderListItem={({ item }) => p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)}
+          data={optionsRows as any}
+          onChange={((value) => c.handleOnSelect(value.map(e => isMListElement(e) ? e.element : e.entity!)))}
+          renderListItem={({ item }) => p.onRenderItem ? p.onRenderItem(item as ResultRow) : Navigator.renderLite(item.entity)}
           renderTagValue={({ item }) => isMListElement(item) ? Navigator.renderLite(getLite(item.element)) :
             p.onRenderItem ? p.onRenderItem(item) : Navigator.renderLite(item.entity!)
           }
@@ -146,7 +146,13 @@ export const EntityMultiSelect = React.forwardRef(function EntityMultiSelect(pro
 
 
     p.ctx.value.forEach(mle => {
-      const lite = mle.element;
+      const entityOrLite = mle.element;
+
+      const lite = isEntity(entityOrLite) ? toLite(entityOrLite) : 
+      isLite(entityOrLite) ? entityOrLite : null;
+
+      if(lite == null)
+        throw new Error("Unexpected " +  mle.element);
 
       var index = elements.findIndex(a => is(a?.entity, lite));
       if (index == -1)

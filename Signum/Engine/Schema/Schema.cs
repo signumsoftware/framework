@@ -114,6 +114,8 @@ public class Schema : IImplementationsFinder
     {
         AssertAllowed(entity.GetType(), inUserInterface: false);
 
+        
+
         IEntityEvents? ee = entityEvents.TryGetC(entity.GetType());
 
         if (ee != null)
@@ -290,7 +292,7 @@ public class Schema : IImplementationsFinder
         return ee.CacheController;
     }
 
-    internal FilterQueryResult<T>? OnFilterQuery<T>()
+    internal FilterQueryResult<T>? OnFilterQuery<T>(FilterQueryArgs args)
         where T : Entity
     {
         AssertAllowed(typeof(T), inUserInterface: false);
@@ -300,7 +302,7 @@ public class Schema : IImplementationsFinder
             return null;
 
         FilterQueryResult<T>? result = null;
-        foreach (var item in ee.OnFilterQuery())
+        foreach (var item in ee.OnFilterQuery(args))
             result = CombineFilterResult(result, item);
 
         return result;
@@ -334,8 +336,10 @@ public class Schema : IImplementationsFinder
             if (ee == null)
                 return a => true;
 
+            var args = FilterQueryArgs.FromQuery(Database.Query<T>());
+
             Func<T, bool>? result = null;
-            foreach (var item in ee.OnFilterQuery().NotNull())
+            foreach (var item in ee.OnFilterQuery(args).NotNull())
             {
                 if (item.InMemoryFunction == null)
                     throw new InvalidOperationException("FilterQueryResult with InDatabaseExpresson '{0}' has no equivalent InMemoryFunction"
@@ -362,7 +366,7 @@ public class Schema : IImplementationsFinder
         return a => one!(a) && two!(a);
     }
 
-    public Expression<Func<T, bool>>? GetInDatabaseFilter<T>()
+    public Expression<Func<T, bool>>? GetInDatabaseFilter<T>(FilterQueryArgs args)
        where T : Entity
     {
         EntityEvents<T>? ee = (EntityEvents<T>?)entityEvents.TryGetC(typeof(T));
@@ -370,7 +374,7 @@ public class Schema : IImplementationsFinder
             return null;
 
         Expression<Func<T, bool>>? result = null;
-        foreach (var item in ee.OnFilterQuery().NotNull())
+        foreach (var item in ee.OnFilterQuery(args).NotNull())
         {
             result = CombineExpr(result, item.InDatabaseExpresson);
         }
@@ -454,7 +458,7 @@ public class Schema : IImplementationsFinder
         var tn = this.Settings.TypeAttribute<CacheViewMetadataAttribute>(viewType);
 
         if (tn != null)
-            return Views.GetOrCreate(viewType, ViewBuilder.NewView(viewType));
+            return Views.GetOrCreate(viewType, () => ViewBuilder.NewView(viewType));
 
         return ViewBuilder.NewView(viewType);
     }
@@ -595,7 +599,8 @@ public class Schema : IImplementationsFinder
 
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.PostgresExtensions;
-        Generating += SchemaGenerator.PostgreeTemporalTableScript;
+        Generating += SchemaGenerator.PostgresTemporalTableScript;
+        Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -617,6 +622,8 @@ public class Schema : IImplementationsFinder
     {
         get { return Connector.Current.Schema; }
     }
+
+    public List<SqlPartitionScheme> PartitionSchemes { get; } = new List<SqlPartitionScheme>();
 
     public Table Table<T>() where T : Entity
     {
@@ -849,6 +856,8 @@ public class Schema : IImplementationsFinder
 
         return field is IColumn c && fullTextIndex.Columns.Contains(c);
     }
+
+
 }
 
 public class RelationInfo

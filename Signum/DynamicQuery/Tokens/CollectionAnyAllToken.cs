@@ -1,3 +1,4 @@
+using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 
 namespace Signum.DynamicQuery.Tokens;
@@ -45,8 +46,12 @@ public class CollectionAnyAllToken : QueryToken
         {
             st.Add(MListElementPropertyToken.RowId(this, ept));
 
-            if (MListElementPropertyToken.HasAttribute(ept.PropertyRoute, typeof(PreserveOrderAttribute)))
+            var fm = (FieldMList)Schema.Current.Field(ept.PropertyRoute);
+            if (fm.TableMList.Order != null)
                 st.Add(MListElementPropertyToken.RowOrder(this, ept));
+
+            if (fm.TableMList.PartitionId != null)
+                st.Add(MListElementPropertyToken.PartitionId(this, ept));
         }
 
         return st;
@@ -136,7 +141,7 @@ public class CollectionAnyAllToken : QueryToken
 
     public Expression BuildAnyAll(Expression collection, ParameterExpression param, Expression body)
     {
-        if (this.CollectionAnyAllType == CollectionAnyAllType.AnyNo)
+        if (this.CollectionAnyAllType == CollectionAnyAllType.NotAll)
             body = Expression.Not(body);
 
         var lambda = Expression.Lambda(body, param);
@@ -147,7 +152,7 @@ public class CollectionAnyAllToken : QueryToken
 
         var result = Expression.Call(mi.MakeGenericMethod(param.Type), collection, lambda);
 
-        if (this.CollectionAnyAllType == CollectionAnyAllType.NoOne)
+        if (this.CollectionAnyAllType == CollectionAnyAllType.NotAny)
             return Expression.Not(result);
 
         return result;
@@ -155,11 +160,11 @@ public class CollectionAnyAllToken : QueryToken
 }
 
 
-[DescriptionOptions(DescriptionOptions.Members)]
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum CollectionAnyAllType
 {
     Any,
     All,
-    NoOne,
-    AnyNo,
+    NotAny,
+    NotAll,
 }

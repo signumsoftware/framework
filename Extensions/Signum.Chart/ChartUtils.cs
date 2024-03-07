@@ -1,5 +1,6 @@
 using Signum.DynamicQuery.Tokens;
 using System.ComponentModel;
+using System.Diagnostics;
 
 namespace Signum.Chart;
 
@@ -43,7 +44,7 @@ public static class ChartUtils
 
     public static bool IsDateOnly(QueryToken token)
     {
-        if ((token is DatePartStartToken dt && (dt.Name == QueryTokenMessage.MonthStart || dt.Name == QueryTokenMessage.WeekStart)) ||
+        if ((token is DatePartStartToken dt && dt.Name is QueryTokenDateMessage.MonthStart or QueryTokenDateMessage.WeekStart or QueryTokenDateMessage.QuarterStart) ||
             token is DateToken)
             return true;
 
@@ -109,14 +110,16 @@ public static class ChartUtils
             }
             else
             {
-                var byName = chart.Parameters.ToDictionary(a => a.Name);
+                var byName = chart.Parameters.ToDictionary(a => a.Name.RemoveChars(' ', '(', ')', '-').ToLowerInvariant());
                 chart.Parameters.Clear();
                 foreach (var sp in chartScriptParameters)
                 {
-                    var cp = byName.TryGetC(sp.Name);
+                    var cp = byName.TryGetC(sp.Name.ToLowerInvariant());
 
                     if (cp != null)
                     {
+                        byName.Remove(sp.Name.ToLowerInvariant());
+                        cp.Name = sp.Name;
                         cp.parentChart = chart;
                         cp.ScriptParameter = sp;
                         ctx?.ForceModifiedState.Add(cp, ModifiedState.SelfModified);
@@ -135,6 +138,11 @@ public static class ChartUtils
                     }
 
                     chart.Parameters.Add(cp);
+                }
+
+                if(byName.Any() && Debugger.IsAttached)
+                {
+                    Debugger.Break(); //Loosing parameters
                 }
             }
         }
@@ -216,6 +224,200 @@ public enum ChartMessage
     ShowChartSettings,
     HideChartSettings,
     [Description("Query result reached max rows ({0})")]
-    QueryResultReachedMaxRows0
+    QueryResultReachedMaxRows0,
+    ListView, 
 }
 
+
+public enum ChartParameterMessage
+{
+    CompleteValues,
+    Scale,
+    Labels,
+    LabelsMargin,
+    NumberOpacity,
+    NumberColor,
+    ColorCategory,
+    HorizontalScale,
+    VerticalScale,
+    UnitMargin,
+    NumberMinWidth,
+    CircleStroke,
+    CircleRadius,
+    CircleAutoReduce,
+    CircleRadiusHover,
+    Color,
+    Interpolate,
+    MapType,
+    MapStyle,
+    AnimateDrop,
+    AnimateOnClick,
+    InfoLinkPosition,
+    ClusterMap,
+    ColorScale,
+    ColorInterpolation,
+    LabelMargin,
+    NumberSizeLimit,
+    FillOpacity,
+    ColorInterpolate,
+    StrokeColor,
+    StrokeWidth,
+    [Description("Scale (1)")] Scale1,
+    [Description("Scale (2)")] Scale2,
+    [Description("Scale (3)")] Scale3,
+    [Description("Scale (4)")] Scale4,
+    [Description("Scale (5)")] Scale5,
+    [Description("Scale (6)")] Scale6,
+    [Description("Scale (7)")] Scale7,
+    [Description("Scale (8)")] Scale8,
+    InnerRadious,
+    Sort,
+    SvgUrl,
+    LocationSelector,
+    LocationAttribute,
+    LocationMatch,
+    ColorScaleMaxValue,
+    NoDataColor,
+    StartDate,
+    Opacity,
+    [Description("Radious(px)")]
+    RadiousPx,
+    SizeScale,
+    TopMargin,
+    RightMargin,
+    ShowLabel,
+    LabelColor,
+    ForceColor,
+    SubTotal,
+    Placeholder,
+    MultiValueFormat,
+    Complete,
+    Order,
+    Gradient,
+    [Description("CSS Style")]
+    CSSStyle,
+    [Description("CSS Style (div)")]
+    CSSStyleDiv,
+    MaxTextLength,
+    ShowCreateButton,
+    ShowAggregateValues,
+    PointSize,
+    DrawingMode,
+    MinZoom,
+    MaxZoom,
+    CompleteHorizontalValues,
+    CompleteVerticalValues,
+    Shape,
+    XMargin,
+    HorizontalLineColor,
+    VerticalLineColor,
+    XSort,
+    YSort,
+    FillColor,
+    OpacityScale,
+    InnerSizeType,
+    InnerFillColor,
+    Stack,
+    ValueAsPercent,
+    HorizontalMargin,
+    Padding,
+    Zoom,
+    Value,
+    Percent,
+    Total
+}
+
+public enum ChartParameterGroupMessage
+{
+    Stroke,
+    Number,
+    Opacity,
+    ColorScale,
+    ColorCategory,
+    Margin,
+    Circle,
+    Shape,
+    Color,
+    Arrange,
+    ShowValue,
+    Url,
+    Location,
+    Fill,
+    Map,
+    Label,
+    ColorGradient,
+    Margins,
+    Points,
+    Numbers,
+    Performance,
+    Zoom,
+    FillColor,
+    Size,
+    InnerSize,
+    ShowPercent,
+    Scale
+}
+
+public enum ChartColumnMessage
+{
+    SplitLines,
+    Height,
+    [Description("Height (2)")]Height2,
+    [Description("Height (3)")] Height3,
+    [Description("Height (4)")] Height4,
+    [Description("Height (5)")] Height5,
+    Line,
+    [Description("Dimension (1)")] Dimension1,
+    [Description("Dimension (2)")] Dimension2,
+    [Description("Dimension (3)")] Dimension3,
+    [Description("Dimension (4)")] Dimension4,
+    [Description("Dimension (5)")] Dimension5,
+    [Description("Dimension (6)")] Dimension6,
+    [Description("Dimension (7)")] Dimension7,
+    [Description("Dimension (8)")] Dimension8,
+    Angle,
+    Sections,
+    Areas,
+    ColorCategory,
+    LocationCode,
+    Location,
+    ColorScale,
+    Opacity,
+    Date,
+    Latitude,
+    Longitude,
+    Weight,
+    Bubble,
+    Size,
+    Parent,
+    Columns,
+    Label,
+    Icon,
+    Title,
+    Info,
+    SplitBars,
+    Width,
+    Width2,
+    Width3,
+    Width4,
+    Width5,
+    SplitColumns,
+    HorizontalAxis,
+    [Description("Horizontal Axis (2)")] HorizontalAxis2,
+    [Description("Horizontal Axis (3)")] HorizontalAxis3,
+    [Description("Horizontal Axis (4)")] HorizontalAxis4,
+    [Description("Vertical Axis (2)")] VerticalAxis2,
+    VerticalAxis,
+    [Description("Vertical Axis (3)")] VerticalAxis3,
+    [Description("Vertical Axis (4)")] VerticalAxis4,
+    Value,
+    [Description("Value (2)")]Value2,
+    [Description("Value (3)")]Value3,
+    [Description("Value (4)")]Value4,
+    Point,
+    Bars,
+    Color,
+    InnerSize,
+    Order,
+    Square
+}

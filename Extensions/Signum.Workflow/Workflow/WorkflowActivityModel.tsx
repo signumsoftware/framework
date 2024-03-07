@@ -2,12 +2,11 @@ import * as React from 'react'
 import {
   WorkflowActivityModel, WorkflowMessage, SubWorkflowEmbedded, SubEntitiesEval, WorkflowScriptEntity, WorkflowScriptPartEmbedded, WorkflowEntity, ViewNamePropEmbedded, ButtonOptionEmbedded, WorkflowActivityMessage,
 } from '../Signum.Workflow'
-import { TypeContext, ValueLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
+import { TypeContext, AutoLine, EntityLine, FormGroup, EntityRepeater, EntityTable, EntityDetail } from '@framework/Lines'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Binding } from '@framework/Reflection';
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
-import * as DynamicViewClient from '../../Signum.Dynamic/DynamicViewClient'
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor'
 import * as Navigator from '@framework/Navigator'
 import * as Finder from '@framework/Finder'
@@ -21,11 +20,16 @@ interface WorkflowActivityModelComponentProps {
   ctx: TypeContext<WorkflowActivityModel>;
 }
 
+export namespace WorkflowActivityModelOptions {
+  export let getViewProps: undefined | ((typeName: string, viewName: string) => Promise<{ name: string, type: string; }[]>);
+  export let navigateToView: undefined | ((typeName: string, viewName: string, props: { [name: string]: any }) => Promise<void>);
+}
+
 export default function WorkflowActivityModelComponent(p : WorkflowActivityModelComponentProps){
   const forceUpdate = useForceUpdate();
 
   const [viewNames, setViewNames] = React.useState<string[] | undefined>(undefined);
-  const [viewProps, setViewProps] = React.useState<DynamicViewClient.DynamicViewProps[] | undefined>(undefined);
+  const [viewProps, setViewProps] = React.useState<{ name: string, type: string; }[] | undefined>(undefined);
 
   React.useEffect(() => {
     if (p.ctx.value.mainEntityType) {
@@ -61,28 +65,30 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
     }
 
     const oldViewNameProps = p.ctx.value.viewNameProps.toObject(a => a.element.name, a => a.element.expression);
-    DynamicViewClient.API.getDynamicViewProps(typeName, viewName!).then(dvp => {
+    if (WorkflowActivityModelOptions.getViewProps) {
+      WorkflowActivityModelOptions.getViewProps(typeName, viewName!).then(dvp => {
 
-      setViewProps(dvp);
-      if (dvp.length > 0) {
+        setViewProps(dvp);
+        if (dvp.length > 0) {
 
-        var newViewNameProps = dvp.map(p => {
+          var newViewNameProps = dvp.map(p => {
 
-          const oldExpr = oldViewNameProps[p.name];
-          return newMListElement(ViewNamePropEmbedded.New({
-            name: p.name,
-            expression: oldExpr,
-          }))
-        });
+            const oldExpr = oldViewNameProps[p.name];
+            return newMListElement(ViewNamePropEmbedded.New({
+              name: p.name,
+              expression: oldExpr,
+            }))
+          });
 
-        p.ctx.value.viewNameProps = newViewNameProps;
-      }
-      else
-        p.ctx.value.viewNameProps = [];
+          p.ctx.value.viewNameProps = newViewNameProps;
+        }
+        else
+          p.ctx.value.viewNameProps = [];
 
-      p.ctx.value.modified = true;
-      forceUpdate();
-    });
+        p.ctx.value.modified = true;
+        forceUpdate();
+      });
+    }
   }
 
   function handleViewNameChange(e: React.SyntheticEvent<HTMLSelectElement>) {
@@ -163,10 +169,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
         })
       });
     else
-      DynamicViewClient.API.getDynamicView(typeName, viewName!)
-        .then(dv => {
-          Navigator.view(dv, { extraProps: props });
-        });
+      WorkflowActivityModelOptions.navigateToView?.(typeName, viewName, props);
   }
 
   function getViewNamePropsExpressionHelpText(ctx: TypeContext<ViewNamePropEmbedded>) {
@@ -191,9 +194,9 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(d => d.name)} onChange={() => forceUpdate()} />
-      <ValueLine ctx={ctx.subCtx(d => d.type)} onChange={handleTypeChange} valueColumns={5} />
-      <ValueLine ctx={ctx.subCtx(a => a.estimatedDuration)} valueColumns={5} />
+      <AutoLine ctx={ctx.subCtx(d => d.name)} onChange={() => forceUpdate()} />
+      <AutoLine ctx={ctx.subCtx(d => d.type)} onChange={handleTypeChange} valueColumns={5} />
+      <AutoLine ctx={ctx.subCtx(a => a.estimatedDuration)} valueColumns={5} />
 
       {ctx.value.type != "DecompositionWorkflow" && ctx.value.type != "CallWorkflow" && ctx.value.type != "Script" &&
         <div>
@@ -215,27 +218,27 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
             <FormGroup ctx={ctx.subCtx(d => d.viewNameProps)}>
               {() => <EntityTable avoidFieldSet
                 ctx={ctx.subCtx(d => d.viewNameProps)}
-                columns={EntityTable.typedColumns<ViewNamePropEmbedded>([
+                columns={[
                   {
                     property: a => a.name,
-                    template: ctx => <ValueLine ctx={ctx.subCtx(a => a.name)} />
+                    template: ctx => <AutoLine ctx={ctx.subCtx(a => a.name)} />
                   },
                   {
                     property: a => a.expression,
                     template: (ctx: TypeContext<ViewNamePropEmbedded>) =>
-                      <ValueLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
+                      <AutoLine ctx={ctx.subCtx(a => a.expression)} helpText={getViewNamePropsExpressionHelpText(ctx)} mandatory={getViewNamePropsIsMandatory(ctx)}
                       />
                   }
-                ])} />}
+                ]} />}
             </FormGroup>
           </>
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.viewName), ctx.niceName(e => e.mainEntityType))}</div>}
 
-        <ValueLine ctx={ctx.subCtx(a => a.requiresOpen)} />
+          <AutoLine ctx={ctx.subCtx(a => a.requiresOpen)} />
 
-        {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
+          {ctx.value.type == "Decision" ? <EntityTable ctx={ctx.subCtx(a => a.decisionOptions)} /> : null}
 
-        {ctx.value.type == "Task" ? <EntityDetail ctx={ctx.subCtx(a => a.customNextButton)} labelColumns={1} valueColumns={4} /> : null}
+          {ctx.value.type == "Task" ? <EntityDetail ctx={ctx.subCtx(a => a.customNextButton)} labelColumns={1} valueColumns={4} /> : null}
 
           {ctx.value.workflow ? <EntityRepeater ctx={ctx.subCtx(a => a.boundaryTimers)} readOnly={false} /> :
             <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSaveWorkflow.niceToString(ctx.niceName(e => e.boundaryTimers))}</div>}
@@ -244,7 +247,7 @@ export default function WorkflowActivityModelComponent(p : WorkflowActivityModel
             <legend>{WorkflowActivityModel.nicePropertyName(a => a.userHelp)}</legend>
             <HtmlEditor binding={Binding.create(ctx.value, a => a.userHelp)} />
           </fieldset>
-          <ValueLine ctx={ctx.subCtx(d => d.comments)} />
+          <AutoLine ctx={ctx.subCtx(d => d.comments)} />
         </div>
       }
 

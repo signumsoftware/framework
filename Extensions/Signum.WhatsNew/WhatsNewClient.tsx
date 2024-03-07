@@ -10,8 +10,11 @@ import { Entity, Lite } from '@framework/Signum.Entities'
 import { Type } from '@framework/Reflection'
 import { WhatsNewEntity, WhatsNewMessage } from './Signum.WhatsNew'
 import { ImportComponent } from '@framework/ImportComponent'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.WhatsNew", () => import("./Changelog"));
 
   options.routes.push({ path: "/newspage/:newsId", element: <ImportComponent onImport={() => import("./Templates/NewsPage")} /> });
   options.routes.push({ path: "/news", element: <ImportComponent onImport={() => import("./Templates/AllNewsPage")} /> });
@@ -23,18 +26,13 @@ export function start(options: { routes: RouteObject[] }) {
   //  hideOnCanExecute: true
   //}));
 
-  QuickLinks.registerQuickLink({
-    type: WhatsNewEntity,
-    key: "Preview",
-    generator: {
-      factory: ctx => new QuickLinks.QuickLinkLink("/newspage/" + ctx.lite.id),
-      options: {
-        text: () => WhatsNewMessage.Preview.niceToString(),
-        icon: "newspaper",
-        iconColor: "purple",
-      }
-    }
-  });
+  QuickLinks.registerQuickLink(WhatsNewEntity, new QuickLinks.QuickLinkLink("Preview",
+    () => WhatsNewMessage.Preview.niceToString(),
+    ctx => "/newspage/" + ctx.lite.id,
+    {
+      icon: "newspaper",
+      iconColor: "purple",
+    }));
 
   const TextPlaceholder = /{(?<prop>(\w|\d|\.)+)}/
   const NumericPlaceholder = /^[ \d]+$/;

@@ -18,3 +18,8 @@ public class PropertyRouteEntity : Entity
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => this.Path);
 }
+
+public enum PropertyRouteMessage
+{
+    Translated
+}

@@ -14,12 +14,14 @@ export interface TypeaheadProps {
   minLength?: number;
   renderList?: (typeahead: TypeaheadController) => React.ReactNode;
   renderItem?: (item: unknown, highlighter: TextHighlighter) => React.ReactNode;
+  isDisabled?: (item: unknown) => boolean;
+  isHeader?: (item: unknown) => boolean;
   onSelect?: (item: unknown, e: React.KeyboardEvent<any> | React.MouseEvent<any>) => string | null;
   scrollHeight?: number;
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
-  itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLButtonElement>;
+  itemAttrs?: (item: unknown) => React.LiHTMLAttributes<HTMLElement>;
   noResultsMessage?: string;
-  renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>;
+  renderInput?: (input: React.ReactElement) => React.ReactElement;
   inputId?: string;
 }
 
@@ -263,8 +265,11 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
       <Dropdown.Menu align={controller.rtl ? "end" : undefined} className="typeahead">
         {
           !items ? null :
-            items.length == 0 ? <button className="no-results dropdown-item"><small>{p.noResultsMessage}</small></button> :
-              items!.map((item, i) => <button key={i}
+            items.length == 0 ? <div className="no-results dropdown-item disabled"><small>{p.noResultsMessage}</small></div> :
+              items!.map((item, i) =>
+                p.isHeader?.(item) ? <div key={i} className="dropdown-header"  {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> : 
+                  p.isDisabled?.(item) ? <div key={i} className="dropdown-item disabled" {...p.itemAttrs && p.itemAttrs(item)}>{p.renderItem!(item, highlighter)}</div> :
+                <button key={i}
                 className={classes("dropdown-item", i == controller.selectedIndex ? "active" : undefined)}
                 onMouseEnter={e => controller.handleElementMouseEnter(e, i)}
                 onMouseLeave={e => controller.handleElementMouseLeave(e, i)}
@@ -327,7 +332,7 @@ export class TextHighlighter {
       this.regex = new RegExp(this.parts.map(p => RegExp.escape(p)).join("|"), "gi");
   }
 
-  highlight(text: string): React.ReactChild {
+  highlight(text: string): React.ReactElement | string {
     if (!text || !this.regex)
       return text;
 

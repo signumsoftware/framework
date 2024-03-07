@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
-  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, 
+import { AutoLine, EntityLine, EntityCombo, EntityList, EntityRepeater, EntityTabRepeater, EntityTable,
+  EntityCheckboxList, EnumCheckboxList, EntityDetail, EntityStrip, RenderEntity, MultiValueLine, AutocompleteConfig, AutoLineProps, ColorLine, 
 } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, isEntity, EntityPack } from '@framework/Signum.Entities'
 import { classes, Dic } from '@framework/Globals'
@@ -33,7 +33,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityOperationContext } from '@framework/Operations';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
-import { ColorTextBox, ValueLineController } from '@framework/Lines/ValueLine'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
 
@@ -480,87 +479,69 @@ export interface LineBaseNode extends BaseNode {
   mandatory?: ExpressionOrValue<boolean>;
 }
 
-export interface ValueLineNode extends LineBaseNode {
-  kind: "ValueLine",
-  textArea?: ExpressionOrValue<string>;
+export interface AutoLineNode extends LineBaseNode {
+  kind: "AutoLine",
   unit?: ExpressionOrValue<string>;
   format?: ExpressionOrValue<string>;
-  autoTrim?: ExpressionOrValue<boolean>;
-  inlineCheckbox?: ExpressionOrValue<boolean>;
-  valueHtmlAttributes?: HtmlAttributesExpression;
-  comboBoxItems?: Expression<string[]>;
   extraButtons?: Expression<(vl: ValueLineController) => React.ReactNode>;
 }
 
-NodeUtils.register<ValueLineNode>({
-  kind: "ValueLine",
+NodeUtils.register<AutoLineNode>({
+  kind: "AutoLine",
   group: "Property",
   order: -1,
   validate: (dn) => NodeUtils.validateFieldMandatory(dn),
   renderTreeNode: NodeUtils.treeNodeKindField,
-  renderCode: (node, cc) => cc.elementCode("ValueLine", {
+  renderCode: (node, cc) => cc.elementCode("AutoLine", {
     ref: node.ref,
     ctx: cc.subCtxCode(node.field, node.styleOptions),
     label: node.label,
     labelHtmlAttributes: node.labelHtmlAttributes,
     formGroupHtmlAttributes: node.formGroupHtmlAttributes,
-    valueHtmlAttributes: node.valueHtmlAttributes,
     unit: node.unit,
     format: node.format,
     readOnly: node.readOnly,
     mandatory: node.mandatory,
-    inlineCheckbox: node.inlineCheckbox,
-    valueLineType: node.textArea && bindExpr(ta => ta ? "TextArea" : undefined, node.textArea),
-    comboBoxItems: node.comboBoxItems,
+    onChange: node.onChange,
     extraButtons: node.extraButtons,
-    autoTrim: node.autoTrim,
-    onChange: node.onChange
   }),
-  render: (dn, ctx) => (<ValueLine
+  render: (dn, ctx) => (<AutoLine
     //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
     ctx={ctx.subCtx(dn.node.field, toStyleOptions(dn, ctx, dn.node.styleOptions))}
     label={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.label, NodeUtils.isStringOrNull)}
     labelHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.labelHtmlAttributes)}
     formGroupHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.formGroupHtmlAttributes)}
-    valueHtmlAttributes={toHtmlAttributes(dn, ctx, dn.node.valueHtmlAttributes)}
     unit={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.unit, NodeUtils.isStringOrNull)}
     format={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.format, NodeUtils.isStringOrNull)}
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
-    inlineCheckbox={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.inlineCheckbox, NodeUtils.isBooleanOrNull)}
-    valueLineType={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.textArea, NodeUtils.isBooleanOrNull) ? "TextArea" : undefined}
-    optionItems={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.comboBoxItems, NodeUtils.isArrayOrNull)}
-    autoFixString={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.autoTrim, NodeUtils.isBooleanOrNull)}
     onChange={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
     extraButtons={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.extraButtons, NodeUtils.isFunctionOrNull)}
   />),
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
-    return (<div>
-      {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
-      <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
-      <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
-      <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.valueHtmlAttributes)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.inlineCheckbox)} type="boolean" defaultValue={false} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.textArea)} type="boolean" defaultValue={false} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.comboBoxItems)} type={null} defaultValue={null} exampleExpression={`["item1", ...]`} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.autoTrim)} type="boolean" defaultValue={true} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraButtons)} type={null} defaultValue={null} />
-    </div>)
+    return (
+        <div>
+            {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
+            <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
+            <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.labelHtmlAttributes)} />
+            <HtmlAttributesLine dn={dn} binding={Binding.create(dn.node, n => n.formGroupHtmlAttributes)} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.unit)} type="string" defaultValue={m?.unit ?? ""} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.format)} type="string" defaultValue={m?.format ?? ""} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraButtons)} type={null} defaultValue={null} />
+        </div>
+    );
   },
 });
 
 export interface MultiValueLineNode extends LineBaseNode {
   kind: "MultiValueLine",
-  onRenderItem?: ExpressionOrValue<(ctx: TypeContext<any>) => React.ReactElement<any>>;
+  onRenderItem?: ExpressionOrValue<(p: AutoLineProps) => React.ReactElement<any>>;
   onCreate?: ExpressionOrValue<() => Promise<any[] | any | undefined>>;
   addValueText?: ExpressionOrValue<string>;
 }
@@ -605,7 +586,7 @@ NodeUtils.register<MultiValueLineNode>({
       {/*<ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.ref)} type={null} defaultValue={true} />*/}
       <FieldComponent dn={dn} binding={Binding.create(dn.node, n => n.field)} />
       <StyleOptionsLine dn={dn} binding={Binding.create(dn.node, n => n.styleOptions)} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(ValueLine, {ctx: mctx})"} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onRenderItem)} type={null} defaultValue={null} exampleExpression={"mctx => modules.React.createElement(AutoLine, {ctx: mctx})"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onCreate)} type={null} defaultValue={null} exampleExpression={"() => Promise.resolve(null)"} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.addValueText)} type="string" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.label)} type="string" defaultValue={m?.niceName ?? ""} />
@@ -623,9 +604,9 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
   onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
   find?: ExpressionOrValue<boolean>;
   onFind?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
-  remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+  remove?: ExpressionOrValue<boolean>;
   onRemove?: Expression<(remove: ModifiableEntity | Lite<Entity>) => Promise<boolean>>;
-  view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+  view?: ExpressionOrValue<boolean>;
   onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>;
   viewOnCreate?: ExpressionOrValue<boolean>;
   findOptions?: FindOptionsExpr;
@@ -1013,7 +994,7 @@ NodeUtils.register<EntityCheckboxListNode>({
     columnWidth: node.columnWidth,
     avoidFieldSet: node.avoidFieldSet,
   }),
-  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false, filterRows: true })}
+  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityListBaseProps(dn, ctx, { showMove: false, filterRows: true })}
     columnCount={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
     columnWidth={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
@@ -1040,7 +1021,7 @@ NodeUtils.register<EntityListNode>({
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityList", cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true })),
-  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })} />),
+  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })} />),
   renderDesigner: dn => NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })
 });
 
@@ -1067,7 +1048,7 @@ NodeUtils.register<EntityStripNode>({
     vertical: node.vertical,
   }),
   render: (dn, ctx) => (<EntityStrip
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
     iconStart={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.iconStart, NodeUtils.isBooleanOrNull)}
     vertical={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
   />),
@@ -1096,7 +1077,7 @@ NodeUtils.register<EntityRepeaterNode>({
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
   />),
   renderDesigner: dn =>
@@ -1122,7 +1103,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityTabRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
   renderDesigner: dn =>
     <div>
@@ -1158,7 +1139,7 @@ NodeUtils.register<EntityTableNode>({
   render: (dn, ctx) => (<EntityTable
     columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => (c.visible == undefined || NodeUtils.evaluateAndValidate(dn, ctx, c, n => n.visible, NodeUtils.isBooleanOrNull)) &&
       NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     scrollable={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.scrollable, NodeUtils.isBooleanOrNull)}
     maxResultsHeight={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
@@ -1547,7 +1528,7 @@ NodeUtils.register<ButtonNode>({
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.color)} type="string" defaultValue={null} options={["primary", "secondary", "success", "danger", "warning", "info", "light", "dark"] as BsColor[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.size)} type="string" defaultValue={null} options={["lg", "md", "sm", "xs"] as BsSize[]} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.icon)} type="string" defaultValue={null} onRenderValue={(val, e) => <IconTypeahead icon={val as string | null | undefined} formControlClass="form-control form-control-xs" onChange={newIcon => e.updateValue(newIcon)} />} />
-      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <ColorTextBox value={val as string | null} formControlClass="form-control form-control-xs" onChange={(newValue: string | null) => e.updateValue(newValue)} />} />
+      <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.iconColor)} type="string" defaultValue={null} onRenderValue={(val, e) => <input type="color" value={val as string | undefined} className="form-control form-control-xs" onChange={ev => e.updateValue(ev.currentTarget.value)} />} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.active)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.disabled)} type="boolean" defaultValue={null} />
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onClick)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n(e) => locals.forceUpdate()"} />
@@ -1616,7 +1597,7 @@ export namespace NodeConstructor {
 
     if (ti) {
       if (ti.kind == "Enum")
-        return { kind: "ValueLine", field } as ValueLineNode;
+        return { kind: "AutoLine", field } as AutoLineNode;
 
       if (tr.name == FilePathEntity.typeName && mi.defaultFileTypeInfo && mi.defaultFileTypeInfo.onlyImages)
         return { kind: "FileImageLine", field } as FileImageLineNode;
@@ -1644,10 +1625,7 @@ export namespace NodeConstructor {
       return { kind: "EntityDetail", field, children: [] } as EntityDetailNode;
     }
 
-    if (ValueLineController.getValueLineType(tr) != undefined)
-      return { kind: "ValueLine", field } as ValueLineNode;
-
-    return undefined;
+      return { kind: "AutoLine", field } as AutoLineNode;
   }
 }
 

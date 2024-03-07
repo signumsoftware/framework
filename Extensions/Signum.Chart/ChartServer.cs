@@ -15,6 +15,7 @@ public static class ChartServer
     public static void Start(IApplicationBuilder app)
     {
         UserAssetServer.Start(app);
+        UserAssetServer.QueryPermissionSymbols.Add(ChartPermission.ViewCharting);
 
         CustomizeChartRequest();
 

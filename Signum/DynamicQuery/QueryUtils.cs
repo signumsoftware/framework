@@ -96,7 +96,7 @@ public static class QueryUtils
 
         var result = FilterOperations[filtertype];
 
-        if (token is EntityPropertyToken ept && ept.HasFullTextIndex)
+        if (token is EntityPropertyToken ept && EntityPropertyToken.HasFullTextIndex(ept.PropertyRoute))
         {
             return result.PreAnd(FilterOperation.FreeText).PreAnd(FilterOperation.ComplexCondition).ToList();
         }
@@ -408,8 +408,8 @@ public static class QueryUtils
             return "Columns can not contain '{0}', '{1}', {2} or {3}".FormatWith(
                 CollectionAnyAllType.All.NiceToString(),
                 CollectionAnyAllType.Any.NiceToString(),
-                CollectionAnyAllType.NoOne.NiceToString(),
-                CollectionAnyAllType.AnyNo.NiceToString());
+                CollectionAnyAllType.NotAny.NiceToString(),
+                CollectionAnyAllType.NotAll.NiceToString());
 
         if (token is OperationsToken or ManualContainerToken)
             return $"{token} is not a valid column";
@@ -454,8 +454,8 @@ public static class QueryUtils
             return "'{0}', '{1}', '{2}' or '{3}' can not be ordered".FormatWith(
                 CollectionAnyAllType.All.NiceToString(),
                 CollectionAnyAllType.Any.NiceToString(),
-                CollectionAnyAllType.NoOne.NiceToString(),
-                CollectionAnyAllType.AnyNo.NiceToString());
+                CollectionAnyAllType.NotAny.NiceToString(),
+                CollectionAnyAllType.NotAll.NiceToString());
 
         if (token is OperationsToken or OperationToken or ManualContainerToken or ManualToken)
             return $"{token} is not a valid order";

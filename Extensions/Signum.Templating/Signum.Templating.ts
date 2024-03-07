@@ -21,7 +21,7 @@ export interface QueryModel {
 export interface ITemplateApplicable {}
 
 export interface IContainsQuery extends Entities.Entity {
-  query: Basics.QueryEntity;
+  query: Basics.QueryEntity | null;
 }
 
 export const ModelConverterSymbol = new Type<ModelConverterSymbol>("ModelConverter");

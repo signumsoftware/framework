@@ -8,7 +8,7 @@ export interface ContextMenuPosition {
   left: number;
   top: number;
   width: number; //Necessary for RTL
-  children: React.ReactElement<any>[]
+  children: React.ReactElement[]
 }
 
 export interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
@@ -50,11 +50,10 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
     const recOp = op!.getBoundingClientRect();
     const recButton = button.getBoundingClientRect();
-
     var result = ({
       left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
       top: recButton.top + recButton.height - recOp.top,
-      width: (op ? op.offsetWidth : window.innerWidth)
+      width: (op ? op.offsetWidth : window.outerWidth)
     }) as ContextMenuPosition;
 
     return result;
@@ -68,7 +67,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
     style.top = position.top + "px";
     if (document.body.className.contains("rtl-mode") !== Boolean(alignRight))
-      style.right = (position.width - position.left) + "px";
+      style.right = (position.width - position.left - 14 /*HACK*/) + "px";
     else
       style.left = position.left + "px";
 

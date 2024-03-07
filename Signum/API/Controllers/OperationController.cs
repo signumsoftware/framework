@@ -12,41 +12,41 @@ namespace Signum.API.Controllers;
 [ValidateModelFilter]
 public class OperationController : ControllerBase
 {
-    [HttpPost("api/operation/construct"), ValidateModelFilter, ProfilerActionSplitter]
-    public EntityPackTS? Construct([Required, FromBody] ConstructOperationRequest request)
+    [HttpPost("api/operation/construct/{operationKey}"), ValidateModelFilter, ProfilerActionSplitter("operationKey")]
+    public EntityPackTS? Construct(string operationKey, [Required, FromBody] ConstructOperationRequest request)
     {
         var entityType = TypeLogic.GetType(request.Type);
 
-        var op = request.GetOperationSymbol(entityType);
+        var op = request.GetOperationSymbol(operationKey, entityType);
 
         var entity = OperationLogic.ServiceConstruct(entityType, op, request.ParseArgs(op));
 
         return entity == null ? null : SignumServer.GetEntityPack(entity);
     }
 
-    [HttpPost("api/operation/constructFromEntity"), ProfilerActionSplitter]
-    public EntityPackTS? ConstructFromEntity([Required, FromBody] EntityOperationRequest request)
+    [HttpPost("api/operation/constructFromEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public EntityPackTS? ConstructFromEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
 
         var entity = OperationLogic.ServiceConstructFrom(request.entity, op, request.ParseArgs(op));
 
         return entity == null ? null : SignumServer.GetEntityPack(entity);
     }
 
-    [HttpPost("api/operation/constructFromLite"), ProfilerActionSplitter]
-    public EntityPackTS? ConstructFromLite([Required, FromBody] LiteOperationRequest request)
+    [HttpPost("api/operation/constructFromLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public EntityPackTS? ConstructFromLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.lite.EntityType);
+        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
         var entity = OperationLogic.ServiceConstructFromLite(request.lite, op, request.ParseArgs(op));
         return entity == null ? null : SignumServer.GetEntityPack(entity);
     }
 
 
-    [HttpPost("api/operation/executeEntity"), ProfilerActionSplitter]
-    public ActionResult<EntityPackTS> ExecuteEntity([Required, FromBody] EntityOperationRequest request)
+    [HttpPost("api/operation/executeEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public ActionResult<EntityPackTS> ExecuteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
         Entity entity;
         try
         {
@@ -67,19 +67,19 @@ public class OperationController : ControllerBase
     }
 
 
-    [HttpPost("api/operation/executeLite"), ProfilerActionSplitter]
-    public EntityPackTS ExecuteLite([Required, FromBody] LiteOperationRequest request)
+    [HttpPost("api/operation/executeLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public EntityPackTS ExecuteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.lite.EntityType);
+        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
         var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op));
 
         return SignumServer.GetEntityPack(entity);
     }
 
-    [HttpPost("api/operation/executeLiteWithProgress"), ProfilerActionSplitter]
-    public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress([Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
+    [HttpPost("api/operation/executeLiteWithProgress/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress(string operationKey, [Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
     {
-        var op = request.GetOperationSymbol(request.lite.EntityType);
+        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
 
         return WithProgressProxy(pp =>
         {
@@ -88,17 +88,17 @@ public class OperationController : ControllerBase
         }, ControllerContext, cancellationToken);
     }
 
-    [HttpPost("api/operation/deleteEntity"), ProfilerActionSplitter]
-    public void DeleteEntity([Required, FromBody] EntityOperationRequest request)
+    [HttpPost("api/operation/deleteEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public void DeleteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
         OperationLogic.ServiceDelete(request.entity, op, request.ParseArgs(op));
     }
 
-    [HttpPost("api/operation/deleteLite"), ProfilerActionSplitter]
-    public void DeleteLite([Required, FromBody] LiteOperationRequest request)
+    [HttpPost("api/operation/deleteLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public void DeleteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(request.lite.EntityType);
+        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
         OperationLogic.ServiceDelete(request.lite, op, request.ParseArgs(op));
     }
 
@@ -120,9 +120,7 @@ public class OperationController : ControllerBase
 
     public class BaseOperationRequest
     {
-        public required string OperationKey { get; set; }
-
-        public OperationSymbol GetOperationSymbol(Type entityType) => ParseOperationAssert(this.OperationKey, entityType);
+        public OperationSymbol GetOperationSymbol(string operationKey, Type entityType) => ParseOperationAssert(operationKey, entityType);
 
         public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
         {
@@ -145,7 +143,7 @@ public class OperationController : ControllerBase
 
         public static void RegisterCustomOperationArgsConverter(OperationSymbol operationSymbol, Func<JsonElement, object?> converter)
         {
-            Func<JsonElement, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol); /*CSBUG*/
+            Func<JsonElement, object?>? a = CustomOperationArgsConverters.TryGetC(operationSymbol);
 
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
@@ -187,51 +185,49 @@ public class OperationController : ControllerBase
             }
 
         }
-
-        public override string ToString() => OperationKey;
     }
 
-    [HttpPost("api/operation/constructFromMany"), ProfilerActionSplitter]
-    public EntityPackTS? ConstructFromMany([Required, FromBody]MultiOperationRequest request)
+    [HttpPost("api/operation/constructFromMany/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public EntityPackTS? ConstructFromMany(string operationKey, [Required, FromBody]MultiOperationRequest request)
     {
         var type = request.Lites.Select(l => l.EntityType).Distinct().Only() ?? TypeLogic.GetType(request.Type!);
 
-        var op = request.GetOperationSymbol(type);
+        var op = request.GetOperationSymbol(operationKey, type);
         var entity = OperationLogic.ServiceConstructFromMany(request.Lites, type, op, request.ParseArgs(op));
 
         return entity == null ? null : SignumServer.GetEntityPack(entity);
     }
 
-    [HttpPost("api/operation/constructFromMultiple"), ProfilerActionSplitter]
-    public IAsyncEnumerable<OperationResult> ConstructFromMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [HttpPost("api/operation/constructFromMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public IAsyncEnumerable<OperationResult> ConstructFromMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-            var op = request.GetOperationSymbol(entity.GetType());
+            var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
         }, cancellationToken);
     }
 
 
-    [HttpPost("api/operation/executeMultiple"), ProfilerActionSplitter]
-    public IAsyncEnumerable<OperationResult> ExecuteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [HttpPost("api/operation/executeMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public IAsyncEnumerable<OperationResult> ExecuteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
-            var op = request.GetOperationSymbol(entity.GetType());
+            var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
         }, cancellationToken);
     }
 
 
-    [HttpPost("api/operation/deleteMultiple"), ProfilerActionSplitter]
-    public IAsyncEnumerable<OperationResult> DeleteMultiple([Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
+    [HttpPost("api/operation/deleteMultiple/{operationKey}"), ProfilerActionSplitter("operationKey")]
+    public IAsyncEnumerable<OperationResult> DeleteMultiple(string operationKey, [Required, FromBody] MultiOperationRequest request, CancellationToken cancellationToken)
     {
         return ForeachMultiple(request.Lites, async lite =>
         {
@@ -239,7 +235,7 @@ public class OperationController : ControllerBase
             if (request.Setters.HasItems())
                 MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
 
-            var op = request.GetOperationSymbol(entity.GetType());
+            var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
         }, cancellationToken);
     }
@@ -433,7 +429,10 @@ internal static class MultiSetter
         {
             var pr = route.AddMany(setter.Property);
 
-            SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
+            if (pr.Parent!.Type.IsMixinEntity())
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity));
+            else
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
 
             if (pr.Type.IsMList())
             {

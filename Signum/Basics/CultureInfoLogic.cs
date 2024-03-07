@@ -3,6 +3,7 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.API;
+using System.Collections.Frozen;
 
 namespace Signum.Basics;
 
@@ -20,8 +21,8 @@ public static class CultureInfoLogic
 
     public static Func<CultureInfo, CultureInfo> CultureInfoModifier = ci => ci;
 
-    public static ResetLazy<Dictionary<string, CultureInfoEntity>> CultureInfoToEntity = null!;
-    public static ResetLazy<Dictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo = null!;
+    public static ResetLazy<FrozenDictionary<string, CultureInfoEntity>> CultureInfoToEntity = null!;
+    public static ResetLazy<FrozenDictionary<CultureInfoEntity, CultureInfo>> EntityToCultureInfo = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -39,11 +40,11 @@ public static class CultureInfoLogic
                     c.NativeName,
                 });
 
-            CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci.Name,
+            CultureInfoToEntity = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci.Name,
                 ci => ci),
                 invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 
-            EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToDictionary(ci => ci,
+            EntityToCultureInfo = sb.GlobalLazy(() => Database.Query<CultureInfoEntity>().ToFrozenDictionaryEx(ci => ci,
                 ci => CultureInfoModifier(CultureInfo.GetCultureInfo(ci.Name))),
                 invalidateWith: new InvalidateWith(typeof(CultureInfoEntity)));
 

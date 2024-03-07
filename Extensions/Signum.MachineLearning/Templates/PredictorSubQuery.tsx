@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityTable, TextBoxLine } from '@framework/Lines'
 import { FindOptions, ColumnOption } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.MachineLearning'
@@ -115,16 +115,16 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(f => f.name)} valueHtmlAttributes={{ onBlur: () => parentCtx.frame!.entityComponent!.forceUpdate() }} />
+      <TextBoxLine ctx={ctx.subCtx(f => f.name)} valueHtmlAttributes={{ onBlur: () => parentCtx.frame!.entityComponent!.forceUpdate() }} />
       <EntityLine ctx={ctx.subCtx(f => f.query)} remove={ctx.value.isNew} onChange={handleOnChange} />
       {queryKey &&
         <div>
         <FilterBuilderEmbedded ctx={ctxxs.subCtx(a => a.filters)} queryKey={queryKey}
           subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
           />
-          <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorSubQueryColumnEmbedded>([
+          <EntityTable ctx={ctxxs.subCtx(e => e.columns)} columns={[
             {
-              property: a => a.usage, template: colCtx => <ValueLine ctx={colCtx.subCtx(a => a.usage)} onChange={() => handleChangeUsage(colCtx)} />
+              property: a => a.usage, template: colCtx => <AutoLine ctx={colCtx.subCtx(a => a.usage)} onChange={() => handleChangeUsage(colCtx)} />
             },
             {
               property: a => a.token,
@@ -137,9 +137,9 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
               />,
               headerHtmlAttributes: { style: { width: "50%" } },
             },
-            { property: a => a.encoding, template: colCtx => isInputOutput(colCtx.value.usage) && <ValueLine ctx={colCtx.subCtx(a => a.encoding)} /> },
-            { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <ValueLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
-          ])} />
+            { property: a => a.encoding, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.encoding)} /> },
+            { property: a => a.nullHandling, template: colCtx => isInputOutput(colCtx.value.usage) && <AutoLine ctx={colCtx.subCtx(a => a.nullHandling)} /> },
+          ]} />
 
           {ctx.value.query && <a href="#" onClick={handlePreviewSubQuery}>{PredictorMessage.Preview.niceToString()}</a>}
         </div>}

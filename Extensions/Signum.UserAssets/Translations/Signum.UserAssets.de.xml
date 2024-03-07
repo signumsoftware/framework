@@ -58,8 +58,6 @@
     <Member Name="SelectTheEntitiesToOverride" Description="Wählen Sie die Elemente zum Überschreiben aus" />
     <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Wählen Sie die XML-Datei mit den Benutzer-Assets, die Sie importieren möchten" />
     <Member Name="SucessfullyImported" Description="Erfolgreich importiert" />
-    <Member Name="SwitchToExpression" Description="Auf Ausdruck umschalten" />
-    <Member Name="SwitchToValue" Description="Auf Wert umschalten" />
     <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="Die Filteroperation {0} ist nicht kompatibel mit {1}" />
   </Type>
   <Type Name="UserAssetPermission">
@@ -76,5 +74,9 @@
   </Type>
   <Type Name="UserAssetPreviewModel" Description="Benutzer-Asset-Vorschau">
     <Member Name="Lines" Description="Linien" />
+  </Type>
+  <Type Name="UserAssetQueryMessage">
+    <Member Name="SwitchToExpression" Description="Zu Ausdruck wechseln" />
+    <Member Name="SwitchToValue" Description="Zu Wert wechseln" />
   </Type>
 </Translations>

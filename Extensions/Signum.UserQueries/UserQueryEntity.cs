@@ -1,7 +1,9 @@
 using Signum.Dashboard;
+using Signum.DynamicQuery;
 using Signum.UserAssets;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
 
 namespace Signum.UserQueries;
@@ -58,6 +60,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 1)]
     public int? ElementsPerPage { get; set; }
 
+    public SystemTimeEmbedded? SystemTime { get; set; }
+
     [PreserveOrder, NoRepeatValidator]
     [ImplementedBy(typeof(UserQueryEntity))]
     public MList<Lite<Entity>> CustomDrilldowns { get; set; } = new MList<Lite<Entity>>();
@@ -88,6 +92,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         }
     }
 
+
+
     internal void ParseData(QueryDescription description)
     {
         var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
@@ -108,20 +114,21 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
             new XAttribute("Guid", Guid),
             new XAttribute("DisplayName", DisplayName),
             new XAttribute("Query", Query.Key),
-            EntityType == null ? null! : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
-            Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
-            !HideQuickLink ? null! : new XAttribute("HideQuickLink", HideQuickLink),
-            IncludeDefaultFilters == null ? null! : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
-            !AppendFilters ? null! : new XAttribute("AppendFilters", AppendFilters),
-            RefreshMode == RefreshMode.Auto ? null! : new XAttribute("RefreshMode", RefreshMode.ToString()),
-            !GroupResults ? null! : new XAttribute("GroupResults", GroupResults),
-            ElementsPerPage == null ? null! : new XAttribute("ElementsPerPage", ElementsPerPage),
-            PaginationMode == null ? null! : new XAttribute("PaginationMode", PaginationMode),
+            EntityType == null ? null : new XAttribute("EntityType", ctx.RetrieveLite(EntityType).CleanName),
+            Owner == null ? null : new XAttribute("Owner", Owner.KeyLong()),
+            !HideQuickLink ? null : new XAttribute("HideQuickLink", HideQuickLink),
+            IncludeDefaultFilters == null ? null : new XAttribute("IncludeDefaultFilters", IncludeDefaultFilters.Value),
+            !AppendFilters ? null : new XAttribute("AppendFilters", AppendFilters),
+            RefreshMode == RefreshMode.Auto ? null : new XAttribute("RefreshMode", RefreshMode.ToString()),
+            !GroupResults ? null : new XAttribute("GroupResults", GroupResults),
+            ElementsPerPage == null ? null : new XAttribute("ElementsPerPage", ElementsPerPage),
+            PaginationMode == null ? null : new XAttribute("PaginationMode", PaginationMode),
             new XAttribute("ColumnsMode", ColumnsMode),
-            Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
-            Columns.IsNullOrEmpty() ? null! : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
-            Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
-            CustomDrilldowns.IsNullOrEmpty() ? null! : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
+            Filters.IsNullOrEmpty() ? null : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
+            Columns.IsNullOrEmpty() ? null : new XElement("Columns", Columns.Select(c => c.ToXml(ctx)).ToList()),
+            Orders.IsNullOrEmpty() ? null : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
+            SystemTime?.ToXml(),
+            CustomDrilldowns.IsNullOrEmpty() ? null : new XElement("CustomDrilldowns", CustomDrilldowns.Select(d => new XElement("CustomDrilldown", ctx.Include((Lite<IUserAssetEntity>)d))).ToList()));
     }
 
     public void FromXml(XElement element, IFromXmlContext ctx)
@@ -142,7 +149,7 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
         Columns.Synchronize(element.Element("Columns")?.Elements().ToList(), (c, x) => c.FromXml(x, ctx));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
         CustomDrilldowns.Synchronize((element.Element("CustomDrilldowns")?.Elements("CustomDrilldown")).EmptyIfNull().Select(x => (Lite<Entity>)ctx.GetEntity(Guid.Parse(x.Value)).ToLiteFat()).NotNull().ToMList());
-
+        SystemTime = element.Element("SystemTime")?.Let(xml => (SystemTime ?? new SystemTimeEmbedded()).FromXml(xml));
         ParseData(ctx.GetQueryDescription(Query));
     }
 
@@ -158,11 +165,94 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     }
 }
 
+public class SystemTimeEmbedded : EmbeddedEntity
+{
+    public SystemTimeMode Mode { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string? StartDate { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string? EndDate { get; set; }
+
+    public SystemTimeJoinMode? JoinMode { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(StartDate))
+        {
+            return (pi, StartDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.AsOf);
+        }
+
+        if (pi.Name == nameof(EndDate))
+        {
+            return (pi, EndDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn);
+        }
+
+        if (pi.Name == nameof(JoinMode))
+        {
+            return (pi, JoinMode).IsSetOnlyWhen(Mode is not SystemTimeMode.AsOf);
+        }
+
+        return base.PropertyValidation(pi);
+    }
+
+    internal SystemTimeEmbedded? FromXml(XElement xml)
+    {
+        Mode = xml.Attribute("Mode")!.Value.ToEnum<SystemTimeMode>();
+        StartDate = xml.Attribute("StartDate")?.Value;
+        EndDate = xml.Attribute("EndDate")?.Value;
+        JoinMode = xml.Attribute("JoinMode")?.Value.ToEnum<SystemTimeJoinMode>();
+        return this;
+    }
+
+    internal SystemTime GetSystemTime() {
+
+        JoinBehaviour GetJoinMode() => JoinMode!.Value switch
+        {
+            SystemTimeJoinMode.Current => JoinBehaviour.Current,
+            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
+            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
+            _ => throw new UnexpectedValueException(JoinMode!.Value)
+        };
+
+        DateTimeOffset ParseDate(string date)
+        {
+            return (DateTimeOffset)(DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
+        }
+
+        return Mode switch
+        {
+            SystemTimeMode.All => new SystemTime.All(GetJoinMode()),
+            SystemTimeMode.AsOf => new SystemTime.AsOf(ParseDate(StartDate!)),
+            SystemTimeMode.Between => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
+            SystemTimeMode.ContainedIn => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
+            _ => throw new UnexpectedValueException(Mode)
+        };
+    }
+    internal XElement ToXml()
+    {
+        return new XElement("SystemTime",
+        new XAttribute("Mode", Mode.ToString()),
+            StartDate == null ? null : new XAttribute("StartDate", StartDate),
+            EndDate == null ? null : new XAttribute("EndDate", EndDate),
+            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!)
+        );
+    }
+}
+
 public class UserQueryLiteModel : ModelEntity
 {
     public string DisplayName { get; set; }
     public QueryEntity Query { get; set; }
     public bool HideQuickLink { get; set; }
+
+    internal static UserQueryLiteModel Translated(UserQueryEntity uq) => new UserQueryLiteModel
+    {
+        DisplayName = uq.TranslatedField(a => a.DisplayName),
+        Query = uq.Query,
+        HideQuickLink = uq.HideQuickLink,
+    };
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => DisplayName);
@@ -241,9 +331,9 @@ public class ValueUserQueryElementEmbedded : EmbeddedEntity
     internal XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("ValueUserQueryElement",
-            Label == null ? null! : new XAttribute(nameof(Label), Label),
-            Href == null ? null! : new XAttribute(nameof(Href), Href),
-            IsQueryCached == false ? null! : new XAttribute(nameof(IsQueryCached), IsQueryCached),
+            Label == null ? null : new XAttribute(nameof(Label), Label),
+            Href == null ? null : new XAttribute(nameof(Href), Href),
+            IsQueryCached == false ? null : new XAttribute(nameof(IsQueryCached), IsQueryCached),
             new XAttribute("UserQuery", ctx.Include(UserQuery)));
     }
 
@@ -359,4 +449,6 @@ public enum UserQueryMessage
     MakesThe0AvailableAsAQuickLinkOf1,
     [Description("the selected {0}")]
     TheSelected0,
+    Date,
+    Pagination,
 }

@@ -5,6 +5,7 @@ using System.Collections;
 using Signum.DynamicQuery.Tokens;
 using Signum.Security;
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 
 namespace Signum.Operations;
 
@@ -16,7 +17,12 @@ public static class OperationLogic
 
     [AutoExpressionField]
     public static OperationLogEntity? PreviousOperationLog(this Entity e) =>
-        As.Expression(() => e.OperationLogs().Where(ol => ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
+        As.Expression(() => e.OperationLogs().Where(ol => ol.Exception == null && ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
+
+    [AutoExpressionField]
+    public static OperationLogEntity? LastOperationLog(this Entity e) =>
+    As.Expression(() => e.OperationLogs().DisableQueryFilter().Where(ol => ol.Exception == null).OrderByDescending(a => a.End!.Value).FirstOrDefault());
+
 
     [AutoExpressionField]
     public static IQueryable<OperationLogEntity> Logs(this OperationSymbol o) =>
@@ -24,12 +30,12 @@ public static class OperationLogic
 
     static Polymorphic<Dictionary<OperationSymbol, IOperation>> operations = new Polymorphic<Dictionary<OperationSymbol, IOperation>>(PolymorphicMerger.InheritDictionaryInterfaces, typeof(IEntity));
 
-    static ResetLazy<Dictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<Dictionary<OperationSymbol, List<Type>>>(() =>
+    static ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>> operationsFromKey = new ResetLazy<FrozenDictionary<OperationSymbol, List<Type>>>(() =>
     {
         return (from t in operations.OverridenTypes
                 from d in operations.GetDefinition(t)!.Keys
                 group t by d into g
-                select KeyValuePair.Create(g.Key, g.ToList())).ToDictionary();
+                select KeyValuePair.Create(g.Key, g.ToList())).ToFrozenDictionaryEx();
     });
 
 
@@ -94,6 +100,7 @@ public static class OperationLogic
 
             QueryLogic.Expressions.Register((OperationSymbol o) => o.Logs(), OperationMessage.Logs);
             QueryLogic.Expressions.Register((Entity o) => o.OperationLogs(), () => typeof(OperationLogEntity).NicePluralName());
+            QueryLogic.Expressions.Register((Entity o) => o.LastOperationLog(), OperationMessage.LastOperationLog);
 
 
             sb.Schema.EntityEventsGlobal.Saving += EntityEventsGlobal_Saving;
@@ -387,13 +394,15 @@ Consider the following options:
     {
         return new OperationInfo(oper.OperationSymbol, oper.OperationType)
         {
-            CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             Returns = oper.Returns,
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
             HasCanExecuteExpression = (oper as IEntityOperation)?.CanExecuteExpression() != null,
+            CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
+            ForReadonlyEntity = (oper as IExecuteOperation)?.ForReadonlyEntity,
+            ResultIsSaved = (oper as IConstructorFromOperation)?.ResultIsSaved,
             BaseType = (oper as IEntityOperation)?.BaseType ?? (oper as IConstructorFromManyOperation)?.BaseType
         };
     }
@@ -782,7 +791,7 @@ Consider the following options:
         var states = lites.Chunk(200).SelectMany(list =>
             Database.Query<T>().Where(e => list.Contains(e.ToLite())).Select(getState).Distinct()).Distinct().ToList();
 
-        return (from o in operations.Cast<Graph<E, S>.IGraphFromStatesOperation>()
+        return (from o in operations.OfType<Graph<E, S>.IGraphFromStatesOperation>()
                 let invalid = states.Where(s => !o.FromStates.Contains(s)).ToList()
                 where invalid.Any()
                 select KeyValuePair.Create(o.OperationSymbol,
@@ -827,14 +836,14 @@ Consider the following options:
 
 public static class FluentOperationInclude
 {
-    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation)
+    public static FluentInclude<T> WithSave<T>(this FluentInclude<T> fi, ExecuteSymbol<T> saveOperation, Action<T, object?[]?>? execute = null)
         where T : Entity
     {
         new Graph<T>.Execute(saveOperation)
         {
             CanBeNew = true,
             CanBeModified = true,
-            Execute = (e, _) => { }
+            Execute = execute ?? ((e, _) => { })
         }.Register();
 
         return fi;

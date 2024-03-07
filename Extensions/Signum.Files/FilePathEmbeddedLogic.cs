@@ -1,4 +1,5 @@
 using Signum.Utilities.Reflection;
+using Signum.Utilities.Synchronization;
 using System.Collections;
 using System.IO;
 
@@ -17,6 +18,18 @@ public static class FilePathEmbeddedLogic
         {
             FileTypeLogic.Start(sb);
 
+            QueryUtils.OrderAdapters.Add(qt =>
+            {
+                if (qt.Type != typeof(FilePathEmbedded))
+                    return null;
+
+                return ctx =>
+                {
+                    var exp = qt.BuildExpression(ctx);
+
+                    return Expression.Property(exp, nameof(FilePathEmbedded.FileName));
+                };
+            });
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {
@@ -32,13 +45,12 @@ public static class FilePathEmbeddedLogic
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                             var a = fpe; //For debugging
 
-                            task.Wait();
+                            task.WaitSafe();
                         };
                     }
                 }
             };
 
-            FilePathEmbedded.CalculatePrefixPair += CalculatePrefixPair;
 
             sb.Schema.SchemaCompleted += Schema_SchemaCompleted;
         }
@@ -173,7 +185,7 @@ public static class FilePathEmbeddedLogic
             (t, rowId, retriever) => propertyRoute);
     }
 
-    static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
+    public static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
     {
         using (new EntityCache(EntityCacheType.ForceNew))
             return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);

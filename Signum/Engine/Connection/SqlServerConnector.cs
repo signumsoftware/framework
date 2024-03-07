@@ -33,9 +33,9 @@ public static class SqlServerVersionDetector
         Azure = 5,
     }
 
-    public static SqlServerVersion? Detect(string connectionString)
+    public static SqlServerVersion Detect(string connectionString, SqlServerVersion fallback)
     {
-        return SqlServerRetry.Retry(() =>
+        try
         {
             using (var con = new SqlConnection(connectionString))
             {
@@ -70,11 +70,16 @@ public static class SqlServerVersionDetector
                         "14" => SqlServerVersion.SqlServer2017,
                         "15" => SqlServerVersion.SqlServer2019,
                         "16" => SqlServerVersion.SqlServer2022,
-                        _ => (SqlServerVersion?)null,
+                        var a => throw new UnexpectedValueException(a),
                     };
                 }
             }
-        });
+        }
+        catch
+        {
+            return fallback;
+        }
+        
     }
 }
 
@@ -388,20 +393,31 @@ public class SqlServerConnector : Connector
     {
         EnsureConnectionRetry(con =>
         {
-            using (var bulkCopy = new SqlBulkCopy(
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
-                options,
-                options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaction!))
-            using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+            try
             {
-                bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
+                using (var bulkCopy = new SqlBulkCopy(
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? con : (SqlConnection)Transaction.CurrentConnection!,
+                    options,
+                    options.HasFlag(SqlBulkCopyOptions.UseInternalTransaction) ? null : (SqlTransaction)Transaction.CurrentTransaction!))
+                using (HeavyProfiler.Log("SQL", () => destinationTable.ToString() + " Rows:" + dt.Rows.Count))
+                {
+                    bulkCopy.BulkCopyTimeout = timeout ?? Connector.ScopeTimeout ?? this.CommandTimeout ?? bulkCopy.BulkCopyTimeout;
 
-                foreach (var c in dt.Columns.Cast<DataColumn>())
-                    bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
+                    foreach (var c in dt.Columns.Cast<DataColumn>())
+                        bulkCopy.ColumnMappings.Add(new SqlBulkCopyColumnMapping(c.ColumnName, c.ColumnName));
 
-                bulkCopy.DestinationTableName = destinationTable.ToString();
-                bulkCopy.WriteToServer(dt);
-                return 0;
+                    bulkCopy.DestinationTableName = destinationTable.ToString();
+                    bulkCopy.WriteToServer(dt);
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                var nex = HandleException(ex, new SqlPreCommandSimple($"## SqlBulkCopy into {destinationTable} ({columns.ToString(a => "'" + a.Name + "'", ", ")})"));
+                if (nex == ex)
+                    throw;
+
+                throw nex;
             }
         });
     }
@@ -528,6 +544,13 @@ public class SqlServerConnector : Connector
     {
         get { return Version >= SqlServerVersion.SqlServer2016; }
     }
+
+    public bool SupportsDateTrunc
+    {
+        get { return Version >= SqlServerVersion.SqlServer2022; }
+    }
+
+    public override bool SupportsPartitioning => true;
 
     public override int MaxNameLength => 128;
 
@@ -707,6 +730,42 @@ open cur
 close cur
 deallocate cur";
 
+    public static readonly string RemoveAllPartitionSchemas=
+@"declare @partScheme nvarchar(128)
+DECLARE @sql nvarchar(255)
+
+declare cur cursor fast_forward for
+select name
+from sys.partition_schemes
+open cur
+    fetch next from cur into @partScheme
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP PARTITION SCHEME [' + @partScheme + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @partScheme
+    end
+close cur
+deallocate cur";
+
+    public static readonly string RemoveAllPartitionFunction =
+@"declare @partFunc nvarchar(128)
+DECLARE @sql nvarchar(255)
+
+declare cur cursor fast_forward for
+select name
+from sys.partition_functions
+open cur
+    fetch next from cur into @partFunc
+    while @@fetch_status <> -1
+    begin
+        select @sql = 'DROP PARTITION FUNCTION [' + @partFunc + '];'
+        exec sp_executesql @sql
+        fetch next from cur into @partFunc
+    end
+close cur
+deallocate cur";
+
     public static readonly string StopSystemVersioning = @"declare @schema nvarchar(128), @tbl nvarchar(128)
 DECLARE @sql nvarchar(255)
 
@@ -724,6 +783,8 @@ open cur
     end
 close cur
 deallocate cur";
+
+
 
     public static readonly string RemoveAllFullTextCatallogs =
 @"declare @catallogName nvarchar(128)
@@ -757,6 +818,8 @@ deallocate cur";
             Connector.Current.SupportsTemporalTables ? new SqlPreCommandSimple(Use(databaseName, StopSystemVersioning)) : null,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllTablesScript)),
             new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas))),
+            Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionSchemas) : null,
+            Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionFunction) : null,
             Connector.Current.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
             )!;
     }

@@ -16,7 +16,7 @@ import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTy
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import "./DynamicType.css"
 import { Tabs, Tab } from 'react-bootstrap';
 import CollapsableCard from '@framework/Components/CollapsableCard';
@@ -24,6 +24,7 @@ import { Typeahead } from '@framework/Components';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicTypeEntity, DynamicTypeMessage } from '../Signum.Dynamic.Types'
 import { DynamicMixinConnectionEntity } from '../Signum.Dynamic.Mixins'
+import { TextAreaLine } from '@framework/Lines'
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;
@@ -122,13 +123,12 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent:  p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -617,13 +617,12 @@ public static class ${entityName}Operation2
   }
 
   function popupCodeSnippet(snippet: string) {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: snippet,
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: `Code Snippet`,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: 150 } },
     });
   }

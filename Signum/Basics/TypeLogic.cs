@@ -71,13 +71,22 @@ public static class TypeLogic
             };
 
             schema.typeCachesLazy = sb.GlobalLazy(() => new TypeCaches(schema), new InvalidateWith(typeof(TypeEntity)), Schema.Current.InvalidateMetadata);
-
-            TypeEntity.SetTypeEntityCallbacks(
-                t => TypeToEntity.GetOrThrow(t),
-                t => EntityToType.GetOrThrow(t),
-                t => LiteToType.GetOrThrow(t)
-                );
         }
+    }
+
+    public static Type ToType(this TypeEntity typeEntity)
+    {
+        return EntityToType.GetOrThrow(typeEntity);
+    }
+
+    public static Type ToType(this Lite<TypeEntity> typeLite)
+    {
+        return LiteToType.GetOrThrow(typeLite);
+    }
+
+    public static TypeEntity ToTypeEntity(this Type type)
+    {
+        return TypeToEntity.GetOrThrow(type);
     }
 
     public static Dictionary<TypeEntity, Type> TryEntityToType(Replacements replacements)

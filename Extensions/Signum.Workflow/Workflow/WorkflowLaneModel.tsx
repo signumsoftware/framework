@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, TypeContext, EntityStrip, EntityDetail } from '@framework/Lines'
+import { AutoLine, TypeContext, EntityStrip, EntityDetail, CheckboxLine } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowLaneModel, WorkflowLaneActorsEval, WorkflowMessage } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -50,15 +50,15 @@ export default function WorkflowLaneModelComponent(p : WorkflowLaneModelComponen
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(wc => wc.name)} />
+      <AutoLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityStrip ctx={ctx.subCtx(wc => wc.actors)} onChange={handleFixBooleans}/>
       {ctx.value.mainEntityType ?
         <EntityDetail ctx={ctx.subCtx(wc => wc.actorsEval)} getComponent={renderActorEval} onCreate={() => Promise.resolve(WorkflowLaneActorsEval.New({ script: "new List<Lite<Entity>>{ e.YourProperty }" }))}
           onChange={handleFixBooleans}
         /> :
         <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.actorsEval), ctx.niceName(e => e.mainEntityType))}</div>}
-      {ctx.value.actorsEval && <ValueLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
-      {ctx.value.actorsEval && ctx.value.actors.length > 0 && < ValueLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
+      {ctx.value.actorsEval && <CheckboxLine ctx={ctx.subCtx(wc => wc.useActorEvalForStart)} inlineCheckbox />}
+      {ctx.value.actorsEval && ctx.value.actors.length > 0 && <CheckboxLine ctx={ctx.subCtx(wc => wc.combineActorAndActorEvalWhenContinuing)} inlineCheckbox/>}
     </div>
   );
 }

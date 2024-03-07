@@ -44,8 +44,11 @@ public static class Administrator
         {
             foreach (var db in Schema.Current.DatabaseNames())
             {
-                Connector.Current.CleanDatabase(db);
-                SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                if (db == null || SafeConsole.Ask($"Delete {db} as well?"))
+                {
+                    Connector.Current.CleanDatabase(db);
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
+                }
             }
         }
     }
@@ -58,22 +61,22 @@ public static class Administrator
     {
         using (OverrideDatabaseInSysViews(tableName.Schema.Database))
         {
+            var table = Database.View<SysTables>().SingleEx(t => t.name == tableName.Name && t.Schema().name == tableName.Schema.Name);
+
             var columns =
-                (from t in Database.View<SysTables>()
-                 where t.name == tableName.Name && t.Schema().name == tableName.Schema.Name
-                 from c in t.Columns()
+                (from c in table.Columns()
                  select new DiffColumn
                  {
                      Name = c.name,
                      DbType = new AbstractDbType(SysTablesSchema.ToSqlDbType(c.Type()!.name)),
                      UserTypeName = null,
-                     PrimaryKey = t.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
+                     PrimaryKey = table.Indices().Any(i => i.is_primary_key && i.IndexColumns().Any(ic => ic.column_id == c.column_id)),
                      Nullable = c.is_nullable,
                  }).ToList();
 
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($@"[TableName(""{tableName}"")]");
-            sb.AppendLine($"public class {tableName.Name} : IView");
+            sb.AppendLine($"public class {tableName.Name.Replace(" ", "")} : IView");
             sb.AppendLine(@"{");
             foreach (var c in columns)
             {
@@ -204,9 +207,7 @@ public static class Administrator
 
         IColumn[] columns = IndexKeyColumns.Split(view, fields);
 
-        var index = unique ?
-            new UniqueTableIndex(view, columns) :
-            new TableIndex(view, columns);
+        var index = new TableIndex(view, columns) { Unique = unique };
 
         Connector.Current.SqlBuilder.CreateIndex(index, checkUnique: null).ExecuteLeaves();
     }
@@ -632,8 +633,11 @@ public static class Administrator
         });
     }
 
-    public static IDisposable DisableUniqueIndex(UniqueTableIndex index)
+    public static IDisposable DisableUniqueIndex(TableIndex index)
     {
+        if (!index.Unique)
+            throw new InvalidOperationException($"Index {index.IndexName} is not unique");
+
         var sqlBuilder = Connector.Current.SqlBuilder;
         SafeConsole.WriteLineColor(ConsoleColor.DarkMagenta, " DISABLE Unique Index "  + index.IndexName);
         sqlBuilder.DisableIndex(index.Table.Name, index.IndexName).ExecuteLeaves();

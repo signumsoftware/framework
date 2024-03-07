@@ -24,7 +24,7 @@ public interface ITable
 
     List<TableIndex>? MultiColumnIndexes { get; set; }
 
-    List<TableIndex> GeneratAllIndexes();
+    List<TableIndex> AllIndexes();
 
     void GenerateColumns();
 
@@ -33,6 +33,9 @@ public interface ITable
     bool IdentityBehaviour { get; }
 
     FieldEmbedded.EmbeddedHasValueColumn? GetHasValueColumn(IColumn column);
+
+    SqlPartitionScheme? PartitionScheme { get; } 
+
 }
 
 public class SystemVersionedInfo
@@ -40,7 +43,7 @@ public class SystemVersionedInfo
     public ObjectName TableName;
     public string? StartColumnName;
     public string? EndColumnName;
-    public string? PostgreeSysPeriodColumnName;
+    public string? PostgresSysPeriodColumnName;
 
     public SystemVersionedInfo(ObjectName tableName, string startColumnName, string endColumnName)
     {
@@ -52,21 +55,21 @@ public class SystemVersionedInfo
     public SystemVersionedInfo(ObjectName tableName, string postgreeSysPeriodColumnName)
     {
         TableName = tableName;
-        PostgreeSysPeriodColumnName = postgreeSysPeriodColumnName;
+        PostgresSysPeriodColumnName = postgreeSysPeriodColumnName;
     }
 
     internal IEnumerable<IColumn> Columns()
     {
-        if (PostgreeSysPeriodColumnName != null)
+        if (PostgresSysPeriodColumnName != null)
             return new[]
             {
-                    new PostgreePeriodColumn(this.PostgreeSysPeriodColumnName!),
+                    new PostgresPeriodColumn(this.PostgresSysPeriodColumnName!),
                 };
         else
             return new[]
             {
-                    new SqlServerPeriodColumn(this.StartColumnName!, ColumnType.Start),
-                    new SqlServerPeriodColumn(this.EndColumnName!, ColumnType.End)
+                    new SqlServerPeriodColumn(this.StartColumnName!, SystemVersionColumnType.Start),
+                    new SqlServerPeriodColumn(this.EndColumnName!, SystemVersionColumnType.End)
                 };
     }
 
@@ -76,11 +79,11 @@ public class SystemVersionedInfo
         return new IntervalExpression(typeof(NullableInterval<DateTime>),
             StartColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, StartColumnName).SetMetadata(ExpressionMetadata.UTC),
             EndColumnName == null ? null : new ColumnExpression(typeof(DateTime?), tableAlias, EndColumnName).SetMetadata(ExpressionMetadata.UTC),
-            PostgreeSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, PostgreeSysPeriodColumnName).SetMetadata(ExpressionMetadata.UTC)
+            PostgresSysPeriodColumnName == null ? null : new ColumnExpression(typeof(NpgsqlRange<DateTime>), tableAlias, PostgresSysPeriodColumnName).SetMetadata(ExpressionMetadata.UTC)
         );
     }
 
-    public enum ColumnType
+    public enum SystemVersionColumnType
     {
         Start,
         End,
@@ -88,14 +91,14 @@ public class SystemVersionedInfo
 
     public class SqlServerPeriodColumn : IColumn
     {
-        public SqlServerPeriodColumn(string name, ColumnType systemVersionColumnType)
+        public SqlServerPeriodColumn(string name, SystemVersionColumnType systemVersionColumnType)
         {
             this.Name = name;
             this.SystemVersionColumnType = systemVersionColumnType;
         }
 
         public string Name { get; private set; }
-        public ColumnType SystemVersionColumnType { get; private set; }
+        public SystemVersionColumnType SystemVersionColumnType { get; private set; }
 
         public IsNullable Nullable => IsNullable.No;
         
@@ -115,11 +118,16 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+        public override string ToString()
+        {
+            return Name;
+        }
+
     }
 
-    public class PostgreePeriodColumn : IColumn
+    public class PostgresPeriodColumn : IColumn
     {
-        public PostgreePeriodColumn(string name)
+        public PostgresPeriodColumn(string name)
         {
             this.Name = name;
         }
@@ -128,7 +136,7 @@ public class SystemVersionedInfo
 
         public IsNullable Nullable => IsNullable.No;
         public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
-        public Type Type => typeof(DateTime);
+        public Type Type => typeof(NpgsqlTypes.NpgsqlRange<DateTime>);
         public string? UserDefinedTypeName => null;
         public bool PrimaryKey => false;
         public bool IdentityBehaviour => false;
@@ -143,6 +151,11 @@ public class SystemVersionedInfo
         public bool AvoidForeignKey => false;
 
         public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 
 }
@@ -289,7 +302,10 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         return fields;
     }
 
-    public List<TableIndex> GeneratAllIndexes()
+    List<TableIndex>? allIndexes;
+    public List<TableIndex> AllIndexes() => allIndexes ??= GeneratAllIndexes();
+
+    List<TableIndex> GeneratAllIndexes()
     {
         IEnumerable<EntityField> fields = Fields.Values.AsEnumerable();
         if (Mixins != null)
@@ -300,7 +316,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         if (MultiColumnIndexes != null)
             result.AddRange(MultiColumnIndexes);
 
-        if (result.OfType<UniqueTableIndex>().Any())
+        if (result.Where(a=>a.Unique).Any())
         {
             var s = Schema.Current.Settings;
             List<IColumn> attachedFields = fields.Where(f => s.FieldAttributes(PropertyRoute.Root(this.Type).Add(f.FieldInfo))!.OfType<AttachToUniqueIndexesAttribute>().Any())
@@ -311,13 +327,13 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
             {
                 result = result.Select(ix =>
                 {
-                    var ui = ix as UniqueTableIndex;
-                    if (ui == null || ui.AvoidAttachToUniqueIndexes)
+                    if (!ix.Unique || ix.AvoidAttachToUniqueIndexes)
                         return ix;
 
-                    return new UniqueTableIndex(ui.Table, ui.Columns.Union(attachedFields).ToArray())
+                    return new TableIndex(ix.Table, ix.Columns.Union(attachedFields).ToArray())
                     {
-                        Where = ui.Where
+                        Unique = true,
+                        Where = ix.Where
                     };
                 }).ToList();
             }
@@ -346,10 +362,22 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
         return this.AllFields().SelectMany(f => f.Field.TablesMList());
     }
 
-    public FieldTicks Ticks { get; internal set; }
     public FieldPrimaryKey PrimaryKey { get; internal set; }
+    public FieldTicks? Ticks { get; internal set; }
+    public FieldPartitionId? PartitionId { get; internal set; }
 
     IColumn ITable.PrimaryKey => PrimaryKey;
+
+    public SqlPartitionScheme? PartitionScheme { get; set; }
+
+    public void SetPartitionSchem(SqlPartitionScheme scheme)
+    {
+        this.PartitionScheme = scheme;
+        foreach (var item in TablesMList())
+        {
+            item.PartitionScheme = scheme;
+        }
+    }
 
     public IEnumerable<EntityField> AllFields()
     {
@@ -362,7 +390,6 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         return this.AllFields().Select(a => a.Field).OfType<FieldEmbedded>().Select(a => a.GetHasValueColumn(column)).NotNull().SingleOrDefaultEx();
     }
-
 }
 
 public class EntityField
@@ -391,7 +418,7 @@ public abstract partial class Field
 {
     public Type FieldType { get; private set; }
     public PropertyRoute Route { get; private set; }
-    public UniqueTableIndex? UniqueIndex { get; set; }
+    public TableIndex? UniqueIndex { get; set; }
 
     public Field(PropertyRoute route, Type? fieldType = null)
     {
@@ -410,13 +437,14 @@ public abstract partial class Field
         return new[] { UniqueIndex };
     }
 
-    public virtual UniqueTableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
+    public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
     {
         if (attribute == null)
             return null;
 
-        var result = new UniqueTableIndex(table, TableIndex.GetColumnsFromFields(this))
+        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this))
         {
+            Unique = true,
             AvoidAttachToUniqueIndexes = attribute.AvoidAttachToUniqueIndexes
         };
 
@@ -503,7 +531,7 @@ public static partial class ColumnExtensions
     public static GeneratedAlwaysType GetGeneratedAlwaysType(this IColumn column)
     {
         if (column is SystemVersionedInfo.SqlServerPeriodColumn svc)
-            return svc.SystemVersionColumnType == SystemVersionedInfo.ColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
+            return svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? GeneratedAlwaysType.AsRowStart : GeneratedAlwaysType.AsRowEnd;
 
         return GeneratedAlwaysType.None;
     }
@@ -562,7 +590,14 @@ public partial class FieldPrimaryKey : Field, IColumn
         if (this.UniqueIndex != null)
             throw new InvalidOperationException("Changing IndexType is not allowed for FieldPrimaryKey");
 
-        return new[] { new PrimaryKeyIndex(table) };
+        if (table.PartitionScheme == null)
+            return new[] { new TableIndex(table, this) { PrimaryKey = true, Clustered = true } };
+        else
+            return new[] {
+                new TableIndex(table, this) { PrimaryKey = true },
+                new TableIndex(table, this) { Clustered = true, Partitioned = true },
+            };
+
     }
 
     internal override IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -636,6 +671,17 @@ public partial class FieldTicks : FieldValue
 
     public FieldTicks(PropertyRoute route, Type type, string name)
         : base(route, null, name)
+    {
+        this.Type = type;
+    }
+}
+
+public partial class FieldPartitionId : FieldValue
+{
+    public new Type Type { get; set; }
+
+    public FieldPartitionId(PropertyRoute route, Type type, string name)
+        : base(route, type, name)
     {
         this.Type = type;
     }
@@ -1306,6 +1352,7 @@ public partial class FieldMList : Field, IFieldFinder
         }
     }
 
+
     internal override IEnumerable<TableMList> TablesMList()
     {
         return new[] { TableMList };
@@ -1334,6 +1381,8 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public string? Check { get; set; }
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
+
+
         public PrimaryKeyColumn(Type type, string name)
         {
             Type = type;
@@ -1349,9 +1398,11 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
     public PrimaryKeyColumn PrimaryKey { get; set; }
     public FieldReference BackReference { get; set; }
     public FieldValue? Order { get; set; }
+    public FieldPartitionId PartitionId { get; internal set; }
     public Field Field { get; set; }
 
     public SystemVersionedInfo? SystemVersioned { get; set; }
+    public SqlPartitionScheme? PartitionScheme { get; set; }
 
     public Type CollectionType { get; private set; }
 
@@ -1382,6 +1433,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         if (Order != null)
             cols.Add(Order);
 
+        if (PartitionId != null)
+            cols.Add(PartitionId);
+
         cols.AddRange(Field.Columns());
 
         if (this.SystemVersioned != null)
@@ -1390,12 +1444,20 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         Columns = cols.ToDictionary(a => a.Name);
     }
 
-    public List<TableIndex> GeneratAllIndexes()
+    List<TableIndex>? allIndexes;
+    public List<TableIndex> AllIndexes() => allIndexes ??= GeneratAllIndexes();
+
+    List<TableIndex> GeneratAllIndexes()
     {
-        var result = new List<TableIndex>
-            {
-                new PrimaryKeyIndex(this)
-            };
+        var result = new List<TableIndex>();
+
+        if (PartitionScheme == null)
+            result.Add(new TableIndex(this, this.PrimaryKey) { Clustered = true, PrimaryKey = true });
+        else
+        {
+            result.Add(new TableIndex(this, this.PrimaryKey) { PrimaryKey = true });
+            result.Add(new TableIndex(this, this.PrimaryKey) { Clustered = true, Partitioned = true });
+        }
 
         result.AddRange(BackReference.GenerateIndexes(this));
         result.AddRange(Field.GenerateIndexes(this));
@@ -1434,6 +1496,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
         if (this.Order != null && predicate(this.Order))
             yield return this.Order;
+
+        if (this.PartitionId != null && predicate(this.PartitionId))
+            yield return this.PartitionId;
 
         if (predicate(this.Field))
             yield return this.Field;

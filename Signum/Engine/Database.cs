@@ -7,6 +7,7 @@ using System.Diagnostics;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine;
 
@@ -130,8 +131,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, Entity>> giRetrieve = new(id => Retrieve<Entity>(id));
-    public static T Retrieve<T>(PrimaryKey id) where T : Entity
+    static readonly GenericInvoker<Func<PrimaryKey, int?, Entity>> giRetrieve = new((id, partitionId) => Retrieve<Entity>(id, partitionId));
+    public static T Retrieve<T>(PrimaryKey id, int? partitionId = null) where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
         {
@@ -150,7 +151,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null)
             {
-                var filter = GetFilterQuery<T>();
+                var filter = GetFilterQuery<T>(a=>a.Id == id);
                 if (filter == null || filter.InMemoryFunction != null)
                 {
                     T result;
@@ -169,7 +170,11 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 }
             }
 
-            T? retrieved = Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
+
+
+            T? retrieved = (partitionId != null ? Database.Query<T>().SingleOrDefaultEx(a => a.Id == id && a.PartitionId == partitionId) : null);
+
+            retrieved ??= Database.Query<T>().SingleOrDefaultEx(a => a.Id == id);
 
             if (retrieved == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -178,8 +183,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         }
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, Task>> giRetrieveAsync = new((id, token) => RetrieveAsync<Entity>(id, token));
-    public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token) where T : Entity
+    static readonly GenericInvoker<Func<PrimaryKey, CancellationToken, int?, Task>> giRetrieveAsync = new((id, token, partitionId) => RetrieveAsync<Entity>(id, token, partitionId));
+    public static async Task<T> RetrieveAsync<T>(PrimaryKey id, CancellationToken token, int? partitionId = null) where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => typeof(T).TypeName()))
         {
@@ -198,7 +203,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             var cc = GetCacheController<T>();
             if (cc != null)
             {
-                var filter = GetFilterQuery<T>();
+                var filter = GetFilterQuery<T>(withFilter: a => a.Id == id);
                 if (filter == null || filter.InMemoryFunction != null)
                 {
                     T result;
@@ -217,7 +222,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 }
             }
 
-            T retrieved = await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id, token);
+            T? retrieved = (partitionId != null ? await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id && a.PartitionId == partitionId) : null);
+
+            retrieved ??= await Database.Query<T>().SingleOrDefaultAsync(a => a.Id == id);
 
             if (retrieved == null)
                 throw new EntityNotFoundException(typeof(T), id);
@@ -238,32 +245,36 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return cc;
     }
 
-    static FilterQueryResult<T>? GetFilterQuery<T>() where T : Entity
+
+    /// <param name="similarQuery">This query won't be executed, is there only for TypeConditions that require FilterQueryArgs</param>
+    static FilterQueryResult<T>? GetFilterQuery<T>(Expression<Func<T, bool>>? withFilter) where T : Entity
     {
         if (EntityCache.HasRetriever) //Filtering is not necessary when retrieving IBA?
             return null;
 
-        return Schema.Current.OnFilterQuery<T>();
+        var args = FilterQueryArgs.FromQuery(withFilter == null ? Database.Query<T>() : Database.Query<T>().Where(withFilter));
+
+        return Schema.Current.OnFilterQuery<T>(args);
     }
 
-    public static Entity Retrieve(Type type, PrimaryKey id)
+    public static Entity Retrieve(Type type, PrimaryKey id, int? partitionId = null)
     {
-        return giRetrieve.GetInvoker(type)(id);
+        return giRetrieve.GetInvoker(type)(id, partitionId);
     }
 
-    public static Task<Entity> RetrieveAsync(Type type, PrimaryKey id, CancellationToken token)
+    public static Task<Entity> RetrieveAsync(Type type, PrimaryKey id, CancellationToken token, int? partitionId = null)
     {
-        return giRetrieveAsync.GetInvoker(type)(id, token).CastTask<Entity>();
+        return giRetrieveAsync.GetInvoker(type)(id, token, partitionId).CastTask<Entity>();
     }
 
-    public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id, Type? modelType = null)
+    public static Lite<Entity>? TryRetrieveLite(Type type, PrimaryKey id, Type? modelType = null, int? partitionId = null)
     {
-        return giTryRetrieveLite.GetInvoker(type)(id, modelType);
+        return giTryRetrieveLite.GetInvoker(type)(id, modelType, partitionId);
     }
 
-    public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id, Type? modelType = null)
+    public static Lite<Entity> RetrieveLite(Type type, PrimaryKey id, Type? modelType = null, int? partitionId = null)
     {
-        return giRetrieveLite.GetInvoker(type)(id, modelType);
+        return giRetrieveLite.GetInvoker(type)(id, modelType, partitionId);
     }
 
     public static Task<Lite<Entity>> RetrieveLiteAsync(Type type, PrimaryKey id, CancellationToken token, Type? modelType = null)
@@ -271,8 +282,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return giRetrieveLiteAsync.GetInvoker(type)(id, token, modelType).CastTask<Lite<Entity>>();
     }
 
-    static readonly GenericInvoker<Func<PrimaryKey, Type?, Lite<Entity>?>> giTryRetrieveLite = new((id, modelType) => TryRetrieveLite<Entity>(id, modelType));
-    public static Lite<T>? TryRetrieveLite<T>(PrimaryKey id, Type? modelType = null)
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, int?, Lite<Entity>?>> giTryRetrieveLite = new((id, modelType, partitionId) => TryRetrieveLite<Entity>(id, modelType, partitionId));
+    public static Lite<T>? TryRetrieveLite<T>(PrimaryKey id, Type? modelType = null, int? partitionId = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "TryRetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
@@ -280,7 +291,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     if (!cc.Exists(id))
                         return null;
@@ -296,7 +307,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     }
                 }
 
-                var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+                var result = (partitionId != null ? Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id && a.PartitionId == partitionId) : null);
+
+                result ??= Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+
                 if (result == null)
                     return null;
 
@@ -313,8 +327,8 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     }
 
 
-    static readonly GenericInvoker<Func<PrimaryKey, Type?, Lite<Entity>>> giRetrieveLite = new((id, modelType) => RetrieveLite<Entity>(id, modelType));
-    public static Lite<T> RetrieveLite<T>(PrimaryKey id, Type? modelType = null)
+    static readonly GenericInvoker<Func<PrimaryKey, Type?, int?, Lite<Entity>>> giRetrieveLite = new((id, modelType, partitionId) => RetrieveLite<Entity>(id, modelType, partitionId));
+    public static Lite<T> RetrieveLite<T>(PrimaryKey id, Type? modelType = null, int? partitionId = null)
         where T : Entity
     {
         using (HeavyProfiler.Log("DBRetrieve", () => "RetrieveLite<{0}>".FormatWith(typeof(T).TypeName())))
@@ -322,7 +336,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -335,7 +349,9 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                     } 
                 }
 
-                var result = Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+                var result = (partitionId != null ? Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id && a.PartitionId == partitionId) : null);
+                result ??= Database.Query<T>().Select(a => a.ToLite()).SingleOrDefaultEx(a => a.Id == id);
+
                 if (result == null)
                     throw new EntityNotFoundException(typeof(T), id);
 
@@ -361,7 +377,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             try
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -415,7 +431,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -455,7 +471,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "GetToStr<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: a => a.Id == id) == null)
                 {
                     using (new EntityCache())
                     using (var rr = EntityCache.NewRetriever())
@@ -561,7 +577,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
-                    var filter = GetFilterQuery<T>();
+                    var filter = GetFilterQuery<T>(withFilter: null);
                     if (filter == null || filter.InMemoryFunction != null)
                     {
                         List<T> result;
@@ -600,7 +616,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 var cc = GetCacheController<T>();
                 if (cc != null)
                 {
-                    var filter = GetFilterQuery<T>();
+                    var filter = GetFilterQuery<T>(withFilter: null);
                     if (filter == null || filter.InMemoryFunction != null)
                     {
                         List<T> result;
@@ -663,7 +679,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: null) == null)
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -699,7 +715,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             using (HeavyProfiler.Log("DBRetrieve", () => "All Lite<{0}>".FormatWith(typeof(T).TypeName())))
             {
                 var cc = GetCacheController<T>();
-                if (cc != null && GetFilterQuery<T>() == null)
+                if (cc != null && GetFilterQuery<T>(withFilter: null) == null)
                 {
                     var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -796,7 +812,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         var cc = GetCacheController<T>();
         if (cc != null)
         {
-            var filter = GetFilterQuery<T>();
+            var filter = GetFilterQuery<T>(withFilter: null);
             if (filter == null || filter.InMemoryFunction != null)
             {
                 List<T> result;
@@ -890,7 +906,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         var cc = GetCacheController<T>();
         if (cc != null)
         {
-            var filter = GetFilterQuery<T>();
+            var filter = GetFilterQuery<T>(withFilter: null);
             if (filter == null || filter.InMemoryFunction != null)
             {
                 List<T> result;
@@ -948,7 +964,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ids));
 
             var cc = GetCacheController<T>();
-            if (cc != null && GetFilterQuery<T>() == null)
+            if (cc != null && GetFilterQuery<T>(withFilter: e => ids.Contains(e.Id)) == null)
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 
@@ -986,7 +1002,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
                 throw new ArgumentNullException(nameof(ids));
 
             var cc = GetCacheController<T>();
-            if (cc != null && GetFilterQuery<T>() == null)
+            if (cc != null && GetFilterQuery<T>(withFilter: e => ids.Contains(e.Id)) == null)
             {
                 var mt = modelType ?? Lite.DefaultModelType(typeof(T));
 

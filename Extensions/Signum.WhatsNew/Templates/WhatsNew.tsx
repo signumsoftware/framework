@@ -6,13 +6,14 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as WhatsNewClient from '../WhatsNewClient';
 import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.WhatsNew';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
-import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, ValueLine } from '@framework/Lines';
+import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, AutoLine } from '@framework/Lines';
 import { FileLine } from '../../Signum.Files/Components/FileLine';
 import WhatsNewHtmlEditor from './WhatsNewHtmlEditor';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { PermissionSymbol, QueryEntity, TypeEntity } from '@framework/Signum.Basics';
 import { OperationSymbol } from '@framework/Signum.Operations';
+import { Entity } from '../../../Signum/React/Signum.Entities';
 
 export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
   const ctx = p.ctx;
@@ -35,14 +36,14 @@ export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(w => w.status)} readOnly />
-      <ValueLine ctx={ctx.subCtx(w => w.name)} />
+      <AutoLine ctx={ctx.subCtx(w => w.status)} readOnly />
+      <AutoLine ctx={ctx.subCtx(w => w.name)} />
       <FileLine ctx={ctx.subCtx(w => w.previewPicture)} mandatory />
       <EntityLine ctx={ctx.subCtx(w => w.related)}
         onFind={() => selectContentType(ti => Navigator.isFindable(ti)).then(ti => ti && Finder.find({ queryName: ti.name }))}
-        onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name))}
+        onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name) as Promise<Entity | undefined>)}
       />
-      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<WhatsNewMessageEmbedded>) =>
+      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={ctx =>
         <WhatsNewMessageComponent ctx={ctx} invalidate={() => forceUpdate} />} />
     </div>
   );
@@ -60,7 +61,7 @@ export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps) {
   return (
     <div>
       <EntityCombo ctx={ec.subCtx(e => e.culture)} label={WhatsNewMessage.Language.niceToString()} onChange={p.invalidate} />
-      <ValueLine ctx={ec.subCtx(e => e.title)} label={ec.subCtx(e => e.title).niceName()} onChange={p.invalidate} />
+      <AutoLine ctx={ec.subCtx(e => e.title)} label={ec.subCtx(e => e.title).niceName()} onChange={p.invalidate} />
       
       <div>
         <p>{ec.subCtx(e => e.description).niceName()}</p>

@@ -1,3 +1,4 @@
+using Signum.API;
 using Signum.Basics;
 using System.Globalization;
 using System.Text.Json.Serialization;
@@ -21,7 +22,7 @@ public abstract class BaseHelp
 public class NamespaceHelp : BaseHelp
 {
     public readonly string Namespace;
-    public readonly string? Before;
+    public readonly string? Module;
     public readonly string Title;
     public readonly string? Description;
     [JsonIgnore]
@@ -43,7 +44,7 @@ public class NamespaceHelp : BaseHelp
 
         Title = entity?.Let(a => a.Title.DefaultToNull()) ?? clean.TryAfterLast('.') ?? clean;
 
-        Before = clean.TryBeforeLast('.');
+        Module = clean.TryBefore('.');
 
         Description = entity?.Description;
         DBEntity = entity;
@@ -99,12 +100,12 @@ public class NamespaceHelp : BaseHelp
 public class EntityItem
 {
     public string CleanName;
-    public bool HasDescription;
+    public bool HasEntity;
 
     public EntityItem(Type t)
     {
         CleanName = TypeLogic.GetCleanName(t);
-        HasDescription = HelpLogic.GetTypeHelp(t).HasEntity;
+        HasEntity = HelpLogic.GetTypeHelp(t).DBEntity != null;
     }
 }
 
@@ -112,8 +113,6 @@ public class TypeHelp : BaseHelp
 {
     public readonly Type Type;
     public readonly CultureInfo Culture;
-
-    public readonly bool HasEntity; 
 
     public TypeHelpEntity? DBEntity; 
 
@@ -129,21 +128,22 @@ public class TypeHelp : BaseHelp
         Culture = culture;
         Info = HelpGenerator.GetEntityHelp(type);
 
-        var props = DBEntity?.Properties.ToDictionaryEx(a => a.Property.ToPropertyRoute(), a => a.Info);
-        var opers = DBEntity?.Operations.ToDictionaryEx(a => a.Operation, a => a.Info);
+        DBEntity = entity;
 
-        Properties = PropertyRoute.GenerateRoutes(type)
-                    .ToDictionary(pp => pp, pp => new PropertyHelp(pp, props?.TryGetC(pp)));
+        var props = DBEntity?.Properties.ToDictionaryEx(a => a.Property.ToPropertyRoute(), a => a.Description);
+        var opers = DBEntity?.Operations.ToDictionaryEx(a => a.Operation, a => a.Description);
+
+        Properties =  HelpLogic.PublicRoutes(type)
+                    .ToDictionary(pp => pp, pp => new PropertyHelp(pp, props?.TryGetCN(pp)));
 
         Operations = OperationLogic.TypeOperations(type)
-                    .ToDictionary(op => op.OperationSymbol, op => new OperationHelp(op.OperationSymbol, type, opers?.TryGetC(op.OperationSymbol)));
+                    .ToDictionary(op => op.OperationSymbol, op => new OperationHelp(op.OperationSymbol, type, opers?.TryGetCN(op.OperationSymbol)));
 
      
         var allQueries = HelpLogic.CachedQueriesHelp();
 
         Queries = HelpLogic.TypeToQuery.Value.TryGetC(this.Type).EmptyIfNull().Select(a => allQueries.GetOrThrow(a)).ToDictionary(qh => qh.QueryName);
 
-        DBEntity = entity;
     }
 
     public TypeHelpEntity GetEntity()
@@ -159,7 +159,7 @@ public class TypeHelp : BaseHelp
         result.Properties.AddRange(
             from pre in PropertyRouteLogic.RetrieveOrGenerateProperties(this.Type.ToTypeEntity())
             let pr = pre.ToPropertyRoute()
-            where !(pr.PropertyInfo != null && pr.PropertyInfo.SetMethod == null && ExpressionCleaner.HasExpansions(pr.PropertyInfo.DeclaringType!, pr.PropertyInfo))
+            where ReflectionServer.InTypeScript(pr)
             let ph = Properties.GetOrThrow(pre.ToPropertyRoute())
             where ph.IsAllowed() == null
             select new PropertyRouteHelpEmbedded

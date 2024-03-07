@@ -4,31 +4,31 @@ import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, isLite, isEntity } from '../Signum.Entities'
 import { EntityBaseController, EntityBaseProps } from './EntityBase'
 import { RenderEntity } from './RenderEntity'
-import { useController } from './LineBase'
+import { genericForwardRef, useController } from './LineBase'
 import { getTypeInfos, tryGetTypeInfos } from '../Reflection'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType, Title } from './GroupHeader'
 
 
-export interface EntityDetailProps extends EntityBaseProps {
-  ctx: TypeContext<ModifiableEntity | Lite<Entity> | null | undefined>;
-  avoidFieldSet?: boolean;
+export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
+  avoidFieldSet?: boolean | HeaderType;
   showAsCheckBox?: boolean;
   onEntityLoaded?: () => void;
   showType?: boolean;
 }
 
 
-export class EntityDetailController extends EntityBaseController<EntityDetailProps> {
-  getDefaultProps(p: EntityDetailProps) {
+export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityDetailProps<V>, V> {
+  getDefaultProps(p: EntityDetailProps<V>) {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
   }
 }
 
-export const EntityDetail = React.forwardRef(function EntityDetail(props: EntityDetailProps, ref: React.Ref<EntityDetailController>) {
+export const EntityDetail = genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
 
   const c = useController(EntityDetailController, props, ref);
   const p = c.props;
@@ -39,7 +39,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
   var ti = tryGetTypeInfos(p.type!).onlyOrNull();
 
   var showAsCheckBox = p.showAsCheckBox ??
-    ((p.type!.isEmbedded || ti != null && ti.entityKind == "Part") && p.extraButtonsAfter == undefined && p.extraButtonsBefore == undefined);
+    ((p.type!.isEmbedded || ti != null && ti.entityKind == "Part") && p.extraButtons == undefined && p.extraButtonsBefore == undefined);
 
 
   function renderType() {
@@ -53,23 +53,25 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
     }
 
   }
+  
 
-  if (p.avoidFieldSet == true)
+  if (p.avoidFieldSet)
     return (
       <div className={classes("sf-entity-line-details", p.ctx.errorClass, c.mandatoryClass, p.ctx.value && "mb-4")}
         {...{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes, ...p.ctx.errorAttributes() }}>
         {getTimeMachineIcon({ ctx: p.ctx})}
         {showAsCheckBox ?
-          <label className="lead">
+          <label><Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
             {renderCheckBox()}
             {p.label} {renderType()}
-            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+            {p.extraButtons && p.extraButtons(c)}
+          </Title>
           </label>
           :
-          <div className="lead">
+          <Title type={p.avoidFieldSet == true ? "lead" : p.avoidFieldSet}>
             <span>{p.label} {renderType()}</span>
             {renderButtons()}
-          </div>
+          </Title>
         }
         <div className="ms-4 mt-2">
           <RenderEntity ctx={p.ctx} getComponent={p.getComponent} getViewPromise={p.getViewPromise} onEntityLoaded={p.onEntityLoaded} />
@@ -87,7 +89,7 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
             <label>
               {renderCheckBox()}
               {p.label} {renderType()}
-              {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+              {p.extraButtons && p.extraButtons(c)}
             </label>
             :
             <div>
@@ -128,9 +130,9 @@ export const EntityDetail = React.forwardRef(function EntityDetail(props: Entity
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!hasValue && c.renderCreateButton(false)}
         {!hasValue && c.renderFindButton(false)}
-        {hasValue && c.renderViewButton(false, p.ctx.value!)}
-        {hasValue && c.renderRemoveButton(false, p.ctx.value!)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {hasValue && c.renderViewButton(false)}
+        {hasValue && c.renderRemoveButton(false)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
     return EntityBaseController.hasChildrens(buttons) ? buttons : undefined;

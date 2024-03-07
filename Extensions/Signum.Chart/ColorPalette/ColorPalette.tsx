@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import { Binding, EntityBaseController, EntityCombo, EntityLine, EntityTable, ValueLine } from '@framework/Lines'
+import { AutoLine, Binding, ColorLine, EntityBaseController, EntityCombo, EntityLine, EntityTable, EnumLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { colorSchemes } from './ColorUtils';
 import { classes, Dic } from '@framework/Globals';
@@ -64,9 +64,9 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
       var chooseEntities = await Finder.findMany({ queryName: ti.name }, {
         message: ColorPaletteMessage.Select0OnlyIfYouWantToOverrideTheAutomaticColor.niceToString().formatHtml(<strong>{ti.nicePluralName}</strong>),
         searchControlProps: {
-          entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+          entityFormatter: new Finder.EntityFormatter(({ row, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
             <EntityLink lite={row.entity}
-              inSearch={true}
+              inSearch="main"
               onNavigated={sc?.handleOnNavigated}
               getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
               inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
@@ -98,8 +98,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
           <EntityLine ctx={ctx4.subCtx(n => n.type)} readOnly={!ctx.value.isNew || ctx.value.specificColors.length > 0} onChange={forceUpdate} />
         </div>
         <div className="col-sm-4">
-          <ValueLine ctx={ctx4.subCtx(n => n.categoryName)} onChange={forceUpdate}
-            valueLineType="DropDownList"
+          <EnumLine ctx={ctx4.subCtx(n => n.categoryName)} onChange={forceUpdate}
             optionItems={Dic.getKeys(colorSchemes)}
             onRenderDropDownListItem={oi => <div style={{ display: "flex", alignItems: "center", userSelect: "none" }}>
               <ColorScheme colorScheme={oi.value} />
@@ -107,22 +106,22 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
             </div>} />
         </div>
         <div className="col-sm-4">
-          <ValueLine ctx={ctx4.subCtx(n => n.seed)} />
+          <AutoLine ctx={ctx4.subCtx(n => n.seed)} />
         </div>
       </div>
 
       {ti != null && (ti.kind != "Enum" || enumConverter != null) &&
         <EntityTable ctx={ctx.subCtx(p => p.specificColors)}
-          extraButtonsAfter={() => <a href="#" className={classes("sf-line-button", "sf-create")}
+          extraButtons={() => <a href="#" className={classes("sf-line-button", "sf-create")}
             title={ColorPaletteMessage.FillAutomatically.niceToString()}
             onClick={handleMagicWand}>
             <FontAwesomeIcon icon="wand-magic-sparkles" />
           </a>}
-          columns={EntityTable.typedColumns<SpecificColorEmbedded>([
+          columns={[
             {
               property: p => p.entity,
               template: (ectx) =>
-                ti.kind == "Enum" ? <ValueLine type={{ name: ctx4.value.type.cleanName }} optionItems={Dic.getKeys(enumConverter!.enumToEntity)} ctx={withConverter(ectx.subCtx(p => p.entity))} /> :
+                ti.kind == "Enum" ? <EnumLine type={{ name: ctx4.value.type.cleanName }} optionItems={Dic.getKeys(enumConverter!.enumToEntity)} ctx={withConverter(ectx.subCtx(p => p.entity))} /> :
                   ti?.isLowPopulation ? <EntityCombo ctx={ectx.subCtx(p => p.entity)} type={{ name: ctx4.value.type.cleanName, isLite: true }} /> :
                     <EntityLine ctx={ectx.subCtx(p => p.entity)} type={{ name: ctx4.value.type.cleanName, isLite: true }} />,
               headerHtmlAttributes: { style: { width: "40%" } },
@@ -132,7 +131,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
               template: (ectx) => <ColorSelector ctx={ectx.subCtx(a => a.color)} colors={colors as (string[] | null)} />,
               headerHtmlAttributes: { style: { width: "40%" } },
             },
-          ])}
+          ]}
         />
       }
     </div>
@@ -148,10 +147,9 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
   }, [p.colors])
 
   if (custom || p.colors == null)
-    return <ValueLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} valueLineType="Color" />
+    return <ColorLine ctx={p.ctx} extraButtons={() => getSwitchModelButton()} />
 
-  return <ValueLine ctx={p.ctx}
-    valueLineType="DropDownList"
+  return <EnumLine ctx={p.ctx}
     optionItems={p.colors!}
     onRenderDropDownListItem={oi => <span>
       <span style={{ backgroundColor: oi.value, height: "20px", width: "20px", display: "inline-block", marginBottom: "-6px" }} className="me-2" />

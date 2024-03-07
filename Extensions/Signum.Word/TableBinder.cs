@@ -16,6 +16,10 @@ using Signum.UserQueries;
 using Signum.UserAssets;
 using Signum.Chart.UserChart;
 using Signum.Chart;
+using Signum.Chart.ColorPalette;
+using Signum.Entities;
+using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.InkML;
 
 namespace Signum.Word;
 
@@ -27,8 +31,7 @@ public static class TableBinder
         var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
         foreach (var item in graphicFrames)
         {
-            var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleOrDefaultEx();
-            var title = GetTitle(nonVisualProps);
+            var title = item.GetTitle();
 
             if (title != null)
             {
@@ -40,8 +43,7 @@ public static class TableBinder
         var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
         foreach (var item in drawings)
         {
-            var docProps = item.Descendants<WPDrawing.DocProperties>().SingleOrDefaultEx();
-            var title = GetTitle(docProps);
+            var title = item.GetTitle();
 
             if (title != null)
             {
@@ -80,38 +82,37 @@ public static class TableBinder
         var graphicFrames = part.RootElement!.Descendants<Presentation.GraphicFrame>().ToList();
         foreach (var item in graphicFrames)
         {
-            var nonVisualProps = item.Descendants<Presentation.NonVisualDrawingProperties>().SingleEx();
-            var title = GetTitle(nonVisualProps);
-
-            Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
+            var title = item.GetTitle();
+            Dictionary<string, string>? overridenColors = null;
+            Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title, out overridenColors) : null;
             if (dataTable != null)
             {
-                ReplaceChartOrTable(part, item, dataTable, title!);
+                ReplaceChartOrTable(part, item, dataTable, title!, overridenColors);
             }
         }
 
         var drawings = part.RootElement!.Descendants<Wordprocessing.Drawing>().ToList();
         foreach (var item in drawings)
         {
-            var docProps = item.Descendants< WPDrawing.DocProperties>().SingleEx();
-            var title = GetTitle(docProps);
+            var title = item.GetTitle();
 
-            Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title) : null;
+            Dictionary<string, string>? overridenColors = null;
+            Data.DataTable? dataTable = title != null ? GetDataTable(parameters, title, out overridenColors) : null;
             if (dataTable != null)
             {
-                ReplaceChartOrTable(part, item, dataTable, title!);
+                ReplaceChartOrTable(part, item, dataTable, title!, overridenColors);
             }
         }
     }
 
-    private static void ReplaceChartOrTable(OpenXmlPart part, OpenXmlElement item, Data.DataTable dataTable, string titleForError)
+    private static void ReplaceChartOrTable(OpenXmlPart part, OpenXmlElement item, Data.DataTable dataTable, string titleForError, Dictionary<string, string>? overridenColors)
     {
         var chartRef = item.Descendants<Charts.ChartReference>().SingleOrDefaultEx();
         if (chartRef != null)
         {
             OpenXmlPart chartPart = part.GetPartById(chartRef.Id!.Value!);
             var chart = chartPart.RootElement!.Descendants<Charts.Chart>().SingleEx();
-            ReplaceChart(chart, dataTable, titleForError);
+            ReplaceChart(chart, dataTable, titleForError, overridenColors);
         }
         else
         {
@@ -123,18 +124,25 @@ public static class TableBinder
         }
     }
 
-    static string? GetTitle(OpenXmlElement? nonVisualProps)
+    public static string? GetTitle(this Presentation.GraphicFrame frame)
     {
-        //if (nonVisualProps is Drawing.NonVisualDrawingProperties draw)
-        //    return draw.Description?.Value ?? draw.Title?.Value;
+        var nvdp = frame.Descendants<Presentation.NonVisualDrawingProperties>().FirstOrDefault();
 
-        if (nonVisualProps is Presentation.NonVisualDrawingProperties pres)
-            return pres.Description?.Value ?? pres.Title?.Value;
+        if(nvdp != null)
+            return nvdp.Description?.Value ?? nvdp.Title?.Value;
 
-        if (nonVisualProps is WPDrawing.DocProperties prop)
+        throw new NotImplementedException("Imposible to get the Title from " + frame?.GetType().FullName);
+       
+    }
+
+    public static string? GetTitle(this Wordprocessing.Drawing drawing)
+    {
+        var prop = drawing.Descendants<WPDrawing.DocProperties>().FirstOrDefault();
+
+        if (prop != null)
             return prop.Description?.Value ?? prop.Title?.Value;
 
-        throw new NotImplementedException("Imposible to get the Title from " + nonVisualProps?.GetType().FullName);
+        throw new NotImplementedException("Imposible to get the Title from " + drawing?.GetType().FullName);
     }
 
     static void SynchronizeNodes<N, T>(List<N> nodes, List<T> data, Action<N, T, int, bool> apply)
@@ -194,7 +202,7 @@ public static class TableBinder
             });
     }
 
-    public static void ReplaceChart(Charts.Chart chart, Data.DataTable table, string titleForError)
+    public static void ReplaceChart(Charts.Chart chart, Data.DataTable table, string titleForError, Dictionary<string, string>? overridenColors)
     {
         var plotArea = chart.Descendants<Charts.PlotArea>().SingleEx();
         var series = plotArea.Descendants<OpenXmlCompositeElement>().Where(a => a.LocalName == "ser").ToList();
@@ -210,12 +218,12 @@ public static class TableBinder
                 if (isCloned)
                     ser.Descendants<Drawing.SchemeColor>().ToList().ForEach(f => f.Remove());
 
-                BindSerie(ser, rows, col, i);
+                BindSerie(ser, rows, col, i, overridenColors);
             });
     }
 
 
-    private static void BindSerie(OpenXmlCompositeElement serie, List<Data.DataRow> rows,  Data.DataColumn dataColumn, int index)
+    private static void BindSerie(OpenXmlCompositeElement serie, List<Data.DataRow> rows, Data.DataColumn dataColumn, int index, Dictionary<string, string>? overridenColors)
     {
         serie.Descendants<Charts.Formula>().ToList().ForEach(f => f.Remove());
 
@@ -224,6 +232,14 @@ public static class TableBinder
 
         var setTxt = serie.Descendants<Charts.SeriesText>().SingleEx();
         setTxt.StringReference!.Descendants<Charts.NumericValue>().SingleEx().Text = dataColumn.ColumnName;
+
+        var colorSerie = dataColumn.ColumnName == null ? null : overridenColors?.TryGetC((string)dataColumn.ColumnName);
+        if (colorSerie != null)
+        {
+            var sppr = serie.Descendants<Charts.ChartShapeProperties>().SingleEx();
+            sppr.Elements<SolidFill>().ToList().ForEach(a => a.Remove());
+            sppr.InsertAt(new SolidFill { RgbColorModelHex = new RgbColorModelHex() { Val = colorSerie.After("#") } }, 0);
+        }
 
         {
             var cat = serie.Descendants<Charts.CategoryAxisData>().SingleEx();
@@ -250,6 +266,24 @@ public static class TableBinder
                 throw new NotImplementedException("Neither StringPoint or NumericPoint found in CategoryAxisData");
         }
 
+        if (overridenColors != null && serie.Descendants<Charts.DataPoint>().ToList() is { Count: > 0 } dataPoints)
+        {
+            SynchronizeNodes(dataPoints, rows,
+              (sp, row, i, isCloned) =>
+              {
+                  sp.Index = new Charts.Index { Val = new UInt32Value((uint)i) };
+                  var rowText = row[0];
+
+                  var color = rowText == null ? null : overridenColors?.TryGetC((string)rowText);
+                  if(color != null)
+                  {
+                      var sppr = sp.Descendants<Charts.ChartShapeProperties>().SingleEx();
+                      sppr.Elements<SolidFill>().ToList().ForEach(a => a.Remove());
+                      sppr.InsertAt(new SolidFill { RgbColorModelHex = new RgbColorModelHex() { Val = color.After("#") } }, 0);
+                  }
+              });
+        }
+
         {
             var vals = serie.Descendants<Charts.Values>().SingleEx();
             vals.Descendants<Charts.PointCount>().SingleEx().Val = new UInt32Value((uint)rows.Count - 1);
@@ -272,8 +306,10 @@ public static class TableBinder
             val.ToString();
     }
     
-    private static Data.DataTable? GetDataTable(WordTemplateParameters parameters, string title)
+    private static Data.DataTable? GetDataTable(WordTemplateParameters parameters, string title, out Dictionary<string, string>? overridenColors)
     {
+        overridenColors = null;
+
         var titleFirsLine = title.Lines().FirstOrDefault();
         var key = titleFirsLine.TryBefore(":");
 
@@ -286,7 +322,7 @@ public static class TableBinder
 
         var ctx = new WordTemplateLogic.WordContext(parameters.Template, (Entity?)parameters.Entity, parameters.Model);
 
-        var table = provider.GetDataTable(titleFirsLine!.After(":"), ctx);
+        var table = provider.GetDataTable(titleFirsLine!.After(":"), ctx, out overridenColors);
 
         var pivotStr = title.TryAfter('\n')?.Trim();
 
@@ -334,14 +370,18 @@ public static class TableBinder
 
 public class ModelDataTableProvider : IWordDataTableProvider
 {
-    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext ctx)
+    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext ctx, out Dictionary<string, string>? overridenColors)
     {
+        overridenColors = null;
+
         MethodInfo mi = GetMethod(ctx.Template, suffix);
 
         object? result;
         try
         {
-            result = mi.Invoke(ctx.Model, null);
+            object[] args = new object[1];
+            result = mi.Invoke(ctx.Model, args);
+            overridenColors = args[0] as Dictionary<string, string>;
         }
         catch (TargetInvocationException e)
         {
@@ -386,15 +426,16 @@ public class ModelDataTableProvider : IWordDataTableProvider
 
 public class UserQueryDataTableProvider : IWordDataTableProvider
 {
-    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
+    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context, out Dictionary<string, string>? overridenColors)
     {
         var userQuery = Database.Query<UserQueryEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
 
         using (CurrentEntityConverter.SetCurrentEntity(context.GetEntity()))
         {
+            overridenColors = null;
             var request = UserQueryLogic.ToQueryRequest(userQuery);
             ResultTable result = QueryLogic.Queries.ExecuteQuery(request);
-            return result.ToDataTable();
+            return result.ToDataTable(new UnambiguousNiceDataTableValueConverter(result));
         }
     }
 
@@ -403,19 +444,23 @@ public class UserQueryDataTableProvider : IWordDataTableProvider
         if (!Guid.TryParse((suffix.TryBefore("\n") ?? suffix).Trim(), out Guid guid))
             return "Impossible to convert '{0}' in a GUID for a UserQuery".FormatWith(suffix);
 
-        var uc = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
+        var uq = Database.Query<UserQueryEntity>().Where(a => a.Guid == guid).Select(a => new { UQ = a.ToLite(), a.EntityType }).SingleOrDefaultEx();
 
-        if (uc == null)
+        if (uq == null)
             return "No UserQuery with GUID={0} found".FormatWith(guid);
 
-        if (uc.EntityType != null)
+        if (uq.EntityType != null)
         {
+
+            if (template.Query == null)
+                return "The UserQuery {0} has EntityType {1} but the template {2} has no query".FormatWith(uq.UQ, uq.EntityType, template.Name);
+
             var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
 
-            var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);
+            var type = TypeLogic.GetType(uq.EntityType.Retrieve().CleanName);
 
             if (imp.Types.Contains(type))
-                return "No UserQuery {0} (GUID={1}) is not compatible with ".FormatWith(uc.UQ, guid, imp);
+                return "No UserQuery {0} (GUID={1}) is not compatible with ".FormatWith(uq.UQ, guid, imp);
         }
 
         return null;
@@ -424,12 +469,12 @@ public class UserQueryDataTableProvider : IWordDataTableProvider
 
 public class UserChartDataTableProvider : IWordDataTableProvider
 {
-    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context)
+    public Data.DataTable GetDataTable(string suffix, WordTemplateLogic.WordContext context, out Dictionary<string, string>? overridenColors)
     {
-        return GetDataTable(suffix, context.GetEntity());
+        return GetDataTable(suffix, context.GetEntity(), out overridenColors);
     }
 
-    public Data.DataTable GetDataTable(string suffix, Entity? entity)
+    public Data.DataTable GetDataTable(string suffix, Entity? entity, out Dictionary<string, string>? overridenColors)
     {
         var userChart = Database.Query<UserChartEntity>().SingleEx(a => a.Guid == Guid.Parse((suffix.TryBefore("\n") ?? suffix).Trim()));
 
@@ -439,8 +484,26 @@ public class UserChartDataTableProvider : IWordDataTableProvider
             ResultTable result = ChartLogic.ExecuteChartAsync(chartRequest, CancellationToken.None).Result;
             var tokens = chartRequest.Columns.Select(a => a.Token).NotNull().ToList();
 
+            var converter = new UnambiguousNiceDataTableValueConverter(result);
 
-            return result.ToDataTable();
+            overridenColors = result.Columns.SelectMany(c =>
+            {
+                if (typeof(Lite<Entity>).IsAssignableFrom(c.Column.Type))
+                    return (from lite in c.Values.OfType<Lite<Entity>>().Distinct()
+                            let color = ColorPaletteLogic.ColorFor(lite)
+                            where color != null
+                            select KeyValuePair.Create((string)converter.ConvertValue(lite, c.Column)!, color));
+
+                if (c.Column.Type.UnNullify().IsEnum)
+                    return (from e in c.Values.OfType<Enum>().Distinct()
+                            let color = ColorPaletteLogic.ColorFor(EnumEntity.FromEnumUntyped(e).ToLite())
+                            where color != null
+                            select KeyValuePair.Create((string)converter.ConvertValue(e, c.Column)!, color));
+
+                return Enumerable.Empty<KeyValuePair<string, string>>();
+            }).DistinctBy(a => a.Key).ToDictionary();
+
+            return result.ToDataTable(converter);
         }
     }
 
@@ -456,6 +519,9 @@ public class UserChartDataTableProvider : IWordDataTableProvider
 
         if(uc.EntityType != null)
         {
+            if (template.Query == null)
+                return "The UserChart {0} has EntityType {1} but the template {2} has no query".FormatWith(uc.UC, uc.EntityType, template.Name);
+
             var imp = QueryLogic.Queries.GetEntityImplementations(template.Query.ToQueryName());
 
             var type = TypeLogic.GetType(uc.EntityType.Retrieve().CleanName);

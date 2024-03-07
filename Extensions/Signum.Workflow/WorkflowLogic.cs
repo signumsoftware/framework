@@ -13,7 +13,7 @@ public static class WorkflowLogic
 {
     public static Action<ICaseMainEntity, WorkflowTransitionContext>? OnTransition;
 
-    public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowEntity>, WorkflowEntity>> Workflows = null!;
 
     [AutoExpressionField]
     public static bool HasExpired(this WorkflowEntity w) =>
@@ -115,7 +115,7 @@ public static class WorkflowLogic
     }
 
 
-    public static ResetLazy<Dictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowEntity>, WorkflowNodeGraph>> WorkflowGraphLazy = null!;
 
     public static List<Lite<IWorkflowNodeEntity>> AutocompleteNodes(Lite<WorkflowEntity> workflow, string subString, int count, List<Lite<IWorkflowNodeEntity>> excludes)
     {
@@ -238,7 +238,7 @@ public static class WorkflowLogic
 
             EvalLogic.GetCustomErrors += GetCustomErrors;
 
-            Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToDictionary(a => a.ToLite()),
+            Workflows = sb.GlobalLazy(() => Database.Query<WorkflowEntity>().ToFrozenDictionary(a => a.ToLite()),
                 new InvalidateWith(typeof(WorkflowEntity)));
 
 
@@ -391,7 +391,7 @@ public static class WorkflowLogic
                     var activities = Database.RetrieveAll<WorkflowActivityEntity>().GroupToDictionary(a => a.Lane.Pool.Workflow.ToLite());
                     var connections = Database.RetrieveAll<WorkflowConnectionEntity>().GroupToDictionary(a => a.From.Lane.Pool.Workflow.ToLite());
 
-                    var result = Database.RetrieveAll<WorkflowEntity>().ToDictionary(workflow => workflow.ToLite(), workflow =>
+                    var result = Database.RetrieveAll<WorkflowEntity>().ToFrozenDictionary(workflow => workflow.ToLite(), workflow =>
                     {
                         var w = workflow.ToLite();
                         var nodeGraph = new WorkflowNodeGraph
@@ -438,13 +438,13 @@ public static class WorkflowLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((WorkflowEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.AddRoute((WorkflowActivityEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.AddRoute((WorkflowActivityEntity tb) => tb.UserHelp, TranslateableRouteType.Html);
+        PropertyRouteTranslationLogic.RegisterRoute((WorkflowEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((WorkflowActivityEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((WorkflowActivityEntity tb) => tb.UserHelp, TranslateableRouteType.Html);
     }
 
 
-    public static ResetLazy<Dictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowTimerConditionEntity>, WorkflowTimerConditionEntity>> TimerConditions = null!;
     public static bool Evaluate(this Lite<WorkflowTimerConditionEntity> wc, CaseActivityEntity ca, DateTime now)
     {
         var tc = TimerConditions.Value.GetOrThrow(wc);
@@ -505,11 +505,11 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        TimerConditions = sb.GlobalLazy(() => Database.Query<WorkflowTimerConditionEntity>().ToDictionary(a => a.ToLite()),
+        TimerConditions = sb.GlobalLazy(() => Database.Query<WorkflowTimerConditionEntity>().ToFrozenDictionary(a => a.ToLite()),
              new InvalidateWith(typeof(WorkflowTimerConditionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowActionEntity>, WorkflowActionEntity>> Actions = null!;
     public static void Execute(this Lite<WorkflowActionEntity> wa, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
     {
         var waEntity = Actions.Value.GetOrThrow(wa);
@@ -571,11 +571,11 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToDictionary(a => a.ToLite()),
+        Actions = sb.GlobalLazy(() => Database.Query<WorkflowActionEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowActionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowConditionEntity>, WorkflowConditionEntity>> Conditions = null!;
     public static bool Evaluate(this Lite<WorkflowConditionEntity> wc, ICaseMainEntity mainEntity, WorkflowTransitionContext ctx)
     {
         var wcEntity = Conditions.Value.GetOrThrow(wc);
@@ -638,11 +638,11 @@ public static class WorkflowLogic
         }.Register();
 
 
-        Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToDictionary(a => a.ToLite()),
+        Conditions = sb.GlobalLazy(() => Database.Query<WorkflowConditionEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowConditionEntity)));
     }
 
-    public static ResetLazy<Dictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts = null!;
+    public static ResetLazy<FrozenDictionary<Lite<WorkflowScriptEntity>, WorkflowScriptEntity>> Scripts = null!;
     public static WorkflowScriptEntity RetrieveFromCache(this Lite<WorkflowScriptEntity> ws) => Scripts.Value.GetOrThrow(ws);
     private static void StartWorkflowScript(SchemaBuilder sb)
     {
@@ -691,7 +691,7 @@ public static class WorkflowLogic
             },
         }.Register();
 
-        Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToDictionary(a => a.ToLite()),
+        Scripts = sb.GlobalLazy(() => Database.Query<WorkflowScriptEntity>().ToFrozenDictionary(a => a.ToLite()),
             new InvalidateWith(typeof(WorkflowScriptEntity)));
 
         sb.Include<WorkflowScriptRetryStrategyEntity>()

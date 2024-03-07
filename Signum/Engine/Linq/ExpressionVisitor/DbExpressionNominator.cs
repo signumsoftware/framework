@@ -633,7 +633,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
         return new ToDayOfWeekExpression(number).TryConvert(typeof(DayOfWeek));
     }
 
-    private Expression? TrySqlStartOf(Expression expression, SqlEnums part)
+    private Expression? TrySqlStartOf(Expression expression, SqlEnums part, Expression? step = null)
     {
         Expression expr = Visit(expression);
         if (innerProjection || !Has(expr))
@@ -649,6 +649,34 @@ internal class DbExpressionNominator : DbExpressionVisitor
         }
         else
         {
+            if (((SqlServerConnector)Connector.Current).SupportsDateTrunc && step == null && part != SqlEnums.week)
+            {
+                Expression? result =
+                TrySqlFunction(null, SqlFunction.DATETRUNC, expr.Type,
+                    new SqlLiteralExpression(part), expr);
+
+                return Add(result);
+            }
+
+            if (step != null)
+            {
+                var stepVisit = Visit(step);
+
+                if (stepVisit is ConstantExpression c)
+                    stepVisit = new SqlConstantExpression(c.Value!);
+
+                Expression result =
+                  TrySqlFunction(null, SqlFunction.DATEADD, expr.Type, new SqlLiteralExpression(part),
+                     Expression.Multiply(
+                         Expression.Divide(
+                            TrySqlFunction(null, SqlFunction.DATEDIFF, typeof(int), new SqlLiteralExpression(part), new SqlConstantExpression(0), expr)!,
+                            stepVisit),
+                         stepVisit),
+                      new SqlConstantExpression(0))!;
+
+                return Add(result);
+            }
+
             if (part == SqlEnums.second)
             {
                 Expression result =
@@ -1661,9 +1689,10 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTimeExtensions.MonthStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.month);
             case "DateTimeExtensions.QuarterStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.quarter);
             case "DateTimeExtensions.WeekStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.week);
-            case "DateTimeExtensions.HourStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour);
-            case "DateTimeExtensions.MinuteStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute);
-            case "DateTimeExtensions.SecondStart": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second);
+            case "DateTimeExtensions.TruncHours": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour, m.TryGetArgument("step"));
+            case "DateTimeExtensions.TruncMinutes": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute, m.TryGetArgument("step"));
+            case "DateTimeExtensions.TruncSeconds": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second, m.TryGetArgument("step"));
+            case "DateTimeExtensions.TruncMilliseconds": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.millisecond, m.GetArgument("step"));
             case "DateTimeExtensions.YearsTo": return TryDatePartTo(SqlEnums.year, m.GetArgument("start"), m.GetArgument("end"));
             case "DateTimeExtensions.MonthsTo": return TryDatePartTo(SqlEnums.month, m.GetArgument("start"), m.GetArgument("end"));
             case "DateTimeExtensions.DaysTo": return TryDatePartTo(SqlEnums.day, m.GetArgument("start"), m.GetArgument("end"));
@@ -1681,6 +1710,16 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "TimeSpan.FromMinute": return TryTimeSpanFrom(SqlEnums.minute, m.GetArgument("value"));
             case "TimeSpan.FromSeconds": return TryTimeSpanFrom(SqlEnums.second, m.GetArgument("value"));
             case "TimeSpan.FromMilliseconds": return TryTimeSpanFrom(SqlEnums.millisecond, m.GetArgument("value"));
+
+            case "TimeSpanExtensions.TruncHours": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.hour, m.TryGetArgument("step"));
+            case "TimeSpanExtensions.TruncMinutes": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.minute, m.TryGetArgument("step"));
+            case "TimeSpanExtensions.TruncSeconds": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.second, m.TryGetArgument("step"));
+            case "TimeSpanExtensions.TruncMilliseconds": return TrySqlStartOf(m.GetArgument("dateTime"), SqlEnums.millisecond, m.GetArgument("step"));
+
+            case "TimeOnlyExtensions.TruncHours": return TrySqlStartOf(m.GetArgument("time"), SqlEnums.hour, m.TryGetArgument("step"));
+            case "TimeOnlyExtensions.TruncMinutes": return TrySqlStartOf(m.GetArgument("time"), SqlEnums.minute, m.TryGetArgument("step"));
+            case "TimeOnlyExtensions.TruncSeconds": return TrySqlStartOf(m.GetArgument("time"), SqlEnums.second, m.TryGetArgument("step"));
+            case "TimeOnlyExtensions.TruncMilliseconds": return TrySqlStartOf(m.GetArgument("time"), SqlEnums.millisecond, m.GetArgument("step"));
 
             case "Math.Sign": return TrySqlFunction(null, SqlFunction.SIGN, m.Type, m.GetArgument("value"));
             case "Math.Abs": return TrySqlFunction(null, SqlFunction.ABS, m.Type, m.GetArgument("value"));

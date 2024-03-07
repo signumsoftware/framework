@@ -190,7 +190,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
     if (settings?.getViewPromise == null) {
 
       if (!isTypeEntity(entity.Type))
-        return new ViewPromise(import('@framework/Lines/DynamicComponent'));
+        return new ViewPromise(import('@framework/AutoComponent'));
 
       return this.chooseViewName(entity, true);
     }
@@ -337,7 +337,7 @@ export function asOverrideFunction(dvo: DynamicViewOverrideEntity): (vr: ViewRep
   let code = dvo.script!;
 
   // Lines
-  var ValueLine = Lines.ValueLine;
+  var AutoLine = Lines.AutoLine;
   var EntityLine = Lines.EntityLine;
   var EntityCombo = Lines.EntityCombo;
   var EnumCheckboxList = Lines.EnumCheckboxList;

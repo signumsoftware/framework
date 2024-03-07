@@ -10,8 +10,8 @@ public enum LoginAuthMessage
     [Description("Username {0} is not valid")]
     Username0IsNotValid,
 
-    [Description("User {0} is disabled")]
-    User0IsDisabled,
+    [Description("User {0} is deactivated")]
+    User0IsDeactivated,
 
     IncorrectPassword,
 

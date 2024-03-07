@@ -12,13 +12,17 @@ public class HelpController : ControllerBase
     [HttpGet("api/help/index")]
     public HelpIndexTS Index()
     {
+        HelpPermissions.ViewHelp.AssertAuthorized();
         return new HelpIndexTS
         {
+            Culture = HelpLogic.GetCulture().ToCultureInfoEntity(),
+
             Namespaces = HelpLogic.GetNamespaceHelps().Select(s => new NamespaceItemTS
             {
                 Namespace = s.Namespace,
-                Before = s.Before,
+                Module = s.Module,
                 Title = s.Title,
+                HasEntity = s.DBEntity != null,
                 AllowedTypes = s.AllowedTypes
             }).ToList(),
 
@@ -33,6 +37,7 @@ public class HelpController : ControllerBase
     [HttpGet("api/help/namespace/{namespace}")]
     public NamespaceHelp Namespace(string @namespace)
     {
+        HelpPermissions.ViewHelp.AssertAuthorized();
         var help = HelpLogic.GetNamespaceHelp(@namespace.Replace("_", "."));
         help.AssertAllowed();
         return help;
@@ -42,7 +47,7 @@ public class HelpController : ControllerBase
     public void SaveNamespace([Required][FromBody]NamespaceHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
-      
+
         if (!entity.Title.HasText() && !entity.Description.HasText())
         {
             if (!entity.IsNew)
@@ -55,19 +60,29 @@ public class HelpController : ControllerBase
     [HttpGet("api/help/appendix/{uniqueName?}")]
     public AppendixHelpEntity Appendix(string? uniqueName)
     {
+        HelpPermissions.ViewHelp.AssertAuthorized();
         if (!uniqueName.HasText())
             return new AppendixHelpEntity
             {
-                Culture = CultureInfo.CurrentCulture.ToCultureInfoEntity() 
+                Culture = HelpLogic.GetCulture().ToCultureInfoEntity() 
             };
 
         var help = HelpLogic.GetAppendixHelp(uniqueName);
         return help;
     }
 
+    [HttpPost("api/help/saveAppendix")]
+    public void SaveNamespace([Required][FromBody] AppendixHelpEntity entity)
+    {
+        HelpPermissions.ViewHelp.AssertAuthorized();
+
+        entity.Execute(AppendixHelpOperation.Save);
+    }
+
     [HttpGet("api/help/type/{cleanName}")]
     public TypeHelpEntity Type(string cleanName)
     {
+        HelpPermissions.ViewHelp.AssertAuthorized();
         var help = HelpLogic.GetTypeHelp(TypeLogic.GetType(cleanName));
         help.AssertAllowed();
         return help.GetEntity();
@@ -77,6 +92,7 @@ public class HelpController : ControllerBase
     public void SaveType([Required][FromBody]TypeHelpEntity entity)
     {
         HelpPermissions.ViewHelp.AssertAuthorized();
+        
         using (var tr = new Transaction())
         {
             foreach (var query in entity.Queries)
@@ -106,6 +122,8 @@ public class HelpController : ControllerBase
             entity.Operations.AddRange(hiddenOperations);
             entity.Operations.RemoveAll(a => !a.Description.HasText());
 
+            
+
             if (entity.Properties.IsEmpty() && entity.Operations.IsEmpty() && !entity.Description.HasText())
             {
                 if (!entity.IsNew)
@@ -121,15 +139,18 @@ public class HelpController : ControllerBase
 
 public class HelpIndexTS
 {
+    public CultureInfoEntity Culture;
     public List<NamespaceItemTS> Namespaces;
     public List<AppendiceItemTS> Appendices;
+
 }
 
 public class NamespaceItemTS
 {
     public string Namespace;
-    public string? Before;
+    public string? Module;
     public string Title;
+    public bool HasEntity;
     public EntityItem[] AllowedTypes;
 }
 

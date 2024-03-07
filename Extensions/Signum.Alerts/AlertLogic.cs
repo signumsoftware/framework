@@ -196,7 +196,7 @@ public static class AlertLogic
             if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
                 return null;
 
-            var alert = (AlertEntity)alertObject;
+            var alert = (AlertEntity)alertObject!;
             var text = alert.Text ?? "";
 
             var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
@@ -302,13 +302,15 @@ public static class AlertLogic
         return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
     }
 
+    static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => new TypeAllowedAndConditions(TypeAllowed.Write));
+
     public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
         Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
     {
         if (Started == false)
             return null;
 
-        using (AuthLogic.Disable())
+        using (AllowSaveAlerts())
         {
             var result = new AlertEntity
             {
@@ -334,7 +336,7 @@ public static class AlertLogic
         if (Started == false)
             return null;
 
-        using (AuthLogic.Disable())
+        using (AllowSaveAlerts())
         {
             alertDate ??= Clock.Now;
             createdBy ??= UserHolder.Current?.User;
@@ -395,7 +397,7 @@ public static class AlertLogic
 
     public static void AttendAllAlerts(Lite<Entity> target, AlertTypeSymbol alertType)
     {
-        using (AuthLogic.Disable())
+        using (AllowSaveAlerts())
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.Target.Is(target) && a.AlertType.Is(alertType) && a.State == AlertState.Saved)
@@ -423,7 +425,7 @@ public static class AlertLogic
 
     public static void DeleteAllAlerts(Lite<Entity> target)
     {
-        using (AuthLogic.Disable())
+        using (AllowSaveAlerts())
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.Target.Is(target))
@@ -440,7 +442,7 @@ public static class AlertLogic
         target.ToLite().DeleteUnattendedAlerts(alertType, recipient);
     public static void DeleteUnattendedAlerts(this Lite<Entity> target, AlertTypeSymbol alertType, Lite<UserEntity>? recipient = null)
     {
-        using (AuthLogic.Disable())
+        using (AllowSaveAlerts())
         {
             Database.Query<AlertEntity>()
                 .Where(a => a.State == AlertState.Saved && a.Target.Is(target) && a.AlertType.Is(alertType) && (recipient == null || a.Recipient.Is(recipient)))

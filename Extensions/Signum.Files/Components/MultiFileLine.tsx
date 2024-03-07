@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
 import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
-import { getSymbol } from '@framework/Reflection'
+import { Type, getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EntityControlMessage, EmbeddedEntity, MListElement, getToString } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from '../Signum.Files'
@@ -11,13 +11,13 @@ import { FileUploader } from './FileUploader'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "./Files.css"
 import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
-import { useController } from '@framework/Lines/LineBase'
+import { genericForwardRef, useController } from '@framework/Lines/LineBase'
 import { EntityBaseController } from '@framework/Lines'
+import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
 
 export { FileTypeSymbol };
 
-interface MultiFileLineProps extends EntityListBaseProps {
-  ctx: TypeContext<MList<ModifiableEntity & IFile | Lite<IFile & Entity> | ModifiableEntity /*implement getFile create Embedded*/>>;
+interface MultiFileLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseProps<V> {
   download?: DownloadBehaviour;
   showFileIcon?: boolean;
   dragAndDrop?: boolean;
@@ -26,13 +26,13 @@ interface MultiFileLineProps extends EntityListBaseProps {
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
   maxSizeInBytes?: number;
-  getFileFromElement?: (e: any /*ModifiableEntity*/) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<ModifiableEntity | undefined>;
+  getFileFromElement?: (ectx: V) => ModifiableEntity & IFile | Lite<IFile & Entity>;
+  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<V | undefined>;
 }
 
-export class MultiFileLineController extends EntityListBaseController<MultiFileLineProps> {
+export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileLineProps<V>, V> {
 
-  overrideProps(p: MultiFileLineProps, overridenProps: MultiFileLineProps) {
+  overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>) {
 
     p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
 
@@ -70,15 +70,11 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
       this.props.createElementFromFile(file)
         .then(em => em && this.addElement(em));
     else
-      this.convert(file)
+      this.convert(file as unknown as Aprox<V>)
         .then(f => this.addElement(f));
   }
 
-  defaultCreate() {
-    return Constructor.construct(this.props.type!.name);
-  }
-
-  renderElementViewButton(btn: boolean, entity: ModifiableEntity | Lite<Entity>, index: number) {
+  renderElementViewButton(btn: boolean, entity: V, index: number) {
 
     if (!this.canView(entity))
       return undefined;
@@ -94,7 +90,7 @@ export class MultiFileLineController extends EntityListBaseController<MultiFileL
   }
 }
 
-export const MultiFileLine = React.forwardRef(function MultiFileLine(props: MultiFileLineProps, ref: React.Ref<MultiFileLineController>) {
+export const MultiFileLine = genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileLineProps<V>, ref: React.Ref<MultiFileLineController<V>>) {
   const c = useController(MultiFileLineController, props, ref);
   const p = c.props;
 
@@ -102,7 +98,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -120,7 +116,7 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                     </a>}
                 </td>
                 <td style={{ width: "100%" }}>
-                  {p.getComponent ? p.getComponent(mlec) :
+                  {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :
                     p.download == "None" ?
                       <span className={classes(mlec.formControlClass, "file-control")} >
                         {getToString(p.getFileFromElement ? p.getFileFromElement(mlec.value) : mlec.value)}
@@ -129,7 +125,8 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
                         configuration={p.configuration}
                         showFileIcon={p.showFileIcon}
                         download={p.download}
-                        entityOrLite={p.getFileFromElement ? p.getFileFromElement(mlec.value as EmbeddedEntity) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
+                        containerEntity={p.getFileFromElement ? mlec.value as ModifiableEntity : undefined}
+                        entityOrLite={p.getFileFromElement ? p.getFileFromElement(mlec.value) : mlec.value as ModifiableEntity & IFile | Lite<IFile & Entity>}
                         htmlAttributes={{ className: classes(mlec.formControlClass, "file-control") }} />
                   }
                 </td>
@@ -164,4 +161,4 @@ export const MultiFileLine = React.forwardRef(function MultiFileLine(props: Mult
   download: "ViewOrSave",
   showFileIcon: true,
   dragAndDrop: true
-} as MultiFileLineProps;
+} as MultiFileLineProps<any>;

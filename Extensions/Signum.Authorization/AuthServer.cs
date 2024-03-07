@@ -11,6 +11,7 @@ using Signum.API.Json;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Collections.Frozen;
 
 namespace Signum.Authorization;
 
@@ -66,6 +67,16 @@ public static class AuthServer
 
                     ti.Extension.Add("maxTypeAllowed", ta.MaxUI());
                     ti.Extension.Add("minTypeAllowed", ta.MinUI());
+
+                    if(ta.Fallback == TypeAllowed.None)
+                    {
+                        var conditions = ta.ConditionRules.SelectMany(a => a.TypeConditions)
+                        .Distinct().Where(a => TypeConditionLogic.IsQueryAuditor(t, a)).Select(a => a.Key);
+
+                        if (conditions.Any())
+                            ti.Extension.Add("queryAuditors", conditions.ToList());
+                    }
+
                     ti.RequiresEntityPack |= ta.ConditionRules.Any();
 
                     return ti;
@@ -88,11 +99,13 @@ public static class AuthServer
 
             EntityPackTS.AddExtension += ep =>
             {
+                var args = FilterQueryArgs.FromEntity(ep.entity);
+
                 var typeAllowed =
                 UserEntity.Current == null ? TypeAllowedBasic.None :
                 ep.entity.IsNew ? TypeAuthLogic.GetAllowed(ep.entity.GetType()).MaxUI() :
-                TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Write, true) ? TypeAllowedBasic.Write :
-                TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, true) ? TypeAllowedBasic.Read :
+                TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Write, inUserInterface: true, args) ? TypeAllowedBasic.Write :
+                TypeAuthLogic.IsAllowedFor(ep.entity, TypeAllowedBasic.Read, inUserInterface: true, args) ? TypeAllowedBasic.Read :
                 TypeAllowedBasic.None;
 
                 ep.extension.Add("typeAllowed", typeAllowed);
@@ -110,7 +123,7 @@ public static class AuthServer
                     if (ta.Max(inUserInterface: true) <= TypeAllowedBasic.Read)
                         return true;
 
-                    return giCountReadonly.GetInvoker(gr.Key)() > 0;
+                    return giCountReadonly.GetInvoker(gr.Key)(gr) > 0;
                 });
             };
         }
@@ -252,8 +265,8 @@ public static class AuthServer
 
     }
 
-    public static ResetLazy<Dictionary<string, List<Type>>> entitiesByNamespace =
-        new ResetLazy<Dictionary<string, List<Type>>>(() => Schema.Current.Tables.Keys.Where(t => !EnumEntity.IsEnumEntity(t)).GroupToDictionary(t => t.Namespace!));
+    public static ResetLazy<FrozenDictionary<string, List<Type>>> entitiesByNamespace =
+        new(() => Schema.Current.Tables.Keys.Where(t => !EnumEntity.IsEnumEntity(t)).GroupToDictionary(t => t.Namespace!).ToFrozenDictionary());
 
     public static ConcurrentDictionary<string, bool> NamespaceNoLoaded = new ConcurrentDictionary<string, bool>();
 
@@ -285,10 +298,14 @@ Consider calling ReflectionServer.RegisterLike(typeof({type.Name}), ()=> yourCon
 
 
 
-    static GenericInvoker<Func<int>> giCountReadonly = new(() => CountReadonly<Entity>());
-    public static int CountReadonly<T>() where T : Entity
+    static GenericInvoker<Func<IEnumerable<Lite<Entity>>, int>> giCountReadonly = new(lites => CountReadonly<UserEntity>(lites));
+    public static int CountReadonly<T>(IEnumerable<Lite<Entity>> lites) where T : Entity
     {
-        return Database.Query<T>().Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true));
+        var array = lites.Cast<Lite<T>>().ToArray();
+        var args = FilterQueryArgs.FromFilter<T>(e => array.Contains(e.ToLite()));
+
+        using (TypeAuthLogic.DisableQueryFilter())
+            return Database.Query<T>().Where(a => array.Contains(a.ToLite())).Count(a => !a.IsAllowedFor(TypeAllowedBasic.Write, true, args));
     }
 
     public static void OnUserPreLogin(ActionContext ac, UserEntity user)

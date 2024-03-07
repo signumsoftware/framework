@@ -352,11 +352,6 @@ public static class UserAssetsImporter
 
     public static void Import(byte[] document, UserAssetPreviewModel preview)
     {
-        //try
-        {
-            //OperationLogic.AllowSaveGlobally = true;
-
-
             using (var tr = new Transaction())
             {
                 var doc = new MemoryStream(document).Using(XDocument.Load);
@@ -381,14 +376,6 @@ public static class UserAssetsImporter
 
                 tr.Commit();
             }
-
-        }
-        //finally
-        //{
-
-        //    //OperationLogic.AllowSaveGlobally = false;
-        //}
-
 
     }
 

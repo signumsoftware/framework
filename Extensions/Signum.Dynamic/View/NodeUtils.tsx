@@ -509,7 +509,7 @@ export function asFunction(thisObject: React.Component<any, any>, expression: Ex
 export function evalWithScope(code: string, modules: any, props: any, locals: any) {
 
   // Lines
-  var ValueLine = Lines.ValueLine;
+  var AutoLine = Lines.AutoLine;
 
   return eval(code);
 }
@@ -739,9 +739,13 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
   return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): EntityBaseProps {
+export function getEntityListBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): Lines.EntityListBaseProps<any> {
+  return getEntityBaseProps(dn, parentCtx, options) as any;
+}
 
-  var result: EntityBaseProps = {
+ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): EntityBaseProps<any> {
+
+  var result: EntityBaseProps<any> = {
     ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions)),
     label: evaluateAndValidate(dn, parentCtx, dn.node, n => n.label, isStringOrNull),
     labelHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes),

@@ -1,29 +1,27 @@
 import * as React from "react";
-import { TypeContext, FormGroup } from "../Lines";
+import { TypeContext, FormGroup, AutoLine, AutoLineProps } from "../Lines";
 import { SearchMessage, MList, newMListElement } from "../Signum.Entities";
 import { mlistItemContext } from "../TypeContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DynamicComponent, { getAppropiateComponent, getAppropiateComponentFactory } from "./DynamicComponent";
 import { ErrorBoundary } from "../Components";
 import { EntityBaseController } from "./EntityBase";
-import { LineBaseProps, LineBaseController, useController } from "./LineBase";
+import { LineBaseProps, LineBaseController, useController, genericForwardRef } from "./LineBase";
 import { KeyGenerator } from "../Globals";
 import { MListElementBinding } from "../Reflection";
 
-interface MultiValueLineProps extends LineBaseProps {
-  ctx: TypeContext<MList<any>>;
-  onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
+  onRenderItem?: (p: AutoLineProps) => React.ReactElement;
   onCreate?: () => Promise<any[] | any | undefined>;
   addValueText?: string;
   valueColumClass?: string;
   filterRows?: (ctxs: TypeContext<any /*T*/>[]) => TypeContext<any /*T*/>[];
 }
 
-export class MultiValueLineController extends LineBaseController<MultiValueLineProps> {
+export class MultiValueLineController<V> extends LineBaseController<MultiValueLineProps<V>, MList<V>> {
 
   keyGenerator = new KeyGenerator();
 
-  getDefaultProps(p: MultiValueLineProps) {
+  getDefaultProps(p: MultiValueLineProps<V>) {
     if (p.ctx.value == undefined)
       p.ctx.value = [];
 
@@ -62,7 +60,7 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
     return Promise.resolve(null);
   }
 
-  getMListItemContext<T>(ctx: TypeContext<MList<T>>): TypeContext<T>[] {
+  getMListItemContext(ctx: TypeContext<MList<V>>): TypeContext<V>[] {
     var rows = mlistItemContext(ctx);
 
     if (this.props.filterRows)
@@ -72,16 +70,23 @@ export class MultiValueLineController extends LineBaseController<MultiValueLineP
   }
 }
 
-export const MultiValueLine = React.forwardRef(function MultiValueLine(props: MultiValueLineProps, ref: React.Ref<MultiValueLineController>) {
-  const c = useController(MultiValueLineController, props, ref);
+export const MultiValueLine = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
+  const c = useController(MultiValueLineController<V>, props, ref);
   const p = c.props;
-  const list = p.ctx.value;
+
+  var renderItem = React.useMemo(() => {
+    if (props.onRenderItem)
+      return props.onRenderItem;
+
+    var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true)!;
+    return AutoLine.getComponentFactory(pr.typeReference(), pr);
+  }, [Boolean(p.onRenderItem), p.ctx.propertyPath]);
 
   if (c.isHidden)
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
       labelHtmlAttributes={p.labelHtmlAttributes}>
@@ -96,7 +101,7 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
                     <MultiValueLineElement
                       ctx={mlec}
                       onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                      onRenderItem={p.onRenderItem}
+                      onRenderItem={renderItem}
                       valueColumClass={p.valueColumClass!} />
                   </div>
                 </ErrorBoundary>
@@ -120,25 +125,24 @@ export const MultiValueLine = React.forwardRef(function MultiValueLine(props: Mu
 export interface MultiValueLineElementProps {
   ctx: TypeContext<any>;
   onRemove: (event: React.MouseEvent<any>) => void;
-  onRenderItem?: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  onRenderItem: (p: AutoLineProps) => React.ReactElement;
   valueColumClass: string;
 }
 
 export function MultiValueLineElement(props: MultiValueLineElementProps) {
-  const ctx = props.ctx;
+  const mctx = props.ctx;
 
-  var renderItem = props.onRenderItem ?? getAppropiateComponentFactory(ctx.propertyRoute!)
 
   return (
     <div style={{ display: "flex", alignItems: "center", marginBottom: "2px" }}>
-      {!ctx.readOnly &&
-        <a href="#" title={ctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+      {!mctx.readOnly &&
+        <a href="#" title={mctx.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
           className="sf-line-button sf-remove"
           onClick={props.onRemove}>
           <FontAwesomeIcon icon="xmark" />
         </a>
       }
-      {React.cloneElement(renderItem(ctx) as React.ReactElement, { mandatory: true })}
+      {React.cloneElement(props.onRenderItem({ ctx: mctx, mandatory: true})!)}
     </div>
   );
 }

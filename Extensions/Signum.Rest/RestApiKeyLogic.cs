@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 
@@ -8,7 +9,7 @@ public class RestApiKeyLogic
     public readonly static string ApiKeyQueryParameter = "apiKey";
     public readonly static string ApiKeyHeader = "X-ApiKey";
 
-    public static ResetLazy<Dictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
+    public static ResetLazy<FrozenDictionary<string, RestApiKeyEntity>> RestApiKeyCache = null!;
     public static Func<string> GenerateRestApiKey = () => DefaultGenerateRestApiKey();
 
     public static void Start(SchemaBuilder sb)
@@ -28,7 +29,7 @@ public class RestApiKeyLogic
 
             RestApiKeyCache = sb.GlobalLazy(() =>
             {
-                return Database.Query<RestApiKeyEntity>().ToDictionaryEx(rak => rak.ApiKey);
+                return Database.Query<RestApiKeyEntity>().ToFrozenDictionaryEx(rak => rak.ApiKey);
             }, new InvalidateWith(typeof(RestApiKeyEntity)));
         }
     }

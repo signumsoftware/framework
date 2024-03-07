@@ -21,15 +21,18 @@ import * as Navigator from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 let started = false;
 export function start(options: { routes: RouteObject[] }) {
   if (started)
     return;
 
+  registerChangeLogModule("Signum.UserAssets", () => import("./Changelog"));
+
   options.routes.push({ path: "/userAssets/import", element: <ImportComponent onImport={() => import("./ImportAssetsPage")} /> });
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
+    allowed: () => AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML),
     key: "ImportUserAssets",
     onClick: () => Promise.resolve("/userAssets/import")
   });
@@ -39,7 +42,7 @@ export function start(options: { routes: RouteObject[] }) {
 }
 
 export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
-  if (AuthClient.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
+  if (AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
     QuickLinks.registerQuickLink(type,
       new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
         allowsMultiple: true,
@@ -73,7 +76,6 @@ export module Converter {
         pinned: fn.pinned && toPinnedFilterParsed(fn.pinned),
         dashboardBehaviour: fn.dashboardBehaviour,
         frozen: false,
-        expanded: false,
       });
     else
       return softCast<FilterConditionOptionParsed>({
@@ -228,6 +230,15 @@ export module API {
     pinned?: PinnedFilter;
     dashboardBehaviour?: DashboardBehaviour;
     indentation?: number;
+  }
+
+  export function parseDate(dateExpression: string): Promise<string /*DateTime*/> {
+    return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
+  }
+
+
+  export function stringifyDate(dateValue: string): Promise<string> {
+    return ajaxPost({ url: "/api/userAssets/stringifyDate/" }, dateValue);
   }
 
 

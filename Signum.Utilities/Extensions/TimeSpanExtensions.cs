@@ -1,4 +1,6 @@
 
+using System.Diagnostics;
+
 namespace Signum.Utilities;
 
 
@@ -10,27 +12,47 @@ public static class TimeSpanExtensions
         switch (precision)
         {
             case DateTimePrecision.Days: return time.TrimToDays();
-            case DateTimePrecision.Hours: return TrimToHours(time);
-            case DateTimePrecision.Minutes: return TrimToMinutes(time);
-            case DateTimePrecision.Seconds: return TrimToSeconds(time);
+            case DateTimePrecision.Hours: return TruncHours(time);
+            case DateTimePrecision.Minutes: return TruncMinutes(time);
+            case DateTimePrecision.Seconds: return TruncSeconds(time);
             case DateTimePrecision.Milliseconds: return time;
         }
         throw new ArgumentException("precision");
     }
 
-    public static TimeSpan TrimToSeconds(this TimeSpan time)
+    public static TimeSpan TruncSeconds(this TimeSpan time)
     {
         return new TimeSpan(time.Days, time.Hours, time.Minutes, time.Seconds);
     }
 
-    public static TimeSpan TrimToMinutes(this TimeSpan time)
+    public static TimeSpan TruncSeconds(this TimeSpan time, int step)
+    {
+        return new TimeSpan(time.Days, time.Hours, time.Minutes, (time.Seconds / step) * step);
+    }
+
+    public static TimeSpan TruncMilliseconds(this TimeSpan time, int step)
+    {
+        return new TimeSpan(time.Days, time.Hours, time.Minutes, time.Seconds, (time.Milliseconds / step) * step);
+    }
+
+    public static TimeSpan TruncMinutes(this TimeSpan time)
     {
         return new TimeSpan(time.Days, time.Hours, time.Minutes, 0);
     }
 
-    public static TimeSpan TrimToHours(this TimeSpan time)
+    public static TimeSpan TruncMinutes(this TimeSpan time, int step)
+    {
+        return new TimeSpan(time.Days, time.Hours, (time.Minutes / step) * step, 0);
+    }
+
+    public static TimeSpan TruncHours(this TimeSpan time)
     {
         return new TimeSpan(time.Days, time.Hours, 0, 0);
+    }
+
+    public static TimeSpan TruncHours(this TimeSpan time, int step)
+    {
+        return new TimeSpan(time.Days, (time.Hours / step) * step, 0, 0);
     }
 
     public static TimeSpan TrimToDays(this TimeSpan time)

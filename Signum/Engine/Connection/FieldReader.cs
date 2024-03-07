@@ -74,9 +74,13 @@ public class FieldReader
         return typeCodes[ordinal] switch
         {
             TypeCode.Byte => reader.GetByte(ordinal).ToString(),
+
             TypeCode.Int16 => reader.GetInt16(ordinal).ToString(),
             TypeCode.Int32 => reader.GetInt32(ordinal).ToString(),
             TypeCode.Int64 => reader.GetInt64(ordinal).ToString(),
+            TypeCode.UInt16 => reader.GetFieldValue<UInt16>(ordinal).ToString(),
+            TypeCode.UInt32 => reader.GetFieldValue<UInt32>(ordinal).ToString(),
+            TypeCode.UInt64 => reader.GetFieldValue<UInt64>(ordinal).ToString(),
             TypeCode.Double => reader.GetDouble(ordinal).ToString(),
             TypeCode.Single => reader.GetFloat(ordinal).ToString(),
             TypeCode.Decimal => reader.GetDecimal(ordinal).ToString(),
@@ -110,6 +114,9 @@ public class FieldReader
             TypeCode.Int16 => reader.GetInt16(ordinal) != 0,
             TypeCode.Int32 => reader.GetInt32(ordinal) != 0,
             TypeCode.Int64 => reader.GetInt64(ordinal) != 0,
+            TypeCode.UInt16 => reader.GetFieldValue<UInt16>(ordinal) != 0,
+            TypeCode.UInt32 => reader.GetFieldValue<UInt32>(ordinal) != 0,
+            TypeCode.UInt64 => reader.GetFieldValue<UInt64>(ordinal) != 0,
             TypeCode.String => bool.Parse(reader.GetString(ordinal)),
             _ => ReflectionTools.ChangeType<bool>(reader.GetValue(ordinal)),
         };
@@ -136,6 +143,9 @@ public class FieldReader
             TypeCode.Int16 => (Byte)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Byte)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Byte)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Byte)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Byte)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Byte)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Byte)reader.GetDouble(ordinal),
             TypeCode.Single => (Byte)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Byte)reader.GetDecimal(ordinal),
@@ -165,6 +175,9 @@ public class FieldReader
             TypeCode.Int16 => (Char)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Char)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Char)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Char)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Char)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Char)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Char)reader.GetDouble(ordinal),
             TypeCode.Single => (Char)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Char)reader.GetDecimal(ordinal),
@@ -194,6 +207,9 @@ public class FieldReader
             TypeCode.Int16 => (Single)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Single)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Single)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Single)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Single)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Single)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Single)reader.GetDouble(ordinal),
             TypeCode.Single => reader.GetFloat(ordinal),
             TypeCode.Decimal => (Single)reader.GetDecimal(ordinal),
@@ -223,6 +239,9 @@ public class FieldReader
             TypeCode.Int16 => (Double)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Double)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Double)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Double)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Double)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Double)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => reader.GetDouble(ordinal),
             TypeCode.Single => (Double)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Double)reader.GetDecimal(ordinal),
@@ -252,6 +271,9 @@ public class FieldReader
             TypeCode.Int16 => (Decimal)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Decimal)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Decimal)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Decimal)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Decimal)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Decimal)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Decimal)reader.GetDouble(ordinal),
             TypeCode.Single => (Decimal)reader.GetFloat(ordinal),
             TypeCode.Decimal => reader.GetDecimal(ordinal),
@@ -281,6 +303,9 @@ public class FieldReader
             TypeCode.Int16 => reader.GetInt16(ordinal),
             TypeCode.Int32 => (Int16)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Int16)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Int16)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Int16)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Int16)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Int16)reader.GetDouble(ordinal),
             TypeCode.Single => (Int16)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Int16)reader.GetDecimal(ordinal),
@@ -310,6 +335,9 @@ public class FieldReader
             TypeCode.Int16 => (Int32)reader.GetInt16(ordinal),
             TypeCode.Int32 => reader.GetInt32(ordinal),
             TypeCode.Int64 => (Int32)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Int32)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Int32)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Int32)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Int32)reader.GetDouble(ordinal),
             TypeCode.Single => (Int32)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Int32)reader.GetDecimal(ordinal),
@@ -339,6 +367,9 @@ public class FieldReader
             TypeCode.Int16 => (Int64)reader.GetInt16(ordinal),
             TypeCode.Int32 => (Int64)reader.GetInt32(ordinal),
             TypeCode.Int64 => (Int64)reader.GetInt64(ordinal),
+            TypeCode.UInt16 => (Int64)reader.GetFieldValue<UInt16>(ordinal),
+            TypeCode.UInt32 => (Int64)reader.GetFieldValue<UInt32>(ordinal),
+            TypeCode.UInt64 => (Int64)reader.GetFieldValue<UInt64>(ordinal),
             TypeCode.Double => (Int64)reader.GetDouble(ordinal),
             TypeCode.Single => (Int64)reader.GetFloat(ordinal),
             TypeCode.Decimal => (Int64)reader.GetDecimal(ordinal),
@@ -694,10 +725,6 @@ public class FieldReaderException : DbException
         this.ColumnName = columnName;
         this.MethodName = methodName;
     }
-    protected FieldReaderException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context)
-        : base(info, context) { }
 
     public override string Message
     {

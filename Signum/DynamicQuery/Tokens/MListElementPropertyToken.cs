@@ -1,3 +1,6 @@
+using Signum.Engine.Maps;
+using Signum.Utilities.Reflection;
+
 namespace Signum.DynamicQuery.Tokens;
 
 public class MListElementPropertyToken : QueryToken
@@ -23,6 +26,12 @@ public class MListElementPropertyToken : QueryToken
     {
         var mleType = MListElementPropertyToken.MListElementType(ept);
         return new MListElementPropertyToken(parent, mleType.GetProperty("RowOrder")!, ept.PropertyRoute, "RowOrder", () => QueryTokenMessage.RowOrder.NiceToString()) { Priority = -5 };
+    }
+
+    public static MListElementPropertyToken PartitionId(QueryToken parent, EntityPropertyToken ept)
+    {
+        var mleType = MListElementPropertyToken.MListElementType(ept);
+        return new MListElementPropertyToken(parent, mleType.GetProperty("RowPartitionId")!, ept.PropertyRoute, "RowPartitionId", () => QueryTokenMessage.PartitionId.NiceToString()) { Priority = -6 };
     }
 
     internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
@@ -97,11 +106,9 @@ public class MListElementPropertyToken : QueryToken
         return new MListElementPropertyToken(parent.Clone(), PropertyInfo, PropertyRoute, Key, nicePropertyName);
     }
 
-    internal static Func<PropertyRoute, Type, bool> HasAttribute = null!;
+    internal static Func<PropertyRoute, Type, bool> HasAttribute = (pr, type) => Schema.Current.Settings.FieldAttributes(pr)?.Any(a => a.GetType() == type) ?? false!;
 
-
-    internal static MethodInfo miMListElementsLite = null!;
-
+    internal static MethodInfo miMListElementsLite = ReflectionTools.GetMethodInfo(() => Database.MListElementsLite<Entity, Entity>(null!, null!)).GetGenericMethodDefinition();
 
     public static Expression BuildMListElements(EntityPropertyToken ept, BuildExpressionContext ctx)
     {

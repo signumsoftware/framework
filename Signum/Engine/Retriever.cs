@@ -1,4 +1,5 @@
 using Signum.Engine.Maps;
+using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 
@@ -255,8 +256,8 @@ class RealRetriever : IRetriever
             }
         }
 
-        var currentlyRetrieved = retrieved.Values.ToHashSet();
-        var currentlyModifiableRetrieved = modifiablePostRetrieving.ToHashSet(Signum.Utilities.DataStructures.ReferenceEqualityComparer<Modifiable>.Default);
+        var currentlyRetrieved = retrieved.Values.ToHashSet(ReferenceEqualityComparer<Entity>.Default);
+        var currentlyModifiableRetrieved = modifiablePostRetrieving.ToHashSet(ReferenceEqualityComparer<Modifiable>.Default);
         var ctx = new PostRetrievingContext();
         foreach (var entity in currentlyRetrieved)
         {

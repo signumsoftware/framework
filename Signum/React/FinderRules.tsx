@@ -18,15 +18,19 @@ import {
 } from './Reflection';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
-import { EntityBaseController, EntityCombo, EntityLine, EntityStrip, FormGroup, StyleContext, TypeContext, ValueLine } from "./Lines";
+import { EntityBaseController, EntityCombo, EntityLine, EntityStrip, FormGroup, StyleContext, TypeContext } from "./Lines";
 import { similarToken } from "./Search";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { TextHighlighter } from "./Components/Typeahead";
-import { ValueLineController } from "./Lines/ValueLine";
 import { CellFormatter, EntityFormatRule, EntityFormatter, FilterValueFormatter, FormatRule, QuickFilterRule, filterValueFormatRules } from "./Finder";
 import { OverlayTrigger, Popover } from "react-bootstrap";
 import { TypeEntity } from "./Signum.Basics";
 import { useForceUpdate } from "./Hooks";
+import { TextAreaLine } from "./Lines/TextAreaLine";
+import { TextBoxLine } from "./Lines/TextBoxLine";
+import { AutoLine } from "./Lines/AutoLine";
+import { EnumLine } from "./Lines/EnumLine";
+import { KeyNames } from "./Components";
 
 
 export function isMultiline(pr?: PropertyRoute) {
@@ -50,7 +54,7 @@ export function initFormatRules(): FormatRule[] {
     },
     {
       name: "Entity",
-      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Lite" || qt.filterType == "Model",
+      isApplicable: qt => qt.filterType == "Embedded" || qt.filterType == "Model",
       formatter: qt => new CellFormatter(cell => cell ? <span className="try-no-wrap">{getToString(cell)}</span> : undefined, true)
     },
     {
@@ -122,14 +126,14 @@ export function initFormatRules(): FormatRule[] {
     {
       name: "Lite",
       isApplicable: qt => qt.filterType == "Lite",
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, true)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, true)
     },
     {
       name: "LiteNoFill",
       isApplicable: qt => {
         return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} />, false)
+      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, false)
     },
     {
       name: "Guid",
@@ -187,7 +191,7 @@ export function initFormatRules(): FormatRule[] {
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
           return (
             <bdi className={classes("date", "try-no-wrap", className)}>
-              {c.toFormat(luxonFormat)}
+              {toFormatWithFixes(c, luxonFormat)}
             </bdi>);
         }, false, "date-cell"); //To avoid flippig hour and date (L LT) in RTL cultures
       }
@@ -207,7 +211,7 @@ export function initFormatRules(): FormatRule[] {
               undefined;
 
           const luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
-          return <bdi className={classes("date", "try-no-wrap", className)}>{c.toFormat(luxonFormat)}</bdi>;
+          return <bdi className={classes("date", "try-no-wrap", className)}>{toFormatWithFixes(c, luxonFormat)}</bdi>;
         }, false, "date-cell");//To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
@@ -363,14 +367,18 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
     return [];
   }
 
+  function isNegative(fo: FilterOperation) {
+    return fo == "NotStartsWith" || fo == "NotContains" || fo == "NotEndsWith" || fo == "NotLike" || fo == "IsNotIn";
+  }
 
   function getFiltersKeywords(fo: FilterOptionParsed): string[] {
+
     if (isFilterGroup(fo)) {
       if (fo.value && fo.pinned && typeof fo.value == "string") {
 
         var filterConditions = fo.filters.filter(sf => sf.token != null && isFilterCondition(sf)) as FilterConditionOptionParsed[];
 
-        var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation != undefined)
+        var filters = filterConditions.filter(sf => similarTokenToStr(sf.token!, token) && sf.operation && !isNegative(sf.operation))
           .flatMap(sf => splitTokens(fo.value!, fo.pinned?.splitValue, sf.operation!));
 
         return filters;
@@ -379,7 +387,7 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
       }
     }
     else {
-      if (fo.token && fo.operation && similarTokenToStr(fo.token, token)) {
+      if (fo.token && fo.operation && !isNegative(fo.operation) && similarTokenToStr(fo.token, token)) {
         return splitTokens(fo.value, fo.pinned?.splitValue, fo.operation);
       } else {
         return [];
@@ -446,9 +454,9 @@ export function initEntityFormatRules(): EntityFormatRule[] {
     {
       name: "View",
       isApplicable: sc => true,
-      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }) ? undefined :
+      formatter: new EntityFormatter(({ row, columns, searchControl: sc }) => !row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }) ? undefined :
         <EntityLink lite={row.entity}
-          inSearch={true}
+          inSearch="main"
           onNavigated={sc?.handleOnNavigated}
           getViewPromise={sc && (sc.props.getViewPromise ?? sc.props.querySettings?.getViewPromise)}
           inPlaceNavigation={sc?.props.view == "InPlace"} className="sf-line-button sf-view">
@@ -553,7 +561,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
         var tokenType = f.token!.type;
         if (ffc.forceNullable)
           tokenType = { ...tokenType, isNotNullable: false };
-        return <ValueLine ctx={ffc.ctx} type={tokenType} format={f.token!.format} unit={f.token!.unit} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        return <AutoLine ctx={ffc.ctx} type={tokenType} format={f.token!.format} unit={f.token!.unit} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     },
     {
@@ -568,7 +576,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
         if (!ti)
           throw new Error(`EnumType ${tokenType.name} not found`);
         const members = Dic.getValues(ti.members).filter(a => !a.isIgnoredEnum);
-        return <ValueLine ctx={ffc.ctx} type={tokenType} format={f.token!.format} unit={f.token!.unit} optionItems={members} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+        return <EnumLine ctx={ffc.ctx} type={tokenType} unit={f.token!.unit} optionItems={members} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
       }
     },
     {
@@ -663,7 +671,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
       renderValue: (f, ffc) => {
         var fg = f as FilterGroupOptionParsed;
         if (fg.filters.some(a => !a.token))
-          return <ValueLine ctx={ffc.ctx} type={{ name: "string" }} onChange={() => ffc.handleValueChange(f)} label={ffc.label || SearchMessage.Search.niceToString()} />
+          return <TextBoxLine ctx={ffc.ctx} type={{ name: "string" }} onChange={() => ffc.handleValueChange(f)} label={ffc.label || SearchMessage.Search.niceToString()} />
 
         if (fg.filters.map(a => getFilterGroupUnifiedFilterType(a.token!.type) ?? "").distinctBy().onlyOrNull() == null && ffc.ctx.value)
           ffc.ctx.value = undefined;
@@ -671,9 +679,8 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
         var tr = fg.filters.map(a => a.token!.type).distinctBy(a => a.name).onlyOrNull();
         var format = (tr && fg.filters.map((a, i) => a.token!.format ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
         var unit = (tr && fg.filters.map((a, i) => a.token!.unit ?? "").distinctBy().onlyOrNull() || null) ?? undefined;
-        const vlt = tr && ValueLineController.getValueLineType(tr);
 
-        return <ValueLine ctx={ffc.ctx} type={vlt != null ? tr! : { name: "string" }} format={format} unit={unit} onChange={() => ffc.handleValueChange(f)} label={ffc.label || SearchMessage.Search.niceToString()} />
+        return <AutoLine ctx={ffc.ctx} type={tr ?? { name: "string" }} format={format} unit={unit} onChange={() => ffc.handleValueChange(f)} label={ffc.label || SearchMessage.Search.niceToString()} />
       }
     },
     {
@@ -694,7 +701,7 @@ export function initFilterValueFormatRules(): FilterValueFormatter[]{
 
 export interface MultiValueProps {
   values: any[],
-  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement<any>;
+  onRenderItem: (ctx: TypeContext<any>) => React.ReactElement;
   readOnly: boolean;
   onChange: () => void;
 }
@@ -779,20 +786,19 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }) {
-  return <ValueLine ctx={p.ctx}
+  return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
-    valueLineType="TextArea"
     valueHtmlAttributes={p.isComplex ? {
       onKeyDown: e => {
         console.log(e);
-        if (e.keyCode == 13 && !e.shiftKey) {
+        if (e.key == KeyNames.enter && !e.shiftKey) {
           e.preventDefault();
         }
       },
       onKeyUp: e => {
         console.log(e);
-        if (e.keyCode == 13 && e.shiftKey) {
+        if (e.key == KeyNames.enter && e.shiftKey) {
           e.stopPropagation()
         }
       }

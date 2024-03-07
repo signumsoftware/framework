@@ -82,6 +82,7 @@ public static class TemplateUtils
         else
         {
             var vpb = ValueProviderBase.TryParse(filter.Groups["token"].Value, variable, parser);
+
             var operation = filter.Groups["operation"].Value;
             var value = filter.Groups["value"].Value;
             return new ConditionCompare(vpb, operation, value, parser.AddError);
@@ -277,7 +278,9 @@ public static class ParsedModel
                 var info =
                     (type.GetField(part, Flags) is { } fi ? new MemberWithArguments(fi) : null) ??
                     (type.GetProperty(part, Flags) is { } pi ? new MemberWithArguments(pi) : null) ??
-                    (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null);
+                    (type.GetMethod(part, Flags) is { } mi ? new MemberWithArguments(mi) : null) ??
+                    (type.IsModifiableEntity() && MixinDeclarations.GetMixinDeclarations(type).Any(a => a.Name == part) ? new MemberWithArguments(MixinDeclarations.GetMixinDeclarations(type).SingleEx(a => a.Name == part)) : null);
+
 
                 if (info == null)
                 {
@@ -298,7 +301,7 @@ public static class ParsedModel
 
                 members.Add(info);
 
-                type = info.Member.ReturningType();
+                type = info.Member as Type ?? info.Member.ReturningType();
             }
 
         }
@@ -313,11 +316,11 @@ public class TemplateSynchronizationContext
     public Type? ModelType;
     public Replacements Replacements;
     public StringDistance StringDistance;
-    public QueryDescription QueryDescription;
+    public QueryDescription? QueryDescription;
 
     public bool HasChanges;
 
-    public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription queryDescription, Type? modelType)
+    public TemplateSynchronizationContext(Replacements replacements, StringDistance stringDistance, QueryDescription? queryDescription, Type? modelType)
     {
         Variables = new ScopedDictionary<string, ValueProviderBase>(null);
         ModelType = modelType;
@@ -331,6 +334,9 @@ public class TemplateSynchronizationContext
     {
         if (parsedToken.QueryToken == null)
         {
+            if (this.QueryDescription == null)
+                throw new InvalidOperationException("Unable to Sync token without QueryDescription: " + parsedToken);
+
             string tokenString = parsedToken.String;
 
             if (tokenString.StartsWith("$"))
@@ -403,6 +409,7 @@ public class TemplateSynchronizationContext
         {
             var allMembers = type.GetFields(ParsedModel.Flags).Where(f => !f.IsBackingField()).Cast<MemberInfo>()
                 .Concat(type.GetProperties(ParsedModel.Flags))
+                .Concat(type.IsModifiableEntity() && !type.IsAbstract ? MixinDeclarations.GetMixinDeclarations(type) : new HashSet<Type>())
                 .ToDictionary(a => a.Name);
 
             string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
@@ -414,7 +421,7 @@ public class TemplateSynchronizationContext
 
             fields.Add(new MemberWithArguments(member));
 
-            type = member.ReturningType();
+            type = member as Type ?? member.ReturningType();
         }
 
         return fields;

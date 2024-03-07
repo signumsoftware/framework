@@ -156,6 +156,7 @@ public static class HtmlToWordConverter
             case "ol":
                 {
                     var mainDocument = document.GetPartsOfType<MainDocumentPart>().SingleEx();
+                    var listLevel = 0;
 
                     int numberId; 
                     {
@@ -170,14 +171,20 @@ public static class HtmlToWordConverter
                         int abstractId = (numberings.Numbering.Elements<AbstractNum>().Max(a => a.AbstractNumberId?.Value) ?? 0) + 1;
                         numberId = (numberings.Numbering.Elements<NumberingInstance>().Max(a => a.NumberID?.Value) ?? 0) + 1;
 
+                        var node = htmlNode;
+                        while(node.ParentNode != null)
+                        {
+                            if(node.ParentNode.Name == "ul" || node.ParentNode.Name == "li")
+                                listLevel++;
+                            node = node.ParentNode;
+                        }
                         numberings.Numbering.InsertAfter(new AbstractNum(
                             new Level(
                                 new StartNumberingValue { Val = 1 },
                                 new NumberingFormat() { Val = htmlNode.Name == "ul" ? NumberFormatValues.Bullet : NumberFormatValues.Decimal },
                                 new LevelText() { Val = htmlNode.Name == "ul" ? "\x2022" : "%1." },
-                                new PreviousParagraphProperties(new Indentation() { Left = "720", Hanging = "360" }),
+                                new PreviousParagraphProperties(new Indentation() { Left = (360 * (listLevel + 1)).ToString(), Hanging = "180" }),
                                 null!
-                                //htmlNode.Name == "ul" ? new NumberingSymbolRunProperties(new RunFonts() { Hint = FontTypeHintValues.Default, Ascii = "Symbol", HighAnsi = "Symbol" }) : null!
                                 )
                             { LevelIndex = 0 })
                         { AbstractNumberId = abstractId },
@@ -212,7 +219,7 @@ public static class HtmlToWordConverter
                                new UIPriority() { Val = 34 },
                                new PrimaryStyle(),
                                new StyleParagraphProperties(
-                                   new Indentation() { Left = "720" },
+                                   new Indentation() { Left = (360 * (listLevel + 1)).ToString() },
                                    new ContextualSpacing()
                                )
                            )

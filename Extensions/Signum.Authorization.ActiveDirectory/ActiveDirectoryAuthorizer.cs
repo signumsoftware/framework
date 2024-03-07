@@ -88,11 +88,12 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
         }
     }
 
-  
 
-    public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal)
+    public string AccessToken; 
+    public AzureClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken)
     {
         this.ClaimsPrincipal = claimsPrincipal;
+        this.AccessToken = accessToken;
     }
 }
 
@@ -149,8 +150,11 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                             {
                                 UpdateUser(user, dsacuCtx);
 
-                                AuthLogic.OnUserLogingIn(user);
 
+                                if (user.State == UserState.Deactivated)
+                                    throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
+
+                                AuthLogic.OnUserLogingIn(user);
                                 return user;
                             }
                             else
@@ -159,6 +163,10 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                                     throw new InvalidOperationException(ActiveDirectoryAuthorizerMessage.ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication.NiceToString(localName));
 
                                 user = OnCreateUser(dsacuCtx);
+
+                                if (user.State == UserState.Deactivated)
+                                    throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
+
                                 AuthLogic.OnUserLogingIn(user);
                                 return user;
                             }
@@ -242,7 +250,9 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
         else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
         {
-            var groups = AzureADLogic.CurrentADGroupsInternal(ctx.OID.Value);
+            var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
+                AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
+
             var roles = config.RoleMapping.Where(m =>
             {
                 Guid.TryParse(m.ADNameOrGuid, out var guid);

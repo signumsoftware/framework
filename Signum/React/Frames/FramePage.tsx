@@ -25,7 +25,7 @@ interface FramePageState {
   pack: EntityPack<Entity>;
   lastEntity: string;
   viewName?: string;
-  getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
+  getComponent: (ctx: TypeContext<Entity>) => React.ReactElement;
   refreshCount: number;
   createNew?: () => Promise<EntityPack<Entity> | undefined>;
   executing?: boolean;
@@ -57,7 +57,7 @@ export default function FramePage() {
 
   useLooseChanges(state && !state.executing ? ({ entity: state.pack.entity, lastEntity: state.lastEntity }) : undefined);
 
-  function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any> }, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
+  function setPack(pack: EntityPack<Entity>, view: { viewName?: string, getComponent: (ctx: TypeContext<Entity>) => React.ReactElement }, createNew?: () => Promise<EntityPack<Entity> | undefined>) {
     return setState({
       pack,
       lastEntity: JSON.stringify(pack.entity),
@@ -123,7 +123,7 @@ export default function FramePage() {
 
   async function loadComponent(pack: EntityPack<Entity>, forceViewName?: string | Navigator.ViewPromise<ModifiableEntity>): Promise<{
     viewName?: string;
-    getComponent: (ctx: TypeContext<Entity>) => React.ReactElement<any>;
+    getComponent: (ctx: TypeContext<Entity>) => React.ReactElement;
   }> {
     if (forceViewName instanceof Navigator.ViewPromise) {
       var getComponent = await forceViewName.promise;
@@ -351,7 +351,7 @@ export default function FramePage() {
       return <h3 className="display-6 sf-entity-title">{JavascriptMessage.loading.niceToString()}</h3>;
 
     const entity = state.pack.entity;
-    const title = getToString(entity);
+    const title = Navigator.renderEntity(entity); 
     const subTitle = Navigator.getTypeSubTitle(entity, undefined);
     const widgets = renderWidgets(wc, settings?.stickyHeader);
 

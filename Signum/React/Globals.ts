@@ -21,7 +21,7 @@ declare global {
     groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
     groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
-    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] };
+    groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
@@ -727,7 +727,7 @@ String.prototype.formatWith = function () {
 
 
 String.prototype.forGenderAndNumber = function (this: string, gender: any, number?: number) {
-
+  
   if (!number && !isNaN(parseFloat(gender))) {
     number = gender;
     gender = undefined;
@@ -738,13 +738,13 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
 
   function replacePart(textToReplace: string, ...prefixes: string[]): string {
     return textToReplace.replace(/\[[^\]\|]+(\|[^\]\|]+)*\]/g, m => {
-      const captures = m.substr(1, m.length - 2).split("|");
+      const captures = m.substring(1, m.length - 1).split("|");
 
       for (let i = 0; i < prefixes.length; i++) {
         const pr = prefixes[i];
         const capture = captures.filter(c => c.startsWith(pr)).firstOrNull();
         if (capture != undefined)
-          return capture.substr(pr.length);
+          return capture.substring(pr.length);
       }
 
       return "";
@@ -763,9 +763,9 @@ String.prototype.forGenderAndNumber = function (this: string, gender: any, numbe
   }
 
   if (number == 1)
-    return replacePart(this, "1" + gender.Value + ":", "1:");
+    return replacePart(this, "1" + gender + ":", "1:");
 
-  return replacePart(this, gender.Value + number + ":", gender.Value + ":", number + ":", ":");
+  return replacePart(this, gender + number + ":", gender + ":", number + ":", ":");
 
 
 };
@@ -1246,4 +1246,12 @@ export function getColorContrasColorBWByHex (hexcolor: string) {
   var b = parseInt(hexcolor.substr(4, 2), 16);
   var yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
   return (yiq >= 128) ? 'black' : 'white';
+}
+
+export function isPromise(value: any): value is Promise<any> {
+  return value != null && value.then != null;
+}
+
+export function toPromise<T>(value: T | Promise<T>): Promise<T> {
+  return isPromise(value) ? value : Promise.resolve(value);
 }

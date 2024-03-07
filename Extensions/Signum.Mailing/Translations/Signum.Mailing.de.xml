@@ -21,6 +21,11 @@
     <Member Name="EmailOwner" Description="E-Mail-Besitzer" />
     <Member Name="InvalidEmail" Description="Ungültige e-Mail" />
   </Type>
+  <Type Name="EmailAddressSource" Description="E-Mail-Adresse Quelle">
+    <Member Name="CurrentUser" Description="Aktueller Benutzer" />
+    <Member Name="HardcodedAddress" Description="Festgelegte Adresse" />
+    <Member Name="QueryToken" Description="Abfrage-Token" />
+  </Type>
   <Type Name="EmailAttachmentEmbedded" Description="E-Mail-Anhang">
     <Member Name="ContentId" Description="Content-id" />
     <Member Name="File" Description="Datei" />
@@ -193,6 +198,7 @@
   </Type>
   <Type Name="EmailServiceEntity" Description="E-Mail-Dienst" PluralDescription="E-Mail-Dienste" Gender="m" />
   <Type Name="EmailTemplateAddressEmbedded" Description="E-Mail-Vorlagenadresse">
+    <Member Name="AddressSource" Description="Adressquelle" />
     <Member Name="DisplayName" Description="Anzeigename" />
     <Member Name="EmailAddress" Description="E-Mail-Adresse" />
     <Member Name="Token" Description="Token" />
@@ -254,6 +260,11 @@
     <Member Name="InsertMessageContent" Description="Inhalt der Nachricht einfügen" />
     <Member Name="Language" Description="Sprache" />
   </Type>
+  <Type Name="EmaiTemplateTargetFrom" Description="Emai-Vorlage Ziel von">
+    <Member Name="NoTarget" Description="Kein Ziel" />
+    <Member Name="Unique" Description="Einzigartig" />
+    <Member Name="UserQuery" Description="Benutzer-Abfrage" />
+  </Type>
   <Type Name="FileTokenAttachmentEntity" Description="File-Token-Anhang" PluralDescription="Datei-Token-Anhänge" Gender="m">
     <Member Name="ContentId" Description="Inhalts-ID" />
     <Member Name="FileName" Description="Dateiname" />
@@ -270,6 +281,7 @@
     <Member Name="EmailTemplate" Description="E-Mail Vorlage" />
     <Member Name="ModelConverter" Description="Modell-Konverter" />
     <Member Name="Name" Description="Name" />
+    <Member Name="TargetFrom" Description="Ziel von" />
     <Member Name="TargetsFromUserQuery" Description="Ziele von Benutzerabfrage" />
     <Member Name="UniqueTarget" Description="Einzigartiges Ziel" />
   </Type>
@@ -286,6 +298,7 @@
     <Member Name="ClientCertificationFiles" Description="Klientzertfikatsdateien" />
     <Member Name="EnableSSL" Description="SSL aktivieren" />
     <Member Name="Host" Description="Host" />
+    <Member Name="NewPassword" Description="Neues Passwort" />
     <Member Name="Password" Description="Passwort" />
     <Member Name="Port" Description="Port" />
     <Member Name="UseDefaultCredentials" Description="Verwenden der Standardanmeldeinformationen" />

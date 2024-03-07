@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine } from '@framework/Lines'
+import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks';
 import { MicrosoftGraphEmailServiceEntity } from '../Signum.Mailing.MicrosoftGraph';
@@ -10,12 +10,12 @@ export default function MicrosoftGraphEmailService(p: { ctx: TypeContext<Microso
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(ca => ca.useActiveDirectoryConfiguration)} onChange={forceUpdate} />
+      <AutoLine ctx={sc.subCtx(ca => ca.useActiveDirectoryConfiguration)} onChange={forceUpdate} />
       {
         !sc.value.useActiveDirectoryConfiguration && <div>
-          <ValueLine ctx={sc.subCtx(ca => ca.azure_DirectoryID)} />
-          <ValueLine ctx={sc.subCtx(ca => ca.azure_ApplicationID)} />
-          <ValueLine ctx={sc.subCtx(ca => ca.azure_ClientSecret)} />
+          <AutoLine ctx={sc.subCtx(ca => ca.azure_DirectoryID)} />
+          <AutoLine ctx={sc.subCtx(ca => ca.azure_ApplicationID)} />
+          <AutoLine ctx={sc.subCtx(ca => ca.azure_ClientSecret)} />
         </div>
       }
     </div>

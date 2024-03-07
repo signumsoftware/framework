@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
+import * as AppContext from '@framework/AppContext'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
@@ -15,11 +16,14 @@ import { expandNumbers } from '../Signum.DiffLog/Templates/DiffDocument';
 import { EvalPanelPermission } from './Signum.Eval';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
 
 export function start(options: { routes: RouteObject[] }) {
 
+  registerChangeLogModule("Signum.Eval", () => import("./Changelog"));
+
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
+    allowed: () => AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
     key: "DynamicPanel",
     onClick: () => Promise.resolve("/dynamic/panel")
   });

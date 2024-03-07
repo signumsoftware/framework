@@ -77,10 +77,10 @@ internal class OverloadingSimplifier : ExpressionVisitor
     static MethodInfo miReverseE = ReflectionTools.GetMethodInfo(() => Enumerable.Reverse((IEnumerable<string>)null!)).GetGenericMethodDefinition();
 
     static MethodInfo miCastQ = ReflectionTools.GetMethodInfo(() => Queryable.Cast<int>((IQueryable<string>)null!)).GetGenericMethodDefinition();
-    static MethodInfo miCastE = ReflectionTools.GetMethodInfo(() => Enumerable.Cast<int>((IEnumerable<string>)null!)).GetGenericMethodDefinition();
+    static MethodInfo miCastE = ReflectionTools.GetMethodInfo(() => Enumerable.Cast<string>((IEnumerable<string>)null!)).GetGenericMethodDefinition();
 
     static MethodInfo miOfTypeQ = ReflectionTools.GetMethodInfo(() => Queryable.OfType<int>((IQueryable<string>)null!)).GetGenericMethodDefinition();
-    static MethodInfo miOfTypeE = ReflectionTools.GetMethodInfo(() => Enumerable.OfType<int>((IEnumerable<string>)null!)).GetGenericMethodDefinition();
+    static MethodInfo miOfTypeE = ReflectionTools.GetMethodInfo(() => Enumerable.OfType<string>((IEnumerable<string>)null!)).GetGenericMethodDefinition();
 
     internal static MethodInfo miToString = ReflectionTools.GetMethodInfo(() => ((object)null!).ToString());
     static MethodInfo miStringConcat = ReflectionTools.GetMethodInfo(() => string.Concat("", ""));

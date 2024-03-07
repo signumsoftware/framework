@@ -12,13 +12,11 @@ public class UniqueKeyException : ApplicationException
     public Table? Table { get; private set; }
 
     public string? IndexName { get; private set; }
-    public UniqueTableIndex? Index { get; private set; }
+    public TableIndex? Index { get; private set; }
     public List<PropertyInfo>? Properties { get; private set; }
 
     public string? Values { get; private set; }
     public object?[]? HumanValues { get; private set; }
-
-    protected UniqueKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
     static Regex[] regexes = new[]
     {
@@ -43,7 +41,7 @@ public class UniqueKeyException : ApplicationException
                 {
                     var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup =>
                     {
-                        var index = tup.table.GeneratAllIndexes().OfType<UniqueTableIndex>().FirstOrDefault(ix => ix.IndexName == tup.indexName);
+                        var index = tup.table.AllIndexes().FirstOrDefault(ix => ix.Unique == true && ix.IndexName == tup.indexName);
 
                         if (index == null)
                             return null;
@@ -130,8 +128,8 @@ public class UniqueKeyException : ApplicationException
     }
 
     static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
-    static ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?> cachedLookups =
-        new ConcurrentDictionary<(Table table, string indexName), (UniqueTableIndex index, List<PropertyInfo> properties)?>();
+    static ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?> cachedLookups =
+        new ConcurrentDictionary<(Table table, string indexName), (TableIndex index, List<PropertyInfo> properties)?>();
 
     public override string Message
     {
@@ -165,11 +163,9 @@ public class ForeignKeyException : ApplicationException
 
     public bool IsInsert { get; private set; }
 
-    static Regex indexRegex = new Regex(@"['""]FK_(?<parts>.+?)['""]");
+    static Regex indexRegex = new Regex(@"['""»]FK_(?<parts>.+?)['""«]");
 
     static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
-
-    protected ForeignKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
 
     public ForeignKeyException(Exception inner) : base(null, inner)
     {
@@ -255,10 +251,6 @@ public class EntityNotFoundException : Exception
     public Type Type { get; private set; }
     public PrimaryKey[] Ids { get; private set; }
 
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    protected EntityNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
-
     public EntityNotFoundException(Type type, params PrimaryKey[] ids)
         : base(EngineMessage.EntityWithType0AndId1NotFound.NiceToString().FormatWith(type.Name, ids.ToString(", ")))
     {
@@ -271,10 +263,6 @@ public class ConcurrencyException : Exception
 {
     public Type Type { get; private set; }
     public PrimaryKey[] Ids { get; private set; }
-
-#pragma warning disable CS8618 // Non-nullable field is uninitialized.
-    protected ConcurrencyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
-#pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
     public ConcurrencyException(Type type, params PrimaryKey[] ids)
         : base(EngineMessage.ConcurrencyErrorOnDatabaseTable0Id1.NiceToString().FormatWith(type.NiceName(), ids.ToString(", ")))

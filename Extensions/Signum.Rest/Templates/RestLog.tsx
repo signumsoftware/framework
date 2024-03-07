@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Rest'
-import { TypeContext, ValueLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
+import { TypeContext, AutoLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
 import { API } from '../RestClient'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument';
@@ -32,41 +32,41 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }) {
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(f => f.startDate)} unit={DateTime.fromISO(ctx.value.startDate).toRelative() ?? undefined} />
-      <ValueLine ctx={ctx.subCtx(f => f.endDate)} />
+      <AutoLine ctx={ctx.subCtx(f => f.startDate)} unit={DateTime.fromISO(ctx.value.startDate).toRelative() ?? undefined} />
+      <AutoLine ctx={ctx.subCtx(f => f.endDate)} />
       <EntityLine ctx={ctx.subCtx(f => f.user)} />
-      <ValueLine ctx={ctx.subCtx(f => f.url)} unit={ctx.value.httpMethod!} />
+      <AutoLine ctx={ctx.subCtx(f => f.url)} unit={ctx.value.httpMethod!} />
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.controller)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.controller)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.action)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.action)} />
         </div>
       </div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.machineName)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.machineName)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.applicationName)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.applicationName)} />
         </div>
       </div>
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.userHostAddress)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.userHostAddress)} />
         </div>
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.userHostName)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.userHostName)} />
         </div>
       </div>
 
-      <ValueLine ctx={ctx.subCtx(f => f.referrer)} />
+      <AutoLine ctx={ctx.subCtx(f => f.referrer)} />
 
       <EntityLine ctx={ctx.subCtx(f => f.exception)} />
 
-      <ValueLine ctx={ctx.subCtx(f => f.replayDate)} />
-      <ValueLine ctx={ctx.subCtx(f => f.changedPercentage)} />
+      <AutoLine ctx={ctx.subCtx(f => f.replayDate)} />
+      <AutoLine ctx={ctx.subCtx(f => f.changedPercentage)} />
 
       <EntityTable ctx={ctx.subCtx(f => f.queryString)} avoidFieldSet />
       {
@@ -81,13 +81,13 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }) {
         </div>
       }
 
-      {renderCode(ctx.subCtx(f => f.requestBody))}
+      {renderCode(ctx.subCtx(f => f.requestBody.text))}
 
       <fieldset>
         <legend>{ctx.subCtx(f => f.responseBody).niceName()}</legend>
         <Tabs defaultActiveKey="prev" id="restLogs">
-          <Tab title="prev" eventKey="prev" className="linkTab"><FormatJson code={ctx.value.responseBody} /></Tab>
-          {replayResult && <Tab title="diff" eventKey="diff" className="linkTab">{<DiffDocument first={ctx.value.responseBody ?? ""} second={replayResult} />}</Tab>}
+          <Tab title="prev" eventKey="prev" className="linkTab"><FormatJson code={ctx.value.responseBody.text} /></Tab>
+          {replayResult && <Tab title="diff" eventKey="diff" className="linkTab">{<DiffDocument first={ctx.value.responseBody.text ?? ""} second={replayResult} />}</Tab>}
           {replayResult && <Tab title="curr" eventKey="curr" className="linkTab"><FormatJson code={replayResult} /></Tab>}
         </Tabs>
       </fieldset>

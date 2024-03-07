@@ -57,7 +57,7 @@ export function VersionInfo(p: { extraInformation?: string }) {
   );
 }
 
-function VersionInfoTooltip(p: { extraInformation?: string}) {
+export function VersionInfoTooltip(p: { extraInformation?: string}) {
 
   var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
 

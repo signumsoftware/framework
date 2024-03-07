@@ -18,7 +18,6 @@ import { EntityControlMessage } from '@framework/Signum.Entities';
 import { tryGetTypeInfos } from '@framework/Reflection';
 import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
-import { isPermissionAuthorized } from '../Signum.Authorization/AuthClient';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineCompareModal, TimeMachineModal } from './TimeMachinePage';
 import { QueryString } from '@framework/QueryString';
@@ -26,62 +25,25 @@ import * as Widgets from '@framework/Frames/Widgets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { getTimeMachineIcon, TimeMachineColors } from '@framework/Lines/TimeMachineIcon';
 import { TimeMachineMessage, TimeMachinePermission } from './Signum.TimeMachine';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
 
-  if (isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-    QuickLinks.registerGlobalQuickLink(entityType => !getTypeInfo(entityType).isSystemVersioned ? undefined :
-      new QuickLinks.QuickLinkLink("TimeMachine",  () => OperationLogEntity.nicePluralName(), ctx => timeMachineRoute(ctx.lite),
-        {
+  registerChangeLogModule("Signum.TimeMachine", () => import("./Changelog"));
+
+  if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
+    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
+      [
+        new QuickLinks.QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
           isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
           icon: "clock-rotate-left",
           iconColor: "blue",
           color: "success",
-        }
-      ));
+        })
+      ]));
 
-/*  QuickLinks.registerGlobalQuickLink(entityType => {
-    if (!getTypeInfo(entityType).isSystemVersioned && isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-      return undefined;
-    return {
-      key: "CompareTimeMachine",
-      generator:
-      {
-        factory: ctx => {
 
-          if (!(ctx.contextualContext?.container instanceof SearchControlLoaded))
-            return undefined;
-
-          var sc = ctx.contextualContext?.container;
-          if (sc.props.findOptions.systemTime == null ||
-            sc.state.selectedRows == null ||
-            sc.state.selectedRows.length <= 1 ||
-            sc.state.selectedRows.some(a => a.entity == null) ||
-            sc.state.selectedRows.distinctBy(a => a.entity!.id!.toString()).length > 1)
-            return undefined;
-
-          var systemValidFromKey = QueryTokenString.entity().systemValidFrom().toString();
-
-          var index = sc.props.findOptions.columnOptions.findIndex(co => co.token?.fullKey == systemValidFromKey);
-
-          if (index == -1)
-            return undefined;
-
-          var lite = sc.state.selectedRows[0].entity!;
-          var versions = sc.state.selectedRows.map(r => r.columns[index] as string);
-
-          return new QuickLinks.QuickLinkAction(e => TimeMachineCompareModal.show(lite, versions))
-        },
-        options: {
-          allowsMultiple: true,
-          icon: "not-equal",
-          iconColor: "blue",
-        }
-      }
-    }
-  });*/
-
-    SearchControlOptions.showSystemTimeButton = sc => isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
+    SearchControlOptions.showSystemTimeButton = sc => AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine);
 
     options.routes.push({ path: "/timeMachine/:type/:id", element: <ImportComponent onImport={() => import("./TimeMachinePage")} /> });
 
@@ -130,11 +92,11 @@ export function start(options: { routes: RouteObject[] }) {
           );
         }
 
-        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: true }))
+        if (!row.entity || !Navigator.isViewable(row.entity.EntityType, { isSearch: "main" }))
           return icon;
 
         return (
-          <TimeMachineLink lite={row.entity} inSearch={true} style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
+          <TimeMachineLink lite={row.entity} inSearch="main" style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
             {EntityControlMessage.View.niceToString()}
             {icon}
           </TimeMachineLink >
@@ -168,7 +130,7 @@ export interface EntityDump {
 
 export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
-  inSearch?: boolean;
+  inSearch?: "main" | "related";
 }
 
 export default function TimeMachineLink(p: TimeMachineLinkProps) {

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity, WorkflowMessage, ConnectionType } from '../Signum.Workflow'
-import { ValueLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<WorkflowConnectionModel> }) {
@@ -19,10 +19,10 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
 
       <div className="row">
         <div className="col-sm-6">
-      <ValueLine ctx={ctx.subCtx(e => e.name)} />
+      <AutoLine ctx={ctx.subCtx(e => e.name)} />
         </div>
         <div className="col-sm-6">
-      <ValueLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
+      <AutoLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
         </div>
       </div>
 
@@ -48,7 +48,7 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
                 ]
               }} /> : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.condition), ctx.niceName(e => e.mainEntityType))}</div>
             : undefined}
-          {ctx.value.needOrder && <ValueLine ctx={ctx.subCtx(e => e.order)} helpText={WorkflowMessage.EvaluationOrderOfTheConnectionForIfElse.niceToString()} />}
+          {ctx.value.needOrder && <AutoLine ctx={ctx.subCtx(e => e.order)} helpText={WorkflowMessage.EvaluationOrderOfTheConnectionForIfElse.niceToString()} />}
         </div>
         <div className="col-sm-6">
           {ctx.value.mainEntityType ?

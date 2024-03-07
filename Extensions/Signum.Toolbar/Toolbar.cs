@@ -17,7 +17,7 @@ public class ToolbarEntity : Entity, IUserAssetEntity, IToolbarEntity
     [ImplementedBy(typeof(UserEntity), typeof(RoleEntity))]
     public Lite<IEntity>? Owner { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Max = 100)]
     public string Name { get; set; }
 
     public ToolbarLocation Location { get; set; }
@@ -142,6 +142,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
             { ToolbarElementType.Divider,   false,          false,     false,          false  },
             { ToolbarElementType.Header,    null,           null,       null,           null  },
             { ToolbarElementType.Item,      null,           null,      null,           null },
+            { ToolbarElementType.ExtraIcon, null,           null,      null,           null },
         };
 
     protected override string? PropertyValidation(PropertyInfo pi)
@@ -156,7 +157,7 @@ public class ToolbarElementEmbedded : EmbeddedEntity
 
             if(pi.Name == nameof(Url))
             { 
-                if (string.IsNullOrEmpty(Url) && Content == null && Type == ToolbarElementType.Item)
+                if (string.IsNullOrEmpty(Url) && Content == null && Type is ToolbarElementType.Item or ToolbarElementType.ExtraIcon)
                     return ValidationMessage._0IsMandatoryWhen1IsNotSet.NiceToString(pi.NiceName(), ReflectionTools.GetPropertyInfo(() => Content).NiceName());
             }
         }
@@ -172,7 +173,7 @@ public enum ShowCount
 {
     [Description("More than 0")]
     MoreThan0 = 1,
-    Always
+    Always,
 }
 
 public enum ToolbarElementType
@@ -180,6 +181,7 @@ public enum ToolbarElementType
     Header = 2,
     Divider,
     Item,
+    ExtraIcon
 }
 
 [EntityKind(EntityKind.Shared, EntityData.Master)]
@@ -191,7 +193,7 @@ public class ToolbarMenuEntity : Entity, IUserAssetEntity, IToolbarEntity
     [UniqueIndex]
     public Guid Guid { get; set; } = Guid.NewGuid();
 
-    [StringLengthValidator(Min = 3, Max = 100)]
+    [StringLengthValidator(Max = 100)]
     public string Name { get; set; }
 
     [PreserveOrder]
@@ -232,4 +234,6 @@ public enum ToolbarMessage
     RecursionDetected,
     [Description(@"{0} cycles have been found in the Toolbar due to the relationships:")]
     _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships,
+    FirstElementCanNotBeExtraIcon,
+    ExtraIconCanNotComeAfterDivider
 }

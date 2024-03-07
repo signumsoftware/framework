@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
-import { EntityLine, ValueLine } from '@framework/Lines'
+import { EntityLine, AutoLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
 import { QueryRulePack, QueryAllowedRule, QueryAllowed, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -50,7 +50,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
     <div>
       <div className="form-compact">
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
-        <ValueLine ctx={ctx.subCtx(f => f.strategy)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
       </div>
       <table className="table table-sm sf-auth-rules">

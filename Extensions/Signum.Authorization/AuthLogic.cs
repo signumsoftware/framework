@@ -3,6 +3,7 @@ using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
+using System.Collections.Frozen;
 using System.IO;
 using System.Xml.Linq;
 
@@ -45,8 +46,8 @@ public static class AuthLogic
 
     static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesGraph = null!;
     static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
-    static ResetLazy<Dictionary<string, Lite<RoleEntity>>> rolesByName = null!;
-    public static ResetLazy<Dictionary<Lite<RoleEntity>, RoleEntity>> RolesByLite = null!;
+    static ResetLazy<FrozenDictionary<string, Lite<RoleEntity>>> rolesByName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleEntity>> RolesByLite = null!;
 
 
 
@@ -56,7 +57,7 @@ public static class AuthLogic
         public MergeStrategy MergeStrategy;
     }
 
-    static ResetLazy<Dictionary<Lite<RoleEntity>, RoleData>> mergeStrategies = null!;
+    static ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleData>> mergeStrategies = null!;
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -108,8 +109,8 @@ public static class AuthLogic
 
 
 
-            RolesByLite = sb.GlobalLazy(() => Database.Query<RoleEntity>().ToDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
-            rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
+            RolesByLite = sb.GlobalLazy(() => Database.Query<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+            rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToFrozenDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
             rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
             rolesInverse = sb.GlobalLazy(() => rolesGraph.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));
             mergeStrategies = sb.GlobalLazy(() =>
@@ -132,7 +133,7 @@ public static class AuthLogic
                     });
                 }
 
-                return result;
+                return result.ToFrozenDictionary();
             }, new InvalidateWith(typeof(RoleEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().Saving += Schema_Saving;
@@ -259,7 +260,7 @@ public static class AuthLogic
         }
     }
 
-    static DirectedGraph<Lite<RoleEntity>> CacheRoles(Dictionary<Lite<RoleEntity>, RoleEntity> rolesLite)
+    static DirectedGraph<Lite<RoleEntity>> CacheRoles(FrozenDictionary<Lite<RoleEntity>, RoleEntity> rolesLite)
     {
         var graph = DirectedGraph<Lite<RoleEntity>>.Generate(rolesLite.Keys, r => rolesLite.GetOrThrow(r).InheritsFrom);
 
@@ -294,7 +295,7 @@ public static class AuthLogic
         var result = RetrieveUserByUsername(username);
 
         if (result != null && result.State == UserState.Deactivated)
-            throw new ApplicationException(LoginAuthMessage.User0IsDisabled.NiceToString().FormatWith(result.UserName));
+            throw new ApplicationException(LoginAuthMessage.User0IsDeactivated.NiceToString().FormatWith(result.UserName));
 
         return result;
     }
@@ -416,7 +417,7 @@ public static class AuthLogic
 
                         user.Execute(UserOperation.Deactivate);
 
-                        throw new UserLockedException(LoginAuthMessage.User0IsDisabled.NiceToString()
+                        throw new UserLockedException(LoginAuthMessage.User0IsDeactivated.NiceToString()
                             .FormatWith(user.UserName));
                     }
 
@@ -969,9 +970,5 @@ public class InvalidRoleGraphException : Exception
     public InvalidRoleGraphException() { }
     public InvalidRoleGraphException(string message) : base(message) { }
     public InvalidRoleGraphException(string message, Exception inner) : base(message, inner) { }
-    protected InvalidRoleGraphException(
-      System.Runtime.Serialization.SerializationInfo info,
-      System.Runtime.Serialization.StreamingContext context)
-        : base(info, context) { }
 }
 

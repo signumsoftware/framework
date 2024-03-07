@@ -10,7 +10,7 @@ export interface WidgetContext<T extends ModifiableEntity> {
   frame: EntityFrame;
 }
 
-export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement<any> | undefined> = [];
+export const onWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => React.ReactElement | undefined> = [];
 export const onEmbeddedWidgets: Array<(ctx: WidgetContext<ModifiableEntity>) => EmbeddedWidget[] | undefined> = [];
 
 
@@ -28,14 +28,14 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>, stickyHeader?
   return (
     <ErrorBoundary>
       <div className={classes("sf-widgets", stickyHeader && "sf-sticky-header")}>
-        {widgets.map((w, i) => React.cloneElement((w as React.ReactElement<any>), { key: i }))}
+        {widgets.map((w, i) => React.cloneElement((w as React.ReactElement), { key: i }))}
       </div>
     </ErrorBoundary>
   );
 }
 
 export interface EmbeddedWidget {
-  embeddedWidget: React.ReactElement<any>;
+  embeddedWidget: React.ReactElement;
   position: EmbeddedWidgetPosition;
   title: string;
   eventKey: string;

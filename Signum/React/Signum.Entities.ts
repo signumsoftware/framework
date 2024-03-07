@@ -81,6 +81,7 @@ export interface Lite<T extends Entity> {
   EntityType: string;
   id?: number | string;
   model?: unknown;
+  partitionId?: number;
 
   ModelType?: string;
   entity?: T;
@@ -412,11 +413,14 @@ export module EntityControlMessage {
   export const ToggleSideBar = new MessageKey("EntityControlMessage", "ToggleSideBar");
   export const Maximize = new MessageKey("EntityControlMessage", "Maximize");
   export const Minimize = new MessageKey("EntityControlMessage", "Minimize");
+  export const _0Characters = new MessageKey("EntityControlMessage", "_0Characters");
+  export const _0CharactersRemaining = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
 }
 
 export module FrameMessage {
   export const New0_G = new MessageKey("FrameMessage", "New0_G");
   export const Copied = new MessageKey("FrameMessage", "Copied");
+  export const CopyToClipboard = new MessageKey("FrameMessage", "CopyToClipboard");
   export const Fullscreen = new MessageKey("FrameMessage", "Fullscreen");
   export const ThereAreErrors = new MessageKey("FrameMessage", "ThereAreErrors");
   export const Main = new MessageKey("FrameMessage", "Main");
@@ -506,6 +510,7 @@ export module OperationMessage {
   export const TheOperation0DidNotReturnAnEntity = new MessageKey("OperationMessage", "TheOperation0DidNotReturnAnEntity");
   export const Logs = new MessageKey("OperationMessage", "Logs");
   export const PreviousOperationLog = new MessageKey("OperationMessage", "PreviousOperationLog");
+  export const LastOperationLog = new MessageKey("OperationMessage", "LastOperationLog");
   export const _0AndClose = new MessageKey("OperationMessage", "_0AndClose");
   export const _0AndNew = new MessageKey("OperationMessage", "_0AndNew");
   export const BulkModifications = new MessageKey("OperationMessage", "BulkModifications");
@@ -520,6 +525,7 @@ export module OperationMessage {
   export const ClosingThisModalOrBrowserTabWillCancelTheOperation = new MessageKey("OperationMessage", "ClosingThisModalOrBrowserTabWillCancelTheOperation");
   export const CancelOperation = new MessageKey("OperationMessage", "CancelOperation");
   export const AreYouSureYouWantToCancelTheOperation = new MessageKey("OperationMessage", "AreYouSureYouWantToCancelTheOperation");
+  export const Operation = new MessageKey("OperationMessage", "Operation");
 }
 
 export module PaginationMessage {
@@ -563,7 +569,10 @@ export module SearchMessage {
   export const CollectionsCanNotBeAddedAsColumns = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
   export const InvalidColumnExpression = new MessageKey("SearchMessage", "InvalidColumnExpression");
   export const AddFilter = new MessageKey("SearchMessage", "AddFilter");
-  export const AddGroup = new MessageKey("SearchMessage", "AddGroup");
+  export const AddOrGroup = new MessageKey("SearchMessage", "AddOrGroup");
+  export const AddAndGroup = new MessageKey("SearchMessage", "AddAndGroup");
+  export const OrGroup = new MessageKey("SearchMessage", "OrGroup");
+  export const AndGroup = new MessageKey("SearchMessage", "AndGroup");
   export const GroupPrefix = new MessageKey("SearchMessage", "GroupPrefix");
   export const AddValue = new MessageKey("SearchMessage", "AddValue");
   export const DeleteFilter = new MessageKey("SearchMessage", "DeleteFilter");
@@ -578,7 +587,7 @@ export module SearchMessage {
   export const NoColumnSelected = new MessageKey("SearchMessage", "NoColumnSelected");
   export const NoFiltersSpecified = new MessageKey("SearchMessage", "NoFiltersSpecified");
   export const Of = new MessageKey("SearchMessage", "Of");
-  export const Operation = new MessageKey("SearchMessage", "Operation");
+  export const Operator = new MessageKey("SearchMessage", "Operator");
   export const Query0IsNotAllowed = new MessageKey("SearchMessage", "Query0IsNotAllowed");
   export const Query0NotAllowed = new MessageKey("SearchMessage", "Query0NotAllowed");
   export const Query0NotRegistered = new MessageKey("SearchMessage", "Query0NotRegistered");
@@ -599,7 +608,6 @@ export module SearchMessage {
   export const NoResultsInThisPage = new MessageKey("SearchMessage", "NoResultsInThisPage");
   export const NoResultsFoundInPage01 = new MessageKey("SearchMessage", "NoResultsFoundInPage01");
   export const GoBackToPageOne = new MessageKey("SearchMessage", "GoBackToPageOne");
-  export const Explore = new MessageKey("SearchMessage", "Explore");
   export const PinnedFilter = new MessageKey("SearchMessage", "PinnedFilter");
   export const Label = new MessageKey("SearchMessage", "Label");
   export const Column = new MessageKey("SearchMessage", "Column");
@@ -635,9 +643,17 @@ export module SearchMessage {
   export const Copy = new MessageKey("SearchMessage", "Copy");
   export const MoreThanOne0Selected = new MessageKey("SearchMessage", "MoreThanOne0Selected");
   export const CombineRowsWith = new MessageKey("SearchMessage", "CombineRowsWith");
+  export const Equal0 = new MessageKey("SearchMessage", "Equal0");
   export const SwitchViewMode = new MessageKey("SearchMessage", "SwitchViewMode");
   export const SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup");
   export const SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup = new MessageKey("SearchMessage", "SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup");
+  export const NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst = new MessageKey("SearchMessage", "NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst");
+  export const NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First = new MessageKey("SearchMessage", "NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First");
+  export const SimpleFilters = new MessageKey("SearchMessage", "SimpleFilters");
+  export const AdvancedFilters = new MessageKey("SearchMessage", "AdvancedFilters");
+  export const FilterDesigner = new MessageKey("SearchMessage", "FilterDesigner");
+  export const TimeMachine = new MessageKey("SearchMessage", "TimeMachine");
+  export const Options = new MessageKey("SearchMessage", "Options");
 }
 
 export module SelectorMessage {

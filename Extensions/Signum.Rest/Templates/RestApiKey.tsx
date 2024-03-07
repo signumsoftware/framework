@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RestApiKeyEntity, RestApiKeyMessage } from '../Signum.Rest'
-import { TypeContext, ValueLine, EntityLine } from "@framework/Lines";
+import { TypeContext, AutoLine, EntityLine, TextBoxLine } from "@framework/Lines";
 import { classes } from "@framework/Globals";
 import { API } from "../RestClient";
 import { useForceUpdate } from '@framework/Hooks';
@@ -24,7 +24,7 @@ export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEnt
   return (
     <div>
       <EntityLine ctx={ctx.subCtx(e => e.user)} />
-      <ValueLine ctx={ctx.subCtx(e => e.apiKey)}
+      <TextBoxLine ctx={ctx.subCtx(e => e.apiKey)}
         extraButtons={vl =>
           <a href="#" className={classes("sf-line-button", "sf-view", "btn input-group-text")}            
             onClick={generateApiKey}>

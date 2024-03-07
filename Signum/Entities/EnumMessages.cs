@@ -37,6 +37,7 @@ public enum OperationMessage
     TheOperation0DidNotReturnAnEntity,
     Logs,
     PreviousOperationLog,
+    LastOperationLog,
     [Description("{0} & Close")]
     _0AndClose,
     [Description("{0} & New")]
@@ -70,6 +71,8 @@ public enum OperationMessage
 
     [Description("Are you sure you want to cancel the operation?")]
     AreYouSureYouWantToCancelTheOperation,
+
+    Operation
 }
 
 public enum SynchronizerMessage
@@ -105,6 +108,7 @@ public enum FrameMessage
     [Description("New {0}")]
     New0_G,
     Copied,
+    CopyToClipboard,
     Fullscreen,
     ThereAreErrors,
     Main,
@@ -148,6 +152,10 @@ public enum EntityControlMessage
     ToggleSideBar,
     Maximize,
     Minimize,
+    [Description("{0} character[s]")]
+    _0Characters,
+    [Description("{0} character[s] remaining")]
+    _0CharactersRemaining
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
@@ -169,8 +177,17 @@ public enum SearchMessage
     InvalidColumnExpression,
     [Description("Add filter")]
     AddFilter,
-    [Description("Add group")]
-    AddGroup,
+
+
+    [Description("Add OR group")]
+    AddOrGroup,
+    [Description("Add AND group")]
+    AddAndGroup,
+
+    [Description("OR group")]
+    OrGroup,
+    [Description("AND group")]
+    AndGroup,
 
     [Description("Group Prefix")]
     GroupPrefix,
@@ -194,7 +211,7 @@ public enum SearchMessage
     NoFiltersSpecified,
     [Description("of")]
     Of,
-    Operation,
+    Operator,
     [Description("Query {0} is not allowed")]
     Query0IsNotAllowed,
     [Description("Query {0} is not allowed")]
@@ -226,7 +243,6 @@ public enum SearchMessage
     NoResultsFoundInPage01,
     [Description("go back to page one")]
     GoBackToPageOne,
-    Explore,
     PinnedFilter,
     Label,
     Column,
@@ -262,7 +278,7 @@ public enum SearchMessage
     DoYouWantToSelectTheNew01_G,
     [Description("Edit pinned filters")]
     EditPinnedFilters,
-    
+
     [Description("Pin filter")]
     PinFilter,
     [Description("Unpin filter")]
@@ -281,7 +297,7 @@ public enum SearchMessage
 
     HiddenColumn,
     ShowHiddenColumns,
-    HideHiddenColumns, 
+    HideHiddenColumns,
 
     GroupKey,
     DerivedGroupKey,
@@ -292,6 +308,9 @@ public enum SearchMessage
     MoreThanOne0Selected,
     CombineRowsWith,
 
+    [Description("Equal {0}")]
+    Equal0,
+
     SwitchViewMode,
 
     [Description("Splits the string value by space and searches each part independently in an AND group")]
@@ -299,6 +318,18 @@ public enum SearchMessage
 
     [Description("Splits the values and searches each one independently in an AND group")]
     SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup,
+
+    [Description("No results found because the rule {0} does not allowed to explore {1} without filtering first")]
+    NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst,
+
+    [Description("No results found because you are not allowed to explore {0} without filtering by {1} first")]
+    NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First,
+
+    SimpleFilters,
+    AdvancedFilters,
+    FilterDesigner,
+    TimeMachine,
+    Options
 }
 
 public enum SelectorMessage

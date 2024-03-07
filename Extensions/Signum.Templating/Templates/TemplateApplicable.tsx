@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { PropertyRoute } from '@framework/Reflection'
-import { TypeContext } from '@framework/Lines'
+import { TextAreaLine, TypeContext } from '@framework/Lines'
 import * as Finder from '@framework/Finder'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { TemplateApplicableEval } from "../Signum.Templating";
 import TypeHelpButtonBarComponent from "../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent";
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
@@ -17,7 +17,7 @@ interface TemplateApplicableProps {
 
 export default function TemplateApplicable(p: TemplateApplicableProps) {
 
-  const typeName = useAPI(() => Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] ?? "Entity"), [p.query.key]);
+  const typeName = useAPI(() => p.query && Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] ?? "Entity"), [p.query.key]);
 
   const forceUpdate = useForceUpdate();
 
@@ -33,13 +33,12 @@ export default function TemplateApplicable(p: TemplateApplicableProps) {
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "CSharp"),
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -56,7 +55,7 @@ export default function TemplateApplicable(p: TemplateApplicableProps) {
           <div className="col-sm-7">
             <div className="code-container">
               <TypeHelpButtonBarComponent typeName={typeName} mode="CSharp" ctx={p.ctx} />
-              <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + typeName + "Entity e)\n{"}</pre>
+              <pre style={{ border: "0px", margin: "0px" }}>{"bool IsApplicable(" + (typeName ? (typeName + "Entity") : "Entity?") + " e)\n{"}</pre>
               <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />
               <pre style={{ border: "0px", margin: "0px" }}>{"}"}</pre>
             </div>

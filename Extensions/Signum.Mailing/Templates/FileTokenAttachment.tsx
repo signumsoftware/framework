@@ -1,10 +1,11 @@
 import * as React from 'react'
-import { ValueLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Files'
 import { EmailTemplateEntity, FileTokenAttachmentEntity } from '../Signum.Mailing.Templates';
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
+import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation';
 
 export default function FileTokenAttachment(p: { ctx: TypeContext<FileTokenAttachmentEntity> }) {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
@@ -13,16 +14,19 @@ export default function FileTokenAttachment(p: { ctx: TypeContext<FileTokenAttac
   return (
     <div className="row">
       <div className="col-sm-6">
-        <ValueLine ctx={sc.subCtx(c => c.type)} />
-        <ValueLine ctx={sc.subCtx(c => c.contentId)} />
+        <AutoLine ctx={sc.subCtx(c => c.type)} />
+        <AutoLine ctx={sc.subCtx(c => c.contentId)} />
       </div>
       <div className="col-sm-6">
-        <QueryTokenEmbeddedBuilder
-          ctx={sc.subCtx(a => a.fileToken)}
-          queryKey={et.query.key}
-          subTokenOptions={SubTokensOptions.CanElement}
-          helpText="Expression pointing to an File" />
-        <ValueLine ctx={sc.subCtx(c => c.fileName)} />
+        {!et.query ?
+          <p className="text-danger">{ValidationMessage._0IsNotSet.niceToString(EmailTemplateEntity.nicePropertyName(a => a.query))}</p> :
+          <QueryTokenEmbeddedBuilder
+            ctx={sc.subCtx(a => a.fileToken)}
+            queryKey={et.query.key}
+            subTokenOptions={SubTokensOptions.CanElement}
+            helpText="Expression pointing to an File" />
+        }
+        <AutoLine ctx={sc.subCtx(c => c.fileName)} />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityRepeater, EntityDetail } from '@framework/Lines'
+import { AutoLine, EntityRepeater, EntityDetail, PasswordLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
 export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }) {
@@ -7,23 +7,22 @@ export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceE
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(s => s.deliveryFormat)} />
-      <ValueLine ctx={sc.subCtx(s => s.deliveryMethod)} />
-      <ValueLine ctx={sc.subCtx(s => s.pickupDirectoryLocation)} />
-      <EntityDetail ctx={sc.subCtx(s => s.network)} getComponent={(net: TypeContext<SmtpNetworkDeliveryEmbedded>) =>
+      <AutoLine ctx={sc.subCtx(s => s.deliveryFormat)} />
+      <AutoLine ctx={sc.subCtx(s => s.deliveryMethod)} />
+      <AutoLine ctx={sc.subCtx(s => s.pickupDirectoryLocation)} />
+      <EntityDetail ctx={sc.subCtx(s => s.network)} getComponent={net =>
         <div>
-          <ValueLine ctx={net.subCtx(s => s.port)} />
-          <ValueLine ctx={net.subCtx(s => s.host)} />
-          <ValueLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
-          <ValueLine ctx={net.subCtx(s => s.username)} />
-          <ValueLine ctx={net.subCtx(s => s.password)} valueLineType="Password" />
-          <ValueLine ctx={net.subCtx(s => s.newPassword)} valueLineType="Password" />
-
-          <ValueLine ctx={net.subCtx(s => s.enableSSL)} />
-          <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={(cert: TypeContext<ClientCertificationFileEmbedded>) =>
+          <AutoLine ctx={net.subCtx(s => s.port)} />
+          <AutoLine ctx={net.subCtx(s => s.host)} />
+          <AutoLine ctx={net.subCtx(s => s.useDefaultCredentials)} />
+          <AutoLine ctx={net.subCtx(s => s.username)} />
+          <PasswordLine ctx={net.subCtx(s => s.password)} />
+		  <PasswordLine ctx={net.subCtx(s => s.newPassword)} />
+          <AutoLine ctx={net.subCtx(s => s.enableSSL)} />
+          <EntityRepeater ctx={net.subCtx(s => s.clientCertificationFiles)} getComponent={cert =>
             <div>
-              <ValueLine ctx={cert.subCtx(s => s.certFileType)} />
-              <ValueLine ctx={cert.subCtx(s => s.fullFilePath)} />
+              <AutoLine ctx={cert.subCtx(s => s.certFileType)} />
+              <AutoLine ctx={cert.subCtx(s => s.fullFilePath)} />
             </div>
           } />
         </div>

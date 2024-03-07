@@ -5,7 +5,7 @@ import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
 import { useForceUpdate } from '@framework/Hooks'
 
 export interface WorkflowEventTaskConditionComponentProps {
-  ctx: TypeContext<WorkflowEventTaskConditionEval | undefined | null>;
+  ctx: TypeContext<WorkflowEventTaskConditionEval | null>;
 }
 
 export default function WorkflowEventTaskConditionComponent(p : WorkflowEventTaskConditionComponentProps){
@@ -20,7 +20,7 @@ export default function WorkflowEventTaskConditionComponent(p : WorkflowEventTas
   var ctx = p.ctx;
 
   return (
-    <EntityDetail ctx={ctx} onChange={() => forceUpdate()} remove={false} getComponent={(ctx: TypeContext<WorkflowEventTaskConditionEval>) =>
+    <EntityDetail ctx={ctx} onChange={() => forceUpdate()} remove={false} getComponent={ctx =>
       <div className="code-container">
         <pre style={{ border: "0px", margin: "0px" }}>{"public bool CustomCondition() \n{"}</pre>
         <CSharpCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />

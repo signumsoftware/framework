@@ -1,9 +1,9 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, TypeContext } from '@framework/Lines'
+import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowScriptEntity } from '../Signum.Workflow'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
 
 interface WorkflowScriptComponentProps {
@@ -34,52 +34,49 @@ export default function WorkflowScriptComponent(p : WorkflowScriptComponentProps
 
 
   function handleRestClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// REST
 var response = HttpClient.Post<MyResponse>("Your URL", new { paramName = e.[Property Name], ... });
 e.[Property Name] = response.[Property Name];
 
 class MyResponse {}`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "REST Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
 
   function handleSoapClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// SOAP
 var lib = Assembly.Load("[Assembly full path name]").GetType("[Type Name]").GetMethod("[Method Name]").Invoke(e.[Property Name]);
 e.[Property Name] = lib;`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "SOAP Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
 
   function handleCtxClick() {
     const hint = "WorkflowScriptContext Members";
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `// ${hint}
 CaseActivityEntity CaseActivity;
 int RetryCount;`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: hint,
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "115px" } },
     });
   }
 
   function handleTryCatchClick() {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `try
 {
@@ -89,10 +86,9 @@ catch (Exception e)
 {
     throw e;
 }`,
-      valueLineType: "TextArea",
+      customComponent: props => <TextAreaLine {...props} />,
       title: "Try/Catch block",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
       valueHtmlAttributes: { style: { height: "180px" } },
     });
   }
@@ -100,7 +96,7 @@ catch (Exception e)
   const ctx = p.ctx;
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(ws => ws.name)} />
+      <AutoLine ctx={ctx.subCtx(ws => ws.name)} />
       <EntityLine ctx={ctx.subCtx(ws => ws.mainEntityType)} onChange={handleMainEntityTypeChange} />
 
       {ctx.value.mainEntityType &&

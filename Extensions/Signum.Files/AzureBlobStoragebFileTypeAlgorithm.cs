@@ -23,12 +23,23 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     //ExistBlob is too slow, consider using CalculateSuffix with a GUID!
     public Func<string, int, string>? RenameAlgorithm { get; set; } = null; // FileTypeAlgorithm.DefaultRenameAlgorithm;
 
-    public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => { return BlobAction.Download; };
+    public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => BlobAction.Download;
 
     public AzureBlobStoragebFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
     {
         this.GetClient = getClient;
 
+    }
+
+    public override bool OnlyImages
+    {
+        get { return base.OnlyImages; }
+        set
+        {
+            base.OnlyImages = value;
+            if (value)
+                GetBlobAction = fp => BlobAction.Open;
+        }
     }
 
     public PrefixPair GetPrefixPair(IFilePath efp)
@@ -149,6 +160,8 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
+    string? alreadyCreated; 
+
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateSuffixWithRenames"))
@@ -161,22 +174,19 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
             fp.SetPrefixPair(GetPrefixPair(fp));
 
             var client = GetClient(fp);
-            if (CreateBlobContainerIfNotExists)
+            if (CreateBlobContainerIfNotExists && alreadyCreated != client.Name)
             {
                 using (HeavyProfiler.LogNoStackTrace("AzureBlobStorage CreateIfNotExists"))
                 {
                     try
                     {
                         client.CreateIfNotExists();
+                        alreadyCreated = client.Name;
                     }
                     catch (Azure.RequestFailedException ex) when (ex.ErrorCode == "ContainerAlreadyExists")
                     {
                         // The error message "The specified container already exists" suggests that there is a concurrency issue at play
                         // Ignore it and continue, since the container exists which is what we wanted anyway
-                    }
-                    finally
-                    {
-                        CreateBlobContainerIfNotExists = false;
                     }
                 }
             }
@@ -197,7 +207,9 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
-    private static BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
+    public Func<IFilePath, string?>? GetCacheControl = null;
+
+    private BlobHttpHeaders GetBlobHttpHeaders(IFilePath fp, BlobAction action)
     {
         var contentType = action == BlobAction.Download ? "application/octet-stream" :
                 ContentTypesDict.TryGet(Path.GetExtension(fp.FileName).ToLowerInvariant(), "application/octet-stream");
@@ -205,7 +217,8 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         return new BlobHttpHeaders
         {
             ContentType = contentType,
-            ContentDisposition = action == BlobAction.Download ? "attachment" : "inline"
+            ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
         };
     }
 

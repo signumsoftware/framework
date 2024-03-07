@@ -139,7 +139,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
     return (
       <div>
-        <span className="sf-entity-title">{p.title || getToString(pack.activity)}</span>&nbsp;
+        <span className="sf-entity-title">{p.title || Navigator.renderEntity(pack.activity)}</span>&nbsp;
         {renderExpandLink(pack)}
         {
           (subTitle || widgets) &&
@@ -306,7 +306,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
       <div className="case-activity-widgets mt-2 me-2">
         {!pack.activity.case.isNew && <div className="mx-2"> <InlineCaseTags case={toLite(pack.activity.case)} avoidHideIcon={true} /></div>}
-        {!pack.activity.case.isNew && AuthClient.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
+        {!pack.activity.case.isNew && AppContext.isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) && <CaseFlowButton caseActivity={pack.activity} />}
       </div>
       <CaseFromSenderInfo current={pack.activity} />
       <div className="modal-body">
@@ -333,7 +333,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 const CaseFrameModalExt = CaseFrameModal;
 
 export namespace CaseFrameModalManager {
-  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
+  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: { readOnly?: boolean }): Promise<CaseActivityEntity | undefined> {
 
     return openModal<CaseActivityEntity>(<CaseFrameModal
       entityOrPack={entityOrPack}

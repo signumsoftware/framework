@@ -50,7 +50,7 @@ export default function SchedulerPanelPage() {
 
   return (
     <div>
-      <h2 className="display-6"><FontAwesomeIcon icon={["far", "clock"]} /> Scheduler Panel</h2>
+      <h2 className="display-6"><FontAwesomeIcon icon="clock" /> Scheduler Panel</h2>
       <div className="btn-toolbar">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" :  "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
@@ -116,7 +116,7 @@ function InMemoryQueue({ queue, onReload }: { queue: SchedulerItemState[], onRel
           <tbody>
             {queue.map((item, i) =>
               <tr key={i}>
-                <td><EntityLink lite={item.scheduledTask} inSearch={true} onNavigated={onReload} /></td>
+                <td><EntityLink lite={item.scheduledTask} inSearch="main" onNavigated={onReload} /></td>
                 <td>{item.rule} </td>
                 <td>{item.nextDate} ({DateTime.fromISO(item.nextDate).toRelative()})</td>
               </tr>)
@@ -152,7 +152,7 @@ function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunni
           <tbody>
             {runningTasks.map((item, i) =>
               <tr key={i}>
-                <td><EntityLink lite={item.schedulerTaskLog} inSearch={true} onNavigated={onReload} /></td>
+                <td><EntityLink lite={item.schedulerTaskLog} inSearch="main" onNavigated={onReload} /></td>
                 <td>{item.startTime} ({DateTime.fromISO(item.startTime).toRelative()})</td>
                 <td><pre>{item.remarks}</pre></td>
                 <td><button className="btn btn-light btn-xs btn-danger" type="button" onClick={e => handleCancelClick(e, item.schedulerTaskLog)}>Cancel</button></td>

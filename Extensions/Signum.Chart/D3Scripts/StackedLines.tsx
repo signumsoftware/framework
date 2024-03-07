@@ -18,7 +18,7 @@ export default function renderStackedLines({ data, width, height, parameters, lo
     _1: 5,
     title: 15,
     _2: 10,
-    labels: parseInt(parameters["Horizontal Margin"]),
+    labels: parseInt(parameters["HorizontalMargin"]),
     _3: 5,
     ticks: 4,
     content: '*',

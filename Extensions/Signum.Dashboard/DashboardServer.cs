@@ -9,6 +9,7 @@ public static class DashboardServer
     public static void Start(IApplicationBuilder app)
     {
         UserAssetServer.Start(app);
+        UserAssetServer.QueryPermissionSymbols.Add(DashboardPermission.ViewDashboard);
 
         EntityPackTS.AddExtension += ep =>
         {

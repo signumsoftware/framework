@@ -151,7 +151,7 @@ function showOnReadonly(coc: ContextualOperationContext<Entity>) {
   if (coc.entityOperationSettings && coc.entityOperationSettings.showOnReadOnly != undefined)
     return coc.entityOperationSettings.showOnReadOnly;
 
-  return false;
+  return coc.operationInfo.forReadonlyEntity ?? false;
 }
 
 

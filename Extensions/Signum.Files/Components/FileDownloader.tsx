@@ -9,11 +9,13 @@ import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { TypeContext } from '@framework/Lines'
 
 export type DownloadBehaviour = "SaveAs" | "View" | "ViewOrSave" | "None";
 
 export interface FileDownloaderProps {
   entityOrLite: ModifiableEntity & IFile | Lite<IFile & Entity>;
+  containerEntity?: ModifiableEntity;
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
@@ -43,17 +45,19 @@ export function FileDownloader(p: FileDownloaderProps) {
       if (!configuration)
         throw new Error("No configuration registered in FileDownloader.configurations for ");
 
+      const container = p.containerEntity;
+
       if (save) {
         if (entity.binaryFile)
           downloadBase64(e, entity.binaryFile, entity.fileName!);
         else
-          configuration.downloadClick ? configuration.downloadClick(e, entity) : downloadUrl(e, configuration.fileUrl!(entity));
+          configuration.downloadClick ? configuration.downloadClick(e, entity, container) : downloadUrl(e, configuration.fileUrl!(entity, container));
       } else {
         if (entity.binaryFile) {
           viewBase64(e, entity.binaryFile, entity.fileName!); //view without mime type is problematic
         }
         else
-          configuration.viewClick ? configuration.viewClick(e, entity) : viewUrl(e, configuration.fileUrl!(entity));
+          configuration.viewClick ? configuration.viewClick(e, entity, container) : viewUrl(e, configuration.fileUrl!(entity, container));
       }
 
     });
@@ -85,7 +89,7 @@ export function FileDownloader(p: FileDownloaderProps) {
         {getChildren() ??
           <>
           {p.showFileIcon && <FontAwesomeIcon className="me-1"
-            icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
+            icon={info?.icon ?? "file"}
             color={info?.color ?? "grey"} />}
             {toStr}
           </>}
@@ -97,7 +101,7 @@ export function FileDownloader(p: FileDownloaderProps) {
             e.preventDefault();
             handleOnClick(e, true);
           }}>
-          <FontAwesomeIcon className="ms-1 sf-pointer" icon={["fas", "download"]} title={EntityControlMessage.Download.niceToString()}/>
+          <FontAwesomeIcon className="ms-1 sf-pointer" icon={"download"} title={EntityControlMessage.Download.niceToString()}/>
         </a>
       }
     </div>
@@ -120,10 +124,10 @@ export function getConfiguration<T extends IFile & ModifiableEntity>(type: Type<
 }
 
 export interface FileDownloaderConfiguration<T extends IFile> {
-  fileUrl?: (file: T) => string;
-  fileLiteUrl?: (file: Lite<T & Entity>) => string;
-  downloadClick?: (event: React.MouseEvent<any>, file: T) => void;
-  viewClick?: (event: React.MouseEvent<any>, file: T) => void;
+  fileUrl?: (file: T, container?: ModifiableEntity) => string;
+  fileLiteUrl?: (file: Lite<T & Entity>, container?: ModifiableEntity) => string;
+  downloadClick?: (event: React.MouseEvent<any>, file: T, container?: ModifiableEntity) => void;
+  viewClick?: (event: React.MouseEvent<any>, file: T, container?: ModifiableEntity) => void;
 }
 
 registerConfiguration(FileEntity, {

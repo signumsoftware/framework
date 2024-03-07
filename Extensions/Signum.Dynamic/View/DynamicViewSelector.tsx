@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import { EntityLine, TypeContext } from '@framework/Lines'
+import { EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { Entity, JavascriptMessage, is, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
 import * as Navigator from '@framework/Navigator'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -20,7 +20,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   const forceUpdate = useForceUpdate();
   const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const scriptChangedRef = React.useRef(false);
 
   const [syntaxError, setSyntaxError] = React.useState<string | undefined>(undefined);
@@ -43,13 +43,12 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
     if (!pr)
       return;
 
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: TypeHelpComponent.getExpression("e", pr, "TypeScript"),
-      valueLineType: "TextArea",
+      customComponent: p => <TextAreaLine {...p}/>,
       title: "Property Template",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 
@@ -78,7 +77,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={() => evaluateTest()}
@@ -134,13 +133,12 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   }
 
   function handleViewNameClick(viewName: string) {
-    ValueLineModal.show({
+    AutoLineModal.show({
       type: { name: "string" },
       initialValue: `"${viewName}"`,
-      valueLineType: "TextArea",
+      customComponent:  a => <TextAreaLine {...a}/>,
       title: "View Name",
       message: "Copy to clipboard: Ctrl+C, ESC",
-      initiallyFocused: true,
     });
   }
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as Navigator from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { ValueLine, EntityLine, IRenderButtons } from '@framework/Lines'
+import { AutoLine, EntityLine, IRenderButtons } from '@framework/Lines'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { PredictSimpleResultEntity, PredictorMessage } from '../Signum.MachineLearning'
 import { predict } from '../PredictorClient';
@@ -31,15 +31,15 @@ export default class PredictSimpleResult extends React.Component<{ ctx: TypeCont
     return (
       <div>
         <EntityLine ctx={ctx.subCtx(a => a.predictor)} />
-        <ValueLine ctx={ctx.subCtx(a => a.type)} />
+        <AutoLine ctx={ctx.subCtx(a => a.type)} />
         <EntityLine ctx={ctx.subCtx(a => a.target)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.key0)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.key1)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.key2)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.originalValue)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.predictedValue)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.originalCategory)} hideIfNull={true} />
-        <ValueLine ctx={ctx.subCtx(a => a.predictedCategory)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.key0)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.key1)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.key2)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.originalValue)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.predictedValue)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.originalCategory)} hideIfNull={true} />
+        <AutoLine ctx={ctx.subCtx(a => a.predictedCategory)} hideIfNull={true} />
       </div>
     );
   }

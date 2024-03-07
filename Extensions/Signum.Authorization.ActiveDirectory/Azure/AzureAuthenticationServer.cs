@@ -10,7 +10,7 @@ namespace Signum.Authorization.ActiveDirectory.Azure;
 
 public class AzureADAuthenticationServer
 {
-    public static bool LoginAzureADAuthentication(ActionContext ac, string jwt, bool throwErrors)
+    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {
@@ -23,8 +23,8 @@ public class AzureADAuthenticationServer
                 if (!config.LoginWithAzureAD)
                     return false;
 
-                var principal = ValidateToken(jwt, out var jwtSecurityToken);
-                var ctx = new AzureClaimsAutoCreateUserContext(principal);
+                var principal = ValidateToken(request.idToken, out var jwtSecurityToken);
+                var ctx = new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
@@ -43,9 +43,15 @@ public class AzureADAuthenticationServer
                 }
                 else
                 {
+                    if (user.State == UserState.Deactivated)
+                        return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
+
                     if (config.AutoUpdateUsers)
                         ada.UpdateUser(user, ctx);
                 }
+
+                if (user.State == UserState.Deactivated)
+                    return throwErrors ? throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user)) : false;
 
                 AuthServer.OnUserPreLogin(ac, user);
                 AuthServer.AddUserSession(ac, user);

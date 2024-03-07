@@ -1,5 +1,6 @@
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
+using Signum.Utilities;
 
 namespace Signum.Engine.Linq;
 
@@ -121,7 +122,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
             var binder = new QueryBinder(aliasGenerator);
             CommandExpression delete = binder.BindDelete(cleaned, avoidMList);
             CommandExpression deleteOptimized = (CommandExpression)Optimize(delete, binder, aliasGenerator, log);
-            CommandExpression deleteSimplified = CommandSimplifier.Simplify(deleteOptimized, removeSelectRowCount, aliasGenerator);
+            CommandExpression deleteSimplified = CommandSimplifier.Simplify(deleteOptimized, removeSelectRowCount, aliasGenerator, binder.schema.Settings.IsPostgres);
 
             cr = TranslatorBuilder.BuildCommandResult(deleteSimplified);
         }
@@ -143,7 +144,7 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
             log.Switch("Bind");
             CommandExpression update = binder.BindUpdate(cleaned, updateable.PartSelector,  updateable.SetterExpressions );
             CommandExpression updateOptimized = (CommandExpression)Optimize(update, binder, aliasGenerator, log);
-            CommandExpression updateSimplified = CommandSimplifier.Simplify(updateOptimized, removeSelectRowCount, aliasGenerator);
+            CommandExpression updateSimplified = CommandSimplifier.Simplify(updateOptimized, removeSelectRowCount, aliasGenerator, binder.schema.Settings.IsPostgres);
             log.Switch("TR");
             cr = TranslatorBuilder.BuildCommandResult(updateSimplified);
         }
@@ -164,12 +165,11 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
             log.Switch("Bind");
             CommandExpression insert = binder.BindInsert(cleaned, constructor, table);
             CommandExpression insertOprimized = (CommandExpression)Optimize(insert, binder, aliasGenerator, log);
-            CommandExpression insertSimplified = CommandSimplifier.Simplify(insertOprimized, removeSelectRowCount, aliasGenerator);
+            CommandExpression insertSimplified = CommandSimplifier.Simplify(insertOprimized, removeSelectRowCount, aliasGenerator, binder.schema.Settings.IsPostgres);
             log.Switch("TR");
             cr = TranslatorBuilder.BuildCommandResult(insertSimplified);
         }
         return continuation(cr);
     }
 }
-
 

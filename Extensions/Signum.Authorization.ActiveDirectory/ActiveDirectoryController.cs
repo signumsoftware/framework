@@ -98,6 +98,18 @@ public class ActiveDirectoryController : ControllerBase
         }
     }
 
+    [HttpGet("api/cachedAzureUserPhoto/{size}/{oID}")]
+    public async Task<string?> GetCachedUserPhotoUrl(string oId, int size)
+    {
+        this.Response.GetTypedHeaders().CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue
+        {
+            MaxAge = PictureMaxAge,
+        };
+
+        var cpp = await CachedProfilePhotoLogic.GetOrCreateCachedPicture(new Guid(oId), size);
+
+        return cpp.Photo?.FullWebPath();
+    }
 
     [HttpGet("api/azureUserPhoto/{size}/{oID}"), SignumAllowAnonymous]
     public Task<ActionResult> GetUserPhoto(string oId, int size)
@@ -107,13 +119,12 @@ public class ActiveDirectoryController : ControllerBase
             MaxAge = PictureMaxAge,
         };
 
-        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(ms =>
+        return AzureADLogic.GetUserPhoto(new Guid(oId), size).ContinueWith(task =>
         {
-            if (ms.IsFaulted || ms.IsCanceled)
+            if (task.IsFaulted || task.IsCanceled)
                 return (ActionResult)new NotFoundResult();
 
-            var photo = ms.Result;
-            photo.Position = 0;
+            var photo = task.Result;
             return new FileStreamResult(photo, "image/jpeg");
         });
     }

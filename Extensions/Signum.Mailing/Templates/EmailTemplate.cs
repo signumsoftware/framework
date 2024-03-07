@@ -34,13 +34,14 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public bool DisableAuthorization { get; set; }
 
-    public QueryEntity Query { get; set; }
+    public QueryEntity? Query { get; set; }
 
     public EmailModelEntity? Model { get; set; }
 
+    [BindParent]
     public EmailTemplateFromEmbedded? From { get; set; }
 
-    [NoRepeatValidator]
+    [NoRepeatValidator, BindParent]
     public MList<EmailTemplateRecipientEmbedded> Recipients { get; set; } = new MList<EmailTemplateRecipientEmbedded>();
 
     public bool GroupResults { get; set; }
@@ -76,6 +77,12 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             if (Messages.GroupCount(m => m.CultureInfo).Any(c => c.Value > 1))
                 return EmailTemplateMessage.TheresMoreThanOneMessageForTheSameLanguage.NiceToString();
         }
+
+        if (pi.Name == nameof(Orders) && Orders.Any() && Query == null)
+            return ValidationMessage._0ShouldBeEmpty.NiceToString(pi.NiceName());
+
+        if (pi.Name == nameof(Orders) && Orders.Any() && Query == null)
+            return ValidationMessage._0ShouldBeEmpty.NiceToString(pi.NiceName());
 
         return base.PropertyValidation(pi);
     }
@@ -124,7 +131,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             new XAttribute("Name", Name),
             new XAttribute("Guid", Guid),
             new XAttribute("DisableAuthorization", DisableAuthorization),
-            new XAttribute("Query", Query.Key),
+            Query == null ? null : new XAttribute("Query", Query.Key),
             new XAttribute("EditableMessage", EditableMessage),
             Model == null ? null! /*FIX all null! -> null*/ : new XAttribute("Model", Model.FullClassName),
             MasterTemplate == null ? null! : new XAttribute("MasterTemplate", ctx.Include(MasterTemplate)),
@@ -167,7 +174,7 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         Name = element.Attribute("Name")!.Value;
         DisableAuthorization = element.Attribute("DisableAuthorization")?.Let(a => bool.Parse(a.Value)) ?? false;
 
-        Query = ctx.GetQuery(element.Attribute("Query")!.Value);
+        Query = element.Attribute("Query")?.Let(a => ctx.GetQuery(a.Value));
         EditableMessage = bool.Parse(element.Attribute("EditableMessage")!.Value);
         Model = element.Attribute("Model")?.Let(at =>  EmailModelLogic.GetEmailModelEntity(at.Value));
 
@@ -209,7 +216,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         Attachments.SynchronizeAttachments(element.Element("Attachments")?.Elements().ToList(), ctx, this);
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });
-        ParseData(ctx.GetQueryDescription(Query));
+        if (Query != null)
+            ParseData(ctx.GetQueryDescription(Query));
     }
 
 }
@@ -217,6 +225,8 @@ public class EmailTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
 public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
 {
+    public EmailAddressSource AddressSource { get; set; }
+
     public string? EmailAddress { get; set; }
 
     public string? DisplayName { get; set; }
@@ -231,21 +241,21 @@ public abstract class EmailTemplateAddressEmbedded : EmbeddedEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(Token))
+        if(pi.Name == nameof(AddressSource) && AddressSource == EmailAddressSource.QueryToken)
         {
-            if (Token == null && EmailAddress.IsNullOrEmpty())
-                return EmailTemplateMessage.TokenOrEmailAddressMustBeSet.NiceToString();
-
-            if (Token != null && !EmailAddress.IsNullOrEmpty())
-                return EmailTemplateMessage.TokenAndEmailAddressCanNotBeSetAtTheSameTime.NiceToString();
-
-            if (Token != null && Token.Token.Type != typeof(EmailOwnerData))
-                return EmailTemplateMessage.TokenMustBeA0.NiceToString(typeof(EmailOwnerData).NiceName());
+            var et = this.TryGetParentEntity<EmailTemplateEntity>();
+            if (et != null && et.Query == null)
+                return ValidationMessage._0ShouldBe12.NiceToString(pi.NiceName(), EmailAddressSource.QueryToken);
         }
+
+        if (pi.Name == nameof(Token))
+            return (pi, Token).IsSetOnlyWhen(AddressSource == EmailAddressSource.QueryToken);
+
+        if (pi.Name == nameof(EmailAddress))
+            return (pi, EmailAddress).IsSetOnlyWhen(AddressSource == EmailAddressSource.HardcodedAddress);
 
         return null;
     }
-
 }
 
 
@@ -301,6 +311,13 @@ public class EmailTemplateFromEmbedded : EmailTemplateAddressEmbedded
     public Guid? AzureUserId { get; set; }
 }
 
+public enum EmailAddressSource
+{
+    QueryToken,
+    HardcodedAddress, 
+    CurrentUser,
+}
+
 
 public enum WhenNoneFromBehaviour
 {
@@ -345,7 +362,7 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     internal object? TextParsedNode;
 
     string subject;
-    [StringLengthValidator(Min = 3, Max = int.MaxValue)]
+    [StringLengthValidator(MultiLine = true)]
     public string Subject
     {
         get { return subject; }

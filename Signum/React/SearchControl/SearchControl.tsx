@@ -3,7 +3,7 @@ import * as Finder from '../Finder'
 import { CellFormatter, EntityFormatter } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
-import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString } from '../Reflection'
+import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
 import * as Navigator from '../Navigator'
 import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
@@ -12,6 +12,7 @@ import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
 import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 import { RefreshMode } from '../Signum.DynamicQuery';
+import { HeaderType, Title } from '../Lines/GroupHeader'
 
 export interface SimpleFilterBuilderProps {
   findOptions: FindOptions;
@@ -22,7 +23,7 @@ export interface SearchControlProps {
   formatters?: { [token: string]: CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: EntityFormatter;
-  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
 
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
   getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
@@ -57,7 +58,7 @@ export interface SearchControlProps {
   deps?: React.DependencyList;
   extraOptions?: any;
   enableAutoFocus?: boolean;
-  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;
@@ -73,6 +74,7 @@ export interface SearchControlProps {
   onPageSubTitleChanged?: () => void;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
+  showTitle?: HeaderType;
 }
 
 export interface SearchControlState {
@@ -196,6 +198,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   return (
     <ErrorBoundary>
+      {p.showTitle && <Title type={p.showTitle}>{getQueryNiceName(qd.queryKey)}</Title>}
       <SearchControlLoaded ref={searchControlLoaded}
         findOptions={fop}
         queryDescription={qd}
@@ -225,7 +228,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         create={p.create != null ? p.create : (qs?.allowCreate ?? true) && tis.some(ti => Navigator.isCreable(ti, {isSearch: true }))}
         createButtonClass={p.createButtonClass}
 
-        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: true }))}
+        view={p.view != null ? p.view : tis.some(ti => Navigator.isViewable(ti, { isSearch: "main" }))}
 
         allowSelection={p.allowSelection != null ? p.allowSelection : qs && qs.allowSelection != null ? qs!.allowSelection : true}
         showContextMenu={p.showContextMenu ?? qs?.showContextMenu ?? ((fo) => fo.groupResults ? "Basic" : true)}
@@ -235,7 +238,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         showBarExtensionOption={p.showBarExtensionOption}
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
-        avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : true}
+        avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
         deps={state.deps}
         extraOptions={p.extraOptions}
 

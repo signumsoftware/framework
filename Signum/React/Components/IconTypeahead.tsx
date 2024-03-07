@@ -1,13 +1,11 @@
-
 import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { FormGroup } from '../Lines'
-import { Typeahead } from '../Components'
 import { TypeContext } from '../TypeContext'
-import { library } from '@fortawesome/fontawesome-svg-core'
+import { library, config, IconLookup } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForceUpdate } from '../Hooks'
-import { TextHighlighter, TypeaheadOptions } from './Typeahead'
+import { TextHighlighter, Typeahead, TypeaheadOptions } from './Typeahead'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 
 export interface IconTypeaheadLineProps {
@@ -15,6 +13,7 @@ export interface IconTypeaheadLineProps {
   onChange?: () => void;
   extraIcons?: string[];
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
+  extraButtons?: () => React.ReactNode;
 }
 
 export function IconTypeaheadLine(p : IconTypeaheadLineProps){
@@ -30,15 +29,42 @@ export function IconTypeaheadLine(p : IconTypeaheadLineProps){
 
   return (
     <FormGroup ctx={ctx} label={ctx.niceName()}>
-      {inputId => <IconTypeahead icon={ctx.value}
+      {inputId => <>
+        <IconTypeahead icon={ctx.value}
         placeholder={p.ctx.placeholderLabels ? p.ctx.niceName() : undefined}
         extraIcons={p.extraIcons}
         formControlClass={ctx.formControlClass}
         inputAttrs={p.inputAttrs}
-        onChange={handleChange} />}
+          onChange={handleChange} />
+        {p.extraButtons?.()}
+      </>
+      }
     </FormGroup>
   );
 }
+
+var lib = library as any as {
+  definitions: {
+    [iconPrefix: string]: {
+      [iconName: string]: any;
+    }
+  }
+};
+
+var allIcons: IconName[];
+
+function getAllIcons(): IconName[] {
+  if (allIcons)
+    return allIcons;
+
+  allIcons = Dic.getValues(lib.definitions).flatMap(dic => Dic.getKeys(dic)).distinctBy(a => a).orderBy(a => a) as IconName[];
+  return allIcons;
+}
+
+function getPrefixes(iconName: IconName): IconPrefix[] {
+  return Dic.getKeys(lib.definitions).filter(prefix => iconName && lib.definitions[prefix]?.[iconName]) as IconPrefix[];
+}
+
 
 export interface IconTypeaheadProps {
   icon: string | null | undefined;
@@ -50,7 +76,7 @@ export interface IconTypeaheadProps {
   inputAttrs?: React.InputHTMLAttributes<HTMLInputElement>;
 }
 
-function toFamilyName(prefix: string) {
+function toLongPrefix(prefix: IconPrefix): string | undefined{
   switch (prefix) {
     case "fas": return "fa-solid"; 
     case "fab": return "fa-brands"; 
@@ -58,27 +84,33 @@ function toFamilyName(prefix: string) {
     case "fal": return "fa-light"; 
     case "fat": return "fa-thin"; 
     case "fad": return "fa-duotone";
-    default: break;
+    default: return undefined;
   };
 }
+
+//function toPrefix(family: string): IconPrefix | undefined  {
+//  switch (family) {
+//    case "fa-solid": return "fas"; 
+//    case "fa-brands": return "fab";
+//    case "fa-regular": return "far";
+//    case "fa-light": return "fal";
+//    case "fa-thin": return "fat"; 
+//    case "fa-duotone": return "fad"; 
+//    default: return undefined;
+//  };
+//}
 
 export function IconTypeahead(p: IconTypeaheadProps) {
   const forceUpdate = useForceUpdate();
 
-  var lib = library as any as {
-    definitions: {
-      [iconPrefix: string]: {
-        [iconName: string]: any;
-      }
-    }
-  };
+  var parsedIcon = parseIcon(p.icon);
 
-  var fontAwesome = Dic.getKeys(lib.definitions).flatMap(prefix => Dic.getKeys(lib.definitions[prefix]).map(name => `${toFamilyName(prefix)} fa-${name}`));
+  var fontAwesome = getAllIcons();
   var icons = ([] as string[]).concat(p.extraIcons ?? []).concat(fontAwesome);
 
   function handleGetItems(query: string) {
     if (!query)
-      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []).concat(["fa-regular fa-", "fa-solid fa-"]));
+      return Promise.resolve(([] as string[]).concat(p.extraIcons ?? []));
 
     var words = query.toLowerCase().split(" ");
 
@@ -93,14 +125,42 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     return Promise.resolve(result);
   }
 
-  function handleSelect(item: string | unknown) {
-    p.onChange(item as string);
+  function toValidIcon(iconName: string | null) : string | null {
+    if (!iconName)
+      return null;
+
+    if (p.extraIcons?.contains(iconName))
+      return iconName;
+
+    var prefixes = getPrefixes(iconName as IconName);
+    if (prefixes.some(a => a != "fab"))
+      return iconName;
+
+    return `${toLongPrefix(prefixes[0])} fa-${iconName}`; //brands
+  }
+
+  function handleSelectIcon(item: string | unknown) {
+
+    const validIcon = toValidIcon(item as string | null);
+    p.onChange(validIcon as string);
     forceUpdate();
     return item as string;
   }
 
+  function handleSelectFamily(e: React.ChangeEvent<HTMLSelectElement>) {
+
+    var iconName: IconName = typeof parsedIcon == "string" ? parsedIcon : (parsedIcon as IconLookup).iconName;
+    var iconPrefix = e.currentTarget.value as IconPrefix;
+    if (e.currentTarget.value == "")
+      p.onChange(iconName);
+    else
+      p.onChange(`${iconPrefix} fa-${iconName}`);
+
+    forceUpdate();
+  }
+
   function handleRenderItem(item: unknown, hl: TextHighlighter) {
-    var icon = parseIcon(item as string);
+    var icon = parseIcon(toValidIcon(item as string));
 
     return (
       <span>
@@ -110,16 +170,40 @@ export function IconTypeahead(p: IconTypeaheadProps) {
     );
   }
 
+  var currentPrefix: IconPrefix | "" = !parsedIcon ? "" :
+    typeof parsedIcon == "string" ? "" :
+      typeof parsedIcon == "object" ? (parsedIcon as IconLookup).prefix : "";
+
+  var currentIcon = !parsedIcon ? null :
+    typeof parsedIcon == "string" ? parsedIcon :
+      typeof parsedIcon == "object" ? (parsedIcon as IconLookup).iconName : null;
+
+  var prefixes = currentIcon && getPrefixes(currentIcon);
+  var hasDefault = prefixes?.some(p => p != "fab");
+
   return (
-    <Typeahead
-      value={(p.icon ?? "")}
-      inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder, ...p.inputAttrs }}
-      getItems={handleGetItems}
-      onSelect={handleSelect}
-      onChange={handleSelect}
-      renderItem={handleRenderItem}
-      minLength={0}
-    />
+    <div className="row g-2">
+      <div className="col-sm-7">
+        <Typeahead
+          value={(currentIcon ?? "")}
+          inputAttrs={{ className: classes(p.formControlClass, "sf-entity-autocomplete"), placeholder: p.placeholder, ...p.inputAttrs }}
+          getItems={handleGetItems}
+          onSelect={handleSelectIcon}
+          onChange={handleSelectIcon}
+          renderItem={handleRenderItem}
+          minLength={0}
+        />
+      </div>
+      <div className="col-sm-5">
+        <select className={p.formControlClass?.replaceAll("control", "select")}
+          value={currentPrefix && (toLongPrefix(currentPrefix) || currentPrefix)}
+          disabled={!(p.icon && (hasDefault || prefixes != null && prefixes.length > 1))}
+          onChange={handleSelectFamily}>
+          {hasDefault && <option value={""} > ({config.styleDefault})</option>}
+          {prefixes?.map((prefix, i) => <option key={prefix} value={toLongPrefix(prefix)}>{toLongPrefix(prefix)}</option>)}
+        </select>
+      </div>
+    </div>
   );
 }
 
@@ -131,12 +215,13 @@ export function parseIcon(iconName: string | undefined | null): IconProp | undef
   if (iconName == null)
     return undefined;
 
-  var result = {
-    prefix: iconName.tryBefore(" ") as IconPrefix,
-    iconName: iconName.tryAfter(" fa-") as IconName,
-  };
+  if (iconName.contains(" "))
+    return {
+      prefix: iconName.tryBefore(" ") as IconPrefix,
+      iconName: iconName.tryAfter(" fa-") as IconName,
+    };
 
-  return result.iconName && result.prefix && result;
+  return (iconName.tryAfter("fa-") ?? iconName) as IconName;
 }
 
 export function iconToString(icon: IconProp) {

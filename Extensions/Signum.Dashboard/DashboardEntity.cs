@@ -223,6 +223,12 @@ public class DashboardLiteModel : ModelEntity
     public string DisplayName { get; set; }
     public bool HideQuickLink { get; set; }
 
+    internal static DashboardLiteModel Translated(DashboardEntity d) => new DashboardLiteModel
+    {
+        DisplayName = PropertyRouteTranslationLogic.TranslatedField(d, d => d.DisplayName),
+        HideQuickLink = d.HideQuickLink,
+    };
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => DisplayName);
 }

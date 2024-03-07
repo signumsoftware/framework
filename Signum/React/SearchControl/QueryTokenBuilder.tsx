@@ -6,7 +6,8 @@ import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"
 import { DropdownList } from 'react-widgets'
 import { StyleContext } from '../Lines';
-import { useAPI } from '../Hooks';
+import { useAPI, useForceUpdate } from '../Hooks';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface QueryTokenBuilderProps {
   prefixQueryToken?: QueryToken | undefined;
@@ -22,7 +23,8 @@ let copiedToken: { fullKey: string, queryKey: string } | undefined;
 
 export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
   var [expanded, setExpanded] = React.useState(false);
-  var lastTokenChanged = React.useRef<string | undefined>(undefined);
+  const [lastTokenChanged, setLastTokenChanged] = React.useState<string | undefined>(undefined);
+
 
   React.useEffect(() => {
     setExpanded(false);
@@ -43,18 +45,29 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
   return (
     <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown}>
       {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
-      {tokenList.map((a, i) => i < initialIndex ? null : <QueryTokenPart key={i == 0 ? "__first__" : tokenList[i - 1]!.fullKey}
-        queryKey={p.queryKey}
-        readOnly={p.readOnly}
-        onTokenSelected={async qt => {
-          var nqt = (await tryApplyToken(p.queryToken, qt)) ?? qt; 
-          lastTokenChanged.current = nqt?.fullKey;
-          p.onTokenChange && p.onTokenChange(nqt);
-        }}
-        defaultOpen={lastTokenChanged.current && i > 0 && lastTokenChanged.current == tokenList[i - 1]!.fullKey ? true : false}
-        subTokenOptions={p.subTokenOptions}
-        parentToken={i == 0 ? undefined : tokenList[i - 1]}
-        selectedToken={a} />)}
+      {tokenList.map((a, i) => {
+        if (i < initialIndex)
+          return null;
+
+        var parentToken = i == 0 ? undefined : tokenList[i - 1]!;
+
+        return (
+          <QueryTokenPart key={i == 0 ? "__first__" : parentToken!.fullKey}
+            queryKey={p.queryKey}
+            readOnly={p.readOnly}
+            setLastTokenChange={(fullKey) => { setLastTokenChanged(fullKey); }}
+            onTokenSelected={async (qt, keyboard) => {
+              var nqt = (await tryApplyToken(p.queryToken, qt)) ?? qt;
+              setLastTokenChanged(keyboard ? nqt?.fullKey : undefined);
+              p.onTokenChange && p.onTokenChange(nqt);
+            }}
+            defaultOpen={lastTokenChanged && i > 0 && lastTokenChanged == parentToken!.fullKey
+          /*&& (tokenList[i - 1]!.type.isCollection)*/ ? true : false}
+            subTokenOptions={p.subTokenOptions}
+            parentToken={parentToken}
+            selectedToken={a} />
+        );
+      })}
     </div>
   );
 
@@ -115,50 +128,19 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
 }
 
 
-interface QueryTokenPartProps{
+interface QueryTokenPartProps {
   parentToken: QueryToken | undefined;
   selectedToken: QueryToken | undefined;
-  onTokenSelected: (newToken: QueryToken | undefined) => void;
+  onTokenSelected: (newToken: QueryToken | undefined, keyboard: boolean) => void;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   readOnly: boolean;
   defaultOpen: boolean;
+  setLastTokenChange: (fullKey: string | undefined) => void;
 }
 
 const ParentTokenContext = React.createContext<QueryToken | undefined>(undefined);
 
-export function clearManualSubTokens() {
-  Dic.clear(manualSubTokens);
-}
-
-export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
-
-export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
-  Dic.addOrThrow(manualSubTokens, key, func);
-}
-
-function getManualSubTokens(token?: QueryToken) {
-
-  //if (token?.type.name == "ManualCellDTO")
-  if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
-    return Promise.resolve([]); //prevents sending to server
-
-  const container = token?.parent && manualSubTokens[token.key] && token;
-  if (container) {
-    const entityType = container.parent!.type.name;
-    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](entityType);
-    const tokens = manuals.then(ms => ms.map(m =>
-    ({
-      ...m, parent: container,
-      fullKey: (container.fullKey + "." + m.key),
-      type: { name: "ManualCellDTO" },
-      queryTokenType: "Manual",
-      isGroupable: false
-    } as QueryToken)));
-
-    return tokens;
-  }
-}
 
 export function QueryTokenPart(p: QueryTokenPartProps) {
 
@@ -168,7 +150,7 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
 
     const manuals = getManualSubTokens(p.parentToken);
     if (manuals)
-      return manuals;
+      return manuals.then(tokens => tokens.length == 0 ? tokens : [null, ...tokens]);
 
     return Finder.API.getSubTokens(p.queryKey, p.parentToken, p.subTokenOptions)
       .then(tokens => tokens.length == 0 ? tokens : [null, ...tokens])
@@ -180,32 +162,31 @@ export function QueryTokenPart(p: QueryTokenPartProps) {
   return (
     <ParentTokenContext.Provider value={p.parentToken}>
       <div className="sf-query-token-part" onKeyUp={handleKeyUp} onKeyDown={handleKeyUp}>
-        <DropdownList
-          disabled={p.readOnly}
-          filter="contains"
-          autoComplete="off"
-          focusFirstItem={true}
-          data={subTokens ?? []}
-          placeholder={p.selectedToken == null ? "..." : undefined}
-          value={p.selectedToken}
-          onChange={handleOnChange}
-          dataKey="fullKey"
-          textField="toStr"
-          renderValue={a => <QueryTokenItem item={a.item} />}
-          renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
-          defaultOpen={p.defaultOpen}
-          busy={!p.readOnly && subTokens == undefined}
-        />
+        {p.selectedToken || p.parentToken == null || p.defaultOpen ?
+          <DropdownList
+            disabled={p.readOnly}
+            filter="contains"
+            autoComplete="off"
+            focusFirstItem={true}
+            data={subTokens ?? []}
+            placeholder={p.selectedToken == null ? "..." : undefined}
+            value={p.selectedToken}
+            onChange={(value, metadata) => p.onTokenSelected(value ?? p.parentToken, metadata.originalEvent?.nativeEvent instanceof KeyboardEvent)}
+            dataKey="fullKey"
+            textField="toStr"
+            onBlur={() => { p.selectedToken == null && p.setLastTokenChange(undefined); }}
+            renderValue={a => <QueryTokenItem item={a.item} />}
+            renderListItem={a => <QueryTokenOptionalItem item={a.item} />}
+            defaultOpen={p.defaultOpen}
+            busy={!p.readOnly && subTokens == undefined}
+          /> : <button className="btn btn-sm sf-query-token-plus" onClick={e => { e.preventDefault(); p.setLastTokenChange(p.parentToken!.fullKey); }}>
+            <FontAwesomeIcon icon="plus" />
+          </button>}
       </div>
-      </ParentTokenContext.Provider>
-      );
+    </ParentTokenContext.Provider>
+  );
 
- 
-  function handleOnChange (value: any) {
-    p.onTokenSelected(value ?? p.parentToken);
-  }
-
-  function handleKeyUp (e: React.KeyboardEvent<any>) {
+  function handleKeyUp(e: React.KeyboardEvent<any>) {
     if (e.key == "Enter") {
       e.preventDefault();
       e.stopPropagation();
@@ -241,9 +222,43 @@ export function QueryTokenOptionalItem(p: { item: QueryToken | null }) {
 
   return (
     <span data-token={item.key}
-      style={{ color: item.typeColor }}
+      style={{ color: item.typeColor, whiteSpace: 'nowrap' }}
       title={StyleContext.default.titleLabels ? item.niceTypeName : undefined}>
-      {((item.parent && !parentToken) ? " > " : "") + item.toStr}
+      {((item.parent && !parentToken) ? (item.parent.niceName + " › ") : "") + item.toStr}
     </span>
   );
+}
+
+
+export function clearManualSubTokens() {
+  Dic.clear(manualSubTokens);
+}
+
+export const manualSubTokens: { [key: string]: (entityType: string) => Promise<ManualToken[]> } = {};
+
+export function registerManualSubTokens(key: string, func: (entityType: string) => Promise<ManualToken[]>) {
+  Dic.addOrThrow(manualSubTokens, key, func);
+}
+
+function getManualSubTokens(token?: QueryToken) {
+
+  //if (token?.type.name == "ManualCellDTO")
+  if (token?.parent && token.queryTokenType == 'Manual' && token.parent.queryTokenType == 'Manual')//it is a Manual sub token
+    return Promise.resolve([]); //prevents sending to server
+
+  const container = token?.parent && manualSubTokens[token.key] && token;
+  if (container) {
+    const entityType = container.parent!.type.name;
+    const manuals = manualSubTokens[container.key] && manualSubTokens[container.key](entityType);
+    const tokens = manuals.then(ms => ms.map(m =>
+    ({
+      ...m, parent: container,
+      fullKey: (container.fullKey + "." + m.key),
+      type: { name: "ManualCellDTO" },
+      queryTokenType: "Manual",
+      isGroupable: false
+    } as QueryToken)));
+
+    return tokens;
+  }
 }

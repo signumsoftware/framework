@@ -1,4 +1,5 @@
 using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Maps;
 
 namespace Signum.DynamicQuery;
 
@@ -26,7 +27,7 @@ public class Order : IEquatable<Order>
     {
         if(this.Token is StringSnippetToken s)
         {
-            if (s.Parent is EntityPropertyToken ep && ep.HasFullTextIndex)
+            if (s.Parent is EntityPropertyToken ep && Schema.Current.HasFullTextIndex(ep.PropertyRoute))
                 return new Order(new FullTextRankToken(ep), this.OrderType == OrderType.Ascending ? OrderType.Descending : OrderType.Ascending);
 
             return new Order(s.Parent!, this.OrderType);

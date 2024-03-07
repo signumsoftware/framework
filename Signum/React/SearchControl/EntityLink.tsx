@@ -7,13 +7,14 @@ import { StyleContext } from "../Lines";
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
-  inSearch?: boolean;
+  inSearch?: "main" | "related";
   inPlaceNavigation?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
   getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
   stopPropagation?: boolean;
   extraProps?: any;
+  extraQuery?: string;
 }
 
 export default function EntityLink(p: EntityLinkProps) {
@@ -22,7 +23,7 @@ export default function EntityLink(p: EntityLinkProps) {
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
-  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch || false }))
+  if (!Navigator.isViewable(lite.EntityType, { isSearch: p.inSearch }))
     return <span data-entity={liteKey(lite)} className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}>{p.children ?? Navigator.renderLite(lite)}</span>;
 
 
@@ -52,13 +53,13 @@ export default function EntityLink(p: EntityLinkProps) {
 
     if (event.ctrlKey || event.button == 1 || avoidPopup && !p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined)));
+      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? "")));
       return;
     }
 
     if (p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? ""));
     } else {
       Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);

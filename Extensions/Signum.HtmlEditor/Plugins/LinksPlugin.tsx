@@ -1,8 +1,10 @@
 import * as React from 'react';
+import * as AppContext from '@framework/AppContext';
 import * as draftjs from 'draft-js';
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IContentStateConverter, HtmlEditorController, HtmlEditorPlugin } from "../HtmlEditor"
 import { HtmlEditorButton } from '../HtmlEditorButtons';
+import { decompress } from '@framework/Finder';
 
 function extractLinks(text: string): { from: number, to: number }[]{
   const linkRegex = /https?:\/\/([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;
@@ -131,7 +133,18 @@ export function DraftLink({ contentState, entityKey, children }: { contentState:
       title="Press [Ctrl] + click to follow the link"
       rel="noopener noreferrer"
       target="_blank"
-      onClick={e => { if (e.ctrlKey) { e.preventDefault(); window.open(url); } }}
+      onClick={e => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          window.open(url);
+        }
+        var start = AppContext.toAbsoluteUrl("/");
+        if (url.startsWith(start)) {
+          e.preventDefault();
+          AppContext.navigate(url)
+        }
+
+      }}
       aria-label={url}
     >
       {children}
@@ -148,7 +161,18 @@ export function AutoDraftLink({ decoratedText, children }: { contentState: draft
       title="Press [Ctrl] + click to follow the link"
       rel="noopener noreferrer"
       target="_blank"
-      onClick={e => { if (e.ctrlKey) { e.preventDefault(); window.open(decoratedText); } }}
+      onClick={e => {
+        if (e.ctrlKey) {
+          e.preventDefault();
+          window.open(decoratedText);
+        }
+
+        var start = AppContext.toAbsoluteUrl("/");
+        if (decoratedText.startsWith(start)) {
+          e.preventDefault();
+          AppContext.navigate(decoratedText)
+        }
+      }}
       aria-label={decoratedText}
     >
       {children}

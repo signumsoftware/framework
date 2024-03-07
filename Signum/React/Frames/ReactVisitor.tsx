@@ -7,7 +7,7 @@ import { ColumnOption, OrderOption, Pagination } from '../Search';
 import { Tab, Tabs } from 'react-bootstrap'
 
 export class ReactVisitor {
-  visitChild(child: React.ReactChild): React.ReactNode {
+  visitChild(child: React.ReactNode | string | number | boolean | undefined | null): React.ReactNode | string | number | undefined | null {
     if (child == undefined)
       return child;
 
@@ -20,10 +20,10 @@ export class ReactVisitor {
     if (typeof child == "boolean")
       return child;
 
-    return this.visitElement(child as React.ReactElement<any>);
+    return this.visitElement(child as React.ReactElement);
   }
 
-  visitElement(element: React.ReactElement<any>): React.ReactNode {
+  visitElement(element: React.ReactElement): React.ReactNode {
 
     if (element.props.children == undefined || element.props.children.count == 0)
       return element;
@@ -38,7 +38,7 @@ export class ReactVisitor {
     return element;
   }
 
-  visit(element: React.ReactElement<any> | null): React.ReactElement<any> | null {
+  visit(element: React.ReactElement | null): React.ReactElement | null {
     if (element == null)
       return element;
 
@@ -47,7 +47,7 @@ export class ReactVisitor {
     if (Array.isArray(result))
       return React.createElement("div", {}, ...result);
 
-    return result as React.ReactElement<any>;
+    return result as React.ReactElement;
   }
 }
 
@@ -55,18 +55,18 @@ export class ReactVisitor {
 export class ReplaceVisitor extends ReactVisitor {
 
   constructor(
-    public predicate: (e: React.ReactElement<any>) => boolean,
-    public replacement: (e: React.ReactElement<any>) => React.ReactNode) {
+    public predicate: (e: React.ReactElement) => boolean,
+    public replacement: (e: React.ReactElement) => React.ReactNode) {
     super();
   }
 
-  visitElement(element: React.ReactElement<any>): React.ReactNode {
+  visitElement(element: React.ReactElement): React.ReactNode {
 
     if (this.predicate(element)) {
 
       var node = this.replacement(element);
 
-      var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c as React.ReactChild));
+      var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c));
 
       return validatedNode;
     }
@@ -76,7 +76,7 @@ export class ReplaceVisitor extends ReactVisitor {
 }
 
 export class ReactValidator extends ReactVisitor {
-  visitElement(element: React.ReactElement<any>): React.ReactNode {
+  visitElement(element: React.ReactElement): React.ReactNode {
 
     if (!React.isValidElement(element))
       return <div className="alert alert-danger">Invalid react element: {JSON.stringify(element)}</div>;
@@ -88,12 +88,12 @@ export class ReactValidator extends ReactVisitor {
 export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
-    public result: React.ReactElement<any> | null,
+    public result: React.ReactElement | null,
     public ctx: TypeContext<T>
   ) {
   }
 
-  removeElement(filter: (e: React.ReactElement<any>) => boolean): this {
+  removeElement(filter: (e: React.ReactElement) => boolean): this {
 
     this.result = new ReplaceVisitor(
       e => filter(e),
@@ -103,7 +103,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertAfterElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
+  insertAfterElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
 
     this.result = new ReplaceVisitor(
       e => filter(e),
@@ -113,7 +113,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertBeforeElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
+  insertBeforeElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
 
     this.result = new ReplaceVisitor(
       e => filter(e),
@@ -123,7 +123,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  replaceElement(filter: (e: React.ReactElement<any>) => boolean, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined | false | null)[]): this {
+  replaceElement(filter: (e: React.ReactElement) => boolean, newElements: (e: React.ReactElement) => (React.ReactElement | undefined | false | null)[]): this {
 
     this.result = new ReplaceVisitor(
       e => filter(e),
@@ -170,7 +170,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined | false | null)[]): this {
+  insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined | false | null)[]): this {
 
     var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
@@ -182,7 +182,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement<any> | undefined)[]): this {
+  insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined)[]): this {
 
     var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
@@ -194,7 +194,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  previousTypeContext(e: React.ReactElement<any>) {
+  previousTypeContext(e: React.ReactElement) {
     var ctx = e.props.ctx as TypeContext<any>;
 
     var parentCtx = ctx.findParentCtx(this.ctx.value.Type);
@@ -202,7 +202,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return parentCtx as TypeContext<T>;
   }
 
-  replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement<any>) => (React.ReactElement<any> | undefined)[]) {
+  replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]) {
     var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
@@ -222,7 +222,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  addTab(tabsId: string, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
+  addTab(tabsId: string, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
       e => e.type == Tabs && e.props.id == tabsId,
       e => [React.cloneElement(e, { children: [...React.Children.toArray(e.props.children), ...newTabs] })])
@@ -231,7 +231,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertTabAfter(eventKey: string | number, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
+  insertTabAfter(eventKey: string | number, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
       e => e.type == Tab && e.props.eventKey == eventKey,
       e => [e, ...newTabs])
@@ -240,7 +240,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertTabBefore(eventKey: string | number, ...newTabs: (React.ReactElement<any> | undefined | false | null)[]): this {
+  insertTabBefore(eventKey: string | number, ...newTabs: (React.ReactElement | undefined | false | null)[]): this {
     this.result = new ReplaceVisitor(
       e => e.type == Tab && e.props.eventKey == eventKey,
       e => [...newTabs, e])
@@ -282,7 +282,7 @@ export function cloneFindOptions(fo: FindOptions): FindOptions {
   };
 }
 
-export function hasPropertyRoute(e: React.ReactElement<any>, pr: PropertyRoute): boolean {
+export function hasPropertyRoute(e: React.ReactElement, pr: PropertyRoute): boolean {
   const tc = e.props.ctx as TypeContext<any>;
 
   if (!tc)

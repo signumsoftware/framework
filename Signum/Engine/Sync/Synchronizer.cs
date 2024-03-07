@@ -158,7 +158,7 @@ public static class Synchronizer
         set.UnionWith(newDictionary.Keys);
         set.UnionWith(oldDictionary.Keys);
 
-        return set.Select(key =>
+        var list = set.Select(key =>
         {
             var newVal = newDictionary.TryGetC(key);
             var oldVal = oldDictionary.TryGetC(key);
@@ -170,7 +170,9 @@ public static class Synchronizer
                 return createNew == null ? null : createNew(key, newVal);
 
             return mergeBoth == null ? null : mergeBoth(key, newVal, oldVal);
-        }).Combine(spacing);
+        }).ToList();
+
+        return list.Combine(spacing);
     }
 
 
@@ -301,7 +303,8 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
             return Distance(sd, o, n);
         }));
 
-        new Dictionary<string, string>();
+
+        bool alwaysNoRename = false;
 
         while (oldOnly.Count > 0 && newOnly.Count > 0)
         {
@@ -309,7 +312,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
             var alternatives = oldDist.Value.OrderBy(a => a.Value).Select(a => a.Key).ToList();
 
-            Selection selection = SelectInteractive(oldDist.Key, alternatives, replacementsKey, Interactive);
+            Selection selection = SelectInteractive(oldDist.Key, alternatives, replacementsKey, Interactive, ref alwaysNoRename);
 
             oldOnly.Remove(selection.OldValue);
             distances.Remove(selection.OldValue);
@@ -346,7 +349,8 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
         var dic = newValues.ToDictionary(a => a, a => Distance(sd, oldValue, a));
 
-        Selection sel = SelectInteractive(oldValue, dic.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive);
+        bool temp = false;
+        Selection sel = SelectInteractive(oldValue, dic.OrderBy(a => a.Value).Select(a => a.Key).ToList(), replacementsKey, Interactive, ref temp);
 
         if (sel.NewValue != null)
         {
@@ -374,7 +378,7 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
     public static Action<string, string, string?>? ResponseRecorder;//  replacementsKey,oldValue,newValue
 
     //public static Dictionary<String, Replacements.Selection>? cases ;
-    public static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive)
+    public static Selection SelectInteractive(string oldValue, List<string> newValues, string replacementsKey, bool interactive, ref bool alwaysNoRename)
     {
         if (AutoReplacement != null)
         {
@@ -390,6 +394,9 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
         if (!interactive)
             throw new InvalidOperationException($"Unable to ask for renames for '{oldValue}' (in {replacementsKey}) without interactive Console. Please use your Terminal application");
+
+        if (alwaysNoRename)
+            return new Selection(oldValue, null);
 
         int startingIndex = 0;
         Console.WriteLine();
@@ -410,6 +417,10 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
 
         SafeConsole.WriteColor(ConsoleColor.White, " n: ", i);
         SafeConsole.WriteColor(ConsoleColor.Gray, "No rename, '{0}' was removed", oldValue);
+        Console.WriteLine();
+
+        SafeConsole.WriteColor(ConsoleColor.White, " n!: ", i);
+        SafeConsole.WriteColor(ConsoleColor.Gray, "Always no rename", oldValue);
         Console.WriteLine();
 
         int remaining = newValues.Count - startingIndex - maxElement;
@@ -442,16 +453,20 @@ public class Replacements : Dictionary<string, Dictionary<string, string>>
             if (answer == "n")
                 response = new Selection(oldValue, null);
 
+            if (answer == "n!")
+            {
+                alwaysNoRename = true;
+                response = new Selection(oldValue, null);
+            }
+
             if (answer == "")
                 response = new Selection(oldValue, newValues[0]);
 
             if (int.TryParse(answer, out int option))
                 response = new Selection(oldValue, newValues[option]);
 
-
             if (response != null)
             {
-
                 if (ResponseRecorder != null)
                     ResponseRecorder.Invoke(replacementsKey, response.Value.OldValue, response.Value.NewValue);
 

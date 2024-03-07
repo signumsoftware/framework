@@ -49,7 +49,7 @@ public class WordAttachmentLogic
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName ?? fileContent.FileName, fileContent.Bytes)),
+                        File = new FilePathEmbedded(EmailFileType.Attachment, fileName ?? fileContent.FileName, fileContent.Bytes),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };
@@ -60,9 +60,9 @@ public class WordAttachmentLogic
     private static string GetTemplateString(string title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
     {
         var block = titleNode != null ? (TextTemplateParser.BlockNode)titleNode :
-            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
+            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryContext?.QueryDescription, ctx.ModelType));
 
-        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
+        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.QueryContext) { Model = ctx.Model });
     }
 
     static string? WordAttachmentFileName_StaticPropertyValidation(WordAttachmentEntity wordAttachment, PropertyInfo pi)

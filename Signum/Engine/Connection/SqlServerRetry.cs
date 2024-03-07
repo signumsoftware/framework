@@ -22,7 +22,7 @@ public static class SqlServerRetry
             return null;
 
         var delta = (Math.Pow(DefaultExponentialBase, currentRetryCount) - 1.0)
-                    * (1.0 + MyRandom.Current.NextDouble() * (DefaultRandomFactor - 1.0));
+                    * (1.0 + Random.Shared.NextDouble() * (DefaultRandomFactor - 1.0));
 
         var delay = Math.Min(
             BaseDelay.TotalMilliseconds * delta,
@@ -77,6 +77,7 @@ public static class SqlServerRetry
             }
         }
     }
+
 
     public static async Task<T> RetryAsync<T>(Func<Task<T>> action)
     {

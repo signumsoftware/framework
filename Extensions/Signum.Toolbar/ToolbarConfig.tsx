@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext';
 import { Entity } from '@framework/Signum.Entities';
 import { Type } from '@framework/Reflection';
 import { parseIcon } from '@framework/Components/IconTypeahead';
-import { ToolbarNavItem } from './Renderers/ToolbarRenderer';
+import { ToolbarNavItem, renderExtraIcons } from './Renderers/ToolbarRenderer';
 import { ToolbarResponse } from './ToolbarClient';
 
 
@@ -46,18 +46,20 @@ export abstract class ToolbarConfig<T extends Entity> {
         return true;
     }
 
-    getMenuItem(res: ToolbarResponse<T>, isActive: boolean, key: number | string, onAutoClose?: () => void) {
-        return (
-            <ToolbarNavItem key={key}
-                title={res.label}
-                onClick={(e: React.MouseEvent<any>) => {
-                    this.handleNavigateClick(e, res);
-                    if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
-                        onAutoClose();
-                }}
-                active={isActive}
-                icon={this.getIcon(res)} />
-        );
+  getMenuItem(res: ToolbarResponse<T>, active: ToolbarResponse<any> | null, key: number | string, onAutoClose?: () => void) {
+      return (
+        <ToolbarNavItem key={key}
+          title={res.label}
+          onClick={(e: React.MouseEvent<any>) => {
+            this.handleNavigateClick(e, res);
+            if (onAutoClose && !(e.ctrlKey || (e as React.MouseEvent<any>).button == 1))
+              onAutoClose();
+          }}
+          active={res == active}
+          extraIcons={ renderExtraIcons(res.extraIcons, active, onAutoClose)}
+          icon={this.getIcon(res)}
+        />
+      );
     }
 }
 

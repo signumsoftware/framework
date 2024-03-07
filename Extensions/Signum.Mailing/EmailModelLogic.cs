@@ -4,6 +4,7 @@ using Signum.Engine.Sync;
 using Signum.Templating;
 using Signum.UserAssets;
 using Signum.Authorization;
+using System.Collections.Frozen;
 
 namespace Signum.Mailing;
 
@@ -73,7 +74,7 @@ public abstract class EmailModel<T> : IEmailModel
         throw new InvalidOperationException($"Since {typeof(T).Name} is not in {imp}, it's necessary to override ${nameof(GetFilters)} in ${this.GetType().Name}");
     }
 
-    public virtual List<Order> GetOrders(QueryDescription queryDescription)
+    public virtual List<Order> GetOrders(QueryDescription qd)
     {
         return new List<Order>();
     }
@@ -134,10 +135,10 @@ public static class EmailModelLogic
         }
     }
 
-    static ResetLazy<Dictionary<Lite<EmailModelEntity>, List<EmailTemplateEntity>>> EmailModelToTemplates = null!;
+    static ResetLazy<FrozenDictionary<Lite<EmailModelEntity>, List<EmailTemplateEntity>>> EmailModelToTemplates = null!;
     static Dictionary<Type, EmailModelInfo> registeredModels = new Dictionary<Type, EmailModelInfo>();
-    public static ResetLazy<Dictionary<Type, EmailModelEntity>> TypeToEntity = null!;
-    public static ResetLazy<Dictionary<EmailModelEntity, Type>> EntityToType = null!;
+    public static ResetLazy<FrozenDictionary<Type, EmailModelEntity>> TypeToEntity = null!;
+    public static ResetLazy<FrozenDictionary<EmailModelEntity, Type>> EntityToType = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -165,7 +166,7 @@ public static class EmailModelLogic
                 from et in Database.Query<EmailTemplateEntity>()
                 where et.Model != null
                 select new { se = et.Model, et })
-                .GroupToDictionary(pair => pair.se!.ToLite(), pair => pair.et!), /*CSBUG*/ 
+                .GroupToDictionary(pair => pair.se.ToLite(), pair => pair.et).ToFrozenDictionary(), 
                 new InvalidateWith(typeof(EmailModelEntity), typeof(EmailTemplateEntity)));
 
             TypeToEntity = sb.GlobalLazy(() =>
@@ -178,13 +179,13 @@ public static class EmailModelLogic
                     type => type.FullName!,
                     (entity, type) => KeyValuePair.Create(type, entity),
                     "caching " + nameof(EmailModelEntity))
-                    .ToDictionary();
+                    .ToFrozenDictionaryEx();
             }, new InvalidateWith(typeof(EmailModelEntity)));
 
 
             sb.Schema.Initializing += () => TypeToEntity.Load();
 
-            EntityToType = sb.GlobalLazy(() => TypeToEntity.Value.Inverse(),
+            EntityToType = sb.GlobalLazy(() => TypeToEntity.Value.Inverse().ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(EmailModelEntity)));
         }
     }

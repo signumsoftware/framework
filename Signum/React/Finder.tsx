@@ -159,7 +159,7 @@ export namespace Options {
     return import("./SearchControl/SearchModal");
   }
 
-  export let entityColumnHeader: () => React.ReactChild = () => "";
+  export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
 
   export let tokenCanSetPropery = (qt: QueryToken) =>
     qt.filterType == "Lite" && qt.key != "Entity" ||
@@ -185,7 +185,7 @@ export function findRow(fo: FindOptions, modalOptions?: ModalFindOptions): Promi
 }
 
 
-export function findMany<T extends Entity = Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
+export function findMany<T extends Entity>(findOptions: FindOptions, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany<T extends Entity>(type: Type<T>, modalOptions?: ModalFindOptionsMany): Promise<Lite<T>[] | undefined>;
 export function findMany(findOptions: FindOptions | Type<any>, modalOptions?: ModalFindOptionsMany): Promise<Lite<Entity>[] | undefined> {
 
@@ -1273,7 +1273,7 @@ export class TokenCompleter {
       const cd = this.queryDescription.columns[fullKey];
 
       if (cd == undefined)
-        throw new Error(`Column '${fullKey}' is not a column of query '${this.queryDescription.queryKey}'. Maybe use 'Entity.${fullKey}' instead?`);
+        throw new Error(`No column with name '${fullKey}' found in query '${this.queryDescription.queryKey}'.\nMaybe use '${(fullKey ? ("Entity." + fullKey) : "Entity")}'`);
 
       return toQueryToken(cd);
     }
@@ -1296,7 +1296,7 @@ export class TokenCompleter {
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
         filters: fo.filters.notNull().map(f => this.toFilterOptionParsed(f)),
-        frozen: false,
+        frozen: fo.frozen || false,
         expanded: false,
       } as FilterGroupOptionParsed);
     }
@@ -1309,6 +1309,7 @@ export class TokenCompleter {
         operation: fo.operation ?? "EqualTo",
         value: fo.value,
         frozen: fo.frozen || false,
+        removeElementWarning: fo.removeElementWarning,
         pinned: fo.pinned && toPinnedFilterParsed(fo.pinned),
         dashboardBehaviour: fo.dashboardBehaviour,
       } as FilterConditionOptionParsed);
@@ -1363,7 +1364,7 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
         const dt = val.endsWith("Z") ? DateTime.fromISO(val, { zone: "utc" }) : DateTime.fromISO(val);
 
         if (val.length == 10 && token.type.name == "DateTime") //Date -> DateTime
-          return dt.toISO();
+          return dt.toISO()!;
 
         if (val.length > 10 && token.type.name == "DateOnly") //DateTime -> Date
           return dt.toISODate();
@@ -1374,13 +1375,13 @@ function parseValue(token: QueryToken, val: any, needModel: Array<any>): any {
       if (val instanceof DateTime) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return val.toISODate();
-        return val.toISO();
+        return val.toISO()!;
       }
 
       if (val instanceof Date) {
         if (token.type.name == "DateOnly") //DateTime -> Date
           return DateTime.fromJSDate(val).toISODate();
-        return DateTime.fromJSDate(val).toISO();
+        return DateTime.fromJSDate(val).toISO()!;
       }
 
       return val;
@@ -1667,20 +1668,20 @@ export module API {
 
   export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
 
-    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery", signal }, request)
+    return ajaxPost<ResultTable>({ url: "/api/query/executeQuery/" + request.queryKey, signal }, request)
       .then(rt => decompress(rt));
   }
 
   export function queryValue(request: QueryValueRequest, avoidNotifyPendingRequest: boolean | undefined = undefined, signal?: AbortSignal): Promise<any> {
-    return ajaxPost({ url: "/api/query/queryValue", avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
+    return ajaxPost({ url: "/api/query/queryValue/" + request.queryKey, avoidNotifyPendingRequests: avoidNotifyPendingRequest, signal }, request);
   }
 
   export function fetchLites(request: QueryEntitiesRequest): Promise<Lite<Entity>[]> {
-    return ajaxPost({ url: "/api/query/lites" }, request);
+    return ajaxPost({ url: "/api/query/lites/" + request.queryKey }, request);
   }
 
   export function fetchEntities(request: QueryEntitiesRequest): Promise<Entity[]> {
-    return ajaxPost({ url: "/api/query/entities" }, request);
+    return ajaxPost({ url: "/api/query/entities/" + request.queryKey }, request);
   }
 
   export function fetchAllLites(request: { types: string }): Promise<Lite<Entity>[]> {
@@ -1984,11 +1985,12 @@ export interface QuerySettings {
   allowSelection?: boolean;
   getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, columns: string[], sc?: SearchControlLoaded) => void;
-  simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement | undefined;
   onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
   onFindMany?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity>[] | undefined>;
   onExplore?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<void>;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
+  noResultMessage?: (searchControl: SearchControlLoaded) => React.ReactElement | string | undefined;
   customGetPropsFromFilter?: (filters: FilterOptionParsed[]) => Promise<any>;
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   markRowsColumn?: string;
@@ -2048,7 +2050,7 @@ export interface FormatRule {
 
 export class CellFormatter {
   constructor(
-    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactChild | undefined,
+    public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactElement | string | null | undefined,
     public fillWidth: boolean,
     public cellClass?: string) {
   }
@@ -2081,7 +2083,7 @@ export interface EntityFormatRule {
 
 export class EntityFormatter {
   constructor(
-    public formatter: (ctx: CellFormatterContext) => React.ReactChild | undefined,
+    public formatter: (ctx: CellFormatterContext) => React.ReactElement | string | null | undefined,
     public cellClass?: string) {
   }
 }

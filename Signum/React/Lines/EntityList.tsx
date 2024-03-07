@@ -1,14 +1,16 @@
 import * as React from 'react'
-import { ModifiableEntity, Lite, Entity, is, getToString } from '../Signum.Entities'
+import { ModifiableEntity, Lite, Entity, is, getToString, EntityControlMessage } from '../Signum.Entities'
 import { FormGroup } from './FormGroup'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { useController } from './LineBase';
+import { genericForwardRef, useController } from './LineBase';
+import { classes } from '../Globals';
+import { EntityBaseController } from './EntityBase';
 
-export interface EntityListProps extends EntityListBaseProps {
+export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseProps<V> {
   size?: number;
 }
 
-export class EntityListController extends EntityListBaseController<EntityListProps>
+export class EntityListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityListProps<V>, V>
 {
   moveUp(index: number) {
     super.moveUp(index);
@@ -66,6 +68,33 @@ export class EntityListController extends EntityListBaseController<EntityListPro
       });
   };
 
+  renderViewButton(btn: boolean, item: V) {
+
+    if (!this.canView(item))
+      return undefined;
+
+    return (
+      <a href="#" className={classes("sf-line-button", "sf-view", btn ? "input-group-text" : undefined)}
+        onClick={this.handleViewClick}
+        title={this.props.ctx.titleLabels ? EntityControlMessage.View.niceToString() : undefined}>
+        {EntityBaseController.getViewIcon()}
+      </a>
+    );
+  }
+
+  renderRemoveButton(btn: boolean, item: V) {
+    if (!this.canRemove(item))
+      return undefined;
+
+    return (
+      <a href="#" className={classes("sf-line-button", "sf-remove", btn ? "input-group-text" : undefined)}
+        onClick={this.handleRemoveClick}
+        title={this.props.ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
+        {EntityBaseController.getRemoveIcon()}
+      </a>
+    );
+  }
+
   handleViewClick = (event: React.MouseEvent<any>) => {
 
     event.preventDefault();
@@ -93,7 +122,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
       this.convert(e).then(m => {
         if (is(list[selectedIndex].element as Entity, e as Entity)) {
           list[selectedIndex].element = m;
-          if (e.modified)
+          if ((e as ModifiableEntity).modified)
             this.setValue(list, event);
         }
         else {
@@ -117,7 +146,7 @@ export class EntityListController extends EntityListBaseController<EntityListPro
 }
 
 
-export const EntityList = React.forwardRef(function EntityList(props: EntityListProps, ref: React.Ref<EntityListController>) {
+export const EntityList = genericForwardRef(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>, ref: React.Ref<EntityListController<V>>) {
   const c = useController(EntityListController, props, ref);
   const p = c.props;
   const list = p.ctx.value!;
@@ -128,13 +157,13 @@ export const EntityList = React.forwardRef(function EntityList(props: EntityList
     return null;
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-line">
         <div className={p.ctx.inputGroupClass}>
           <select id={inputId} className={p.ctx.formSelectClass} size={p.size ?? 30} style={{ height: "120px", overflow: "auto" }} onChange={c.handleOnSelect} ref={c.handleSelectLoad}>
-            {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityListBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
+            {list.map(mle => <option key={c.keyGenerator.getKey(mle)} title={p.ctx.titleLabels ? c.getTitle(mle.element) : undefined} {...EntityBaseController.entityHtmlAttributes(mle.element)}>{getToString(mle.element)}</option>)}
           </select>
           <span className="input-group-vertical">
             {c.renderCreateButton(true)}

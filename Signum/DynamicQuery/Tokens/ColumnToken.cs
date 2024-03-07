@@ -110,6 +110,29 @@ public class ColumnToken : QueryToken
                 return StepTokens(this, Reflector.NumDecimals(Column.Format)).AndHasValue(this);
         }
 
+        if (uType == typeof(string))
+        {
+            PropertyRoute? route = this.GetPropertyRoute();
+            var result = StringTokens();
+
+            if (route != null && EntityPropertyToken.HasFullTextIndex(route))
+            {
+                result.Add(new FullTextRankToken(this));
+            }
+
+            if (route != null && EntityPropertyToken.HasSnippet(route) && (options & SubTokensOptions.CanSnippet) != 0)
+            {
+                result.Add(new StringSnippetToken(this));
+            }
+
+            if (route != null && PropertyRouteTranslationLogic.IsTranslateable(route))
+            {
+                result.Add(new TranslatedToken(this));
+            }
+
+            return result.AndHasValue(this);
+        }
+
         return SubTokensBase(Column.Type, options, Column.Implementations);
     }
 

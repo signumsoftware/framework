@@ -1,22 +1,19 @@
 import * as React from 'react'
 import * as Navigator from '../Navigator'
 import { classes } from '../Globals'
-import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
 import { ModifiableEntity, Lite, Entity, JavascriptMessage, toLite, liteKey, getToString, isLite, is, parseLiteList } from '../Signum.Entities'
 import { Typeahead } from '../Components'
-import { EntityBaseController, EntityBaseProps } from './EntityBase'
+import { Aprox, EntityBaseController, EntityBaseProps } from './EntityBase'
 import { AutocompleteConfig } from './AutoCompleteConfig'
 import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { useAPI, useMounted } from '../Hooks'
-import { useController } from './LineBase'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { genericForwardRef, genericForwardRefWithMemo, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
-export interface EntityLineProps extends EntityBaseProps {
-  ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
+export interface EntityLineProps<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseProps<V> {
   avoidLink?: boolean;
   avoidViewButton?: boolean;
   avoidCreateButton?: boolean;
@@ -32,13 +29,13 @@ interface ItemPair {
   item?: unknown;
 }
 
-export class EntityLineController extends EntityBaseController<EntityLineProps> {
+export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityLineProps<V>,V> {
   currentItem!: ItemPair | undefined;
   setCurrentItem!: (v: ItemPair | undefined) => void;
   focusNext!: React.MutableRefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController>;
 
-  init(pro: EntityLineProps) {
+  init(pro: EntityLineProps<V>) {
     super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
@@ -84,7 +81,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 
   }
 
-  overrideProps(p: EntityLineProps, overridenProps: EntityLineProps) {
+  overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>) {
     super.overrideProps(p, overridenProps);
     if (p.autocomplete === undefined && p.type) {
       p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
@@ -108,14 +105,14 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
     this.typeahead.current && this.typeahead.current.writeInInput(query);
   }
 
-  handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
+  handleOnSelect = (item: unknown, event: React.SyntheticEvent<any>) => {
     this.props.autocomplete!.getEntityFromItem(item)
       .then(entity => entity &&
-        this.convert(entity)
+        this.convert(entity as Aprox<V>)
           .then(entity => {
-            return this.props.autocomplete!.getItemFromEntity(entity) //newItem could be different to item on create new case
+            return this.props.autocomplete!.getItemFromEntity(entity!) //newItem could be different to item on create new case
               .then(newItem => {
-                this.setCurrentItem({ entity: entity, item: newItem });
+                this.setCurrentItem({ entity: entity!, item: newItem });
                 this.setValue(entity, event);
               });
           }));
@@ -125,7 +122,7 @@ export class EntityLineController extends EntityBaseController<EntityLineProps> 
 }
 
 
-export const EntityLine = React.memo(React.forwardRef(function EntityLine(props: EntityLineProps, ref: React.Ref<EntityLineController>) {
+export const EntityLine = genericForwardRefWithMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
 
@@ -139,15 +136,15 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
       {c.props.extraButtonsBefore && c.props.extraButtonsBefore(c)}
       {!hasValue && !p.avoidViewButton && c.renderCreateButton(true)}
       {!hasValue && c.renderFindButton(true)}
-      {hasValue && !p.avoidViewButton && c.renderViewButton(true, p.ctx.value!)}
-      {hasValue && c.renderRemoveButton(true, p.ctx.value!)}
+      {hasValue && !p.avoidViewButton && c.renderViewButton(true)}
+      {hasValue && c.renderRemoveButton(true)}
       {c.renderPasteButton(true)}
-      {c.props.extraButtonsAfter && c.props.extraButtonsAfter(c)}
+      {c.props.extraButtons && c.props.extraButtons(c)}
     </>
   );
 
   return (
-    <FormGroup ctx={p.ctx} label={p.label} helpText={p.helpText}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-line">
@@ -180,7 +177,7 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     c.paste(text);
   }
 
-  function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement<any>) => React.ReactElement<any>) {
+  function renderAutoComplete(inputId: string, renderInput?: (input: React.ReactElement) => React.ReactElement) {
 
     const ctx = p.ctx;
 
@@ -248,4 +245,4 @@ export const EntityLine = React.memo(React.forwardRef(function EntityLine(props:
     }
     c.focusNext.current = false;
   }
-}), (prev, next) => EntityBaseController.propEquals(prev, next));
+}, (prev, next) => EntityBaseController.propEquals(prev, next));

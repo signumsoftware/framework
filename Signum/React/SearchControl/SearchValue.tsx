@@ -43,9 +43,10 @@ export interface SearchValueProps {
   searchControlProps?: Partial<SearchControlProps>;
   modalSize?: BsSize;
   onRender?: (value: any | undefined, vsc: SearchValueController) => React.ReactElement | null | undefined | false;
-  htmlAttributes?: React.HTMLAttributes<HTMLElement>,
+  htmlAttributes?: React.AllHTMLAttributes<HTMLElement>,
   customRequest?: (req: QueryValueRequest, fop: FindOptionsParsed, token: QueryToken | null, signal: AbortSignal) => Promise<any>,
   avoidRenderTimeMachineIcon?: boolean;
+  onExplore?: (vsc: SearchValueController) => Promise<boolean>;
 }
 
 export interface SearchValueController {
@@ -179,8 +180,6 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     setReloadTicks(a => a + 1);
   }
 
-
-
   var controller = React.useMemo(() => ({} as any as SearchValueController), []);
   controller.props = p;
   controller.value = value;
@@ -188,6 +187,8 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
   controller.renderValue = renderValue;
   controller.refreshValue = refreshValue;
   controller.handleClick = handleClick;
+
+
 
   React.useImperativeHandle(ref, () => controller, []);
 
@@ -292,9 +293,11 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
     p.customClass && typeof p.customClass == "function" ? p.customClass(value) : p.customClass
   );
 
+  const { onClick, ...htmlAttrs } = p.htmlAttributes ?? {};
+
   if (p.formControlClass) {
     return (
-      <div id={p.id} className={className} style={p.customStyle} {...p.htmlAttributes}>
+      <div id={p.id} className={className} style={p.customStyle} {...htmlAttrs}>
         {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </div>
@@ -304,20 +307,21 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
 
   if (p.isLink) {
     return (
-      <a id={p.id} className={className} onClick={handleClick} href="#" style={p.customStyle} {...p.htmlAttributes}>
+      <a id={p.id} className={className} onClick={handleClick} href="#" style={p.customStyle} {...htmlAttrs}>
         {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
         {renderValue()}
       </a>
     );
   }
 
-  return <span id={p.id} className={className} style={p.customStyle} {...p.htmlAttributes}>
+  return <span id={p.id} className={className} style={p.customStyle} {...htmlAttrs}>
     {!p.avoidRenderTimeMachineIcon && renderTimeMachineIcon(controller.hasHistoryChanges, `translate(-100%, -80%)`)}
     {renderValue()}
   </span>
 
 
   function onClickLite(e: React.MouseEvent<any>, lite: Lite<Entity>) {
+
     e.preventDefault();
     const s = Navigator.getSettings(lite.EntityType)
     const avoidPopup = s != undefined && s.avoidPopup;
@@ -331,7 +335,7 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       .then(() => { refreshValue(); p.onExplored && p.onExplored(); });
   }
 
-  function renderValue(): React.ReactChild | null{
+  function renderValue(): React.ReactElement | string | null{
 
     if (value === undefined)
       return "…";
@@ -375,14 +379,28 @@ const SearchValue = React.forwardRef(function SearchValue(p: SearchValueProps, r
       case "Enum": return getEnumInfo(token!.type.name, value).niceName;
       case "Guid":
         let str = value as string;
-        return <span className="guid">{str.substr(0, 4) + "…" + str.substring(str.length - 4)}</span>;
+        return <span className="guid">{str.substring(0, 4) + "…" + str.substring(str.length - 4)}</span>;
     }
 
     return value;
   }
 
+
   function handleClick(e: React.MouseEvent<any>) {
     e.preventDefault();
+
+    if (p.onExplore) {
+      p.onExplore(controller).then(r => {
+        if (r && !p.avoidAutoRefresh) 
+          refreshValue();
+
+        if (p.onExplored)
+          p.onExplored();
+      });
+      return;
+    }
+
+    p.htmlAttributes?.onClick?.(e);
 
     var fo: FindOptions;
     if (p.findOptions.columnOptions == undefined && valueToken && valueToken.parent)

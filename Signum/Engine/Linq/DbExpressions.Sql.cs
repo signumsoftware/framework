@@ -645,6 +645,7 @@ internal enum SqlFunction
     CONTAINSTABLE,
     FREETEXT,
     FREETEXTTABLE,
+    DATETRUNC,
 }
 
 internal enum PostgresFunction

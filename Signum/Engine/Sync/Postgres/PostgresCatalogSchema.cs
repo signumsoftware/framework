@@ -33,29 +33,19 @@ public static class PostgresCatalogSchema
                      {
                          Name = new ObjectName(new SchemaName(db, ns.nspname, isPostgres), t.relname, isPostgres),
 
-                         TemporalType = t.Triggers().Any(t => t.Proc()!.proname == "versioning") ? SysTableTemporalType.SystemVersionTemporalTable : SysTableTemporalType.None,
-
-                         //Period = !con.SupportsTemporalTables ? null :
-
-                         //(from p in t.Periods()
-                         // join sc in t.Columns() on p.start_column_id equals sc.column_id
-                         // join ec in t.Columns() on p.end_column_id equals ec.column_id
-                         // select new DiffPeriod
-                         // {
-                         //     StartColumnName = sc.name,
-                         //     EndColumnName = ec.name,
-                         // }).SingleOrDefaultEx(),
-
-                         TemporalTableName = t.Triggers()
+                         VersionningTrigger = t.Triggers()
                              .Where(t => t.Proc()!.proname == "versioning")
-                             .Select(t => ParseVersionFunctionParam(t.tgargs))
-                             .SingleOrDefaultEx(),
+                             .Select(t => t.tgname == null ? null : new DiffPostgresVersioningTrigger
+                             {
+                                 proname = t.Proc()!.proname,
+                                 tgrelid = t.tgrelid,
+                                 tgname = t.tgname,
+                                 tgfoid = t.tgfoid,
+                                 tgargs = t.tgargs
+                             })
+                             .SingleOrDefault(),
 
-                         //TemporalTableName = !con.SupportsTemporalTables || t.history_table_id == null ? null :
-                         //    Database.View<SysTables>()
-                         //    .Where(ht => ht.object_id == t.history_table_id)
-                         //    .Select(ht => new ObjectName(new SchemaName(db, ht.Schema().name, isPostgres), ht.name, isPostgres))
-                         //    .SingleOrDefault(),
+                      
 
                          PrimaryKeyName = (from c in t.Constraints()
                                            where c.contype == ConstraintType.PrimaryKey
@@ -108,7 +98,7 @@ public static class PostgresCatalogSchema
                                               Columns = (from i in generate_subscripts(ix.indkey, 1)
                                                          let at = t.Attributes().Single(a => a.attnum == ix.indkey[i])
                                                          orderby i
-                                                         select new DiffIndexColumn { ColumnName = at.attname, IsIncluded = i >= ix.indnkeyatts }).ToList()
+                                                         select new DiffIndexColumn { ColumnName = at.attname, Type = i >= ix.indnkeyatts ? DiffIndexColumnType.Included : DiffIndexColumnType.Key }).ToList()
                                           }).ToList(),
 
                          ViewIndices = new List<DiffIndex>(),
@@ -121,6 +111,13 @@ public static class PostgresCatalogSchema
                 if (SchemaSynchronizer.IgnoreTable != null)
                     tables.RemoveAll(SchemaSynchronizer.IgnoreTable);
 
+
+                tables.ForEach(t =>
+                {
+                    t.TemporalType = t.VersionningTrigger == null ? SysTableTemporalType.None : SysTableTemporalType.SystemVersionTemporalTable;
+                    t.TemporalTableName = t.VersionningTrigger == null ? null : ParseVersionFunctionParam(t.VersionningTrigger.tgargs);
+                });
+
                 tables.ForEach(t => t.Columns.RemoveAll(c => c.Value.DbType.PostgreSql == (NpgsqlDbType)(-1)));
 
                 tables.ForEach(t => t.ForeignKeysToColumns());
@@ -131,11 +128,17 @@ public static class PostgresCatalogSchema
 
         var database = allTables.ToDictionary(t => t.Name.ToString());
 
-        var historyTables = database.Values.Select(a => a.TemporalTableName).NotNull().ToList();
+        var historyTables = database.Values.Select(a => a.TemporalTableName?.ToString()).NotNull().ToHashSet();
 
-        historyTables.ForEach(h =>
+        Replacements rep = new Replacements();
+        var replacementKey = "Postgres broken versioning triggers";
+        rep.AskForReplacements(historyTables, database.Keys.ToHashSet(), replacementKey);
+
+        var withReplacements = rep.ApplyReplacementsToNew(database, replacementKey);
+        historyTables.ToList().ForEach(h =>
         {
-            var t = database.TryGetC(h.ToString());
+            var t = withReplacements.TryGetC(h);
+             
             if (t != null)
                 t.TemporalType = SysTableTemporalType.HistoryTable;
         });
@@ -143,7 +146,7 @@ public static class PostgresCatalogSchema
         return database;
     }
 
-    private static ObjectName? ParseVersionFunctionParam(byte[]? tgargs)
+    public static ObjectName? ParseVersionFunctionParam(byte[]? tgargs)
     {
         if (tgargs == null)
             return null;

@@ -3,31 +3,33 @@ import { classes } from '../Globals'
 import * as Finder from '../Finder'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
-import { EntityBaseController, EntityBaseProps } from './EntityBase'
-import { useController } from './LineBase'
+import { Aprox, AsLite, EntityBaseController, EntityBaseProps } from './EntityBase'
+import { genericForwardRef, useController } from './LineBase'
 import { ResultTable } from '../Search'
 import { ResultRow } from '../FindOptions'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
+import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 
 
-export interface EntityRadioButtonListProps extends EntityBaseProps {
-  data?: Lite<Entity>[];
+export interface EntityRadioButtonListProps<V extends Entity | Lite<Entity> | null> extends EntityBaseProps<V> {
+  data?: AsLite<V>[];
   columnCount?: number;
   columnWidth?: number;
-  avoidFieldSet?: boolean;
+  avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   nullPlaceHolder?: string;
-  onRenderItem?: (lite: Lite<Entity> | null) => React.ReactChild;
+  onRenderItem?: (lite: AsLite<V> | null) => React.ReactElement | null;
   nullElement?: "No" | "Always" | "Initially";
 }
 
-export class EntityRadioButtonListController extends EntityBaseController<EntityRadioButtonListProps> {
+export class EntityRadioButtonListController<V extends Entity | Lite<Entity> | null> extends EntityBaseController<EntityRadioButtonListProps<V>, V> {
 
-  getDefaultProps(state: EntityRadioButtonListProps) {
+  getDefaultProps(state: EntityRadioButtonListProps<V>) {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
-      state.ctx.value = null;
+      state.ctx.value = null!;
 
     state.remove = false;
     state.create = false;
@@ -36,9 +38,9 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
     state.columnWidth = 200;
   }
 
-  handleOnChange = (lite: Lite<Entity> | null) => {
+  handleOnChange = (lite: AsLite<V> | null) => {
     if (lite == null)
-      this.setValue(lite);
+      this.setValue(null!);
     else
       this.convert(lite)
         .then(v => this.setValue(v));
@@ -46,35 +48,22 @@ export class EntityRadioButtonListController extends EntityBaseController<Entity
 
 }
 
-export const EntityRadioButtonList = React.forwardRef(function EntityRadioButtonList(props: EntityRadioButtonListProps, ref: React.Ref<EntityRadioButtonListController>) {
+export const EntityRadioButtonList = genericForwardRef(function EntityRadioButtonList<V extends Entity | Lite<Entity>>(props: EntityRadioButtonListProps<V>, ref: React.Ref<EntityRadioButtonListController<V>>) {
   const c = useController(EntityRadioButtonListController, props, ref);
   const p = c.props;
 
   if (c.isHidden)
     return null;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-        {getTimeMachineIcon({ ctx: p.ctx})}
-        {renderButtons()}
-        {renderRadioList()}
-      </div>
-    );
-
   return (
-    <>
-      {getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}
-      <fieldset className={classes("sf-radiobutton-list", p.ctx.errorClass, c.mandatoryClass)} {...{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
-        <legend>
-          <div>
-            <span>{p.label}</span>
-            {renderButtons()}
-          </div>
-        </legend>
-        {renderRadioList()}
-      </fieldset>
-    </>
+    <GroupHeader className={classes("sf-radiobutton-list", p.ctx.errorClassBorder, c.mandatoryClass)}
+      label={<>{getTimeMachineIcon({ ctx: p.ctx, translateY: "100%" })}{p.label}</>}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} >
+      {renderRadioList()}
+    </GroupHeader >
   );
 
   function renderButtons() {
@@ -94,13 +83,13 @@ export const EntityRadioButtonList = React.forwardRef(function EntityRadioButton
 });
 
 
-interface EntityRadioButtonListSelectProps {
-  ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
-  controller: EntityRadioButtonListController;
+interface EntityRadioButtonListSelectProps<V extends Lite<Entity> | Entity | null> {
+  ctx: TypeContext<V>;
+  controller: EntityRadioButtonListController<V>;
   nullElement?: "No" | "Always" | "Initially";
 }
 
-export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectProps) {
+export function EntityRadioButtonListSelect<V extends Lite<Entity> | Entity | null>(props: EntityRadioButtonListSelectProps<V>) {
 
   const c = props.controller;
   const p = c.props;
@@ -172,7 +161,7 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
     if (p.nullElement == "Always")
       fixedData.insertAt(0, { entity: null as any } as ResultRow);
 
-    const value = p.ctx.value as Entity | Lite<Entity> | null;
+    const value = p.ctx.value ;
     if (!fixedData.some(d => is(d.entity, value)) && (p.nullElement == "Initially" || value != null))
       fixedData.insertAt(0, { entity: value && maybeToLite(value) } as ResultRow);
 
@@ -180,10 +169,10 @@ export function EntityRadioButtonListSelect(props: EntityRadioButtonListSelectPr
       <label className="sf-radio-element" key={i}>
         <input type="radio" style={{ marginLeft: "10px" }}
           checked={is(value, row.entity)}
-          onClick={e => c.handleOnChange(row.entity!)}
+          onClick={e => c.handleOnChange(row.entity as AsLite<V>)}
           disabled={p.ctx.readOnly}/>
         &nbsp;
-        {c.props.onRenderItem ? c.props.onRenderItem(row.entity!) : <span>{getToString(row.entity) ?? p.nullPlaceHolder ?? " - "}</span>}
+        {c.props.onRenderItem ? c.props.onRenderItem(row.entity as AsLite<V>) : <span>{getToString(row.entity) ?? p.nullPlaceHolder ?? " - "}</span>}
       </label>);
   }
 }

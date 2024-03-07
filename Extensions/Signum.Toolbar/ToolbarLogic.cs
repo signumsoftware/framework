@@ -2,14 +2,15 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.UserAssets;
 using Signum.Utilities.DataStructures;
+using System.Collections.Frozen;
 using System.Text.Json.Serialization;
 
 namespace Signum.Toolbar;
 
 public static class ToolbarLogic
 {
-    public static ResetLazy<Dictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
-    public static ResetLazy<Dictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
+    public static ResetLazy<FrozenDictionary<Lite<ToolbarEntity>, ToolbarEntity>> Toolbars = null!;
+    public static ResetLazy<FrozenDictionary<Lite<ToolbarMenuEntity>, ToolbarMenuEntity>> ToolbarMenus = null!;
 
     public static Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>> CustomPermissionResponse = 
         new Dictionary<PermissionSymbol, Func<List<ToolbarResponse>>>();
@@ -54,19 +55,27 @@ public static class ToolbarLogic
                 Database.Query<ToolbarEntity>().Any(a => a.Owner.Is(role)) ||
                 Database.Query<ToolbarMenuEntity>().Any(a => a.Owner.Is(role));
 
-            UserAssetsImporter.Register<ToolbarEntity>("Toolbar", ToolbarOperation.Save);
-            UserAssetsImporter.Register<ToolbarMenuEntity>("ToolbarMenu", ToolbarMenuOperation.Save);
+            UserAssetsImporter.Register("Toolbar", ToolbarOperation.Save);
+            UserAssetsImporter.Register("ToolbarMenu", ToolbarMenuOperation.Save);
 
             RegisterDelete<QueryEntity>(sb);
             RegisterDelete<ToolbarMenuEntity>(sb);
     
 
             RegisterContentConfig<ToolbarMenuEntity>(
-                lite => ToolbarMenus.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
+                lite =>
+                {
+                    var entity = ToolbarMenus.Value.GetOrCreate(lite);
+                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+                },
                 lite => PropertyRouteTranslationLogic.TranslatedField(ToolbarMenus.Value.GetOrCreate(lite), a => a.Name));
 
             RegisterContentConfig<ToolbarEntity>(
-                lite => Toolbars.Value.GetOrCreate(lite).IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false),
+                lite =>
+                {
+                    ToolbarEntity entity = Toolbars.Value.GetOrCreate(lite);
+                    return entity.IsAllowedFor(TypeAllowedBasic.Read, inUserInterface: false, FilterQueryArgs.FromEntity(entity));
+                },
                 lite => PropertyRouteTranslationLogic.TranslatedField(Toolbars.Value.GetOrCreate(lite), a => a.Name));
             
             RegisterContentConfig<QueryEntity>(
@@ -95,33 +104,24 @@ public static class ToolbarLogic
             //{ typeof(WorkflowEntity), a => { var wf = WorkflowLogic.WorkflowGraphLazy.Value.GetOrCreate((Lite<WorkflowEntity>)a); return InMemoryFilter(wf.Workflow) && wf.IsStartCurrentUser(); } },
 
 
-            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToDictionary(a => a.ToLite()),
+            Toolbars = sb.GlobalLazy(() => Database.Query<ToolbarEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarEntity)));
 
-            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToDictionary(a => a.ToLite()),
+            ToolbarMenus = sb.GlobalLazy(() => Database.Query<ToolbarMenuEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                new InvalidateWith(typeof(ToolbarMenuEntity)));
         }
     }
 
-    public static void UpdateToolbarIconNameInDB()
-    {
-        Database.Query<ToolbarEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
 
-        Database.Query<ToolbarMenuEntity>().Where(t => t.Elements.Any(e => e.IconName.HasText())).ToList().ForEach(t => {
-            t.Elements.Where(e => e.IconName.HasText()).ToList().ForEach(e => {
-                e.IconName = FontAwesomeV6Upgrade.UpdateIconName(e.IconName!);
-            });
-            t.Save();
-        });
-    }
 
     private static void IToolbar_Saving(IToolbarEntity tool)
     {
+        if (tool.Elements.FirstOrDefault()?.Type == ToolbarElementType.ExtraIcon)
+            throw new InvalidOperationException(ToolbarMessage.FirstElementCanNotBeExtraIcon.NiceToString());
+
+        if(tool.Elements.GroupWhen(e => e.Type != ToolbarElementType.ExtraIcon).Any(gr => gr.Count() > 0 && gr.Key.Type == ToolbarElementType.Divider))
+            throw new InvalidOperationException(ToolbarMessage.ExtraIconCanNotComeAfterDivider.NiceToString());
+
         if (!tool.IsNew && tool.Elements.IsGraphModified)
         {
             using (new EntityCache(EntityCacheType.ForceNew))
@@ -140,30 +140,21 @@ public static class ToolbarLogic
         }
     }
 
-    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
-    {
-        sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(UserEntity));
+    public static void RegisterUserTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, owner => owner.Is(UserEntity.Current));
 
-        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-            t => t.Owner.Is(UserEntity.Current));
+    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition) =>
+        RegisterTypeCondition(sb, typeCondition, owner => owner == null || AuthLogic.CurrentRoles().Contains(owner));
 
-        sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(UserEntity));
-
-        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-            t => t.Owner.Is(UserEntity.Current));
-    }
-
-    public static void RegisterRoleTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition)
+    public static void RegisterTypeCondition(SchemaBuilder sb, TypeConditionSymbol typeCondition, Expression<Func<Lite<IEntity>?, bool>> isAllowed)
     {
         sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition,
-            t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
+        TypeConditionLogic.RegisterCompile<ToolbarEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
 
         sb.Schema.Settings.AssertImplementedBy((ToolbarMenuEntity t) => t.Owner, typeof(RoleEntity));
 
-        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition,
-            t => AuthLogic.CurrentRoles().Contains(t.Owner) || t.Owner == null);
+        TypeConditionLogic.RegisterCompile<ToolbarMenuEntity>(typeCondition, t => isAllowed.Evaluate(t.Owner));
     }
 
     public static void RegisterDelete<T>(SchemaBuilder sb, Expression<Func<T, QueryEntity>>? querySelectorForSync = null) where T : Entity
@@ -229,10 +220,10 @@ public static class ToolbarLogic
 
     public static void RegisterTranslatableRoutes()
     {
-        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Name);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarEntity tb) => tb.Elements[0].Label);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tm) => tm.Name);
-        PropertyRouteTranslationLogic.AddRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarEntity tb) => tb.Elements[0].Label);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tm) => tm.Name);
+        PropertyRouteTranslationLogic.RegisterRoute((ToolbarMenuEntity tb) => tb.Elements[0].Label);
     }
 
     public static ToolbarEntity? GetCurrent(ToolbarLocation location)
@@ -270,7 +261,7 @@ public static class ToolbarLogic
 
     private static List<ToolbarResponse> ToResponseList(List<TranslatableElement<ToolbarElementEmbedded>> elements)
     {
-        var result = elements.SelectMany(a => ToResponse(a) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
+        var result = elements.GroupWhen(a=>a.Value.Type != ToolbarElementType.ExtraIcon, BeforeFirstKey.Skip).SelectMany(gr => ToResponse(gr) ?? Enumerable.Empty<ToolbarResponse>()).NotNull().ToList();
 
         retry:
         var extraDividers = result.Where((a, i) => a.type == ToolbarElementType.Divider && (
@@ -298,20 +289,31 @@ public static class ToolbarLogic
         return tr.type == ToolbarElementType.Header && tr.content == null && string.IsNullOrEmpty(tr.url);
     }
 
-    private static IEnumerable<ToolbarResponse>? ToResponse(TranslatableElement<ToolbarElementEmbedded> transElement)
+    private static IEnumerable<ToolbarResponse>? ToResponse(IGrouping<TranslatableElement<ToolbarElementEmbedded>, TranslatableElement<ToolbarElementEmbedded>> gr)
     {
-        var element = transElement.Value;
+        var transElement = gr.Key;
+        var element = gr.Key.Value;
 
         IContentConfig? config = null;
         if (element.Content != null)
         {
-            config = ContentCondigDictionary.GetOrThrow(element.Content.EntityType);
+            config = ContentConfigDictionary.GetOrThrow(element.Content.EntityType);
             if (!config.IsAuhorized(element.Content))
                 return null;
 
             var customResponse = config.CustomResponses(element.Content);
             if (customResponse != null)
                 return customResponse;
+        }
+
+        if (element.Content is Lite<ToolbarEntity>)
+        {
+            var tme = Toolbars.Value.GetOrThrow((Lite<ToolbarEntity>)element.Content);
+            var res = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
+            if (res.Count == 0)
+                return null;
+
+            return res;
         }
 
         var result = new ToolbarResponse
@@ -325,6 +327,35 @@ public static class ToolbarLogic
             showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
+            extraIcons = gr.IsEmpty() ? null : gr.Select(extra =>
+            {
+                var extraElement = extra.Value;
+                IContentConfig? config = null;
+                if (extraElement.Content != null)
+                {
+                    config = ContentConfigDictionary.GetOrThrow(extraElement.Content.EntityType);
+                    if (!config.IsAuhorized(extraElement.Content))
+                        return null;
+                }
+
+                if (extraElement.Content is Lite<ToolbarEntity>)
+                {
+                    return null;
+                }
+
+                return new ToolbarExtraIcon
+                {
+                    type = extraElement.Type,
+                    content = extraElement.Content,
+                    url = extraElement.Url,
+                    label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(extraElement.Content!),
+                    iconName = extraElement.IconName,
+                    iconColor = extraElement.IconColor,
+                    showCount = extraElement.ShowCount,
+                    autoRefreshPeriod = extraElement.AutoRefreshPeriod,
+                    openInPopup = extraElement.OpenInPopup,
+                };
+            }).NotNull().ToList()
         };
 
         if (element.Content is Lite<ToolbarMenuEntity>)
@@ -333,17 +364,7 @@ public static class ToolbarLogic
             result.elements = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
             if (result.elements.Count == 0)
                 return null;
-        }
-
-        if (element.Content is Lite<ToolbarEntity>)
-        {
-            var tme = Toolbars.Value.GetOrThrow((Lite<ToolbarEntity>)element.Content);
-            var res = ToResponseList(PropertyRouteTranslationLogic.TranslatedMList(tme, t => t.Elements).ToList());
-            if (res.Count == 0)
-                return null;
-
-            return res;
-        }
+        }    
 
         return new[] { result };
     }
@@ -351,15 +372,15 @@ public static class ToolbarLogic
     public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel) 
         where T : Entity
     {
-        ContentCondigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel));
+        ContentConfigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel));
     }
 
     public static ContentConfig<T> GetContentConfig<T>() where T: Entity
     {
-        return (ContentConfig<T>)ContentCondigDictionary.GetOrThrow(typeof(T));
+        return (ContentConfig<T>)ContentConfigDictionary.GetOrThrow(typeof(T));
     }
 
-    static Dictionary<Type, IContentConfig> ContentCondigDictionary = new Dictionary<Type, IContentConfig>();
+    static Dictionary<Type, IContentConfig> ContentConfigDictionary = new Dictionary<Type, IContentConfig>();
 
     public interface IContentConfig
     {
@@ -422,23 +443,38 @@ public static class ToolbarLogic
 
 }
 
-public class ToolbarResponse
+public class ToolbarResponse : ToolbarResponseBase
 {
-    public ToolbarElementType type;
-    public string? label;
-    public Lite<Entity>? content;
-    public string? url;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<ToolbarResponse>? elements;
-    
-    public string? iconName;
-    public string? iconColor;
-    public ShowCount? showCount;
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public int? autoRefreshPeriod;
-
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool openInPopup;
+    public List<ToolbarExtraIcon>? extraIcons;
 
     public override string ToString() => $"{type} {label} {content} {url}";
+}
+
+public class ToolbarExtraIcon : ToolbarResponseBase
+{
+
+}
+
+public class ToolbarResponseBase
+{
+    public ToolbarElementType type;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? label;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Lite<Entity>? content;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? url;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? iconName;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? iconColor;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public ShowCount? showCount;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public int? autoRefreshPeriod;
+
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool openInPopup;
+
+
+    public override string ToString() => $"{type} {label} {content} {url}";
+
 }

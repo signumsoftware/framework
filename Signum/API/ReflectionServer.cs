@@ -8,6 +8,7 @@ using Signum.API.Json;
 using System.Linq;
 using Signum.Utilities;
 using System.Collections.Generic;
+using System.Collections.Frozen;
 
 namespace Signum.API;
 
@@ -31,8 +32,7 @@ public static class ReflectionServer
 
     public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = new Dictionary<Assembly, HashSet<string>>();
 
-    public static ResetLazy<Dictionary<string, Type>> TypesByName = new ResetLazy<Dictionary<string, Type>>(
-        () => GetTypes().ToDictionaryEx(GetTypeName, "Types"));
+    public static ResetLazy<FrozenDictionary<string, Type>> TypesByName = new (() => GetTypes().ToFrozenDictionaryEx(GetTypeName, "Types"));
 
     public static Dictionary<string, Func<bool>> OverrideIsNamespaceAllowed = new Dictionary<string, Func<bool>>();
 
@@ -262,7 +262,7 @@ public static class ReflectionServer
             HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
             Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
 
-            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute != null),
+            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute == true),
         };
 
         return OnTypeExtension(result, type);
@@ -433,6 +433,8 @@ public class OperationInfoTS
     public OperationType OperationType;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeNew;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? CanBeModified;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? ForReadonlyEntity;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? ResultIsSaved;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecute;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasCanExecuteExpression;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public bool? HasStates;
@@ -443,6 +445,8 @@ public class OperationInfoTS
     public OperationInfoTS(OperationInfo oper)
     {
         this.CanBeNew = oper.CanBeNew;
+        this.ForReadonlyEntity = oper.ForReadonlyEntity;
+        this.ResultIsSaved = oper.ResultIsSaved;
         this.CanBeModified = oper.CanBeModified;
         this.HasCanExecute = oper.HasCanExecute;
         this.HasCanExecuteExpression = oper.HasCanExecuteExpression;
@@ -471,8 +475,8 @@ public class TypeReferenceTS
         this.IsNotNullable = clean.IsValueType && !clean.IsNullable();
         this.IsEmbedded = clean.IsEmbeddedEntity();
 
-        if (this.IsEmbedded && !this.IsCollection)
-            this.TypeNiceName = type.NiceName();
+        if (this.IsEmbedded)
+            this.TypeNiceName = this.IsCollection ? type.ElementType()!.NiceName() :  type.NiceName();
         if (implementations != null)
         {
             try

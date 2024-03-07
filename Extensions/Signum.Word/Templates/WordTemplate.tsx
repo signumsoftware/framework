@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { ValueLine, EntityLine, EntityCombo, EntityDetail, EntityTable } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import * as Finder from '@framework/Finder'
 import * as Navigator from '@framework/Navigator'
@@ -36,7 +36,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
 
       <div className="row">
         <div className="col-sm-6">
-          <ValueLine ctx={ctx4.subCtx(f => f.name)} />
+          <AutoLine ctx={ctx4.subCtx(f => f.name)} />
           <EntityLine ctx={ctx4.subCtx(f => f.query)} onChange={forceUpdate} />
           <EntityCombo ctx={ctx4.subCtx(f => f.model)} />
 
@@ -48,13 +48,12 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
         </div>
       </div>
 
-      {ctx.value.query &&
         <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
           <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
-            <ValueLine ctx={ctx.subCtx(f => f.fileName)} />
+            <AutoLine ctx={ctx.subCtx(f => f.fileName)} />
             <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
             <div className="card-header" style={{ padding: "5px" }}>
-                <TemplateControls queryKey={ctx.value.query.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
+              <TemplateControls queryKey={ctx.value.query?.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
                   {UserChartEntity.tryTypeInfo() && qd && <UserChartTemplateButton qd={qd} />}
                   {UserQueryEntity.tryTypeInfo() && qd && <UserQueryTemplateButton qd={qd} />}
                 </div>} />
@@ -62,15 +61,16 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             </div>
             <FileLine ctx={ctx.subCtx(e => e.template)} />
           </Tab>
+        {ctx.value.query &&
           <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
             {ctx.niceName(a => a.query)}
           </span>}>
             <div className="row">
               <div className="col-sm-4">
-                <ValueLine ctx={ctx.subCtx(e => e.disableAuthorization)} inlineCheckbox />
+                <CheckboxLine ctx={ctx.subCtx(e => e.disableAuthorization)} inlineCheckbox />
               </div>
               <div className="col-sm-4">
-                <ValueLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
+                <CheckboxLine ctx={ctx.subCtx(e => e.groupResults)} inlineCheckbox onChange={forceUpdate} />
               </div>
               <div className="col-sm-4">
               </div>
@@ -78,7 +78,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctx.value.query!.key}/>
-            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
               {
                 property: a => a.token,
                 template: ctx => <QueryTokenEmbeddedBuilder
@@ -87,17 +87,18 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
                   subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
               },
               { property: a => a.orderType }
-            ])} />
+            ]} />
           </Tab>
+        }
           <Tab eventKey="applicable" title={
             <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
               {ctx.niceName(a => a.applicable)}
             </span>}>
             <EntityDetail ctx={ctx.subCtx(e => e.applicable)} onChange={forceUpdate}
-              getComponent={(ctx2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ctx2} query={ctx.value.query!} />} />
+              getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
           </Tab>
         </Tabs>
-      }
+
     </div>
   );
 }
@@ -133,7 +134,7 @@ export function UserChartTemplateButton(p: {qd: QueryDescription}) {
 }
 
 export function UserQueryTemplateButton(p: { qd: QueryDescription }) {
-  return renderWidgetButton(<><FontAwesomeIcon icon={["far", "rectangle-list"]} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
+  return renderWidgetButton(<><FontAwesomeIcon icon={"rectangle-list"} color={"dodgerblue"} className="icon" /> {UserQueryEntity.niceName()}</>, () => Finder.find<UserChartEntity>({
     queryName: UserQueryEntity,
     filterOptions: [{
       token: UserQueryEntity.token(a => a.entity!.entityType!.entity!.cleanName),
@@ -150,12 +151,11 @@ function renderWidgetButton(text: React.ReactElement, getCode: () => Promise<str
       getCode()
         .then(code =>
           code &&
-          ValueLineModal.show({
+          AutoLineModal.show({
             type: { name: "string" },
-            valueLineType: "TextArea",
+            customComponent: props => <TextAreaLine {...props} />,
             initialValue: code,
             title: "Embedded Widget",
             message: "Make a similar-looking Chart or Table in Excel and copy it to Word or PowerPoint. Then add the following code in the Alternative Text to bind the data:",
-            initiallyFocused: true,
           }))} >{text}</button>
 }

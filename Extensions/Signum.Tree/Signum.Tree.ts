@@ -46,6 +46,7 @@ export module TreeMessage {
   export const ImpossibleToMove01Of2 = new MessageKey("TreeMessage", "ImpossibleToMove01Of2");
   export const Move0 = new MessageKey("TreeMessage", "Move0");
   export const Copy0 = new MessageKey("TreeMessage", "Copy0");
+  export const ListView = new MessageKey("TreeMessage", "ListView");
 }
 
 export module TreeOperation {

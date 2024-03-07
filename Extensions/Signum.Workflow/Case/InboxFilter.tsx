@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime, Settings } from 'luxon'
 import { newMListElement } from '@framework/Signum.Entities'
 import { InboxFilterModel, InboxMessage, CaseNotificationState, CaseActivityEntity, CaseNotificationEntity } from '../Signum.Workflow'
-import { TypeContext, ValueLine, EnumCheckboxList } from '@framework/Lines'
+import { TypeContext, AutoLine, EnumCheckboxList } from '@framework/Lines'
 import { ISimpleFilterBuilder, extractFilterValue, FilterOption } from '@framework/Search'
 import { FilterOptionParsed } from "@framework/FindOptions";
 import CollapsableCard from "@framework/Components/CollapsableCard";
@@ -43,9 +43,9 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
                 <EnumCheckboxList ctx={ctx.subCtx(o => o.states)} columnCount={2} formGroupHtmlAttributes={{ style: { marginTop: -15, marginBottom: -15 } }} />
               </div>
               <div className="col-sm-3">
-                <ValueLine ctx={ctx4.subCtx(o => o.range)} />
-                <ValueLine ctx={ctx4.subCtx(o => o.fromDate)} />
-                <ValueLine ctx={ctx4.subCtx(o => o.toDate)} />
+                <AutoLine ctx={ctx4.subCtx(o => o.range)} />
+                <AutoLine ctx={ctx4.subCtx(o => o.fromDate)} />
+                <AutoLine ctx={ctx4.subCtx(o => o.toDate)} />
               </div>
               <div className="col-sm-1">
                 <Button variant="warning" className="btn" onClick={this.handleOnClearFiltersClick}>{InboxMessage.Clear.niceToString()}</Button>
@@ -71,18 +71,16 @@ export default class InboxFilter extends React.Component<{ ctx: TypeContext<Inbo
           break;
 
         case "LastWeek":
-          fromDate = DateTime.local().plus({ day: -7 }).toISO();
+          fromDate = DateTime.local().plus({ day: -7 }).toISO()!;
           break;
 
         case "LastMonth":
-          fromDate = DateTime.local().plus({ day: -30 }).toISO();
+          fromDate = DateTime.local().plus({ day: -30 }).toISO()!;
           break;
 
         case "CurrentYear":
-          {
-            fromDate = DateTime.local().startOf("year").toISO();
-            break;
-          }
+          fromDate = DateTime.local().startOf("year").toISO()!;
+          break;
       }
 
       if (fromDate && fromDate.length > 0)

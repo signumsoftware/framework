@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { EntityDetail, EntityLine, EntityStrip, FormGroup, ValueLine } from '@framework/Lines'
+import { EntityDetail, EntityLine, EntityStrip, FormGroup, AutoLine } from '@framework/Lines'
 import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
@@ -48,8 +48,8 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
           <EntityStrip ctx={ctx.subCtx(f => f.bccRecipients)} labelColumns={3} hideIfNull />
         </div>
         <div className="col-sm-4">
-          <ValueLine ctx={ctx.subCtx(f => f.sentDateTime)} labelColumns={6} />
-          <ValueLine ctx={ctx.subCtx(f => f.receivedDateTime)} labelColumns={6} />
+          <AutoLine ctx={ctx.subCtx(f => f.sentDateTime)} labelColumns={6} />
+          <AutoLine ctx={ctx.subCtx(f => f.receivedDateTime)} labelColumns={6} />
         </div>
       </div>
 
@@ -64,7 +64,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
             return (
               <span>
                 <FontAwesomeIcon className="me-1"
-                  icon={Array.isArray(info?.icon) ? info.icon : typeof info?.icon == "string" ? ["far", info?.icon] : ["far", "file"]}
+                  icon={info?.icon ?? "file"}
                   color={info?.color ?? "grey"} />
                 {item.toStr}
               </span>
@@ -79,7 +79,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
           }}
         />
       }
-      <ValueLine ctx={ctx.subCtx(f => f.subject)} />
+      <AutoLine ctx={ctx.subCtx(f => f.subject)} />
 
       {ctx.value.isBodyHtml ?
         <RemoteEmailRenderer remoteEmail={ctx.value} /> : 

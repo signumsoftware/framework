@@ -29,7 +29,7 @@ public static class ResetPasswordRequestOperation
 }
 
 
-public enum AuthEmailMessage
+public enum ResetPasswordMessage
 {
     [Description("You recently requested a new password")]
     YouRecentlyRequestedANewPassword,
@@ -49,4 +49,7 @@ public enum AuthEmailMessage
     YourAccountHasBeenLockedDueToSeveralFailedLogins,
     [Description("Your account has been locked")]
     YourAccountHasBeenLocked,
+    TheCodeOfYourLinkIsIncorrect,
+    TheCodeOfYourLinkHasAlreadyBeenUsed,
+
 }

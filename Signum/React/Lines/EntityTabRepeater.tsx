@@ -10,21 +10,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { EntityBaseController } from '../Lines';
 import { EntityTableProps } from './EntityTable'
 import { Tabs, Tab } from 'react-bootstrap'
-import { useController } from './LineBase'
+import { genericForwardRef, useController } from './LineBase'
 import { getTimeMachineIcon } from './TimeMachineIcon'
+import { GroupHeader, HeaderType } from './GroupHeader'
 
-export interface EntityTabRepeaterProps extends EntityListBaseProps {
-  createAsLink?: boolean | ((er: EntityTabRepeaterController) => React.ReactElement<any>);
+export interface EntityTabRepeaterProps<V extends ModifiableEntity> extends EntityListBaseProps<V> {
+  createAsLink?: boolean | ((er: EntityTabRepeaterController<V>) => React.ReactElement);
   createMessage?: string;
-  avoidFieldSet?: boolean;
-  getTitle?: (ctx: TypeContext<any /*T*/>) => React.ReactChild;
-  extraTabs?: (c: EntityTabRepeaterController) => React.ReactNode;
+  avoidFieldSet?: boolean | HeaderType;
+  getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
+  extraTabs?: (c: EntityTabRepeaterController<V>) => React.ReactNode;
   selectedIndex?: number;
   onSelectTab?: (newIndex: number) => void;
 }
 
 
-function isControlled(p: EntityTabRepeaterProps) {
+function isControlled(p: EntityTabRepeaterProps<any>) {
 
   if ((p.selectedIndex != null) != (p.onSelectTab != null))
     throw new Error("selectedIndex and onSelectTab should be set together");
@@ -32,13 +33,13 @@ function isControlled(p: EntityTabRepeaterProps) {
   return p.selectedIndex != null;
 }
 
-export class EntityTabRepeaterController extends EntityListBaseController<EntityTabRepeaterProps> {
+export class EntityTabRepeaterController<V extends ModifiableEntity> extends EntityListBaseController<EntityTabRepeaterProps<V>, V> {
 
   selectedIndex!: number;
   setSelectedIndex!: (index: number) => void;
   initialIsControlled!: boolean;
 
-  init(p: EntityTabRepeaterProps) {
+  init(p: EntityTabRepeaterProps<V>) {
     super.init(p);
 
     this.initialIsControlled = React.useMemo(() => isControlled(p), []);
@@ -54,13 +55,13 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
     }
   }
 
-  getDefaultProps(p: EntityTabRepeaterProps) {
+  getDefaultProps(p: EntityTabRepeaterProps<V>) {
     super.getDefaultProps(p);
     p.createAsLink = true;
     p.viewOnCreate = false;
   }
 
-  removeElement(mle: MListElement<ModifiableEntity | Lite<Entity>>) {
+  removeElement(mle: MListElement<V>) {
     const list = this.props.ctx.value!;
     let deleteIndex = list.indexOf(mle);
 
@@ -69,7 +70,7 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
     this.setValue(list);
   }
 
-  addElement(entityOrLite: Lite<Entity> | ModifiableEntity) {
+  addElement(entityOrLite: V) {
 
     if (isLite(entityOrLite) != (this.props.type!.isLite || false))
       throw new Error("entityOrLite should be already converted");
@@ -82,7 +83,7 @@ export class EntityTabRepeaterController extends EntityListBaseController<Entity
 
 }
 
-export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(props: EntityTabRepeaterProps, ref: React.Ref<EntityTabRepeaterController>) {
+export const EntityTabRepeater = genericForwardRef(function EntityTabRepeater<V extends ModifiableEntity>(props: EntityTabRepeaterProps<V>, ref: React.Ref<EntityTabRepeaterController<V>>) {
   const c = useController(EntityTabRepeaterController, props, ref);
   const p = c.props;
 
@@ -91,26 +92,15 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
   if (c.isHidden)
     return null;
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
-        {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-        {renderButtons()}
-        {renderTabs()}
-      </div>
-    );
-
   return (
-    <fieldset className={classes("sf-repeater-field sf-control-container", ctx.errorClass)}
-      {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes} {...ctx.errorAttributes()}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-          {renderButtons()}
-        </div>
-      </legend>
+    <GroupHeader className={classes("sf-repeater-field sf-control-container", ctx.errorClassBorder)}
+      label={p.label}
+      labelIcon={p.labelIcon}
+      avoidFieldSet={p.avoidFieldSet}
+      buttons={renderButtons()}
+      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...ctx.errorAttributes() }} >
       {renderTabs()}
-    </fieldset>
+    </GroupHeader >
   );
 
   function renderButtons() {
@@ -119,7 +109,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
         {!p.createAsLink && c.renderCreateButton(false, p.createMessage)}
         {c.renderFindButton(false)}
-        {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+        {p.extraButtons && p.extraButtons(c)}
       </span>
     );
 
@@ -155,7 +145,7 @@ export const EntityTabRepeater = React.forwardRef(function EntityTabRepeater(pro
 
             return (
               <Tab eventKey={i} key={c.keyGenerator.getKey(mlec.value)}
-                {...EntityListBaseController.entityHtmlAttributes(mlec.value)}
+                {...EntityBaseController.entityHtmlAttributes(mlec.value)}
                 className="sf-repeater-element"
                 title={
                   <div

@@ -38,8 +38,8 @@ public static class SMSLogic
 
     public static ISMSProvider GetProvider() => Provider ?? throw new InvalidOperationException("No ISMSProvider set");
 
-    public static ResetLazy<Dictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
-    public static ResetLazy<Dictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
+    public static ResetLazy<FrozenDictionary<Lite<SMSTemplateEntity>, SMSTemplateEntity>> SMSTemplatesLazy = null!;
+    public static ResetLazy<FrozenDictionary<object, List<SMSTemplateEntity>>> SMSTemplatesByQueryName = null!;
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -91,12 +91,12 @@ public static class SMSLogic
                     .Where(a => a.Model.Is(e)));
 
             SMSTemplatesLazy = sb.GlobalLazy(() =>
-                Database.Query<SMSTemplateEntity>().ToDictionary(et => et.ToLite())
+                Database.Query<SMSTemplateEntity>().ToFrozenDictionary(et => et.ToLite())
                 , new InvalidateWith(typeof(SMSTemplateEntity)));
 
             SMSTemplatesByQueryName = sb.GlobalLazy(() =>
             {
-                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToDictionary();
+                return SMSTemplatesLazy.Value.Values.Where(q=>q.Query!=null).SelectCatch(et => KeyValuePair.Create(et.Query!.ToQueryName(), et)).GroupToFrozenDictionary();
             }, new InvalidateWith(typeof(SMSTemplateEntity)));
 
 
@@ -252,7 +252,7 @@ public static class SMSLogic
             try
             {
                 message.MessageID = GetProvider().SMSSendAndGetTicket(message);
-                message.SendDate = Clock.Now.TrimToSeconds();
+                message.SendDate = Clock.Now.TruncSeconds();
                 message.State = SMSMessageState.Sent;
                 message.Save();
 
@@ -284,7 +284,7 @@ public static class SMSLogic
     {
         var messages = new List<SMSMessageEntity>();
         var IDs = GetProvider().SMSMultipleSendAction(template, phones);
-        var sendDate = Clock.Now.TrimToSeconds();
+        var sendDate = Clock.Now.TruncSeconds();
         for (int i = 0; i < phones.Count; i++)
         {
             var message = new SMSMessageEntity { Message = template.Message, From = template.From };
@@ -346,7 +346,7 @@ public static class SMSLogic
             return new SMSMessageEntity
             {
                 Template = t.ToLite(),
-                Message = node.Print(new TextTemplateParameters(entity, ci, columnTokens, table.Rows) { Model = model }),
+                Message = node.Print(new TextTemplateParameters(entity, ci, new QueryContext(qd, table)) { Model = model }),
                 From = t.From,
                 EditableMessage = t.EditableMessage,
                 State = SMSMessageState.Created,

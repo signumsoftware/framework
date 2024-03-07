@@ -3,10 +3,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as _fontawesome_svg_core from '@fortawesome/fontawesome-svg-core'; //throwaway reference to avoid error the inferred type cannot be named without a reference -> https://github.com/microsoft/TypeScript/issues/5938
 import { classes } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
-import { ModifiableEntity, EntityControlMessage } from '@framework/Signum.Entities'
+import { ModifiableEntity, EntityControlMessage, newMListElement } from '@framework/Signum.Entities'
 import { EntityListBaseProps, EntityListBaseController } from '@framework/Lines/EntityListBase'
 import { isModifiableEntity } from '@framework/Signum.Entities';
-import { useController } from '@framework/Lines/LineBase';
+import { genericForwardRef, useController } from '@framework/Lines/LineBase';
+import { Aprox, AsEntity } from '@framework/Lines/EntityBase';
 
 
 export interface IGridEntity {
@@ -15,34 +16,32 @@ export interface IGridEntity {
   columns: number
 }
 
-export interface EntityGridRepeaterProps extends EntityListBaseProps {
-  getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
+export interface EntityGridRepeaterProps<V extends ModifiableEntity & IGridEntity> extends EntityListBaseProps<V> {
   createAsLink?: boolean;
-  move?: boolean;
+  /*move?: boolean;*/
   resize?: boolean;
 }
 
-export interface EntityGridRepaterDragging {
+export interface EntityGridRepaterDragging<V extends ModifiableEntity & IGridEntity> {
   dragMode: "move" | "left" | "right";
   initialPageX?: number;
   originalStartColumn?: number;
-  //currentItem: TypeContext<ModifiableEntity & IGridEntity>;
-  currentItem: ModifiableEntity & IGridEntity;
+  currentItem: V;
   currentRow?: number;
 }
 
 
-export class EntityGridRepeaterController extends EntityListBaseController<EntityGridRepeaterProps> {
+export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEntity> extends EntityListBaseController<EntityGridRepeaterProps<V>, V> {
 
-  drag!: EntityGridRepaterDragging | undefined;
-  setDrag!: React.Dispatch<EntityGridRepaterDragging | undefined>;
+  drag!: EntityGridRepaterDragging<V> | undefined;
+  setDrag!: React.Dispatch<EntityGridRepaterDragging<V> | undefined>;
 
-  init(p: EntityGridRepeaterProps) {
+  init(p: EntityGridRepeaterProps<V>) {
     super.init(p);
-    [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging | undefined>(undefined);
+    [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging<V> | undefined>(undefined);
   }
   
-  getDefaultProps(state: EntityGridRepeaterProps) {
+  getDefaultProps(state: EntityGridRepeaterProps<V>) {
     super.getDefaultProps(state);
     state.viewOnCreate = false;
     state.move = true;
@@ -50,41 +49,34 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
     state.remove = true;
   }
 
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
 
     const p = this.props;
     const pr = p.ctx.propertyRoute!.addLambda(a => a[0]);
-    const promise = p.onCreate ?
-      p.onCreate(pr) : this.defaultCreate(pr);
+    const e = p.onCreate ? await p.onCreate(pr) :
+      await this.defaultCreate(pr);
 
-    if (!promise)
+    if (!e)
       return;
 
-    promise
-      .then(e => {
+    if (!isModifiableEntity(e))
+      throw new Error("Should be an entity");
 
-        if (!e)
-          return;
+    let ge = e as V;
 
-        if (!isModifiableEntity(e))
-          throw new Error("Should be an entity");
+    const list = p.ctx.value!;
+    if (ge.row == undefined)
+      ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max()! + 1;
+    if (ge.startColumn == undefined)
+      ge.startColumn = 0;
+    if (ge.columns == undefined)
+      ge.columns = 12;
 
-        let ge = e as ModifiableEntity & IGridEntity;
-
-        const list = p.ctx.value!;
-        if (ge.row == undefined)
-          ge.row = list.length == 0 ? 0 : list.map(a => (a.element as IGridEntity).row).max()! + 1;
-        if (ge.startColumn == undefined)
-          ge.startColumn = 0;
-        if (ge.columns == undefined)
-          ge.columns = 12;
-
-        list.push({ rowId: null, element: e });
-        this.setValue(list);
-      });
-  };
+    list.push(newMListElement(ge));
+    this.setValue(list);
+  }
 
   handleRowDragOver = (e: React.DragEvent<any>, row: number) => {
     e.dataTransfer.dropEffect = "move";
@@ -124,20 +116,20 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
     this.setDrag(undefined);
   };
 
-  handleResizeDragStart: (resizer: "left" | "right", e: React.DragEvent<any>, mlec: ModifiableEntity & IGridEntity) => void = (resizer, e, mlec) => {
+  handleResizeDragStart: (resizer: "left" | "right", e: React.DragEvent<any>, mlec: V) => void = (resizer, e, mlec) => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
     this.setDrag({ currentItem: mlec, dragMode: resizer });
   };
 
-  handleMoveDragStart = (e: React.DragEvent<any>, mlec: ModifiableEntity & IGridEntity) => {
+  handleMoveDragStart = (e: React.DragEvent<any>, mlec: V) => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
 
     this.setDrag({ dragMode: "move", initialPageX: de.pageX, originalStartColumn: mlec.startColumn, currentItem: mlec });
   };
 
-  handleMoveDragEnd = (e: React.DragEvent<any>, mlec: ModifiableEntity & IGridEntity) => {
+  handleMoveDragEnd = (e: React.DragEvent<any>, mlec: V) => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
     this.setDrag(undefined);
@@ -210,7 +202,7 @@ export class EntityGridRepeaterController extends EntityListBaseController<Entit
 }
 
 
-export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(props: EntityGridRepeaterProps, ref: React.Ref<EntityGridRepeaterController>) {
+export const EntityGridRepeater = genericForwardRef(function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>, ref: React.Ref<EntityGridRepeaterController<V>>) {
   const c = useController(EntityGridRepeaterController, props, ref)
   const p = c.props;
 
@@ -226,7 +218,7 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
             {p.extraButtonsBefore && p.extraButtonsBefore(c)}
             {c.renderCreateButton(false)}
             {c.renderFindButton(false)}
-            {p.extraButtonsAfter && p.extraButtonsAfter(c)}
+            {p.extraButtons && p.extraButtons(c)}
           </span>
         </div>
       </legend>
@@ -240,14 +232,14 @@ export const EntityGridRepeater = React.forwardRef(function EntityGridRepeater(p
       <div className={classes("sf-grid-container", c.drag?.dragMode == "move" ? "sf-dragging" : undefined)} onDrop={c.handleOnDrop}>
         {(!p.ctx.value || p.ctx.value.length == 0) && renderSeparator(1)}
         {
-          c.getMListItemContext<ModifiableEntity & IGridEntity>(p.ctx)
+          c.getMListItemContext(p.ctx)
             .groupBy(ctx => { return ctx.value.row.toString(); })
             .orderBy(gr => parseInt(gr.key))
             .flatMap((gr, i, groups) => [
               renderSeparator(parseInt(gr.key)),
               <div className="row items-row" key={"row" + gr.key} onDragOver={e => c.handleItemsRowDragOver(e, parseInt(gr.key))}>
                 {gr.elements.orderBy(ctx => ctx.value.startColumn).map((ctx, j, list) => {
-                  let item = p.getComponent!(ctx);
+                  let item = p.getComponent!(ctx as unknown as TypeContext<AsEntity<V>>);
                   const s = p;
                   item = React.cloneElement(item, {
                     onResizerDragStart: ctx.readOnly || !s.resize ? undefined : (resizer, e) => c.handleResizeDragStart(resizer, e, ctx.value),

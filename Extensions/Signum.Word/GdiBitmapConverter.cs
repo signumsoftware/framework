@@ -27,26 +27,31 @@ public class GdiBitmapConverter : IImageConverter<Bitmap>
         return ResizeBitmap(image, maxWidth, maxHeight);
     }
 
-    public void Save(Bitmap image, Stream str, ImagePartType imagePartType)
+    public void Save(Bitmap image, Stream str, PartTypeInfo imagePartType)
     {
         image.Save(str, ToImageFormat(imagePartType));
     }
 
-    private static ImageFormat ToImageFormat(ImagePartType imagePartType)
+    public static Dictionary<PartTypeInfo, ImageFormat> ToImageFormatMapping = new Dictionary<PartTypeInfo, ImageFormat>()
     {
-        switch (imagePartType)
-        {
-            case ImagePartType.Bmp: return ImageFormat.Bmp;
-            case ImagePartType.Emf: return ImageFormat.Emf;
-            case ImagePartType.Gif: return ImageFormat.Gif;
-            case ImagePartType.Icon: return ImageFormat.Icon;
-            case ImagePartType.Jpeg: return ImageFormat.Jpeg;
-            case ImagePartType.Png: return ImageFormat.Png;
-            case ImagePartType.Tiff: return ImageFormat.Tiff;
-            case ImagePartType.Wmf: return ImageFormat.Wmf;
-        }
+        { ImagePartType.Bmp, ImageFormat.Bmp}, 
+        { ImagePartType.Emf, ImageFormat.Emf},
+        { ImagePartType.Gif, ImageFormat.Gif},
+        { ImagePartType.Icon, ImageFormat.Icon},
+        { ImagePartType.Jpeg, ImageFormat.Jpeg},
+        { ImagePartType.Png, ImageFormat.Png},
+        { ImagePartType.Tiff, ImageFormat.Tiff},
+        { ImagePartType.Wmf, ImageFormat.Wmf},
+    };
 
-        throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
+    private static ImageFormat ToImageFormat(PartTypeInfo imagePartType)
+    {
+        var imageFormat = ToImageFormatMapping.TryGetC(imagePartType);
+
+        if (imageFormat == null)
+            throw new InvalidOperationException("Unexpected {0}".FormatWith(imagePartType));
+
+        return imageFormat;
     }
 
     //http://stackoverflow.com/a/10445101/38670

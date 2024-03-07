@@ -93,33 +93,18 @@ public class IncorrectUsernameException : ApplicationException
 {
     public IncorrectUsernameException() { }
     public IncorrectUsernameException(string message) : base(message) { }
-    protected IncorrectUsernameException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context)
-        : base(info, context)
-    { }
 }
 
 public class UserLockedException : ApplicationException
 {
     public UserLockedException() { }
     public UserLockedException(string message) : base(message) { }
-    protected UserLockedException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context)
-        : base(info, context)
-    { }
 }
 
 public class IncorrectPasswordException : ApplicationException
 {
     public IncorrectPasswordException() { }
     public IncorrectPasswordException(string message) : base(message) { }
-    protected IncorrectPasswordException(
-        System.Runtime.Serialization.SerializationInfo info,
-        System.Runtime.Serialization.StreamingContext context)
-        : base(info, context)
-    { }
 }
 
 
@@ -142,6 +127,8 @@ public class UserLiteModel : ModelEntity
     public Guid? OID { get; set; }
 
     public string? SID { get; set; }
+
+    public string? PhotoSuffix { get; set; }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => ToStringValue ?? UserName);

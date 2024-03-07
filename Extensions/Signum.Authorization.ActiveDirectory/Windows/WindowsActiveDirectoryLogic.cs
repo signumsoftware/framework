@@ -4,6 +4,7 @@ using System.DirectoryServices.AccountManagement;
 using Signum.API;
 using Signum.Mailing;
 using Signum.Authorization.ActiveDirectory.Azure;
+using DocumentFormat.OpenXml.Vml.Office;
 
 namespace Signum.Authorization.ActiveDirectory.Windows;
 
@@ -14,6 +15,8 @@ public static class WindowsActiveDirectoryLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
+            PermissionLogic.RegisterTypes(typeof(ActiveDirectoryPermission));
+
             if (sb.WebServerBuilder != null)
             {
                 ReflectionServer.RegisterLike(typeof(ActiveDirectoryPermission), () => ActiveDirectoryPermission.InviteUsersFromAD.IsAuthorized());
@@ -40,10 +43,10 @@ public static class WindowsActiveDirectoryLogic
                     {
                         stc.ForeachWriting(list, u => u.UserName, u =>
                         {
+                            var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
+
                             if (u.State == UserState.Active)
                             {
-                                var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, u.UserName);
-
                                 if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == false)
                                 {
                                     stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been deactivated in AD");
@@ -60,6 +63,15 @@ public static class WindowsActiveDirectoryLogic
                                     u.Execute(UserOperation.Deactivate);
                                 }
 
+                            }
+
+                            if (u.State == UserState.Deactivated)
+                            {
+                                if (foundUser != null && foundUser.Enabled.HasValue && foundUser.Enabled == true)
+                                {
+                                    stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with SID {u.Mixin<UserADMixin>().SID} has been reactivated in AD");
+                                    u.Execute(UserOperation.Reactivate);
+                                }
                             }
                         });
 

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, TypeContext } from '@framework/Lines'
+import { AutoLine, TypeContext } from '@framework/Lines'
 import CSSCodeMirror from '../../Signum.CodeMirror/CSSCodeMirror'
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicCSSOverrideEntity } from '../Signum.Dynamic.CSS';
@@ -17,7 +17,7 @@ export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<Dynam
 
   return (
     <div>
-      <ValueLine ctx={ctx.subCtx(dt => dt.name)} />
+      <AutoLine ctx={ctx.subCtx(dt => dt.name)} />
       <br />
       <div className="code-container">
         <CSSCodeMirror script={ctx.value.script ?? ""} onChange={handleCodeChange} />

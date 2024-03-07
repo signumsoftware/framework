@@ -16,8 +16,12 @@ import { ImportExcelProgressModal } from './ImportExcelProgressModal';
 import { TypeInfo } from '@framework/Reflection';
 import { softCast } from '@framework/Globals';
 import { QueryString } from '@framework/QueryString';
+import { isPermissionAuthorized } from '@framework/AppContext';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], plainExcel: boolean, importFromExcel: boolean, excelReport: boolean }) {
+
+  registerChangeLogModule("Signum.Excel", () => import("./Changelog"));
 
   if (options.excelReport) {
     Navigator.addSettings(new EntitySettings(ExcelReportEntity, e => import('./Templates/ExcelReport')));
@@ -33,7 +37,7 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
       !(ctx.searchControl.props.showBarExtensionOption?.showExcelMenu ?? ctx.searchControl.props.largeToolbarButtons))
       return undefined;
 
-    if (!(options.plainExcel && AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
+    if (!(options.plainExcel && isPermissionAuthorized(ExcelPermission.PlainExcel)) &&
       !(options.excelReport && Navigator.isViewable(ExcelReportEntity)))
       return undefined;
 
@@ -47,14 +51,14 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
 
   if (options.plainExcel) {
     ChartClient.ButtonBarChart.onButtonBarElements.push(ctx => {
-      if (!AuthClient.isPermissionAuthorized(ChartPermission.ViewCharting) || !AuthClient.isPermissionAuthorized(ExcelPermission.PlainExcel))
+      if (!isPermissionAuthorized(ChartPermission.ViewCharting) || !isPermissionAuthorized(ExcelPermission.PlainExcel))
         return undefined;
 
       return (
         <button
           className="sf-query-button sf-chart-script-edit btn btn-light"
           onClick={() => { API.generatePlainExcel(ChartClient.API.getRequest(ctx.chartRequest)); }}>
-          <FontAwesomeIcon icon={["far", "file-excel"]} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
+          <FontAwesomeIcon icon={"file-excel"} /> &nbsp; {ExcelMessage.ExcelReport.niceToString()}
         </button>
       );
     });
@@ -64,7 +68,7 @@ export function start(options: { routes: RouteObject[], plainExcel: boolean, imp
 export namespace API {
 
   export function generatePlainExcel(request: QueryRequest, overrideFileName?: string, forImport?: boolean): void {
-    ajaxPostRaw({ url: "/api/excel/plain?" + QueryString.stringify({ forImport }) }, request)
+    ajaxPostRaw({ url: "/api/excel/plain/" + request.queryKey + "?" + QueryString.stringify({ forImport }) }, request)
       .then(response => saveFile(response, overrideFileName));
   }
 
@@ -74,18 +78,18 @@ export namespace API {
 
 
   export function generateExcelReport(queryRequest: QueryRequest, excelReport: Lite<ExcelReportEntity>): void {
-    ajaxPostRaw({ url: "/api/excel/excelReport" }, { queryRequest, excelReport })
+    ajaxPostRaw({ url: "/api/excel/excelReport/" + queryRequest.queryKey }, { queryRequest, excelReport })
       .then(response => saveFile(response));
   }
 
   export function validateForImport(queryRequest: QueryRequest): Promise<QueryToken | undefined> {
-    return ajaxPost({ url: "/api/excel/validateForImport" }, queryRequest);
+    return ajaxPost({ url: "/api/excel/validateForImport/" + queryRequest.queryKey }, queryRequest);
   }
 
   export function importFromExcel(qr: QueryRequest, model: ImportExcelModel, type: TypeInfo): Promise<ImportFromExcelReport> {
     var abortController = new AbortController();
     return ImportExcelProgressModal.show(abortController, type,
-      () => ajaxPostRaw({ url: "/api/excel/import", signal: abortController.signal }, softCast<ImportFromExcelRequest>({ importModel: model, queryRequest : qr }))
+      () => ajaxPostRaw({ url: "/api/excel/import/" + qr.queryKey, signal: abortController.signal }, softCast<ImportFromExcelRequest>({ importModel: model, queryRequest : qr }))
     );
   }
 }

@@ -78,15 +78,35 @@
             color: var(--sidebar-accent);
         }
 
+    .sidebar-inner .nav-item .sf-extra-icon.active {
+        background-color: #dfdfdf;
+    }
+
+    .sidebar-inner .nav-item .sf-extra-icon.active > svg.icon {
+        filter: brightness(0.7);
+    }
+
+    .sidebar-inner .nav-item .sf-extra-icon:hover {
+        background-color: #d5d5d5;
+    }
+
+    .sidebar-inner .nav-item .sf-extra-icon:hover > svg.icon {
+        filter: brightness(0.5);
+    }
+
+    /* .sidebar-inner .nav-item .sf-extra-icon:active > svg {
+        color: var(--sidebar-accent);
+    } */
+
     .sidebar-inner .nav-item-sub-menu .nav-item .nav-link.active {
         background-color: #dfdfdf;
     }
 
-    .sidebar-inner .nav-item .nav-link.active svg.icon {
+    .sidebar-inner .nav-item .nav-link.active > svg.icon {
         filter: brightness(0.7);
     }
 
-    .sidebar-inner .nav-item .nav-link.active span.icon.count-search {
+    .sidebar-inner .nav-item .nav-link.active > span.icon.count-search {
         filter: brightness(0.7);
     }
 
@@ -118,18 +138,18 @@
         background-color: #c9c9c9;
     }
 
-    .sidebar-inner .nav-item .nav-link:hover svg {
+    .sidebar-inner .nav-item .nav-link:hover > svg.icon {
         filter: brightness(0.5);
     }
 
-    .sidebar-inner .nav-item .nav-link:active {
+    /* .sidebar-inner .nav-item .nav-link:active > span {
         color: var(--sidebar-accent);
         border-left-color: var(--sidebar-accent);
     }
 
-        .sidebar-inner .nav-item .nav-link:active svg {
+        .sidebar-inner .nav-item .nav-link:active > svg {
             color: var(--sidebar-accent);
-        }
+        } */
 
     .sidebar-inner .nav-item .nav-link * {
         transition: all 200ms;
@@ -173,21 +193,8 @@
 }
 
 .nav-arrow-icon {
-}
-
-.nav-icon-with-arrow {
-    opacity: .3;
-}
-
-
-.sidebar-nav.wide .nav-arrow-icon {
     margin-left: -18px;
 }
-
-.sidebar-nav.wide .nav-icon-with-arrow {
-    opacity: .8;
-}
-
 
 @media (min-width: 768px) {
     .sidebar-container {
@@ -343,6 +350,7 @@
         overflow: hidden;
         display: inline-block;
     }
+
 
 
 .sidebar-container .sidebar {

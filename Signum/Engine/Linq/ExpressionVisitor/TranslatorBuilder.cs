@@ -24,7 +24,7 @@ internal static class TranslatorBuilder
         var lazyChildProjections = LazyChildProjectionGatherer.Gatherer(proj).Select(cp => BuildChild(cp)).ToList();
 
         Scope scope = new Scope(
-            alias :proj.Select.Alias,
+            alias: proj.Select.Alias,
             positions: proj.Select.Columns.Select((c, i) => new { c.Name, i }).ToDictionary(p => p.Name, p => p.i)
         );
 
@@ -461,6 +461,11 @@ internal static class TranslatorBuilder
             var customModel = Visit(lite.CustomModelExpression);
             var typeId = lite.TypeId;
 
+            Expression GetPartitionId(Type type)
+            {
+                return lite.PartitionIds?.TryGetC(type) ?? NullId;
+            }
+
             Expression GetEagerModel(Type entityType, out bool requiresRequest)
             {
                 requiresRequest = false;
@@ -483,8 +488,9 @@ internal static class TranslatorBuilder
                 Type type = tee.TypeValue;
 
                 var model = GetEagerModel(type, out var requiresRequest);
+                var partitionId = Visit(GetPartitionId(type));
 
-                var liteConstructor = Expression.Convert(Lite.NewExpression(type, id, model), lite.Type);
+                var liteConstructor = Expression.Convert(Lite.NewExpression(type, id, model, partitionId), lite.Type);
 
                 return Expression.Condition(Expression.NotEqual(id, NullId),
                     requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor),
@@ -497,8 +503,8 @@ internal static class TranslatorBuilder
                     {
                         var visitId = Visit(NullifyColumn(ti.Value));
                         var model = GetEagerModel(ti.Key, out var requiresRequest);
-
-                        var liteConstructor = Lite.NewExpression(ti.Key, visitId, model);
+                        var partitonId = Visit(GetPartitionId(ti.Key));
+                        var liteConstructor = Lite.NewExpression(ti.Key, visitId, model, partitonId);
 
                         return Expression.Condition(Expression.NotEqual(visitId, NullId),
                             Expression.Convert(requiresRequest ? RequestLite(liteConstructor) : PostRetrieving(liteConstructor), lite.Type),
@@ -516,23 +522,28 @@ internal static class TranslatorBuilder
                 if (customModel != null)
                     return Expression.Condition(Expression.Equal(tid, NullId), nothing,
                         PostRetrieving(Expression.Convert(
-                            Expression.Call(miLiteCreateModel, typeFromId, uid, customModel), 
+                            Expression.Call(miLiteCreateModel, typeFromId, uid, customModel, NullId), 
                             lite.Type)));
 
                 var baseCase = Expression.Condition(Expression.Equal(tid, NullId), nothing,
                     RequestLite(
                         Expression.Convert(
-                            Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Call(miGetDefaultModelType, typeFromId)), 
+                            Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Call(miGetDefaultModelType, typeFromId), NullId), 
                             lite.Type)));
+
+                if (lite.Models == null)
+                    return baseCase;
 
                 var result = lite.Models!.Aggregate((Expression)baseCase,
                     (acum, kvp) =>
                     {
                         var model = GetEagerModel(kvp.Key, out var requiresRequest);
 
+                        var partitionId = Visit(GetPartitionId(kvp.Key));
+
                         var liteExpression = requiresRequest ?
-                                RequestLite(Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Constant(model.Type))) :
-                                PostRetrieving(Expression.Call(miLiteCreateModel, typeFromId, uid, model));
+                                RequestLite(Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Constant(model.Type), partitionId)) :
+                                PostRetrieving(Expression.Call(miLiteCreateModel, typeFromId, uid, model, partitionId));
 
                         return Expression.Condition(Expression.Equal(tid, Expression.Constant(TypeLogic.TypeToId.GetOrThrow(kvp.Key))),
                             Expression.Convert(liteExpression, lite.Type),
@@ -546,8 +557,8 @@ internal static class TranslatorBuilder
                 var type = Visit(typeId);
 
                 var constructor = customModel != null ?
-                    PostRetrieving(Expression.Call(miLiteCreateModel, type, id.UnNullify(), customModel)) :
-                    RequestLite(Expression.Call(miLiteCreateModelType, type, id.UnNullify(), Expression.Call(miGetDefaultModelType, type))); //Maybe could be optimized
+                    PostRetrieving(Expression.Call(miLiteCreateModel, type, id.UnNullify(), customModel, NullId)) :
+                    RequestLite(Expression.Call(miLiteCreateModelType, type, id.UnNullify(), Expression.Call(miGetDefaultModelType, type), NullId)); //Maybe could be optimized
 
                 return Expression.Condition(Expression.NotEqual(id.Nullify(), NullId),
                         Expression.Convert(constructor, lite.Type),
@@ -568,8 +579,8 @@ internal static class TranslatorBuilder
         }
 
         static readonly MethodInfo miGetTypeFromId = ReflectionTools.GetMethodInfo((Schema s) => s.GetType(1));
-        static MethodInfo miLiteCreateModel = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (object)null!));
-        static MethodInfo miLiteCreateModelType = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (Type)null!));
+        static MethodInfo miLiteCreateModel = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (object)null!, null));
+        static MethodInfo miLiteCreateModelType = ReflectionTools.GetMethodInfo(() => Lite.Create(null!, 0, (Type)null!, null));
 
         protected internal override Expression VisitMListElement(MListElementExpression mle)
         {
@@ -583,6 +594,9 @@ internal static class TranslatorBuilder
 
             if (mle.Order != null)
                 bindings.Add(Expression.Bind(type.GetProperty("RowOrder")!, Visit(mle.Order)));
+
+            if (mle.PartitionId != null)
+                bindings.Add(Expression.Bind(type.GetProperty("RowPartitionId")!, Visit(mle.PartitionId)));
 
             bindings.Add(Expression.Bind(type.GetProperty("Element")!, Visit(mle.Element)));
 

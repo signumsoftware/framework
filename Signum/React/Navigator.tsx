@@ -39,12 +39,14 @@ export function start(options: { routes: RouteObject[] }) {
   AppContext.clearSettingsActions.push(clearWidgets)
   AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
   AppContext.clearSettingsActions.push(clearCustomConstructors);
-  AppContext.clearSettingsActions.push(cleanEntityChanged);
+  AppContext.clearSettingsActions.push(clearEntityChanged);
   AppContext.clearSettingsActions.push(clearSpecialActions);
+  AppContext.clearSettingsActions.push(clearEvents);
 
   ErrorModalOptions.getExceptionUrl = exceptionId => navigateRoute(newLite(ExceptionEntity, exceptionId));
   ErrorModalOptions.isExceptionViewable = () => isViewable(ExceptionEntity);
 }
+
 
 export namespace NavigatorManager {
   export function getFramePage() {
@@ -90,7 +92,7 @@ export function useEntityChanged<T extends Entity>(typeOrTypes: Type<any> | stri
   }, [types.join(","), ...deps]);
 }
 
-function cleanEntityChanged() {
+function clearEntityChanged() {
   Dic.clear(entityChanged);
 }
 
@@ -134,13 +136,13 @@ export function setDefaultRenderTitleFunction(newFunction: (typeInfo: TypeInfo, 
 }
 
 
-let renderId = (entity: Entity): React.ReactChild => {
+let renderId = (entity: Entity): React.ReactElement | string | number => {
   var idType = getTypeInfo(entity.Type).members["Id"].type;
 
-  const guid = idType!.name == "Guid";
+  const hideId = getSettings(entity.Type)?.hideId ?? idType!.name == "Guid";
   return (
     <>
-      <span className={guid ? "sf-hide-id" : ""}>
+      <span className={hideId ? "sf-hide-id" : ""}>
         {entity.id}
       </span>
       <CopyLiteButton className={"sf-hide-id"} entity={entity} />
@@ -149,7 +151,7 @@ let renderId = (entity: Entity): React.ReactChild => {
   );
 }
 
-export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactChild) {
+export function setRenderIdFunction(newFunction: (entity: Entity) => React.ReactElement | string | number) {
   renderId = newFunction;
 }
 
@@ -211,7 +213,7 @@ export function renderLiteOrEntity(entity: Lite<Entity> | Entity | ModifiableEnt
   }
 }
 
-export function renderLite(lite: Lite<Entity>, hl?: TextHighlighter): React.ReactChild {
+export function renderLite(lite: Lite<Entity>, hl?: TextHighlighter): React.ReactElement | string {
   var es = entitySettings[lite.EntityType];
   if (es != null && es.renderLite != null) {
     return es.renderLite(lite, hl ?? new TextHighlighter(undefined));
@@ -221,7 +223,7 @@ export function renderLite(lite: Lite<Entity>, hl?: TextHighlighter): React.Reac
   return hl == null ? toStr : hl.highlight(toStr);
 }
 
-export function renderEntity(entity: ModifiableEntity): React.ReactChild {
+export function renderEntity(entity: ModifiableEntity): React.ReactElement | string {
   var es = entitySettings[entity.Type];
   if (es != null && es.renderEntity != null) {
     return es.renderEntity(entity, new TextHighlighter(undefined));
@@ -232,6 +234,14 @@ export function renderEntity(entity: ModifiableEntity): React.ReactChild {
 
 export function clearEntitySettings() {
   Dic.clear(entitySettings);
+}
+
+export function clearEvents() {
+
+  isCreableEvent.clear();
+  isReadonlyEvent.clear();
+  isViewableEvent.clear();
+  Finder.isFindableEvent.clear();
 }
 
 export const entitySettings: { [type: string]: EntitySettings<ModifiableEntity> } = {};
@@ -308,7 +318,7 @@ export class BasicViewDispatcher implements ViewDispatcher {
 
 }
 
-export class DynamicComponentViewDispatcher implements ViewDispatcher {
+export class AutoViewDispatcher implements ViewDispatcher {
 
   hasDefaultView(typeName: string) {
     return true;
@@ -330,7 +340,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
     if (viewName == undefined) {
 
       if (es?.getViewPromise == null)
-        return new ViewPromise<ModifiableEntity>(import('./Lines/DynamicComponent'));
+        return new ViewPromise<ModifiableEntity>(import('./AutoComponent'));
 
       return es.getViewPromise(entity).applyViewOverrides(entity.Type);
     } else {
@@ -347,7 +357,7 @@ export class DynamicComponentViewDispatcher implements ViewDispatcher {
   }
 }
 
-export let viewDispatcher: ViewDispatcher = new DynamicComponentViewDispatcher();
+export let viewDispatcher: ViewDispatcher = new AutoViewDispatcher();
 
 export function getViewPromise<T extends ModifiableEntity>(entity: T, viewName?: string): ViewPromise<T> {
   return viewDispatcher.getViewPromise(entity, viewName);
@@ -532,7 +542,7 @@ export const isViewableEvent: Array<(typeName: string, entityPack: EntityPack<Mo
 
 export interface IsViewableOptions {
   customComponent?: boolean;
-  isSearch?: boolean;
+  isSearch?: "main" | "related";
   isEmbedded?: boolean;
   buttons?: ViewButtons;
 }
@@ -561,7 +571,7 @@ export function isViewable(typeOrEntity: PseudoType | EntityPack<ModifiableEntit
 
   const typeName = isEntityPack(typeOrEntity) ? typeOrEntity.entity.Type : getTypeName(typeOrEntity as PseudoType);
 
-  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch);
+  const baseTypeName = checkFlag(typeIsViewable(typeName, options?.isEmbedded), options?.isSearch == "main");
 
   const hasView = options?.customComponent || viewDispatcher.hasDefaultView(typeName);
 
@@ -656,32 +666,28 @@ export function getAutoCompleteBasic(type: TypeInfo, findOptions: FindOptions | 
   });
 }
 
-export interface ViewOptions {
+export interface ViewOptions<T extends ModifiableEntity> {
   title?: React.ReactNode | null;
   subTitle?: React.ReactNode | null;
   propertyRoute?: PropertyRoute;
   readOnly?: boolean;
   modalSize?: BsSize;
-  isOperationVisible?: (eoc: Operations.EntityOperationContext<any /*Entity*/>) => boolean;
+  isOperationVisible?: (eoc: Operations.EntityOperationContext<T & Entity>) => boolean;
   validate?: boolean;
   requiresSaveOperation?: boolean;
   avoidPromptLoseChange?: boolean;
   buttons?: ViewButtons;
-  getViewPromise?: (entity: ModifiableEntity) => undefined | string | ViewPromise<ModifiableEntity>;
-  createNew?: () => Promise<EntityPack<ModifiableEntity> | undefined>;
+  getViewPromise?: (entity: T) => undefined | string | ViewPromise<T>;
+  createNew?: () => Promise<EntityPack<T> | undefined>;
   allowExchangeEntity?: boolean;
   extraProps?: {};
 }
 
-export function view<T extends ModifiableEntity>(options: EntityPack<T>, viewOptions?: ViewOptions): Promise<T | undefined>;
-export function view<T extends ModifiableEntity>(entity: T, viewOptions?: ViewOptions): Promise<T | undefined>;
-export function view<T extends Entity>(entity: Lite<T>, viewOptions?: ViewOptions): Promise<T | undefined>
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined>;
-export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions): Promise<ModifiableEntity | undefined> {
+export function view<T extends ModifiableEntity>(entityOrPack: Lite<T & Entity> | T | EntityPack<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined> {
 
   const typeName = isEntityPack(entityOrPack) ? entityOrPack.entity.Type : getTypeName(entityOrPack);
 
-  const es = getSettings(typeName);
+  const es = getSettings(typeName) as EntitySettings<T> | undefined;
 
   if (es?.onView)
     return es.onView(entityOrPack, viewOptions);
@@ -689,7 +695,7 @@ export function view(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<
     return viewDefault(entityOrPack, viewOptions);
 }
 
-export function viewDefault(entityOrPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>, viewOptions?: ViewOptions) {
+export function viewDefault<T extends ModifiableEntity>(entityOrPack: Lite<T & Entity> | T | EntityPack<T>, viewOptions?: ViewOptions<T>): Promise<T | undefined> {
   return NavigatorManager.getFrameModal()
     .then(NP => NP.FrameModalManager.openView(entityOrPack, viewOptions ?? {}));
 }
@@ -721,22 +727,22 @@ export function createNavigateOrTab(pack: EntityPack<Entity> | undefined, event:
 }
 
 
-export function toEntityPack(entityOrEntityPack: Lite<Entity> | ModifiableEntity | EntityPack<ModifiableEntity>): Promise<EntityPack<ModifiableEntity>> {
-  if ((entityOrEntityPack as EntityPack<ModifiableEntity>).canExecute)
-    return Promise.resolve(entityOrEntityPack as EntityPack<ModifiableEntity>);
+export function toEntityPack<T extends ModifiableEntity>(entityOrEntityPack: Lite<T & Entity> | T | EntityPack<T>): Promise<EntityPack<T>> {
+  if ((entityOrEntityPack as EntityPack<T>).canExecute)
+    return Promise.resolve(entityOrEntityPack as EntityPack<T>);
 
-  const entity = (entityOrEntityPack as ModifiableEntity).Type ?
-    entityOrEntityPack as ModifiableEntity :
-    (entityOrEntityPack as Lite<Entity> | EntityPack<ModifiableEntity>).entity;
+  const entity = (entityOrEntityPack as T).Type ?
+    entityOrEntityPack as T :
+    (entityOrEntityPack as Lite<Entity> | EntityPack<T>).entity;
 
   if (entity == undefined)
-    return API.fetchEntityPack(entityOrEntityPack as Lite<Entity>);
+    return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
   let ti = tryGetTypeInfo(entity.Type);
   if (ti == null || !ti.requiresEntityPack)
     return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
-  return API.fetchEntityPackEntity(entity as Entity).then(ep => ({ ...ep, entity: cloneEntity(entity)}));
+  return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));
 }
 
 export async function reloadFrameIfNecessary(frame: EntityFrame) {
@@ -851,17 +857,17 @@ export module API {
     if (lite.id == null)
       throw new Error("Lite has no Id");
 
-    return fetchEntity(lite.EntityType, lite.id) as Promise<T>;
+    return fetchEntity(lite.EntityType, lite.id, lite.partitionId) as Promise<T>;
   }
 
-  export function fetchEntity<T extends Entity>(type: Type<T>, id: any): Promise<T>;
-  export function fetchEntity(type: PseudoType, id: number | string): Promise<Entity>;
-  export function fetchEntity(type: PseudoType, id?: number | string): Promise<Entity> {
+  export function fetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number): Promise<T>;
+  export function fetchEntity(type: PseudoType, id: number | string, partitionId?: number): Promise<Entity>;
+  export function fetchEntity(type: PseudoType, id?: number | string, partitionId?: number): Promise<Entity> {
 
     const typeName = getTypeName(type);
     let idVal = id;
 
-    return ajaxGet({ url: "/api/entity/" + typeName + "/" + id });
+    return ajaxGet({ url: "/api/entity/" + typeName + "/" + id + (partitionId ? "?partitionId=" + partitionId : "") });
   }
 
   export function exists<T extends Entity>(lite: Lite<T>): Promise<boolean>;
@@ -887,14 +893,14 @@ export module API {
 
 
   export function fetchEntityPack<T extends Entity>(lite: Lite<T>): Promise<EntityPack<T>>;
-  export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string): Promise<EntityPack<T>>;
-  export function fetchEntityPack(type: PseudoType, id: number | string): Promise<EntityPack<Entity>>;
-  export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any): Promise<EntityPack<Entity>> {
+  export function fetchEntityPack<T extends Entity>(type: Type<T>, id: number | string, partitionId?: number): Promise<EntityPack<T>>;
+  export function fetchEntityPack(type: PseudoType, id: number | string, partitionId?: number): Promise<EntityPack<Entity>>;
+  export function fetchEntityPack(typeOrLite: PseudoType | Lite<any>, id?: any, partitionId?: number): Promise<EntityPack<Entity>> {
 
     const typeName = (typeOrLite as Lite<any>).EntityType ?? getTypeName(typeOrLite as PseudoType);
     let idVal = (typeOrLite as Lite<any>).id != null ? (typeOrLite as Lite<any>).id : id;
-
-    return ajaxGet({ url: "/api/entityPack/" + typeName + "/" + idVal });
+    let pId = (typeOrLite as Lite<any>)?.partitionId ?? partitionId;
+    return ajaxGet({ url: "/api/entityPack/" + typeName + "/" + idVal + (pId ? "?partitionId=" + pId : "") });
   }
 
   export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
@@ -938,6 +944,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   avoidPopup?: boolean;
   supportsAdditionalTabs?: boolean;
 
+  hideId?: boolean;
+
   allowWrapEntityLink?: boolean;
   avoidFillSearchColumnWidth?: boolean;
 
@@ -956,11 +964,11 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
 
   getViewPromise?: (entity: T) => ViewPromise<T>;
   onNavigateRoute?: (typeName: string, id: string | number) => string;
-  onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+  onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions<T>) => Promise<T | undefined>;
   onCreateNew?: (oldEntity: EntityPack<T>) => (Promise<EntityPack<T> | undefined>) | undefined; /*Save An New*/
 
-  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactChild;
-  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactChild; 
+  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactElement | string;
+  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactElement | string; 
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
@@ -995,7 +1003,7 @@ export function getAutocompleteConstructors(tr: TypeReference, str: string, aac:
     if (typeof es.autocompleteConstructor == "string")
       return softCast<AutocompleteConstructor<ModifiableEntity>>({
         type: ti.name,
-        onClick: () => Constructor.construct(ti.name, { [es!.autocompleteConstructor as string]: str }).then(a=>a && view(a))
+        onClick: () => Constructor.construct(ti.name, { [es!.autocompleteConstructor as string]: str }).then(a => a && view(a))
       });
 
     return es.autocompleteConstructor(str, aac);
@@ -1016,6 +1024,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   avoidPopup!: boolean;
   supportsAdditionalTabs?: boolean;
 
+  hideId?: boolean;
+
   allowWrapEntityLink?: boolean;
   avoidFillSearchColumnWidth?: boolean;
 
@@ -1032,7 +1042,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   autocompleteConstructor?: (keyof T) | ((str: string, aac: AutocompleteConstructorContext) => AutocompleteConstructor<T> | null);
   defaultFindOptions?: FindOptions;
 
-  onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions) => Promise<T | undefined>;
+  onView?: (entityOrPack: Lite<Entity & T> | T | EntityPack<T>, viewOptions?: ViewOptions<T>) => Promise<T | undefined>;
   onNavigateRoute?: (typeName: string, id: string | number, viewName?: string) => string;
 
   namedViews?: { [viewName: string]: NamedViewSettings<T> };
@@ -1043,8 +1053,8 @@ export class EntitySettings<T extends ModifiableEntity> {
     this.viewOverrides.push({ override, viewName });
   }
 
-  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactChild; 
-  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactChild; 
+  renderLite?: (lite: Lite<T & Entity>, hl: TextHighlighter) => React.ReactElement | string; 
+  renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactElement | string; 
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
@@ -1095,17 +1105,17 @@ export class NamedViewSettings<T extends ModifiableEntity> {
 export type ViewModule<T extends ModifiableEntity> = { default: React.ComponentClass<any /* { ctx: TypeContext<T> }*/> | React.FunctionComponent<any /*{ ctx: TypeContext<T> }*/> };
 
 export class ViewPromise<T extends ModifiableEntity> {
-  promise!: Promise<(ctx: TypeContext<T>) => React.ReactElement<any>>;
+  promise!: Promise<(ctx: TypeContext<T>) => React.ReactElement>;
 
   constructor(promise?: Promise<ViewModule<T>>) {
     if (promise)
       this.promise = promise
         .then(mod => {
-          return (ctx: TypeContext<T>): React.ReactElement<any> => React.createElement(mod.default, { ctx });
+          return (ctx: TypeContext<T>): React.ReactElement => React.createElement(mod.default, { ctx });
         });
   }
 
-  static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement<any>) {
+  static resolve<T extends ModifiableEntity>(getComponent: (ctx: TypeContext<T>) => React.ReactElement) {
     var result = new ViewPromise<T>();
     result.promise = Promise.resolve(getComponent);
     return result;
@@ -1116,7 +1126,7 @@ export class ViewPromise<T extends ModifiableEntity> {
     var result = new ViewPromise<T>();
 
     result.promise = this.promise.then(func => {
-      return (ctx: TypeContext<T>): React.ReactElement<any> => {
+      return (ctx: TypeContext<T>): React.ReactElement => {
         var result = func(ctx);
         return React.cloneElement(result, { ...props });
       };
@@ -1163,7 +1173,7 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
   if (component.prototype.render.withViewOverrides)
     return;
 
-  const baseRender = component.prototype.render as (this: React.Component<any>) => React.ReactElement<any>;
+  const baseRender = component.prototype.render as (this: React.Component<any>) => React.ReactElement;
 
   component.prototype.render = function (this: React.Component<any, any>) {
 
@@ -1199,7 +1209,7 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   var result = function NewComponent(props: { ctx: TypeContext<T> }) {
     var view = functionComponent(props);
 
-    const replacer = new ViewReplacer<T>(view!, props.ctx);
+    const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };
@@ -1214,9 +1224,9 @@ export function surroundFunctionComponent<T extends ModifiableEntity>(functionCo
   return result;
 }
 
-export function checkFlag(entityWhen: EntityWhen, isSearch: boolean | undefined) {
+export function checkFlag(entityWhen: EntityWhen, isSearchMainEntity: boolean | undefined) {
   return entityWhen == "Always" ||
-    entityWhen == (isSearch ? "IsSearch" : "IsLine");
+    entityWhen == (isSearchMainEntity ? "IsSearch" : "IsLine");
 }
 
 export type EntityWhen = "Always" | "IsSearch" | "IsLine" | "Never";

@@ -5,6 +5,9 @@ import { ProfilerPermission } from './Signum.Profiler'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { isPermissionAuthorized } from '@framework/AppContext';
+import { Lite } from '@framework/Signum.Entities';
+import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push(
@@ -15,19 +18,19 @@ export function start(options: { routes: RouteObject[] }) {
 
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.ViewHeavyProfiler),
     key: "ProfilerHeavy",
     onClick: () => Promise.resolve("/profiler/heavy")
   });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.ViewTimeTracker),
     key: "ProfilerTimes",
     onClick: () => Promise.resolve("/profiler/times")
   });
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
+    allowed: () => isPermissionAuthorized(ProfilerPermission.OverrideSessionTimeout),
     key: "OverrideSessionTimeout",
     onClick: () => Promise.resolve("/profiler/overrideSessionTimeout")
   });
@@ -109,20 +112,26 @@ export interface HeavyProfilerEntry {
   entries: HeavyProfilerEntry[];
 }
 
+export interface TimeTrackerTime {
+  duration: number;
+  date: string;
+  url: string;
+  user: Lite<UserEntity>;
+}
+
 export interface TimeTrackerEntry {
-  key: string;
+  identifier: string;
   count: number;
-  averageTime: number;
-  totalTime: number;
+  averageDuration: number;
+  totalDuration: number;
 
-  lastTime: number;
-  lastDate: string;
 
-  maxTime: number;
-  maxDate: string;
+  max: TimeTrackerTime;
+  max2?: TimeTrackerTime;
+  max3?: TimeTrackerTime;
 
-  minTime: number;
-  minDate: string;
+  min: TimeTrackerTime;
+  last: TimeTrackerTime;
 }
 
 

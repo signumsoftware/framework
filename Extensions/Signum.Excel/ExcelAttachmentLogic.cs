@@ -35,7 +35,7 @@ public class ExcelAttachmentLogic
 
         EmailTemplateLogic.GenerateAttachment.Register((ExcelAttachmentEntity ea, EmailTemplateLogic.GenerateAttachmentContext ctx) =>
         {
-            var finalEntity = ea.Related?.RetrieveAndRemember() ?? (Entity?)ctx.Entity ?? ctx.Model!.UntypedEntity as Entity;
+            var finalEntity = ea.Related?.RetrieveAndRemember() ?? (Entity?)ctx.Entity ?? ctx.Model?.UntypedEntity as Entity;
 
             using (finalEntity == null ? null : CurrentEntityConverter.SetCurrentEntity(finalEntity))
             using (CultureInfoUtils.ChangeBothCultures(ctx.Culture))
@@ -51,7 +51,7 @@ public class ExcelAttachmentLogic
                 {
                     new EmailAttachmentEmbedded
                     {
-                        File = Files.FilePathEmbeddedLogic.SaveFile(new FilePathEmbedded(EmailFileType.Attachment, fileName, bytes)),
+                        File = new FilePathEmbedded(EmailFileType.Attachment, fileName, bytes),
                         Type = EmailAttachmentType.Attachment,
                     }
                 };
@@ -62,9 +62,9 @@ public class ExcelAttachmentLogic
     private static string GetTemplateString(string? title, ref object? titleNode, EmailTemplateLogic.GenerateAttachmentContext ctx)
     {
         var block = titleNode != null ? (TextTemplateParser.BlockNode)titleNode :
-            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryDescription, ctx.ModelType));
+            (TextTemplateParser.BlockNode)(titleNode = TextTemplateParser.Parse(title, ctx.QueryContext?.QueryDescription, ctx.ModelType));
 
-        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.ResultColumns, ctx.CurrentRows) { Model = ctx.Model });
+        return block.Print(new TextTemplateParameters(ctx.Entity, ctx.Culture, ctx.QueryContext) { Model = ctx.Model });
     }
 
     static string? ExcelAttachmentFileName_StaticPropertyValidation(ExcelAttachmentEntity excelAttachment, PropertyInfo pi)

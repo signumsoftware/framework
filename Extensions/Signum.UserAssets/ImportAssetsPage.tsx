@@ -7,7 +7,7 @@ import { API } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction, LiteConflictEmbedded } from './Signum.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
-import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, ValueLine } from '@framework/Lines'
+import { ChangeEvent, EntityLine, EntityTable, PropertyRoute, AutoLine } from '@framework/Lines'
 import { EntityLink } from '@framework/Search'
 import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal'
@@ -141,7 +141,7 @@ export default function ImportAssetsPage() {
                       <td colSpan={4}>
                         {UserAssetMessage.LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase.niceToString().formatHtml(<strong>{ea.text}</strong>)}
                         <EntityTable avoidFieldSet ctx={mlec.subCtx(a => a.liteConflicts)} create={false} remove={false} move={false}
-                          columns={EntityTable.typedColumns<LiteConflictEmbedded>([
+                          columns={[
                             { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
                             { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
                             {
@@ -150,7 +150,7 @@ export default function ImportAssetsPage() {
                                 onChange={e =>  handleChangeConflict(ctx.value)}
                                 />
                             }
-                          ])}
+                          ]}
                         />
                       </td>
                     </tr>}

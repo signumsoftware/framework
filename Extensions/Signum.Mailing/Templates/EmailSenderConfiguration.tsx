@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ValueLine, EntityDetail, EntityAccordion } from '@framework/Lines'
+import { AutoLine, EntityDetail, EntityAccordion } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailSenderConfigurationEntity, EmailRecipientEmbedded, EmailMessageEntity } from '../Signum.Mailing'
 import { SearchValueLine } from '@framework/Search';
@@ -9,7 +9,7 @@ export default function EmailSenderConfiguration(p: { ctx: TypeContext<EmailSend
 
   return (
     <div>
-      <ValueLine ctx={sc.subCtx(s => s.name)} />
+      <AutoLine ctx={sc.subCtx(s => s.name)} />
       <EntityDetail ctx={sc.subCtx(s => s.defaultFrom)} />
       <EntityAccordion ctx={sc.subCtx(s => s.additionalRecipients)}
         getTitle={(ctx: TypeContext<EmailRecipientEmbedded>) => <span>

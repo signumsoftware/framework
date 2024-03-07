@@ -57,6 +57,7 @@ export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarE
         shortcut: e => groupButtons.some(bbe => bbe.shortcut != null && bbe.shortcut(e)),
         button: React.cloneElement(
           <DropdownButton title={group.text()} data-key={group.key} key={i} id={group.key} variant={group.outline != false ? ("outline-" + (group.color ?? "secondary")) : group.color ?? "light"}>
+            {undefined}
           </DropdownButton>,
           undefined,
           ...groupButtons.map(bbe => bbe.button)
@@ -129,13 +130,15 @@ interface OperationButtonProps extends ButtonProps {
   className?: string;
   outline?: boolean;
   color?: BsColor;
+  textInTitle?: boolean;
   avoidAlternatives?: boolean;
   onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
   children?: React.ReactNode;
   hideOnCanExecute?: boolean;
 }
 
-export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color, avoidAlternatives, hideOnCanExecute,  ...props }: OperationButtonProps): React.ReactElement<any> | null {
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color,
+  avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement | null {
 
   if (eocOrNull == null)
     return null;
@@ -187,7 +190,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
         disabled={disabled}
         title={main?.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
-        onClick={disabled ? undefined : e => { eoc.event = e;  main.onClick(eoc); }}
+        onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
         data-operation={eoc.operationInfo.key}>
         {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
       </Dropdown.Item>;
@@ -213,7 +216,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
   var button = <Button variant={(outline ? ("outline-" + main.color) as OutlineBsColor : main.color)}
     {...props}
     key="button"
-    title={main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
+    title={[(textInTitle ? main.text : undefined), main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)].notNull().join(" ")}
     className={classes(disabled ? "disabled" : undefined, main.classes)}
     onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
     data-operation={eoc.operationInfo.key}>
@@ -241,7 +244,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
           {button}
           {buttonAlternatives.map((aos, i) =>
             <Button key={i}
-              variant={(outline ? ("outline-" + color) as OutlineBsColor : color)}
+              variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
               className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
               onClick={() => aos.onClick(eoc)}
               title={aos.text + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>

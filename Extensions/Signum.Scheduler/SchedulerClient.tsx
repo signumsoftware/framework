@@ -14,8 +14,13 @@ import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { SearchValueLine } from '@framework/Search';
+import { isPermissionAuthorized } from '@framework/AppContext';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.Scheduler", () => import("./Changelog"));
+
   options.routes.push({ path: "/scheduler/view", element: <ImportComponent onImport={() => import("./SchedulerPanelPage")} /> });
 
   Navigator.addSettings(new EntitySettings(ScheduledTaskEntity, e => import('./Templates/ScheduledTask')));
@@ -36,14 +41,14 @@ export function start(options: { routes: RouteObject[] }) {
   }));
 
   OmniboxSpecialAction.registerSpecialAction({
-    allowed: () => AuthClient.isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
+    allowed: () => isPermissionAuthorized(SchedulerPermission.ViewSchedulerPanel),
     key: "SchedulerPanel",
     onClick: () => Promise.resolve("/scheduler/view")
   });
 
   var es = new EntitySettings(ScheduledTaskLogEntity, undefined);
   es.overrideView(vr => vr.insertAfterLine(a => a.exception, ctx => [
-    <SearchValueLine ctx={ctx} findOptions={{
+    <SearchValueLine ctx={ctx} badgeColor="danger" isBadge="MoreThanZero" findOptions={{
       queryName: SchedulerTaskExceptionLineEntity,
       filterOptions: [{ token: SchedulerTaskExceptionLineEntity.token(e => e.schedulerTaskLog), value: ctx.value}],
     }} />

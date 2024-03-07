@@ -11,7 +11,6 @@ import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Eval from '../Signum.Eval/Signum.Eval'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
-import * as Types from '../Signum.Dynamic/Signum.Dynamic.Types'
 import * as Processes from '../Signum.Processes/Signum.Processes'
 
 interface IWorkflowTimerConditionEvaluator {}
@@ -51,6 +50,7 @@ export interface ButtonOptionEmbedded extends Entities.EmbeddedEntity {
   Type: "ButtonOptionEmbedded";
   name: string;
   style: Basics.BootstrapStyle;
+  withConfirmation: boolean;
 }
 
 export const CaseActivityEntity = new Type<CaseActivityEntity>("CaseActivity");
@@ -129,7 +129,6 @@ export module CaseActivityOperation {
   export const ScriptExecute : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptExecute");
   export const ScriptScheduleRetry : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptScheduleRetry");
   export const ScriptFailureJump : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptFailureJump");
-  export const FixCaseDescriptions : Operations.ExecuteSymbol<Types.DynamicTypeEntity> = registerSymbol("Operation", "CaseActivityOperation.FixCaseDescriptions");
 }
 
 export module CaseActivityProcessAlgorithm {
@@ -389,6 +388,8 @@ export module WorkflowActivityMessage {
   export const LocateWorkflowActivityInDiagram = new MessageKey("WorkflowActivityMessage", "LocateWorkflowActivityInDiagram");
   export const Approve = new MessageKey("WorkflowActivityMessage", "Approve");
   export const Decline = new MessageKey("WorkflowActivityMessage", "Decline");
+  export const Conformation = new MessageKey("WorkflowActivityMessage", "Conformation");
+  export const Conformation0 = new MessageKey("WorkflowActivityMessage", "Conformation0");
 }
 
 export const WorkflowActivityModel = new Type<WorkflowActivityModel>("WorkflowActivityModel");

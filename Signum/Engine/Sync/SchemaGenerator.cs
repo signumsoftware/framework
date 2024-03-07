@@ -22,6 +22,28 @@ public static class SchemaGenerator
             .Combine(Spacing.Simple);
     }
 
+    public static SqlPreCommand? CreatePartitioningFunctionScript()
+    {
+        Schema s = Schema.Current;
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        var defaultSchema = SchemaName.Default(s.Settings.IsPostgres);
+
+        var schemes = s.GetDatabaseTables().Where(a => a.PartitionScheme != null).Select(a => (a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct();
+
+        return SqlPreCommand.Combine(Spacing.Double,
+
+            schemes
+            .Select(a => (a.Database, a.scheme.PartitionFunction))
+            .Distinct()
+            .Select(a => sqlBuilder.CreateSqlPartitionFunction(a.PartitionFunction, a.Database))
+            .Combine(Spacing.Simple),
+
+            schemes
+            .Select(a => sqlBuilder.CreateSqlPartitionScheme(a.scheme, a.Database))
+            .Combine(Spacing.Simple)
+        );
+    }
+
     public static SqlPreCommand? CreateTablesScript()
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
@@ -29,7 +51,21 @@ public static class SchemaGenerator
 
         List<ITable> tables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToList();
 
-        SqlPreCommand? createTables = tables.Select(t => sqlBuilder.CreateTableSql(t)).Combine(Spacing.Double)?.PlainSqlCommand();
+        SqlPreCommand? createTables = tables.Select(t =>
+        {
+
+            var table = sqlBuilder.CreateTableSql(t);
+
+            if (sqlBuilder.IsPostgres && t.SystemVersioned != null)
+            {
+                return SqlPreCommand.Combine(Spacing.Simple, table,
+                    sqlBuilder.CreateVersioningTrigger(t),
+                    sqlBuilder.CreateSystemTableVersionLike(t)
+                    );
+            }
+
+            return table;
+        }).Combine(Spacing.Double)?.PlainSqlCommand();
 
         if (createTables != null)
             createTables.GoAfter = true;
@@ -43,7 +79,7 @@ public static class SchemaGenerator
 
         SqlPreCommand? indices = tables.Select(t =>
         {
-            var allIndexes = t.GeneratAllIndexes().Where(a => !(a is PrimaryKeyIndex));
+            var allIndexes = t.AllIndexes().Where(a => !a.PrimaryKey);
 
             fullTextSearchCatallogs.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.CatallogName));
 
@@ -88,7 +124,7 @@ public static class SchemaGenerator
         return Schema.Current.PostgresExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
     }
 
-    public static SqlPreCommand? PostgreeTemporalTableScript()
+    public static SqlPreCommand? PostgresTemporalTableScript()
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;

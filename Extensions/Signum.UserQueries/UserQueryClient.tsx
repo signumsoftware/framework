@@ -29,8 +29,12 @@ import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
 import UserQueryToolbarConfig from './UserQueryToolbarConfig';
 import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import UserQueryOmniboxProvider from './UserQueryOmniboxProvider';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[] }) {
+
+  registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
+
   UserAssetsClient.start({ routes: options.routes });
   UserAssetsClient.registerExportAssertLink(UserQueryEntity);
 
@@ -40,19 +44,19 @@ export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/userQuery/:userQueryId/:entity?", element: <ImportComponent onImport={() => import("./Templates/UserQueryPage")} /> });
 
   Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-    if (!ctx.searchControl.props.showBarExtension ||
-      !AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
-      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons))
-      return undefined;
 
-    return { button: <UserQueryMenu searchControl={ctx.searchControl} /> };
+    const isHidden = !ctx.searchControl.props.showBarExtension ||
+      !AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery) ||
+      !(ctx.searchControl.props.showBarExtensionOption?.showUserQuery ?? ctx.searchControl.props.largeToolbarButtons);
+
+    return { button: <UserQueryMenu searchControl={ctx.searchControl} isHidden={isHidden} /> };
   });
 
-  if (AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+  if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     QuickLinks.registerGlobalQuickLink(entityType =>
       API.forEntityType(entityType)
         .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
-          icon: ["far", "rectangle-list"], iconColor: "dodgerblue", color: "info",
+          icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
           onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
         })))
     );
@@ -74,7 +78,7 @@ export function start(options: { routes: RouteObject[] }) {
       })
   },
     {
-      isVisible: AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
+      isVisible: AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery), group: null, icon: "eye", iconColor: "blue", color: "info"
     }
   ));
 
@@ -101,7 +105,7 @@ export function start(options: { routes: RouteObject[] }) {
   DashboardClient.registerRenderer(UserQueryPartEntity, {
     waitForInvalidation: true,
     component: () => import('./Dashboard/View/UserQueryPart').then((a: any) => a.default),
-    defaultIcon: () => ({ icon: ["far", "rectangle-list"], iconColor: "#2E86C1" }),
+    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "#2E86C1" }),
     defaultTitle: c => translated(c.userQuery, uc => uc.displayName),
     withPanel: c => c.renderMode != "BigValue",
     getQueryNames: c => [c.userQuery?.query].notNull(),
@@ -133,7 +137,7 @@ export function start(options: { routes: RouteObject[] }) {
             }));
 
       }} />
-}
+    }
   });
 }
 
@@ -148,7 +152,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
   if (cic.container.state.resultFindOptions?.systemTime)
     return undefined;
 
-  if (!AuthClient.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
+  if (!AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
     return undefined;
 
   const resFO = cic.container.state.resultFindOptions;
@@ -169,7 +173,7 @@ function getGroupUserQueriesContextMenu(cic: ContextualItemsContext<Entity>) {
         header: UserQueryEntity.nicePluralName(),
         menuItems: uqs.map(uq =>
           <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)}>
-            <FontAwesomeIcon icon={["far", "rectangle-list"]} className="icon" color="dodgerblue" />
+            <FontAwesomeIcon icon={"rectangle-list"} className="icon" color="dodgerblue" />
             {getToString(uq)}
           </Dropdown.Item>
         )
@@ -284,49 +288,62 @@ export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity,
 
 export module Converter {
 
-  export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
+  export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
     var query = uq.query!;
 
     var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;
 
-    const convertedFilters = UserAssetsClient.API.parseFilters({
+    const filters = await UserAssetsClient.API.parseFilters({
       queryKey: query.key,
       canAggregate: uq.groupResults || false,
       entity: entity,
       filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
-    return convertedFilters.then(filters => {
-
-      fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
-      fo.columnOptionsMode = uq.columnsMode;
-
-      fo.columnOptions = (uq.columns ?? []).map(f => ({
-        token: f.element.token.tokenString,
-        displayName: translated(f.element, c => c.displayName),
-        summaryToken: f.element.summaryToken?.tokenString,
-        hiddenColumn: f.element.hiddenColumn,
-        combineRows: f.element.combineRows,
-      }) as ColumnOption);
-
-      fo.orderOptions = (uq.orders ?? []).map(f => ({
-        token: f.element.token!.tokenString,
-        orderType: f.element.orderType
-      }) as OrderOption);
 
 
-      const qs = Finder.querySettings[query.key];
+    fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
+    fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
+    fo.columnOptionsMode = uq.columnsMode;
 
-      fo.pagination = uq.paginationMode == undefined ? undefined : {
-          mode: uq.paginationMode,
-          currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
-          elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
-        } as Pagination;
+    fo.columnOptions = (uq.columns ?? []).map(f => ({
+      token: f.element.token.tokenString,
+      displayName: translated(f.element, c => c.displayName),
+      summaryToken: f.element.summaryToken?.tokenString,
+      hiddenColumn: f.element.hiddenColumn,
+      combineRows: f.element.combineRows,
+    }) as ColumnOption);
 
-      return fo;
-    });
+    fo.orderOptions = (uq.orders ?? []).map(f => ({
+      token: f.element.token!.tokenString,
+      orderType: f.element.orderType
+    }) as OrderOption);
+
+    fo.pagination = uq.paginationMode == undefined ? undefined : {
+      mode: uq.paginationMode,
+      currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
+      elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
+    } as Pagination;
+
+    async function parseDate(dateExpression: string | null): Promise<string | undefined> {
+      if (dateExpression == null)
+        return undefined;
+
+      var date = await UserAssetsClient.API.parseDate(dateExpression);
+
+      return date;
+    }
+
+    fo.systemTime = uq.systemTime == null ? undefined : {
+      mode: uq.systemTime.mode ?? undefined,
+      startDate: await parseDate(uq.systemTime.startDate),
+      endDate: await parseDate(uq.systemTime.endDate),
+      joinMode: uq.systemTime.joinMode ?? undefined,
+    };
+
+    return fo;
+
   }
 
   export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
@@ -340,6 +357,7 @@ export module Converter {
         fop.orderOptions = fop2.orderOptions;
         fop.columnOptions = fop2.columnOptions;
         fop.pagination = fop2.pagination;
+        fop.systemTime = fop2.systemTime;
         return fop;
       });
   }
@@ -352,6 +370,11 @@ export module API {
 
   export function forQuery(queryKey: string): Promise<Lite<UserQueryEntity>[]> {
     return ajaxGet({ url: "/api/userQueries/forQuery/" + queryKey });
+  }
+
+
+  export function translated(userQuery: Lite<UserQueryEntity>): Promise<UserQueryLiteModel> {
+    return ajaxPost({ url: "/api/userQueries/translated" }, userQuery);
   }
 
   export function forQueryAppendFilters(queryKey: string): Promise<Lite<UserQueryEntity>[]> {

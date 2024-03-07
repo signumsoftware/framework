@@ -6,7 +6,7 @@ import {PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { Tabs, Tab } from 'react-bootstrap';
-import { TypeContext, EntityTable, ValueLine } from '@framework/Lines';
+import { TypeContext, EntityTable, AutoLine } from '@framework/Lines';
 import { DynamicViewTree } from './DynamicViewTree';
 import { DynamicViewInspector, PropsHelp } from './Designer';
 import { ModulesHelp } from "./ModulesHelp";
@@ -26,10 +26,10 @@ export function DynamicViewTabs({ ctx, rootNode }: { ctx: TypeContext<DynamicVie
       </Tab>
       <Tab eventKey="props" title="Props">
         <EntityTable ctx={ctx.subCtx(a => a.props)} onChange={handleChange}
-          columns={EntityTable.typedColumns<DynamicViewPropEmbedded>([
-            { property: a => a.name, template: sctx => <ValueLine ctx={sctx.subCtx(a => a.name)} onChange={handleChange} /> },
-            { property: a => a.type, template: sctx => <ValueLine ctx={sctx.subCtx(a => a.type)} onChange={handleChange} /> },
-          ])} />
+          columns={[
+            { property: a => a.name, template: sctx => <AutoLine ctx={sctx.subCtx(a => a.name)} onChange={handleChange} /> },
+            { property: a => a.type, template: sctx => <AutoLine ctx={sctx.subCtx(a => a.type)} onChange={handleChange} /> },
+          ]} />
       </Tab>
       <Tab eventKey="locals" title="Locals">
         <div className="code-container">

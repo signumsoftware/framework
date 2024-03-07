@@ -1,5 +1,6 @@
 using Signum.Utilities.ExpressionTrees;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Specialized;
 
 namespace Signum.Utilities;
@@ -68,18 +69,6 @@ public static class DictionaryExtensions
     {
         return dictionary.GetOrAdd(key, k => new V());
     }
-
-    public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, V value)
-        where K : notnull
-    {
-        if (!dictionary.TryGetValue(key, out V? result))
-        {
-            result = value;
-            dictionary.Add(key, result);
-        }
-        return result;
-    }
-
     public static V GetOrCreate<K, V>(this IDictionary<K, V> dictionary, K key, Func<V> generator)
         where K : notnull
     {
@@ -155,14 +144,6 @@ public static class DictionaryExtensions
         return dictionary.ToDictionaryEx(p => mapKey(p.Key), p => mapValue(p.Key, p.Value));
     }
 
-    public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection)
-        where K : notnull
-    {
-        var result = new Dictionary<K, V>();
-        result.AddRange<K, V>(collection);
-        return result;
-    }
-
     public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
         where K : notnull
     {
@@ -171,13 +152,6 @@ public static class DictionaryExtensions
         return result;
     }
 
-    public static Dictionary<K, V> ToDictionary<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer)
-        where K : notnull
-    {
-        var result = new Dictionary<K, V>(comparer);
-        result.AddRange<K, V>(collection);
-        return result;
-    }
 
     public static Dictionary<K, V> ToDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)
         where K : notnull
@@ -219,6 +193,25 @@ public static class DictionaryExtensions
         result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
         return result;
     }
+
+    public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
+        where K : notnull => collection.ToDictionaryEx(errorContext).ToFrozenDictionary();
+
+
+    public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, IEqualityComparer<K> comparer, string? errorContext = null)
+        where K : notnull => collection.ToDictionaryEx(comparer, errorContext).ToFrozenDictionary();
+
+    public static FrozenDictionary<K, T> ToFrozenDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string? errorContext = null)
+        where K : notnull => source.ToDictionaryEx(keySelector, errorContext).ToFrozenDictionary();
+
+    public static FrozenDictionary<K, V> ToFrozenDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string? errorContext = null)
+        where K : notnull => source.ToDictionaryEx(keySelector, elementSelector, errorContext).ToFrozenDictionary();
+
+    public static FrozenDictionary<K, T> ToFrozenDictionaryEx<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string? errorContext = null)
+        where K : notnull => source.ToDictionaryEx(keySelector, comparer, errorContext).ToFrozenDictionary();
+
+    public static FrozenDictionary<K, V> ToFrozenDictionaryEx<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string? errorContext = null)
+        where K : notnull => source.ToDictionaryEx(keySelector, elementSelector, comparer, errorContext).ToFrozenDictionary();
 
     public static Dictionary<K, V> JumpDictionary<K, Z, V>(this IDictionary<K, Z> dictionary, IDictionary<Z, V> other)
         where K : notnull

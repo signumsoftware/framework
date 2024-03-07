@@ -5,9 +5,10 @@ import './ProfilePhoto.css'
 import { getToString, Lite, liteKey, toLite } from "@framework/Signum.Entities";
 import UserCircle from "./UserCircle";
 import * as UserCircles from "./UserCircle";
-import { Dic, classes } from "@framework/Globals";
+import { Dic, classes, isPromise } from "@framework/Globals";
+import { useAPI } from "@framework/Hooks";
 
-export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => Promise<string | null>)[] = [];
+export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string | null> | null)[] = [];
 
 export function clearCache() {
   Dic.clear(urlCache);
@@ -16,11 +17,14 @@ export function clearCache() {
 
 export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   const [imageError, setImageError] = useState(false);
-  const url = useCachedUrl(p.user, p.size!);
+  let url = useCachedUrl(p.user, p.size!);
 
   useEffect(() => {
     setImageError(false);
   }, [url]);
+
+  if (imageError)
+    url = null;
 
   var color = p.user.isNew ? "gray" : UserCircles.Options.getUserColor(toLite(p.user));
 
@@ -51,25 +55,24 @@ export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, cl
   );
 }
 
-var urlCache: { [userKey: string]: Promise<string | null> | null } = { };
+function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number): string | null | undefined {
 
-function useCachedUrl(user: UserEntity | Lite<UserEntity>, size: number) {
-  const [url, setUrl] = useState<string | null>(null);
+  var url = useAPI(() => {
 
-  useEffect(() => {
+    const val = !user.id ? getFirstUrl(user, size) : getCachedFirstUrl(user, size);
 
-    if (!user.id)
-      return;
-
-    const userLite = UserEntity.isLite(user) ? user : toLite(user);
-    const userLiteKey = liteKey(userLite);
-
-    const promise = (urlCache[userLiteKey] ??= urlProviders.map(f => f(user, size)).notNull().firstOrNull());
-
-    promise ? promise.then(u => setUrl(u)) : setUrl(null);
-
+    return val;
   }, [user.id]);
 
   return url
+}
+
+var urlCache: { [userKeyPlusSize: string]: Promise<string | null> | string | null } = { };
+function getCachedFirstUrl(user: Lite<UserEntity> | UserEntity, size: number) {
+  return urlCache[liteKey(UserEntity.isLite(user) ? user : toLite(user)) + ":" + size] ??= getFirstUrl(user, size);
+}
+
+function getFirstUrl(user: Lite<UserEntity> | UserEntity, size: number): Promise<string | null> | string | null {
+  return urlProviders.map(f => f(user, size)).notNull().firstOrNull();
 }
 

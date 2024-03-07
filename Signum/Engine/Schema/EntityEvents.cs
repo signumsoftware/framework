@@ -1,4 +1,5 @@
 using System.Collections;
+using Signum.Engine.Linq;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps;
@@ -46,12 +47,12 @@ public class EntityEvents<T> : IEntityEvents
         RegisterBinding(pr, shouldSet, valueExpression, valueFunction);
     }
 
-    internal IEnumerable<FilterQueryResult<T>> OnFilterQuery()
+    internal IEnumerable<FilterQueryResult<T>> OnFilterQuery(FilterQueryArgs args)
     {
         if (FilterQuery == null)
             return Enumerable.Empty<FilterQueryResult<T>>();
 
-        return FilterQuery.GetInvocationListTyped().Select(f => f()).NotNull().ToList();
+        return FilterQuery.GetInvocationListTyped().Select(f => f(args)).NotNull().ToList();
     }
 
     public IDisposable? OnPreUnsafeDelete(IQueryable entityQuery) => this.OnPreUnsafeDelete((IQueryable<T/*Entity*/>)entityQuery);
@@ -285,7 +286,7 @@ public delegate void PreSavingEventHandler<T>(T ident, PreSavingContext ctx) whe
 public delegate void RetrievedEventHandler<T>(T ident, PostRetrievingContext ctx) where T : Entity;
 public delegate void SavingEventHandler<T>(T ident) where T : Entity;
 public delegate void SavedEventHandler<T>(T ident, SavedEventArgs args) where T : Entity;
-public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>() where T : Entity;
+public delegate FilterQueryResult<T>? FilterQueryEventHandler<T>(FilterQueryArgs args) where T : Entity;
 public delegate void AlternativeRetrieveEventHandler<T>(PrimaryKey id, AlternativeRetrieveArgs<T> args) where T : Entity;
 
 public delegate IDisposable? PreUnsafeDeleteHandler<T>(IQueryable<T> entityQuery);
@@ -293,6 +294,94 @@ public delegate IDisposable? PreUnsafeMListDeleteHandler<T>(IQueryable mlistQuer
 public delegate IDisposable? PreUnsafeUpdateHandler<T>(IUpdateable update, IQueryable<T> entityQuery);
 public delegate LambdaExpression PreUnsafeInsertHandler<T>(IQueryable query, LambdaExpression constructor, IQueryable<T> entityQuery);
 public delegate void BulkInsetHandler<T>(bool inMListTable);
+
+
+public class FilterQueryArgs
+{
+    internal FilterQueryArgs(Expression fullQuery, ConstantExpression baseQuery)
+    {
+        FullQuery = fullQuery;
+        BaseQuery = baseQuery;
+    }
+
+    /// Database.Query<OperationLogEntity>().Where(ol => ol.Target == myInvoice)
+    /// |<--------------------------- FullQuery------------------------------->|
+    /// |<----------- BaseQuery----------->|
+    //                                     ^ <- Here will be inserted the new where, if any
+
+    public Expression FullQuery { get; set; }
+
+    //The 
+    public ConstantExpression BaseQuery { get; set; }
+
+    public static FilterQueryArgs FromLite(Lite<IEntity> lite)
+    {
+        return giFromLitePrivate.GetInvoker(lite.EntityType)((Lite<Entity>)lite);
+    }
+
+    static GenericInvoker<Func<Lite<Entity>, FilterQueryArgs>> giFromLitePrivate = new(lite => FromLitePrivate<Entity>(lite));
+    static FilterQueryArgs FromLitePrivate<T>(Lite<T> lite) where T : Entity
+    {
+        return FromFilter<T>(e => e.Is(lite));
+    }
+
+    public static FilterQueryArgs FromEntity(Entity entity)
+    {
+        return giFromEntityPrivate.GetInvoker(entity.GetType())(entity);
+    }
+
+    static GenericInvoker<Func<Entity, FilterQueryArgs>> giFromEntityPrivate = new(entity => FromEntityPrivate((Entity)entity));
+    static FilterQueryArgs FromEntityPrivate<T>(T entity) where T : Entity
+    {
+        return FromFilter<T>(e => e.Is(entity));
+    }
+
+    static GenericInvoker<Func<LambdaExpression, FilterQueryArgs>> giFromFilter = 
+        new GenericInvoker<Func<LambdaExpression, FilterQueryArgs>>(lambda => FromFilter((Expression<Func<Entity, bool>>)lambda));
+    public static FilterQueryArgs FromFilter<T>(Expression<Func<T, bool>> filter) where T: Entity
+    {
+        var query = filter == null ? Database.Query<T>() : Database.Query<T>().Where(filter);
+        return FilterQueryArgs.FromQuery(query);
+    }   
+
+    public static FilterQueryArgs FromQuery<T>(IQueryable<T> similarQuery) where T : Entity
+    {
+        var fullQuery = DbQueryProvider.Clean(similarQuery.Expression, false, null)!;
+        var baseQuey = FindBaseQueryVisitor.FindBase(fullQuery!);
+
+        return new FilterQueryArgs(fullQuery, baseQuey);
+    }
+
+    class FindBaseQueryVisitor : ExpressionVisitor
+    {
+        ConstantExpression? result;
+
+        public static ConstantExpression FindBase(Expression query)
+        {
+            var finder = new FindBaseQueryVisitor();
+            finder.Visit(query);
+
+            if (finder.result == null)
+                throw new InvalidOperationException("No base query found");
+
+            return finder.result;
+        }
+
+        protected override Expression VisitConstant(ConstantExpression node)
+        {
+            if (node.Value is IQueryable q && q.IsBase())
+            {
+                if (result != null)
+                    throw new InvalidOperationException("More than one result base query found");
+
+                this.result = (ConstantExpression)q.Expression;
+            }
+
+            return base.VisitConstant(node);
+        }
+    }
+}
+
 
 
 public class AlternativeRetrieveArgs<T> where T : Entity

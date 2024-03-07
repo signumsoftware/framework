@@ -33,6 +33,12 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         writer.WritePropertyName("id");
         JsonSerializer.Serialize(writer, lite.IdOrNull?.Object, lite.IdOrNull?.Object.GetType() ?? typeof(object), options);
 
+        if (value.PartitionId != null)
+        {
+            writer.WritePropertyName("partitionId");
+            writer.WriteNumberValue(value.PartitionId.Value);
+        }
+
         if (lite.Model != null)
         {
             if (lite.Model is string str)
@@ -70,6 +76,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
         object? model = null;
         string? idObj = null;
+        int? partitionId = null;
         Type? type = null;
         string? modelTypeStr = null;
         Entity? entity = null;
@@ -94,6 +101,16 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
                         break;
                     }
+                case "partitionId":
+                    {
+                        reader.Read();
+                        partitionId =
+                            reader.TokenType == JsonTokenType.Null ? null :
+                            reader.TokenType == JsonTokenType.Number ? reader.GetInt32() :
+                            throw new UnexpectedValueException(reader.TokenType);
+
+                        break;
+                    }
                 case "ModelType": reader.Read(); modelTypeStr = reader.GetString(); break;
                 case "model":
                     reader.Read();
@@ -104,7 +121,7 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
                         using (EntityJsonConverterFactory.SetPath(".model"))
                         {
                             var converter = (JsonConverterWithExisting<ModelEntity>)options.GetConverter(typeof(ModelEntity));
-                            model = converter.Read(ref reader, typeof(ModelEntity), options, (ModelEntity?)existingValue?.Model, modelTypeStr => Lite.ParseModelType(type!, modelTypeStr));
+                            model = converter.Read(ref reader, typeof(ModelEntity), options, existingValue?.Model as ModelEntity, modelTypeStr => Lite.ParseModelType(type!, modelTypeStr));
                         }
                     }
                     break;
@@ -135,8 +152,8 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
         if (entity == null)
         {
             return model != null ?
-                (Lite<T>)Lite.Create(type!, idOrNull!.Value, model) :
-                (Lite<T>)Lite.Create(type!, idOrNull!.Value, getModelType());
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, model, partitionId) :
+                (Lite<T>)Lite.Create(type!, idOrNull!.Value, getModelType(), partitionId);
         }
 
         var result = model != null ?

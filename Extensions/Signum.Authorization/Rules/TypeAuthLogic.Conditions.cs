@@ -1,6 +1,7 @@
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization;
 
@@ -23,13 +24,13 @@ public static partial class TypeAuthLogic
         return new Disposable(() => inSave.Value = false);
     }
 
-    public static Type? IsDelete => isDelete.Value;
-    static readonly Variable<Type?> isDelete = Statics.ThreadVariable<Type?>("isDelete");
-    static IDisposable? OnIsDelete(Type type)
+    public static Type? IsWriting => isWriting.Value;
+    static readonly Variable<Type?> isWriting = Statics.ThreadVariable<Type?>("isWriting");
+    static IDisposable? OnIsWriting(Type type)
     {
-        var oldType = isDelete.Value;
-        isDelete.Value = type;
-        return new Disposable(() => isDelete.Value = type);
+        var oldType = isWriting.Value;
+        isWriting.Value = type;
+        return new Disposable(() => isWriting.Value = type);
     }
 
     const string CreatedKey = "Created";
@@ -134,7 +135,7 @@ public static partial class TypeAuthLogic
             var found = requested.Chunk(1000).SelectMany(gr => Database.Query<T>().Where(a => gr.Contains(a.Id)).Select(a => new
             {
                 a.Id,
-                Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface),
+                Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface, null! /*automatically populated*/),
             })).ToArray();
 
             if (found.Length != requested.Length)
@@ -143,8 +144,10 @@ public static partial class TypeAuthLogic
             PrimaryKey[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
             if (notFound.Any())
             {
+                var args = FilterQueryArgs.FromFilter<T>(t => notFound.Contains(t.Id));
+
                 List<DebugData> debugInfo = Database.Query<T>().Where(a => notFound.Contains(a.Id))
-                    .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface)).ToList();
+                    .Select(a => a.IsAllowedForDebug(typeAllowed, ExecutionMode.InUserInterface, args)).ToList();
 
                 string details = 
                     debugInfo.Count == 1 ? debugInfo.SingleEx().ErrorMessage! : 
@@ -157,47 +160,32 @@ public static partial class TypeAuthLogic
         }
     }
 
-    public static void AssertAllowed(this IEntity ident, TypeAllowedBasic allowed)
+    public static void AssertAllowed(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
-        AssertAllowed(ident, allowed, ExecutionMode.InUserInterface);
-    }
-
-    public static void AssertAllowed(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface)
-    {
-        if (!ident.IsAllowedFor(allowed, inUserInterface))
+        if (!ident.IsAllowedFor(allowed, inUserInterface, args))
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), ident.GetType().NiceName(), ident.Id));
     }
 
-    public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed)
-    {
-        AssertAllowed(lite, allowed, ExecutionMode.InUserInterface);
-    }
-
-    public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
+    public static void AssertAllowed(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
         if (lite.IdOrNull == null)
-            AssertAllowed(lite.Entity, allowed, inUserInterface);
+            AssertAllowed(lite.Entity, allowed, inUserInterface, args);
 
-        if (!lite.IsAllowedFor(allowed, inUserInterface))
+        if (!lite.IsAllowedFor(allowed, inUserInterface, args))
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(allowed.NiceToString().ToLower(), lite.EntityType.NiceName(), lite.Id));
     }
 
-    [MethodExpander(typeof(IsAllowedForExpander))]
-    public static bool IsAllowedFor(this IEntity ident, TypeAllowedBasic allowed)
-    {
-        return IsAllowedFor(ident, allowed, ExecutionMode.InUserInterface);
-    }
 
     [MethodExpander(typeof(IsAllowedForExpander))]
-    public static bool IsAllowedFor(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface)
+    public static bool IsAllowedFor(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
-        return miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, inUserInterface);
+        return miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, inUserInterface, args);
     }
 
-    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, bool>> miIsAllowedForEntity
-        = new((ie, tab, ec) => IsAllowedFor<Entity>((Entity)ie, tab, ec));
+    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, FilterQueryArgs, bool>> miIsAllowedForEntity
+        = new((ie, tab, ec, args) => IsAllowedFor<Entity>((Entity)ie, tab, ec, args));
     [MethodExpander(typeof(IsAllowedForExpander))]
-    static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface)
+    static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
         where T : Entity
     {
         if (!AuthLogic.IsEnabled)
@@ -220,7 +208,7 @@ public static partial class TypeAuthLogic
             return inMemoryCodition(entity);
 
         using (DisableQueryFilter())
-            return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
+            return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
     }
 
     private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
@@ -247,28 +235,22 @@ public static partial class TypeAuthLogic
     }
 
     [MethodExpander(typeof(IsAllowedForExpander))]
-    public static bool IsAllowedFor(this Lite<IEntity> lite, TypeAllowedBasic allowed)
+    public static bool IsAllowedFor(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
-        return IsAllowedFor(lite, allowed, ExecutionMode.InUserInterface);
+        return miIsAllowedForLite.GetInvoker(lite.EntityType).Invoke(lite, allowed, inUserInterface, args);
     }
 
+    static GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, FilterQueryArgs, bool>> miIsAllowedForLite =
+        new((lite, tab, ui, args) => IsAllowedFor<Entity>(lite, tab, ui, args));
     [MethodExpander(typeof(IsAllowedForExpander))]
-    public static bool IsAllowedFor(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
-    {
-        return miIsAllowedForLite.GetInvoker(lite.EntityType).Invoke(lite, allowed, inUserInterface);
-    }
-
-    static GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, bool>> miIsAllowedForLite =
-        new((l, tab, ec) => IsAllowedFor<Entity>(l, tab, ec));
-    [MethodExpander(typeof(IsAllowedForExpander))]
-    static bool IsAllowedFor<T>(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
+    static bool IsAllowedFor<T>(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
         where T : Entity
     {
         if (!AuthLogic.IsEnabled)
             return true;
 
         using (DisableQueryFilter())
-            return ((Lite<T>)lite).InDB().WhereIsAllowedFor(allowed, inUserInterface).Any();
+            return ((Lite<T>)lite).InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
     }
 
     class IsAllowedForExpander : IMethodExpander
@@ -277,38 +259,25 @@ public static partial class TypeAuthLogic
         {
             TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
-            bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2])! : ExecutionMode.InUserInterface;
+            bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2])!;
+            FilterQueryArgs args = (FilterQueryArgs)ExpressionEvaluator.Eval(arguments[3])!;
 
             Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
-            return IsAllowedExpression(exp, allowed, inUserInterface);
+            return IsAllowedExpression(exp, allowed, inUserInterface, args);
         }
     }
 
     [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    public static DebugData IsAllowedForDebug(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface)
+    public static DebugData IsAllowedForDebug(this IEntity ident, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
     {
-        return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((Entity)ident, allowed, inUserInterface);
+        return miIsAllowedForDebugEntity.GetInvoker(ident.GetType()).Invoke((Entity)ident, allowed, inUserInterface, args);
     }
 
+    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, FilterQueryArgs, DebugData>> miIsAllowedForDebugEntity =
+        new((ii, tab, ec, args) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec, args));
     [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    public static string? CanBeModified(this IEntity ident)
-    {
-        var taac = TypeAuthLogic.GetAllowed(ident.GetType());
-
-        if (taac.ConditionRules.IsEmpty())
-            return taac.Fallback.GetDB() >= TypeAllowedBasic.Write ? null : AuthAdminMessage.CanNotBeModified.NiceToString();
-
-        if (ident.IsNew)
-            return null;
-
-        return IsAllowedForDebug(ident, TypeAllowedBasic.Write, false)?.ErrorMessage;
-    }
-
-    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugEntity =
-        new((ii, tab, ec) => IsAllowedForDebug<Entity>((Entity)ii, tab, ec));
-    [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface)
+    static DebugData IsAllowedForDebug<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
         where T : Entity
     {
         if (!AuthLogic.IsEnabled)
@@ -318,26 +287,7 @@ public static partial class TypeAuthLogic
             throw new InvalidOperationException("The entity {0} is new".FormatWith(entity));
 
         using (DisableQueryFilter())
-            return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
-    }
-
-    [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    public static DebugData IsAllowedForDebug(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
-    {
-        return miIsAllowedForDebugLite.GetInvoker(lite.EntityType).Invoke(lite, allowed, inUserInterface);
-    }
-
-    static GenericInvoker<Func<Lite<IEntity>, TypeAllowedBasic, bool, DebugData>> miIsAllowedForDebugLite =
-        new((l, tab, ec) => IsAllowedForDebug<Entity>(l, tab, ec));
-    [MethodExpander(typeof(IsAllowedForDebugExpander))]
-    static DebugData IsAllowedForDebug<T>(this Lite<IEntity> lite, TypeAllowedBasic allowed, bool inUserInterface)
-         where T : Entity
-    {
-        if (!AuthLogic.IsEnabled)
-            throw new InvalidOperationException("AuthLogic.IsEnabled is false");
-
-        using (DisableQueryFilter())
-            return ((Lite<T>)lite).InDB().Select(a => a.IsAllowedForDebug(allowed, inUserInterface)).SingleEx();
+            return entity.InDB().Select(e => e.IsAllowedForDebug(allowed, inUserInterface, args)).SingleEx();
     }
 
     class IsAllowedForDebugExpander : IMethodExpander
@@ -346,16 +296,17 @@ public static partial class TypeAuthLogic
         {
             TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
 
-            bool inUserInterface = arguments.Length == 3 ? (bool)ExpressionEvaluator.Eval(arguments[2])! : ExecutionMode.InUserInterface;
+            bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2])!;
+            FilterQueryArgs args = (FilterQueryArgs)ExpressionEvaluator.Eval(arguments[3])!;
 
             Expression exp = arguments[0].Type.IsLite() ? Expression.Property(arguments[0], "Entity") : arguments[0];
 
-            return IsAllowedExpressionDebug(exp, allowed, inUserInterface);
+            return IsAllowedExpressionDebug(exp, allowed, inUserInterface, args);
         }
     }
 
 
-    static FilterQueryResult<T>? TypeAuthLogic_FilterQuery<T>()
+    static FilterQueryResult<T>? TypeAuthLogic_FilterQuery<T>(FilterQueryArgs args)
       where T : Entity
     {
         if (queryFilterDisabled.Value)
@@ -369,9 +320,9 @@ public static partial class TypeAuthLogic
 
         ParameterExpression e = Expression.Parameter(typeof(T), "e");
 
-        var tab = typeof(T) == IsDelete ? TypeAllowedBasic.Write : TypeAllowedBasic.Read;
+        var tab = typeof(T) == IsWriting ? TypeAllowedBasic.Write : TypeAllowedBasic.Read;
 
-        Expression body = IsAllowedExpression(e, tab, ui);
+        Expression body = IsAllowedExpression(e, tab, ui, args);
 
         if (body is ConstantExpression ce)
         {
@@ -385,19 +336,7 @@ public static partial class TypeAuthLogic
     }
 
 
-    [MethodExpander(typeof(WhereAllowedExpander))]
-    public static IQueryable<T> WhereAllowed<T>(this IQueryable<T> query)
-        where T : Entity
-    {
-        if (ExecutionMode.InGlobal || !AuthLogic.IsEnabled)
-            return query;
-
-        var ui = ExecutionMode.InUserInterface;
-
-        AssertMinimum<T>(ui);
-
-        return WhereIsAllowedFor<T>(query, TypeAllowedBasic.Read, ui);
-    }
+  
 
     private static void AssertMinimum<T>(bool ui) where T : Entity
     {
@@ -411,13 +350,12 @@ public static partial class TypeAuthLogic
 
 
     [MethodExpander(typeof(WhereIsAllowedForExpander))]
-    public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool inUserInterface)
+    public static IQueryable<T> WhereIsAllowedFor<T>(this IQueryable<T> query, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
         where T : Entity
     {
-        ParameterExpression e = Expression.Parameter(typeof(T), "e");
+        ParameterExpression expr = Expression.Parameter(typeof(T), "e");
 
-        Expression body = IsAllowedExpression(e, allowed, inUserInterface);
-
+        Expression body = IsAllowedExpression(expr, allowed, inUserInterface, args);
 
         if (body is ConstantExpression ce)
         {
@@ -425,26 +363,9 @@ public static partial class TypeAuthLogic
                 return query;
         }
 
-        IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(body, e));
+        IQueryable<T> result = query.Where(Expression.Lambda<Func<T, bool>>(body, expr));
 
         return result;
-    }
-
-    class WhereAllowedExpander : IMethodExpander
-    {
-        public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
-        {
-            return miCallWhereAllowed.GetInvoker(mi.GetGenericArguments()).Invoke(arguments[0]);
-        }
-
-        static GenericInvoker<Func<Expression, Expression>> miCallWhereAllowed = new(exp => CallWhereAllowed<TypeEntity>(exp));
-        static Expression CallWhereAllowed<T>(Expression expression)
-            where T : Entity
-        {
-            IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
-            IQueryable<T> result = WhereAllowed(query);
-            return result.Expression;
-        }
     }
 
     class WhereIsAllowedForExpander : IMethodExpander
@@ -453,22 +374,23 @@ public static partial class TypeAuthLogic
         {
             TypeAllowedBasic allowed = (TypeAllowedBasic)ExpressionEvaluator.Eval(arguments[1])!;
             bool inUserInterface = (bool)ExpressionEvaluator.Eval(arguments[2])!;
+            FilterQueryArgs args = (FilterQueryArgs)ExpressionEvaluator.Eval(arguments[3])!;
 
-            return miCallWhereIsAllowedFor.GetInvoker(mi.GetGenericArguments())(arguments[0], allowed, inUserInterface);
+            return miCallWhereIsAllowedFor.GetInvoker(mi.GetGenericArguments())(arguments[0], allowed, inUserInterface, args);
         }
 
-        static GenericInvoker<Func<Expression, TypeAllowedBasic, bool, Expression>> miCallWhereIsAllowedFor =
-            new((ex, tab, ui) => CallWhereIsAllowedFor<TypeEntity>(ex, tab, ui));
-        static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool inUserInterface)
+        static GenericInvoker<Func<Expression, TypeAllowedBasic, bool, FilterQueryArgs, Expression>> miCallWhereIsAllowedFor =
+            new((ex, tab, ui, args) => CallWhereIsAllowedFor<TypeEntity>(ex, tab, ui, args));
+        static Expression CallWhereIsAllowedFor<T>(Expression expression, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
             where T : Entity
         {
             IQueryable<T> query = new Query<T>(DbQueryProvider.Single, expression);
-            IQueryable<T> result = WhereIsAllowedFor(query, allowed, inUserInterface);
+            IQueryable<T> result = WhereIsAllowedFor(query, allowed, inUserInterface, args);
             return result.Expression;
         }
     }
 
-    public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic requested, bool inUserInterface)
+    public static Expression IsAllowedExpression(Expression entity, TypeAllowedBasic requested, bool inUserInterface, FilterQueryArgs args)
     {
         Type type = entity.Type;
 
@@ -478,7 +400,7 @@ public static partial class TypeAuthLogic
 
         var simpleNode = node.Simplify();
 
-        var expression = simpleNode.ToExpression(entity);
+        var expression = simpleNode.ToExpression(entity, args);
 
         return expression;
     }
@@ -489,7 +411,7 @@ public static partial class TypeAuthLogic
     static ConstructorInfo ciConditionDebugData = ReflectionTools.GetConstuctorInfo(() => new ConditionDebugData(null!, true));
     static MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity a) => a.ToLite()).GetGenericMethodDefinition();
 
-    internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic requested, bool inUserInterface)
+    internal static Expression IsAllowedExpressionDebug(Expression entity, TypeAllowedBasic requested, bool inUserInterface, FilterQueryArgs args)
     {
         Type type = entity.Type;
 
@@ -503,7 +425,7 @@ public static partial class TypeAuthLogic
                     Expression.ListInit(Expression.New(typeof(List<ConditionDebugData>)),
                             line.TypeConditions.Select(tc => Expression.New(ciConditionDebugData,
                                 Expression.Constant(tc, typeof(TypeConditionSymbol)),
-                                Expression.Invoke(TypeConditionLogic.GetCondition(type, tc), entity))).ToArray()),
+                                Expression.Invoke(TypeConditionLogic.GetCondition(type, tc, args), entity))).ToArray()),
 
                     Expression.Constant(line.Allowed)))
                 .ToArray();
@@ -676,7 +598,7 @@ public static partial class TypeAuthLogic
         var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
             .Where(gr =>
             {
-                if (gr.Key.s.FieldInfo == null) /*CSBUG*/
+                if (gr.Key.s.FieldInfo == null)
                 {
                     var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
                     if (replacedName == null)

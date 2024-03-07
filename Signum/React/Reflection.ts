@@ -73,6 +73,8 @@ export interface OperationInfo {
   operationType: OperationType;
   canBeNew?: boolean;
   canBeModified?: boolean;
+  resultIsSaved?: boolean;
+  forReadonlyEntity?: boolean;
   hasCanExecute?: boolean;
   hasCanExecuteExpression?: boolean;
   hasStates?: boolean;
@@ -152,10 +154,11 @@ export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, dur
 
 export function dateTimePlaceholder(luxonFormat: string) {
   var result = DateTime.expandFormat(luxonFormat);
-
+  
   return result
     .replace(/\bd\b/, "dd")
     .replace(/\bMM?\b/, "mm")
+    .replace(/\byyyyy\b/, "yyyy")
     .replace(/\bh\b/, "hh")
     .replace(/\bHH?\b/, "hh")
     .replace(/\bm\b/, "mm");
@@ -260,7 +263,7 @@ const oneDigitCulture = new Set([
 
 export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
 
-  if (!oneDigitCulture.has(dt.locale)) {
+  if (!oneDigitCulture.has(dt.locale!)) {
 
     if (format == "D")
       return dt.toLocaleString({ year: "numeric", month: "2-digit", day: "2-digit", ...options });
@@ -530,7 +533,7 @@ export function isLowPopulationSymbol(type: PseudoType) {
 }
 
 export function parseId(ti: TypeInfo, id: string): string | number {
-  return ti.members["Id"].type.name == "number" ? parseInt(id) : id;
+  return getMemberInfo(ti, "Id").type.name == "number" ? parseInt(id) : id;
 }
 
 export const IsByAll = "[ALL]";
@@ -761,7 +764,7 @@ export function setTypes(types: TypeInfoDictionary) {
   Object.freeze(_queryNames);
 
   missingSymbols = missingSymbols.filter(s => {
-    const m = getMember(s.key);
+    const m = getSymbolMember(s.key);
     if (m)
       s.id = m.id;
 
@@ -1561,8 +1564,12 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + ".All");
   }
 
-  anyNo<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".AnyNo");
+  notAll<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NotAll");
+  }
+
+  notAny<S = ArrayElement<T>>(): QueryTokenString<S> {
+    return new QueryTokenString<S>(this.token + ".NotAny");
   }
 
   separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
@@ -1582,9 +1589,7 @@ export class QueryTokenString<T> {
   }
   
 
-  noOne<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".NoOne");
-  }
+
 
   element<S = ArrayElement<T>>(index = 1): QueryTokenString<S> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
@@ -1669,8 +1674,17 @@ export class EnumType<T extends string> {
   }
 
   niceToString(value: T): string {
-    return this.typeInfo().members[value as string].niceName;
+    return getMemberInfo(this.typeInfo(), value as string).niceName;
   }
+}
+
+function getMemberInfo(ti: TypeInfo, memberName: string) {
+  var member = ti.members[memberName];
+  if (member == null)
+    throw new Error(`Member ${memberName} not found on type ${ti.name}`);
+
+  return member;
+
 }
 
 export class MessageKey {
@@ -1679,12 +1693,13 @@ export class MessageKey {
     public type: string,
     public name: string) { }
 
-  propertyInfo(): MemberInfo {
-    return getTypeInfo(this.type).members[this.name]
+  memberInfo(): MemberInfo {
+    var ti = getTypeInfo(this.type);
+    return getMemberInfo(ti, this.name)
   }
 
   niceToString(...args: any[]): string {
-    const msg = this.propertyInfo().niceName;
+    const msg = this.memberInfo().niceName;
 
     return args.length ? msg.formatWith(...args) : msg;
   }
@@ -1697,7 +1712,7 @@ export class QueryKey {
     public name: string) { }
 
   memberInfo(): MemberInfo {
-    return getTypeInfo(this.type).members[this.name]
+    return getMemberInfo(getTypeInfo(this.type), this.name)
   }
 
   niceName(): string {
@@ -1713,7 +1728,7 @@ export interface ISymbol {
 
 let missingSymbols: ISymbol[] = [];
 
-function getMember(key: string): MemberInfo | undefined {
+function getSymbolMember(key: string): MemberInfo | undefined {
 
   if (!key.contains("."))
     return undefined;
@@ -1731,21 +1746,21 @@ function getMember(key: string): MemberInfo | undefined {
 export function symbolNiceName(symbol: Entity & ISymbol | Lite<Entity & ISymbol>): string {
   if ((symbol as Entity).Type != null) //Don't use isEntity to avoid cycle
   {
-    var m = getMember((symbol as Entity & ISymbol).key);
+    var m = getSymbolMember((symbol as Entity & ISymbol).key);
     return m && m.niceName || (symbol as Entity).toStr!;
   }
   else {
     var model = (symbol as Lite<Entity>).model;
     var toStr = typeof model == "string" ? model : (model as ModelEntity).toStr!;
 
-    var m = getMember(toStr);
+    var m = getSymbolMember(toStr);
     return m && m.niceName || toStr;
   }
 }
 
 export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string) { //Unsafe Type!
 
-  const mi = getMember(key);
+  const mi = getSymbolMember(key);
   if (mi == null)
     throw new Error(`No Symbol with key '${key}' found`);
 
@@ -1759,7 +1774,7 @@ export function getSymbol<T extends Entity & ISymbol>(type: Type<T>, key: string
 
 export function registerSymbol(type: string, key: string): any /*ISymbol*/ {
 
-  const mi = getMember(key);
+  const mi = getSymbolMember(key);
 
   var symbol = {
     Type: type,

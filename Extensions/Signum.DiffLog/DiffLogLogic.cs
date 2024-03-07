@@ -1,4 +1,6 @@
 using Signum.API;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 using Signum.DiffLog;
 
 namespace Signum.DiffLog;
@@ -13,6 +15,10 @@ public static class DiffLogLogic
         {
             MixinDeclarations.AssertDeclared(typeof(OperationLogEntity), typeof(DiffLogMixin));
 
+            TypeConditionLogic.RegisterWhenAlreadyFilteringBy(OperationLogTypeCondition.FilteringByTarget, 
+                property: (OperationLogEntity ol) => ol.Target,
+                isConstantAuthorized: e => e != null && TypeAuthLogic.IsAllowedFor(e, TypeAllowedBasic.Read, true, FilterQueryArgs.FromLite(e)),
+                useInDBForInMemoryCondition: false);
 
             OperationLogic.SurroundOperation += OperationLogic_SurroundOperation;
 
@@ -21,12 +27,9 @@ public static class DiffLogLogic
 
             if (sb.WebServerBuilder != null)
                 DiffLogServer.Start(sb.WebServerBuilder.WebApplication);
+
         }
     }
-
-    
-
-   
 
     public static void RegisterShouldLog<T>(Func<IEntity, IOperation, bool> func) where T : Entity
     {
@@ -37,7 +40,7 @@ public static class DiffLogLogic
     {
         if (entity != null && ShouldLog.Invoke(entity, operation))
         {
-            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModified(entity))
+            if (operation.OperationType == OperationType.Execute && !entity.IsNew && ((IEntityOperation)operation).CanBeModified && GraphExplorer.IsGraphModifiedVirtual(entity))
                 entity = RetrieveFresh(entity);
 
             using (CultureInfoUtils.ChangeBothCultures(Schema.Current.ForceCultureInfo))

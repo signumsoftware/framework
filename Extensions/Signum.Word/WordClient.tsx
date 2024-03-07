@@ -23,8 +23,11 @@ import { ButtonsContext, ButtonBarElement } from "@framework/TypeContext";
 import { Dropdown } from 'react-bootstrap';
 import * as EvalClient from '../Signum.Eval/EvalClient';
 import { SearchControlLoaded } from '@framework/Search';
+import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 
 export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
+
+  registerChangeLogModule("Signum.Word", () => import("./Changelog"));
 
   EvalClient.Options.checkEvalFindOptions.push({ queryName: WordTemplateEntity });
   register(QueryModel, {
@@ -140,7 +143,7 @@ export function getWordTemplates(ctx: ContextualItemsContext<Entity>): Promise<M
         header: WordTemplateEntity.nicePluralName(),
         menuItems: wts.map(wt =>
           <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
-            <FontAwesomeIcon icon={["far", "file-word"]} className="icon" />
+            <FontAwesomeIcon icon={"file-word"} className="icon" />
             {getToString(wt)}
           </Dropdown.Item>
         )

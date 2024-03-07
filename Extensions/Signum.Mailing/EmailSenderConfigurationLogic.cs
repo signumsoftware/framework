@@ -1,12 +1,13 @@
 using System.Net.Mail;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Collections.Frozen;
 
 namespace Signum.Mailing;
 
 public static class EmailSenderConfigurationLogic
 {
-    public static ResetLazy<Dictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> EmailSenderCache = null!;
+    public static ResetLazy<FrozenDictionary<Lite<EmailSenderConfigurationEntity>, EmailSenderConfigurationEntity>> EmailSenderCache = null!;
 
     public static Func<string, string> EncryptPassword = s => s;
     public static Func<string, string> DecryptPassword = s => s;
@@ -33,7 +34,7 @@ public static class EmailSenderConfigurationLogic
                     s.Service
                 });
             
-            EmailSenderCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToDictionary(a => a.ToLite()),
+            EmailSenderCache = sb.GlobalLazy(() => Database.Query<EmailSenderConfigurationEntity>().ToFrozenDictionaryEx(a => a.ToLite()),
                 new InvalidateWith(typeof(EmailSenderConfigurationEntity)));
 
             new Graph<EmailSenderConfigurationEntity>.Execute(EmailSenderConfigurationOperation.Save)

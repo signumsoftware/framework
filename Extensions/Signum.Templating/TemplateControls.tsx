@@ -2,39 +2,40 @@ import * as React from 'react'
 import { SubTokensOptions, QueryToken, hasAnyOrAll, FindOptions } from '@framework/FindOptions'
 import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
-import ValueLineModal from '@framework/ValueLineModal'
+import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI } from '@framework/Hooks'
 import * as Finder from '@framework/Finder'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { ajaxGet } from '@framework/Services'
 
 export interface TemplateControlsProps {
-  queryKey: string;
+  queryKey: string | null | undefined;
   forHtml: boolean;
   widgetButtons?: React.ReactElement;
 }
 
 export default function TemplateControls(p: TemplateControlsProps) {
 
-  const [currentToken, setCurrentToken] = React.useState<{ type: "Query", token?: QueryToken} | { type: "Global", expression?: GlobalVariable }>({ type: 'Query'});
+  const [currentToken, setCurrentToken] = React.useState<{ type: "Query", token?: QueryToken } | { type: "Global", expression?: GlobalVariable }>({ type: p.queryKey ? 'Query' : "Global" });
 
+  React.useEffect(() => {
+
+    setCurrentToken({ type: p.queryKey ? 'Query' : "Global" });
+
+  }, [p.queryKey])
 
   function renderButton(text: string, canClick: string | undefined, buildPattern: (key: string) => string) {
     return <input type="button" disabled={!!canClick} className="btn btn-light btn-sm sf-button"
       title={canClick} value={text}
-      onClick={() => ValueLineModal.show({
+      onClick={() => AutoLineModal.show({
         type: { name: "string" },
         initialValue: buildPattern(
           currentToken.type == 'Query' ? (currentToken.token ? currentToken.token.fullKey : "") : (currentToken.expression ? ("g:" + currentToken.expression.key) : "")),
         title: "Template",
         message: "Copy to clipboard: Ctrl+C, ESC",
-        initiallyFocused: true,
       })} />
   }
-
   
-
-
   function tokenHasAnyOrAll(): boolean {
 
     if (currentToken.type == 'Query')
@@ -94,19 +95,16 @@ export default function TemplateControls(p: TemplateControlsProps) {
   }
   const ct = currentToken;
 
-  if (!p.queryKey)
-    return null;
-
   return (
     <div className="d-flex">
       <select className="form-select form-select-sm w-auto" onChange={(e: React.FormEvent<any>) => setCurrentToken({ type: (e.currentTarget as HTMLSelectElement).value as "Query" | "Global" })} >
-        <option value="Query">Query</option>
+        {p.queryKey && <option value="Query">Query</option>}
         <option value="Global">Global</option>
       </select>
       <span className="mx-1">:</span>
       <span className="rw-widget-sm">
-        {ct.type == "Query" ? <QueryTokenBuilder queryToken={ct.token} queryKey={p.queryKey} onTokenChange={t => setCurrentToken({ type: "Query", token: t ?? undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} /> :
-          <GlobalVariables onTokenChange={t => setCurrentToken({ type: 'Global', expression: t ?? undefined})} />}
+        {ct.type == "Query" ? (p.queryKey && <QueryTokenBuilder queryToken={ct.token} queryKey={p.queryKey} onTokenChange={t => setCurrentToken({ type: "Query", token: t ?? undefined })} subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement} readOnly={false} />) :
+          <GlobalVariables selected={ct.expression} onTokenChange={t => setCurrentToken({ type: 'Global', expression: t ?? undefined })} />}
       </span>
       <div className="btn-group" style={{ marginLeft: "10px" }}>
         {renderButton(TemplateTokenMessage.Insert.niceToString(), canElement(), token => `@[${token}]`)}
@@ -126,11 +124,13 @@ export default function TemplateControls(p: TemplateControlsProps) {
 }
 
 
-function GlobalVariables(p: { onTokenChange: (newToken: GlobalVariable | undefined) => void }) {
-  var variableList = useAPI(signal => getGlobalVariables(), []);
+function GlobalVariables(p: { onTokenChange: (newToken: GlobalVariable | undefined) => void, selected: GlobalVariable | undefined }) {
+  
+  var variableList = useAPI(signal => getGlobalVariables(), []); 
   return (
-    <select id="variables" className="form-select form-select-sm w-auto" onChange={(e: React.FormEvent<any>) => p.onTokenChange(variableList?.[parseInt((e.currentTarget as HTMLSelectElement).value)])}>
-      {variableList?.map((v, i) => <option key={i} value={i}>{v.key}</option>)}
+    <select id="variables" className="form-select form-select-sm w-auto" value={p.selected?.key ?? ""} onChange={(e: React.FormEvent<any>) => p.onTokenChange(variableList?.singleOrNull(a => a.key == e.currentTarget.value) ?? undefined)}>
+      {p.selected == null && < option value=""> - </option>}
+      {variableList?.map((v, i) => <option key={i} value={v.key}>{v.key}</option>)}
     </select>
     );
 }
