@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, classes } from '../Globals'
 import { Navigator, ViewPromise } from '../Navigator'
-import * as Constructor from '../Constructor'
+import { Constructor } from '../Constructor'
 import { Finder } from '../Finder'
 import { FindOptions } from '../FindOptions'
 import { TypeContext } from '../TypeContext'

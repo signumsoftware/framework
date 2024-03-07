@@ -7,7 +7,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { Entity } from '@framework/Signum.Entities'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicTypeConditionEntity, DynamicTypeConditionEval, DynamicTypeConditionOperation } from './Signum.Dynamic.Types';
 

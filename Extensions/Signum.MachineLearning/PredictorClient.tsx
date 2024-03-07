@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'

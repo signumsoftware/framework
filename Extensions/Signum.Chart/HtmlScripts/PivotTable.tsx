@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Navigator } from '@framework/Navigator';
 import { Finder } from '@framework/Finder';
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';

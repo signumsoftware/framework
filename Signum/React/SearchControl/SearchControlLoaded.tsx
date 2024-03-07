@@ -11,7 +11,7 @@ import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString,
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
-import * as Constructor from '../Constructor'
+import { Constructor } from '../Constructor'
 import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'

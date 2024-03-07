@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import * as ColorUtils from './ColorUtils'
 import { PseudoType, getTypeName } from '@framework/Reflection';
 import { Lite } from '@framework/Signum.Entities';
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import { Finder } from '@framework/Finder';
 import { Dic } from '@framework/Globals';
 import { getColorInterpolation } from './ColorUtils';

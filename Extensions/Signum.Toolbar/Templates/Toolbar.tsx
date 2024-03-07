@@ -9,7 +9,7 @@ import * as ToolbarClient from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { Finder } from '@framework/Finder';
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';

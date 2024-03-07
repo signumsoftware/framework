@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'

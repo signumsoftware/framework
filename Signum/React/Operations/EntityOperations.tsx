@@ -12,7 +12,7 @@ import {
 } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import * as Constructor from "../Constructor"
+import { Constructor } from "../Constructor"
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
 import { notifySuccess } from "../Operations";

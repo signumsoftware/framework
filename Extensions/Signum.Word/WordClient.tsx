@@ -8,7 +8,7 @@ import { Lite, Entity, EntityPack, toLite, ModifiableEntity, toMList, getToStrin
 import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'
 import * as Operations from '@framework/Operations'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplateVisibleOn } from './Signum.Word'
 import { QueryModel, MultiEntityModel } from '../Signum.Templating/Signum.Templating'
 import { ButtonBarManager } from '@framework/Frames/ButtonBar';

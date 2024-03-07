@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Finder } from '@framework/Finder';
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as WhatsNewClient from '../WhatsNewClient';

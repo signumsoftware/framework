@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes } from '../Globals'
 import { Finder } from '../Finder'
-import * as Constructor from '../Constructor'
+import { Constructor } from '../Constructor'
 import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'
 import { getQueryKey, getQueryNiceName, QueryTokenString, tryGetTypeInfos, getTypeInfos } from '../Reflection'

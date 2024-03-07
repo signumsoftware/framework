@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as AppContext from '../AppContext'
 import { Navigator, ViewPromise } from '../Navigator'
-import * as Constructor from '../Constructor'
+import { Constructor } from '../Constructor'
 import { useLocation, useParams, unstable_useBlocker } from "react-router-dom"
 import { Finder } from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'

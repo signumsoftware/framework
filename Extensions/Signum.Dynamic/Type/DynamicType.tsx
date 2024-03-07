@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { IHasChanges } from '@framework/TypeContext'

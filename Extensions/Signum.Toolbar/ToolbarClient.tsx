@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity } from '@framework/Signum.Entities'
 import { ToolbarEntity, ToolbarMenuEntity, ToolbarElementEmbedded, ToolbarElementType, ToolbarLocation, ShowCount } from './Signum.Toolbar'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dic } from '@framework/Globals';
 import QueryToolbarConfig from './QueryToolbarConfig';

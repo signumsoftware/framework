@@ -5,7 +5,7 @@ import { ajaxGet } from '@framework/Services';
 import { Navigator } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {

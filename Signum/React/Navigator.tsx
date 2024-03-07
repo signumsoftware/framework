@@ -9,7 +9,7 @@ import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './Ty
 import * as AppContext from './AppContext';
 import { Finder } from './Finder';
 import * as Operations from './Operations';
-import * as Constructor from './Constructor';
+import { Constructor } from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'
 import { AutocompleteConfig, FindOptionsAutocompleteConfig, getLitesWithSubStr, LiteAutocompleteConfig, MultiAutoCompleteConfig } from './Lines/AutoCompleteConfig'
 import { FindOptions } from './FindOptions'
@@ -17,7 +17,6 @@ import { ImportComponent } from './ImportComponent'
 import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
-import { clearCustomConstructors } from "./Constructor";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
 import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
@@ -40,7 +39,7 @@ export namespace Navigator {
     AppContext.clearSettingsActions.push(clearEntitySettings);
     AppContext.clearSettingsActions.push(clearWidgets)
     AppContext.clearSettingsActions.push(ButtonBarManager.clearButtonBarRenderer);
-    AppContext.clearSettingsActions.push(clearCustomConstructors);
+    AppContext.clearSettingsActions.push(Constructor.clearCustomConstructors);
     AppContext.clearSettingsActions.push(clearEntityChanged);
     AppContext.clearSettingsActions.push(clearSpecialActions);
     AppContext.clearSettingsActions.push(clearEvents);

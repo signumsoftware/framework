@@ -5,7 +5,7 @@ import { SearchValueLine } from '@framework/Search'
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicValidationEntity, DynamicValidationEval } from './Signum.Dynamic.Validations';
 

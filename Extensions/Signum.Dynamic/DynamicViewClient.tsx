@@ -22,7 +22,7 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "@framework/Modals/MessageModal";
 import { Dic } from "@framework/Globals";
 import * as Components from "@framework/Components";
-import * as Constructor from "@framework/Constructor"
+import { Constructor } from "@framework/Constructor"
 import { QueryString } from '@framework/QueryString';
 import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewOverrideEntity, DynamicViewSelectorEntity, DynamicViewSelectorOperation } from './Signum.Dynamic.Views';
 

@@ -24,7 +24,7 @@ import {
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import * as QuickLinks from '@framework/QuickLinks'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import SelectorModal from '@framework/SelectorModal'
 import AutoLineModal from '@framework/AutoLineModal'
 import {
