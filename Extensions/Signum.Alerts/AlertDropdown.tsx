@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as Operations from '@framework/Operations'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, getToString, is, JavascriptMessage, liteKey, parseLite, toLite } from '@framework/Signum.Entities'
 import { Toast } from 'react-bootstrap'
 import { DateTime } from 'luxon'

@@ -1,7 +1,7 @@
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Lite, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, ISMSOwnerEntity } from './Signum.SMS'
 import * as QuickLinks from '@framework/QuickLinks'

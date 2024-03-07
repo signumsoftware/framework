@@ -9,7 +9,7 @@ import { Multiselect } from 'react-widgets/cjs';
 import { genericForwardRef, useController } from './LineBase';
 import { number } from 'prop-types';
 import { FindOptions, ResultRow } from '../FindOptions'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { normalizeEmptyArray } from './EntityCombo';
 import { useMounted } from '../Hooks';
 import { FormGroup } from './FormGroup';

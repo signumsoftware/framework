@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Navigator } from '@framework/Navigator';
-import * as Finder from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import * as ChartClient from '../ChartClient';
 import { ChartColumn, ChartRow } from '../ChartClient';

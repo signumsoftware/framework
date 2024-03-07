@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '../Navigator'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { EntityOperationSettings } from '../Operations'
 import * as Operations from '../Operations'
 import { getAllTypes } from "../Reflection";

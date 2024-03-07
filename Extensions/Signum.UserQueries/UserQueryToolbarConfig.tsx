@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Location } from 'react-router'
 import { Navigator } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Lite, liteKey } from '@framework/Signum.Entities'
 import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'

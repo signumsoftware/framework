@@ -4,7 +4,7 @@ import * as draftjs from 'draft-js';
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { IContentStateConverter, HtmlEditorController, HtmlEditorPlugin } from "../HtmlEditor"
 import { HtmlEditorButton } from '../HtmlEditorButtons';
-import { decompress } from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 
 function extractLinks(text: string): { from: number, to: number }[]{
   const linkRegex = /https?:\/\/([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g;

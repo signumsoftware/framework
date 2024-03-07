@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPostRaw, ajaxGet, saveFile, ajaxPost } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { QueryRequest, QueryToken } from '@framework/FindOptions'
 import { Entity, Lite } from '@framework/Signum.Entities'
 import { ExcelReportEntity, ExcelMessage, ExcelPermission, ImportExcelModel } from './Signum.Excel'

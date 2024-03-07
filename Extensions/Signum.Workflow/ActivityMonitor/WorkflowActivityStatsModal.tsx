@@ -12,7 +12,7 @@ import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
-import { toFilterOptions, isAggregate } from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import { toAbsoluteUrl } from '@framework/AppContext';
 
 interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
@@ -46,7 +46,7 @@ const [show, setShow] = React.useState<boolean>(true);
             queryName: CaseActivityEntity,
             filterOptions: [
               { token: CaseActivityEntity.token(e => e.entity.workflowActivity), value: stats.workflowActivity },
-              ...toFilterOptions(p.config.filters.filter(f => !isAggregate(f)))
+              ...Finder.toFilterOptions(p.config.filters.filter(f => !Finder.isAggregate(f)))
             ],
             columnOptionsMode: "Add",
             columnOptions: p.config.columns

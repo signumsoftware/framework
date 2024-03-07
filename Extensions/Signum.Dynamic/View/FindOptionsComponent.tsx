@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { getQueryNiceName, isTypeEntity, Binding, getTypeInfos } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import { Typeahead } from '@framework/Components'

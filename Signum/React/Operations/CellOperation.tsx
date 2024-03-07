@@ -15,7 +15,7 @@ import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiP
 import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
 import { withIcon } from "./EntityOperations";
-import { CellFormatter } from "../Finder";
+import {  } from "../Finder";
 import { useDoubleClick } from "../Hooks";
 
 

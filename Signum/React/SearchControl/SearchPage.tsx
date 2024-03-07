@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLocation, useParams } from 'react-router'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, FilterOption, QueryDescription, isFilterGroup } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
 import { Navigator } from '../Navigator'

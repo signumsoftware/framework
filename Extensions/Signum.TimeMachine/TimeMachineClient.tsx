@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import * as QuickLinks from '@framework/QuickLinks'
@@ -15,7 +15,6 @@ import { EntityLink, SearchControl, SearchControlLoaded } from '@framework/Searc
 import { liteKey } from '@framework/Signum.Entities';
 import { EntityControlMessage } from '@framework/Signum.Entities';
 import { tryGetTypeInfos } from '@framework/Reflection';
-import { CellFormatter } from '@framework/Finder';
 import { TypeReference } from '@framework/Reflection';
 import { SearchControlOptions } from '@framework/SearchControl/SearchControl';
 import { TimeMachineCompareModal, TimeMachineModal } from './TimeMachinePage';
@@ -107,7 +106,7 @@ export function start(options: { routes: RouteObject[] }) {
     Finder.formatRules.push({
       name: "Lite_TM",
       isApplicable: (qt, sc) => qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(qt.type),
-      formatter: qt => new CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, true)
+      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity>, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, true)
     });
 
     Finder.formatRules.push({
@@ -116,7 +115,7 @@ export function start(options: { routes: RouteObject[] }) {
         return qt.filterType == "Lite" && sc != null && sc.props.findOptions.systemTime != null && Finder.isSystemVersioned(qt.type) &&
           tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
-      formatter: qt => new CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, false)
+      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <TimeMachineLink lite={cell} />, false)
     });
   }
 

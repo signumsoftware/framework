@@ -3,7 +3,7 @@ import { Tab, Tabs } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ifError, classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'

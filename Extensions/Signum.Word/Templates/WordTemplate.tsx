@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable, CheckboxL
 import { TypeContext } from '@framework/TypeContext'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { getTypeInfos } from '@framework/Reflection'
 import { WordTemplateEntity } from '../Signum.Word'

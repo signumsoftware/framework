@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { MListElementBinding, ReadonlyBinding, TypeReference } from '../Reflection'

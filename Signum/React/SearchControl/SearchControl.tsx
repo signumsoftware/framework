@@ -1,6 +1,5 @@
 import * as React from 'react'
-import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter } from '../Finder'
+import { Finder } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
@@ -20,9 +19,9 @@ export interface SimpleFilterBuilderProps {
 
 export interface SearchControlProps {
   findOptions: FindOptions;
-  formatters?: { [token: string]: CellFormatter };
+  formatters?: { [token: string]: Finder.CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
-  entityFormatter?: EntityFormatter;
+  entityFormatter?: Finder.EntityFormatter;
   selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
 
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];

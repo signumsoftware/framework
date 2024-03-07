@@ -1,10 +1,9 @@
 import * as React from 'react'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed, withoutAggregate } from '@framework/FindOptions'
 import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Chart'
 import * as ChartClient from '../ChartClient'
-import { toFilterOptions } from '@framework/Finder';
 import { ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
 import { TypeInfo } from '@framework/Reflection'
@@ -73,7 +72,7 @@ export default function ChartTableComponent(p: ChartTableProps) {
 
       window.open(toAbsoluteUrl(Finder.findOptionsPath({
         queryName: lcr.queryKey,
-        filterOptions: toFilterOptions(filters),
+        filterOptions: Finder.toFilterOptions(filters),
         columnOptions: columns,
         columnOptionsMode: "ReplaceOrAdd"
       })));

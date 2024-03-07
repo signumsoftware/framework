@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { TreeMessage } from './Signum.Tree'

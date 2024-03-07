@@ -229,9 +229,9 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 //  defaultOrderType?: OrderType;
 //  defaultFilters?: FilterOption[];
 //  hiddenColumns?: ColumnOption[];
-//  formatters?: { [token: string]: CellFormatter };
+//  formatters?: { [token: string]: Finder.CellFormatter };
 //  rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
-//  entityFormatter?: EntityFormatter;
+//  entityFormatter?: Finder.EntityFormatter;
 //  inPlaceNavigation?: boolean;
 //  showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
 //  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
@@ -243,14 +243,14 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 //  extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
 //}
 
-//export class CellFormatter {
+//export class Finder.CellFormatter {
 //  constructor(
-//    public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
+//    public formatter: (cell: any, ctx: Finder.CellFormatterContext) => React.ReactChild | undefined,
 //    public cellClass?: string) {
 //  }
 //}
 
-//export interface CellFormatterContext {
+//export interface Finder.CellFormatterContext {
 //  refresh?: () => void;
 //  systemTime?: SystemTime;
 //}

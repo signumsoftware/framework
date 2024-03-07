@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { areEqual, classes, Dic } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { QueryToken, SubTokensOptions, getTokenParents, isPrefix, ManualToken } from '../FindOptions'
 import * as PropTypes from "prop-types";
 import "./QueryTokenBuilder.css"

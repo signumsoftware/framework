@@ -8,7 +8,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead';
 import * as ToolbarClient from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
-import * as Finder from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { ToolbarCount } from '../QueryToolbarConfig';

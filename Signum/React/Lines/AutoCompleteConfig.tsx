@@ -1,10 +1,9 @@
 import * as React from 'react'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, TypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
-import { toFilterRequests } from '../Finder';
 import { TextHighlighter, TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
 import { Navigator, AutocompleteConstructor } from '../Navigator';
 import { Dic } from '../Globals'

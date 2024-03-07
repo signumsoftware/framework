@@ -8,7 +8,7 @@ import { tryGetMixin } from '@framework/Signum.Entities'
 import * as AppContext from "@framework/AppContext"
 import { useEffect, useState } from 'react'
 import ProfilePhoto from './ProfilePhoto'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as AuthAdminClient from '../AuthAdminClient'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }) {

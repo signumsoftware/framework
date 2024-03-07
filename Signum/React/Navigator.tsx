@@ -7,7 +7,7 @@ import { TypeEntity, ExceptionEntity } from './Signum.Basics';
 import { PropertyRoute, PseudoType, Type, getTypeInfo, tryGetTypeInfos, getTypeName, isTypeModel, OperationType, TypeReference, IsByAll, isTypeEntity, tryGetTypeInfo, getTypeInfos, newLite, TypeInfo, EnumType } from './Reflection';
 import { ButtonBarElement, ButtonsContext, EntityFrame, TypeContext } from './TypeContext';
 import * as AppContext from './AppContext';
-import * as Finder from './Finder';
+import { Finder } from './Finder';
 import * as Operations from './Operations';
 import * as Constructor from './Constructor';
 import { ViewReplacer } from './Frames/ReactVisitor'

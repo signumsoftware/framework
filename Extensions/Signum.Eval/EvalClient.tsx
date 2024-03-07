@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { QueryEntitiesRequest } from "@framework/FindOptions";
@@ -11,7 +11,6 @@ import { StyleContext } from '@framework/TypeContext'
 import { FindOptions, FilterConditionOption, ColumnOption } from '@framework/FindOptions';
 import { Type, QueryTokenString } from '@framework/Reflection';
 import { SearchValueLine } from '@framework/Search';
-import { CellFormatter } from '@framework/Finder';
 import { expandNumbers } from '../Signum.DiffLog/Templates/DiffDocument';
 import { EvalPanelPermission } from './Signum.Eval';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
@@ -57,7 +56,7 @@ export namespace Options {
 
       return (
         <SearchValueLine ctx={ctx} findOptions={findOptions} searchControlProps={{
-          formatters: columns.toObjectDistinct(a => a.token.toString(), a => new CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />, true))
+          formatters: columns.toObjectDistinct(a => a.token.toString(), a => new Finder.CellFormatter((cell, cfc) => cell && <HighlightText search={search} text={cell} type={a.type} />, true))
         }} />
       );
     });

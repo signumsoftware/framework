@@ -6,7 +6,7 @@ import * as Constructor from '@framework/Constructor';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'

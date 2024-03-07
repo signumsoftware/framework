@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Navigator } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { AutoLine, EntityLine, EnumLine } from '@framework/Lines'
 import { Lite, is } from '@framework/Signum.Entities'
 import { TypeContext } from '@framework/TypeContext'

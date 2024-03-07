@@ -2,13 +2,12 @@ import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { classes } from '../Globals'
 import { Navigator } from '../Navigator'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, FindOptionsParsed, SubTokensOptions, QueryToken, QueryValueRequest, QueryDescription } from '../FindOptions'
 import { Lite, Entity, getToString, EmbeddedEntity, EntityControlMessage } from '../Signum.Entities'
 import { getQueryKey, toNumberFormat, toLuxonFormat, getEnumInfo, QueryTokenString, getTypeInfo, getTypeName, toLuxonDurationFormat, timeToString, toFormatWithFixes } from '../Reflection'
 import { SearchControlProps } from "./SearchControl";
 import { BsColor, BsSize } from '../Components';
-import { toFilterRequests } from '../Finder';
 import { PropertyRoute, StyleContext } from '../Lines'
 import { useAPI, usePrevious } from '../Hooks'
 import * as Hooks from '../Hooks'
@@ -65,7 +64,7 @@ function getQueryRequestValue(fo: FindOptionsParsed, valueToken?: string | Query
   return {
     queryKey: fo.queryKey,
     multipleValues: multipleValues,
-    filters: toFilterRequests(fo.filterOptions),
+    filters: Finder.toFilterRequests(fo.filterOptions),
     valueToken: valueToken?.toString(),
     systemTime: fo.systemTime && { ...fo.systemTime }
   };

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Finder from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import * as Constructor from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

@@ -3,7 +3,7 @@ import { Lite, liteKey } from '@framework/Signum.Entities'
 import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
 import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import { Navigator } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as UserQueryClient from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
 

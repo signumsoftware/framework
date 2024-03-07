@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { ResultTable, FindOptions, FilterOption, QueryDescription } from '@framework/FindOptions'
 import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/Signum.Entities'

@@ -4,7 +4,7 @@ import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import * as Operations from '@framework/Operations'
@@ -19,7 +19,6 @@ import { ContextualItemsContext, renderContextualItems } from "@framework/Search
 import { Entity } from "@framework/Signum.Entities";
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Dropdown, DropdownButton } from 'react-bootstrap';
-import { toFilterRequests } from '@framework/Finder';
 import "./TreeViewer.css"
 import { QueryTokenString, tryGetOperationInfo } from '@framework/Reflection';
 import * as Hooks from '@framework/Hooks'
@@ -289,8 +288,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
 
-      const userFilters = toFilterRequests(filters.filter(fo => fo.frozen == false));
-      const frozenFilters = toFilterRequests(filters.filter(fo => fo.frozen == true));
+      const userFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == false));
+      const frozenFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == true));
 
       if (userFilters.length == 0)
         userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });

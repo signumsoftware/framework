@@ -17,7 +17,7 @@ import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip,
 import { BsColor } from "../Components";
 import { notifySuccess } from "../Operations";
 import { FunctionalAdapter } from "../Modals";
-import { getTypeNiceName } from "../Finder";
+import {  } from "../Finder";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {

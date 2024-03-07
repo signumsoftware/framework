@@ -5,7 +5,7 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import * as Constructor from '@framework/Constructor'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Lite, Entity, newMListElement, registerToString, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PseudoType, Type, getTypeName, isTypeEntity, getQueryKey } from '@framework/Reflection'

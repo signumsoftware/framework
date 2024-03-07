@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { PropertyRoute } from '@framework/Reflection'
 import { TextAreaLine, TypeContext } from '@framework/Lines'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import AutoLineModal from '@framework/AutoLineModal'
 import { TemplateApplicableEval } from "../Signum.Templating";

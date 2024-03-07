@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { getToString, Lite, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'

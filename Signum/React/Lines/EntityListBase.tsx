@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes, Dic, KeyGenerator } from '../Globals'
 import { ModifiableEntity, Lite, Entity, MListElement, MList, EntityControlMessage, newMListElement, isLite, parseLiteList, is, liteKey, toLite } from '../Signum.Entities'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as Constructor from '../Constructor'
 import { FilterOption, FindOptions } from '../FindOptions'

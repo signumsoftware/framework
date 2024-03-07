@@ -5,7 +5,7 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import * as Constructor from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'

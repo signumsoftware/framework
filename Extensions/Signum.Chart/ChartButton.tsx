@@ -7,7 +7,7 @@ import { default as SearchControlLoaded } from '@framework/SearchControl/SearchC
 import { ChartMessage, ChartRequestModel } from './Signum.Chart'
 import * as ChartClient from './ChartClient'
 import { Button } from 'react-bootstrap'
-import * as Finder from '@framework//Finder';
+import { Finder } from '@framework//Finder';
 
 export interface ChartButtonProps {
   searchControl: SearchControlLoaded;

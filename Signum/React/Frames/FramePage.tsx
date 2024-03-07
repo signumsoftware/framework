@@ -3,7 +3,7 @@ import * as AppContext from '../AppContext'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as Constructor from '../Constructor'
 import { useLocation, useParams, unstable_useBlocker } from "react-router-dom"
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { Entity, Lite, getToString, EntityPack, JavascriptMessage, entityInfo, SelectorMessage, is, ModifiableEntity } from '../Signum.Entities'
 import { TypeContext, StyleOptions, EntityFrame, ButtonBarElement } from '../TypeContext'

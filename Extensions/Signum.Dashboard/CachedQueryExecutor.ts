@@ -1,4 +1,4 @@
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { ColumnRequest, FilterOperation, FilterOptionParsed, FilterRequest, FindOptionsParsed, OrderRequest, Pagination, QueryRequest, QueryToken, QueryValueRequest, ResultRow, ResultTable, isFilterGroup } from '@framework/FindOptions'
 import { Entity, getToString, is, Lite } from '@framework/Signum.Entities';
 import { ignoreErrors } from '@framework/QuickLinks';

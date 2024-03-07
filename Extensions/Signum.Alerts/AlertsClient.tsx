@@ -12,7 +12,7 @@ import * as QuickLinks from '@framework/QuickLinks'
 import { andClose } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ajaxGet } from '@framework/Services'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, getToString, isEntity, isLite, Lite, toLite } from '@framework/Signum.Entities'
 import { EntityLink } from '@framework/Search'
 import Alert from './Templates/Alert'

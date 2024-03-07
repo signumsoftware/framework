@@ -3,7 +3,7 @@ import { useLocation, Location } from 'react-router'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic, softCast } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
@@ -20,7 +20,6 @@ import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { TokenCompleter } from '@framework/Finder'
 import { useForceUpdate } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import FramePage from '@framework/Frames/FramePage'
@@ -206,7 +205,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
 
 
-    var parser = new TokenCompleter(sc.props.queryDescription);
+    var parser = new Finder.TokenCompleter(sc.props.queryDescription);
     [
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Dic, classes } from '@framework/Globals'
 import * as Constructor from '@framework/Constructor'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage, getToString } from '@framework/Signum.Entities'

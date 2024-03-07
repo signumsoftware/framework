@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Lite, Entity, EntityPack, toLite, ModifiableEntity, toMList, getToString } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { Type, isTypeEntity, QueryTokenString } from '@framework/Reflection'

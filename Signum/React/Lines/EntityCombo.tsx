@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { ModifiableEntity, Lite, Entity, toLite, is, liteKey, getToString, isEntity } from '../Signum.Entities'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfos, tryGetTypeInfos, TypeReference } from '../Reflection'

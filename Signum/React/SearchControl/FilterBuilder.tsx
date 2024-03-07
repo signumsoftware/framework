@@ -16,7 +16,7 @@ import "./FilterBuilder.css"
 import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
-import { renderFilterValue } from '../Finder'
+import { Finder } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
 import { isNumberKey, NumberBox } from '../Lines/NumberLine'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
@@ -439,7 +439,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return renderFilterValue(f, { ctx, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
+    return Finder.renderFilterValue(f, { ctx, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
   }
 
   function handleValueChange() {
@@ -645,7 +645,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return renderFilterValue(f, { ctx: ctx, filterOptions: p.allFilterOptions, handleValueChange });
+    return Finder.renderFilterValue(f, { ctx: ctx, filterOptions: p.allFilterOptions, handleValueChange });
   }
 
   function handleValueChange() {

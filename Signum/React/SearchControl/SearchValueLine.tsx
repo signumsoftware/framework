@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import * as Constructor from '../Constructor'
 import { FindOptions, FindOptionsParsed, QueryDescription, QueryToken, QueryValueRequest } from '../FindOptions'
 import { Lite, Entity, isEntity, EntityControlMessage, isLite } from '../Signum.Entities'

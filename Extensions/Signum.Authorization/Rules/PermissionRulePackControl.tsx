@@ -3,7 +3,7 @@ import { Button } from 'react-bootstrap'
 import { notifySuccess } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 
 import { API } from '../AuthAdminClient'
 import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage } from './Signum.Authorization.Rules'
