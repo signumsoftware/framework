@@ -3,7 +3,7 @@ import { Entity, toLite, JavascriptMessage, OperationMessage, getToString, Norma
 import { getTypeInfo, OperationType, GraphExplorer, tryGetTypeInfo } from '../Reflection';
 import { classes, ifError } from '../Globals';
 import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameComponent } from '../TypeContext';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
 import {
@@ -12,12 +12,12 @@ import {
 } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
-import * as Constructor from "../Constructor"
+import { Constructor } from "../Constructor"
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
 import { notifySuccess } from "../Operations";
 import { FunctionalAdapter } from "../Modals";
-import { getTypeNiceName } from "../Finder";
+import {  } from "../Finder";
 
 
 export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {

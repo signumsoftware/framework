@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Workflow'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';
@@ -11,7 +11,6 @@ import { useLocation, useParams } from "react-router";
 import { newLite } from '@framework/Reflection';
 import FilterBuilder from '@framework/SearchControl/FilterBuilder';
 import ColumnBuilder from '@framework/SearchControl/ColumnBuilder';
-import { toFilterRequests } from '@framework/Finder';
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 
 export interface WorkflowActivityMonitorConfig {
@@ -81,7 +80,7 @@ export default function WorkflowActivityMonitorPage() {
 function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
   return {
     workflow: conf.workflow,
-    filters: toFilterRequests(conf.filters),
+    filters: Finder.toFilterRequests(conf.filters),
     columns: conf.columns.filter(c => c.token != null).map(c => ({
       token: c.token!.fullKey,
       displayName: c.token!.niceName

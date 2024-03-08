@@ -5,7 +5,7 @@ import "./Widgets.css"
 import { ErrorBoundary } from '../Components';
 import { WidgetContext, EmbeddedWidget, onEmbeddedWidgets } from './Widgets'
 import { Tabs, Tab } from 'react-bootstrap';
-import * as Navigator from "../Navigator"
+import { Navigator } from "../Navigator"
 
 
 export interface WidgetEmbeddedProps {

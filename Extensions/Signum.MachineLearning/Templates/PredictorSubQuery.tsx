@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, EntityTable, TextBoxLine } from '@framework/Lines
 import { FindOptions, ColumnOption } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEntity, PredictorMainQueryEmbedded, PredictorMessage, PredictorSubQueryColumnUsage } from '../Signum.MachineLearning'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'

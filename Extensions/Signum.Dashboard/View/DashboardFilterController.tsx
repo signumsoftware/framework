@@ -2,7 +2,7 @@ import { DashboardEntity, InteractionGroup, PanelPartEmbedded } from '../Signum.
 import { FilterConditionOptionParsed, FilterGroupOptionParsed, FilterOption, FilterOptionParsed, FindOptions, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions';
 import { FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { Entity, is, Lite } from '@framework/Signum.Entities';
-import * as Finder from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '@framework/Globals';
 import { hasWaitForInvalidation } from '../DashboardClient';

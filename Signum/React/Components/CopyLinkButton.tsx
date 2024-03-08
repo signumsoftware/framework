@@ -3,7 +3,7 @@ import { Overlay, Tooltip } from "react-bootstrap";
 import { Entity, FrameMessage, liteKey, NormalControlMessage, toLite } from '../Signum.Entities';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useInterval } from '../Hooks';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import * as AppContext from '../AppContext';
 
 interface CopyLinkButtonProps {

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
 import * as Operations from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';

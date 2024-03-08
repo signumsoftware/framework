@@ -7,7 +7,7 @@ import * as WorkflowClient from '../WorkflowClient'
 import { NavDropdown, Dropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
 import { LinkContainer } from '@framework/Components'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 
 export default function WorkflowDropdown(props: {}) {
   

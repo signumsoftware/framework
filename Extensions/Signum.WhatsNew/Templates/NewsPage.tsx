@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useParams } from "react-router-dom";
 import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink';
 
 export default function NewsPage() {

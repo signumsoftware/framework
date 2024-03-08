@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { AutoLine } from '@framework/Lines'
 import { DynamicTypeEntity } from './Signum.Dynamic.Types';
 import { DynamicIsolationMixin } from './Signum.Dynamic.Isolation';

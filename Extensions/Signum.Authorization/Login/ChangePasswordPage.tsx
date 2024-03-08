@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes, Dic, ifError } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'

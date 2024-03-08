@@ -1,4 +1,4 @@
-import * as Navigator from './Navigator'
+import { Navigator } from './Navigator'
 import { getTypeName, GraphExplorer } from './Reflection'
 import { Entity, is, isEntity, isModifiableEntity, MListElement, ModifiableEntity } from './Signum.Entities';
 

@@ -8,7 +8,7 @@ import { API, CaseFlow } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
-import * as Navigator from "@framework/Navigator";
+import { Navigator } from "@framework/Navigator";
 import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
 import * as AuthClient from '../../Signum.Authorization/AuthClient'

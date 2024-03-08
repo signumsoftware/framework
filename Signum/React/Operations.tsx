@@ -6,9 +6,9 @@ import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple,
 import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString, getOperationInfo, getQueryKey } from './Reflection';
 import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
-import * as Finder from './Finder';
+import { Finder } from './Finder';
 import * as QuickLinks from './QuickLinks';
-import * as Navigator from './Navigator';
+import { Navigator } from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';
@@ -21,7 +21,6 @@ import { FilterOperation } from "./Signum.DynamicQuery";
 import { FunctionalAdapter } from "./Modals";
 import { SearchControlLoaded } from "./Search";
 import { isActive } from "./FindOptions";
-import { CellFormatter, CellFormatterContext } from "./Finder";
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperation";
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
@@ -63,7 +62,7 @@ export function start() {
     isApplicable: c => {
       return c.type.name == "CellOperationDTO";
     },
-    formatter: c => new CellFormatter((dto: CellOperationDto, ctx) => dto && dto.lite ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
+    formatter: c => new Finder.CellFormatter((dto: CellOperationDto, ctx) => dto && dto.lite ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
 
   });
 
@@ -382,7 +381,7 @@ export class CellOperationContext<T extends Entity> {
   tag?: string;
   readonly lite: Lite<T>;
   readonly operationInfo: OperationInfo;
-  readonly cellContext: CellFormatterContext;
+  readonly cellContext: Finder.CellFormatterContext;
   readonly canExecute?: string;
   readonly settings?: CellOperationSettings<T>;
   readonly entityOperationSettings?: EntityOperationSettings<any>;
@@ -399,7 +398,7 @@ export class CellOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
-  constructor(ctx: CellFormatterContext, co: CellOperationDto) {
+  constructor(ctx: Finder.CellFormatterContext, co: CellOperationDto) {
     this.lite = co.lite as Lite<T>;
     this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
     this.cellContext = ctx;

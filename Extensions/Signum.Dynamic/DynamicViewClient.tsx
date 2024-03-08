@@ -5,8 +5,7 @@ import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
 import { SearchValueLine } from '@framework/Search'
-import { EntitySettings, ViewPromise } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings, ViewPromise } from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { TypeContext } from '@framework/TypeContext'
@@ -23,7 +22,7 @@ import * as NodeUtils from './View/NodeUtils' //Typings-only
 import MessageModal from "@framework/Modals/MessageModal";
 import { Dic } from "@framework/Globals";
 import * as Components from "@framework/Components";
-import * as Constructor from "@framework/Constructor"
+import { Constructor } from "@framework/Constructor"
 import { QueryString } from '@framework/QueryString';
 import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicViewOverrideEntity, DynamicViewSelectorEntity, DynamicViewSelectorOperation } from './Signum.Dynamic.Views';
 

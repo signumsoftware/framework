@@ -6,8 +6,8 @@ import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.MachineLearning'
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
+import { Navigator } from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
@@ -21,7 +21,6 @@ import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
-import { toFilterOptions } from '@framework/Finder';
 import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
@@ -140,7 +139,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         var fo: FindOptions = {
           queryName: mq.query!.key,
           groupResults: mq.groupResults,
-          filterOptions: toFilterOptions(filters),
+          filterOptions: Finder.toFilterOptions(filters),
           columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
             token: mle.element.token && mle.element.token.tokenString,
           } as ColumnOption)),

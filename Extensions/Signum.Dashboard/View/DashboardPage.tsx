@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link } from 'react-router-dom'
 import { Entity, parseLite, getToString, JavascriptMessage, EntityPack, translated } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { DashboardEntity, DashboardMessage } from '../Signum.Dashboard'
 import DashboardView from './DashboardView'
 import { useLocation, useParams } from "react-router";

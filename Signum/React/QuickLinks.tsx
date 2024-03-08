@@ -4,9 +4,9 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { getTypeInfo, getQueryNiceName, getQueryKey, getTypeName, Type, tryGetTypeInfo, PseudoType, QueryKey } from './Reflection'
 import { classes, Dic, toPromise } from './Globals'
 import { FindOptions, ManualCellDto, ManualToken, QueryToken, toQueryToken } from './FindOptions'
-import * as Finder from './Finder'
+import { Finder } from './Finder'
 import * as AppContext from './AppContext'
-import * as Navigator from './Navigator'
+import { Navigator } from './Navigator'
 import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is, isEntity, liteKey } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
 import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
@@ -15,7 +15,6 @@ import { StyleContext } from './Lines'
 import { Dropdown } from 'react-bootstrap'
 import DropdownToggle from 'react-bootstrap/DropdownToggle'
 import { BsColor } from './Components'
-import { CellFormatter } from './Finder'
 import { registerManualSubTokens } from './SearchControl/QueryTokenBuilder'
 
 export function start() {
@@ -31,7 +30,7 @@ export function start() {
     name: "CellQuickLink",
     isApplicable: qt => qt.parent?.key == "[QuickLinks]",
 
-    formatter: (c, sc) => new CellFormatter((dto: ManualCellDto, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
+    formatter: (c, sc) => new Finder.CellFormatter((dto: ManualCellDto, ctx, token) => (dto.manualTokenKey && dto.lite && <CellQuickLink quickLinkKey = { dto.manualTokenKey } lite = { dto.lite } />), false),
   });
 }
 

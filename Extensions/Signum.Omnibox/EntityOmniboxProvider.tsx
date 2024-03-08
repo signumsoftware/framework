@@ -3,7 +3,7 @@ import { Lite, Entity, getToString } from '@framework/Signum.Entities'
 import { OmniboxMessage } from './Signum.Omnibox'
 import { OmniboxResult, OmniboxMatch } from './OmniboxClient'
 import { OmniboxProvider } from "./OmniboxProvider"
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { getTypeInfo, tryGetTypeInfo } from '@framework/Reflection'
 
 export default class EntityOmniboxProvider extends OmniboxProvider<EntityOmniboxResult>

@@ -9,7 +9,7 @@ import "./FilterBuilder.css"
 import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { renderFilterValue } from '../Finder'
+import { Finder } from '../Finder'
 import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
@@ -123,7 +123,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "Basic", readOnly: readOnly, formSize: p.extraSmall ? "xs" : "sm" }, undefined as any, Binding.create(f, a => a.value));
 
-    return renderFilterValue(f, {
+    return Finder.renderFilterValue(f, {
       ctx,
       filterOptions: p.filterOptions,
       label: label,

@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import * as React from 'react'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeJoinMode, SystemTimeMode } from '../Signum.DynamicQuery'

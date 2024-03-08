@@ -3,8 +3,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost } from '@framework/Services';
 import { SearchValueLine } from '@framework/Search'
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicExpressionEntity } from './Signum.Dynamic.Expression';

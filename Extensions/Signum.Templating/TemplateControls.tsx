@@ -4,7 +4,7 @@ import { TemplateTokenMessage } from './Signum.Templating'
 import QueryTokenBuilder from '@framework/SearchControl/QueryTokenBuilder'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI } from '@framework/Hooks'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { getTypeInfos, TypeReference } from '@framework/Reflection'
 import { ajaxGet } from '@framework/Services'
 

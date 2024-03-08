@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { classes, Dic, DomUtils, KeyGenerator } from '../Globals'
 import { TypeContext } from '../TypeContext'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { ModifiableEntity, MList, EntityControlMessage, newMListElement, Entity, Lite, is } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'

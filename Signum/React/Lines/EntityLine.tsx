@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { classes } from '../Globals'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'

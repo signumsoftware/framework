@@ -8,7 +8,7 @@ import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, SearchValueLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
 import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, ViewPromise } from '@framework/Navigator'
 import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
@@ -321,7 +321,7 @@ NodeUtils.register<ImageNode>({
 export interface RenderEntityNode extends ContainerNode {
   kind: "RenderEntity";
   field?: string;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
   styleOptions?: StyleOptionsExpression;
   onEntityLoaded?: Expression<() => void>;
   extraProps?: Expression<{}>;
@@ -606,7 +606,7 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
   onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>;
   viewOnCreate?: ExpressionOrValue<boolean>;
   findOptions?: FindOptionsExpr;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
 }
 
 export interface EntityLineNode extends EntityBaseNode {
@@ -1195,7 +1195,7 @@ export interface SearchControlNode extends BaseNode {
   searchOnLoad?: ExpressionOrValue<boolean>;
   showContextMenu?: Expression<(fop: FindOptionsParsed) => boolean | "Basic">;
   extraButtons?: Expression<(searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[]>;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
   showFilterButton?: ExpressionOrValue<boolean>;

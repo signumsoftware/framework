@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { Duration, DurationUnit } from 'luxon';
 import { ifError, Dic } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as EvalClient from '../Signum.Eval/EvalClient';
 import {
   EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
@@ -12,8 +12,7 @@ import { TypeEntity } from '@framework/Signum.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQueryNiceName, getOperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
@@ -25,7 +24,7 @@ import {
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
 import * as QuickLinks from '@framework/QuickLinks'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import SelectorModal from '@framework/SelectorModal'
 import AutoLineModal from '@framework/AutoLineModal'
 import {

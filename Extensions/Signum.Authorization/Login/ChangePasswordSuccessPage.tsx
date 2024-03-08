@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import {PropertyRoute, Binding } from '@framework/Reflection'
 import { Expression, DesignerNode } from './NodeUtils'
 import { BaseNode } from './Nodes'

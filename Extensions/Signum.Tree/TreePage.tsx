@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { getTypeInfo, tryGetOperationInfo } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as Operations from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { useLocation, useParams } from "react-router";

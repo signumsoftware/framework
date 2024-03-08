@@ -1,18 +1,17 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { DomUtils, classes, Dic, softCast } from '../Globals'
-import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter, isAggregate, toFilterOptions } from '../Finder'
+import { Finder } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
-import * as Constructor from '../Constructor'
+import { Constructor } from '../Constructor'
 import * as Hooks from '../Hooks'
 import PaginationSelector from './PaginationSelector'
 import FilterBuilder from './FilterBuilder'
@@ -69,12 +68,12 @@ export interface SearchControlLoadedProps {
   queryDescription: QueryDescription;
   querySettings: Finder.QuerySettings | undefined;
 
-  formatters?: { [token: string]: CellFormatter };
+  formatters?: { [token: string]: Finder.CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
-  entityFormatter?: EntityFormatter;
+  entityFormatter?: Finder.EntityFormatter;
   selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
-  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
 
@@ -923,7 +922,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const rt = this.state.resultTable;
     let value = cm.rowIndex == undefined || rt == null ? undefined : rt.rows[cm.rowIndex].columns[rt.columns.indexOf(token.fullKey)];
 
-    var rule = Finder.quickFilterRules.filter(a => a.applicable(token, value, this)).last("QuickFilterRule");
+    var rule = Finder.quickFilterRules.filter(a => a.applicable(token, value, this)).last("Finder.QuickFilterRule");
 
     var showFilter = await rule.execute(token, value, this);
 
@@ -1476,7 +1475,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
-    var originalFilters = toFilterOptions(resFo.filterOptions.filter(f => !isAggregate(f)));
+    var originalFilters = Finder.toFilterOptions(resFo.filterOptions.filter(f => !Finder.isAggregate(f)));
 
     return [...originalFilters, ...keyFilters];
   }

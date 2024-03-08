@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, HeavyProfilerEntry, TimeTrackerEntry, TimeTrackerTime } from '../ProfilerClient'
 import { useLocation, useParams } from "react-router";
 
@@ -8,7 +8,7 @@ import "./Times.css"
 import { Tab, Tabs } from 'react-bootstrap';
 import { useAPI, useAPIWithReload } from '@framework/Hooks';
 import { useTitle } from '@framework/AppContext';
-import { formatRules } from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import { toNumberFormat } from '@framework/Reflection';
 import { isDurationKey } from '@framework/Lines/TimeLine';
 import { Color } from '@framework/Basics/Color';

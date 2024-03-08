@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
 import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
 import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute, StyleContext } from '../Lines'
 import { Type } from '../Reflection';
@@ -13,7 +13,7 @@ import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DropdownList } from 'react-widgets'
 import { QueryTokenMessage } from '../Signum.DynamicQuery.Tokens'
-import { getTypeNiceName } from '../Finder'
+import { Finder } from '../Finder'
 import { openModal, IModalProps } from '../Modals'
 import { Modal } from 'react-bootstrap'
 import { ErrorBoundary } from '../Components'
@@ -525,7 +525,7 @@ export function getTypeColor(type: TypeReference) {
 
 export function getNiceTypeName(tr: TypeReference) {
   if (tr.isCollection)
-    return QueryTokenMessage.ListOf0.niceToString(getTypeNiceName({ ...tr, isCollection: false }));
+    return QueryTokenMessage.ListOf0.niceToString(Finder.getTypeNiceName({ ...tr, isCollection: false }));
 
   switch (tr.name) {
     case "number": return QueryTokenMessage.Number.niceToString();

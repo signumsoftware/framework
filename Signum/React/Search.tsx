@@ -25,9 +25,9 @@ export type { SearchValueProps, SearchValueController } from './SearchControl/Se
 export { default as SearchValueLine } from './SearchControl/SearchValueLine'
 export type { SearchValueLineProps, SearchValueLineController } from './SearchControl/SearchValueLine'
 import { QueryTokenString } from './Reflection';
-import { AddToLite } from './Finder';
+import { Finder } from './Finder';
 
-export function extractFilterValue<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): AddToLite<T> | null | undefined;
+export function extractFilterValue<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: Finder.AddToLite<T> | null) => boolean): Finder.AddToLite<T> | null | undefined;
 export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: any) => boolean): any;
 export function extractFilterValue(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: any) => boolean): any {
 
@@ -38,9 +38,9 @@ export function extractFilterValue(filters: FilterOptionParsed[], token: string 
   return f.value;
 }
 
-export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<T> | null) => boolean): FilterConditionOptionParsed | undefined;
-export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
-export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
+export function extractFilter<T>(filters: FilterOptionParsed[], token: QueryTokenString<T>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: Finder.AddToLite<T> | null) => boolean): FilterConditionOptionParsed | undefined;
+export function extractFilter(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: Finder.AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined;
+export function extractFilter<T>(filters: FilterOptionParsed[], token: string | QueryTokenString<any>, operation: FilterOperation | ((op: FilterOperation) => boolean), valueCondition?: (v: Finder.AddToLite<any> | null) => boolean): FilterConditionOptionParsed | undefined {
   var f = filters.firstOrNull(f => isFilterCondition(f) && isActive(f) && 
     similarToken(f.token!.fullKey, token.toString()) &&
     (typeof operation == "function" ? operation(f.operation!) : f.operation == operation) &&

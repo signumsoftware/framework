@@ -2,12 +2,11 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet, ajaxPost } from '@framework/Services';
-import * as Constructor from '@framework/Constructor';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Constructor } from '@framework/Constructor';
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
 import * as QuickLinks from '@framework/QuickLinks'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'

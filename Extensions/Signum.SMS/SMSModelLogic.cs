@@ -1,4 +1,5 @@
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 using System.Globalization;
 
 namespace Signum.SMS;

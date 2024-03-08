@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { openModal, IModalProps, IHandleKeyboard, FunctionalAdapter } from '../Modals'
 import MessageModal from '../Modals/MessageModal'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
@@ -13,7 +13,6 @@ import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
 import { EntityOperationContext, notifySuccess, operationInfos, operationSettings, Defaults } from '../Operations'
-import { ViewPromise } from "../Navigator";
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
@@ -35,7 +34,7 @@ interface FrameModalProps<T extends ModifiableEntity> extends IModalProps<T | un
   requiresSaveOperation?: boolean;
   avoidPromptLoseChange?: boolean;
   extraProps?: {}
-  getViewPromise?: (e: T) => (undefined | string | Navigator.ViewPromise<T>);
+  getViewPromise?: (e: T) => (undefined | string | ViewPromise<T>);
   buttons?: Navigator.ViewButtons;
   allowExchangeEntity?: boolean;
   readOnly?: boolean;
@@ -82,10 +81,10 @@ export const FrameModal = genericForwardRef(function FrameModal<T extends Modifi
       .then(pack => loadComponent(pack).promise.then(getComponent => setPack(pack, getComponent)));
   }, [p.entityOrPack]);
 
-  function loadComponent(pack: EntityPack<T>, forceViewName?: string | Navigator.ViewPromise<T>) {
+  function loadComponent(pack: EntityPack<T>, forceViewName?: string | ViewPromise<T>) {
 
     if (forceViewName) {
-      if (forceViewName instanceof Navigator.ViewPromise)
+      if (forceViewName instanceof ViewPromise)
         return forceViewName;
 
       return Navigator.getViewPromise(pack.entity, forceViewName);
@@ -366,7 +365,7 @@ export namespace FrameModalManager {
 }
 
 export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPromise }: {
-  pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+  pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
 }) {
 
   if (!pack)

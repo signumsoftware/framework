@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString } from '../Signum.Entities'
 import { Aprox, AsLite, EntityBaseController, EntityBaseProps } from './EntityBase'

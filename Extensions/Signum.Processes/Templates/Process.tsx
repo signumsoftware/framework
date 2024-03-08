@@ -2,7 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityLine } from '@framework/Lines'
 import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { TypeContext } from '@framework/TypeContext'
 import { ProcessEntity, ProcessExceptionLineEntity, ProcessState } from '../Signum.Processes'
 import { BsColor } from '@framework/Components';
