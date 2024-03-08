@@ -9,11 +9,6 @@ class Upgrade_20230829_UpdateNPMPackages : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ChangeCodeFile(@"package.json", file =>
-        {
-            file.UpdateNpmPackage("@types/react", "18.2.21");
-        });
-
         uctx.ChangeCodeFile(@"Southwind/package.json", file =>
           {
               file.UpdateNpmPackages("""
