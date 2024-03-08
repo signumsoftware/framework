@@ -52,6 +52,8 @@ public class AlertEntity : Entity
 
     public bool EmailNotificationsSent { get; set; }
 
+    public bool AvoidSendMail { get; set; } = false;
+
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Title);
 

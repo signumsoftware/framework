@@ -41,6 +41,7 @@ export interface AlertEntity extends Entities.Entity {
   alertType: AlertTypeSymbol | null;
   state: AlertState;
   emailNotificationsSent: boolean;
+  avoidSendMail: boolean;
 }
 
 export module AlertMessage {
