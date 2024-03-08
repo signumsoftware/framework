@@ -6,9 +6,7 @@ import { classes, softCast } from '../Globals';
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
-import {
-  operationInfos, getSettings, notifySuccess, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults
-} from '../Operations'
+import { operationInfos, getSettings, notifySuccess, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults } from '../Operations'
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";

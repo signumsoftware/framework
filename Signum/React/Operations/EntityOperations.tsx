@@ -6,10 +6,7 @@ import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameCom
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
-import {
-  operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup,
-  CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString
-} from '../Operations'
+import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Constructor } from "../Constructor"
