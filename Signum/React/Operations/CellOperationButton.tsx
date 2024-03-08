@@ -5,9 +5,7 @@ import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
-import {
-  operationInfos, getSettings, notifySuccess, API, Defaults, CellOperationContext, EntityOperationSettings
-} from '../Operations'
+import { operationInfos, getSettings, notifySuccess, API, Defaults, CellOperationContext, EntityOperationSettings } from '../Operations'
 import * as Operations from "../Operations";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Button, ButtonProps, Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
