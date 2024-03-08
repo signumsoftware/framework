@@ -632,7 +632,7 @@
     <Member Name="Search" Description="Suche" />
     <Member Name="ShowHiddenColumns" Description="Ausgeblendete Spalten anzeigen" />
     <Member Name="SimpleFilters" Description="Einfache Filter" />
-    <Member Name="Split" Description="Teilen" />
+    <Member Name="Split" Description="Aufteilen" />
     <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Teilt den Zeichenfolgenwert durch Leerzeichen auf und durchsucht jeden Teil unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Teilt die Werte auf und durchsucht jeden Wert unabhängig voneinander in einer UND-Gruppe" />
     <Member Name="SummaryHeader" Description="Zusammenfassungskopfzeile" />
