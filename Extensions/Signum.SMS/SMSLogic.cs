@@ -2,6 +2,7 @@ using Signum.DynamicQuery.Tokens;
 using Signum.Processes;
 using Signum.Templating;
 using Signum.Utilities.Reflection;
+using System.Collections.Frozen;
 using System.Globalization;
 
 namespace Signum.SMS;
