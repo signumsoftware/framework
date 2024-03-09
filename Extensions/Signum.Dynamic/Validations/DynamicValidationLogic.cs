@@ -1,4 +1,6 @@
 
+using System.Collections.Frozen;
+
 namespace Signum.Dynamic.Validations;
 
 public static class DynamicValidationLogic
