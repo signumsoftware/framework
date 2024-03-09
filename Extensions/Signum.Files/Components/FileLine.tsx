@@ -120,18 +120,18 @@ export const FileLine = genericForwardRefWithMemo(function FileLine<V extends Mo
       fileDropCssClass={c.mandatoryClass ?? undefined}
       divHtmlAttributes={{ className: "sf-file-line-new" }} />;
 
-    if (!p.extraButtonsBefore && !p.extraButtonsAfter)
+    if (!p.extraButtonsBefore && !p.extraButtons)
       return content;
 
     return (
       <div className={p.ctx.inputGroupClass}>
         {p.extraButtonsBefore?.(c)}
         {content}
-        {p.extraButtonsAfter?.(c)}
+        {p.extraButtons?.(c)}
       </div>
     );
   }
-}), (prev, next) => FileLineController.propEquals(prev, next));
+}, (prev, next) => FileLineController.propEquals(prev, next));
 
 (FileLine as any).defaultProps = {
   download: "ViewOrSave",

@@ -7,9 +7,9 @@ import { AsEntity, EntityBaseController } from './EntityBase'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { RenderEntity } from './RenderEntity'
 import { tryGetTypeInfos, getTypeInfo } from '../Reflection';
+import { genericForwardRef, useController } from './LineBase'
 import { TypeBadge } from './AutoCompleteConfig'
 import { getTimeMachineIcon } from './TimeMachineIcon'
-import { Row } from 'react-bootstrap'
 import { GroupHeader, HeaderType } from './GroupHeader'
 
 export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
@@ -18,6 +18,7 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
   createMessage?: string;
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   itemExtraButtons?: (er: EntityRepeaterController<V>, index: number) => React.ReactElement;
+  rowClassName?: (er: EntityRepeaterController<V>, index: number) => string;
 }
 
 export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityRepeaterProps<V>, V> {

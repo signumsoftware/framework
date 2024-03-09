@@ -135,7 +135,7 @@ export const EntityCheckboxList = genericForwardRef(function EntityCheckboxList<
         {p.extraButtonsBefore?.(c)}
         {c.renderCreateButton(false)}
         {c.renderFindButton(false)}
-        {p.extraButtonsAfter?.(c)}
+        {p.extraButtons?.(c)}
       </span>
     );
   }
