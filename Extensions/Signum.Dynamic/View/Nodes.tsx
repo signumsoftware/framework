@@ -35,6 +35,7 @@ import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
+import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -483,7 +484,7 @@ export interface AutoLineNode extends LineBaseNode {
   kind: "AutoLine",
   unit?: ExpressionOrValue<string>;
   format?: ExpressionOrValue<string>;
-  extraButtons?: Expression<(vl: ValueLineController) => React.ReactNode>;
+  extraButtons?: Expression<(vl: LineBaseController<LineBaseProps, unknown>) => React.ReactNode>;
 }
 
 NodeUtils.register<AutoLineNode>({
