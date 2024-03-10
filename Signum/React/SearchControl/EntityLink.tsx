@@ -14,6 +14,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   innerRef?: React.Ref<HTMLAnchorElement>;
   stopPropagation?: boolean;
   extraProps?: any;
+  extraQuery?: string;
 }
 
 export default function EntityLink(p: EntityLinkProps) {
@@ -52,13 +53,13 @@ export default function EntityLink(p: EntityLinkProps) {
 
     if (event.ctrlKey || event.button == 1 || avoidPopup && !p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined)));
+      window.open(AppContext.toAbsoluteUrl(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? "")));
       return;
     }
 
     if (p.inPlaceNavigation) {
       var vp = p.getViewPromise && p.getViewPromise(null);
-      AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined));
+      AppContext.navigate(Navigator.navigateRoute(lite, vp && typeof vp == "string" ? vp : undefined) + (p.extraQuery ?? ""));
     } else {
       Navigator.view(lite, { getViewPromise: p.getViewPromise, buttons: "close", extraProps: p.extraProps }).then(() => {
         p.onNavigated && p.onNavigated(lite);
