@@ -15,7 +15,7 @@ public static class TemplateUtils
 
     public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
 
-    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?((\[[^\[\]]+\])|([^\[\]]+))+)(\:(?<format>.*))?");
+    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?((\[[^\[\]]+\])|([^\[\]\:]+))+)(\:(?<format>.*))?");
     
     public struct SplittedToken
     {
