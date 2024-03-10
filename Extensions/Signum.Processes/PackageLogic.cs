@@ -264,7 +264,7 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
                 case OperationType.ConstructorFrom:
                     {
                         var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args);
-                        line.Result = result.ToLite();
+                        line.Result = result?.ToLite();
                     }
                     break;
                 default:

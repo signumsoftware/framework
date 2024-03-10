@@ -18,6 +18,7 @@ export interface EntityRepeaterProps<V extends ModifiableEntity | Lite<Entity>> 
   createMessage?: string;
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   itemExtraButtons?: (er: EntityRepeaterController<V>, index: number) => React.ReactElement;
+  rowClassName?: (er: EntityRepeaterController<V>, index: number) => string;
 }
 
 export class EntityRepeaterController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityRepeaterProps<V>, V> {
@@ -76,6 +77,7 @@ export const EntityRepeater = genericForwardRef(function EntityRepeater<V extend
             move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
             drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
             itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(c, mlec.index!)) : undefined}
+            rowClassName={p.rowClassName ? (() => p.rowClassName!(c, mlec.index!)) : undefined}
             getComponent={p.getComponent}
             getViewPromise={p.getViewPromise}
             title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
@@ -104,13 +106,14 @@ export interface EntityRepeaterElementProps<V extends ModifiableEntity | Lite<En
   drag?: DragConfig;
   title?: React.ReactElement;
   itemExtraButtons?: () => React.ReactElement;
+  rowClassName?: () => string;
 }
 
-export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title }: EntityRepeaterElementProps<V>)
+export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, rowClassName }: EntityRepeaterElementProps<V>)
 {
 
   return (
-    <div className={drag?.dropClass}
+    <div className={classes(drag?.dropClass, rowClassName?.())}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}>

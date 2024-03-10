@@ -35,6 +35,7 @@ import { OperationButton } from '@framework/Operations/EntityOperations';
 import { useAPI } from '@framework/Hooks';
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 import { FileEmbedded, FileEntity, FilePathEmbedded, FilePathEntity } from '../../Signum.Files/Signum.Files'
+import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 
 export interface BaseNode {
   ref?: Expression<any>;
@@ -483,6 +484,7 @@ export interface AutoLineNode extends LineBaseNode {
   kind: "AutoLine",
   unit?: ExpressionOrValue<string>;
   format?: ExpressionOrValue<string>;
+  extraButtons?: Expression<(vl: LineBaseController<LineBaseProps, unknown>) => React.ReactNode>;
 }
 
 NodeUtils.register<AutoLineNode>({
@@ -501,7 +503,8 @@ NodeUtils.register<AutoLineNode>({
     format: node.format,
     readOnly: node.readOnly,
     mandatory: node.mandatory,
-    onChange: node.onChange
+    onChange: node.onChange,
+    extraButtons: node.extraButtons,
   }),
   render: (dn, ctx) => (<AutoLine
     //ref={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.ref, NodeUtils.isObjectOrFunctionOrNull)}
@@ -514,6 +517,7 @@ NodeUtils.register<AutoLineNode>({
     readOnly={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.readOnly, NodeUtils.isBooleanOrNull)}
     mandatory={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.mandatory, NodeUtils.isBooleanOrNull)}
     onChange={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.onChange, NodeUtils.isFunctionOrNull)}
+    extraButtons={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.extraButtons, NodeUtils.isFunctionOrNull)}
   />),
   renderDesigner: (dn) => {
     const m = dn.route && dn.route.member;
@@ -530,6 +534,7 @@ NodeUtils.register<AutoLineNode>({
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.readOnly)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.mandatory)} type="boolean" defaultValue={null} />
             <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.onChange)} type={null} defaultValue={false} exampleExpression={"/* you must declare 'forceUpdate' in locals */ \r\n() => locals.forceUpdate()"} />
+            <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraButtons)} type={null} defaultValue={null} />
         </div>
     );
   },

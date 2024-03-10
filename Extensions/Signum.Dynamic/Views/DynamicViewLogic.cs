@@ -1,3 +1,5 @@
+using System.Collections.Frozen;
+
 namespace Signum.Dynamic.Views;
 
 public static class DynamicViewLogic
