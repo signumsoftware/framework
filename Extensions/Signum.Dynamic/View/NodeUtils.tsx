@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { globalModules } from './GlobalModules'
 import { ModifiableEntity } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, ViewPromise } from '@framework/Navigator'
 import { classes, Dic } from '@framework/Globals'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor'
 import { Binding, EnumType, PropertyRoute, isTypeModifiableEntity } from '@framework/Reflection'
@@ -213,7 +213,7 @@ ${assignments.indent(4)}
 
 }
 
-export function toFunction(val: string | undefined | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)): undefined | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>) {
+export function toFunction(val: string | undefined | ((e: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)): undefined | ((e: ModifiableEntity) => string | ViewPromise<ModifiableEntity>) {
   if (!val)
     return undefined;
 
@@ -223,7 +223,7 @@ export function toFunction(val: string | undefined | ((e: ModifiableEntity) => s
   return () => val;
 }
 
-export function toFunctionCode(val: ExpressionOrValue<string | ((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>) | undefined>): Expression<((e: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)> | undefined {
+export function toFunctionCode(val: ExpressionOrValue<string | ((e: ModifiableEntity) => string | ViewPromise<ModifiableEntity>) | undefined>): Expression<((e: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)> | undefined {
   if (!val)
     return undefined;
 
@@ -739,9 +739,13 @@ export function addBreakLines(breakLines: boolean, message: string): React.React
   return message.split("\n").flatMap((e, i) => i == 0 ? [e] : [<br />, e]);
 }
 
-export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): EntityBaseProps {
+export function getEntityListBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): Lines.EntityListBaseProps<any> {
+  return getEntityBaseProps(dn, parentCtx, options) as any;
+}
 
-  var result: EntityBaseProps = {
+ export function getEntityBaseProps(dn: DesignerNode<EntityBaseNode>, parentCtx: TypeContext<ModifiableEntity>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, avoidGetComponent?: boolean, isEntityLine?: boolean, filterRows?: boolean }): EntityBaseProps<any> {
+
+  var result: EntityBaseProps<any> = {
     ctx: parentCtx.subCtx(dn.node.field, toStyleOptions(dn, parentCtx, dn.node.styleOptions)),
     label: evaluateAndValidate(dn, parentCtx, dn.node, n => n.label, isStringOrNull),
     labelHtmlAttributes: toHtmlAttributes(dn, parentCtx, dn.node.labelHtmlAttributes),

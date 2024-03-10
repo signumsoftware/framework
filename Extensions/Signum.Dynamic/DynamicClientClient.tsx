@@ -2,11 +2,10 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { SearchValueLine } from '@framework/Search'
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Entity } from '@framework/Signum.Entities'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import * as EvalClient from '../Signum.Eval/EvalClient'
 import { globalModules } from './View/GlobalModules'
 import { DynamicClientEntity } from './Signum.Dynamic.Client';

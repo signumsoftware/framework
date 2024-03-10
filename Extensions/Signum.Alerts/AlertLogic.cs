@@ -150,7 +150,7 @@ public static class AlertLogic
             var min = task.IgnoreNotificationsOlderThan == null ? (DateTime?)null : Clock.Now.AddDays(-task.IgnoreNotificationsOlderThan.Value);
 
             var query = Database.Query<AlertEntity>()
-            .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.Recipient != null && (min == null || min < a.AlertDate) && a.AlertDate < max)
+            .Where(a => a.State == AlertState.Saved && a.EmailNotificationsSent == false && a.AvoidSendMail == false && a.Recipient != null && (min == null || min < a.AlertDate) && a.AlertDate < max)
             .Where(a => task.SendBehavior == SendAlertTypeBehavior.All ||
                         task.SendBehavior == SendAlertTypeBehavior.Include && task.AlertTypes.Contains(a.AlertType!) ||
                         task.SendBehavior == SendAlertTypeBehavior.Exclude && !task.AlertTypes.Contains(a.AlertType!));
@@ -196,7 +196,11 @@ public static class AlertLogic
             if (!tp.RuntimeVariables.TryGetValue("$a", out object? alertObject))
                 return null;
 
-            var alert = (AlertEntity)alertObject!;
+            return GetAlertText((AlertEntity)alertObject!);
+        }
+
+        public static HtmlString GetAlertText(AlertEntity alert)
+        {
             var text = alert.Text ?? "";
 
             var newText = LinkPlaceholder.SplitAfter(text).Select(pair =>
@@ -214,7 +218,7 @@ public static class AlertLogic
                     var lite = prop is Entity e ? e.ToLite() :
                                 prop is Lite<Entity> l ? l : null;
 
-                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Let(url => url.StartsWith("~") ? (EmailLogic.Configuration.UrlLeft + url.After("~")) : url) ?? 
+                    var url = ReplacePlaceHolders(m.Groups["url"].Value.DefaultToNull(), alert)?.Let(url => url.StartsWith("~") ? (EmailLogic.Configuration.UrlLeft + url.After("~")) : url) ??
                     (lite != null ? EntityUrl(lite) : "#");
 
                     var text = ReplacePlaceHolders(m.Groups["text"].Value.DefaultToNull(), alert) ?? (lite?.ToString());
@@ -236,7 +240,6 @@ public static class AlertLogic
             return new HtmlString(text);
         }
 
-   
 
         private static string EntityUrl(Lite<Entity> lite)
         {
@@ -297,15 +300,15 @@ public static class AlertLogic
     }
 
     public static AlertEntity? CreateAlert(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
-        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
+        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
     {
-        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
+        return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget, avoidSendMail);
     }
 
     static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => new TypeAllowedAndConditions(TypeAllowed.Write));
 
     public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
-        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
+        Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
     {
         if (Started == false)
             return null;
@@ -323,7 +326,8 @@ public static class AlertLogic
                 LinkTarget = linkTarget,
                 GroupTarget = groupTarget,
                 AlertType = alertType,
-                Recipient = recipient
+                Recipient = recipient,
+                AvoidSendMail = avoidSendMail
             };
 
             return result.Execute(AlertOperation.Save);
@@ -331,7 +335,7 @@ public static class AlertLogic
     }
 
     public static int? UnsafeInsertAlerts(IQueryable<(Lite<IUserEntity>? recipient, Lite<Entity>? target)> query, AlertTypeSymbol alertType, string? text = null, 
-        string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
+        string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
     {
         if (Started == false)
             return null;
@@ -356,24 +360,25 @@ public static class AlertLogic
                 Recipient = tuple.recipient,
                 State = AlertState.Saved,
                 EmailNotificationsSent = false,
+                AvoidSendMail = avoidSendMail,
             }.SetReadonly(a => a.CreationDate, Clock.Now));
         }
     }
 
 
-    public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
+    public static AlertEntity? CreateAlertForceNew(this IEntity entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
     {
-        return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
+        return CreateAlertForceNew(entity.ToLite(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget, avoidSendMail);
     }
 
-    public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null)
+    public static AlertEntity? CreateAlertForceNew(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)
     {
         if (Started == false)
             return null;
 
         using (var tr = Transaction.ForceNew())
         {
-            var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget);
+            var alert = entity.CreateAlert(alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget, avoidSendMail);
 
             return tr.Commit(alert);
         }

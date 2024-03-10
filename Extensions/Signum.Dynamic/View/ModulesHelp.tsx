@@ -125,7 +125,7 @@ modules.SelectorModal.default.chooseType(/*options:*/ ["${p.cleanName}", ....].m
     [name: string]: string;
   } = {};
   if (p.clientCode) {
-    clientModules["Navigator"] = `modules.Navigator.addSettings(modules.Navigator.EntitySettings("${p.cleanName}", undefined, {...} /*: EntitySettingsOptions<${p.cleanName}>*/)
+    clientModules["Navigator"] = `modules.Navigator.addSettings(modules.EntitySettings("${p.cleanName}", undefined, {...} /*: EntitySettingsOptions<${p.cleanName}>*/)
 modules.Navigator.getSettings("${p.cleanName}") /*: EntitySettingsOptions<${p.cleanName}>*/)
 modules.Navigator.getOrAddSettings("${p.cleanName}") /*: EntitySettingsOptions<${p.cleanName}>*/)
 
@@ -229,12 +229,12 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 //  defaultOrderType?: OrderType;
 //  defaultFilters?: FilterOption[];
 //  hiddenColumns?: ColumnOption[];
-//  formatters?: { [token: string]: CellFormatter };
+//  formatters?: { [token: string]: Finder.CellFormatter };
 //  rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
-//  entityFormatter?: EntityFormatter;
+//  entityFormatter?: Finder.EntityFormatter;
 //  inPlaceNavigation?: boolean;
 //  showContextMenu?: (fop: FindOptionsParsed) => boolean | "Basic";
-//  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | Navigator.ViewPromise<ModifiableEntity>);
+//  getViewPromise?: (e: ModifiableEntity | null) => (undefined | string | ViewPromise<ModifiableEntity>);
 //  onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
 //  simpleFilterBuilder?: (sfbc: SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
 //  onFind?: (fo: FindOptions, mo?: ModalFindOptions) => Promise<Lite<Entity> | undefined>;
@@ -243,14 +243,14 @@ modules.Finder.getOrAddSettings("${p.cleanName}") /*: QuerySettings*/
 //  extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
 //}
 
-//export class CellFormatter {
+//export class Finder.CellFormatter {
 //  constructor(
-//    public formatter: (cell: any, ctx: CellFormatterContext) => React.ReactChild | undefined,
+//    public formatter: (cell: any, ctx: Finder.CellFormatterContext) => React.ReactChild | undefined,
 //    public cellClass?: string) {
 //  }
 //}
 
-//export interface CellFormatterContext {
+//export interface Finder.CellFormatterContext {
 //  refresh?: () => void;
 //  systemTime?: SystemTime;
 //}

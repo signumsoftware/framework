@@ -15,7 +15,7 @@ public static class DynamicValidationLogic
         }
     }
 
-    static ResetLazy<Dictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!;
+    static ResetLazy<FrozenDictionary<Type, List<DynamicValidationPair>>> DynamicValidations = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -48,7 +48,7 @@ public static class DynamicValidationLogic
 
             DynamicValidations = sb.GlobalLazy(() => Database.Query<DynamicValidationEntity>()
                     .SelectCatch(dv => new DynamicValidationPair(dv.SubEntity?.ToPropertyRoute() ?? PropertyRoute.Root(TypeLogic.EntityToType.GetOrThrow(dv.EntityType)), dv))
-                    .GroupToDictionary(a => a.PropertyRoute.Type),
+                    .GroupToFrozenDictionary(a => a.PropertyRoute.Type),
             new InvalidateWith(typeof(DynamicValidationEntity)));
 
             DynamicValidationEntity.GetMainType = dve => dve.SubEntity?.ToPropertyRoute().Type ?? TypeLogic.EntityToType.GetOrThrow(dve.EntityType);

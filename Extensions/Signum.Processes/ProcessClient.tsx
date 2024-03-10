@@ -5,9 +5,8 @@ import { OverlayTrigger, Tooltip, Dropdown } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals';
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import { Lite, Entity, EntityPack, OperationMessage } from '@framework/Signum.Entities'
 import { ContextualOperationContext, EntityOperationSettings } from '@framework/Operations'
 import { GraphExplorer, OperationType } from '@framework/Reflection'

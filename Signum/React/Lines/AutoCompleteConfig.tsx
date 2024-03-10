@@ -1,13 +1,11 @@
 import * as React from 'react'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { AbortableRequest } from '../Services'
 import { FindOptions, FilterOptionParsed, OrderOptionParsed, OrderRequest, ResultRow, ColumnOptionParsed, ColumnRequest, QueryDescription, QueryRequest, FilterOption, ResultTable } from '../FindOptions'
 import { getTypeInfo, getQueryKey, QueryTokenString, getTypeName, getTypeInfos, TypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, toLite, is, isLite, isEntity, getToString, liteKey, SearchMessage, parseLiteList } from '../Signum.Entities'
-import { toFilterRequests } from '../Finder';
 import { TextHighlighter, TypeaheadController, TypeaheadOptions } from '../Components/Typeahead'
-import { AutocompleteConstructor } from '../Navigator';
-import * as Navigator from '../Navigator';
+import { Navigator, AutocompleteConstructor } from '../Navigator';
 import { Dic } from '../Globals'
 
 export interface AutocompleteConfig<T> {
@@ -386,9 +384,16 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
   }
 }
 
-export function TypeBadge(p: { entity: Lite<Entity> | Entity }) {
+export function TypeBadge(p: { entity: Lite<Entity> | ModifiableEntity }) {
 
-  const ti = getTypeInfo(isEntity(p.entity) ? p.entity.Type : p.entity.EntityType);
+  var typeName = isEntity(p.entity) ? p.entity.Type :
+    isLite(p.entity) ? p.entity.EntityType :
+      null;
+
+  if (typeName == null)
+    return <span className="text-danger">Embedded?</span>;
+
+  const ti = getTypeInfo(typeName);
 
   return <span className="sf-type-badge ms-1">{ti.niceName}</span>;
 }

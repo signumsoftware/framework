@@ -5,6 +5,12 @@
     <Member Name="InteractionGroup" Description="Interaktionsgruppe" />
     <Member Name="None" Description="Nichts" />
   </Type>
+  <Type Name="SystemTimeEmbedded" Description="Systemzeit">
+    <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="JoinMode" Description="Join-Modus" />
+    <Member Name="Mode" Description="Modus" />
+    <Member Name="StartDate" Description="Startdatum" />
+  </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="AppendFilters" Description="Filters anfügen" />
     <Member Name="Columns" Description="Spalten" />
@@ -23,6 +29,7 @@
     <Member Name="PaginationMode" Description="Paginierungsmodus" />
     <Member Name="Query" Description="Abfrage" />
     <Member Name="RefreshMode" Description="Aktualisierungsmodus" />
+    <Member Name="SystemTime" Description="Systemzeit" />
   </Type>
   <Type Name="UserQueryLiteModel" Description="Benutzerabfrage lite">
     <Member Name="DisplayName" Description="Anzeigename" />
@@ -33,9 +40,11 @@
     <Member Name="ApplyChanges" Description="Änderungen anwenden" />
     <Member Name="BackToDefault" Description="Zurück zum Standard" />
     <Member Name="CreateNew" Description="Erstellen" />
+    <Member Name="Date" Description="Datum" />
     <Member Name="Edit" Description="Bearbeiten" />
     <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Stellt die {0} als Quick Link of {1} zur Verfügung" />
     <Member Name="MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0" Description="Macht die {0} für benutzerdefinierte Drilldowns und im Kontextmenü beim Gruppieren verfügbar {1}" />
+    <Member Name="Pagination" Description="Paginierung" />
     <Member Name="Preview" Description="Vorschau" />
     <Member Name="TheSelected0" Description="die ausgewählte {0}" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Verwenden Sie {0}, um nach der aktuellen Entität zu filtern" />
@@ -58,7 +67,7 @@
   </Type>
   <Type Name="UserQueryPartRenderMode" Description="Benutzerabfrage Teil Rendermodus">
     <Member Name="BigValue" Description="Großer Wert" />
-    <Member Name="SearchControl" Description="Suchsteuerung" />
+    <Member Name="SearchControl" Description="Suchliste Komponente" />
   </Type>
   <Type Name="UserQueryPermission">
     <Member Name="ViewUserQuery" Description="Benutzer-Abfrage anzeigen" />

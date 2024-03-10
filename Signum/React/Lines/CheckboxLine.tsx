@@ -6,12 +6,11 @@ import { getTimeMachineIcon } from './TimeMachineIcon'
 import { ValueBaseController, ValueBaseProps } from './ValueBase'
 import { TypeContext } from '../Lines'
 
-export interface CheckboxLineProps extends ValueBaseProps<CheckboxLineController> {
-  ctx: TypeContext<boolean | undefined | null>;
+export interface CheckboxLineProps extends ValueBaseProps<boolean | null> {
   inlineCheckbox?: boolean | "block";
 }
 
-export class CheckboxLineController extends ValueBaseController<CheckboxLineProps>{
+export class CheckboxLineController extends ValueBaseController<CheckboxLineProps, boolean | null>{
 
 }
 

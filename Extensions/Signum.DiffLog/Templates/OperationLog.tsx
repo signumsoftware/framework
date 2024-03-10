@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { AutoLine, EntityLine } from '@framework/Lines'
 import { Entity, getMixin, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'

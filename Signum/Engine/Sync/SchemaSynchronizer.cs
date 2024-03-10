@@ -208,7 +208,7 @@ public static class SchemaSynchronizer
                     var removedColums = dif.Columns.Keys.Except(tab.Columns.Keys).ToHashSet();
 
                     var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
-                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex)).ToDictionary(),
+                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.PrimaryKey && !kvp.Value.Unique).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
@@ -540,7 +540,7 @@ public static class SchemaSynchronizer
 
             SqlPreCommand? addIndicesHistory =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
-                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => a.GetType() == typeof(TableIndex) && !a.Unique).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple),
+                createNew: (tn, tab) => modelIndices[tab].Values.Where(a => a.GetType() == typeof(TableIndex) && !a.PrimaryKey && !a.Unique).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple),
                 removeOld: null,
                 mergeBoth: (tn, tab, dif) =>
                 {
@@ -551,9 +551,9 @@ public static class SchemaSynchronizer
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];
 
                     var indices = Synchronizer.SynchronizeScript(Spacing.Simple,
-                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.Unique).ToDictionary(),
+                        modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.PrimaryKey && !kvp.Value.Unique).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
-                        createNew: (i, mix) => mix.Unique || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
+                        createNew: (i, mix) => mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                         removeOld: null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);

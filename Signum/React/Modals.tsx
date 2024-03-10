@@ -31,8 +31,8 @@ export function isStarted() {
 
 
 interface GlobalModalContainerHandles {
-  pushModal(element: React.ReactElement<any>) : Promise<any>;
-  popModal(element: React.ReactElement<any>): Promise<any>;
+  pushModal(element: React.ReactElement) : Promise<any>;
+  popModal(element: React.ReactElement): Promise<any>;
   getCount(): number;
 }
 
@@ -116,7 +116,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     return this.props.children;
   }
 
-  static withRef(element: React.ReactElement<any>, ref: React.Ref<React.Component>) {
+  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>) {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype?.render) {
       return React.cloneElement(element, { ref: ref });

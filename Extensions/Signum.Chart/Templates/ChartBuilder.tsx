@@ -232,7 +232,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     return <TextBoxLine {...tbl} />;
   }
   else if (scriptParameter.type == "Enum") {
-    const el: EnumLineProps = {
+    const el: EnumLineProps<string | null> = {
       ctx: ctx.subCtx(a => a.value),
       label: scriptParameter.displayName!,
     };

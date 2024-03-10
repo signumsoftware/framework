@@ -1,5 +1,5 @@
 import * as d3 from "d3"
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { calculatePoint, wrap, colorScale, forceBoundingBox } from '../Utils'
 import { OperationLogEntity } from "@framework/Signum.Operations";
 import { Point, Rectangle } from "../Schema/ClientColorProvider";

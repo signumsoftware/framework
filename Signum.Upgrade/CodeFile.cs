@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Xml.Linq;
@@ -403,6 +404,47 @@ public class CodeFile
             throw new InvalidOperationException("");
     }
 
+    internal void ReplaceTypeScriptImports(Expression<Func<string, bool>> pathPredicate, Func<HashSet<string>, HashSet<string>?> importedPartsSelector)
+    {
+        AssertExtension(".ts", ".tsx");
+
+        var compiled = pathPredicate.Compile();
+        ProcessLines(lines =>
+        {
+            var parts = new HashSet<string>();
+            int pos = 0;
+            var initialPos = -1;
+            var after = (string?)null;
+            while ((pos = lines.FindIndex(pos, a => a.StartsWith("import ") && a.Contains(" from ") && compiled(a.After("from").Trim(' ', '\'', '\"', ';')))) != -1)
+            {
+                if (initialPos == -1)
+                    initialPos = pos;
+
+                var line = lines[pos];
+                var importPart = line.After("import").Before("from").Trim();
+                if (after == null)
+                    after = line.After("from");
+
+                lines.RemoveAt(pos);
+
+                parts.AddRange(importPart.StartsWith('*') ? new[] { importPart.Trim() } : importPart.Between("{", "}").SplitNoEmpty(",").Select(a => a.Trim()));
+            }
+
+            if (initialPos == -1)
+            {
+                Warning($"Unable to find import with path where {pathPredicate}");
+                return false;
+            }
+
+            var newImports = importedPartsSelector(parts);
+
+            if (newImports != null)
+                lines.Insert(initialPos, "import { " + newImports.ToString(", ") + " } from" + after);
+
+            return true;
+        });
+    }
+
     public void UpdateNpmPackages(string packageJsonBlock)
     {
         var packages = packageJsonBlock.Lines().Select(a => a.Trim()).Where(a => a.HasText()).Select(a => new
@@ -416,6 +458,7 @@ public class CodeFile
             UpdateNpmPackage(v.PackageName, v.Version);
         }
     }
+
 
     public void UpdateNpmPackage(string packageName, string version)
     {
@@ -629,6 +672,8 @@ public class CodeFile
         this.WarningLevel = none;
         return new Disposable(() => this.WarningLevel = oldLevel);
     }
+
+  
 }
 
 public class ReplaceBetweenOption

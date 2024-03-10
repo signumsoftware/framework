@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals'
 import { PropertyRoute, Binding } from '@framework/Reflection'
 import { AutoLine, EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -24,7 +24,7 @@ interface DynamicValidationProps {
 
 export default function DynamicValidation(p: DynamicValidationProps) {
 
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const dv = p.ctx.value;
   const routeTypeName = useAPI(() => dv.subEntity ? API.routeTypeName(dv.subEntity) : dv.entityType ? Promise.resolve(dv.entityType.className) : Promise.resolve(undefined), [dv.subEntity, dv.entityType]);
 
@@ -34,7 +34,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
 
   function handleEntityTypeChange() {
     p.ctx.value.subEntity = null;
-    exampleEntityRef.current = undefined;
+    exampleEntityRef.current = null;
     setResponse(undefined);
     handleCodeChange("");
   }
@@ -105,7 +105,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}
@@ -113,7 +113,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
     );
   }
 
-  function handleOnView(exampleEntity: Lite<Entity> | ModifiableEntity) {
+  function handleOnView(exampleEntity: Entity) {
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 

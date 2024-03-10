@@ -16,8 +16,8 @@ import { QueryToken } from '@framework/FindOptions';
 import { DashboardBehaviour, FilterGroupOperation } from '@framework/Signum.DynamicQuery';
 import { Dic, softCast } from '@framework/Globals';
 import * as AppContext from '@framework/AppContext';
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
+import { Navigator } from '@framework/Navigator'
 import SelectorModal from '@framework/SelectorModal';
 import { SearchControlLoaded } from '@framework/Search';
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded } from './Signum.UserAssets.Queries';
@@ -230,6 +230,15 @@ export module API {
     pinned?: PinnedFilter;
     dashboardBehaviour?: DashboardBehaviour;
     indentation?: number;
+  }
+
+  export function parseDate(dateExpression: string): Promise<string /*DateTime*/> {
+    return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
+  }
+
+
+  export function stringifyDate(dateValue: string): Promise<string> {
+    return ajaxPost({ url: "/api/userAssets/stringifyDate/" }, dateValue);
   }
 
 

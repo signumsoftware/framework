@@ -4,7 +4,7 @@ import { classes, Dic } from '@framework/Globals'
 import { AutoLine, EntityLine, EntityCombo, TextBoxLine, EnumLine } from '@framework/Lines'
 import { FilterOptionParsed } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Binding, IsByAll, tryGetTypeInfos, TypeReference, getTypeInfos } from '@framework/Reflection'
 import {
   QueryDescription, SubTokensOptions, FilterConditionOptionParsed,
@@ -12,17 +12,18 @@ import {
 	getFilterGroupUnifiedFilterType, getFilterType, isFilterGroup
 } from '@framework/FindOptions'
 import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
-import * as Navigator from "@framework/Navigator";
+import { Navigator } from "@framework/Navigator";
 import FilterBuilder, { RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
-import { TokenCompleter } from '@framework/Finder';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryFilterEmbedded, QueryTokenEmbedded, UserAssetQueryMessage } from '../Signum.UserAssets.Queries'
 import { MultiValue } from '@framework/FinderRules'
+import { HeaderType } from '@framework/Lines/GroupHeader'
 
 interface FilterBuilderEmbeddedProps {
   ctx: TypeContext<MList<QueryFilterEmbedded>>;
+  avoidFieldSet?: boolean | HeaderType;
   queryKey: string;
   subTokenOptions: SubTokensOptions;
   onChanged?: () => void;
@@ -153,6 +154,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
         qd != null &&
         <FilterBuilder
           title={p.ctx.niceName()}
+          avoidFieldSet={p.avoidFieldSet}
           queryDescription={qd}
           filterOptions={filterOptions ?? []}
           subTokensOptions={p.subTokenOptions}
@@ -169,7 +171,7 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
 }
 
 FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
-  const completer = new TokenCompleter(qd);
+  const completer = new Finder.TokenCompleter(qd);
 
   allFilters.forEach(mle => {
     if (mle.element.token && mle.element.token.tokenString)
@@ -254,7 +256,7 @@ export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
 }
 
 interface EntityLineOrExpressionProps {
-  ctx: TypeContext<string | null | undefined>;
+  ctx: TypeContext<string | null>;
   onChange: () => void;
   type: TypeReference;
   filterType: FilterType;
@@ -316,7 +318,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
 
 
 interface ValueLineOrExpressionProps {
-  ctx: TypeContext<string | null | undefined>;
+  ctx: TypeContext<string | null>;
   onChange: () => void;
   type: TypeReference;
   format?: string;

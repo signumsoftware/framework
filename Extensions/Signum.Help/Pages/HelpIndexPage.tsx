@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { API, Urls } from '../HelpClient'
 import { SearchControl } from '@framework/Search';

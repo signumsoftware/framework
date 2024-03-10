@@ -16,7 +16,7 @@ import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 
-export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
+export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
 

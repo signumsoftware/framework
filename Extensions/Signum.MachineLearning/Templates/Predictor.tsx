@@ -6,8 +6,8 @@ import { SearchControl, ColumnOption, FindOptions } from '@framework/Search'
 import { TypeContext, ButtonsContext, ButtonBarElement } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Components/FileLine';
 import { PredictorEntity, PredictorColumnEmbedded, PredictorMessage, PredictorSubQueryEntity, PredictorFileType, PredictorCodificationEntity, PredictorSubQueryColumnEmbedded, PredictorEpochProgressEntity, NeuralNetworkSettingsEntity, DefaultColumnEncodings } from '../Signum.MachineLearning'
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
+import { Navigator } from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import * as PredictorClient from '../PredictorClient';
@@ -21,7 +21,6 @@ import { QueryToken } from '@framework/FindOptions';
 import PredictorMetrics from './PredictorMetrics';
 import PredictorClassificationMetrics from './PredictorClassificationMetrics';
 import PredictorRegressionMetrics from './PredictorRegressionMetrics';
-import { toFilterOptions } from '@framework/Finder';
 import { useAPI, useForceUpdate, useInterval } from '@framework/Hooks'
 import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
@@ -140,7 +139,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
         var fo: FindOptions = {
           queryName: mq.query!.key,
           groupResults: mq.groupResults,
-          filterOptions: toFilterOptions(filters),
+          filterOptions: Finder.toFilterOptions(filters),
           columnOptions: mq.columns.orderBy(mle => mle.element.usage == "Input" ? 0 : 1).map(mle => ({
             token: mle.element.token && mle.element.token.tokenString,
           } as ColumnOption)),
@@ -189,7 +188,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
                 <FilterBuilderEmbedded ctx={ctxmq.subCtx(a => a.filters)}
                   queryKey={queryKey}
                   subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}/>
-                <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={EntityTable.typedColumns<PredictorColumnEmbedded>([
+                <EntityTable ctx={ctxmq.subCtx(e => e.columns)} columns={[
                   { property: a => a.usage },
                   {
                     property: a => a.token,
@@ -202,14 +201,14 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
                   },
                   { property: a => a.encoding },
                   { property: a => a.nullHandling },
-                ])} />
+                ]} />
                 {ctxmq.value.query && <a href="#" onClick={handlePreviewMainQuery}>{PredictorMessage.Preview.niceToString()}</a>}
               </div>}
 
             </fieldset>
             {queryKey && <EntityTabRepeater ctx={ctxxs.subCtx(e => e.subQueries)} onCreate={handleCreate}
               getTitle={(mctx: TypeContext<PredictorSubQueryEntity>) => mctx.value.name || PredictorSubQueryEntity.niceName()}
-              getComponent={(mctx: TypeContext<PredictorSubQueryEntity>) =>
+              getComponent={mctx =>
                 <div>
                   {!queryDescription ? undefined : <PredictorSubQuery ctx={mctx} mainQuery={ctxmq.value} mainQueryDescription={queryDescription} />}
                 </div>

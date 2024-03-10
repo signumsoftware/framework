@@ -1,13 +1,12 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
+import { Navigator } from '@framework/Navigator'
 import { Type, PropertyRoute } from '@framework/Reflection'
 import { AutoLine } from '@framework/Lines/AutoLine'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
 import { FileLine } from './Components/FileLine'
-import CellFormatter = Finder.CellFormatter;
-import { ModifiableEntity, Lite, Entity, isLite, registerToString } from "@framework/Signum.Entities";
+import { ModifiableEntity, Lite, Entity, isLite, registerToString, MList } from "@framework/Signum.Entities";
 import { FileImageLine } from './Components/FileImageLine';
 import { MultiFileLine } from './Components/MultiFileLine';
 import { FileDownloader } from './Components/FileDownloader';
@@ -16,6 +15,7 @@ import { FileImage } from './Components/FileImage';
 import { ImageModal } from './Components/ImageModal';
 import { IconName, IconProp } from '@fortawesome/fontawesome-svg-core';
 import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient'
+import { TypeContext } from '@framework/Lines'
 
 export function start(options: { routes: RouteObject[] }) {
 
@@ -37,25 +37,25 @@ export function start(options: { routes: RouteObject[] }) {
 function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
   AutoLine.registerComponent(type.typeName, (tr, pr) => { 
     if (tr.isCollection)
-      return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx} {...rest} />;
+      return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx as any} {...rest as any} />;
 
     var m = pr?.member;
     if (m?.defaultFileTypeInfo && m.defaultFileTypeInfo.onlyImages)
-      return ({ ctx, ...rest }) => <FileImageLine ctx={ctx} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} {...rest} />;
+      return ({ ctx, ...rest }) => <FileImageLine ctx={ctx as any} imageHtmlAttributes={{ style: { maxWidth: '100%', maxHeight: '100%' } }} {...rest as any} />;
 
-    return ({ ctx, ...rest }) => <FileLine ctx={ctx} {...rest} />; 
+    return ({ ctx, ...rest }) => <FileLine ctx={ctx as any} {...rest as any} />; 
   });
 
   Finder.formatRules.push({
     name: type.typeName + "_Download",
     isApplicable: qt => qt.type.name == type.typeName && !isImage(qt.propertyRoute),
-    formatter: qt => new CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} htmlAttributes={{ className: "try-no-wrap" }} /> : undefined, true)
+    formatter: qt => new Finder.CellFormatter(cell => cell ? <FileDownloader entityOrLite={cell} htmlAttributes={{ className: "try-no-wrap" }} /> : undefined, true)
   });
 
   Finder.formatRules.push({
     name: type.typeName + "_Image",
     isApplicable: qt => qt.type.name == type.typeName && isImage(qt.propertyRoute),
-    formatter: c => new CellFormatter(cell => !cell ? undefined :
+    formatter: c => new Finder.CellFormatter(cell => !cell ? undefined :
       isLite(cell) ? <FetchInState lite={cell as Lite<IFile & Entity>}>{e => <FileThumbnail file={e as IFile & ModifiableEntity} />}</FetchInState> :
         <FileThumbnail file={cell as IFile & ModifiableEntity} />, false)
   });

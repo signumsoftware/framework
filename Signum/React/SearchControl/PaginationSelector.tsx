@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { classes } from '../Globals'
 import { ResultTable, Pagination, PaginationMode, PaginateMath } from '../FindOptions'
 import { SearchMessage } from '../Signum.Entities'

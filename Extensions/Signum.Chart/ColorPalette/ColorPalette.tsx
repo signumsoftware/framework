@@ -4,9 +4,9 @@ import { AutoLine, Binding, ColorLine, EntityBaseController, EntityCombo, Entity
 import { TypeContext } from '@framework/TypeContext'
 import { colorSchemes } from './ColorUtils';
 import { classes, Dic } from '@framework/Globals';
-import * as Navigator from '@framework/Navigator';
+import { Navigator, EnumConverter } from '@framework/Navigator';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Finder from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { getTypeInfo, IBinding, tryGetTypeInfo } from '@framework/Reflection';
 import { Entity, EntityControlMessage, Lite, newMListElement, toLite } from '@framework/Signum.Entities';
@@ -117,7 +117,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
             onClick={handleMagicWand}>
             <FontAwesomeIcon icon="wand-magic-sparkles" />
           </a>}
-          columns={EntityTable.typedColumns<SpecificColorEmbedded>([
+          columns={[
             {
               property: p => p.entity,
               template: (ectx) =>
@@ -131,7 +131,7 @@ export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }
               template: (ectx) => <ColorSelector ctx={ectx.subCtx(a => a.color)} colors={colors as (string[] | null)} />,
               headerHtmlAttributes: { style: { width: "40%" } },
             },
-          ])}
+          ]}
         />
       }
     </div>
@@ -178,9 +178,9 @@ function ColorSelector(p: { ctx: TypeContext<string>, colors: string[] | null })
 class ConvertBinding implements IBinding<string | null> {
 
   parent: IBinding<Lite<Entity> | null>;
-  converter: Navigator.EnumConverter<string>;
+  converter: EnumConverter<string>;
 
-  constructor(binding: IBinding<Lite<Entity>>, enumEntities: Navigator.EnumConverter<string>) {
+  constructor(binding: IBinding<Lite<Entity>>, enumEntities: EnumConverter<string>) {
     this.parent = binding;
     this.suffix = this.parent.suffix;
     this.converter = enumEntities;

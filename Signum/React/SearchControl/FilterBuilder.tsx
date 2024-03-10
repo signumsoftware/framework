@@ -16,12 +16,13 @@ import "./FilterBuilder.css"
 import { useForceUpdate, useForceUpdatePromise } from '../Hooks'
 import { Dropdown, OverlayTrigger, Popover } from 'react-bootstrap'
 import PinnedFilterBuilder from './PinnedFilterBuilder'
-import { renderFilterValue } from '../Finder'
+import { Finder } from '../Finder'
 import { trimDateToFormat } from '../Lines/DateTimeLine'
 import { isNumberKey, NumberBox } from '../Lines/NumberLine'
 import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { FilterHelp } from './SearchControlVisualTips'
+import { GroupHeader, HeaderType } from '../Lines/GroupHeader'
 
 interface FilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -33,7 +34,8 @@ interface FilterBuilderProps {
   onHeightChanged?: () => void;
   readOnly?: boolean;
   title?: React.ReactNode;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  avoidFieldSet?: boolean | HeaderType;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions?: boolean;
   showPinnedFiltersOptionsButton?: boolean;
   showDashboardBehaviour?: boolean;
@@ -117,9 +119,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
         <PinnedFilterBuilder filterOptions={p.filterOptions} onFiltersChanged={handleFilterChanged} highlightFilter={highlightFilter} showGrid={true} />
       </div>
       }
-      <fieldset className="form-xs">
-
-        {p.title && <legend>{p.title}</legend>}
+      <GroupHeader label={p.title} avoidFieldSet={p.avoidFieldSet}>
         <div className="sf-filters-list table-responsive" style={{ overflowX: "visible" }}>
           <table className="table-sm">
             <thead>
@@ -200,7 +200,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
             </tbody>
           </table>
         </div>
-      </fieldset>
+      </GroupHeader>
     </>
   );
 }
@@ -223,7 +223,7 @@ export interface FilterGroupComponentsProps {
   onFilterChanged: () => void;
   onHeightChanged: () => void;
   lastToken: QueryToken | undefined;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   disableValue: boolean;
@@ -439,7 +439,7 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return renderFilterValue(f, { ctx, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
+    return Finder.renderFilterValue(f, { ctx, filterOptions: p.allFilterOptions, handleValueChange: handleValueChange });
   }
 
   function handleValueChange() {
@@ -478,7 +478,7 @@ export interface FilterConditionComponentProps {
   subTokensOptions: SubTokensOptions;
   onTokenChanged?: (token: QueryToken | undefined) => void;
   onFilterChanged: () => void;
-  renderValue?: (rvc: RenderValueContext) => React.ReactElement<any> | undefined;
+  renderValue?: (rvc: RenderValueContext) => React.ReactElement | undefined;
   showPinnedFiltersOptions: boolean;
   showDashboardBehaviour: boolean;
   setHighlightFilter?: (fo: FilterOptionParsed | undefined) => void;
@@ -645,7 +645,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
 
     const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: readOnly, formSize: "xs" }, undefined, Binding.create(f, a => a.value));
 
-    return renderFilterValue(f, { ctx: ctx, filterOptions: p.allFilterOptions, handleValueChange });
+    return Finder.renderFilterValue(f, { ctx: ctx, filterOptions: p.allFilterOptions, handleValueChange });
   }
 
   function handleValueChange() {

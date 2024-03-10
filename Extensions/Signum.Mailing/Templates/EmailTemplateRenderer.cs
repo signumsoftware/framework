@@ -274,8 +274,9 @@ class EmailMessageBuilder
                     new EmailOwnerRecipientData(new EmailOwnerData { CultureInfo = null, DisplayName = r.DisplayName, Email = r.EmailAddress, Owner = r.EmailOwner }) { Kind = r.Kind }));
             }
 
-            if (recipients.Where(r => r.OwnerData.Email.HasText()).Any())
-                yield return recipients;
+            var validRecipients = recipients.Where(r => r.OwnerData.Email.HasText());
+            if (validRecipients.Any())
+                yield return validRecipients.ToList();
         }
     }
 

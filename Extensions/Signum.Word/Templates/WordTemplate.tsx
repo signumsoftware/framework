@@ -3,8 +3,8 @@ import { AutoLine, EntityLine, EntityCombo, EntityDetail, EntityTable, CheckboxL
 import { TypeContext } from '@framework/TypeContext'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import * as Finder from '@framework/Finder'
-import * as Navigator from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
+import { Navigator } from '@framework/Navigator'
 import { getTypeInfos } from '@framework/Reflection'
 import { WordTemplateEntity } from '../Signum.Word'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
@@ -48,13 +48,12 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
         </div>
       </div>
 
-      {ctx.value.query &&
         <Tabs id={ctx.prefix + "tabs"} mountOnEnter={true}>
           <Tab eventKey="template" title={ctx.niceName(a => a.template)}>
             <AutoLine ctx={ctx.subCtx(f => f.fileName)} />
             <div className="card form-xs" style={{ marginTop: "10px", marginBottom: "10px" }}>
             <div className="card-header" style={{ padding: "5px" }}>
-                <TemplateControls queryKey={ctx.value.query.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
+              <TemplateControls queryKey={ctx.value.query?.key} forHtml={false} widgetButtons={<div className="btn-group" style={{ marginLeft: "auto" }}>
                   {UserChartEntity.tryTypeInfo() && qd && <UserChartTemplateButton qd={qd} />}
                   {UserQueryEntity.tryTypeInfo() && qd && <UserQueryTemplateButton qd={qd} />}
                 </div>} />
@@ -62,6 +61,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             </div>
             <FileLine ctx={ctx.subCtx(e => e.template)} />
           </Tab>
+        {ctx.value.query &&
           <Tab eventKey="query" title={<span style={{ fontWeight: ctx.value.groupResults || ctx.value.filters.length > 0 || ctx.value.orders.length ? "bold" : undefined }}>
             {ctx.niceName(a => a.query)}
           </span>}>
@@ -78,7 +78,7 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
             <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
               subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
               queryKey={ctx.value.query!.key}/>
-            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={EntityTable.typedColumns<QueryOrderEmbedded>([
+            <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
               {
                 property: a => a.token,
                 template: ctx => <QueryTokenEmbeddedBuilder
@@ -87,17 +87,18 @@ export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }
                   subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
               },
               { property: a => a.orderType }
-            ])} />
+            ]} />
           </Tab>
+        }
           <Tab eventKey="applicable" title={
             <span style={{ fontWeight: ctx.value.applicable ? "bold" : undefined }}>
               {ctx.niceName(a => a.applicable)}
             </span>}>
             <EntityDetail ctx={ctx.subCtx(e => e.applicable)} onChange={forceUpdate}
-              getComponent={(ctx2: TypeContext<TemplateApplicableEval>) => <TemplateApplicable ctx={ctx2} query={ctx.value.query!} />} />
+              getComponent={ctxApp => <TemplateApplicable ctx={ctxApp} query={ctx.value.query!} />} />
           </Tab>
         </Tabs>
-      }
+
     </div>
   );
 }

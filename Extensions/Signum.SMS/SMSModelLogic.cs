@@ -1,4 +1,5 @@
 using Signum.Engine.Sync;
+using System.Collections.Frozen;
 using System.Globalization;
 
 namespace Signum.SMS;
@@ -65,10 +66,10 @@ public static class SMSModelLogic
         }
     }
 
-    static ResetLazy<Dictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
+    static ResetLazy<FrozenDictionary<Lite<SMSModelEntity>, List<SMSTemplateEntity>>> SMSModelToTemplates = null!;
     static Dictionary<Type, SMSModelInfo> registeredModels = new Dictionary<Type, SMSModelInfo>();
-    static ResetLazy<Dictionary<Type, SMSModelEntity>> typeToEntity = null!;
-    static ResetLazy<Dictionary<SMSModelEntity, Type>> entityToType = null!;
+    static ResetLazy<FrozenDictionary<Type, SMSModelEntity>> typeToEntity = null!;
+    static ResetLazy<FrozenDictionary<SMSModelEntity, Type>> entityToType = null!;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -94,7 +95,7 @@ public static class SMSModelLogic
                 from et in Database.Query<SMSTemplateEntity>()
                 where et.Model != null
                 select KeyValuePair.Create(et.Model!.ToLite(), et))
-                .GroupToDictionary(),
+                .GroupToFrozenDictionary(),
                 new InvalidateWith(typeof(SMSTemplateEntity), typeof(SMSModelEntity)));
 
             typeToEntity = sb.GlobalLazy(() =>
@@ -107,13 +108,13 @@ public static class SMSModelLogic
                     type => type.FullName!,
                     (entity, type) => KeyValuePair.Create(type, entity),
                     "caching " + nameof(SMSModelEntity))
-                    .ToDictionary();
+                    .ToFrozenDictionary();
             }, new InvalidateWith(typeof(SMSModelEntity)));
 
 
             sb.Schema.Initializing += () => typeToEntity.Load();
 
-            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse(),
+            entityToType = sb.GlobalLazy(() => typeToEntity.Value.Inverse().ToFrozenDictionary(),
                 new InvalidateWith(typeof(SMSModelEntity)));
         }
     }

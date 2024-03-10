@@ -476,7 +476,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     FROM {oldTableName}
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
-){(!uniqueIndex.Where.HasText() ? "" : "AND " + uniqueIndex.Where.Replace(columnReplacement))};")!);
+){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
     }
 
     public SqlPreCommand? RemoveDuplicatesIfNecessary(TableIndex uniqueIndex, Replacements rep)

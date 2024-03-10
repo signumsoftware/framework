@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Entity, JavascriptMessage, OperationMessage, SearchMessage, Lite, getToString, liteKey } from '../Signum.Entities';
 import { getTypeInfo, OperationType } from '../Reflection';
 import { classes, softCast } from '../Globals';
-import * as Navigator from '../Navigator';
+import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
 import {

@@ -4,7 +4,7 @@ import { openModal, IModalProps, IHandleKeyboard } from '@framework/Modals'
 import { TypeContext, StyleOptions, EntityFrame, FunctionalFrameComponent } from '@framework/TypeContext'
 import { TypeInfo, getTypeInfo, GraphExplorer, PropertyRoute, ReadonlyBinding, } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { Lite, JavascriptMessage, entityInfo, getToString, toLite, EntityPack, ModifiableEntity, SaveChangesMessage, FrameMessage } from '@framework/Signum.Entities'
 import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
@@ -333,7 +333,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 const CaseFrameModalExt = CaseFrameModal;
 
 export namespace CaseFrameModalManager {
-  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: Navigator.ViewOptions): Promise<CaseActivityEntity | undefined> {
+  export function openView(entityOrPack: Lite<CaseActivityEntity> | CaseActivityEntity | WorkflowClient.CaseEntityPack, options?: { readOnly?: boolean }): Promise<CaseActivityEntity | undefined> {
 
     return openModal<CaseActivityEntity>(<CaseFrameModal
       entityOrPack={entityOrPack}

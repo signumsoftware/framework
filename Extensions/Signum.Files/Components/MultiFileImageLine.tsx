@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { TypeContext } from '@framework/TypeContext'
-import { getSymbol } from '@framework/Reflection'
+import { Type, getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, MList, SearchMessage, EmbeddedEntity, EntityControlMessage, getToString } from '@framework/Signum.Entities'
 import { IFile, FileTypeSymbol } from '../Signum.Files'
@@ -14,13 +14,13 @@ import "./Files.css"
 import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/EntityListBase'
 import { FetchAndRemember } from '@framework/Lines'
 import { FileImage } from './FileImage';
-import { useController } from '@framework/Lines/LineBase'
+import { genericForwardRef, useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
+import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
 
 export { FileTypeSymbol };
 
-interface MultiFileImageLineProps extends EntityListBaseProps {
-  ctx: TypeContext<MList<ModifiableEntity & IFile | Lite<IFile & Entity> | EmbeddedEntity>>;
+interface MultiFileImageLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseProps<V> {
   download?: DownloadBehaviour;
   dragAndDrop?: boolean;
   dragAndDropMessage?: string;
@@ -29,13 +29,13 @@ interface MultiFileImageLineProps extends EntityListBaseProps {
   configuration?: FileDownloaderConfiguration<IFile>;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
-  getFile?: (ectx: EmbeddedEntity) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createEmbedded?: (file: ModifiableEntity & IFile) => Promise<EmbeddedEntity>;
+  getFile?: (ectx: V) => ModifiableEntity & IFile | Lite<IFile & Entity>;
+  createEmbedded?: (file: ModifiableEntity & IFile | Lite<IFile & Entity>) => Promise<V>;
 }
 
-export class MultiFileImageLineController extends EntityListBaseController<MultiFileImageLineProps> {
+export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileImageLineProps<V>, V> {
 
-  overrideProps(p: MultiFileImageLineProps, overridenProps: MultiFileImageLineProps) {
+  overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>) {
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
@@ -68,18 +68,14 @@ export class MultiFileImageLineController extends EntityListBaseController<Multi
       this.props.createEmbedded(file)
         .then(em => em && this.addElement(em));
     else
-      this.convert(file)
+      this.convert(file as unknown as Aprox<V>)
         .then(f => this.addElement(f));
-  }
-
-  defaultCreate() {
-    return Constructor.construct(this.props.type!.name);
   }
 }
 
-export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props: MultiFileImageLineProps, ref: React.Ref<MultiFileImageLineController>) {
+export const MultiFileImageLine = genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>, ref: React.Ref<MultiFileImageLineController<V>>) {
 
-  const c = useController(MultiFileImageLineController, props, ref);
+  const c = useController(MultiFileImageLineController<V>, props, ref);
   const p = c.props;
 
   if (c.isHidden)
@@ -95,9 +91,9 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
           {
             c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
               <div className="sf-file-image-container m-2" key={mlec.index}>
-                {p.getComponent ? p.getComponent(mlec) :
+                {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :
                   p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
-                    renderFile(p.getFile ? (mlec as TypeContext<EmbeddedEntity>).subCtx(p.getFile) : mlec as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>)}
+                    renderFile(p.getFile ? mlec.subCtx(p.getFile) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
                 {!p.ctx.readOnly &&
                   <a href="#" title={EntityControlMessage.Remove.niceToString()}
                     className="sf-line-button sf-remove"
@@ -129,20 +125,19 @@ export const MultiFileImageLine = React.forwardRef(function MultiFileLine(props:
   );
 
 
-  function renderFile(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity> | undefined | null>) {
+  function renderFile(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>) {
     const val = ctx.value!;
 
     return ctx.propertyRoute!.typeReference().isLite ?
       <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
       <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} />;
   }
-
 });
 
 (MultiFileImageLine as any).defaultProps = {
   download: "SaveAs",
   dragAndDrop: true
-} as MultiFileImageLineProps;
+} as MultiFileImageLineProps<any>;
 
 
 

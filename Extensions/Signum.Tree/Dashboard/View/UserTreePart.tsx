@@ -1,6 +1,6 @@
 
 import * as React from 'react'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { getTypeInfos, tryGetOperationInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import * as UserQueryClient from '../../../Signum.UserQueries/UserQueryClient'

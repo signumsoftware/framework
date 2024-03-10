@@ -1,6 +1,6 @@
 import * as d3 from "d3"
 import { EntityData, EntityKind } from '@framework/Reflection'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { Point, ITableInfo, Rectangle, TableInfo, MListTableInfo, ClientColorProvider, IRelationInfo, SchemaMapInfo, RelationInfo } from './ClientColorProvider'
 import { calculatePoint, wrap, forceBoundingBox } from '../Utils'

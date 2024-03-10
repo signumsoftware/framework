@@ -1,7 +1,7 @@
 import * as React from 'react'
 import ChartBuilder from '../Templates/ChartBuilder'
 import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'

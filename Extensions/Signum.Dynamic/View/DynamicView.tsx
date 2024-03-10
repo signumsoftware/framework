@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
@@ -18,7 +18,7 @@ interface DynamicViewEntityComponentProps {
 }
 
 interface DynamicViewEntityComponentState {
-  exampleEntity?: Entity;
+  exampleEntity: Entity | null;
   rootNode?: BaseNode;
   selectedNode?: DesignerNode<BaseNode>;
   viewOverrides?: Navigator.ViewOverride<ModifiableEntity>[];
@@ -28,7 +28,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   constructor(props: DynamicViewEntityComponentProps) {
     super(props);
-    this.state = {};
+    this.state = { exampleEntity : null };
   }
 
   handleShowCode = () => {
@@ -109,13 +109,13 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
   handleTypeChange = () => {
 
-    this.state = {};
+    this.state = { exampleEntity : null };
 
     var dve = this.props.ctx.value;
 
     if (dve.entityType == null) {
       dve.viewContent = null!;
-      this.setState({ exampleEntity: undefined });
+      this.setState({ exampleEntity: null });
     } else {
       dve.viewContent = JSON.stringify(NodeConstructor.createDefaultNode(getTypeInfo(dve.entityType.cleanName)));
     }
@@ -154,7 +154,7 @@ export default class DynamicViewEntityComponent extends React.Component<DynamicV
 
     const ctx = this.props.ctx;
 
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, { frame: ctx.frame }, root.route!, Binding.create(this.state, s => s.exampleEntity));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, { frame: ctx.frame }, root.route!, Binding.create(this.state, s => s.exampleEntity));
 
     return (
       <div className="design-main" style={{ marginTop: "10px" }}>

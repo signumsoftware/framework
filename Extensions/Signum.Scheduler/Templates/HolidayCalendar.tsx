@@ -10,10 +10,10 @@ export default function HolidayCalendar(p : { ctx: TypeContext<HolidayCalendarEn
     <div>
       <AutoLine ctx={e.subCtx(f => f.name)} />
       <div>
-        <EntityTable ctx={e.subCtx(f => f.holidays)} columns={EntityTable.typedColumns<HolidayEmbedded>([
+        <EntityTable ctx={e.subCtx(f => f.holidays)} columns={[
           { property: a => a.date },
           { property: a => a.name },
-        ])} />
+        ]} />
       </div>
     </div>
   );

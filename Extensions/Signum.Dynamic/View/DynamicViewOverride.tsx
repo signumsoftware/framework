@@ -5,7 +5,7 @@ import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -34,7 +34,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
 
   const forceUpdate = useForceUpdate();
 
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const componentTypeRef = React.useRef<React.ComponentType<{ ctx: TypeContext<Entity> }> | null>(null);
   function setComponentType(ct: React.ComponentType<{ ctx: TypeContext<Entity> }> | null) {
     componentTypeRef.current = ct;
@@ -127,7 +127,7 @@ export default function DynamicViewOverrideComponent(p: DynamicViewOverrideCompo
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <div className="code-container">

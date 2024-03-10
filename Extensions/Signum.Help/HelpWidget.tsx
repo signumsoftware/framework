@@ -16,13 +16,11 @@ export interface HelpWidgetProps {
   wc: WidgetContext<Entity>
 }
 
-const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {}; 
-
 export function HelpWidget(p: HelpWidgetProps) {
 
   const entity = p.wc.ctx.value;
 
-  var typeHelp = useAPI(() => cache[entity.Type] ?? HelpClient.API.type(entity.Type), [entity.Type]);
+  var typeHelp = useAPI(() => HelpClient.API.type(entity.Type), [entity.Type]);
 
   var hasContent = Boolean(typeHelp && !typeHelp!.isNew);
 
@@ -40,14 +38,14 @@ export function HelpWidget(p: HelpWidgetProps) {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any> }) {
+export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }) {
 
   //debugger;
 
   if (p.ctx.propertyRoute == null)
     return undefined;
 
-  var typeHelp = p.ctx.frame?.pack.typeHelp;
+  var typeHelp = p.typeHelp ?? p.ctx.frame?.pack.typeHelp;
 
   const pr = p.ctx.propertyRoute;
 
@@ -82,3 +80,4 @@ export function HelpIcon(p: { ctx: TypeContext<any> }) {
     </OverlayTrigger>
   );
 }
+

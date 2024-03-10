@@ -7,7 +7,6 @@ import { Dic, classes, } from './Globals';
 import { clearContextHeaders, ajaxGet, ajaxPost, RetryFilter } from "./Services";
 import { PseudoType, Type, getTypeName, tryGetTypeInfo } from "./Reflection";
 import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
-import { navigateRoute } from "./Navigator";
 
 Dic.skipClasses.push(React.Component);
 
@@ -172,12 +171,12 @@ export function toAbsoluteUrl(appRelativeUrl: string): string {
 
 declare global {
   interface String {
-    formatHtml(...parameters: any[]): React.ReactElement<any>;
+    formatHtml(...parameters: any[]): React.ReactElement;
   }
 
   interface Array<T> {
-    joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement<any>;
-    joinHtml(this: Array<T>, separator: string | React.ReactElement<any>): React.ReactElement<any>;
+    joinCommaHtml(this: Array<T>, lastSeparator: string): React.ReactElement;
+    joinHtml(this: Array<T>, separator: string | React.ReactElement): React.ReactElement;
   }
 }
 
@@ -188,7 +187,7 @@ String.prototype.formatHtml = function (this: string) {
 
   const parts = this.split(regex);
 
-  const result: (string | React.ReactElement<any>)[] = [];
+  const result: (string | React.ReactElement)[] = [];
   for (let i = 0; i < parts.length - 4; i += 4) {
     result.push(parts[i]);
     result.push(args[parseInt(parts[i + 1])]);
@@ -201,7 +200,7 @@ String.prototype.formatHtml = function (this: string) {
 Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
   const args = arguments;
 
-  const result: (string | React.ReactElement<any>)[] = [];
+  const result: (string | React.ReactElement)[] = [];
   for (let i = 0; i < this.length - 2; i++) {
     result.push(this[i]);
     result.push(", ");
@@ -219,10 +218,10 @@ Array.prototype.joinCommaHtml = function (this: any[], lastSeparator: string) {
   return React.createElement("span", undefined, ...result);
 }
 
-Array.prototype.joinHtml = function (this: any[], separator: string | React.ReactElement<any>) {
+Array.prototype.joinHtml = function (this: any[], separator: string | React.ReactElement) {
   const args = arguments;
 
-  const result: (string | React.ReactElement<any>)[] = [];
+  const result: (string | React.ReactElement)[] = [];
   for (let i = 0; i < this.length -1; i++) {
     result.push(this[i]);
     result.push(separator);

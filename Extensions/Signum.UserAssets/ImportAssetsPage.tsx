@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
 import { API } from './UserAssetClient'
@@ -141,7 +141,7 @@ export default function ImportAssetsPage() {
                       <td colSpan={4}>
                         {UserAssetMessage.LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase.niceToString().formatHtml(<strong>{ea.text}</strong>)}
                         <EntityTable avoidFieldSet ctx={mlec.subCtx(a => a.liteConflicts)} create={false} remove={false} move={false}
-                          columns={EntityTable.typedColumns<LiteConflictEmbedded>([
+                          columns={[
                             { property: a => a.propertyRoute, template: ctx => <code>{ctx.value.propertyRoute}</code> },
                             { property: a => a.from, template: ctx => <code>{liteKeyLong(ctx.value.from)}</code> },
                             {
@@ -150,7 +150,7 @@ export default function ImportAssetsPage() {
                                 onChange={e =>  handleChangeConflict(ctx.value)}
                                 />
                             }
-                          ])}
+                          ]}
                         />
                       </td>
                     </tr>}

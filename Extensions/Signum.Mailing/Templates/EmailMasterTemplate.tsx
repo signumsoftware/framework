@@ -17,8 +17,8 @@ export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTe
       <AutoLine ctx={ctx.subCtx(f => f.isDefault)} />
       <Tabs id={ctx.prefix + "tabs"}>
         <Tab eventKey="messages" title={ctx.niceName(a => a.messages)}>
-          <EntityTabRepeater ctx={ctx.subCtx(a => a.messages)} avoidFieldSet onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<EmailMasterTemplateMessageEmbedded>) =>
-            <EmailTemplateMessageComponent ctx={ctx} invalidate={() => forceUpdate()} />} />
+          <EntityTabRepeater ctx={ctx.subCtx(a => a.messages)} avoidFieldSet onChange={() => forceUpdate()} getComponent={ctxMsg =>
+            <EmailTemplateMessageComponent ctx={ctxMsg} invalidate={() => forceUpdate()} />} />
         </Tab>
         <Tab eventKey="attachments" title={ctx.niceName(a => a.attachments)}>
           <EntityRepeater ctx={ctx.subCtx(e => e.attachments)} avoidFieldSet onChange={() => forceUpdate()} />

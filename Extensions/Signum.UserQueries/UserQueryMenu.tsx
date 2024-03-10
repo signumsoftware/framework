@@ -3,11 +3,11 @@ import { useLocation, Location } from 'react-router'
 import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, Dic, softCast } from '@framework/Globals'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
-import { UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
+import { Navigator } from '@framework/Navigator'
+import { SystemTimeEmbedded, UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
 import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
@@ -20,9 +20,9 @@ import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
 import type StringDistance from './StringDistance'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { TokenCompleter } from '@framework/Finder'
 import { useForceUpdate } from '@framework/Hooks'
 import { PinnedQueryFilterEmbedded, QueryColumnEmbedded, QueryFilterEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../Signum.UserAssets/Signum.UserAssets.Queries'
+import FramePage from '@framework/Frames/FramePage'
 
 export interface UserQueryMenuProps {
   searchControl: SearchControlLoaded;
@@ -117,11 +117,11 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
 
-  function applyUserQuery(uq: Lite<UserQueryEntity>) {
+  function applyChangesToSearchControl(uq: Lite<UserQueryEntity>) {
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
-      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, undefined, sc.props.defaultIncudeDefaultFilters)
+      UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
           if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
@@ -134,23 +134,22 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     })
   }
 
-  function handleOnClick(uq: Lite<UserQueryEntity>) {
-    applyUserQuery(uq);
+  function handleSelectUserQuery(uq: Lite<UserQueryEntity>) {
+    applyChangesToSearchControl(uq);
   }
 
-  function handleEdit() {
-    Navigator.API.fetch(currentUserQuery!)
-      .then(userQuery => Navigator.view(userQuery))
-      .then(() => reloadList())
-      .then(list => {
-        if (!list.some(a => is(a, currentUserQuery)))
-          setCurrentUserQuery(undefined, undefined);
-        else
-          applyUserQuery(currentUserQuery!)
-      });
+  async function handleEdit() {
+    const userQuery = await Navigator.API.fetch(currentUserQuery!);
+    await Navigator.view(userQuery);
+
+    await reloadList();
+    if (currentUserQuery  && await Navigator.API.exists(currentUserQuery))
+      applyChangesToSearchControl(currentUserQuery!);
+     else
+      setCurrentUserQuery(undefined, undefined);
   }
 
-  async function applyChanges(): Promise<UserQueryEntity> {
+  async function applyChangesToUserQuery(): Promise<UserQueryEntity> {
     const sc = p.searchControl;
 
     const uqOld = await Navigator.API.fetch(currentUserQuery!);
@@ -168,6 +167,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     uqOld.columnsMode = uqNew.columnsMode;
     uqOld.orders = uqNew.orders;
     uqOld.paginationMode = uqNew.paginationMode;
+    uqOld.systemTime = uqNew.systemTime == null ? null : SystemTimeEmbedded.New({
+      mode: uqNew.systemTime.mode,
+      joinMode: uqNew.systemTime.joinMode,
+      startDate: uqNew.systemTime.startDate && UserQueryMerger.similarValues(foOld.systemTime!.startDate, foNew.systemTime!.startDate) ? uqOld.systemTime!.startDate : uqNew.systemTime.startDate,
+      endDate: uqNew.systemTime.endDate && UserQueryMerger.similarValues(foOld.systemTime!.endDate, foNew.systemTime!.endDate) ? uqOld.systemTime!.endDate : uqNew.systemTime.endDate,
+    });
     uqOld.elementsPerPage = uqNew.elementsPerPage;
     uqOld.customDrilldowns = uqNew.customDrilldowns;
     uqOld.modified = true;
@@ -175,16 +180,15 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     return uqOld;
   }
 
-  function handleApplyChanges() {
-    applyChanges()
-      .then(uqOld => Navigator.view(uqOld))
-      .then(() => reloadList())
-      .then(list => {
-        if (!list.some(a => is(a, currentUserQuery)))
-          setCurrentUserQuery(undefined, undefined);
-        else
-          applyUserQuery(currentUserQuery!);
-      });
+  async function handleApplyChanges() {
+    const uqOld = await applyChangesToUserQuery();
+    await Navigator.view(uqOld);
+    const list = await reloadList();
+
+    if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
+      applyChangesToSearchControl(currentUserQuery!);
+    else
+      setCurrentUserQuery(undefined, undefined);
   }
 
   async function createUserQuery(): Promise<UserQueryEntity> {
@@ -201,7 +205,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
 
 
-    var parser = new TokenCompleter(sc.props.queryDescription);
+    var parser = new Finder.TokenCompleter(sc.props.queryDescription);
     [
       ...fo.columnOptions?.map(a => a?.token) ?? [],
       ...fo.columnOptions?.map(a => a?.summaryToken) ?? [],
@@ -233,6 +237,12 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           token: parser.get(c.token.toString())
         })
       }))),
+      systemTime: fo.systemTime && SystemTimeEmbedded.New({
+        mode: fo.systemTime.mode,
+        startDate: fo.systemTime.startDate && await UserAssetClient.API.stringifyDate(fo.systemTime.startDate),
+        endDate: fo.systemTime.endDate && await UserAssetClient.API.stringifyDate(fo.systemTime.endDate),
+        joinMode: fo.systemTime.joinMode
+      }),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       refreshMode: p.searchControl.state.refreshMode ?? "Auto",
@@ -246,7 +256,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uq => {
         if (uq?.id) {
           reloadList().then(() => {
-            applyUserQuery(toLite(uq));
+            applyChangesToSearchControl(toLite(uq));
           });
         }
       });
@@ -295,7 +305,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
               return (
                 <Dropdown.Item key={i}
                   className={classes("sf-userquery", is(uq, currentUserQuery) && "active")}
-                  onClick={() => handleOnClick(uq)}>
+                  onClick={() => handleSelectUserQuery(uq)}>
                   {getToString(uq)}
                 </Dropdown.Item>
               );
@@ -398,7 +408,8 @@ export namespace UserQueryMerger {
       oldF.isGroup = newF.isGroup;
       oldF.groupOperation = newF.groupOperation;
       oldF.operation = newF.operation;
-      oldF.valueString = similarValues(ch.added.filter.value, ch.removed.filter.value) ? oldF.valueString : newF.valueString;
+      debugger;
+      oldF.valueString = similarValues(ch.added.filter.value, ch.removed.filter.value) || oldF.valueString?.startsWith("[") && oldF.valueString.endsWith("]") ? oldF.valueString : newF.valueString;
       if (newF.pinned == null)
         oldF.pinned = null;
       else {
@@ -420,7 +431,7 @@ export namespace UserQueryMerger {
     return result;
   }
 
-  function similarValues(val1: any, val2: any) {
+  export function similarValues(val1: any, val2: any) {
     if (val1 == val2)
       return true;
 

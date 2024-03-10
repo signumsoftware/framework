@@ -2,6 +2,7 @@ using Signum.Engine.Linq;
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 
 namespace Signum.DynamicQuery;
 
@@ -167,13 +168,13 @@ public class ExpressionContainer
     }
 
 
-    private ResetLazy<HashSet<K>> GetAllKeysLazy<K>()
+    private ResetLazy<FrozenSet<K>> GetAllKeysLazy<K>()
     {
         if (typeof(K).IsEnum)
-            return new ResetLazy<HashSet<K>>(() => EnumExtensions.GetValues<K>().ToHashSet());
+            return new ResetLazy<FrozenSet<K>>(() => EnumExtensions.GetValues<K>().ToFrozenSet());
 
         if (typeof(K).IsLite())
-            return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToHashSet());
+            return GlobalLazy.WithoutInvalidations(() => Database.RetrieveAllLite(typeof(K).CleanType()).Cast<K>().ToFrozenSet());
 
         throw new InvalidOperationException("Unable to get all the possible keys for " + typeof(K).TypeName());
     }

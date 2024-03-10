@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, JavascriptMessage } from './Signum.Entities'
-import { TypeReference, Binding } from './Reflection'
+import { TypeReference, Binding, getFieldMembers, PropertyRoute } from './Reflection'
 import { TypeContext } from './TypeContext'
 import { MemberInfo } from './Reflection';
 import { BsSize, KeyNames } from './Components';
@@ -9,7 +9,6 @@ import { useForceUpdate } from './Hooks';
 import { Modal } from 'react-bootstrap';
 import { AutoFocus } from './Components/AutoFocus';
 import type { AutoLineProps } from './Lines/AutoLine';
-//import { AutoLine } from './Lines/AutoLine';
 
 const AutoLine = React.lazy(() => import("./Lines/AutoLine").then(module => ({ default: module.AutoLine })));
 
@@ -50,16 +49,19 @@ export default function AutoLineModal(p: AutoLineModalProps) {
 
   const ctx = new TypeContext(undefined, undefined, undefined as any, Binding.create(value, s => s.current), "valueLineModal");
 
-  var label = props.label !== undefined ? props.label : props.member?.niceName;
+  var member = props.propertyRoute?.member;
+
+  var label = props.label !== undefined ? props.label : member?.niceName;
 
   var alp: AutoLineProps = {
     ctx: ctx,
-    format: props.format !== undefined ? props.format : props.member?.format,
-    unit: props.unit !== undefined ? props.unit : props.member?.unit,
+    format: props.format !== undefined ? props.format : member?.format,
+    unit: props.unit !== undefined ? props.unit : member?.unit,
     label: label,
-    type: props.type ?? props.member?.type,
+    type: props.type ?? member?.type,
+    propertyRoute: props.propertyRoute,
     formGroupStyle: label ? "Basic" : "SrOnly",
-    onChange: forceUpdate
+    onChange: forceUpdate,
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
@@ -106,12 +108,12 @@ AutoLineModal.show = (options: AutoLineModalOptions): Promise<any> => {
 }
 
 export interface AutoLineModalOptions {
-  member?: MemberInfo;
+  propertyRoute?: PropertyRoute;
   type?: TypeReference;
   initialValue?: any;
-  title?: React.ReactChild;
-  message?: React.ReactChild;
-  label?: React.ReactChild;
+  title?: React.ReactElement | string | null;
+  message?: React.ReactElement | string | null;
+  label?: React.ReactElement | string | null;
   customComponent?: (p: AutoLineProps) => React.ReactElement;
   validateValue?: (val: any) => string | undefined;
   format?: string;

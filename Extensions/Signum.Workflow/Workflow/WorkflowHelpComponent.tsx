@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Workflow';
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { TypeHelpMode } from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import AutoLineModal from '@framework/AutoLineModal';
 import { getToString } from '@framework/Signum.Entities';

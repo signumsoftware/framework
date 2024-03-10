@@ -2,7 +2,7 @@ import { PredictorEntity } from "../Signum.MachineLearning";
 import { Modal } from "react-bootstrap";
 import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as Navigator from "@framework/Navigator";
+import { Navigator } from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
 import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";

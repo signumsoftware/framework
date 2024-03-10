@@ -2,7 +2,7 @@ import { DateTime, Duration } from 'luxon'
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
@@ -12,7 +12,7 @@ import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
-import { toFilterOptions, isAggregate } from '@framework/Finder';
+import { Finder } from '@framework/Finder';
 import { toAbsoluteUrl } from '@framework/AppContext';
 
 interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
@@ -46,7 +46,7 @@ const [show, setShow] = React.useState<boolean>(true);
             queryName: CaseActivityEntity,
             filterOptions: [
               { token: CaseActivityEntity.token(e => e.entity.workflowActivity), value: stats.workflowActivity },
-              ...toFilterOptions(p.config.filters.filter(f => !isAggregate(f)))
+              ...Finder.toFilterOptions(p.config.filters.filter(f => !Finder.isAggregate(f)))
             ],
             columnOptionsMode: "Add",
             columnOptions: p.config.columns

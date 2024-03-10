@@ -309,6 +309,10 @@ public class GermanDiacriticsRemover : IDiacriticsRemover
             .Replace("ö", "oe")
             .Replace("Ü", "Ue")
             .Replace("Ä", "Ae")
-            .Replace("Ö", "Oe");
+            .Replace("Ö", "Oe")
+            .Replace("ß", "ss")
+            .Replace("ẞ", "Ss");
+        
+
     }
 }

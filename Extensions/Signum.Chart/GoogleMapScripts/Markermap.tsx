@@ -1,7 +1,7 @@
 /// <reference path="../../../../node_modules/@types/googlemaps/index.d.ts" />
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Lite, Entity, liteKey, ModifiableEntity, getToString } from '../Signum.Entities';
 import * as AppContext from '../AppContext';
-import * as Navigator from '../Navigator';
+import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
 
@@ -10,7 +10,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   inSearch?: "main" | "related";
   inPlaceNavigation?: boolean;
   onNavigated?: (lite: Lite<Entity>) => void;
-  getViewPromise?: (e: ModifiableEntity | null) => undefined | string | Navigator.ViewPromise<ModifiableEntity>;
+  getViewPromise?: (e: ModifiableEntity | null) => undefined | string | ViewPromise<ModifiableEntity>;
   innerRef?: React.Ref<HTMLAnchorElement>;
   stopPropagation?: boolean;
   extraProps?: any;

@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { PrintLineEntity, PrintPackageEntity, PrintPermission, PrintLineOperation } from './Signum.Printing'

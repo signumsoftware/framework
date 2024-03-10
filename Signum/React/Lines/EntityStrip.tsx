@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
@@ -8,8 +8,8 @@ import { Typeahead } from '../Components'
 import { EntityListBaseController, EntityListBaseProps, DragConfig, MoveConfig } from './EntityListBase'
 import { AutocompleteConfig, TypeBadge } from './AutoCompleteConfig'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { EntityBaseController } from './EntityBase';
-import { LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
+import { Aprox, EntityBaseController, NN } from './EntityBase';
+import { genericForwardRef, LineBaseController, LineBaseProps, tasks, useController } from './LineBase'
 import { getTypeInfo, getTypeInfos, getTypeName, QueryTokenString, tryGetTypeInfos } from '../Reflection'
 import { FindOptions } from '../Search'
 import { useForceUpdate } from '../Hooks'
@@ -17,24 +17,24 @@ import { TextHighlighter, TypeaheadController } from '../Components/Typeahead'
 import { getTimeMachineIcon } from './TimeMachineIcon'
 
 
-export interface EntityStripProps extends EntityListBaseProps {
+export interface EntityStripProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
   vertical?: boolean;
   iconStart?: boolean;
   autocomplete?: AutocompleteConfig<any> | null;
-  onRenderItem?: (item: any /*T*/) => React.ReactNode;
+  onRenderItem?: (item: NoInfer<V>) => React.ReactNode;
   showType?: boolean;
-  onItemHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  onItemContainerHtmlAttributes?: (item: any /*T*/) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: NoInfer<V>) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   avoidDuplicates?: boolean;
-  groupElementsBy?: (e: any /*T*/) => string;
+  groupElementsBy?: (e: V) => string;
   renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
 }
 
-export class EntityStripController extends EntityListBaseController<EntityStripProps> {
+export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseController<EntityStripProps<V>, V> {
 
   typeahead!: React.RefObject<TypeaheadController>;
 
-  overrideProps(p: EntityStripProps, overridenProps: EntityStripProps) {
+  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>) {
     super.overrideProps(p, overridenProps);
     this.typeahead = React.useRef<TypeaheadController>(null);
 
@@ -77,17 +77,15 @@ export class EntityStripController extends EntityListBaseController<EntityStripP
 
   handleOnSelect = (item: any, event: React.SyntheticEvent<any>) => {
     this.props.autocomplete!.getEntityFromItem(item)
-      .then(entity => entity && this.convert(entity)
+      .then(entity => entity && this.convert(entity as Aprox<V>)
         .then(e => this.addElement(e))
       );
 
     return "";
   }
-
-  
 }
 
-export const EntityStrip = React.forwardRef(function EntityStrip(props: EntityStripProps, ref: React.Ref<EntityStripController>) {
+export const EntityStrip = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
 
@@ -107,7 +105,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
             p.groupElementsBy == undefined ?
               c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i)) :
 
-              c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion) : p.groupElementsBy!(a)).map((gr, i) =>
+              c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion.value) : p.groupElementsBy!(a.value)).map((gr, i) =>
                 <div className={classes("mb-2")} key={i} >
                   <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
                   {gr.elements.map((mlec, i) => renderElement(mlec, i))}
@@ -119,8 +117,8 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     </FormGroup>
   );
 
-  function renderElement(mlec: TypeContext<any>, index: number): JSX.Element {
-    return <EntityStripElement key={index}
+  function renderElement(mlec: TypeContext<V>, index: number): JSX.Element {
+    return <EntityStripElement<V> key={index}
       ctx={mlec}
       iconStart={p.iconStart}
       autoComplete={p.autocomplete}
@@ -174,7 +172,7 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
     });
   }
 
-  function renderAutoComplete(renderInput?: (input: React.ReactElement<any> | null) => React.ReactElement<any>) {
+  function renderAutoComplete(renderInput?: (input: React.ReactElement | null) => React.ReactElement) {
     var ac = p.autocomplete;
 
     if (p.ctx!.readOnly)
@@ -197,22 +195,22 @@ export const EntityStrip = React.forwardRef(function EntityStrip(props: EntitySt
   }
 });
 
-export interface EntityStripElementProps {
+export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entity>> {
   iconStart?: boolean;
   onRemove?: (event: React.MouseEvent<any>) => void;
   onView?: (event: React.MouseEvent<any>) => void;
-  ctx: TypeContext<Lite<Entity> | ModifiableEntity>;
-  autoComplete?: AutocompleteConfig<any> | null;
-  onRenderItem?: (item: Lite<Entity> | ModifiableEntity) => React.ReactNode;
-  onItemHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  onItemContainerHtmlAttributes?: (item: Lite<Entity> | ModifiableEntity) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  ctx: TypeContext<V>;
+  autoComplete?: AutocompleteConfig<unknown> | null;
+  onRenderItem?: (item: V) => React.ReactNode;
+  onItemHtmlAttributes?: (item: V) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
+  onItemContainerHtmlAttributes?: (item: V) => React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   drag?: DragConfig;
   move?: MoveConfig;
   showType: boolean;
   vertical?: boolean;
 }
 
-export function EntityStripElement(p: EntityStripElementProps) {
+export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>) {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
 
@@ -232,7 +230,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
     if (p.autoComplete) {
       var newEntity = p.ctx.value;
       if (!currentEntityRef.current || currentEntityRef.current.entity !== newEntity) {
-        var ci = { entity: newEntity!, item: undefined }
+        var ci = { entity: newEntity!, item: undefined as unknown }
         currentEntityRef.current = ci;
         var fillItem = (newEntity: ModifiableEntity | Lite<Entity>) => {
           const autocomplete = p.autoComplete;
@@ -281,7 +279,7 @@ export function EntityStripElement(p: EntityStripElementProps) {
 
   return (
     <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
-      {...EntityListBaseController.entityHtmlAttributes(p.ctx.value)}
+      {...EntityBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
       <div className={classes(drag && "sf-strip-dropable")}
         onDragEnter={drag?.onDragOver}

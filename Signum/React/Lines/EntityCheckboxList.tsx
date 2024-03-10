@@ -1,49 +1,51 @@
 
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { MListElementBinding, ReadonlyBinding, TypeReference } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, MList, toLite, is, liteKey, getToString, MListElement } from '../Signum.Entities'
 import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
-import { useController } from './LineBase'
+import { genericForwardRef, useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
-import { renderLite } from '../Navigator'
+import { Navigator } from '../Navigator'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 import { getEntityOperationButtons } from '../Operations/EntityOperations'
 import { GroupHeader, HeaderType } from './GroupHeader'
+import { Aprox } from './EntityBase'
 
 
 
-export interface RenderCheckboxItemContext<T> {
+export interface RenderCheckboxItemContext<V extends ModifiableEntity | Lite<Entity>> {
   row: ResultRow;
   index: number;
   checked: boolean;
-  controller: EntityCheckboxListController;
+  controller: EntityCheckboxListController<V>;
   resultTable?: ResultTable;
-  ectx: TypeContext<T> | null;
+  ectx: TypeContext<V> | null;
+  oldCtx: TypeContext<V> | null;
 }
 
-export interface EntityCheckboxListProps extends EntityListBaseProps {
+export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entity>> extends EntityListBaseProps<V> {
   data?: Lite<Entity>[];
   columnCount?: number | null;
   columnWidth?: number | null;
   avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
-  onRenderCheckbox?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
-  onRenderItem?: (ric: RenderCheckboxItemContext<any>) => React.ReactElement;
+  onRenderCheckbox?: (ric: RenderCheckboxItemContext<V>) => React.ReactElement;
+  onRenderItem?: (ric: RenderCheckboxItemContext<V>) => React.ReactElement;
 
-  getLiteFromElement?: (e: any /*ModifiableEntity*/) => Entity | Lite<Entity>;
-  createElementFromLite?: (file: Lite<any>) => Promise<ModifiableEntity>;
+  getLiteFromElement?: (e: V) => Entity | Lite<Entity>;
+  createElementFromLite?: (file: Lite<Entity>) => Promise<V>;
 }
 
-export class EntityCheckboxListController extends EntityListBaseController<EntityCheckboxListProps> {
+export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityCheckboxListProps<V>, V> {
 
   refresh: number = 0;
 
-  getDefaultProps(state: EntityCheckboxListProps) {
+  getDefaultProps(state: EntityCheckboxListProps<V>) {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
@@ -56,7 +58,7 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     state.columnWidth = 200;
   }
 
-  getKeyEntity(element: Lite<Entity> | ModifiableEntity): Lite<Entity> | Entity {
+  getKeyEntity(element: V): Lite<Entity> | Entity {
     if (this.props.getLiteFromElement)
       return this.props.getLiteFromElement(element);
     else
@@ -68,22 +70,23 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     return new TypeContext(this.props.ctx, undefined, pr, new ReadonlyBinding(embedded, ""));
   }
 
-  handleOnChange = (event: React.SyntheticEvent, lite: Lite<Entity>) => {
+  handleOnChange = async (event: React.SyntheticEvent, lite: Lite<Entity>) => {
     const ctx = this.props.ctx!;
     const toRemove = this.getMListItemContext(ctx).filter(ctxe => is(this.getKeyEntity(ctxe.value), lite))
 
     if (toRemove.length) {
-      toRemove.forEach(ctxe => ctx.value.remove((ctxe.binding as MListElementBinding<any>).getMListElement()));
+      toRemove.forEach(ctxe => ctx.value.remove((ctxe.binding as MListElementBinding<V>).getMListElement()));
       this.setValue(ctx.value, event);
     }
     else {
-      (this.props.createElementFromLite ? this.props.createElementFromLite(lite) : this.convert(lite)).then(e => {
-        this.addElement(e);
-      });
+      var elem = this.props.createElementFromLite ? await this.props.createElementFromLite(lite) :
+        await this.convert(lite as Aprox<V>);
+
+      this.addElement(elem);
     }
   }
 
-  handleCreateClick = (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
 
@@ -92,34 +95,23 @@ export class EntityCheckboxListController extends EntityListBaseController<Entit
     if (this.props.getLiteFromElement)
       pr = pr.addLambda(this.props.getLiteFromElement);
 
-    const promise = this.props.onCreate ?
-      this.props.onCreate(pr) : this.defaultCreate(pr);
+    let e = this.props.onCreate ? await this.props.onCreate(pr) : await this.defaultCreate(pr);
 
-    if (!promise)
-      return;
+    if (e == undefined)
+      return undefined;
 
-    promise.then<ModifiableEntity | Lite<Entity> | undefined>(e => {
+    if (!this.props.viewOnCreate) {
+      e = await this.doView(await this.convert(e));
+    }
 
-      if (e == undefined)
-        return undefined;
-
-      if (!this.props.viewOnCreate)
-        return Promise.resolve(e);
-
-      return this.doView(e);
-
-    }).then(e => {
-      if (e) {
-        this.refresh++;
-        this.forceUpdate();
-      }
-    });
-
-  };
-
+    if (e) {
+      this.refresh++;
+      this.forceUpdate();
+    }
+  }
 }
 
-export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(props: EntityCheckboxListProps, ref: React.Ref<EntityCheckboxListController>) {
+export const EntityCheckboxList = genericForwardRef(function EntityCheckboxList<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V>, ref: React.Ref<EntityCheckboxListController<V>>) {
   const c = useController(EntityCheckboxListController, props, ref);
   const p = c.props;
 
@@ -154,12 +146,12 @@ export const EntityCheckboxList = React.forwardRef(function EntityCheckboxList(p
 });
 
 
-interface EntityCheckboxListSelectProps {
-  ctx: TypeContext<MList<Lite<Entity> | ModifiableEntity>>;
-  controller: EntityCheckboxListController;
+interface EntityCheckboxListSelectProps<V extends ModifiableEntity | Lite<Entity>> {
+  ctx: TypeContext<MList<V>>;
+  controller: EntityCheckboxListController<V>;
 }
 
-export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
+export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListSelectProps<V>) {
 
   const c = props.controller;
   const p = c.props;
@@ -246,7 +238,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
     return fixedData.map((row, i) => {
       var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
       var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
-        listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.previousVersion?.value), row.entity));
+        listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.previousVersion!.value), row.entity));
 
       var ric: RenderCheckboxItemContext<any> = {
         row,
@@ -254,7 +246,8 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
         checked: ectx != null,
         controller: c,
         resultTable: resultTable,
-        ectx: ectx
+        ectx: ectx,
+        oldCtx: oldCtx
       };
 
       if (p.onRenderCheckbox)
@@ -270,7 +263,7 @@ export function EntityCheckboxListSelect(props: EntityCheckboxListSelectProps) {
             name={liteKey(row.entity!)}
             onChange={e => c.handleOnChange(e, row.entity!)} />
           &nbsp;
-          {p.onRenderItem ? p.onRenderItem(ric) : <span>{renderLite(row.entity!)}</span>}
+          {p.onRenderItem ? p.onRenderItem(ric) : <span>{Navigator.renderLite(row.entity!)}</span>}
         </label>
       );
     }

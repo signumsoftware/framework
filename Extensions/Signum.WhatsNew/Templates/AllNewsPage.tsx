@@ -7,7 +7,7 @@ import * as AppContext from "@framework/AppContext"
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.WhatsNew';
 import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 
 export default function AllNews() {
   const news: WhatsNewFull[] | undefined = useAPI(() => API.getAllNews().then(w => w), []);

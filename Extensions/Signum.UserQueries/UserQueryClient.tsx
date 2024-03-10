@@ -3,12 +3,11 @@ import { RouteObject } from 'react-router'
 import { Dropdown } from 'react-bootstrap'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
@@ -137,7 +136,7 @@ export function start(options: { routes: RouteObject[] }) {
             }));
 
       }} />
-}
+    }
   });
 }
 
@@ -288,49 +287,62 @@ export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity,
 
 export module Converter {
 
-  export function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
+  export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
 
     var query = uq.query!;
 
     var fo = { queryName: query.key, groupResults: uq.groupResults } as FindOptions;
 
-    const convertedFilters = UserAssetsClient.API.parseFilters({
+    const filters = await UserAssetsClient.API.parseFilters({
       queryKey: query.key,
       canAggregate: uq.groupResults || false,
       entity: entity,
       filters: uq.filters!.map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
     });
 
-    return convertedFilters.then(filters => {
-
-      fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
-      fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
-      fo.columnOptionsMode = uq.columnsMode;
-
-      fo.columnOptions = (uq.columns ?? []).map(f => ({
-        token: f.element.token.tokenString,
-        displayName: translated(f.element, c => c.displayName),
-        summaryToken: f.element.summaryToken?.tokenString,
-        hiddenColumn: f.element.hiddenColumn,
-        combineRows: f.element.combineRows,
-      }) as ColumnOption);
-
-      fo.orderOptions = (uq.orders ?? []).map(f => ({
-        token: f.element.token!.tokenString,
-        orderType: f.element.orderType
-      }) as OrderOption);
 
 
-      const qs = Finder.querySettings[query.key];
+    fo.filterOptions = filters.map(f => UserAssetsClient.Converter.toFilterOption(f));
+    fo.includeDefaultFilters = uq.includeDefaultFilters == null ? undefined : uq.includeDefaultFilters;
+    fo.columnOptionsMode = uq.columnsMode;
 
-      fo.pagination = uq.paginationMode == undefined ? undefined : {
-          mode: uq.paginationMode,
-          currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
-          elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
-        } as Pagination;
+    fo.columnOptions = (uq.columns ?? []).map(f => ({
+      token: f.element.token.tokenString,
+      displayName: translated(f.element, c => c.displayName),
+      summaryToken: f.element.summaryToken?.tokenString,
+      hiddenColumn: f.element.hiddenColumn,
+      combineRows: f.element.combineRows,
+    }) as ColumnOption);
 
-      return fo;
-    });
+    fo.orderOptions = (uq.orders ?? []).map(f => ({
+      token: f.element.token!.tokenString,
+      orderType: f.element.orderType
+    }) as OrderOption);
+
+    fo.pagination = uq.paginationMode == undefined ? undefined : {
+      mode: uq.paginationMode,
+      currentPage: uq.paginationMode == "Paginate" ? 1 : undefined,
+      elementsPerPage: uq.paginationMode == "All" ? undefined : uq.elementsPerPage,
+    } as Pagination;
+
+    async function parseDate(dateExpression: string | null): Promise<string | undefined> {
+      if (dateExpression == null)
+        return undefined;
+
+      var date = await UserAssetsClient.API.parseDate(dateExpression);
+
+      return date;
+    }
+
+    fo.systemTime = uq.systemTime == null ? undefined : {
+      mode: uq.systemTime.mode ?? undefined,
+      startDate: await parseDate(uq.systemTime.startDate),
+      endDate: await parseDate(uq.systemTime.endDate),
+      joinMode: uq.systemTime.joinMode ?? undefined,
+    };
+
+    return fo;
+
   }
 
   export function applyUserQuery(fop: FindOptionsParsed, uq: UserQueryEntity, entity: Lite<Entity> | undefined, defaultIncudeDefaultFilters: boolean): Promise<FindOptionsParsed> {
@@ -344,6 +356,7 @@ export module Converter {
         fop.orderOptions = fop2.orderOptions;
         fop.columnOptions = fop2.columnOptions;
         fop.pagination = fop2.pagination;
+        fop.systemTime = fop2.systemTime;
         return fop;
       });
   }

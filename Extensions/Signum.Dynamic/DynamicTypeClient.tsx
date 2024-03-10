@@ -4,9 +4,8 @@ import { RouteObject } from 'react-router'
 import { ifError } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { SearchControl, SearchValueLine } from '@framework/Search'
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { EntityOperationSettings } from '@framework/Operations'

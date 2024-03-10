@@ -8,7 +8,7 @@ import { SubTokensOptions } from '@framework/FindOptions'
 import { SearchControl, SearchValueLine, FindOptionsParsed, ResultTable, SearchControlLoaded } from '@framework/Search'
 import { TypeInfo, MemberInfo, getTypeInfo, tryGetTypeInfos, PropertyRoute, isTypeEntity, Binding, IsByAll, getAllTypes } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, ViewPromise } from '@framework/Navigator'
 import { TypeContext, ButtonBarElement } from '@framework/TypeContext'
 import { EntityTableColumn } from '@framework/Lines/EntityTable'
 import { ExpressionOrValueComponent, FieldComponent } from './Designer'
@@ -321,7 +321,7 @@ NodeUtils.register<ImageNode>({
 export interface RenderEntityNode extends ContainerNode {
   kind: "RenderEntity";
   field?: string;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
   styleOptions?: StyleOptionsExpression;
   onEntityLoaded?: Expression<() => void>;
   extraProps?: Expression<{}>;
@@ -600,13 +600,13 @@ export interface EntityBaseNode extends LineBaseNode, ContainerNode {
   onCreate?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
   find?: ExpressionOrValue<boolean>;
   onFind?: Expression<() => Promise<ModifiableEntity | Lite<Entity> | undefined> | undefined>;
-  remove?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+  remove?: ExpressionOrValue<boolean>;
   onRemove?: Expression<(remove: ModifiableEntity | Lite<Entity>) => Promise<boolean>>;
-  view?: ExpressionOrValue<boolean | ((item: ModifiableEntity | Lite<Entity>) => boolean)>;
+  view?: ExpressionOrValue<boolean>;
   onView?: Expression<(entity: ModifiableEntity | Lite<Entity>, pr: PropertyRoute) => Promise<ModifiableEntity | undefined> | undefined>;
   viewOnCreate?: ExpressionOrValue<boolean>;
   findOptions?: FindOptionsExpr;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
 }
 
 export interface EntityLineNode extends EntityBaseNode {
@@ -990,7 +990,7 @@ NodeUtils.register<EntityCheckboxListNode>({
     columnWidth: node.columnWidth,
     avoidFieldSet: node.avoidFieldSet,
   }),
-  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityBaseProps(dn, ctx, { showMove: false, filterRows: true })}
+  render: (dn, ctx) => (<EntityCheckboxList {...NodeUtils.getEntityListBaseProps(dn, ctx, { showMove: false, filterRows: true })}
     columnCount={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnCount, NodeUtils.isNumberOrNull)}
     columnWidth={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.columnWidth, NodeUtils.isNumberOrNull)}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
@@ -1017,7 +1017,7 @@ NodeUtils.register<EntityListNode>({
   validate: (dn, ctx) => NodeUtils.validateEntityBase(dn, ctx),
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityList", cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true })),
-  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })} />),
+  render: (dn, ctx) => (<EntityList {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })} />),
   renderDesigner: dn => NodeUtils.designEntityBase(dn, { findMany: true, showMove: true, filterRows: true })
 });
 
@@ -1044,7 +1044,7 @@ NodeUtils.register<EntityStripNode>({
     vertical: node.vertical,
   }),
   render: (dn, ctx) => (<EntityStrip
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { showAutoComplete: true, findMany: true, showMove: true, filterRows: true })}
     iconStart={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.iconStart, NodeUtils.isBooleanOrNull)}
     vertical={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.vertical, NodeUtils.isBooleanOrNull)}
   />),
@@ -1073,7 +1073,7 @@ NodeUtils.register<EntityRepeaterNode>({
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
   />),
   renderDesigner: dn =>
@@ -1099,7 +1099,7 @@ NodeUtils.register<EntityTabRepeaterNode>({
   renderTreeNode: NodeUtils.treeNodeKindField,
   renderCode: (node, cc) => cc.elementCode("EntityTabRepeater", { ...cc.getEntityBasePropsEx(node, { findMany: true, showMove: true, filterRows: true }), avoidFieldSet: node.avoidFieldSet }),
   render: (dn, ctx) => (<EntityTabRepeater
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)} />),
   renderDesigner: dn =>
     <div>
@@ -1135,7 +1135,7 @@ NodeUtils.register<EntityTableNode>({
   render: (dn, ctx) => (<EntityTable
     columns={dn.node.children.length == 0 ? undefined : dn.node.children.filter(c => (c.visible == undefined || NodeUtils.evaluateAndValidate(dn, ctx, c, n => n.visible, NodeUtils.isBooleanOrNull)) &&
       NodeUtils.validate(dn.createChild(c), ctx) == null).map(col => NodeUtils.render(dn.createChild(col as EntityTableColumnNode), ctx) as any)}
-    {...NodeUtils.getEntityBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
+    {...NodeUtils.getEntityListBaseProps(dn, ctx, { findMany: true, showMove: true, avoidGetComponent: true, filterRows: true })}
     avoidFieldSet={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.avoidFieldSet, NodeUtils.isBooleanOrNull)}
     scrollable={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.scrollable, NodeUtils.isBooleanOrNull)}
     maxResultsHeight={NodeUtils.evaluateAndValidate(dn, ctx, dn.node, n => n.maxResultsHeight, NodeUtils.isNumberOrStringOrNull)}
@@ -1195,7 +1195,7 @@ export interface SearchControlNode extends BaseNode {
   searchOnLoad?: ExpressionOrValue<boolean>;
   showContextMenu?: Expression<(fop: FindOptionsParsed) => boolean | "Basic">;
   extraButtons?: Expression<(searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[]>;
-  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | Navigator.ViewPromise<ModifiableEntity>)>;
+  viewName?: ExpressionOrValue<string | ((mod: ModifiableEntity) => string | ViewPromise<ModifiableEntity>)>;
   showHeader?: ExpressionOrValue<boolean>;
   showFilters?: ExpressionOrValue<boolean>;
   showFilterButton?: ExpressionOrValue<boolean>;

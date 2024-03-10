@@ -2,12 +2,12 @@ import * as React from 'react'
 import { Location } from 'react-router'
 import { IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Basics'
 import { ToolbarResponse } from './ToolbarClient'
 import { ToolbarConfig, IconColor } from "./ToolbarConfig"
 import { SearchValue, FindOptions } from '@framework/Search';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { useAPI, useInterval } from '@framework/Hooks'
 import { classes } from '@framework/Globals'
 import { ShowCount } from './Signum.Toolbar'

@@ -1,10 +1,9 @@
 import * as React from 'react'
-import * as Finder from '../Finder'
-import { CellFormatter, EntityFormatter } from '../Finder'
+import { Finder } from '../Finder'
 import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionParsed, FilterOption, QueryDescription, QueryRequest } from '../FindOptions'
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
@@ -20,13 +19,13 @@ export interface SimpleFilterBuilderProps {
 
 export interface SearchControlProps {
   findOptions: FindOptions;
-  formatters?: { [token: string]: CellFormatter };
+  formatters?: { [token: string]: Finder.CellFormatter };
   rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
-  entityFormatter?: EntityFormatter;
-  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement<any> | undefined;
+  entityFormatter?: Finder.EntityFormatter;
+  selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
 
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
-  getViewPromise?: (e: any /*Entity*/) => undefined | string | Navigator.ViewPromise<any /*Entity*/>;
+  getViewPromise?: (e: any /*Entity*/) => undefined | string | ViewPromise<any /*Entity*/>;
   maxResultsHeight?: Property.MaxHeight<string | number> | any;
   tag?: string | {};
   searchOnLoad?: boolean;
@@ -58,7 +57,7 @@ export interface SearchControlProps {
   deps?: React.DependencyList;
   extraOptions?: any;
   enableAutoFocus?: boolean;
-  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement<any> | undefined;
+  simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
   onSelectionChanged?: (rows: ResultRow[]) => void;

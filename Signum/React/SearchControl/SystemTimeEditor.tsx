@@ -1,6 +1,6 @@
 import { DateTime } from 'luxon'
 import * as React from 'react'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription } from '../FindOptions'
 import { SystemTimeJoinMode, SystemTimeMode } from '../Signum.DynamicQuery'
@@ -147,7 +147,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps){
     var utcDate = systemTime[field]
 
     var m = utcDate == null ? null : DateTime.fromISO(utcDate);
-    var luxonFormat = toLuxonFormat("o", "DateTime");
+    var luxonFormat = toLuxonFormat("G", "DateTime");
     return (
       <div className="rw-widget-sm ms-1" style={{ width: "230px" }}>
         <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}

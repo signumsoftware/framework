@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { AutoLine, EntityLine, TextAreaLine, TypeContext } from '@framework/Lines'
 import { PropertyRoute, Binding } from '@framework/Reflection'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
 import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
@@ -19,11 +19,11 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
 
 
   const [response, setResponse] = React.useState<DynamicTypeConditionTestResponse | undefined>(undefined);
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const forceUpdate = useForceUpdate();
 
   function handleEntityTypeChange() {
-    exampleEntityRef.current = undefined;
+    exampleEntityRef.current = null;
     setResponse(undefined);
     handleCodeChange("");
   }
@@ -102,7 +102,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, e => e.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, e => e.current));
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={handleEvaluate}

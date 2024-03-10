@@ -1,17 +1,17 @@
 import * as React from 'react'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import { TypeContext, EntityFrame } from '../TypeContext'
 import { PropertyRoute, getTypeInfo, ReadonlyBinding, tryGetTypeInfo } from '../Reflection'
 import { ModifiableEntity, Lite, Entity, isLite, isModifiableEntity } from '../Signum.Entities'
-import { ViewPromise, useFetchAndRemember } from "../Navigator";
 import { ErrorBoundary } from '../Components';
 import { useAPI, useForceUpdate } from '../Hooks'
 import { FunctionalAdapter } from '../Modals'
+import { AsEntity } from './EntityBase'
 
-export interface RenderEntityProps {
-  ctx: TypeContext<ModifiableEntity | Lite<Entity> | undefined | null>;
-  getComponent?: (ctx: TypeContext<any /*T*/>) => React.ReactElement<any>;
-  getViewPromise?: (e: any /*T*/) => undefined | string | Navigator.ViewPromise<any>;
+export interface RenderEntityProps<V extends ModifiableEntity | Lite<Entity> | null> {
+  ctx: TypeContext<V>;
+  getComponent?: (ctx: TypeContext<AsEntity<V>>) => React.ReactElement;
+  getViewPromise?: (e: AsEntity<V>) => undefined | string | ViewPromise<AsEntity<V>>;
   onRefresh?: () => void;
   onEntityLoaded?: () => void;
   extraProps?: any;
@@ -19,21 +19,21 @@ export interface RenderEntityProps {
   previousDate?: string;
 }
 
-interface FuncBox {
-  func: ((ctx: TypeContext<any /*T*/>) => React.ReactElement<any>);
-  lastEntity: ModifiableEntity;
+interface FuncBox<V  extends ModifiableEntity> {
+  func: ((ctx: TypeContext<V>) => React.ReactElement);
+  lastEntity: V;
 }
 
-export function RenderEntity(p: RenderEntityProps) {
+export function RenderEntity<V extends ModifiableEntity | Lite<Entity> | null>(p: RenderEntityProps<V>) {
 
   var e = p.ctx.value
 
-  useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
-  var entity = isLite(e) ? e.entity : e;
+  Navigator.useFetchAndRemember(isLite(e) && p.ctx.propertyRoute != null ? e : null, p.onEntityLoaded);
+  var entity = (isLite(e) ? e.entity : e) as AsEntity<V>;
   var entityComponent = React.useRef<React.Component | null>(null);
   var forceUpdate = useForceUpdate();
 
-  var componentBox = useAPI<FuncBox | "useGetComponent" | null>(() => {
+  var componentBox = useAPI<FuncBox<AsEntity<V>> | "useGetComponent" | null>(() => {
     if (p.ctx.propertyRoute == null)
       return Promise.resolve(null);
 
@@ -45,7 +45,7 @@ export function RenderEntity(p: RenderEntityProps) {
 
     var vp = p.getViewPromise && p.getViewPromise(entity);
     var viewPromise = vp == undefined || typeof vp == "string" ? Navigator.getViewPromise(entity, vp) : vp;
-    return viewPromise.promise.then(p => ({ func: p, lastEntity : entity! }));
+    return viewPromise.promise.then(p => ({ func: p, lastEntity: entity! }) as FuncBox<AsEntity<V>>);
   }, [entity, p.getComponent == null, p.getViewPromise && entity && toViewName(p.getViewPromise(entity))], { avoidReset: true });
 
   if (p.ctx.propertyRoute == null)
@@ -95,7 +95,7 @@ export function RenderEntity(p: RenderEntityProps) {
   }
 
 
-  const newCtx = new TypeContext<ModifiableEntity>(ctx, { frame }, pr, new ReadonlyBinding(lastEntity, ""), prefix);
+  const newCtx = new TypeContext<AsEntity<V>>(ctx, { frame }, pr, new ReadonlyBinding(lastEntity, ""), prefix);
   if (ctx.previousVersion && ctx.previousVersion.value)
     newCtx.previousVersion = { value: ctx.previousVersion.value as any };
   var element = componentBox == "useGetComponent" ? p.getComponent!(newCtx) : componentBox.func(newCtx);
@@ -113,6 +113,6 @@ export function RenderEntity(p: RenderEntityProps) {
 }
 
 const Anonymous = "__Anonymous__";
-function toViewName(result: undefined | string | Navigator.ViewPromise<ModifiableEntity>): string | undefined {
+function toViewName(result: undefined | string | ViewPromise<any>): string | undefined {
   return (result instanceof ViewPromise ? Anonymous : result);
 }

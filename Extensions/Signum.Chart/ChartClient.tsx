@@ -2,10 +2,10 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { DateTime } from 'luxon'
 import { ajaxGet } from '@framework/Services';
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import * as Finder from '@framework/Finder'
-import * as Constructor from '@framework/Constructor'
+import { Finder } from '@framework/Finder'
+import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
@@ -20,7 +20,6 @@ import { ImportComponent } from '@framework/ImportComponent'
 import { ColumnRequest } from '@framework/FindOptions';
 import { toLuxonFormat } from '@framework/Reflection';
 import { toNumberFormat } from '@framework/Reflection';
-import { toFilterRequests, toFilterOptions } from '@framework/Finder';
 import { QueryString } from '@framework/QueryString';
 import { MemoRepository } from './D3Scripts/Components/ReactChart';
 import { DashboardFilter } from '../Signum.Dashboard/View/DashboardFilterController';
@@ -527,7 +526,7 @@ export function defaultParameterValue(scriptParameter: ChartScriptParameter, rel
 export function cleanedChartRequest(request: ChartRequestModel): ChartRequestModel {
   const clone = { ...request };
   
-  clone.filters = toFilterRequests(clone.filterOptions);
+  clone.filters = Finder.toFilterRequests(clone.filterOptions);
   delete (clone as any).filterOptions;
 
   return clone;
@@ -592,7 +591,7 @@ export module Encoder {
       queryName: cr.queryKey,
       chartScript: cr.chartScript?.key.after(".") ?? undefined,
       maxRows: cr.maxRows,
-      filterOptions: toFilterOptions(cr.filterOptions),
+      filterOptions: Finder.toFilterOptions(cr.filterOptions),
       columnOptions: cr.columns.map(co => ({
         token: co.element.token && co.element.token.tokenString,
         displayName: co.element.displayName,
@@ -758,7 +757,7 @@ export module API {
     return {
       queryKey: request.queryKey,
       groupResults: hasAggregates(request),
-      filters: toFilterRequests(request.filterOptions),
+      filters: Finder.toFilterRequests(request.filterOptions),
       columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
       orders: request.columns.filter(mle => mle.element.orderByType != null && mle.element.token != null).orderBy(mle => mle.element.orderByIndex).map(mle => ({ token: mle.element.token!.token!.fullKey, orderType: mle.element.orderByType! }) as OrderRequest),
       pagination: request.maxRows == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: request.maxRows }

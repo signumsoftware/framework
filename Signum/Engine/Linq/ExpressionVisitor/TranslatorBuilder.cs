@@ -531,6 +531,9 @@ internal static class TranslatorBuilder
                             Expression.Call(miLiteCreateModelType, typeFromId, uid, Expression.Call(miGetDefaultModelType, typeFromId), NullId), 
                             lite.Type)));
 
+                if (lite.Models == null)
+                    return baseCase;
+
                 var result = lite.Models!.Aggregate((Expression)baseCase,
                     (acum, kvp) =>
                     {

@@ -1,10 +1,9 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { SearchControl, SearchValueLine } from '@framework/Search'
-import * as Finder from '@framework/Finder'
-import * as Constructor from '@framework/Constructor'
+import { Finder } from '@framework/Finder'
+import { Constructor } from '@framework/Constructor'
 import * as EvalClient from '../Signum.Eval/EvalClient'
 import { DynamicApiEntity, DynamicApiEval } from './Signum.Dynamic.Controllers'
 

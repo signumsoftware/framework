@@ -4,12 +4,11 @@ import { ModifiableEntity, EntityPack, is, SearchMessage, Lite, getToString, Ent
 import { ifError, softCast } from '@framework/Globals';
 import { ajaxPost, ajaxGet, ajaxGetRaw, saveFile, ServiceError } from '@framework/Services';
 import * as Services from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { tasks, LineBaseProps, LineBaseController } from '@framework/Lines/LineBase'
 import { EntityBaseController, FormGroup, TypeContext } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
 import { EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
@@ -225,7 +224,7 @@ export function queryIsFindable(queryKey: string, fullScreen: boolean) {
   return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
 }
 
-export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps>, state: LineBaseProps) {
+export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
   if (state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
 

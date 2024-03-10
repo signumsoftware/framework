@@ -1,10 +1,9 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Constructor from '@framework/Constructor';
+import { Constructor } from '@framework/Constructor';
 import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
-import * as Finder from '@framework/Finder'
+import { Navigator, EntitySettings } from '@framework/Navigator'
+import { Finder } from '@framework/Finder'
 import { Lite, toLite } from '@framework/Signum.Entities'
 import { EntityOperationSettings } from '@framework/Operations'
 import { symbolNiceName, toNumberFormat } from '@framework/Reflection'
@@ -21,7 +20,6 @@ import { QueryToken } from '@framework/FindOptions';
 import { ImportComponent } from '@framework/ImportComponent';
 import { TypeContext } from '@framework/Lines';
 import SelectorModal from '@framework/SelectorModal';
-import { CellFormatter } from '@framework/Finder';
 
 export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
@@ -29,15 +27,15 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
   Navigator.addSettings(new EntitySettings(PredictSimpleResultEntity, e => import('./Templates/PredictSimpleResult')));
 
-  function numbericCellFormatter(color: string) {
+  function numbericFinder.CellFormatter(color: string) {
     var numberFormat = toNumberFormat("0.000");
-    return new CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, false, "numeric-cell");
+    return new Finder.CellFormatter((cell: number) => cell == undefined ? "" : <span style={{ color: color }}>{numberFormat.format(cell)}</span>, false, "numeric-cell");
   }
 
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericCellFormatter("#1A5276"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyTraining), numbericCellFormatter("#5DADE2"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericCellFormatter("#7B241C"));
-  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossTraining), numbericFinder.CellFormatter("#1A5276"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyTraining), numbericFinder.CellFormatter("#5DADE2"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.lossValidation), numbericFinder.CellFormatter("#7B241C"));
+  Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericFinder.CellFormatter("#D98880"));
 
 
   QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadCsv.name, () => PredictorMessage.DownloadCsv.niceToString(), ctx => API.downloadCsvById(ctx.lite)));

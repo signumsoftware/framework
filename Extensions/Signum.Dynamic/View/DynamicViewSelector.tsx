@@ -5,7 +5,7 @@ import { Entity, JavascriptMessage, is, SaveChangesMessage } from '@framework/Si
 import { Binding, PropertyRoute } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import MessageModal from '@framework/Modals/MessageModal'
@@ -20,7 +20,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   const forceUpdate = useForceUpdate();
   const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);
 
-  const exampleEntityRef = React.useRef<Entity | undefined>(undefined);
+  const exampleEntityRef = React.useRef<Entity | null>(null);
   const scriptChangedRef = React.useRef(false);
 
   const [syntaxError, setSyntaxError] = React.useState<string | undefined>(undefined);
@@ -77,7 +77,7 @@ export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<Dynam
   }
 
   function renderExampleEntity(typeName: string) {
-    const exampleCtx = new TypeContext<Entity | undefined>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
+    const exampleCtx = new TypeContext<Entity | null>(undefined, undefined, PropertyRoute.root(typeName), Binding.create(exampleEntityRef, s => s.current));
 
     return (
       <EntityLine ctx={exampleCtx} create={true} find={true} remove={true} view={true} onView={handleOnView} onChange={() => evaluateTest()}

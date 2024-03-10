@@ -3,6 +3,7 @@ using Signum.Authorization;
 using Signum.Authorization.Rules;
 using Signum.Dashboard;
 using Signum.DynamicQuery.Tokens;
+using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Omnibox;
 using Signum.Toolbar;
@@ -12,6 +13,7 @@ using Signum.UserAssets.QueryTokens;
 using Signum.ViewLog;
 using System.Collections.Frozen;
 using System.Linq.Expressions;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.UserQueries;
 
@@ -161,7 +163,8 @@ public static class UserQueryLogic
             Filters = userQuery.Filters.ToFilterList(),
             Columns = MergeColumns(userQuery, ignoreHidden),
             Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
-            Pagination = userQuery.GetPagination() ?? new Pagination.All()
+            Pagination = userQuery.GetPagination() ?? new Pagination.All(),
+            SystemTime = userQuery.SystemTime?.GetSystemTime()
         };
 
         return qr;
@@ -185,7 +188,8 @@ public static class UserQueryLogic
             Columns = new List<Column> { new Column(valueToken, null) },
             Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
 
-            Pagination = userQuery.GetPagination() ?? new Pagination.All()
+            Pagination = userQuery.GetPagination() ?? new Pagination.All(),
+            SystemTime = userQuery.SystemTime?.GetSystemTime()
         };
 
         return qr;
@@ -486,6 +490,40 @@ public static class UserQueryLogic
                 if (uq.ShouldHaveElements && !uq.ElementsPerPage.HasValue)
                     uq.ElementsPerPage = 20;
 
+                if(uq.SystemTime != null)
+                {
+                    if (uq.SystemTime.Mode is not (SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.AsOf))
+                        uq.SystemTime.StartDate = null;
+                    else
+                    {
+                    retry:
+                        var date = uq.SystemTime.StartDate;
+                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: uq.SystemTime.StartDate = date; goto retry;
+                        }
+                    }
+
+                    if (uq.SystemTime.Mode is not (SystemTimeMode.Between or SystemTimeMode.ContainedIn))
+                        uq.SystemTime.EndDate = null;
+                    else
+                    {
+                    retry:
+                        var date = uq.SystemTime.EndDate;
+                        switch (QueryTokenSynchronizer.FixValue(new Replacements(), typeof(DateTime), ref date, allowRemoveToken: false, isList: false, null))
+                        {
+                            case FixTokenResult.Nothing: break;
+                            case FixTokenResult.DeleteEntity: return table.DeleteSqlSync(uq, u => u.Guid == uq.Guid);
+                            case FixTokenResult.SkipEntity: return null;
+                            case FixTokenResult.Fix: uq.SystemTime.EndDate = date; goto retry;
+                        }
+                    }
+
+                }
+
                 using (replacements.WithReplacedDatabaseName())
                     return table.UpdateSqlSync(uq, u => u.Guid == uq.Guid && u.Ticks == uq.Ticks, includeCollections: true)?.TransactionBlock($"UserQuery Guid = {uq.Guid} Ticks = {uq.Ticks} ({uq})");
             }
@@ -495,4 +533,6 @@ public static class UserQueryLogic
             return new SqlPreCommandSimple("-- Exception on {0}\r\n{1}".FormatWith(uq.BaseToString(), e.Message.Indent(2, '-')));
         }
     }
+
+
 }

@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as QuickLinks from '@framework/QuickLinks'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ajaxGet, ajaxPost } from '@framework/Services'

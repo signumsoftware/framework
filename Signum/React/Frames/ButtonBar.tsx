@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { IRenderButtons, ButtonsContext, ButtonBarElement } from '../TypeContext'
 import { namespace } from 'd3';
 import { FunctionalAdapter } from '../Modals';

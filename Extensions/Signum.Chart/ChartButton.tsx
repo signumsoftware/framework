@@ -2,12 +2,12 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroup } from '@framework/FindOptions'
 import * as AppContext from '@framework/AppContext'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Chart'
 import * as ChartClient from './ChartClient'
 import { Button } from 'react-bootstrap'
-import * as Finder from '@framework//Finder';
+import { Finder } from '@framework//Finder';
 
 export interface ChartButtonProps {
   searchControl: SearchControlLoaded;

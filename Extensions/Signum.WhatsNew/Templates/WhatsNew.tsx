@@ -1,7 +1,7 @@
 import * as React from 'react'
-import * as Finder from '@framework/Finder';
-import * as Constructor from '@framework/Constructor';
-import * as Navigator from '@framework/Navigator';
+import { Finder } from '@framework/Finder';
+import { Constructor } from '@framework/Constructor';
+import { Navigator } from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as WhatsNewClient from '../WhatsNewClient';
 import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.WhatsNew';
@@ -13,6 +13,7 @@ import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { PermissionSymbol, QueryEntity, TypeEntity } from '@framework/Signum.Basics';
 import { OperationSymbol } from '@framework/Signum.Operations';
+import { Entity } from '../../../Signum/React/Signum.Entities';
 
 export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
   const ctx = p.ctx;
@@ -40,9 +41,9 @@ export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
       <FileLine ctx={ctx.subCtx(w => w.previewPicture)} mandatory />
       <EntityLine ctx={ctx.subCtx(w => w.related)}
         onFind={() => selectContentType(ti => Navigator.isFindable(ti)).then(ti => ti && Finder.find({ queryName: ti.name }))}
-        onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name))}
+        onCreate={() => selectContentType(ti => Navigator.isCreable(ti)).then(ti => ti && Constructor.construct(ti.name) as Promise<Entity | undefined>)}
       />
-      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={(ctx: TypeContext<WhatsNewMessageEmbedded>) =>
+      <EntityTabRepeater ctx={ctx.subCtx(w => w.messages)} onChange={() => forceUpdate()} getComponent={ctx =>
         <WhatsNewMessageComponent ctx={ctx} invalidate={() => forceUpdate} />} />
     </div>
   );

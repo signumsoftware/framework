@@ -3,7 +3,7 @@ import { OmniboxMessage } from './Signum.Omnibox'
 import { OmniboxResult, OmniboxMatch } from './OmniboxClient'
 import { OmniboxProvider } from "./OmniboxProvider"
 import { QueryToken, FilterOperation, FindOptions } from '@framework/FindOptions'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 
 const UNKNOWN = "??UNKNOWN??";
 
