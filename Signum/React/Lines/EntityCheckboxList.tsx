@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Finder from '../Finder'
+import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { mlistItemContext, TypeContext } from '../TypeContext'
 import { MListElementBinding, ReadonlyBinding, TypeReference } from '../Reflection'
@@ -10,7 +10,7 @@ import { EntityListBaseController, EntityListBaseProps } from './EntityListBase'
 import { genericForwardRef, useController } from './LineBase'
 import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
-import { renderLite } from '../Navigator'
+import { Navigator } from '../Navigator'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
 import { getEntityOperationButtons } from '../Operations/EntityOperations'
 import { GroupHeader, HeaderType } from './GroupHeader'
@@ -265,7 +265,7 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
             name={liteKey(row.entity!)}
             onChange={e => c.handleOnChange(e, row.entity!)} />
           &nbsp;
-          {p.onRenderItem ? p.onRenderItem(ric) : <span>{renderLite(row.entity!)}</span>}
+          {p.onRenderItem ? p.onRenderItem(ric) : <span>{Navigator.renderLite(row.entity!)}</span>}
         </label>
       );
     }

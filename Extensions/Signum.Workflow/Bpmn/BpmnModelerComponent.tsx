@@ -3,7 +3,7 @@ import * as React from 'react'
 import { WorkflowActivityModel, WorkflowPoolModel, WorkflowLaneModel, WorkflowConnectionModel, WorkflowEventModel, WorkflowEntity, IWorkflowNodeEntity, WorkflowMessage, WorkflowEventTaskModel, WorkflowTimerEmbedded, WorkflowGatewayModel, ButtonOptionEmbedded, ActivityWithRemarks, WorkflowEntitiesDictionary, TimeSpanEmbedded } from '../Signum.Workflow'
 import Modeler from "bpmn-js/lib/Modeler"
 import { ModelEntity, parseLite } from '@framework/Signum.Entities'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as connectionIcons from './ConnectionIcons'
 import * as customRenderer from './CustomRenderer'
 import * as customPopupMenu from './CustomPopupMenu'

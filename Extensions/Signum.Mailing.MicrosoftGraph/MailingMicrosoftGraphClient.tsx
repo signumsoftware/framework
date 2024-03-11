@@ -1,7 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as Navigator from '@framework/Navigator'
-import { EntitySettings } from '@framework/Navigator';
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { MicrosoftGraphEmailServiceEntity } from './Signum.Mailing.MicrosoftGraph';
 import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
 

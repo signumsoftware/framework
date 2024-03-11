@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
 import { useAPI } from '@framework/Hooks'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { getTypeInfo } from '@framework/Reflection'
 import { getToString, is } from '@framework/Signum.Entities'
 import * as React from 'react'

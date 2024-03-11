@@ -1,5 +1,5 @@
 import { Location } from 'react-router'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { ToolbarResponse } from '../../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../../Signum.Toolbar/ToolbarConfig'
 import * as UserChartClient from '../UserChart/UserChartClient'

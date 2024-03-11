@@ -1,7 +1,6 @@
 import { RouteObject } from 'react-router'
 import { ajaxGet } from '@framework/Services';
-import { EntitySettings } from '@framework/Navigator'
-import * as Navigator from '@framework/Navigator'
+import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import * as AuthAdminClient from '../Signum.Authorization/AuthAdminClient'

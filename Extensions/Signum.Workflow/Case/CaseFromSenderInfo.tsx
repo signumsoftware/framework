@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { JavascriptMessage, is, getToString } from '@framework/Signum.Entities'
 import { CaseActivityEntity, CaseActivityMessage } from '../Signum.Workflow'
-import { useFetchInState } from '@framework/Navigator'
 
 interface CaseFromSenderInfoProps {
   current: CaseActivityEntity;
@@ -15,7 +14,7 @@ interface CaseFromSenderInfoState {
 
 export default function CaseFromSenderInfo(p: CaseFromSenderInfoProps) {
 
-  const prev = useFetchInState(p.current.previous);
+  const prev = Navigator.useFetchInState(p.current.previous);
 
   const c = p.current;
 

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
-import * as Finder from '../Finder';
+import { Finder } from '../Finder';
 import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'

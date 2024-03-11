@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as Operations from '@framework/Operations'
 import { useRootClose } from '@restart/ui'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'
 import { Toast, Button, ButtonGroup } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPI, useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as WhatsNewClient from '../WhatsNewClient'
 import "./WhatsNewDropdown.css"

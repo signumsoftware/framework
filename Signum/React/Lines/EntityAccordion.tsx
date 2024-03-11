@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator, ViewPromise } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, getToString, isLite } from '../Signum.Entities'
 import { EntityBaseController } from './EntityBase'
@@ -135,7 +135,7 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
               drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
               itemExtraButtons={p.itemExtraButtons ? (() => p.itemExtraButtons!(mlec, c)) : undefined}
               getComponent={p.getComponent as (ctx: TypeContext<V>) => React.ReactElement}
-              getViewPromise={p.getViewPromise as (entity: V) => undefined | string | Navigator.ViewPromise<V>}
+              getViewPromise={p.getViewPromise as (entity: V) => undefined | string | ViewPromise<V>}
               getTitle={p.getTitle}
               htmlAttributes={p.itemHtmlAttributes?.(mlec, c)}
               headerHtmlAttributes={p.headerHtmlAttributes?.(mlec, c)}
@@ -159,7 +159,7 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
 export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   ctx: TypeContext<V>;
   getComponent?: (ctx: TypeContext<V>) => React.ReactElement;
-  getViewPromise?: (entity: V) => undefined | string | Navigator.ViewPromise<V>;
+  getViewPromise?: (entity: V) => undefined | string | ViewPromise<V>;
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
   onRemove?: (event: React.MouseEvent<any>) => void;
   move?: MoveConfig;

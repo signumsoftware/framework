@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
 import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail } from '@framework/Lines'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'

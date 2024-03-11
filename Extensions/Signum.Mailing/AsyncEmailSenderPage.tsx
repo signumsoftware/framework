@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
 import { useLocation, useParams } from 'react-router'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { API, AsyncEmailSenderState } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Mailing'

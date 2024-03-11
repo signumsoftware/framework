@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, classes } from '@framework/Globals'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import * as Operations from '@framework/Operations'
 import { getToString, Lite, newMListElement } from '@framework/Signum.Entities'
 import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation, CaseMessage } from '../Signum.Workflow'

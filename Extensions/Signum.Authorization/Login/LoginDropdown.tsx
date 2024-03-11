@@ -34,9 +34,9 @@ export default function LoginDropdown(p: {
 
   function handleProfileClick() {
     import("@framework/Navigator")
-      .then(Navigator =>
-        Navigator.API.fetchEntityPack(toLite(user))
-          .then(pack => Navigator.view(pack))
+      .then(file =>
+        file.Navigator.API.fetchEntityPack(toLite(user))
+          .then(pack => file.Navigator.view(pack))
           .then(u => u && AuthClient.API.fetchCurrentUser(true).then(nu => AuthClient.setCurrentUser(u))));
   }
 

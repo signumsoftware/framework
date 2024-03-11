@@ -7,7 +7,7 @@ import { SearchControl, SearchValue, SearchValueController } from '@framework/Se
 import * as UserQueryClient from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'

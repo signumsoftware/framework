@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes } from '@framework/Globals'
-import * as Constructor from '@framework/Constructor'
+import { Constructor } from '@framework/Constructor'
 import { ButtonBarElement, TypeContext } from '@framework/TypeContext'
 import { Type, getSymbol } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'

@@ -1,12 +1,12 @@
 import * as React from 'react'
 import * as Operations from '@framework/Operations'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import { Entity, getToString, is, JavascriptMessage, liteKey, parseLite, toLite } from '@framework/Signum.Entities'
 import { Toast } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@framework/Hooks';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AlertsClient from './AlertsClient'
 import "./AlertDropdown.css"

@@ -13,7 +13,7 @@ import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValueLine } from '@framework/Search';
-import * as Navigator from '@framework/Navigator';
+import { Navigator } from '@framework/Navigator';
 import { classes } from '@framework/Globals';
 import { OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';

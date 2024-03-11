@@ -4,7 +4,7 @@ import { configurations } from "./FileDownloader";
 import { Entity, isLite, isModifiableEntity, Lite, ModifiableEntity } from '@framework/Signum.Entities';
 import * as Services from '@framework/Services'
 import { PropertyRoute } from '@framework/Lines';
-import { useFetchInState } from '@framework/Navigator';
+import {  } from '@framework/Navigator';
 
 interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file?: IFile & ModifiableEntity | Lite<IFile & Entity> | null;

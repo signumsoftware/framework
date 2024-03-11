@@ -13,7 +13,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
-import * as Navigator from '@framework/Navigator'
+import { Navigator } from '@framework/Navigator'
 
 export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }) {
 

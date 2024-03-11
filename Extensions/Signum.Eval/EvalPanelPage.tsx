@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
-import * as Finder from '@framework/Finder'
+import { Finder } from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
 import { SearchValue, FindOptions, SearchValueLine } from '@framework/Search'
@@ -15,7 +15,6 @@ import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
-import { toFilterRequests } from '@framework/Finder';
 import "./EvalPanelPage.css"
 import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
@@ -129,7 +128,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
       .then(fop => {
         var request = {
           queryKey: fop.queryKey,
-          filters: toFilterRequests(fop.filterOptions),
+          filters: Finder.toFilterRequests(fop.filterOptions),
           orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
           count: 10000,
         } as QueryEntitiesRequest;

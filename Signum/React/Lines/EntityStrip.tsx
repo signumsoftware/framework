@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { classes, Dic } from '../Globals'
-import * as Navigator from '../Navigator'
+import { Navigator } from '../Navigator'
 import { TypeContext } from '../TypeContext'
 import { FormGroup } from '../Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, EntityControlMessage, toLite, is, liteKey, getToString, isEntity, isLite, parseLiteList } from '../Signum.Entities'
