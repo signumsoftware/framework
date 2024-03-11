@@ -185,19 +185,15 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
   }
 
 
-  if (coc.operationInfo.operationType == "Delete") {
+  if (defaultHasConfirmMessage(coc)) {
     return getDefaultConfirmMessage(coc);
   }
 
-  if (ContextualOperationContext.fallbackConfirmMessage) {
-    var result = ContextualOperationContext.fallbackConfirmMessage(coc);
-    if (result == true)
-      return getDefaultConfirmMessage(coc);
-    else
-      return result;
-  }
-
   return undefined;
+}
+
+function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
+  return coc.operationInfo.operationType == "Delete" || coc.context.lites.length > 1;
 }
 
 function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {

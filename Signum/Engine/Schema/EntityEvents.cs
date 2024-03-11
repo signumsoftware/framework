@@ -136,8 +136,7 @@ public class EntityEvents<T> : IEntityEvents
 
         AlternativeRetrieve(id, args);
 
-
-        if (args.AvoidAlternativeRetrieve)
+        if (args.SkipAlternativeRetrieve)
             return null;
 
         if (args.Entity == null)
@@ -151,8 +150,6 @@ public class EntityEvents<T> : IEntityEvents
         }
 
         return (Entity)args.Entity;
-
-
     }
 
 
@@ -387,7 +384,7 @@ public class FilterQueryArgs
 public class AlternativeRetrieveArgs<T> where T : Entity
 {
     public bool AvoidAccesVerify { get; set; }
-    public bool AvoidAlternativeRetrieve { get; set; }
+    public bool SkipAlternativeRetrieve { get; set; }
     public T? Entity { get; set; }
 }
 
