@@ -25,7 +25,7 @@ export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3Emai
           <AutoLine ctx={sc.subCtx(s => s.username)} />
         </div>
         <div className="col-sm-auto">
-          <AutoLine ctx={sc.subCtx(s => s.password)} valueLineType="Password" />
+          <AutoLine ctx={sc.subCtx(s => s.password)} />
         </div>
       </div>
       
