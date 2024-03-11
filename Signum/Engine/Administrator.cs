@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
@@ -16,9 +17,11 @@ public static class Administrator
 {
     public static Func<bool>? OnTotalGeneration;
 
-    public static void TotalGeneration()
+    public static Func<DatabaseName, bool, bool> DeleteOtherDatabase = (db, interactive) => interactive && SafeConsole.Ask($"Delete {db} as well?");
+
+    public static void TotalGeneration(bool interactive = true)
     {
-        CleanAllDatabases();
+        CleanAllDatabases(interactive);
 
         ExecuteGenerationScript();
     }
@@ -38,13 +41,13 @@ public static class Administrator
         }
     }
 
-    private static void CleanAllDatabases()
+    private static void CleanAllDatabases(bool interactive = true)
     {
         using (Connector.CommandTimeoutScope(TimeoutCreateDatabase))
         {
             foreach (var db in Schema.Current.DatabaseNames())
             {
-                if (db == null || SafeConsole.Ask($"Delete {db} as well?"))
+                if (db == null || Administrator.DeleteOtherDatabase.Invoke(db, interactive))
                 {
                     Connector.Current.CleanDatabase(db);
                     SafeConsole.WriteColor(ConsoleColor.DarkGray, '.');
