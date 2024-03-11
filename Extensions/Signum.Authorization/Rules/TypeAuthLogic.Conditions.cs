@@ -182,7 +182,7 @@ public static partial class TypeAuthLogic
         return miIsAllowedForEntity.GetInvoker(ident.GetType()).Invoke(ident, allowed, inUserInterface, args);
     }
 
-    static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, FilterQueryArgs, bool>> miIsAllowedForEntity
+    public static GenericInvoker<Func<IEntity, TypeAllowedBasic, bool, FilterQueryArgs, bool>> miIsAllowedForEntity
         = new((ie, tab, ec, args) => IsAllowedFor<Entity>((Entity)ie, tab, ec, args));
     [MethodExpander(typeof(IsAllowedForExpander))]
     static bool IsAllowedFor<T>(this T entity, TypeAllowedBasic allowed, bool inUserInterface, FilterQueryArgs args)
@@ -253,7 +253,7 @@ public static partial class TypeAuthLogic
             return ((Lite<T>)lite).InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
     }
 
-    class IsAllowedForExpander : IMethodExpander
+    public class IsAllowedForExpander : IMethodExpander
     {
         public Expression Expand(Expression? instance, Expression[] arguments, MethodInfo mi)
         {

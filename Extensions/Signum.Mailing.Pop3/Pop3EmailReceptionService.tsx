@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityRepeater } from '@framework/Lines'
+import { AutoLine, EntityRepeater, PasswordLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3';
 
@@ -25,7 +25,7 @@ export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3Emai
           <AutoLine ctx={sc.subCtx(s => s.username)} />
         </div>
         <div className="col-sm-auto">
-          <AutoLine ctx={sc.subCtx(s => s.password)} valueLineType="Password" />
+          <PasswordLine ctx={sc.subCtx(s => s.password)} />
         </div>
       </div>
       

@@ -28,7 +28,7 @@ public static class MusicStarter
 
             Start(connectionString);
 
-            Administrator.TotalGeneration();
+            Administrator.TotalGeneration(interactive: false);
 
             Schema.Current.Initialize();
 

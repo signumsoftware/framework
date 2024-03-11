@@ -5,7 +5,7 @@ import { globalModules } from './View/GlobalModules'
 import { ajaxGet } from '@framework/Services';
 import * as Search from '@framework/Search'
 import { SearchValueLine } from '@framework/Search'
-import { Navigator, EntitySettings, ViewPromise } from '@framework/Navigator'
+import { Navigator, EntitySettings, ViewPromise, ViewOverride } from '@framework/Navigator'
 import { EntityOperationSettings } from '@framework/Operations'
 import * as Operations from '@framework/Operations'
 import { TypeContext } from '@framework/TypeContext'
@@ -116,7 +116,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
   }
 
 
-  getViewOverrides(typeName: string, viewName?: string): Promise<Navigator.ViewOverride<ModifiableEntity>[]> {
+  getViewOverrides(typeName: string, viewName?: string): Promise<ViewOverride<ModifiableEntity>[]> {
     const es = Navigator.getSettings(typeName);
     var staticViewOverrides = es?.viewOverrides?.filter(a => a.viewName == viewName) || [];
 
@@ -128,7 +128,7 @@ export class DynamicViewViewDispatcher implements Navigator.ViewDispatcher {
       ...dvos.filter(dvo => dvo.entity.viewName == viewName).map(dvo => ({
         override: dvo.override,
         viewName: dvo.entity.viewName
-      } as Navigator.ViewOverride<ModifiableEntity>))
+      } as ViewOverride<ModifiableEntity>))
     ])
   }
 

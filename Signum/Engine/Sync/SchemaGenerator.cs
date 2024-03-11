@@ -86,7 +86,7 @@ public static class SchemaGenerator
             var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
             var historyIndices = t.SystemVersioned == null ? null :
-                     allIndexes.Where(a => a.GetType() == typeof(TableIndex)).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
+                     allIndexes.Where(a => a.GetType() == typeof(TableIndex) && !a.Unique).Select(mix => sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true)).Combine(Spacing.Simple);
 
             return SqlPreCommand.Combine(Spacing.Double, mainIndices, historyIndices);
 
