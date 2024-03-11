@@ -5,7 +5,7 @@ import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
 import * as DynamicViewClient from '../DynamicViewClient'
-import { Navigator } from '@framework/Navigator'
+import { Navigator, ViewPromise } from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
 import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
@@ -323,7 +323,7 @@ export function RenderWithReplacements(p: RenderWithReplacementsProps) {
       return p.componentType;
     }
     else
-      return Navigator.surroundFunctionComponent((p.componentType as React.FunctionComponent<{ ctx: TypeContext<Entity> }>), [{ override: vo }]);
+      return ViewPromise.surroundFunctionComponent((p.componentType as React.FunctionComponent<{ ctx: TypeContext<Entity> }>), [{ override: vo }]);
   }
 
   var frame = { refreshCount: 0 } as EntityFrame;
