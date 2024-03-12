@@ -1,7 +1,6 @@
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
 import * as QuickLinks from '@framework/QuickLinks'
 import { getQueryKey } from '@framework/Reflection'

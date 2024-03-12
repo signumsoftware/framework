@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, softCast } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import * as CultureClient from '@framework/Basics/CultureClient'
 import { API, TypeInstancesChanges, TranslationRecord, PropertyChange } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
@@ -67,7 +67,7 @@ export default function TranslatedInstanceSync() {
     }).notNull());
 
     lock(() => API.saveTranslatedInstanceData(records, type, true, culture)
-      .then(() => { reloadResult(); notifySuccess(); }));
+      .then(() => { reloadResult(); Operations.notifySuccess(); }));
   }
 
   const message = result && result.totalInstances == 0 ? TranslationMessage._0AlreadySynchronized.niceToString(getTypeInfo(type).niceName) :

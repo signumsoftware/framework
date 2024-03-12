@@ -9,7 +9,7 @@ import { BsSize } from '../Components';
 import { Modal } from 'react-bootstrap';
 import { getTypeInfo, OperationInfo, tryGetTypeInfo, TypeInfo } from '../Reflection';
 import { ButtonsContext, EntityFrame } from '../TypeContext';
-import { EntityOperationContext, operationInfos } from '../Operations';
+import { Operations, EntityOperationContext } from '../Operations';
 import { PropertyRoute } from '../Lines';
 import { OperationButton } from '../Operations/EntityOperations';
 

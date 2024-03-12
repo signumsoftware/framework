@@ -2,7 +2,7 @@ import * as React from 'react'
 import { getTypeInfo, tryGetOperationInfo } from '@framework/Reflection'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { TreeViewer } from './TreeViewer'
 import { useLocation, useParams } from "react-router";
 import { TreeOperation } from "./Signum.Tree";

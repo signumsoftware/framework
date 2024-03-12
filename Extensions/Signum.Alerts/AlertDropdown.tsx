@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { Finder } from '@framework/Finder'
 import { Entity, getToString, is, JavascriptMessage, liteKey, parseLite, toLite } from '@framework/Signum.Entities'
 import { Toast } from 'react-bootstrap'

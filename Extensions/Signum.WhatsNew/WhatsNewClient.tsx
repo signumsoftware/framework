@@ -21,7 +21,7 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(WhatsNewEntity, t => import('./Templates/WhatsNew'), { modalSize: "xl" }));
 
   //Operations.addSettings(new EntityOperationSettings(WhatsNewOperation.Read, {
-  //  alternatives: eoc => [andClose(eoc)],
+  //  alternatives: eoc => [EntityOperations.andClose(eoc)],
   //  hideOnCanExecute: true
   //}));
 

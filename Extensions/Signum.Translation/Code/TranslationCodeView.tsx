@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { getToString } from '@framework/Signum.Entities'
 import * as CultureClient from '@framework/Basics/CultureClient'
 import { API } from '../TranslationClient'
@@ -44,7 +44,7 @@ export default function TranslationCodeView() {
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => notifySuccess());
+    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => Operations.notifySuccess());
   }
 
   const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),

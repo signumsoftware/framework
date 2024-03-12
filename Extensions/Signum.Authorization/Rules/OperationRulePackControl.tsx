@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { notifySuccess, getSettings, EntityOperationSettings } from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { getToString } from '@framework/Signum.Entities'
@@ -19,7 +19,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
     API.saveOperationRulePack(pack)
       .then(() => API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
-        notifySuccess();
+        Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
   }
@@ -75,7 +75,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
         </thead>
         <tbody>
           {ctx.mlistItemCtxs(a => a.rules).filter(c => {
-            var os = getSettings(c.value.resource!.operation);
+            var os = Operations.getSettings(c.value.resource!.operation);
 
             if (os instanceof EntityOperationSettings && os.isVisibleOnlyType && !os.isVisibleOnlyType(ctx.value.type.cleanName))
               return false;

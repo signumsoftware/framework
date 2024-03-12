@@ -8,7 +8,7 @@ import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, Entity
 import { Type } from '../Reflection';
 import { EntityRepeater } from '../Lines/EntityRepeater';
 import { MultiValueLine } from '../Lines/MultiValueLine';
-import { API, Defaults } from '../Operations';
+import { Operations } from '../Operations';
 import { useForceUpdate } from '../Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { DropdownList } from 'react-widgets'
@@ -31,7 +31,7 @@ interface MultiPropertySetterModalProps extends IModalProps<boolean | undefined>
   typeInfo: TypeInfo;
   lites: Lite<Entity>[];
   operationInfo: OperationInfo;
-  setters: API.PropertySetter[];
+  setters: Operations.API.PropertySetter[];
   mandatory: boolean;
 }
 
@@ -84,17 +84,17 @@ export function MultiPropertySetterModal(p: MultiPropertySetterModalProps) {
     </Modal>
   );
 
-  function isValid(setter: API.PropertySetter) {
+  function isValid(setter: Operations.API.PropertySetter) {
     return setter.property != null;
   }
 }
 
-MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: API.PropertySetter[]): Promise<API.PropertySetter[] | undefined> => {
-  var settersOrDefault = setters ?? [{ property: null!, operation: null! } as API.PropertySetter];
+MultiPropertySetterModal.show = (typeInfo: TypeInfo, lites: Lite<Entity>[], operationInfo: OperationInfo, mandatory: boolean, setters?: Operations.API.PropertySetter[]): Promise<Operations.API.PropertySetter[] | undefined> => {
+  var settersOrDefault = setters ?? [{ property: null!, operation: null! } as Operations.API.PropertySetter];
   return openModal<boolean | undefined>(<MultiPropertySetterModal typeInfo={typeInfo} lites={lites} operationInfo={operationInfo} mandatory={mandatory} setters={settersOrDefault} />).then(a => a ? settersOrDefault : undefined);
 };
 
-export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: API.PropertySetter[], isPredicate: boolean, onChange: () => void }) {
+export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { root: PropertyRoute, setters: Operations.API.PropertySetter[], isPredicate: boolean, onChange: () => void }) {
 
   function handleNewPropertySetter(e: React.MouseEvent) {
     e.preventDefault();
@@ -102,7 +102,7 @@ export function MultiPropertySetter({ root, setters, onChange, isPredicate }: { 
     onChange();
   }
 
-  function handleDeletePropertySetter(ps: API.PropertySetter) {
+  function handleDeletePropertySetter(ps: Operations.API.PropertySetter) {
     setters.remove(ps);
     onChange();
   }
@@ -180,8 +180,8 @@ export function getPropertyOperations(type: TypeReference): PropertyOperation[] 
 
 export interface PropertySetterComponentProps {
   root: PropertyRoute;
-  setter: API.PropertySetter;
-  onDeleteSetter: (pi: API.PropertySetter) => void;
+  setter: Operations.API.PropertySetter;
+  onDeleteSetter: (pi: Operations.API.PropertySetter) => void;
   isPredicate: boolean;
   onSetterChanged: () => void;
 }
@@ -238,7 +238,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps) {
     s.filterOperation = fOperation;
   }
 
-  function fixOperation(p: API.PropertySetter, pr: PropertyRoute | null | undefined): Promise<void> {
+  function fixOperation(p: Operations.API.PropertySetter, pr: PropertyRoute | null | undefined): Promise<void> {
 
     p.value = undefined;
     p.predicate = p.operation && showPredicate(p.operation) ? [] : undefined;

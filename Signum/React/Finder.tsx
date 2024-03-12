@@ -44,6 +44,7 @@ import { CollectionMessage } from "./Signum.External";
 import { QueryTokenMessage } from "./Signum.DynamicQuery.Tokens";
 import { TextHighlighter } from "./Components/Typeahead";
 import * as FinderRules from "./FinderRules";
+import { Operations } from "./Operations";
 
 
 export namespace Finder {

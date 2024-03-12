@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
@@ -21,7 +21,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
     API.saveQueryRulePack(pack)
       .then(() => API.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
-        notifySuccess();
+        Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
   }

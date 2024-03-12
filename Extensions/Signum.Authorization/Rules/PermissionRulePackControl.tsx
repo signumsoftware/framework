@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
@@ -34,7 +34,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
     API.savePermissionRulePack(pack)
       .then(() => API.fetchPermissionRulePack(pack.role.id!))
       .then(newPack => {
-        notifySuccess();
+        Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
   }

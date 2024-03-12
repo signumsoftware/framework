@@ -8,7 +8,7 @@ import "../Translation.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { getTypeInfo, reloadTypes } from '@framework/Reflection'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as CultureClient from '@framework/Basics/CultureClient'
 
@@ -34,7 +34,7 @@ export default function TranslationCodeStatus() {
         setFile(file);
         setFileVer(fileVer + 1);
 
-        API.uploadFile(file!).then(model => { notifySuccess(); reload(); });
+        API.uploadFile(file!).then(model => { Operations.notifySuccess(); reload(); });
       };
       fileReader.readAsDataURL(f);
     }
