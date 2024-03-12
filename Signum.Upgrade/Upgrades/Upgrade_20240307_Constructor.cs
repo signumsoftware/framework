@@ -14,7 +14,7 @@ public class Upgrade_20240307_Constructor : CodeUpgradeBase
     public override void Execute(UpgradeContext uctx)
     {
         var simpleExports = "Construct|clearCustomConstructors|registerConstructor";
-        var regexHooksFinder = new Regex($@"(?<!\.|on|default|can)({simpleExports})\b", RegexOptions.Singleline);
+        var regexHooksFinder = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         var simpleExportArray = simpleExports.Split("|");
 
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
