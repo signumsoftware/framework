@@ -6,13 +6,12 @@ import { ButtonsContext, IOperationVisible, ButtonBarElement, FunctionalFrameCom
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ValidationError } from '../Services';
-import { operationInfos, getSettings, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, CreateGroup, API, isEntityOperation, AlternativeOperationSetting, getShortcutToString } from '../Operations'
+import { Operations, EntityOperationSettings, EntityOperationContext, EntityOperationGroup, AlternativeOperationSetting } from '../Operations'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Constructor } from "../Constructor"
 import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip, ButtonGroup } from "react-bootstrap";
 import { BsColor } from "../Components";
-import { notifySuccess } from "../Operations";
 import { FunctionalAdapter } from "../Modals";
 import {  } from "../Finder";
 
@@ -23,10 +22,10 @@ export namespace EntityOperations {
     if (ti == undefined)
       return undefined;
 
-    const operations = operationInfos(ti)
-      .filter(oi => isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
+    const operations = Operations.operationInfos(ti)
+      .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
       .map(oi => {
-        const eos = getSettings(oi.key) as EntityOperationSettings<Entity>;
+        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
 
         const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
         eoc.tag = ctx.tag;
@@ -78,7 +77,7 @@ export namespace EntityOperations {
       isDefault: isDefault,
       onClick: () => {
         eoc.onExecuteSuccess = pack => {
-          notifySuccess();
+          Operations.notifySuccess();
           Navigator.raiseEntityChanged(pack.entity);
           eoc.frame.onClose(pack);
           return Promise.resolve(undefined);
@@ -99,7 +98,7 @@ export namespace EntityOperations {
       inDropdown: inDropdown,
       onClick: () => {
         eoc.onExecuteSuccess = pack => {
-          notifySuccess();
+          Operations.notifySuccess();
           Navigator.raiseEntityChanged(pack.entity);
           return (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
             .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent));
@@ -109,179 +108,7 @@ export namespace EntityOperations {
     });
   }
 
-  export type OutlineBsColor =
-    | 'outline-primary'
-    | 'outline-secondary'
-    | 'outline-success'
-    | 'outline-danger'
-    | 'outline-warning'
-    | 'outline-info'
-    | 'outline-dark'
-    | 'outline-light';
 
-  interface OperationButtonProps extends ButtonProps {
-    eoc: EntityOperationContext<any /*Entity*/> | undefined;
-    group?: EntityOperationGroup;
-    variant?: BsColor;
-    canExecute?: string | null;
-    className?: string;
-    outline?: boolean;
-    color?: BsColor;
-    textInTitle?: boolean;
-    avoidAlternatives?: boolean;
-    onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
-    children?: React.ReactNode;
-    hideOnCanExecute?: boolean;
-  }
-
-  export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color,
-    avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement | null {
-
-    if (eocOrNull == null)
-      return null;
-
-    const eoc = eocOrNull;
-
-    if (canExecute === undefined)
-      canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
-
-    const disabled = !!canExecute || eoc.frame?.isExecuting();
-
-    if (hideOnCanExecute && disabled)
-      return null;
-
-    var alternatives = avoidAlternatives ? undefined : eoc.alternatives?.filter(a => a.isVisible != false); //Clone
-
-    var main: AlternativeOperationSetting<any> = {
-      name: "main",
-      onClick: eoc => {
-        if (onOperationClick)
-          onOperationClick(eoc);
-        else
-          eoc.click();
-      },
-      text: eoc.settings?.text ? eoc.settings.text(eoc) :
-        group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
-          eoc.operationInfo.niceName,
-      keyboardShortcut: eoc.keyboardShortcut,
-      color: color ?? eoc.color,
-      classes: classes(props.className, eoc.settings?.classes),
-      icon: eoc.icon,
-      iconColor: eoc.settings?.iconColor,
-      iconAlign: eoc.settings?.iconAlign,
-    };
-
-    if (alternatives && alternatives.some(a => a.isDefault)) {
-      const newMain = alternatives.single(a => a.isDefault == true);
-      main.inDropdown = newMain.inDropdown;
-      alternatives.remove(newMain);
-      alternatives.insertAt(0, main);
-      main = newMain;
-    }
-
-    if (group) {
-
-      const item =
-        <Dropdown.Item
-          {...props as any}
-          disabled={disabled}
-          title={main?.keyboardShortcut && getShortcutToString(main.keyboardShortcut)}
-          className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
-          onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
-          data-operation={eoc.operationInfo.key}>
-          {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
-        </Dropdown.Item>;
-
-      if (canExecute)
-        return (
-          <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"right"}>{canExecute}</Tooltip>}>
-            {item}
-          </OverlayTrigger>
-        );
-
-      return (
-        <>
-          {item}
-          {alternatives?.map(a => renderAlternative(a))}
-        </>
-      );
-    }
-
-    if (outline == null)
-      outline = eoc.outline;
-
-    var button = <Button variant={(outline ? ("outline-" + main.color) as OutlineBsColor : main.color)}
-      {...props}
-      key="button"
-      title={[(textInTitle ? main.text : undefined), main.keyboardShortcut && getShortcutToString(main.keyboardShortcut)].notNull().join(" ")}
-      className={classes(disabled ? "disabled" : undefined, main.classes)}
-      onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
-      data-operation={eoc.operationInfo.key}>
-      {props.children ?? withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
-    </Button>;
-
-    if (canExecute) {
-      return (
-        <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"bottom"}>{canExecute}</Tooltip>}>
-          {button}
-        </OverlayTrigger>
-      );
-    }
-
-    if (alternatives == undefined || alternatives.length == 0)
-      return button;
-
-    var buttonAlternatives = alternatives.filter(a => !a.inDropdown);
-
-    if (buttonAlternatives.length) {
-      button =
-        (
-          <div className="btn-group"
-            key="buttonGroup">
-            {button}
-            {buttonAlternatives.map((aos, i) =>
-              <Button key={i}
-                variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
-                className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
-                onClick={() => aos.onClick(eoc)}
-                title={aos.text + (aos.keyboardShortcut ? (" (" + getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
-                <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
-              </Button>
-            )}
-          </div>
-        );
-    }
-
-    var dropdownAlternatives = alternatives.filter(a => a.inDropdown);
-    if (dropdownAlternatives.length == 0)
-      return button;
-
-    return (
-      <Dropdown as={ButtonGroup}>
-        {button}
-        <Dropdown.Toggle split color={eoc.color} id={eoc.operationInfo.key + "_split"} />
-        <Dropdown.Menu align="start">
-          {dropdownAlternatives.map(a => renderAlternative(a))}
-        </Dropdown.Menu>
-      </Dropdown>
-    );
-
-
-    function renderAlternative(aos: AlternativeOperationSetting<Entity>) {
-
-      return (
-        <Dropdown.Item
-          color={aos.color}
-          className={aos.classes}
-          key={aos.name}
-          title={aos.keyboardShortcut && getShortcutToString(aos.keyboardShortcut)}
-          onClick={() => aos.onClick(eoc!)}
-          data-alternative={aos.name}>
-          {withIcon(aos.text, aos.icon, aos.iconColor, aos.iconAlign)}
-        </Dropdown.Item>
-      );
-    }
-  }
 
   export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
     if (icon) {
@@ -319,9 +146,9 @@ export namespace EntityOperations {
       if (!conf)
         return;
 
-      return API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
+      return Operations.API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(eoc.onConstructFromSuccess ?? (pack => {
-          notifySuccess();
+          Operations.notifySuccess();
           if (pack?.entity.id != null)
             Navigator.raiseEntityChanged(pack.entity);
           return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
@@ -336,9 +163,9 @@ export namespace EntityOperations {
       if (!conf)
         return;
 
-      return API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+      return Operations.API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
         .then(eoc.onConstructFromSuccess ?? (pack => {
-          notifySuccess();
+          Operations.notifySuccess();
           if (pack?.entity.id != null)
             Navigator.raiseEntityChanged(pack.entity);
           return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
@@ -354,12 +181,12 @@ export namespace EntityOperations {
       if (!conf)
         return;
 
-      return API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
+      return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(eoc.onExecuteSuccess ?? (pack => {
           eoc.frame.onReload(pack);
           if (pack?.entity.id != null)
             Navigator.raiseEntityChanged(pack.entity);
-          notifySuccess();
+          Operations.notifySuccess();
           return;
         }))
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
@@ -373,15 +200,15 @@ export namespace EntityOperations {
         return;
 
       var promise = eoc.progressModalOptions ?
-        API.executeLiteWithProgress(toLite(eoc.entity), eoc.operationInfo.key, eoc.progressModalOptions, ...args) :
-        API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args);
+        Operations.API.executeLiteWithProgress(toLite(eoc.entity), eoc.operationInfo.key, eoc.progressModalOptions, ...args) :
+        Operations.API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args);
 
       return promise
         .then(eoc.onExecuteSuccess ?? (pack => {
           eoc.frame.onReload(pack);
           if (pack?.entity.id != null)
             Navigator.raiseEntityChanged(pack.entity);
-          notifySuccess();
+          Operations.notifySuccess();
           return;
         }))
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
@@ -394,11 +221,11 @@ export namespace EntityOperations {
       if (!conf)
         return;
 
-      return API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
+      return Operations.API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
         .then(eoc.onDeleteSuccess ?? (() => {
           eoc.frame.onClose();
           Navigator.raiseEntityChanged(eoc.entity.Type);
-          notifySuccess();
+          Operations.notifySuccess();
           return;
         }))
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
@@ -411,11 +238,11 @@ export namespace EntityOperations {
       if (!conf)
         return;
 
-      return API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
+      return Operations.API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
         .then(eoc.onDeleteSuccess ?? (() => {
           eoc.frame.onClose();
           Navigator.raiseEntityChanged(eoc.entity.Type);
-          notifySuccess();
+          Operations.notifySuccess();
           return;
         }))
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
@@ -477,5 +304,180 @@ export namespace EntityOperations {
         <strong>{getToString(eoc.entity)} ({getTypeInfo(eoc.entity.Type).niceName} {eoc.entity.id})</strong>
       );
 
+  }
+}
+
+export type OutlineBsColor =
+  | 'outline-primary'
+  | 'outline-secondary'
+  | 'outline-success'
+  | 'outline-danger'
+  | 'outline-warning'
+  | 'outline-info'
+  | 'outline-dark'
+  | 'outline-light';
+
+interface OperationButtonProps extends ButtonProps {
+  eoc: EntityOperationContext<any /*Entity*/> | undefined;
+  group?: EntityOperationGroup;
+  variant?: BsColor;
+  canExecute?: string | null;
+  className?: string;
+  outline?: boolean;
+  color?: BsColor;
+  textInTitle?: boolean;
+  avoidAlternatives?: boolean;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  children?: React.ReactNode;
+  hideOnCanExecute?: boolean;
+}
+
+
+export function OperationButton({ group, onOperationClick, canExecute, eoc: eocOrNull, outline, color,
+  avoidAlternatives, hideOnCanExecute, textInTitle, ...props }: OperationButtonProps): React.ReactElement | null {
+
+  if (eocOrNull == null)
+    return null;
+
+  const eoc = eocOrNull;
+
+  if (canExecute === undefined)
+    canExecute = eoc.settings?.overrideCanExecute ? eoc.settings.overrideCanExecute(eoc) : eoc.canExecute;
+
+  const disabled = !!canExecute || eoc.frame?.isExecuting();
+
+  if (hideOnCanExecute && disabled)
+    return null;
+
+  var alternatives = avoidAlternatives ? undefined : eoc.alternatives?.filter(a => a.isVisible != false); //Clone
+
+  var main: AlternativeOperationSetting<any> = {
+    name: "main",
+    onClick: eoc => {
+      if (onOperationClick)
+        onOperationClick(eoc);
+      else
+        eoc.click();
+    },
+    text: eoc.settings?.text ? eoc.settings.text(eoc) :
+      group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
+        eoc.operationInfo.niceName,
+    keyboardShortcut: eoc.keyboardShortcut,
+    color: color ?? eoc.color,
+    classes: classes(props.className, eoc.settings?.classes),
+    icon: eoc.icon,
+    iconColor: eoc.settings?.iconColor,
+    iconAlign: eoc.settings?.iconAlign,
+  };
+
+  if (alternatives && alternatives.some(a => a.isDefault)) {
+    const newMain = alternatives.single(a => a.isDefault == true);
+    main.inDropdown = newMain.inDropdown;
+    alternatives.remove(newMain);
+    alternatives.insertAt(0, main);
+    main = newMain;
+  }
+
+  if (group) {
+
+    const item =
+      <Dropdown.Item
+        {...props as any}
+        disabled={disabled}
+        title={main?.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut)}
+        className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
+        onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
+        data-operation={eoc.operationInfo.key}>
+        {props.children ?? EntityOperations.withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
+      </Dropdown.Item>;
+
+    if (canExecute)
+      return (
+        <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"right"}>{canExecute}</Tooltip>}>
+          {item}
+        </OverlayTrigger>
+      );
+
+    return (
+      <>
+        {item}
+        {alternatives?.map(a => renderAlternative(a))}
+      </>
+    );
+  }
+
+  if (outline == null)
+    outline = eoc.outline;
+
+  var button = <Button variant={(outline ? ("outline-" + main.color) as OutlineBsColor : main.color)}
+    {...props}
+    key="button"
+    title={[(textInTitle ? main.text : undefined), main.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut)].notNull().join(" ")}
+    className={classes(disabled ? "disabled" : undefined, main.classes)}
+    onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
+    data-operation={eoc.operationInfo.key}>
+    {props.children ?? EntityOperations.withIcon(main.text, main.icon, main.iconColor, main.iconAlign)}
+  </Button>;
+
+  if (canExecute) {
+    return (
+      <OverlayTrigger overlay={<Tooltip id={eoc.operationInfo.key + "_tooltip"} placement={"bottom"}>{canExecute}</Tooltip>}>
+        {button}
+      </OverlayTrigger>
+    );
+  }
+
+  if (alternatives == undefined || alternatives.length == 0)
+    return button;
+
+  var buttonAlternatives = alternatives.filter(a => !a.inDropdown);
+
+  if (buttonAlternatives.length) {
+    button =
+      (
+        <div className="btn-group"
+          key="buttonGroup">
+          {button}
+          {buttonAlternatives.map((aos, i) =>
+            <Button key={i}
+              variant={(outline ? ("outline-" + (color ?? main.color)) as OutlineBsColor : (color ?? main.color))}
+              className={classes("dropdown-toggle-split px-1", disabled ? "disabled" : undefined, aos.classes)}
+              onClick={() => aos.onClick(eoc)}
+              title={aos.text + (aos.keyboardShortcut ? (" (" + Operations.getShortcutToString(aos.keyboardShortcut) + ")") : "")}>
+              <small><FontAwesomeIcon icon={aos.icon!} color={aos.iconColor} fixedWidth /></small>
+            </Button>
+          )}
+        </div>
+      );
+  }
+
+  var dropdownAlternatives = alternatives.filter(a => a.inDropdown);
+  if (dropdownAlternatives.length == 0)
+    return button;
+
+  return (
+    <Dropdown as={ButtonGroup}>
+      {button}
+      <Dropdown.Toggle split color={eoc.color} id={eoc.operationInfo.key + "_split"} />
+      <Dropdown.Menu align="start">
+        {dropdownAlternatives.map(a => renderAlternative(a))}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+
+
+  function renderAlternative(aos: AlternativeOperationSetting<Entity>) {
+
+    return (
+      <Dropdown.Item
+        color={aos.color}
+        className={aos.classes}
+        key={aos.name}
+        title={aos.keyboardShortcut && Operations.getShortcutToString(aos.keyboardShortcut)}
+        onClick={() => aos.onClick(eoc!)}
+        data-alternative={aos.name}>
+        {EntityOperations.withIcon(aos.text, aos.icon, aos.iconColor, aos.iconAlign)}
+      </Dropdown.Item>
+    );
   }
 }

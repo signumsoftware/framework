@@ -6,8 +6,7 @@ import { classes, softCast } from '../Globals';
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
 import { ContextualItemsContext, MenuItemBlock } from '../SearchControl/ContextualItems';
-import { operationInfos, getSettings, notifySuccess, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings, API, isEntityOperation, Defaults } from '../Operations'
-import * as Operations from "../Operations";
+import { Operations, ContextualOperationSettings, ContextualOperationContext, EntityOperationSettings } from '../Operations'
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
@@ -32,10 +31,10 @@ export namespace ContextualOperations {
 
     const ti = getTypeInfo(types[0].key);
 
-    const menuItems = operationInfos(ti)
+    const menuItems = Operations.operationInfos(ti)
       .filter(oi => oi.operationType == "ConstructorFromMany")
       .map(oi => {
-        const cos = getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
+        const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
         return new ContextualOperationContext<Entity>(oi, ctx, cos);
       })
       .filter(coc => coc.isVisibleInContextualMenu())
@@ -69,10 +68,10 @@ export namespace ContextualOperations {
       return undefined;
 
     const ti = getTypeInfo(types[0].key);
-    const contexts = operationInfos(ti)
-      .filter(oi => isEntityOperation(oi.operationType))
+    const contexts = Operations.operationInfos(ti)
+      .filter(oi => Operations.isEntityOperation(oi.operationType))
       .map(oi => {
-        const eos = getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
+        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
         const cos = eos == undefined ? undefined :
           ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
         const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
@@ -97,7 +96,7 @@ export namespace ContextualOperations {
           return contexts;
         });
       } else /*if (ctx.lites.length > 1)*/ {
-        contextPromise = API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
+        contextPromise = Operations.API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
           .then(response => {
             contexts.forEach(coc => {
               coc.canExecute = response.canExecutes[coc.operationInfo.key];
@@ -286,7 +285,7 @@ export namespace ContextualOperations {
 
     var cos = coc.settings;
 
-    var multiSetter = coc.operationInfo.canBeModified && !((cos?.settersConfig ?? Defaults.defaultSetterConfig)(coc) == "NoDialog") ?
+    var multiSetter = coc.operationInfo.canBeModified && !((cos?.settersConfig ?? Operations.Defaults.defaultSetterConfig)(coc) == "NoDialog") ?
       <small className="ms-2">{OperationMessage.MultiSetter.niceToString()}</small> : null;
 
     return <>{OperationMenuItem.simplifyName(coc.operationInfo.niceName)}{multiSetter}</>;
@@ -310,9 +309,9 @@ export namespace ContextualOperations {
       switch (coc.operationInfo.operationType) {
         case "ConstructorFromMany":
           {
-            return API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
+            return Operations.API.constructFromMany(coc.context.lites, coc.operationInfo.key, ...args)
               .then(coc.onConstructFromSuccess ?? (pack => {
-                notifySuccess();
+                Operations.notifySuccess();
                 if (pack?.entity.id != null)
                   Navigator.raiseEntityChanged(pack.entity);
                 Navigator.createNavigateOrTab(pack, coc.event!)
@@ -321,47 +320,47 @@ export namespace ContextualOperations {
           }
         case "ConstructorFrom":
           if (coc.context.lites.length == 1) {
-            return API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
+            return Operations.API.constructFromLite(coc.context.lites[0], coc.operationInfo.key, ...args)
               .then(coc.onConstructFromSuccess ?? (pack => {
                 if (pack?.entity.id != null)
                   Navigator.raiseEntityChanged(pack.entity);
-                notifySuccess();
+                Operations.notifySuccess();
                 return Navigator.createNavigateOrTab(pack, coc.event!)
                   .then(() => coc.context.markRows({}))
               }));
           } else {
             return getSetters(coc)
-              .then(setters => setters && API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
+              .then(setters => setters && Operations.API.constructFromMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
                 .then(coc.onContextualSuccess ?? (report => {
                   //Navigator.raiseEntityChanged(??);
-                  notifySuccess();
+                  Operations.notifySuccess();
                   coc.context.markRows(report.errors);
                 })));
           }
         case "Execute":
           if (coc.progressModalOptions && coc.context.lites.length == 1) {
-            return API.executeLiteWithProgress(coc.context.lites[0], coc.operationInfo.key, coc.progressModalOptions, ...args)
-              .then(pack => softCast<API.ErrorReport>({ errors: {} })/*, error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } })*/)
+            return Operations.API.executeLiteWithProgress(coc.context.lites[0], coc.operationInfo.key, coc.progressModalOptions, ...args)
+              .then(pack => softCast<Operations.API.ErrorReport>({ errors: {} })/*, error => softCast<API.ErrorReport>({ errors: { [liteKey(coc.context.lites[0])]: (error as Error).message } })*/)
               .then(coc.onContextualSuccess ?? (report => {
                 coc.raiseEntityChanged();
-                notifySuccess();
+                Operations.notifySuccess();
                 coc.context.markRows(report.errors);
               }));
           } else {
             return getSetters(coc)
-              .then(setters => setters && API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
+              .then(setters => setters && Operations.API.executeMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
                 .then(coc.onContextualSuccess ?? (report => {
                   coc.raiseEntityChanged();
-                  notifySuccess();
+                  Operations.notifySuccess();
                   coc.context.markRows(report.errors);
                 })));
           }
         case "Delete":
           return getSetters(coc)
-            .then(setters => setters && API.deleteMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
+            .then(setters => setters && Operations.API.deleteMultiple(coc.context.lites, coc.operationInfo.key, { setters }, ...args)
               .then(coc.onContextualSuccess ?? (report => {
                 coc.raiseEntityChanged();
-                notifySuccess();
+                Operations.notifySuccess();
                 coc.context.markRows(report.errors);
               })));
       }
@@ -372,7 +371,7 @@ export namespace ContextualOperations {
       if (!coc.operationInfo.canBeModified)
         return Promise.resolve([]);
 
-      var settersConfig = (coc.settings?.settersConfig ?? Defaults.defaultSetterConfig)(coc);
+      var settersConfig = (coc.settings?.settersConfig ?? Operations.Defaults.defaultSetterConfig)(coc);
 
       if (settersConfig == "NoDialog")
         return Promise.resolve([]);

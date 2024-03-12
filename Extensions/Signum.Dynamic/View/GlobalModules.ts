@@ -1,7 +1,7 @@
 import * as React from 'react'
 import * as luxon from 'luxon'
 import * as Entities from '@framework/Signum.Entities'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { Constructor } from '@framework/Constructor'
 import * as Globals from '@framework/Globals'
 import { Finder } from '@framework/Finder'

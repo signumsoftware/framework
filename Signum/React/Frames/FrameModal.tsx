@@ -12,7 +12,7 @@ import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, getToS
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
 import { ValidationErrors, ValidationErrorsHandle } from './ValidationErrors'
 import { renderWidgets, WidgetContext } from './Widgets'
-import { EntityOperationContext, notifySuccess, operationInfos, operationSettings, Defaults } from '../Operations'
+import { Operations, EntityOperationContext } from '../Operations'
 import { BsSize, ErrorBoundary } from '../Components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import "./Frames.css"
@@ -127,11 +127,11 @@ export const FrameModal = genericForwardRef(function FrameModal<T extends Modifi
       tag: "SaveChangesModal"
     };
 
-    return ti == null ? [] : operationInfos(ti)
+    return ti == null ? [] : Operations.operationInfos(ti)
       .filter(oi => oi.canBeNew || !pack.entity.isNew)
       .filter(oi => oi.operationType == "Execute" && oi.canBeModified)
       .map(oi => EntityOperationContext.fromEntityPack<T & Entity>(frame as unknown as EntityFrame<T & Entity>, pack as EntityPack<T & Entity>, oi.key)!)
-      .filter(eoc => (eoc.settings?.showOnSaveChangesModal ?? Defaults.isSave(eoc.operationInfo)))
+      .filter(eoc => (eoc.settings?.showOnSaveChangesModal ?? Operations.Defaults.isSave(eoc.operationInfo)))
       .filter(eoc => eoc.isVisibleInButtonBar(buttonContext));
   }
 
@@ -195,7 +195,7 @@ export const FrameModal = genericForwardRef(function FrameModal<T extends Modifi
           if (result instanceof EntityOperationContext) {
 
             result.onExecuteSuccess = pack => {
-                notifySuccess();
+                Operations.notifySuccess();
                 frameRef.current!.onClose(pack);
                 return Promise.resolve();
             };

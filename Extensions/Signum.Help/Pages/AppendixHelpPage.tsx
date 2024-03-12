@@ -4,14 +4,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { API, Urls } from '../HelpClient'
-import * as Operations from '@framework/Operations';
+import { Operations } from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Help';
 import { getOperationInfo, getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity, toLite, OperationMessage, getToString } from '@framework/Signum.Entities';
 import { TypeContext } from '@framework/Lines';
 import { EditableTextComponent, EditableHtmlComponent } from './EditableText';
-import { notifySuccess } from '@framework/Operations';
 import MessageModal from '@framework/Modals/MessageModal';
 import { classes } from '@framework/Globals';
 import { useTitle } from '@framework/AppContext'
@@ -66,7 +65,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
     API.saveAppendix(ctx.value)
       .then(() => {
         onSuccess();
-        notifySuccess();
+        Operations.notifySuccess();
       });
   }
 
@@ -91,7 +90,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
         Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
             AppContext.navigate(Urls.indexUrl());
-            notifySuccess();
+            Operations.notifySuccess();
           }));
       }
     });

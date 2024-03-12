@@ -5,14 +5,13 @@ import { getTypeInfo, OperationType } from '../Reflection';
 import { classes } from '../Globals';
 import { Navigator } from '../Navigator';
 import MessageModal from '../Modals/MessageModal'
-import { operationInfos, getSettings, notifySuccess, API, Defaults, CellOperationContext, EntityOperationSettings } from '../Operations'
-import * as Operations from "../Operations";
+import { Operations, CellOperationContext, EntityOperationSettings } from '../Operations'
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { Button, ButtonProps, Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { MultiPropertySetterModal, PropertySetterComponentProps } from "./MultiPropertySetter";
 import { BsColor } from "../Components";
 import Exception from "../Exceptions/Exception";
-import { withIcon } from "./EntityOperations";
+import { EntityOperations } from "./EntityOperations";
 import {  } from "../Finder";
 import { useDoubleClick } from "../Hooks";
 
@@ -46,7 +45,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   const eos = coc.entityOperationSettings;
 
   if (color == null)
-    color = coc.settings?.color ?? eos?.color ?? Defaults.getColor(coc.operationInfo);
+    color = coc.settings?.color ?? eos?.color ?? Operations.Defaults.getColor(coc.operationInfo);
 
   if (icon == null)
     icon = coalesceIcon(coc.settings?.icon, eos?.icon);
@@ -96,7 +95,7 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
 
     let text: string = coc.settings?.text ? coc.settings.text(coc) : coc.operationInfo.niceName;
 
-    return withIcon(text, icon, iconColor, iconAlign);
+    return EntityOperations.withIcon(text, icon, iconColor, iconAlign);
   }
 }
 
@@ -179,30 +178,30 @@ export function defaultCellOperationClick(coc: CellOperationContext<any>, ...arg
 
       case "ConstructorFrom":
         if (coc.lite) {
-          return API.constructFromLite(coc.lite, coc.operationInfo.key, ...args)
+          return Operations.API.constructFromLite(coc.lite, coc.operationInfo.key, ...args)
             .then(coc.onConstructFromSuccess ?? (pack => {
               if (pack?.entity.id != null)
                 Navigator.raiseEntityChanged(pack.entity);
-              notifySuccess();
+              Operations.notifySuccess();
               return Navigator.createNavigateOrTab(pack, coc.event!)
                 .then(() => { })
             }));
         };
       case "Execute":
         return (coc.progressModalOptions ?
-          API.executeLiteWithProgress(coc.lite, coc.operationInfo.key, coc.progressModalOptions, ...args) :
-          API.executeLite(coc.lite, coc.operationInfo.key, ...args))
+          Operations.API.executeLiteWithProgress(coc.lite, coc.operationInfo.key, coc.progressModalOptions, ...args) :
+          Operations.API.executeLite(coc.lite, coc.operationInfo.key, ...args))
           .then(coc.onExecuteSuccess ?? (pack => {
             coc.cellContext.refresh?.();
             coc.raiseEntityChanged();
-            notifySuccess();
+            Operations.notifySuccess();
           }));
       case "Delete":
-        return API.deleteLite(coc.lite, coc.operationInfo.key, ...args)
+        return Operations.API.deleteLite(coc.lite, coc.operationInfo.key, ...args)
           .then(coc.onDeleteSuccess ?? (() => {
             coc.cellContext.refresh?.();
             coc.raiseEntityChanged();
-            notifySuccess();
+            Operations.notifySuccess();
           }));
     }
   });

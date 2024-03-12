@@ -14,7 +14,7 @@ import { ErrorBoundary } from '../Components';
 import "./Frames.css"
 import { AutoFocus } from '../Components/AutoFocus';
 import { useStateWithPromise, useForceUpdate, useMounted, useDocumentEvent, useWindowEvent, useUpdatedRef } from '../Hooks'
-import * as Operations from '../Operations'
+import { Operations } from '../Operations'
 import WidgetEmbedded from './WidgetEmbedded'
 import { useTitle } from '../AppContext'
 import { FunctionalAdapter } from '../Modals'

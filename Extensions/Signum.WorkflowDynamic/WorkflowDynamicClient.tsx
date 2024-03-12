@@ -1,7 +1,6 @@
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import * as DynamicViewClient from '../Signum.Dynamic/DynamicViewClient'
 import { getCaseActivityContext } from '../Signum.Workflow/WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityModel } from '../Signum.Workflow/Signum.Workflow'

@@ -3,7 +3,7 @@ import { useParams, Link, useLocation } from 'react-router-dom'
 import { Collapse } from 'react-bootstrap'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import { API, Urls } from '../HelpClient'
 import { Overlay, Tooltip } from "react-bootstrap";
@@ -14,7 +14,6 @@ import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
 import { EditableHtmlComponent, HtmlViewer } from './EditableText';
 import { classes } from '@framework/Globals';
-import { EntityOperationSettings, notifySuccess } from '@framework/Operations';
 import * as HelpClient from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -231,7 +230,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
     API.saveType(ctx.value)
       .then((() => {
         onSuccess();
-        notifySuccess();
+        Operations.notifySuccess();
       }));
   }
 

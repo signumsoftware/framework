@@ -11,8 +11,8 @@ import * as QuickLinks from './QuickLinks';
 import { Navigator } from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
-import { getEntityOperationButtons, defaultOnClick, andClose, andNew, OperationButton } from './Operations/EntityOperations';
-import { getConstructFromManyContextualItems, getEntityOperationsContextualItems, defaultContextualOperationClick, OperationMenuItem } from './Operations/ContextualOperations';
+import { EntityOperations, OperationButton } from './Operations/EntityOperations';
+import { ContextualOperations } from './Operations/ContextualOperations';
 import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
 import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
@@ -37,9 +37,9 @@ export namespace Operations {
   
 
   export function start() {
-    ButtonBarManager.onButtonBarRender.push(getEntityOperationButtons);
-    ContexualItems.onContextualItems.push(getConstructFromManyContextualItems);
-    ContexualItems.onContextualItems.push(getEntityOperationsContextualItems);
+    ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
+    ContexualItems.onContextualItems.push(ContextualOperations.getConstructFromManyContextualItems);
+    ContexualItems.onContextualItems.push(ContextualOperations.getEntityOperationsContextualItems);
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
@@ -218,8 +218,8 @@ export namespace Operations {
     export function getAlternatives<T extends Entity>(eoc: EntityOperationContext<T>): AlternativeOperationSetting<T>[] | undefined {
       if (Defaults.isSave(eoc.operationInfo)) {
         return [
-          andClose(eoc),
-          andNew(eoc)
+          EntityOperations.andClose(eoc),
+          EntityOperations.andNew(eoc)
         ]
       }
 
@@ -520,7 +520,7 @@ export class ContextualOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
 
   defaultClick(...args: any[]): Promise<void> {
-    return defaultContextualOperationClick(this, ...args);
+    return ContextualOperations.defaultContextualOperationClick(this, ...args);
   }
 
   constructor(operationInfo: OperationInfo, context: ContextualItemsContext<T>, cos: ContextualOperationSettings<T> | undefined, eos?: EntityOperationSettings<T>) {
@@ -601,7 +601,7 @@ export class ContextualOperationContext<T extends Entity> {
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [<OperationMenuItem coc={this} />];
+    return [<ContextualOperations.OperationMenuItem coc={this} />];
   }
 
   raiseEntityChanged() {
@@ -860,7 +860,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   defaultClick(...args: any[]) {
-    return defaultOnClick(this, ...args);
+    return EntityOperations.defaultOnClick(this, ...args);
   }
 
   click() {
@@ -870,7 +870,7 @@ export class EntityOperationContext<T extends Entity> {
       else if (this.settings?.commonOnClick)
         return this.settings.commonOnClick(this);
       else
-        return defaultOnClick(this);
+        return EntityOperations.defaultOnClick(this);
     });
   }
 

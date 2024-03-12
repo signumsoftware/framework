@@ -8,10 +8,9 @@ import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Lite, Entity, EntityPack, OperationMessage } from '@framework/Signum.Entities'
-import { ContextualOperationContext, EntityOperationSettings } from '@framework/Operations'
+import { Operations, ContextualOperationContext, EntityOperationSettings, ContextualOperationSettings } from '@framework/Operations'
 import { GraphExplorer, OperationType } from '@framework/Reflection'
-import * as Operations from '@framework/Operations'
-import * as ContextualOperations from '@framework/Operations/ContextualOperations'
+import { ContextualOperations } from '@framework/Operations/ContextualOperations'
 import { ProcessState, ProcessEntity, ProcessPermission, PackageLineEntity, PackageEntity, PackageOperationEntity, ProcessOperation, ProcessMessage } from './Signum.Processes'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import * as AuthClient from '../Signum.Authorization/AuthClient'
@@ -75,8 +74,8 @@ export function start(options: { routes: RouteObject[], packages: boolean, packa
   }));
 }
 
-export const processOperationSettings: { [key: string]: Operations.ContextualOperationSettings<any> } = {};
-export function register<T extends Entity>(...settings: Operations.ContextualOperationSettings<T>[]) {
+export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
+export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]) {
   settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
 }
 
@@ -84,7 +83,7 @@ function monkeyPatchCreateContextualMenuItem() {
 
   const base = ContextualOperationContext.prototype.createMenuItems;
 
-  ContextualOperationContext.prototype.createMenuItems = function(this: Operations.ContextualOperationContext<any>): React.ReactElement[] {
+  ContextualOperationContext.prototype.createMenuItems = function(this: ContextualOperationContext<any>): React.ReactElement[] {
 
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
@@ -121,7 +120,7 @@ function monkeyPatchCreateContextualMenuItem() {
   };
 }
 
-function defaultConstructProcessFromMany(coc: Operations.ContextualOperationContext<Entity>, ...args: any[]) {
+function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
   var event = coc.event!;
 
   event!.preventDefault();

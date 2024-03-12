@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, softCast } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import * as CultureClient from '@framework/Basics/CultureClient'
 import { API, TranslatedInstanceView, TranslatedInstanceViewType, TranslatedTypeSummary, TranslationRecord } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
@@ -71,7 +71,7 @@ export default function TranslationInstanceView() {
     }));
 
     lock(() => API.saveTranslatedInstanceData(records, type, false, culture)
-      .then(() => { reloadResult(); notifySuccess(); }));
+      .then(() => { reloadResult(); Operations.notifySuccess(); }));
   }
 
   const message = TranslationMessage.View0In1.niceToString(type,

@@ -4,7 +4,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { ajaxGet, ajaxPost } from '@framework/Services';
 import { Constructor } from '@framework/Constructor';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
@@ -84,7 +84,7 @@ export function start(options: { routes: RouteObject[] }) {
   ToolbarClient.registerConfig(new DashboardToolbarConfig());
   OmniboxClient.registerProvider(new DashboardOmniboxProvider());
 
-  Operations.addSettings(new Operations.EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
+  Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
     isVisible: () => false,
     color: "warning",
     icon: "gears",

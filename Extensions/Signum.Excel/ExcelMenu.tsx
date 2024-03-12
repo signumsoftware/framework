@@ -7,7 +7,7 @@ import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Excel'
 import * as ExcelClient from './ExcelClient'
 import { Dropdown } from 'react-bootstrap';
-import * as Operations from '@framework/Operations';
+import { Operations } from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
 import { onImportFromExcel } from './Templates/ImportExcelModel'
