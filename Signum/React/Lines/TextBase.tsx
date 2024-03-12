@@ -1,0 +1,27 @@
+import * as React from 'react';
+import { ValueBaseController, ValueBaseProps } from './ValueBase'
+
+export interface TextBaseProps<V = any> extends ValueBaseProps<V> {
+  autoTrimString?: boolean;
+  autoFixString?: boolean;
+  triggerChange?: "onBlur";
+}
+
+export class TextBaseController<T extends TextBaseProps<V>, V> extends ValueBaseController<T, V> {
+
+  tempValueRef!: React.RefObject<V>;
+  init(p: T) {
+    super.init(p);
+    this.tempValueRef = React.useRef<V>(null);
+  }
+
+  setTempValue(value: V) {
+    (this.tempValueRef as React.MutableRefObject<V>).current = value;
+    this.forceUpdate();
+  }
+
+  getValue() {
+    return this.tempValueRef.current ?? this.props.ctx.value;
+  }
+}
+

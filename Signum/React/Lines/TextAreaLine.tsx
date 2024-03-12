@@ -1,28 +1,20 @@
 import * as React from 'react'
-import { DateTime, Duration } from 'luxon'
-import { DatePicker, DropdownList, Combobox } from 'react-widgets'
-import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes } from '../Globals'
-import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
-import { LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
+import { addClass, classes } from '../Globals'
+import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
-import { FormControlReadonly } from '../Lines/FormControlReadonly'
-import { BooleanEnum, EntityControlMessage, JavascriptMessage } from '../Signum.Entities'
+import { EntityControlMessage } from '../Signum.Entities'
 import TextArea from '../Components/TextArea';
 import { getTimeMachineIcon } from './TimeMachineIcon'
 import { TextBoxLineController } from './TextBoxLine'
-import { ValueBaseController, ValueBaseProps } from './ValueBase'
-import { TypeContext } from '../Lines'
 import { useForceUpdate } from '../Hooks'
+import { TextBaseController, TextBaseProps } from './TextBase'
 
-export interface TextAreaLineProps extends ValueBaseProps<string | null> {
-  autoFixString?: boolean;
-  autoTrimString?: boolean;
+export interface TextAreaLineProps extends TextBaseProps<string | null> {
   autoResize?: boolean;
   charCounter?: true | ((length: number) => React.ReactElement | string);
 }
 
-export class TextAreaLineController extends ValueBaseController<TextAreaLineProps, string | null>{
+export class TextAreaLineController extends TextBaseController<TextAreaLineProps, string | null>{
   init(p: TextAreaLineProps) {
     super.init(p);
     this.assertType("TextAreaLine", ["string"]);
@@ -54,16 +46,21 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
 
   const handleTextOnChange = (e: React.SyntheticEvent<any>) => {
     const input = e.currentTarget as HTMLInputElement;
-    c.setValue(input.value, e);
+
+    if (s.triggerChange == "onBlur")
+      c.setTempValue(input.value)
+    else
+      c.setValue(input.value, e); 
+
     ccRef.current?.setCurrentLength(input.value.length);
   };
 
   let handleBlur: ((e: React.FocusEvent<any>) => void) | undefined = undefined;
-  if (s.autoFixString != false) {
+  if (s.autoFixString != false || s.triggerChange == "onBlur") {
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       var fixed = TextAreaLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
-      if (fixed != input.value)
+      if (fixed != s.ctx.value)
         c.setValue(fixed!, e);
 
       if (htmlAtts?.onBlur)
@@ -94,7 +91,10 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
       helpText={s.helpText && cc ? <>{cc}<br />{s.helpText}</> : (cc ?? s.helpText)}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
-        <TextArea {...c.props.valueHtmlAttributes} autoResize={autoResize} className={addClass(c.props.valueHtmlAttributes, classes(s.ctx.formControlClass, c.mandatoryClass))} value={s.ctx.value || ""}
+        <TextArea {...c.props.valueHtmlAttributes}
+          autoResize={autoResize}
+          className={addClass(c.props.valueHtmlAttributes, classes(s.ctx.formControlClass, c.mandatoryClass))}
+          value={c.getValue() ?? ""}
           id={inputId}
           minHeight={c.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}

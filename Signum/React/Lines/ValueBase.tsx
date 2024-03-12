@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Dic } from '../Globals';
 import { LineBaseController, LineBaseProps, setRefProp, tasks, useInitiallyFocused } from '../Lines/LineBase';
 import { getTimeMachineIcon } from './TimeMachineIcon';
-import { Value } from 'react-widgets/cjs';
 
 export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
   format?: string;
@@ -16,10 +15,10 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
 
   inputElement!: React.RefObject<HTMLElement>;
   init(p: T) {
-      super.init(p);
+    super.init(p);
 
-      this.inputElement = React.useRef<HTMLElement>(null);
-      useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
+    this.inputElement = React.useRef<HTMLElement>(null);
+    useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
   }
 
   setRefs = (node: HTMLElement | null) => {
@@ -38,7 +37,6 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
       super.overrideProps(state, overridenProps);
       state.valueHtmlAttributes = valueHtmlAttributes;
   }
-
 
   withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
 
@@ -69,6 +67,7 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
           ((p.ctx.placeholderLabels || p.ctx.formGroupStyle == "FloatingLabel") ? asString(p.label) :
               undefined);
   }
+
   static autoFixString(str: string | null | undefined, autoTrim: boolean, autoNull: boolean): string | null | undefined {
 
     if (autoTrim)
@@ -76,7 +75,6 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
 
     return str == "" && autoNull ? null : str;
   }
-
 }
 
 export function asString(reactChild: React.ReactNode | undefined): string | undefined {
