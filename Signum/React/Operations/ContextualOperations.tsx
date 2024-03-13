@@ -17,45 +17,7 @@ import { CollectionMessage } from "../Signum.External";
 
 export namespace ContextualOperations {
 
-  export function getConstructFromManyContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
-    if (ctx.lites.length == 0)
-      return undefined;
-
-    if (ctx.container instanceof SearchControlLoaded && ctx.container.state.resultFindOptions?.systemTime)
-      return undefined;
-
-    const types = ctx.lites.groupBy(lite => lite.EntityType);
-
-    if (types.length != 1)
-      return undefined;
-
-    const ti = getTypeInfo(types[0].key);
-
-    const menuItems = Operations.operationInfos(ti)
-      .filter(oi => oi.operationType == "ConstructorFromMany")
-      .map(oi => {
-        const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
-        return new ContextualOperationContext<Entity>(oi, ctx, cos);
-      })
-      .filter(coc => coc.isVisibleInContextualMenu())
-      .map(coc => coc!)
-      .orderBy(coc => coc.settings && coc.settings.order)
-      .flatMap(coc => coc.createMenuItems());
-
-    if (!menuItems.length)
-      return undefined;
-
-    return Promise.resolve({
-      header: SearchMessage.Create.niceToString(),
-      menuItems: menuItems
-    } as MenuItemBlock);
-  }
-
-
-
-
-
-  export function getEntityOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> | undefined {
+  export async function getOperationsContextualItems(ctx: ContextualItemsContext<Entity>): Promise<MenuItemBlock | undefined> {
     if (ctx.lites.length == 0)
       return undefined;
 
@@ -69,13 +31,19 @@ export namespace ContextualOperations {
 
     const ti = getTypeInfo(types[0].key);
     const contexts = Operations.operationInfos(ti)
-      .filter(oi => Operations.isEntityOperation(oi.operationType))
+      .filter(oi => Operations.isEntityOperation(oi.operationType) || oi.operationType == "ConstructorFromMany")
       .map(oi => {
-        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
-        const cos = eos == undefined ? undefined :
-          ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-        const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
-        return coc;
+
+        if (oi.operationType == "ConstructorFromMany") {
+          const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
+          return new ContextualOperationContext<Entity>(oi, ctx, cos);
+        } else {
+          const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
+          const cos = eos == undefined ? undefined :
+            ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
+          const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
+          return coc;
+        }
       })
       .filter(coc => coc.isVisibleInContextualMenu())
       .map(coc => coc!)
@@ -84,52 +52,55 @@ export namespace ContextualOperations {
     if (!contexts.length)
       return undefined;
 
-    let contextPromise: Promise<ContextualOperationContext<Entity>[]>;
-    if (contexts.some(coc => coc.operationInfo.hasCanExecute || coc.operationInfo.hasStates) || Operations.Options.maybeReadonly(ti)) {
+    if (contexts.some(coc => coc.operationInfo.hasCanExecute || coc.operationInfo.hasCanExecuteExpression || coc.operationInfo.hasStates) || Operations.Options.maybeReadonly(ti)) {
       if (ctx.lites.length == 1) {
-        contextPromise = Navigator.API.fetchEntityPack(ctx.lites[0]).then(ep => {
-          contexts.forEach(coc => {
+        var normal = contexts.filter(a => a.operationInfo.operationType != "ConstructorFromMany");
+        if (normal.length) {
+          var ep = await Navigator.API.fetchEntityPack(ctx.lites[0]);
+          normal.forEach(coc => {
             coc.pack = ep;
             coc.canExecute = ep.canExecute[coc.operationInfo.key];
             coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
           });
-          return contexts;
-        });
-      } else /*if (ctx.lites.length > 1)*/ {
-        contextPromise = Operations.API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
-          .then(response => {
-            contexts.forEach(coc => {
-              coc.canExecute = response.canExecutes[coc.operationInfo.key];
-              coc.isReadonly = response.isReadOnly;
-            });
-            return contexts;
+        }
+
+        var cfm = contexts.filter(a => a.operationInfo.operationType == "ConstructorFromMany");
+        if (cfm.length) {
+          const response = await Operations.API.stateCanExecutes(ctx.lites, cfm.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
+          cfm.forEach(coc => {
+            coc.canExecute = response.canExecutes[coc.operationInfo.key];
+            coc.isReadonly = response.isReadOnly;
           });
+        }
+
+      } else /*if (ctx.lites.length > 1)*/ {
+        const response = await Operations.API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
+        contexts.forEach(coc => {
+          coc.canExecute = response.canExecutes[coc.operationInfo.key];
+          coc.isReadonly = response.isReadOnly;
+        });
       }
     } else {
 
       if (Navigator.isReadOnly(ti, { ignoreTypeIsReadonly: true })) {
         contexts.forEach(a => a.isReadonly = true);
       }
-
-      contextPromise = Promise.resolve(contexts);
     }
 
-    return contextPromise.then(ctxs => {
-      const menuItems = ctxs
-        .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
-        .filter(coc => !coc.isReadonly || showOnReadonly(coc))
-        .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
-          coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-        .flatMap(coc => coc.createMenuItems());
+    const menuItems = contexts
+      .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+      .filter(coc => !coc.isReadonly || showOnReadonly(coc))
+      .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
+        coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
+      .flatMap(coc => coc.createMenuItems());
 
-      if (menuItems.length == 0)
-        return undefined;
+    if (menuItems.length == 0)
+      return undefined;
 
-      return {
-        header: SearchMessage.Operations.niceToString(),
-        menuItems: menuItems
-      } as MenuItemBlock;
-    });
+    return {
+      header: SearchMessage.Operations.niceToString(),
+      menuItems: menuItems
+    } as MenuItemBlock;
   }
 
 

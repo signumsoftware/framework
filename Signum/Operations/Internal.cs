@@ -14,7 +14,6 @@ public interface IConstructorFromOperation : IEntityOperation
 public interface IConstructorFromManyOperation : IOperation
 {
     IEntity Construct(IEnumerable<Lite<IEntity>> lites, params object?[]? parameters);
-
     Type BaseType { get; }
 }
 

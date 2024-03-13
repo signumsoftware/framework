@@ -38,8 +38,7 @@ export namespace Operations {
 
   export function start() {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
-    ContexualItems.onContextualItems.push(ContextualOperations.getConstructFromManyContextualItems);
-    ContexualItems.onContextualItems.push(ContextualOperations.getEntityOperationsContextualItems);
+    ContexualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 

@@ -50,7 +50,6 @@ public class OperationController : ControllerBase
         Entity entity;
         try
         {
-
             entity = OperationLogic.ServiceExecute(request.entity, op, request.ParseArgs(op));
         }
         catch (IntegrityCheckException ex)
