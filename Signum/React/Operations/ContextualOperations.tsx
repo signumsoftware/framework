@@ -193,7 +193,8 @@ function getConfirmMessage(coc: ContextualOperationContext<Entity>) {
 }
 
 function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
-  return coc.operationInfo.operationType == "Delete" || coc.context.lites.length > 1;
+  return coc.operationInfo.operationType == "Delete" ||
+    coc.operationInfo.operationType != "ConstructorFromMany" && coc.context.lites.length > 1;
 }
 
 function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {
