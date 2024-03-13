@@ -60,7 +60,7 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       var fixed = TextAreaLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : false, false);
-      if (fixed != s.ctx.value)
+      if (fixed != (s.ctx.value ?? ""))
         c.setValue(fixed!, e);
 
       if (htmlAtts?.onBlur)

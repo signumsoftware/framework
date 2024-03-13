@@ -120,7 +120,7 @@ function internalTextBox<V extends string | null>(vl: TextBoxLineController, typ
     handleBlur = (e: React.FocusEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       var fixed = TextBoxLineController.autoFixString(input.value, s.autoTrimString != null ? s.autoTrimString : true, type == "guid");
-      if (fixed != s.ctx.value)
+      if (fixed != (s.ctx.value ?? ""))
         vl.setValue(fixed as V, e);
 
       if (htmlAtts?.onBlur)
