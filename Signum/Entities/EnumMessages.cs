@@ -465,6 +465,8 @@ public enum JavascriptMessage
     removeColumn,
     [Description("Group by this column")]
     groupByThisColumn,
+    [Description("Remove other columns")]
+    removeOtherColumns,
     [Description("Restore default columns")]
     restoreDefaultColumns,
     [Description("Saved")]

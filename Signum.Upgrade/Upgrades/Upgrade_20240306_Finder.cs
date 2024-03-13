@@ -13,8 +13,8 @@ public class Upgrade_20240306_Finder : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var simpleExports = "toFilterRequests|getTypeNiceName|renderFilterValue|CellFormatter|EntityFormatter|isAggregate|toFilterOptions|AddToLite|CellFormatterContext|EntityFormatRule|FilterValueFormatter|FormatRule|QuickFilterRule|filterValueFormatRules|decompress|formatRules|TokenCompleter|useInDB|parseOrderOptions";
-        var regexHooksFinder = new Regex($@"(?<!\.|get)({simpleExports})\b", RegexOptions.Singleline);
+        var simpleExports = "toFilterRequests|getTypeNiceName|renderFilterValue|CellFormatter|EntityFormatter|isAggregate|toFilterOptions|AddToLite|CellFormatterContext|EntityFormatRule|FilterValueFormatter|FormatRule|QuickFilterRule|filterValueFormatRules|decompress|formatRules|TokenCompleter|useInDB|useQuery|parseOrderOptions";
+        var regexHooksFinder = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         var simpleExportArray = simpleExports.Split("|");
 
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>

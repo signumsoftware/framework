@@ -11,11 +11,11 @@ namespace Signum.Templating;
 
 public static class TemplateUtils
 {
-    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>[^\]\}]+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
+    public static readonly Regex KeywordsRegex = new Regex(@"\@(((?<keyword>(foreach|if|raw|global|model|modelraw|any|declare|))\[(?<expr>((\[[^\[\]]+\])|([^\[\]]+))+)\](\s+as\s+(?<dec>\$\w*))?)|(?<keyword>endforeach|else|endif|notany|endany))");
 
     public static readonly Regex TokenOperationValueRegex = new Regex(@"(?<token>((?<type>[\w]):)?.+?)(?<operation>(" + FilterValueConverter.OperationRegex + @"))(?<value>[^\]]+)");
 
-    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?(\\\]|\\\:|[^\:\]])+)(\:(?<format>.*))?");
+    public static readonly Regex TokenFormatRegex = new Regex(@"(?<token>((?<type>[\w]):)?((\[[^\[\]]+\])|([^\[\]\:]+))+)(\:(?<format>.*))?");
     
     public struct SplittedToken
     {
@@ -33,7 +33,7 @@ public static class TemplateUtils
 
         return new SplittedToken
         {
-            Token = tok.Groups["token"].Value.Replace(@"\:", ":").Replace(@"\]", "]"),
+            Token = tok.Groups["token"].Value,
             Format = tok.Groups["format"].Value.DefaultText("").Replace(@"\:", ":").Replace(@"\]", "]").DefaultToNull()
         };
     }

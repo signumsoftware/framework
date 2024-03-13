@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Navigator } from '@framework/Navigator'
+import { Navigator, ViewOverride } from '@framework/Navigator'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding } from '@framework/Reflection'
@@ -21,7 +21,7 @@ interface DynamicViewEntityComponentState {
   exampleEntity: Entity | null;
   rootNode?: BaseNode;
   selectedNode?: DesignerNode<BaseNode>;
-  viewOverrides?: Navigator.ViewOverride<ModifiableEntity>[];
+  viewOverrides?: ViewOverride<ModifiableEntity>[];
 }
 
 export default class DynamicViewEntityComponent extends React.Component<DynamicViewEntityComponentProps, DynamicViewEntityComponentState> implements IRenderButtons {

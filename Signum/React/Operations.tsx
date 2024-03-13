@@ -502,7 +502,6 @@ export interface ContextualOperationOptions<T extends Entity> {
 }
 
 export class ContextualOperationContext<T extends Entity> {
-
   context: ContextualItemsContext<T>
   operationInfo: OperationInfo;
   settings?: ContextualOperationSettings<T>;

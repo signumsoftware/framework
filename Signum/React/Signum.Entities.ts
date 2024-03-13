@@ -459,6 +459,7 @@ export module JavascriptMessage {
   export const editColumn = new MessageKey("JavascriptMessage", "editColumn");
   export const removeColumn = new MessageKey("JavascriptMessage", "removeColumn");
   export const groupByThisColumn = new MessageKey("JavascriptMessage", "groupByThisColumn");
+  export const removeOtherColumns = new MessageKey("JavascriptMessage", "removeOtherColumns");
   export const restoreDefaultColumns = new MessageKey("JavascriptMessage", "restoreDefaultColumns");
   export const saved = new MessageKey("JavascriptMessage", "saved");
   export const search = new MessageKey("JavascriptMessage", "search");

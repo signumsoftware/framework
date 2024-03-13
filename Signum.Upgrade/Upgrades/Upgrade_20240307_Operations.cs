@@ -15,7 +15,7 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
     public override void Execute(UpgradeContext uctx)
     {
         var simpleExports = "clearOperationSettings|operationInfos|getSettings|CreateGroup|isEntityOperation|getShortcutToString|notifySuccess|operationSettings";
-        var regexHooksFinder = new Regex($@"(?<!\.|function\s|module\s|[A-Za-z])({simpleExports})\b", RegexOptions.Singleline);
+        var regexHooksFinder = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         var simpleExportArray = simpleExports.Split("|");
 
         var newSimpleExport = "ConstructorOperationSettings|ConstructorOperationOptions|ConstructorOperationContext|ContextualOperationSettings|ContextualOperationOptions|ContextualOperationContext|" +
@@ -63,7 +63,7 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
 
 
         simpleExports = "getConstructFromManyContextualItems|getEntityOperationsContextualItems|defaultContextualOperationClick|OperationMenuItem";
-        regexHooksFinder = new Regex($@"(?<!\.|function\s|module\s|[A-Za-z])({simpleExports})\b", RegexOptions.Singleline);
+        regexHooksFinder = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         simpleExportArray = simpleExports.Split("|");
 
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>
@@ -89,8 +89,8 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
         });
 
 
-        simpleExports = "getEntityOperationButtons|withIcon|defaultOnClick|andClose|andNew|OperationButton|confirmInNecessary|defaultExecuteLite|defaultExecuteEntity";
-        regexHooksFinder = new Regex($@"(?<!\.|function\s|module\s|[A-Za-z])({simpleExports})\b", RegexOptions.Singleline);
+        simpleExports = "getEntityOperationButtons|withIcon|defaultOnClick|andClose|andNew|confirmInNecessary|defaultExecuteLite|defaultExecuteEntity";
+        regexHooksFinder = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         simpleExportArray = simpleExports.Split("|");
 
         uctx.ForeachCodeFile(@"*.tsx, *.ts", file =>

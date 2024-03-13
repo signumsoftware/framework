@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { globalModules } from './GlobalModules'
 import { ModifiableEntity } from '@framework/Signum.Entities'
-import { Navigator, ViewPromise } from '@framework/Navigator'
+import { Navigator, ViewPromise, ViewOverride } from '@framework/Navigator'
 import { classes, Dic } from '@framework/Globals'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor'
 import { Binding, EnumType, PropertyRoute, isTypeModifiableEntity } from '@framework/Reflection'
@@ -17,7 +17,6 @@ import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import { registeredCustomContexts } from '../DynamicViewClient'
-import { findMany } from '@framework/Finder';
 import * as Lines from '@framework/Lines'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 
@@ -341,7 +340,7 @@ export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNo
 }
 
 
-export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: Navigator.ViewOverride<ModifiableEntity>[] }) {
+export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: ViewOverride<ModifiableEntity>[] }) {
 
   var resultWithErrors: JSX.Element | null | undefined;
 

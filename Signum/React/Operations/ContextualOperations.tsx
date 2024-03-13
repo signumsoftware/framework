@@ -35,14 +35,14 @@ export namespace ContextualOperations {
       .map(oi => {
 
         if (oi.operationType == "ConstructorFromMany") {
-          const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
-          return new ContextualOperationContext<Entity>(oi, ctx, cos);
+        const cos = Operations.getSettings(oi.key) as ContextualOperationSettings<Entity> | undefined;
+        return new ContextualOperationContext<Entity>(oi, ctx, cos);
         } else {
-          const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
-          const cos = eos == undefined ? undefined :
-            ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
-          const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
-          return coc;
+        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity> | undefined;
+        const cos = eos == undefined ? undefined :
+          ctx.lites.length == 1 ? eos.contextual : eos.contextualFromMany
+        const coc = new ContextualOperationContext<Entity>(oi, ctx, cos, eos);
+        return coc;
         }
       })
       .filter(coc => coc.isVisibleInContextualMenu())
@@ -70,15 +70,15 @@ export namespace ContextualOperations {
           cfm.forEach(coc => {
             coc.canExecute = response.canExecutes[coc.operationInfo.key];
             coc.isReadonly = response.isReadOnly;
-          });
+        });
         }
 
       } else /*if (ctx.lites.length > 1)*/ {
         const response = await Operations.API.stateCanExecutes(ctx.lites, contexts.filter(coc => coc.operationInfo.hasStates || coc.operationInfo.hasCanExecuteExpression).map(a => a.operationInfo.key))
-        contexts.forEach(coc => {
-          coc.canExecute = response.canExecutes[coc.operationInfo.key];
-          coc.isReadonly = response.isReadOnly;
-        });
+            contexts.forEach(coc => {
+              coc.canExecute = response.canExecutes[coc.operationInfo.key];
+              coc.isReadonly = response.isReadOnly;
+            });
       }
     } else {
 
@@ -88,19 +88,19 @@ export namespace ContextualOperations {
     }
 
     const menuItems = contexts
-      .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
-      .filter(coc => !coc.isReadonly || showOnReadonly(coc))
-      .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
-        coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
-      .flatMap(coc => coc.createMenuItems());
+        .filter(coc => coc.canExecute == undefined || !hideOnCanExecute(coc))
+        .filter(coc => !coc.isReadonly || showOnReadonly(coc))
+        .orderBy(coc => coc.settings && coc.settings.order != undefined ? coc.settings.order :
+          coc.entityOperationSettings && coc.entityOperationSettings.order != undefined ? coc.entityOperationSettings.order : 0)
+        .flatMap(coc => coc.createMenuItems());
 
-    if (menuItems.length == 0)
-      return undefined;
+      if (menuItems.length == 0)
+        return undefined;
 
-    return {
-      header: SearchMessage.Operations.niceToString(),
-      menuItems: menuItems
-    } as MenuItemBlock;
+      return {
+        header: SearchMessage.Operations.niceToString(),
+        menuItems: menuItems
+      } as MenuItemBlock;
   }
 
 
@@ -156,12 +156,17 @@ export namespace ContextualOperations {
     }
 
 
-    if (coc.operationInfo.operationType == "Delete") {
+  if (defaultHasConfirmMessage(coc)) {
       return getDefaultConfirmMessage(coc);
     }
 
     return undefined;
   }
+
+function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
+  return coc.operationInfo.operationType == "Delete" ||
+    coc.operationInfo.operationType != "ConstructorFromMany" && coc.context.lites.length > 1;
+}
 
   function getDefaultConfirmMessage(coc: ContextualOperationContext<Entity>) {
 

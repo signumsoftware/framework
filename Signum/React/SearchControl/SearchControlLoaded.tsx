@@ -32,7 +32,7 @@ import "./SearchMobile.css"
 import PinnedFilterBuilder from './PinnedFilterBuilder';
 import { AutoFocus } from '../Components/AutoFocus';
 import { ButtonBarElement, StyleContext } from '../TypeContext';
-import { Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
+import { Button, ButtonGroup, Dropdown, DropdownButton, OverlayTrigger, Tooltip } from 'react-bootstrap'
 import { getBreakpoint, Breakpoints, useForceUpdate } from '../Hooks'
 import { IconDefinition, IconProp } from '@fortawesome/fontawesome-svg-core'
 import { similarToken } from '../Search'
@@ -157,7 +157,7 @@ export interface SearchControlLoadedState {
 
 type SearchControlFilterMode = "Simple" | "Advanced" | "Pinned";
 
-export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState>{
+export class SearchControlLoaded extends React.Component<SearchControlLoadedProps, SearchControlLoadedState> {
 
   constructor(props: SearchControlLoadedProps) {
     super(props);
@@ -1045,6 +1045,21 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearchPage1();
   }
 
+  handleRemoveOtherColumns = () => {
+    const cm = this.state.contextualMenu!;
+    const fo = this.props.findOptions;
+
+    const col = fo.columnOptions[cm.columnIndex!];
+
+    fo.columnOptions.clear();
+    fo.columnOptions.push(col);
+
+    this.setState({ editingColumn: undefined }, () => this.handleHeightChanged());
+
+    if (this.props.searchOnLoad)
+      this.doSearchPage1();
+  }
+
   handleRestoreDefaultColumn = () => {
     const cm = this.state.contextualMenu!;
     const fo = this.props.findOptions;
@@ -1115,6 +1130,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           menuItems.push(<Dropdown.Item className="sf-group-by-column" onClick={this.handleGroupByThisColumn}>
             {getGroupByThisColumnIcon()}&nbsp;{JavascriptMessage.groupByThisColumn.niceToString()}
           </Dropdown.Item>);
+
+        menuItems.push(<Dropdown.Item className="sf-remove-other-columns" onClick={this.handleRemoveOtherColumns}>
+          {getRemoveOtherColumns()}&nbsp;{JavascriptMessage.removeOtherColumns.niceToString()}
+        </Dropdown.Item>);
       }
 
       menuItems.push(<Dropdown.Item className="sf-restore-default-columns" onClick={this.handleRestoreDefaultColumn}>
@@ -2028,6 +2047,13 @@ export function getGroupByThisColumnIcon() {
   </span>
 }
 
+export function getRemoveOtherColumns() {
+  return <span className="fa-layers fa-fw icon">
+    <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
+    <FontAwesomeIcon icon="remove" transform="shrink-4 up-8 right-8" color="black" />
+  </span>
+}
+
 export function getRemoveColumnIcon() {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="table-columns" transform="left-2" color="gray" />
@@ -2052,7 +2078,7 @@ export function getInsertColumnIcon() {
 export function getAddFilterIcon() {
   return <span className="fa-layers fa-fw icon">
     <FontAwesomeIcon icon="filter" transform="left-2" color="gray" />
-    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#008400" />
+    <FontAwesomeIcon icon={["fas", "square-plus"]} transform="shrink-3 up-8 right-8" color="#21618C" />
   </span>
 }
 
@@ -2143,24 +2169,22 @@ function dominates(root: QueryToken, big: QueryToken) {
 
 function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boolean }) {
 
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
-
   if (p.isHidden)
     return null;
 
-  function handleSelectedToggle(isOpen: boolean) {
-    setIsOpen(isOpen);
-  }
   var props = p.sc.props;
   var filterMode = p.sc.state.filterMode;
+  const active = filterMode == "Advanced" || filterMode == "Pinned";
   return (
-    <Dropdown onToggle={handleSelectedToggle} show={isOpen}>
-      <Dropdown.Toggle as={EllipseToggle} id="ellipsisMenuDropDown" variant={"light"} >
-      </Dropdown.Toggle>
+    <Dropdown as={ButtonGroup}>
+      <Button variant="light" id="" className="sf-filter-button pe-1" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+        <FontAwesomeIcon icon="filter" />
+      </Button>
+      <Dropdown.Toggle split className="ps-1" variant={"light"} ></Dropdown.Toggle>
       <Dropdown.Menu>
-        <Dropdown.Item active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
-        <Dropdown.Item active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>
+        <Dropdown.Item data-key={("Pinned" satisfies SearchControlFilterMode)} active={filterMode == 'Pinned'} onClick={e => p.sc.handleChangeFiltermode('Pinned')} ><span className="me-2" style={{ visibility: filterMode != 'Pinned' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.FilterDesigner.niceToString()}</Dropdown.Item>
         {props.showSystemTimeButton && <Dropdown.Divider />}
         {props.showSystemTimeButton && <Dropdown.Item onClick={p.sc.handleSystemTimeClick} ><span className="me-2" style={{ visibility: p.sc.props.findOptions.systemTime == null ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.TimeMachine.niceToString()}</Dropdown.Item>}
       </Dropdown.Menu>

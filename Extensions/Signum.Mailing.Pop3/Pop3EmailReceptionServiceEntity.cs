@@ -13,6 +13,7 @@ public class Pop3EmailReceptionServiceEntity : EmailReceptionServiceEntity
     [StringLengthValidator(Max = 100)]
     public string? Username { get; set; }
 
+    [Format("Password")]
     [StringLengthValidator(Max = 100)]
     public string? Password { get; set; }
 

@@ -67,7 +67,7 @@ public class SearchControlProxy
 
     public WebElementLocator ToggleFiltersButton
     {
-        get { return this.Element.WithLocator(By.ClassName("sf-filters-header")); }
+        get { return this.Element.WithLocator(By.ClassName("sf-filter-button")); }
     }
 
     public WebElementLocator FiltersPanel

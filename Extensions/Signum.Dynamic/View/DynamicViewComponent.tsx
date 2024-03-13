@@ -4,7 +4,7 @@ import { AutoLine } from '@framework/Lines'
 import { ModifiableEntity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { classes } from '@framework/Globals'
 import { getTypeInfo } from '@framework/Reflection'
-import { Navigator } from '@framework/Navigator'
+import { Navigator, ViewOverride } from '@framework/Navigator'
 import MessageModal from '@framework/Modals/MessageModal'
 import { TypeContext } from '@framework/TypeContext'
 import { Operations } from '@framework/Operations'
@@ -30,7 +30,7 @@ export interface DynamicViewComponentState {
   rootNode: BaseNode;
   selectedNode: DesignerNode<BaseNode>;
   dynamicView: DynamicViewEntity;
-  viewOverrides?: Navigator.ViewOverride<ModifiableEntity>[];
+  viewOverrides?: ViewOverride<ModifiableEntity>[];
   
 }
 
