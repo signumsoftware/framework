@@ -16,7 +16,7 @@ public class QueryTokenPartProxy
     {
         if (!this.Element.IsElementVisible(By.ClassName("rw-popup-container")))
         {
-            this.Element.FindElement(By.ClassName("rw-dropdown-list")).SafeClick();
+            this.Element.FindElement(By.CssSelector(".rw-dropdown-list,.sf-query-token-plus")).SafeClick();
         }
 
         var container = this.Element.WaitElementVisible(By.ClassName("rw-popup-container"));

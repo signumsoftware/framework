@@ -13,9 +13,8 @@ import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQue
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { Finder } from '@framework/Finder'
-import { EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
-import { confirmInNecessary, OperationButton } from '@framework/Operations/EntityOperations'
+import { Operations, EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
+import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations'
 import TypeHelpButtonBarComponent from '../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import {
   WorkflowConditionEval, WorkflowTimerConditionEval, WorkflowActionEval, WorkflowMessage, WorkflowActivityMonitorMessage,
@@ -50,7 +49,7 @@ import { EmailMessageEntity } from '../Signum.Mailing/Signum.Mailing';
 import { FunctionalAdapter } from '@framework/Modals';
 import { QueryString } from '@framework/QueryString';
 import * as UserAssetsClient from '../Signum.UserAssets/UserAssetClient'
-import { OperationMenuItem } from '@framework/Operations/ContextualOperations';
+import { ContextualOperations } from '@framework/Operations/ContextualOperations';
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 import MessageModal from '@framework/Modals/MessageModal';
 import { ExecuteSymbol } from '@framework/Signum.Operations';
@@ -359,11 +358,11 @@ export function start(options: { routes: RouteObject[], overrideCaseActivityMixi
         const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
         if (wa.type == "Task") {
 
-          return [wa.customNextButton == null ? <OperationMenuItem coc={coc} />
-            : <OperationMenuItem coc={coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</OperationMenuItem>];
+          return [wa.customNextButton == null ? <ContextualOperations.OperationMenuItem coc={coc} />
+            : <ContextualOperations.OperationMenuItem coc={coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</ContextualOperations.OperationMenuItem>];
 
         } else if (wa.type == "Decision") {
-          return wa.decisionOptions.map(mle => <OperationMenuItem coc={coc} onOperationClick={() => coc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</OperationMenuItem>);
+          return wa.decisionOptions.map(mle => <ContextualOperations.OperationMenuItem coc={coc} onOperationClick={() => coc.defaultClick(mle.element.name)} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</ContextualOperations.OperationMenuItem>);
         }
         else
           return [];
@@ -533,7 +532,7 @@ function hide<T extends Entity>(type: Type<T>) {
   Navigator.addSettings(new EntitySettings(type, undefined, { isViewable: "Never", isCreable: "Never" }));
 }
 
-export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: Operations.EntityOperationContext<CaseActivityEntity>) => Promise<void>): Promise<void> {
+export function executeCaseActivity(eoc: EntityOperationContext<CaseActivityEntity>, defaultOnClick: (eoc: EntityOperationContext<CaseActivityEntity>) => Promise<void>): Promise<void> {
   const op = customOnClicks[eoc.operationInfo.key];
 
   const onClick = op && op[eoc.entity.case.mainEntity.Type];
@@ -541,10 +540,10 @@ export function executeCaseActivity(eoc: Operations.EntityOperationContext<CaseA
   if (onClick)
     return onClick(eoc);
   else
-    return defaultOnClick(eoc);
+    return EntityOperations.defaultOnClick(eoc);
 }
 
-export function executeWorkflowSave(eoc: Operations.EntityOperationContext<WorkflowEntity>): Promise<void> {
+export function executeWorkflowSave(eoc: EntityOperationContext<WorkflowEntity>): Promise<void> {
 
 
   function saveAndSetErrors(entity: WorkflowEntity, model: WorkflowModel, replacementModel: WorkflowReplacementModel | undefined): Promise<void> {
@@ -617,9 +616,9 @@ function getWorkflowFreeJump(workflow: WorkflowEntity): Promise<Lite<WorkflowEnt
   });
 }
 
-export function executeAndClose(eoc: Operations.EntityOperationContext<CaseActivityEntity>): Promise<void> {
+export function executeAndClose(eoc: EntityOperationContext<CaseActivityEntity>): Promise<void> {
 
-  return confirmInNecessary(eoc).then(conf => {
+  return EntityOperations.confirmInNecessary(eoc).then(conf => {
     if (!conf)
       return;
 

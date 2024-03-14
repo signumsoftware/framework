@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useParams } from 'react-router'
 import { Dic } from '@framework/Globals'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { getToString } from '@framework/Signum.Entities'
 import { API, AssemblyResult } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Translation'
@@ -30,7 +30,7 @@ export default function TranslationCodeSync() {
 
   function handleSave() {
     API.save(assembly, culture ?? "", result!)
-      .then(() => notifySuccess())
+      .then(() => Operations.notifySuccess())
       .then(() => reloadResult());
   }
 

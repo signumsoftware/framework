@@ -1,5 +1,5 @@
 import * as React from 'react'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { useRootClose } from '@restart/ui'
 import { Finder } from '@framework/Finder'
 import { is, JavascriptMessage, toLite } from '@framework/Signum.Entities'

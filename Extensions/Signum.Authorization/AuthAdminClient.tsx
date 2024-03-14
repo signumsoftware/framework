@@ -10,10 +10,9 @@ import { EntityBaseController, FormGroup, TypeContext } from '@framework/Lines'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import * as QuickLinks from '@framework/QuickLinks'
-import { EntityOperationSettings } from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import { PseudoType, getTypeInfo, OperationInfo, getQueryInfo, GraphExplorer, PropertyRoute, tryGetTypeInfo, getAllTypes, Type, QueryTokenString, QueryKey, getQueryKey, getTypeInfos, symbolNiceName, getSymbol } from '@framework/Reflection'
-import * as Operations from '@framework/Operations'
 import {
   PropertyAllowed, TypeAllowedBasic, AuthAdminMessage, BasicPermission,
   PermissionRulePack, TypeRulePack, OperationRulePack, PropertyRulePack, QueryRulePack, QueryAllowed, TypeConditionSymbol

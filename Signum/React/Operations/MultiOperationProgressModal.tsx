@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
-import { API } from '../Operations';
+import { Operations } from '../Operations';
 import { Modal, ProgressBar } from 'react-bootstrap';
 import { Entity, JavascriptMessage, Lite, liteKey, OperationMessage } from '../Signum.Entities';
 import { useForceUpdate, useThrottle } from '../Hooks';
@@ -12,7 +12,7 @@ import { CollectionMessage } from '../Signum.External';
 import { OperationSymbol } from '../Signum.Operations';
 
 
-interface MultiOperationProgressModalProps extends IModalProps<API.ErrorReport> {
+interface MultiOperationProgressModalProps extends IModalProps<Operations.API.ErrorReport> {
   operation: OperationInfo;
   lites: Lite<Entity>[];
   makeRequest: () => Promise<Response>;
@@ -23,7 +23,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
-  const operationResultsRef = React.useRef([] as API.OperationResult[]);
+  const operationResultsRef = React.useRef([] as Operations.API.OperationResult[]);
 
 
   const [requestStarted, setRequestStarted] = React.useState<boolean>(false)
@@ -34,7 +34,7 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
     setRequestStarted(true);
     var resp = await p.makeRequest();
 
-    var generator = jsonObjectStream<API.OperationResult>(resp.body!.getReader());
+    var generator = jsonObjectStream<Operations.API.OperationResult>(resp.body!.getReader());
     for await (const val of generator) {
       operationResultsRef.current.push(val);
       forceUpdate();
@@ -88,15 +88,15 @@ export function MultiOperationProgressModal(p: MultiOperationProgressModalProps)
   );
 }
 
-MultiOperationProgressModal.show = (lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: ()=> Promise<Response>): Promise<API.ErrorReport> => {
+MultiOperationProgressModal.show = (lites: Lite<Entity>[], operationKey: string | OperationSymbol, progressModal: boolean | undefined, abortController: AbortController, makeRequest: ()=> Promise<Response>): Promise<Operations.API.ErrorReport> => {
 
   if (progressModal ?? lites.length > 1) {
     var oi = getOperationInfo(operationKey, lites[0].EntityType);
-    return openModal<API.ErrorReport>(<MultiOperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
+    return openModal<Operations.API.ErrorReport>(<MultiOperationProgressModal operation={oi} lites={lites} makeRequest={makeRequest} abortController={abortController} />);
   } else {
     return makeRequest().then(r => r.json()).then(obj => {
-      var results = obj as API.OperationResult[];
-      return softCast<API.ErrorReport>({ errors: results.toObject(a => liteKey(a.entity), a => a.error) });
+      var results = obj as Operations.API.OperationResult[];
+      return softCast<Operations.API.ErrorReport>({ errors: results.toObject(a => liteKey(a.entity), a => a.error) });
     });
   }
 };

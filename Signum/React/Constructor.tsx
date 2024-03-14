@@ -2,7 +2,7 @@ import { Dic } from './Globals';
 import { Entity, ModifiableEntity, SelectorMessage, EntityPack, isEntityPack } from './Signum.Entities';
 import { Type, getTypeInfo, OperationType, New, OperationInfo, PropertyRoute, tryGetTypeInfo } from './Reflection';
 import SelectorModal from './SelectorModal';
-import * as Operations from './Operations';
+import { Operations, ConstructorOperationSettings, ConstructorOperationContext } from './Operations';
 import { Navigator } from './Navigator';
 
 export namespace Constructor {
@@ -51,9 +51,9 @@ export namespace Constructor {
             if (!oi)
               return undefined;
 
-            const settings = Operations.getSettings(oi.key) as Operations.ConstructorOperationSettings<Entity>;
+            const settings = Operations.getSettings(oi.key) as ConstructorOperationSettings<Entity>;
 
-            var ctx = new Operations.ConstructorOperationContext(oi, settings, ti);
+            var ctx = new ConstructorOperationContext(oi, settings, ti);
 
             if (settings?.onConstruct)
               return settings.onConstruct(ctx, props);

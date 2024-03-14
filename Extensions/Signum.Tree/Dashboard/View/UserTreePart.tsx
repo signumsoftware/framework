@@ -8,7 +8,7 @@ import { useAPI } from '@framework/Hooks'
 import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { TreeViewer } from '../../TreeViewer'
 import { TreeOperation, UserTreePartEntity } from '../../Signum.Tree'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 
 
 export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity>) {

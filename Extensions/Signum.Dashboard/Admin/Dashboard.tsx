@@ -15,7 +15,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { SearchValueLine } from '@framework/Search';
 import { Navigator } from '@framework/Navigator';
 import { classes } from '@framework/Globals';
-import { OperationButton } from '@framework/Operations/EntityOperations';
+import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';

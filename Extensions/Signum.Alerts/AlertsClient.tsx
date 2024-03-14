@@ -3,13 +3,12 @@ import { RouteObject } from 'react-router'
 import { Link } from 'react-router-dom'
 import { DateTime } from 'luxon'
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import { EntityOperationSettings } from '@framework/Operations'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Alerts'
 import * as QuickLinks from '@framework/QuickLinks'
-import { andClose } from '@framework/Operations/EntityOperations';
+import { EntityOperations } from '@framework/Operations/EntityOperations';
 import * as AuthClient from '../Signum.Authorization/AuthClient'
 import { ajaxGet } from '@framework/Services'
 import { Finder } from '@framework/Finder'
@@ -51,7 +50,7 @@ export function start(options: { routes: RouteObject[], showAlerts: (typeName: s
   )]));
 
   Operations.addSettings(new EntityOperationSettings(AlertOperation.Attend, {
-    alternatives: eoc => [andClose(eoc)],
+    alternatives: eoc => [EntityOperations.andClose(eoc)],
     hideOnCanExecute: true
   }));
 

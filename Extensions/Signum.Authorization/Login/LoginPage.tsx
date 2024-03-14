@@ -40,7 +40,7 @@ export default function LoginPage() {
       {LoginPage.showLoginForm == "initially_not" && showLoginForm == false &&
         <div className="row">
           <div className="col-md-6 offset-md-3 mt-2">
-            <a href="#" className="ms-1" onClick={e => {
+            <a href="#" className="ms-1" id="sf-show-login-form" onClick={e => {
               e.preventDefault();
               setShowLoginForm(true);
             }}>

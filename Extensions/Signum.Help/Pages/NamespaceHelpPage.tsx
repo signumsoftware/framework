@@ -7,10 +7,9 @@ import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection';
 import { JavascriptMessage, Entity } from '@framework/Signum.Entities';
-import * as Operations from '@framework/Operations';
+import { Operations } from '@framework/Operations';
 import { TypeContext } from '@framework/Lines';
 import { EditableHtmlComponent, EditableTextComponent } from './EditableText';
-import { notifySuccess } from '@framework/Operations';
 import { useTitle } from '@framework/AppContext';
 import { classes } from '@framework/Globals';
 import { Shortcut } from './TypeHelpPage'
@@ -63,7 +62,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
     API.saveNamespace(ctx.value)
       .then((() => {
         onSuccess();
-        notifySuccess();
+        Operations.notifySuccess();
       }));
   }
 

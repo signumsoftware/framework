@@ -36,12 +36,13 @@ export function GroupHeader(p: {
 
   return (
     <fieldset >
-      <legend>
+      {(p.label || p.labelIcon || p.buttons) && < legend >
         <div>
           <span>{p.label}{p.labelIcon}</span>
           {p.buttons}
         </div>
       </legend>
+      }
       {p.children}
     </fieldset>
   );

@@ -12,7 +12,7 @@ import { normalizeEmptyArray } from './EntityCombo'
 import { ResultTable } from '../Search'
 import { Navigator } from '../Navigator'
 import { getTimeMachineCheckboxIcon, getTimeMachineIcon } from './TimeMachineIcon'
-import { getEntityOperationButtons } from '../Operations/EntityOperations'
+import { EntityOperations } from '../Operations/EntityOperations'
 import { GroupHeader, HeaderType } from './GroupHeader'
 import { Aprox } from './EntityBase'
 

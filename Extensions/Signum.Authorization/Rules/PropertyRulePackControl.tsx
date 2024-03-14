@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Button } from 'react-bootstrap';
 import { PropertyRouteEntity } from '@framework/Signum.Basics';
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { API } from '../AuthAdminClient'
@@ -18,7 +18,7 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
     API.savePropertyRulePack(pack)
       .then(() => API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
-        notifySuccess();
+        Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
   }

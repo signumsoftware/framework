@@ -5,7 +5,7 @@ import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { classes } from '@framework/Globals'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { notifySuccess } from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, EntityFrame, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
@@ -54,7 +54,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
     API.saveTypeRulePack(pack)
       .then(() => API.fetchTypeRulePack(pack.role.id!))
       .then(newPack => {
-        notifySuccess();
+        Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
   }

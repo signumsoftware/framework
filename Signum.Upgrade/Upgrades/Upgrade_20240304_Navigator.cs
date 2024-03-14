@@ -20,7 +20,7 @@ class Upgrade_20240304_Navigator : CodeUpgradeBase
     {
         var simpleExports = "useFetchAndRemember|useFetchInState|useFetchInStateWithReload|useFetchAll|useLiteToString|useEntityChanged";
 
-        var regexSipleNavigator = new Regex($@"(?<!\.)({simpleExports})\b", RegexOptions.Singleline);
+        var regexSipleNavigator = new Regex($@"(?<!\.)\b({simpleExports})\b", RegexOptions.Singleline);
         var simpleExportsArray = simpleExports.Split("|");
 
         

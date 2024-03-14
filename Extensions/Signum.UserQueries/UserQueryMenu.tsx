@@ -12,7 +12,7 @@ import * as UserQueryClient from './UserQueryClient'
 import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
-import * as Operations from '@framework/Operations';
+import { Operations } from '@framework/Operations';
 import { FilterOption, FilterOptionParsed } from '@framework/Search'
 import { FindOptionsParsed, isFilterCondition, isFilterGroup, PinnedFilter, SubTokensOptions } from '@framework/FindOptions'
 import { QueryString } from '@framework/QueryString'

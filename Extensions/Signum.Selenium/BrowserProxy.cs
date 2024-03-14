@@ -116,7 +116,12 @@ public class BrowserProxy
     public virtual void Login(string username, string password)
     {
         Selenium.Url = Url("Auth/Login");
-        Selenium.WaitElementPresent(By.Id("login"));
+        var button = Selenium.WaitElementPresent(By.CssSelector("#login, #sf-show-login-form"));
+        if(button.GetID() == "sf-show-login-form")
+        {
+            button.Click();
+            Selenium.WaitElementPresent(By.CssSelector("#login"));
+        }
 
         var currentUser = GetCurrentUser();
         if (currentUser == username)

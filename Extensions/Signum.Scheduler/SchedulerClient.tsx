@@ -3,7 +3,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxGet } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as Operations from '@framework/Operations'
+import { Operations, EntityOperationGroup, EntityOperationSettings } from '@framework/Operations'
 import { Lite } from '@framework/Signum.Entities'
 import {
   ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduleRuleMinutelyEntity, ScheduleRuleMonthsEntity,
@@ -28,12 +28,12 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(ScheduleRuleMonthsEntity, e => import('./Templates/ScheduleRuleMonths')));
   Navigator.addSettings(new EntitySettings(HolidayCalendarEntity, e => import('./Templates/HolidayCalendar')));
 
-  var group: Operations.EntityOperationGroup = {
+  var group: EntityOperationGroup = {
     key: "execute",
     text: () => ITaskMessage.Execute.niceToString()
   };
 
-  Operations.addSettings(new Operations.EntityOperationSettings(ITaskOperation.ExecuteSync, {
+  Operations.addSettings(new EntityOperationSettings(ITaskOperation.ExecuteSync, {
     icon: "bolt",
     iconColor: "#F1C40F",
     group: group

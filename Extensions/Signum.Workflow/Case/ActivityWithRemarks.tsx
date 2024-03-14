@@ -6,7 +6,7 @@ import { CaseActivityMessage, CaseNotificationEntity, CaseNotificationOperation,
 import { FindOptions } from '@framework/Search'
 import { Finder } from '@framework/Finder'
 import * as AppContext from '@framework/AppContext'
-import * as Operations from '@framework/Operations'
+import { Operations } from '@framework/Operations'
 import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity } from '../../Signum.Alerts/Signum.Alerts'
 import InlineCaseTags from './InlineCaseTags'

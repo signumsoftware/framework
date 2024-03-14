@@ -5,9 +5,8 @@ import { ajaxPost, ajaxGet, saveFile, ajaxGetRaw } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
 import { Lite, toLite } from '@framework/Signum.Entities'
-import { EntityOperationSettings } from '@framework/Operations'
+import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { symbolNiceName, toNumberFormat } from '@framework/Reflection'
-import * as Operations from '@framework/Operations'
 import {
   PredictorEntity, PredictorSubQueryEntity, PredictorMessage,
   PredictorAlgorithmSymbol,
