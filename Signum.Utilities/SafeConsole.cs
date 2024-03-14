@@ -95,6 +95,11 @@ public static class SafeConsole
         return Ask(question, "yes", "no") == "yes";
     }
 
+    public static bool AskRetry(string question)
+    {
+        return AskRetry(question, "yes", "no") == "yes";
+    }
+
     public static string AskRetry(string question, params string[] answers)
     {
         retry:

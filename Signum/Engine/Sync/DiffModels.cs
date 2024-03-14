@@ -63,6 +63,7 @@ public class DiffTable
 
     public SysTableTemporalType TemporalType;
     public ObjectName? TemporalTableName;
+    public ObjectName? InferredTemporalTableName;
     public DiffPeriod? Period;
 
     public Dictionary<string, DiffIndex> Indices = new Dictionary<string, DiffIndex>();

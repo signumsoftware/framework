@@ -62,7 +62,7 @@ export function initFormatRules(): Finder.FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && isMultiline(pr))
+          if (pr != null && pr.member != null && isMultiline(pr))
             return true;
         }
 
@@ -93,7 +93,7 @@ export function initFormatRules(): Finder.FormatRule[] {
       isApplicable: qt => {
         if (qt.type.name == "string" && qt.propertyRoute != null) {
           var pr = PropertyRoute.tryParseFull(qt.propertyRoute);
-          if (pr != null && pr.member != null && !pr.member.isPhone && !pr.member.isMail && (!pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength <= 20))
+          if (pr != null && pr.member != null && !pr.member.isMultiline && pr.member.maxLength != null && pr.member.maxLength <= 150)
             return true;
         }
 
