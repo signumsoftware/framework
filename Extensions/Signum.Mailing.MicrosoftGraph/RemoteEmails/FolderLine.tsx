@@ -6,8 +6,6 @@ import { UserEntity, UserLiteModel } from '../../Signum.Authorization/Signum.Aut
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { classes } from '@framework/Globals';
 import { API } from './RemoteEmailsClient';
-import { EntityOperations, defaultConstructFromEntity } from '@framework/Operations/EntityOperations';
-
 
 export function FolderLine(p: { ctx: TypeContext<RemoteEmailFolderModel | null>; user: Lite<UserEntity> | undefined; label?: string; mandatory?: boolean; onChange: () => void }) {
   var oid = (p.user?.model as UserLiteModel)?.oID;
