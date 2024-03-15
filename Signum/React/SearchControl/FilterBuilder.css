@@ -41,3 +41,8 @@ select.form-control.sf-group-selector {
     min-width: 22px;
     text-align: center;
 }
+
+    .sf-remove-filter-icon .disable {
+        cursor: default;
+        opacity: 0;
+    }
