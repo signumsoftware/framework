@@ -9,7 +9,7 @@ using Signum.UserAssets.Queries;
 namespace Signum.Dashboard;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
+public class DashboardEntity : Entity, IUserAssetLikedEntity, ITaskEntity
 {
     public DashboardEntity()
     {

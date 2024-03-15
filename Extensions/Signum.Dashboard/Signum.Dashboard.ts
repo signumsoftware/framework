@@ -45,7 +45,7 @@ export type DashboardEmbedededInEntity =
   "Tab";
 
 export const DashboardEntity = new Type<DashboardEntity>("Dashboard");
-export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Scheduler.ITaskEntity {
+export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetLikedEntity, UserAssets.IUserAssetEntity, Scheduler.ITaskEntity {
   Type: "Dashboard";
   entityType: Entities.Lite<Basics.TypeEntity> | null;
   embeddedInEntity: DashboardEmbedededInEntity | null;
