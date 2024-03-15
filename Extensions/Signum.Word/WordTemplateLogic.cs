@@ -39,6 +39,10 @@ public static class WordTemplateLogic
 
     public static Func<Entity?, CultureInfo>? GetCultureInfo;
 
+
+    [AutoExpressionField]
+    public static WordTemplateEntity WordTemplate(this FileEntity file) => As.Expression(() => Database.Query<WordTemplateEntity>().SingleEx(wt => wt.Template.Is(file)));
+
     [AutoExpressionField]
     public static IQueryable<WordTemplateEntity> WordTemplates(this WordModelEntity e) => 
         As.Expression(() => Database.Query<WordTemplateEntity>().Where(a => a.Model.Is(e)));
@@ -461,14 +465,14 @@ public static class WordTemplateLogic
         WordModelLogic.WordModelTypeToEntity.Load(); //To avoid N exceptions
 
         SqlPreCommand? cmd = wordTemplates
-            .Select(wt => SynchronizeWordTemplateFile(replacements, wt, sd, table)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})"))
+            .Select(wt => SynchronizeWordTemplate(replacements, wt, sd, table)?.TransactionBlock($"WordTemplate Guid = {wt.Guid} Ticks = {wt.Ticks} ({wt})"))
             .Combine(Spacing.Double);
 
         return cmd;
     }
 
 
-    internal static SqlPreCommand? SynchronizeWordTemplateFile(Replacements replacements, WordTemplateEntity wt, StringDistance sd, Table table)
+    internal static SqlPreCommand? SynchronizeWordTemplate(Replacements replacements, WordTemplateEntity wt, StringDistance sd, Table table)
     {
         if (!replacements.Interactive)
             return null;
@@ -548,9 +552,9 @@ public static class WordTemplateLogic
                         if (sc.HasChanges)
                         {
                             Dump(document, "3.Synchronized.txt");
-                            var variables = new ScopedDictionary<string, ValueProviderBase>(null);
                             foreach (var root in document.AllRootElements())
                             {
+                                var variables = new ScopedDictionary<string, ValueProviderBase>(null);
                                 foreach (var node in root.Descendants<BaseNode>().ToList())
                                 {
                                     node.RenderTemplate(variables);
@@ -569,7 +573,7 @@ public static class WordTemplateLogic
                         file.BinaryFile = bytes;
 
                         using (replacements.WithReplacedDatabaseName())
-                            fileSync = Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash, comment: "WordTemplate: " + wt.Name);
+                            fileSync = Schema.Current.Table<FileEntity>().UpdateSqlSync(file, f => f.Hash == oldHash && f.WordTemplate().Guid == wt.Guid && f.WordTemplate().Ticks == wt.Ticks, comment: "WordTemplate: " + wt.Name);
                     }
                 }
                 catch (TemplateSyncException ex)
