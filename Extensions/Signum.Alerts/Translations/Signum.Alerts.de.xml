@@ -17,6 +17,7 @@
     <Member Name="Attended" Description="Erledigte" />
     <Member Name="AttendedBy" Description="Erledigt von" />
     <Member Name="AttendedDate" Description="Erledigungsdatum" />
+    <Member Name="AvoidSendMail" Description="E-Mail-Versand vermeiden" />
     <Member Name="CreatedBy" Description="Erstellt von" />
     <Member Name="CreationDate" Description="Erstellungsdatum" />
     <Member Name="CurrentState" Description="Aktueller Status" />
