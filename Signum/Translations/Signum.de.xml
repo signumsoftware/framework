@@ -331,6 +331,7 @@
     <Member Name="popupErrorsStop" Description="Es sind Fehler in der Entität" />
     <Member Name="remove" Description="Entfernen" />
     <Member Name="removeColumn" Description="Spalte löschen" />
+    <Member Name="removeOtherColumns" Description="Andere Spalten entfernen" />
     <Member Name="restoreDefaultColumns" Description="Standard-Spalten wiederherstellen" />
     <Member Name="saveChangesBeforeOrPressCancel" Description="Speichern Sie die Änderungen vorher oder drücken Sie &quot;Abbrechen&quot;" />
     <Member Name="saved" Description="Gespeichert" />

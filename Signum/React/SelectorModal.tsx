@@ -7,7 +7,7 @@ import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
 
 interface SelectorModalProps extends IModalProps<any> {
-  options: { value: unknown; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement> }[];
+  options: { value: unknown; displayName: React.ReactNode; name: string; htmlAttributes?: React.HTMLAttributes<HTMLButtonElement>, groupKey?: string }[];
   title: React.ReactNode;
   message: React.ReactNode;
   size?: BsSize;
@@ -15,7 +15,8 @@ interface SelectorModalProps extends IModalProps<any> {
   multiSelect?: {
     minElements?: number | null, /*Default 1*/
     maxElements?: number | null;
-  }
+  },
+  renderGroup?: (groupKey: string) => React.ReactNode;
 }
 
 export default function SelectorModal(p: SelectorModalProps) {
@@ -64,8 +65,10 @@ export default function SelectorModal(p: SelectorModalProps) {
       }
     }
 
-  
+
   };
+
+  var groups = p.options.groupBy(a => a.groupKey ?? "");
 
   return (
     <Modal size={p.size || "sm" as any} show={show} onExited={handleOnExited}
@@ -82,21 +85,25 @@ export default function SelectorModal(p: SelectorModalProps) {
       <div className="modal-body">
         <div>
           {p.message && (typeof p.message == "string" ? <p>{p.message}</p> : p.message)}
-          {p.multiSelect ? <div>
-            {p.options.map((o, i) =>
-              <label className="m-2" style={{ display: "block", userSelect: "none" }} onDoubleClick={e => { e.preventDefault(); handleDoubleClickClicked(o.value); }} key={i}>
-                <input type={p.multiSelect?.maxElements == 1 ? "radio" : "checkbox"} onChange={e => handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} />
-                {" "}{o.displayName}
-              </label>)}
-          </div> :
-            <div>{
-              p.options.map((o, i) =>
-                <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
-                  className="sf-chooser-button sf-close-button btn btn-light" {...o.htmlAttributes}>
-                  {o.displayName}
-                </button>)
-            }</div>
-          }
+
+          <div className="row">
+            {groups
+              .map(gr => <div className="col-sm" key={gr.key}>
+                {gr.key && (p.renderGroup == null ? <h4 className="lead">{gr.key}</h4> : p.renderGroup!(gr.key))}
+                {gr.elements.map((o, i) =>
+                  p.multiSelect ?
+                    <label className="m-2" style={{ display: "block", userSelect: "none" }} onDoubleClick={e => { e.preventDefault(); handleDoubleClickClicked(o.value); }} key={i}>
+                      <input type={p.multiSelect?.maxElements == 1 ? "radio" : "checkbox"} onChange={e => handleCheckboxOnChange(e, o.value)} className={"form-check-input"} name={o.displayName?.toString()!} checked={selectedItems.contains(o.value)} />
+                      {" "}{o.displayName}
+                    </label> :
+                    <button key={i} type="button" onClick={() => handleButtonClicked(o.value)} name={o.name}
+                      className={"sf-chooser-button sf-close-button btn btn-light"} >
+                      {o.displayName}
+                    </button>)
+                }
+              </div>)
+            }
+          </div>
         </div>
       </div>
 
@@ -114,7 +121,7 @@ export default function SelectorModal(p: SelectorModalProps) {
 }
 
 SelectorModal.chooseElement = <T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> => {
-  const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
+  const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
 
   if (!config || !config.forceShow) {
     if (options.length == 1)
@@ -129,7 +136,8 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
       value: a,
       displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
       name: buttonName ? buttonName(a) : a.toString(),
-      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a)
+      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
+      groupKey: buttonGroupKey?.(a) ?? undefined,
     }))}
     title={title || SelectorMessage.ChooseAValue.niceToString()}
     message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
@@ -138,7 +146,7 @@ SelectorModal.chooseElement = <T extends Object>(options: T[], config?: Selector
 };
 
 SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: MultiSelectorConfig<T>): Promise<T[] | undefined> => {
-  const { buttonDisplay, buttonName, title, message, size, dialogClassName } = config || {} as SelectorConfig<T>;
+  const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
 
   var minElements = config?.minElements === undefined ? 1 : config.minElements;
 
@@ -156,6 +164,7 @@ SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: Mult
       displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
       name: buttonName ? buttonName(a) : a.toString(),
       htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
+      groupKey: buttonGroupKey?.(a) ?? undefined,
     }))}
     title={title || SelectorMessage.ChooseValues.niceToString()}
     message={message ?? SelectorMessage.PleaseSelectAtLeastOneValueToContinue.niceToString()}
@@ -210,6 +219,7 @@ export interface SelectorConfig<T> {
   buttonName?: (val: T) => string; //For testing
   buttonDisplay?: (val: T) => React.ReactNode;
   buttonHtmlAttributes?: (val: T) => React.HTMLAttributes<HTMLButtonElement>; //For testing
+  buttonGroupKey?: (val: T) => string | null | undefined;
   title?: React.ReactNode;
   message?: React.ReactNode;
   size?: BsSize;
