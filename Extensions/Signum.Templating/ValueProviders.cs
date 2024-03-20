@@ -612,7 +612,7 @@ public class ModelValueProvider : ValueProviderBase
     {
         if (Members == null)
         {
-            Members = sc.GetMembers(fieldOrPropertyChain!, sc.ModelType!);
+            Members = sc.GetMembers(fieldOrPropertyChain!, sc.ModelType!, ref sc.HasChanges);
 
             if (Members != null)
                 fieldOrPropertyChain = Members.ToString(a => a.ToString(sc.Variables), ".");
@@ -737,7 +737,7 @@ public class GlobalValueProvider : ValueProviderBase
 
         if(remainingFieldsOrProperties.HasText() && Members == null)
         {
-            Members = sc.GetMembers(remainingFieldsOrProperties, GlobalVariables[globalKey].Type);
+            Members = sc.GetMembers(remainingFieldsOrProperties, GlobalVariables[globalKey].Type, ref sc.HasChanges);
 
             if (Members != null)
                 remainingFieldsOrProperties = Members.ToString(a => a.ToString(sc.Variables), ".");
@@ -983,7 +983,7 @@ public class ContinueValueProvider : ValueProviderBase
     {
         if (Members == null)
         {
-            Members = sc.GetMembers(fieldOrPropertyChain!, ParentType()!);
+            Members = sc.GetMembers(fieldOrPropertyChain!, ParentType()!, ref sc.HasChanges);
 
             if (Members != null)
                 fieldOrPropertyChain = Members.ToString(a => a.ToString(sc.Variables), ".");

@@ -8,7 +8,7 @@ public static partial class TextTemplateParser
 {
     public static BlockNode Parse(string? text, QueryDescription? qd, Type? modelType)
     {
-        return new TextTemplateParserImp(text, qd, modelType).Parse();      
+        return new TextTemplateParserImp(text, qd, modelType).Parse();
     }
 
     public static BlockNode TryParse(string? text, QueryDescription? qd, Type? modelType, out string errorMessage)
@@ -16,10 +16,10 @@ public static partial class TextTemplateParser
         return new TextTemplateParserImp(text, qd, modelType).TryParse(out errorMessage);
     }
 
-    internal class TextTemplateParserImp: ITemplateParser
+    internal class TextTemplateParserImp : ITemplateParser
     {
         string text;
-        
+
         BlockNode mainBlock = null!;
         Stack<BlockNode> stack = null!;
         public ScopedDictionary<string, ValueProviderBase> Variables { get; set; } = null!;
@@ -36,7 +36,7 @@ public static partial class TextTemplateParser
         {
             this.text = text ?? "";
             this.QueryDescription = qd;
-            this.ModelType = modelType; 
+            this.ModelType = modelType;
         }
 
         public BlockNode Parse()
@@ -68,7 +68,7 @@ public static partial class TextTemplateParser
 
         public void AddError(bool fatal, string message)
         {
-            errors.Add(new TemplateError(fatal, message)); 
+            errors.Add(new TemplateError(fatal, message));
         }
 
         void DeclareVariable(ValueProviderBase? valueProvider)
@@ -102,7 +102,7 @@ public static partial class TextTemplateParser
         public void PushBlock(BlockNode block)
         {
             stack.Push(block);
-            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables); 
+            Variables = new ScopedDictionary<string, ValueProviderBase>(Variables);
         }
 
         void ParseInternal()
@@ -189,7 +189,7 @@ public static partial class TextTemplateParser
                                 var fn = new ForeachNode(vp);
                                 stack.Peek().Nodes.Add(fn);
                                 PushBlock(fn.Block);
-                                if(vp != null)
+                                if (vp != null)
                                     vp.IsForeach = true;
                                 DeclareVariable(vp);
                                 break;
@@ -251,8 +251,6 @@ public static partial class TextTemplateParser
 
         node.Synchronize(sc);
 
-        return node.ToString(); 
+        return node.ToString();
     }
 }
-
-   

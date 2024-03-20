@@ -350,7 +350,7 @@ public static class EmailTemplateLogic
 
         EmailModelLogic.EntityToType.Load(); //To avoid N exceptions
 
-        SqlPreCommand? cmd = emailTemplates.Select(uq => ProcessEmailTemplate(replacements, table, uq, sd)).Combine(Spacing.Double);
+        SqlPreCommand? cmd = emailTemplates.Select(et => ProcessEmailTemplate(replacements, table, et, sd)).Combine(Spacing.Double);
 
         return cmd;
     }

@@ -17,6 +17,7 @@ class Upgrade_20240312_TypeScript_and_nugets : CodeUpgradeBase
             file.UpdateNugetReference("Microsoft.TypeScript.MSBuild", "5.4.2");
             file.UpdateNugetReference("Azure.Messaging.ServiceBus", "7.17.4");
             file.UpdateNugetReference("Microsoft.Data.SqlClient", "5.2.0");
+            file.UpdateNugetReference("Microsoft.Graph", "5.44.0");
             file.UpdateNugetReference("Microsoft.CodeAnalysis.CSharp", "4.9.2");
             file.UpdateNugetReference("Selenium.WebDriver.ChromeDriver", "122.0.6261.11100");
             file.UpdateNugetReference("SixLabors.ImageSharp", "2.1.7");

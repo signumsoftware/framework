@@ -78,8 +78,11 @@ export const MultiValueLine = genericForwardRef(function MultiValueLine<V>(props
     if (props.onRenderItem)
       return props.onRenderItem;
 
-    var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true)!;
-    return AutoLine.getComponentFactory(pr.typeReference(), pr);
+    var pr = c.props.ctx.propertyRoute?.addMember("Indexer", "", true);
+    if (pr)
+      return AutoLine.getComponentFactory(pr.typeReference(), pr);
+
+    return null;
   }, [Boolean(p.onRenderItem), p.ctx.propertyPath]);
 
   if (c.isHidden)
@@ -101,7 +104,7 @@ export const MultiValueLine = genericForwardRef(function MultiValueLine<V>(props
                     <MultiValueLineElement
                       ctx={mlec}
                       onRemove={e => { e.preventDefault(); c.handleDeleteValue(i); }}
-                      onRenderItem={renderItem}
+                      onRenderItem={renderItem!}
                       valueColumClass={p.valueColumClass!} />
                   </div>
                 </ErrorBoundary>

@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Excel;
@@ -17,7 +18,8 @@ public enum DefaultStyle
     Number,
     Decimal,
     Percentage,
-    Time
+    Time,
+    Multiline
 }
 
 public class CellBuilder
@@ -95,6 +97,7 @@ public class CellBuilder
     public Cell Cell(object? value, DefaultStyle template, UInt32Value styleIndex, bool forImport = false)
     {
         string excelValue = value == null ? "" :
+
             template == DefaultStyle.DateTime ? ExcelExtensions.ToExcelDate(((DateTime)value)) :
             template == DefaultStyle.Date ? value is DateTime dt ? ExcelExtensions.ToExcelDate(dt) : ExcelExtensions.ToExcelDate(((DateOnly)value).ToDateTime()) :
             template == DefaultStyle.Time ? ExcelExtensions.ToExcelTime((TimeOnly)value) :
@@ -103,6 +106,7 @@ public class CellBuilder
             forImport && template == DefaultStyle.Enum ? value.ToString()! :
             template == DefaultStyle.Enum ? ((Enum)value).NiceToString() :
             forImport && value is Lite<Entity> lite ? lite.KeyLong() :
+            value is string s ? s.Replace("\r\n", "\n").Replace("\n", "\r\n") :
             value.ToString()!;
 
         Cell cell = 
@@ -123,7 +127,8 @@ public class CellBuilder
             DefaultStyle.Header or 
             DefaultStyle.Text or
             DefaultStyle.General or 
-            DefaultStyle.Enum => true,
+            DefaultStyle.Enum or 
+            DefaultStyle.Multiline => true,
 
             DefaultStyle.Boolean or 
             DefaultStyle.Date or 
@@ -154,7 +159,10 @@ public class CellBuilder
             }
         }
 
-        var defaultStyle = c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d" ? DefaultStyle.Date :
+        var defaultStyle = 
+            c.Column.Type == typeof(string) && c.Column.Token is EntityPropertyToken ept && Validator.TryGetPropertyValidator(ept.PropertyRoute)?.Validators.Any(v => v is StringLengthValidatorAttribute slv && slv.MultiLine) == true? DefaultStyle.Multiline: 
+            c.Column.Token is CollectionToArrayToken at && at.ToArrayType is CollectionToArrayType.SeparatedByNewLine or  CollectionToArrayType.SeparatedByNewLineDistinct ? DefaultStyle.Text :
+            c.Column.Type.UnNullify() == typeof(DateTime) && c.Column.Format == "d" ? DefaultStyle.Date :
             ReflectionTools.IsDecimalNumber(c.Column.Type) && c.Column.Format?.ToLower()== "p"? DefaultStyle.Percentage :
             GetDefaultStyle(c.Column.Type);
 

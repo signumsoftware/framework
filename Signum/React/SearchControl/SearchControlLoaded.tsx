@@ -2177,10 +2177,10 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
   const active = filterMode == "Advanced" || filterMode == "Pinned";
   return (
     <Dropdown as={ButtonGroup}>
-      <Button variant="light" id="" className="sf-filter-button pe-1" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
+      <Button variant="light" id="" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon icon="filter" />
       </Button>
-      <Dropdown.Toggle split className="ps-1" variant={"light"} ></Dropdown.Toggle>
+      <Dropdown.Toggle split className="px-2" variant={"light"} ></Dropdown.Toggle>
       <Dropdown.Menu>
         <Dropdown.Item data-key={("Simple" satisfies SearchControlFilterMode)} active={filterMode == 'Simple'} onClick={e => p.sc.handleChangeFiltermode('Simple')} ><span className="me-2" style={{ visibility: filterMode != 'Simple' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.SimpleFilters.niceToString()}</Dropdown.Item>
         <Dropdown.Item data-key={("Advanced" satisfies SearchControlFilterMode)} active={filterMode == 'Advanced'} onClick={e => p.sc.handleChangeFiltermode('Advanced')} ><span className="me-2" style={{ visibility: filterMode != 'Advanced' ? 'hidden' : undefined }} > <FontAwesomeIcon icon="check" color="navy" /></span>{SearchMessage.AdvancedFilters.niceToString()}</Dropdown.Item>

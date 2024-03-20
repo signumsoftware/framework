@@ -377,7 +377,7 @@ public class TemplateSynchronizationContext
                     break;
                 case FixTokenResult.SkipEntity:
                 case FixTokenResult.RemoveToken:
-                 case FixTokenResult.RegenerateEntity:
+                case FixTokenResult.RegenerateEntity:
                     throw new TemplateSyncException(result);
             }
         }
@@ -400,8 +400,9 @@ public class TemplateSynchronizationContext
     }
 
 
-    internal List<MemberWithArguments>? GetMembers(string fieldOrPropertyChain, Type initialType)
+    internal List<MemberWithArguments>? GetMembers(string fieldOrPropertyChain, Type initialType, ref bool hasChanges)
     {
+        hasChanges = false;
         List<MemberWithArguments> fields = new List<MemberWithArguments>();
 
         Type type = initialType;
@@ -415,7 +416,13 @@ public class TemplateSynchronizationContext
             string? s = this.Replacements.SelectInteractive(field, allMembers.Keys, "Members {0}".FormatWith(type.FullName), this.StringDistance);
 
             if (s == null)
+            {
+                hasChanges = true;
                 return null;
+            }
+
+            if (s != field)
+                hasChanges = true;
 
             var member = allMembers.GetOrThrow(s);
 
