@@ -819,10 +819,11 @@ Consider the following options:
     }
 
     internal static GenericInvoker<Func<IOperation, IEnumerable<Lite<IEntity>>, Dictionary<PrimaryKey, string>>> giGetCanExecute =
-        new GenericInvoker<Func<IOperation, IEnumerable<Lite<IEntity>>, Dictionary<PrimaryKey, string>>>((op, lites) => GetCanExecute<Entity>(op, (IEnumerable<Lite<Entity>>)lites));
-    static Dictionary<PrimaryKey, string> GetCanExecute<FF>(IOperation operation, IEnumerable<Lite<FF>> lites)
+        new GenericInvoker<Func<IOperation, IEnumerable<Lite<IEntity>>, Dictionary<PrimaryKey, string>>>((op, lites) => GetCanExecute<Entity>(op, lites));
+    static Dictionary<PrimaryKey, string> GetCanExecute<FF>(IOperation operation, IEnumerable<Lite<IEntity>> lites)
         where FF : Entity
     {
+        var casted = lites.Cast<Lite<FF>>();
         var eParam = Expression.Parameter(typeof(FF));
         var canExecutes = Expression.Lambda<Func<FF, string?>>(Expression.Invoke(operation.CanExecuteExpression()!, eParam), eParam);
         return Database.Query<FF>().Where(a => lites.Contains(a.ToLite()))

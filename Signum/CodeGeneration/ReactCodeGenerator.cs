@@ -317,9 +317,9 @@ public class ReactCodeGenerator
         sb.AppendLine("import { Route, RouteObject } from 'react-router'");
         sb.AppendLine("import { ajaxPost, ajaxGet } from '@framework/Services';");
         sb.AppendLine("import { EntitySettings, ViewPromise } from '@framework/Navigator'");
-        sb.AppendLine("import * as Navigator from '@framework/Navigator'");
+        sb.AppendLine("import { Navigator } from '@framework/Navigator'");
         sb.AppendLine("import { EntityOperationSettings } from '@framework/Operations'");
-        sb.AppendLine("import * as Operations from '@framework/Operations'");
+        sb.AppendLine("import { Operations } from '@framework/Operations'");
 
         foreach (var gr in mod.Types.GroupBy(a => a.Namespace))
         {
