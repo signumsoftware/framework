@@ -176,6 +176,7 @@ export interface ProcessLogicState {
   applicationName: string;
   justMyProcesses: boolean;
   nextPlannedExecution: string;
+  log: string;
   executing: ExecutionState[];
 }
 
