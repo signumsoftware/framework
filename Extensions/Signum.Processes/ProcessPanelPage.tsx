@@ -107,6 +107,9 @@ export default function ProcessPanelPage() {
           deps={[state?.executing.map(a => a.process.id!.toString()).join(",")]}
         />
       </div>
+      <pre>
+        {s.log}
+      </pre>
     </div>
   );
 }
