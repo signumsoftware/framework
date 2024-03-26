@@ -17,7 +17,7 @@ import { FindOptionsLine, QueryTokenLine, ViewNameComponent, FetchQueryDescripti
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import * as NodeUtils from './NodeUtils'
-import { registeredCustomContexts, API } from '../DynamicViewClient'
+import { DynamicViewClient } from '../DynamicViewClient'
 import { toFindOptions, FindOptionsExpr } from './FindOptionsExpression'
 import { toHtmlAttributes, HtmlAttributesExpression, withClassName } from './HtmlAttributesExpression'
 import { toStyleOptions, StyleOptionsExpression } from './StyleOptionsExpression'
@@ -376,7 +376,7 @@ function ExtraPropsComponent({ dn }: { dn: DesignerNode<RenderEntityNode> }) {
     const staticViews = ["STATIC"].concat((es?.namedViews && Dic.getKeys(es.namedViews)) ?? []);
 
     if (!staticViews.contains(fixedViewName)) {
-      const viewProps = useAPI(signal => API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
+      const viewProps = useAPI(signal => DynamicViewClient.API.getDynamicViewProps(typeName, fixedViewName), [typeName, fixedViewName]);
       if (viewProps && viewProps.length > 0)
         return <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.extraProps)} type={null} defaultValue={null} exampleExpression={"({\r\n" + viewProps!.map(p => `  ${p.name}: null`).join(', \r\n') + "\r\n})"} />
     }
@@ -395,22 +395,22 @@ NodeUtils.register<CustomContextNode>({
   group: "Container",
   order: 6,
   isContainer: true,
-  validate: dn => NodeUtils.mandatory(dn, n => n.typeContext) || (!registeredCustomContexts[dn.node.typeContext] ? `${dn.node.typeContext} not found` : undefined),
+  validate: dn => NodeUtils.mandatory(dn, n => n.typeContext) || (!DynamicViewClient.registeredCustomContexts[dn.node.typeContext] ? `${dn.node.typeContext} not found` : undefined),
   renderTreeNode: dn => <span><small > {dn.node.kind}:</small > <strong>{dn.node.typeContext}</strong></span >,
   renderCode: (node, cc) => {
-    const ncc = registeredCustomContexts[node.typeContext].getCodeContext(cc);
+    const ncc = DynamicViewClient.registeredCustomContexts[node.typeContext].getCodeContext(cc);
     var childrensCode = node.children.map(c => NodeUtils.renderCode(c, ncc));
     return ncc.elementCode("div", null, ...childrensCode);
   },
   render: (dn, parentCtx) => {
-    const nctx = registeredCustomContexts[dn.node.typeContext].getTypeContext(parentCtx);
+    const nctx = DynamicViewClient.registeredCustomContexts[dn.node.typeContext].getTypeContext(parentCtx);
     if (!nctx)
       return undefined;
 
     return NodeUtils.withChildrensSubCtx(dn, nctx, <div />);
   },
   renderDesigner: dn => (<div>
-    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeContext)} allowsExpression={false} type="string" options={Dic.getKeys(registeredCustomContexts)} defaultValue={null} />
+    <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, n => n.typeContext)} allowsExpression={false} type="string" options={Dic.getKeys(DynamicViewClient.registeredCustomContexts)} defaultValue={null} />
   </div>),
 });
 

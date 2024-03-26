@@ -8,14 +8,14 @@ import { DateTime } from 'luxon'
 import { useAPI, useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as WhatsNewClient from '../WhatsNewClient'
+import { WhatsNewClient } from '../WhatsNewClient'
 import "./WhatsNewDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
-import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
+import { WhatsNewClient, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
 export default function WhatsNewDropdown() {
@@ -35,9 +35,9 @@ function WhatsNewDropdownImp() {
   
   const isOpenRef = useUpdatedRef(isOpen);
 
-  var [countResult, reloadCount] = useAPIWithReload<WhatsNewClient.NumWhatsNews>(() => WhatsNewClient.API.myNewsCount().then(res => {
+  var [countResult, reloadCount] = useAPIWithReload<WhatsNewClient.NumWhatsNews>(() => WhatsNewClient.WhatsNewClient.API.myNewsCount().then(res => {
     if (isOpenRef.current) {
-      WhatsNewClient.API.myNews()
+      WhatsNewClient.WhatsNewClient.API.myNews()
         .then(als => {
           setNews(als);
         });
@@ -53,7 +53,7 @@ function WhatsNewDropdownImp() {
   function handleOnToggle() {
 
     if (!isOpen) {
-      WhatsNewClient.API.myNews()
+      WhatsNewClient.WhatsNewClient.API.myNews()
         .then(wn => setNews(wn));
     }
 
@@ -80,10 +80,10 @@ function WhatsNewDropdownImp() {
       countResult.numWhatsNews -= 1;
     forceUpdate();
 
-    API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
+    WhatsNewClient.API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
 
       // Pesimistic
-      WhatsNewClient.API.myNews()
+      WhatsNewClient.WhatsNewClient.API.myNews()
         .then(wn => {
           if (wasClosed && wn.length > 0)
             setIsOpen(true);

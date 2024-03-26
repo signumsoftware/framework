@@ -4,7 +4,7 @@ import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror';
 import { useForceUpdate } from '@framework/Hooks';
 import { ModulesHelp } from '../View/ModulesHelp';
-import { DynamicClientEntity } from '../Signum.Dynamic.Client'
+import { Signum.Dynamic.Client, DynamicClientEntity } from '../Signum.Dynamic.Client'
 
 
 export default function DynamicClientComponent(p: { ctx: TypeContext<DynamicClientEntity> }) {

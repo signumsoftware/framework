@@ -3,7 +3,7 @@ import { classes, Dic } from '@framework/Globals'
 import { ModelState } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
-import * as ResetPasswordClient from './ResetPasswordClient'
+import { ResetPasswordClient } from './ResetPasswordClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
 export default function ForgotPasswordEmailPage() {

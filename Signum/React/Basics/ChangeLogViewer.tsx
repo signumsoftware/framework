@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import * as ChangeLogClient from './ChangeLogClient'
+import { ChangeLogClient } from './ChangeLogClient'
 import { useAPI, useAPIWithReload } from "../Hooks";
 import MessageModal from "../Modals/MessageModal";
 import { DateTime } from "luxon";

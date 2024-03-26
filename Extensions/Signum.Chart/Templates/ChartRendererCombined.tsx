@@ -1,8 +1,7 @@
 import * as React from 'react'
 import { ChartRequestModel} from '../Signum.Chart'
-import * as ChartClient from '../ChartClient'
+import { ChartClient, ChartTable } from '../ChartClient'
 import "../Chart.css"
-import { ChartScript } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 import { handleDrillDown } from './ChartRenderer'
@@ -23,8 +22,8 @@ export interface ChartRendererCombinedProps {
 export interface ChartRendererCombinedInfo {
   userChart: Lite<UserChartEntity>;
   chartRequest: ChartRequestModel;
-  chartScript: ChartScript;
-  data?: ChartClient.ChartTable;
+  chartScript: ChartClient.ChartScript;
+  data?: ChartTable;
   memo: MemoRepository;
 } 
 
@@ -57,7 +56,7 @@ export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
               loading={p.loading}
               onDrillDown={(r, e) => handleDrillDown(r, e, p.lastChartRequest!)}
               parameters={parameters}
-              onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)} />
+              onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)} />
           }
         </ErrorBoundary>
       </FullscreenComponent>

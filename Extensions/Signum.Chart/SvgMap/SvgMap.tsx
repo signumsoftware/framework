@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as AppContext from '@framework/AppContext';
 import { useAPI } from '@framework/Hooks';
@@ -8,12 +8,12 @@ import { scaleFor } from '../D3Scripts/Components/ChartUtils';
 import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 
 
-export default function renderSvgMap(p: ChartClient.ChartScriptProps) {
+export default function renderSvgMap(p: ChartScriptProps) {
 
   return <SvgMap {...p} />
 }
 
-function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps) {
+function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, dashboardFilter }: ChartScriptProps) {
 
   const memo = React.useMemo(() => new MemoRepository(), [chartRequest]);
 
@@ -58,18 +58,18 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
 
     var svg = divRef.current!.getElementsByTagName("svg")[0] as SVGElement;
     if (data != null && svg != null) {
-      var locationCodeColumn = data.columns.c0! as ChartClient.ChartColumn<string>;
+      var locationCodeColumn = data.columns.c0! as ChartColumn<string>;
       var locationColumn = data.columns.c1;
-      var colorScaleColumn = data.columns.c2 as ChartClient.ChartColumn<number>;
+      var colorScaleColumn = data.columns.c2 as ChartColumn<number>;
       var colorCategoryColumn = data.columns.c3;
-      var opacityColumn = data.columns.c4 as ChartClient.ChartColumn<number> | undefined;
+      var opacityColumn = data.columns.c4 as ChartColumn<number> | undefined;
 
       var opacity: null | ((row: number) => number | undefined) = null;
       if (opacityColumn != null) {
         opacity = scaleFor(opacityColumn, data.rows.map(opacityColumn.getValue), 0, 1, opacityScale);
       }
 
-      var color: (r: ChartClient.ChartRow) => string | undefined;
+      var color: (r: ChartRow) => string | undefined;
       if (colorScaleColumn) {
         var values = data.rows.map(r => colorScaleColumn!.getValue(r));
   
@@ -89,7 +89,7 @@ function SvgMap({ data, parameters, onDrillDown, width, height, chartRequest, da
 
       var dataDic = data.rows.toObject(row => locationCodeColumn.getValue(row));
 
-      var getRow: (attr: string) => ChartClient.ChartRow | undefined;
+      var getRow: (attr: string) => ChartRow | undefined;
 
       if (locationMatch == "Exact")
         getRow = attr => dataDic[attr];

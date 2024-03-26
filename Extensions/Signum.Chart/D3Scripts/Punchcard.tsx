@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartColumn, ChartRow } from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import { Dic } from '@framework/Globals';
 import { XKeyTicks, YKeyTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
@@ -11,7 +10,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPunchcard({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,

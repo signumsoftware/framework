@@ -10,7 +10,7 @@ import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions'
-import * as PredictorClient from '../PredictorClient';
+import { PredictorClient } from '../PredictorClient';
 import { toLite } from "@framework/Signum.Entities";
 import { newMListElement } from '@framework/Signum.Entities';
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';

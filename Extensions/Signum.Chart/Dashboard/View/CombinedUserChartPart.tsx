@@ -1,16 +1,15 @@
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
 import { JavascriptMessage, toLite, liteKey } from '@framework/Signum.Entities'
-import * as UserChartClient from '../../UserChart/UserChartClient'
-import * as ChartClient from '../../ChartClient'
+import { UserChartClient } from '../../UserChart/UserChartClient'
 import { ChartRequestModel } from '../../Signum.Chart'
 import ChartTableComponent from '../../Templates/ChartTable'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { useForceUpdate } from '@framework/Hooks'
 import { MemoRepository } from '../../D3Scripts/Components/ReactChart'
 import { CombinedUserChartPartEntity, UserChartEntity } from '../../UserChart/Signum.Chart.UserChart'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
-import { executeChartCached } from '../../ChartClient'
+import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { ChartClient } from '../../ChartClient'
 import ChartRendererCombined from '../../Templates/ChartRendererCombined'
 
 
@@ -67,7 +66,7 @@ export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedU
 
                   if (cachedQuery)
                     return ChartClient.getChartScript(chartRequest!.chartScript)
-                      .then(cs => cachedQuery.then(cq => executeChartCached(chartRequest, cs, cq)))
+                      .then(cs => cachedQuery.then(cq => ChartClient.executeChartCached(chartRequest, cs, cq)))
                       .then(result => {
                         if (!signal.aborted) {
                           c.result = result;

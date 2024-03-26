@@ -4,7 +4,7 @@ import { useLocation, useParams, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { API, Urls } from '../HelpClient'
+import { HelpClient, Urls } from '../HelpClient'
 import { SearchControl } from '@framework/Search';
 import { useAPI } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity } from '../Signum.Help';
@@ -15,7 +15,7 @@ export default function HelpIndexPage() {
 
   useTitle(HelpMessage.Help.niceToString());
 
-  var index = useAPI(() => API.index(), []);
+  var index = useAPI(() => HelpClient.API.index(), []);
 
   return (
     <div className="container">

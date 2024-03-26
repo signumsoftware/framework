@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { RestApiKeyEntity, RestApiKeyMessage } from '../Signum.Rest'
 import { TypeContext, AutoLine, EntityLine, TextBoxLine } from "@framework/Lines";
 import { classes } from "@framework/Globals";
-import * as RestApiKeyClient from "../RestApiKeyClient";
+import { RestApiKeyClient } from "../RestApiKeyClient";
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }){

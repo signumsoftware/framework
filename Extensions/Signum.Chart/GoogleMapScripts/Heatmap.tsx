@@ -1,16 +1,16 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartColumn, ChartScriptProps } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function renderHeatmapChart(p: ChartClient.ChartScriptProps) {
+export default function renderHeatmapChart(p: ChartScriptProps) {
   return <HeatmapChartImp {...p} />
 }
 
-function HeatmapChartImp({ data, parameters }: ChartClient.ChartScriptProps) {
+function HeatmapChartImp({ data, parameters }: ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
@@ -33,9 +33,9 @@ function HeatmapChartImp({ data, parameters }: ChartClient.ChartScriptProps) {
     var coords: any[] = [];
 
     if (data) {
-      var latitudeColumn = data.columns.c0! as ChartClient.ChartColumn<number>;
-      var longitudeColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
-      var weightColumn = data.columns.c2! as ChartClient.ChartColumn<number> | undefined;
+      var latitudeColumn = data.columns.c0! as ChartColumn<number>;
+      var longitudeColumn = data.columns.c1! as ChartColumn<number>;
+      var weightColumn = data.columns.c2! as ChartColumn<number> | undefined;
 
       data.rows.forEach(r => {
         if (latitudeColumn.getValue(r) != null &&

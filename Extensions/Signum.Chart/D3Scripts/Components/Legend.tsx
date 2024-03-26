@@ -4,7 +4,7 @@ import { translate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
 import { PivotColumn, PivotTable } from './PivotTable';
-import { ChartRow } from '../../ChartClient';
+import { ChartClient, ChartRow } from '../../ChartClient';
 import { isActive } from '@framework/FindOptions';
 
 interface LegendProps {

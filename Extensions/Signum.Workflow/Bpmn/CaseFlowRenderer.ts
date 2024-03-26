@@ -3,7 +3,7 @@ import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { DateTime, Duration } from 'luxon'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Workflow'
 import { CustomRenderer } from './CustomRenderer'
-import { CaseFlow, CaseActivityStats, formatDuration } from '../WorkflowClient'
+import { WorkflowClient, CaseFlow, CaseActivityStats } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint } from "../../Signum.Map/Utils"
 import { getToString } from "@framework/Signum.Entities"
@@ -194,7 +194,7 @@ function formatMinutes(minutes: number | undefined) {
   if (minutes == undefined)
     return "";
 
-  return formatDuration(Duration.fromObject({ minutes }).shiftTo("days", "hours", "minutes"));
+  return WorkflowClient.formatDuration(Duration.fromObject({ minutes }).shiftTo("days", "hours", "minutes"));
 }
 
 export const __init__ = ['caseFlowRenderer'];

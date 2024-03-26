@@ -4,11 +4,11 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
 import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { WorkflowActivityStats } from "../WorkflowClient";
+import { WorkflowClient, WorkflowActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
 import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Workflow";
 import { SearchControl, ColumnOption } from "@framework/Search";
-import * as WorkflowClient from '../WorkflowClient';
+import { WorkflowClient } from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';

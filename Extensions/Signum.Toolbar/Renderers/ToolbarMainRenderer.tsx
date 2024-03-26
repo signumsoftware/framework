@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { ToolbarMenuEntity } from '../Signum.Toolbar'
-import * as ToolbarClient from '../ToolbarClient'
+import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import { ToolbarConfig } from "../ToolbarConfig"
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
@@ -32,7 +32,7 @@ export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
   return (<ToolbarMainRendererPrivate response={response} />);
 }
 
-function ToolbarMainRendererPrivate({ response }: { response: ToolbarClient.ToolbarResponse<any> }) {
+function ToolbarMainRendererPrivate({ response }: { response: ToolbarResponse<any> }) {
   return (
     <div>
       {
@@ -52,7 +52,7 @@ function ToolbarMainRendererPrivate({ response }: { response: ToolbarClient.Tool
   );
 }
 
-function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
+function CollapsableBlock({ r }: { r: ToolbarResponse<any> }) {
   const [isOpen, setIsOpen] = React.useState(false);
   return (
     <div>
@@ -66,7 +66,7 @@ function CollapsableBlock({ r }: { r: ToolbarClient.ToolbarResponse<any> }) {
   );
 }
 
-function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
+function ToolbarIconButton({ tr }: { tr: ToolbarResponse<any> }) {
 
   if (tr.elements && tr.elements.length > 0) {
     return (
@@ -124,7 +124,7 @@ function ToolbarIconButton({ tr }: { tr: ToolbarClient.ToolbarResponse<any> }) {
 
 
 interface ToolbarMainModalModalProps extends IModalProps<undefined> {
-  tr: ToolbarClient.ToolbarResponse<any>;
+  tr: ToolbarResponse<any>;
 }
 
 interface ToolbarMainModalModalState {
@@ -157,6 +157,6 @@ function ToolbarMainModalModal(p: ToolbarMainModalModalProps) {
 }
 
 
-ToolbarMainModalModal.show = (tr: ToolbarClient.ToolbarResponse<any>): Promise<undefined> => {
+ToolbarMainModalModal.show = (tr: ToolbarResponse<any>): Promise<undefined> => {
   return openModal<undefined>(<ToolbarMainModalModal tr={tr} />);
 }

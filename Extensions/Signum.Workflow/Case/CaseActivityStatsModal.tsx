@@ -6,7 +6,7 @@ import { timeToString, toNumberFormat } from '@framework/Reflection';
 import { Finder } from '@framework/Finder';
 import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
-import { CaseActivityStats, formatDuration } from "../WorkflowClient";
+import { WorkflowClient, CaseActivityStats } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity, WorkflowEventType } from "../Signum.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
@@ -178,5 +178,5 @@ function formatMinutes(duration: number | undefined) {
 
   var formatNumber = toNumberFormat("0.00");
 
-  return <span>{formatNumber.format(duration)} {unit} <mark>({formatDuration(Duration.fromObject({ minute: duration }))})</mark></span>
+  return <span>{formatNumber.format(duration)} {unit} <mark>({WorkflowClient.formatDuration(Duration.fromObject({ minute: duration }))})</mark></span>
 }

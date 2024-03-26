@@ -2,7 +2,7 @@ import * as React from 'react'
 import { EntityControlMessage, getToString, JavascriptMessage } from '@framework/Signum.Entities';
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage } from '../Signum.WhatsNew';
 import { useAPI } from '@framework/Hooks';
-import { API } from "../WhatsNewClient";
+import { WhatsNewClient } from "../WhatsNewClient";
 import "./NewsPage.css"
 import * as AppContext from "@framework/AppContext"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +16,7 @@ export default function NewsPage() {
   const params = useParams() as { newsId: string };
 
   const [refreshValue, setRefreshValue] = React.useState<number>(0);
-  const whatsnew = useAPI(() => API.newsPage(params.newsId).then(w => {
+  const whatsnew = useAPI(() => WhatsNewClient.API.newsPage(params.newsId).then(w => {
     Navigator.raiseEntityChanged(WhatsNewLogEntity);
     return w;
   }), [params.newsId, refreshValue]);

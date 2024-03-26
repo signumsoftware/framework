@@ -1,7 +1,7 @@
 import { Location } from 'react-router'
 import type { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
-import * as DashboardClient from './DashboardClient'
+import { DashboardClient } from './DashboardClient'
 import { DashboardEntity } from './Signum.Dashboard'
 
 export default class DashboardToolbarConfig extends ToolbarConfig<DashboardEntity> {

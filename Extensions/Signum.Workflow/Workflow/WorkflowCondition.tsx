@@ -5,7 +5,7 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Workflow'
-import { WorkflowConditionTestResponse, API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
+import { WorkflowClient, WorkflowConditionTestResponse } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate, useAPI, useAPIWithReload } from '@framework/Hooks'
@@ -25,7 +25,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
 
   const [response, reloadResponse] = useAPIWithReload(() => exampleEntityRef.current == undefined ?
     Promise.resolve(undefined) :
-    API.conditionTest({
+    WorkflowClient.API.conditionTest({
       workflowCondition: p.ctx.value,
       exampleEntity: exampleEntityRef.current,
     }), []);
@@ -111,7 +111,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
       <AutoLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
-        autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac))}
+        autocomplete={new LiteAutocompleteConfig((ac, str) => WorkflowClient.API.findMainEntityType({ subString: str, count: 5 }, ac))}
         find={false} />
       {ctx.value.mainEntityType &&
         <div>
@@ -120,7 +120,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
             <div className="col-sm-8">
               {exampleEntityRef.current && <button className="btn btn-success" onClick={reloadResponse}><FontAwesomeIcon icon="play" /> Evaluate</button>}
               <div className="btn-group" style={{ marginBottom: "3px" }}>
-                <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => WorkflowClient.showWorkflowTransitionContextCodeHelp()} />
               </div>
               <div className="code-container">
                 <pre style={{ border: "0px", margin: "0px" }}>{"bool Evaluate(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>

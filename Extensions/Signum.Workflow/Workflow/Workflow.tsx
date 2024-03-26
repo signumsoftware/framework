@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { WorkflowEntity, WorkflowModel, WorkflowEntitiesDictionary, WorkflowMessage } from '../Signum.Workflow'
 import { TypeContext, AutoLine, EntityLine, LiteAutocompleteConfig, EnumCheckboxList } from '@framework/Lines'
 import { is, JavascriptMessage, toLite, ModifiableEntity, Lite, Entity } from '@framework/Signum.Entities'
-import { API } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import { IconName, IconProp, IconPrefix } from "@fortawesome/fontawesome-svg-core";
 import BpmnModelerComponent from '../Bpmn/BpmnModelerComponent'
 import MessageModal from "@framework/Modals/MessageModal";
@@ -21,7 +21,7 @@ interface WorkflowState {
 
 export interface WorkflowHandle {
   workflowState: WorkflowState;
-  setIssues: (value: Array<API.WorkflowIssue>) => void;
+  setIssues: (value: Array<WorkflowClient.API.WorkflowIssue>) => void;
   getXml(): Promise<string>;
   getSvg(): Promise<string>;
 }
@@ -30,7 +30,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
 
   const bpmnModelerComponentRef = React.useRef<BpmnModelerComponent>(null);
 
-  const [issues, setIssues] = React.useState<Array<API.WorkflowIssue> | undefined>(undefined);
+  const [issues, setIssues] = React.useState<Array<WorkflowClient.API.WorkflowIssue> | undefined>(undefined);
   const [workflowState, setWorkflowState] = React.useState<WorkflowState | undefined>(undefined);
 
   function updateState(model: WorkflowModel) {
@@ -54,7 +54,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
       });
     }
     else
-      API.getWorkflowModel(toLite(w))
+      WorkflowClient.API.getWorkflowModel(toLite(w))
         .then(pair => {
           updateState(pair.model);
           setIssues(pair.issues);
@@ -68,7 +68,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
     getSvg: () => bpmnModelerComponentRef.current!.getSvg()
   } as WorkflowHandle), [bpmnModelerComponentRef.current, workflowState]);
 
-  function handleHighlightClick(e: React.MouseEvent<HTMLAnchorElement>, issue: API.WorkflowIssue) {
+  function handleHighlightClick(e: React.MouseEvent<HTMLAnchorElement>, issue: WorkflowClient.API.WorkflowIssue) {
     e.preventDefault();
     if (bpmnModelerComponentRef)
       bpmnModelerComponentRef.current!.focusElement(issue.bpmnElementId);
@@ -152,7 +152,7 @@ export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref
           <div className="col-sm-6">
             <AutoLine ctx={ctx.subCtx(d => d.name)} />
             <EntityLine ctx={ctx.subCtx(d => d.mainEntityType)}
-              autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }))}
+              autocomplete={new LiteAutocompleteConfig((signal, str) => WorkflowClient.API.findMainEntityType({ subString: str, count: 5 }))}
               find={false}
               onRemove={handleMainEntityTypeChange} />
             <AutoLine ctx={ctx.subCtx(d => d.expirationDate)} />

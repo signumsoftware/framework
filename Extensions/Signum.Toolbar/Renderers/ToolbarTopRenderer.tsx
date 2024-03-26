@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useLocation, Location } from 'react-router'
-import * as ToolbarClient from '../ToolbarClient'
+import { ToolbarClient, ToolbarResponse } from '../ToolbarClient'
 import '@framework/Frames/MenuIcons.css'
 import './Toolbar.css'
 import { useAPI, useUpdatedRef } from '@framework/Hooks'
@@ -14,7 +14,7 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
   const responseRef = useUpdatedRef(response);
 
   const [refresh, setRefresh] = React.useState(false);
-  const [active, setActive] = React.useState<ToolbarClient.ToolbarResponse<any> | null>(null);
+  const [active, setActive] = React.useState<ToolbarResponse<any> | null>(null);
   const activeRef = useUpdatedRef(active);
 
   function changeActive(location: Location) {
@@ -40,7 +40,7 @@ export default function ToolbarTopRenderer(): React.ReactElement | null {
 
   return (
      <div className={classes("nav navbar-nav")}>
-        {response && response.elements && response.elements.map((res: ToolbarClient.ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh))}
+        {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh))}
       </div>
   );
 }

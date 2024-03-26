@@ -9,7 +9,7 @@ import * as AppContext from "@framework/AppContext"
 import { useEffect, useState } from 'react'
 import ProfilePhoto from './ProfilePhoto'
 import { Finder } from '@framework/Finder'
-import * as AuthAdminClient from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }) {
 

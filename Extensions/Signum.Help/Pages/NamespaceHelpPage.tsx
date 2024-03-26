@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { API, Urls } from '../HelpClient'
+import { HelpClient, Urls } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection';
@@ -19,7 +19,7 @@ export default function NamespaceHelpPage() {
   const params = useParams() as { namespace: string };
 
   var [count, setCount] = React.useState(0);
-  var [namespace, reloadNamespace] = useAPIWithReload(() => API.namespace(params.namespace), [count]);
+  var [namespace, reloadNamespace] = useAPIWithReload(() => HelpClient.API.namespace(params.namespace), [count]);
   useTitle(HelpMessage.Help.niceToString() + (namespace && (" > " + namespace.title)));
   var forceUpdate = useForceUpdate();
   if (namespace == null)
@@ -59,7 +59,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<NamespaceHelpEntity>,
     return null;
 
   function onClick() {
-    API.saveNamespace(ctx.value)
+    HelpClient.API.saveNamespace(ctx.value)
       .then((() => {
         onSuccess();
         Operations.notifySuccess();

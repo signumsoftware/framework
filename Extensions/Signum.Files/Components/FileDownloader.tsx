@@ -4,7 +4,7 @@ import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { ModifiableEntity, Lite, Entity, isModifiableEntity, getToString, EntityControlMessage } from '@framework/Signum.Entities'
 import { IFile, FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFilePath } from '../Signum.Files'
-import { ExtensionInfo, extensionInfo } from '../FilesClient'
+import { FilesClient } from '../FilesClient'
 import { Type } from '@framework/Reflection';
 import "./Files.css"
 import { QueryString } from '@framework/QueryString'
@@ -19,7 +19,7 @@ export interface FileDownloaderProps {
   download?: DownloadBehaviour;
   configuration?: FileDownloaderConfiguration<IFile>;
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
-  children?: React.ReactNode | ((info: ExtensionInfo | undefined) => React.ReactNode)
+  children?: React.ReactNode | ((info: FilesClient.ExtensionInfo | undefined) => React.ReactNode)
   showFileIcon?: boolean;
 }
 
@@ -69,7 +69,7 @@ export function FileDownloader(p: FileDownloaderProps) {
 
   const fileName = getFileName(toStr); //Hacky
 
-  const info: ExtensionInfo | undefined = extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
+  const info: FilesClient.ExtensionInfo | undefined = FilesClient.extensionInfo[fileName.tryAfterLast(".")?.toLowerCase()!]
 
   function getChildren(){
     return !p.children ? null : (typeof p.children === 'function') ? p.children(info) : p.children
@@ -189,7 +189,7 @@ function downloadBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: 
 function viewBase64(e: React.MouseEvent<any>, binaryFile: string, fileName: string) {
   e.preventDefault();
 
-  const info = extensionInfo[fileName.tryAfterLast(".")?.toLocaleLowerCase()!];
+  const info = FilesClient.extensionInfo[fileName.tryAfterLast(".")?.toLocaleLowerCase()!];
 
   const blob = Services.b64toBlob(binaryFile, info?.mimeType);
 

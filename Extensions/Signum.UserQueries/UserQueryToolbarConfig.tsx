@@ -3,13 +3,13 @@ import { Location } from 'react-router'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
 import { Lite, liteKey } from '@framework/Signum.Entities'
-import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 import { IconColor, ToolbarConfig } from '../Signum.Toolbar/ToolbarConfig'
-import * as UserQueryClient from './UserQueryClient'
+import { UserQueryClient } from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
 import { useAPI } from '@framework/Hooks';
 import { SearchToolbarCount, ToolbarCount } from '../Signum.Toolbar/QueryToolbarConfig';
 import { ShowCount } from '../Signum.Toolbar/Signum.Toolbar'
+import { ToolbarResponse } from '../Signum.Toolbar/ToolbarClient'
 
 export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntity> {
   constructor() {

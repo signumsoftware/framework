@@ -5,7 +5,7 @@ import { classes } from '@framework/Globals'
 import { ModelState, JavascriptMessage } from '@framework/Signum.Entities'
 import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization'
-import * as AuthClient from '../AuthClient'
+import { AuthClient } from '../AuthClient'
 import MessageModal from '@framework/Modals/MessageModal'
 import * as AppContext from '@framework/AppContext'
 import { QueryString } from "@framework/QueryString"

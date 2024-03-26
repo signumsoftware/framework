@@ -6,7 +6,7 @@ import { toLite, Lite, JavascriptMessage } from '@framework/Signum.Entities';
 import { DateTime } from 'luxon'
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as RemoteEmailsClient from './RemoteEmailsClient'
+import { RemoteEmailsClient } from './RemoteEmailsClient'
 import { RemoteEmailRenderer } from './RemoteEmailMessage'
 import { UserEntity, UserLiteModel } from '../../Signum.Authorization/Signum.Authorization';
 

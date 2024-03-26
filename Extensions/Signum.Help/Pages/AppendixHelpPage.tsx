@@ -3,7 +3,7 @@ import { useLocation, useParams, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
-import { API, Urls } from '../HelpClient'
+import { HelpClient, Urls } from '../HelpClient'
 import { Operations } from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Help';
@@ -20,7 +20,7 @@ import { Shortcut } from './TypeHelpPage'
 export default function AppendixHelpHelp() {
   const params = useParams() as { uniqueName: string | undefined };
 
-  var [appendix, reloadAppendix] = useAPIWithReload(() => API.appendix(params.uniqueName), []);
+  var [appendix, reloadAppendix] = useAPIWithReload(() => HelpClient.API.appendix(params.uniqueName), []);
   useTitle(HelpMessage.Help.niceToString() + (appendix && (" > " + appendix.title)));
   var forceUpdate = useForceUpdate();
   if (appendix == null)
@@ -62,7 +62,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<AppendixHelpEntity>, 
     return null;
 
   function onClick() {
-    API.saveAppendix(ctx.value)
+    HelpClient.API.saveAppendix(ctx.value)
       .then(() => {
         onSuccess();
         Operations.notifySuccess();
@@ -87,7 +87,7 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
     }).then(result => {
       if (result == "yes") {
 
-        Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
+        Operations.HelpClient.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
             AppContext.navigate(Urls.indexUrl());
             Operations.notifySuccess();

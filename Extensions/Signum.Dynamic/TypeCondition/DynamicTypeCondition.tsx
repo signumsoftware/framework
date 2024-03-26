@@ -5,7 +5,7 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
+import { DynamicTypeConditionClient, DynamicTypeConditionTestResponse } from '../DynamicTypeConditionClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
@@ -81,7 +81,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
     if (exampleEntityRef == undefined)
       setResponse(undefined);
     else {
-      API.typeConditionTest({
+      DynamicTypeConditionClient.API.typeConditionTest({
         dynamicTypeCondition: p.ctx.value,
         exampleEntity: exampleEntityRef.current!,
       })

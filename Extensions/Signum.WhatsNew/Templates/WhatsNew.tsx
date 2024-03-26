@@ -3,7 +3,7 @@ import { Finder } from '@framework/Finder';
 import { Constructor } from '@framework/Constructor';
 import { Navigator } from '@framework/Navigator';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import * as WhatsNewClient from '../WhatsNewClient';
+import { WhatsNewClient } from '../WhatsNewClient';
 import { WhatsNewEntity, WhatsNewMessage, WhatsNewMessageEmbedded } from '../Signum.WhatsNew';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { Binding, EntityCombo, EntityLine, EntityTabRepeater, TypeContext, AutoLine } from '@framework/Lines';

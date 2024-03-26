@@ -4,7 +4,7 @@ import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
-import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
+import { PredictorClient, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, AutoLine, EnumLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
@@ -30,7 +30,7 @@ export function PredictModal(p: PredictModalProps) {
   const [hasChanged, setHasChanged] = React.useState<boolean>(false);
   const [predict, setPredict] = React.useState<PredictRequest>(p.initialPredict);
 
-  const abortableUpdateRequest = React.useMemo(() => new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request)), []);
+  const abortableUpdateRequest = React.useMemo(() => new AbortableRequest((abortController, request: PredictRequest) => PredictorClient.API.updatePredict(request)), []);
 
   function handleOnClose() {
     setShow(false);

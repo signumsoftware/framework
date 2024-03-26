@@ -5,7 +5,7 @@ import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
-import { API, Urls } from '../HelpClient'
+import { HelpClient, Urls } from '../HelpClient'
 import { Overlay, Tooltip } from "react-bootstrap";
 import { useAPI, useForceUpdate, useAPIWithReload, useInterval } from '@framework/Hooks';
 import { HelpMessage, AppendixHelpEntity, TypeHelpEntity, TypeHelpOperation, PropertyRouteHelpEmbedded, OperationHelpEmbedded, QueryHelpEntity, QueryColumnHelpEmbedded } from '../Signum.Help';
@@ -14,7 +14,7 @@ import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities';
 import { TypeContext, PropertyRoute } from '@framework/Lines';
 import { EditableHtmlComponent, HtmlViewer } from './EditableText';
 import { classes } from '@framework/Globals';
-import * as HelpClient from '../HelpClient';
+import { HelpClient } from '../HelpClient';
 import { mlistItemContext } from '@framework/TypeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
@@ -28,8 +28,8 @@ export default function TypeHelpPage() {
 
 
   var cleanName = params.cleanName;
-  var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => API.type(cleanName), [cleanName]);
-  var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : API.namespace(typeHelp.type.namespace), [typeHelp]);
+  var [typeHelp, reloadTypeHelp] = useAPIWithReload(() => HelpClient.API.type(cleanName), [cleanName]);
+  var namespaceHelp = useAPI(() => !typeHelp ? Promise.resolve(undefined) : HelpClient.API.namespace(typeHelp.type.namespace), [typeHelp]);
   var forceUpdate = useForceUpdate();
 
   React.useEffect(() => {
@@ -227,7 +227,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
     return null;
 
   function onClick() {
-    API.saveType(ctx.value)
+    HelpClient.API.saveType(ctx.value)
       .then((() => {
         onSuccess();
         Operations.notifySuccess();

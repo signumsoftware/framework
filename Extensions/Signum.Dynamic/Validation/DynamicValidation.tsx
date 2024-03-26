@@ -5,7 +5,7 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { AutoLine, EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
-import { API, DynamicValidationTestResponse } from '../DynamicValidationClient'
+import { DynamicValidationClient, DynamicValidationTestResponse } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
@@ -26,7 +26,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
 
   const exampleEntityRef = React.useRef<Entity | null>(null);
   const dv = p.ctx.value;
-  const routeTypeName = useAPI(() => dv.subEntity ? API.routeTypeName(dv.subEntity) : dv.entityType ? Promise.resolve(dv.entityType.className) : Promise.resolve(undefined), [dv.subEntity, dv.entityType]);
+  const routeTypeName = useAPI(() => dv.subEntity ? DynamicValidationClient.API.routeTypeName(dv.subEntity) : dv.entityType ? Promise.resolve(dv.entityType.className) : Promise.resolve(undefined), [dv.subEntity, dv.entityType]);
 
   const [response, setResponse] = React.useState<DynamicValidationTestResponse | undefined>(undefined);
 
@@ -84,7 +84,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
     if (exampleEntityRef.current == undefined)
       setResponse(undefined);
     else {
-      API.validationTest({
+      DynamicValidationClient.API.validationTest({
         dynamicValidation: p.ctx.value,
         exampleEntity: exampleEntityRef.current,
       })

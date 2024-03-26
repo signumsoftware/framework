@@ -5,7 +5,7 @@ import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
 import { ChartMessage, ChartRequestModel } from './Signum.Chart'
-import * as ChartClient from './ChartClient'
+import { ChartClient } from './ChartClient'
 import { Button } from 'react-bootstrap'
 import { Finder } from '@framework//Finder';
 

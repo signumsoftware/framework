@@ -2,7 +2,7 @@ import * as React from 'react'
 import { WorkflowEntitiesDictionary, WorkflowConnectionModel, CaseFlowColor, CaseActivityEntity, CaseEntity, WorkflowMessage, WorkflowEventEntity, WorkflowActivityEntity, IWorkflowNodeEntity } from '../Signum.Workflow'
 import { JavascriptMessage } from '@framework/Signum.Entities'
 import { Dic } from '@framework/Globals'
-import { CaseFlow } from '../WorkflowClient'
+import { WorkflowClient, CaseFlow } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import * as caseFlowRenderer from './CaseFlowRenderer'
 import * as connectionIcons from './ConnectionIcons'

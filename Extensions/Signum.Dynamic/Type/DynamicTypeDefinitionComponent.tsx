@@ -9,10 +9,10 @@ import { StyleContext } from '@framework/TypeContext'
 import { EntityControlMessage, toLite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal';
 import MessageModal from '@framework/Modals/MessageModal'
-import * as DynamicTypeClient from '../DynamicTypeClient';
-import * as EvalClient from '../../Signum.Eval/EvalClient'
-import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
-import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
+import { DynamicTypeClient } from '../DynamicTypeClient';
+import { EvalClient } from '../../Signum.Eval/EvalClient'
+import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient';
+import { DynamicTypeClient, Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';

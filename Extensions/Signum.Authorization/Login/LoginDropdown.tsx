@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { LoginAuthMessage, UserEntity } from '../Signum.Authorization'
-import * as AuthClient from '../AuthClient'
+import { AuthClient } from '../AuthClient'
 import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
 import { Lite, toLite, is } from '@framework/Signum.Entities';
-import * as CultureClient from '@framework/Basics/CultureClient'
+import { CultureClient } from '@framework/Basics/CultureClient'
 import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
 

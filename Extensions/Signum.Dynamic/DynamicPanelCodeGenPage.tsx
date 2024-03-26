@@ -5,7 +5,7 @@ import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
-import { API, CompilationError, DynamicPanelInformation } from './DynamicClient'
+import { DynamicClient, CompilationError, DynamicPanelInformation } from './DynamicClient'
 import CSharpCodeMirror from '../Signum.CodeMirror/CSharpCodeMirror'
 import { DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation } from "react-router";
@@ -16,7 +16,7 @@ import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval'
 import { CheckEvalsStep, SearchPanel } from '../Signum.Eval/EvalPanelPage'
-import { Options } from '../Signum.Eval/EvalClient'
+import { EvalClient, Options } from '../Signum.Eval/EvalClient'
 
 
 
@@ -27,8 +27,8 @@ export default function DynamicPanelPage() {
 
   const [refreshKey, setRefreshKey] = React.useState(0);
 
-  const startErrors = useAPI(() => API.getStartErrors(), [refreshKey]);
-  const panelInformation = useAPI(() => API.getPanelInformation(), [refreshKey]);
+  const startErrors = useAPI(() => DynamicClient.API.getStartErrors(), [refreshKey]);
+  const panelInformation = useAPI(() => DynamicClient.API.getPanelInformation(), [refreshKey]);
   const [restarting, setRestarting] = React.useState<DateTime | null>(null);
 
 
@@ -109,7 +109,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
 
   function handleCompile(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.compile()
+    DynamicClient.API.compile()
       .then(errors => {
         setSelectedErrorIndex(undefined);
         setCompilationErrors(errors);
@@ -119,7 +119,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
 
   function handleCheck(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.getCompilationErrors()
+    DynamicClient.API.getCompilationErrors()
       .then(errors => {
         setSelectedErrorIndex(undefined);
         setCompilationErrors(errors);
@@ -258,7 +258,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
   function handleRestartApplication(e: React.MouseEvent<any>) {
     e.preventDefault();
 
-    API.restartServer()
+    DynamicClient.API.restartServer()
       .then(() => {
         p.setRestarting(DateTime.local());
         return Promise.all([refreshScreen(), reconnectWithServer()]);
@@ -277,7 +277,7 @@ export function RestartServerAppStep(p: RestartServerAppStepProps) {
   async function reconnectWithServer() {
     while (true) {
       try {
-        var errors = await API.getStartErrors();
+        var errors = await DynamicClient.API.getStartErrors();
         p.setRestarting(null);
         p.refreshView();
         return;

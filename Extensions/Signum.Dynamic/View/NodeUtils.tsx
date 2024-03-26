@@ -16,7 +16,7 @@ import { toStyleOptions, StyleOptionsExpression, subCtx } from './StyleOptionsEx
 import { HtmlAttributesLine } from './HtmlAttributesComponent'
 import { StyleOptionsLine } from './StyleOptionsComponent'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
-import { registeredCustomContexts } from '../DynamicViewClient'
+import { DynamicViewClient } from '../DynamicViewClient'
 import * as Lines from '@framework/Lines'
 import { DynamicViewValidationMessage } from '../Signum.Dynamic.Views'
 
@@ -296,7 +296,7 @@ export class DesignerNode<N extends BaseNode> {
 
     const options = registeredNodes[this.node.kind];
     if (options.kind == "CustomContext") {
-      var cc = registeredCustomContexts[(this.node as BaseNode as CustomContextNode).typeContext];
+      var cc = DynamicViewClient.registeredCustomContexts[(this.node as BaseNode as CustomContextNode).typeContext];
       return cc.getPropertyRoute(this as DesignerNode<BaseNode> as DesignerNode<CustomContextNode>);
     }
 

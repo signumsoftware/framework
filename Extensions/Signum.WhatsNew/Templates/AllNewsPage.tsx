@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useAPI } from '@framework/Hooks';
-import { API, WhatsNewFull } from "../WhatsNewClient";
+import { WhatsNewClient, WhatsNewFull } from "../WhatsNewClient";
 import "./AllNewsPage.css"
 import * as AppContext from "@framework/AppContext"
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.WhatsNew';
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { Navigator } from '@framework/Navigator';
 
 export default function AllNews() {
-  const news: WhatsNewFull[] | undefined = useAPI(() => API.getAllNews().then(w => w), []);
+  const news: WhatsNewFull[] | undefined = useAPI(() => WhatsNewClient.API.getAllNews().then(w => w), []);
 
   if (news == undefined)
     return <div>{JavascriptMessage.loading.niceToString()}</div>;

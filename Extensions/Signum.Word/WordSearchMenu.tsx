@@ -4,7 +4,7 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { WordTemplateEntity, WordTemplateMessage } from './Signum.Word'
-import * as WordClient from './WordClient'
+import { WordClient } from './WordClient'
 import { saveFile } from "@framework/Services";
 import { DropdownButton, Dropdown } from 'react-bootstrap';
 

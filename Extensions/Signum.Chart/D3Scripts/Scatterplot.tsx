@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps, ChartTable } from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartRow } from '../ChartClient';
 import { YScaleTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
@@ -12,7 +11,7 @@ import { ChartRequestModel } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
 
 
-export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderScatterplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -49,11 +48,11 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 
 
   var keyColumn = data.columns.c0!;
-  var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
-  var verticalColumn = data.columns.c2! as ChartClient.ChartColumn<number>;
-  var horizontalColumn2 = data.columns.c3 as ChartClient.ChartColumn<number> | undefined;
-  var verticalColumn2 = data.columns.c4 as ChartClient.ChartColumn<number> | undefined;
-  var colorScaleColumn = data.columns.c5 as ChartClient.ChartColumn<number> | undefined;
+  var horizontalColumn = data.columns.c1! as ChartColumn<number>;
+  var verticalColumn = data.columns.c2! as ChartColumn<number>;
+  var horizontalColumn2 = data.columns.c3 as ChartColumn<number> | undefined;
+  var verticalColumn2 = data.columns.c4 as ChartColumn<number> | undefined;
+  var colorScaleColumn = data.columns.c5 as ChartColumn<number> | undefined;
   var colorSchemeColumn = data.columns.c6;
 
   if (horizontalColumn2 && horizontalColumn2.type != horizontalColumn.type)
@@ -83,7 +82,7 @@ export default function renderScatterplot({ data, width, height, parameters, loa
     color = r => keyColumn.getValueColor(r) ?? categoryColor(keyColumn.getValueKey(r));
   }
 
-  var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+  var keyColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [keyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
   return (
@@ -140,23 +139,23 @@ export default function renderScatterplot({ data, width, height, parameters, loa
 function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
   horizontalColumn, verticalColumn, horizontalColumn2, verticalColumn2,
   colorKeyColumn, color, onDrillDown, pointSize, dashboardFilter, chartRequest }: {
-    data: ChartClient.ChartTable,
-    keyColumns: ChartClient.ChartColumn<any>[],
+    data: ChartTable,
+    keyColumns: ChartColumn<any>[],
     xRule: Rule<"content">,
     yRule: Rule<"content">,
     initialLoad: boolean,
     x: d3.ScaleContinuousNumeric<number, number, never>,
     y: d3.ScaleContinuousNumeric<number, number, never>,
-    horizontalColumn: ChartClient.ChartColumn<number>,
-    horizontalColumn2?: ChartClient.ChartColumn<number>,
-    verticalColumn: ChartClient.ChartColumn<number>,
-    verticalColumn2?: ChartClient.ChartColumn<number>,
-    colorKeyColumn: ChartClient.ChartColumn<unknown>,
+    horizontalColumn: ChartColumn<number>,
+    horizontalColumn2?: ChartColumn<number>,
+    verticalColumn: ChartColumn<number>,
+    verticalColumn2?: ChartColumn<number>,
+    colorKeyColumn: ChartColumn<unknown>,
     color: (val: ChartRow) => string | undefined,
     pointSize: number,
     dashboardFilter?: DashboardFilter,
     chartRequest: ChartRequestModel,
-    onDrillDown: (row: ChartClient.ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
+    onDrillDown: (row: ChartRow, e: MouseEvent | React.MouseEvent<any, MouseEvent>) => void
   }): JSX.Element {
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);
@@ -240,13 +239,13 @@ function SvgScatterplot({ data, keyColumns, xRule, yRule, initialLoad, y, x,
 function CanvasScatterplot(p: {
   xRule: Rule<"content">,
   yRule: Rule<"content">,
-  colorKeyColumn: ChartClient.ChartColumn<unknown>,
-  horizontalColumn: ChartClient.ChartColumn<number>,
-  horizontalColumn2?: ChartClient.ChartColumn<number>,
-  verticalColumn: ChartClient.ChartColumn<number>,
-  verticalColumn2?: ChartClient.ChartColumn<number>,
+  colorKeyColumn: ChartColumn<unknown>,
+  horizontalColumn: ChartColumn<number>,
+  horizontalColumn2?: ChartColumn<number>,
+  verticalColumn: ChartColumn<number>,
+  verticalColumn2?: ChartColumn<number>,
   pointSize: number,
-  data: ChartClient.ChartTable,
+  data: ChartTable,
   onDrillDown: (r: ChartRow, e: MouseEvent) => void,
   color: (val: ChartRow) => string | undefined,
   x: d3.ScaleContinuousNumeric<number, number>,

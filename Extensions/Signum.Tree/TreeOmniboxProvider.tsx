@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxClient, OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
 import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 
 

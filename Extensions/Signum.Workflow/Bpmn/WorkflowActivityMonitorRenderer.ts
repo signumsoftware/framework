@@ -3,7 +3,7 @@ import { Duration } from 'luxon'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Workflow'
 import { Color, Gradient } from '@framework/Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowActivityStats, WorkflowActivityMonitor, formatDuration } from '../WorkflowClient'
+import { WorkflowClient, WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
@@ -75,7 +75,7 @@ function formatMinutes(minutes: number | undefined, token: QueryToken) {
   if (minutes == undefined)
     return "";
 
-  return formatDuration(Duration.fromObject({ minutes }));
+  return WorkflowClient.formatDuration(Duration.fromObject({ minutes }));
 }
 
 export const __init__ = ['workflowActivityMonitorRenderer'];

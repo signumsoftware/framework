@@ -1,6 +1,6 @@
 import { DateTime, DurationUnit, DateTimeUnit } from "luxon"
 import * as d3 from "d3"
-import { ChartColumn } from "../../ChartClient"
+import { ChartClient, ChartColumn } from "../../ChartClient"
 import { Dic } from "@framework/Globals";
 import { tryGetTypeInfo } from "@framework/Reflection";
 import { isFilterGroup, FilterConditionOptionParsed, FilterOptionParsed, QueryToken } from "@framework/FindOptions";

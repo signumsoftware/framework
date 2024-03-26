@@ -2,7 +2,7 @@ import * as React from 'react'
 import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
-import { API } from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 import { QueryRulePack, QueryAllowedRule, QueryAllowed, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import { Button } from 'react-bootstrap'
@@ -18,8 +18,8 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.saveQueryRulePack(pack)
-      .then(() => API.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
+    AuthAdminClient.API.saveQueryRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchQueryRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });

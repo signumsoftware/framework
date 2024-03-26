@@ -6,7 +6,7 @@ import { Operations } from '@framework/Operations'
 import { getToString, Lite, newMListElement } from '@framework/Signum.Entities'
 import { CaseTagTypeEntity, CaseEntity, CaseTagsModel, CaseOperation, CaseMessage } from '../Signum.Workflow'
 import Tag from './Tag'
-import * as WorkflowClient from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 
 import "./Tag.css"
 
