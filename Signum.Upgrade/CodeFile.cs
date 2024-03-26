@@ -272,7 +272,7 @@ public class CodeFile
     public void ReplaceMethod(Expression<Predicate<string>> methodLine, string text) =>
         ReplaceBetween(
             new(methodLine, 0),
-            new(s => s.Contains("}"), 0) { SameIdentation = true }, 
+            new(s => s.Contains("}"), 0) { SameIdentation = true },
             text);
 
 
@@ -404,7 +404,33 @@ public class CodeFile
             throw new InvalidOperationException("");
     }
 
-    internal void ReplaceTypeScriptImports(Expression<Func<string, bool>> pathPredicate, Func<HashSet<string>, HashSet<string>?> importedPartsSelector)
+    internal void ReplacPartInTypeScriptImport(Expression<Func<string, bool>> pathPredicate, Func<string /*path*/, HashSet<string> /*parts*/, HashSet<string>?> importedPartsSelector)
+    {
+        AssertExtension(".ts", ".tsx");
+
+        var compiled = pathPredicate.Compile();
+        ProcessLines(lines =>
+        {
+            bool changed = false;
+            int pos = 0;
+            while ((pos = lines.FindIndex(pos, a => a.StartsWith("import ") && a.Contains(" from ") && compiled(a.After("from").Trim(' ', '\'', '\"', ';')))) != -1)
+            {
+                var line = lines[pos];
+                var importPart = line.After("import").Before("from").Trim();
+                string after = line.After("from");
+
+                var parts = importPart.StartsWith('*') ? new[] { importPart.Trim() }.ToHashSet() : importPart.Between("{", "}").SplitNoEmpty(",").Select(a => a.Trim()).ToHashSet();
+                var newParts = 
+                lines[pos] = "import { " + parts.ToString(", ") + " } from" + after;
+                changed = true;
+            }
+
+            return changed;
+
+        });
+    }
+
+    internal void ReplaceAndCombineTypeScriptImports(Expression<Func<string, bool>> pathPredicate, Func<HashSet<string>, HashSet<string>?> importedPartsSelector)
     {
         AssertExtension(".ts", ".tsx");
 
