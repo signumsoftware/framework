@@ -63,7 +63,7 @@ class Upgrade_20240327_NamespaceInClients : CodeUpgradeBase
 
             foreach (var kvp in dic)
             {
-                file.Replace(new Regex($@"\b{kvp.Key}\b"), kvp.Value);
+                file.Replace(new Regex($@"\b(?<!\.){kvp.Key}\b"), kvp.Value);
             }
         });
     }
