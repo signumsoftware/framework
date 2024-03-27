@@ -15,7 +15,6 @@ import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
-import { WhatsNewClient, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
 export default function WhatsNewDropdown() {
@@ -35,9 +34,9 @@ function WhatsNewDropdownImp() {
   
   const isOpenRef = useUpdatedRef(isOpen);
 
-  var [countResult, reloadCount] = useAPIWithReload<WhatsNewClient.NumWhatsNews>(() => WhatsNewClient.WhatsNewClient.API.myNewsCount().then(res => {
+  var [countResult, reloadCount] = useAPIWithReload<WhatsNewClient.NumWhatsNews>(() => WhatsNewClient.API.myNewsCount().then(res => {
     if (isOpenRef.current) {
-      WhatsNewClient.WhatsNewClient.API.myNews()
+      WhatsNewClient.API.myNews()
         .then(als => {
           setNews(als);
         });
@@ -48,12 +47,12 @@ function WhatsNewDropdownImp() {
 
   Navigator.useEntityChanged(WhatsNewLogEntity, () => reloadCount(), []);
 
-  const [whatsNew, setNews] = React.useState<WhatsNewShort[] | undefined>(undefined);
+  const [whatsNew, setNews] = React.useState<WhatsNewClient.WhatsNewShort[] | undefined>(undefined);
 
   function handleOnToggle() {
 
     if (!isOpen) {
-      WhatsNewClient.WhatsNewClient.API.myNews()
+      WhatsNewClient.API.myNews()
         .then(wn => setNews(wn));
     }
 
@@ -65,7 +64,7 @@ function WhatsNewDropdownImp() {
     AppContext.navigate("/news/");
   }
 
-  function handleOnCloseNews(toRemove: WhatsNewShort[]) {
+  function handleOnCloseNews(toRemove: WhatsNewClient.WhatsNewShort[]) {
 
     //Optimistic
     let wasClosed = false;
@@ -83,7 +82,7 @@ function WhatsNewDropdownImp() {
     WhatsNewClient.API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
 
       // Pesimistic
-      WhatsNewClient.WhatsNewClient.API.myNews()
+      WhatsNewClient.API.myNews()
         .then(wn => {
           if (wasClosed && wn.length > 0)
             setIsOpen(true);
@@ -143,7 +142,7 @@ function WhatsNewDropdownImp() {
   );
 }
 
-export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
+export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClose: (e: WhatsNewClient.WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
 {
   //ignoring open tags other than img
   function HTMLSubstring(text: string) {

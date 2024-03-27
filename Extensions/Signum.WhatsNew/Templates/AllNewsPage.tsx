@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { useAPI } from '@framework/Hooks';
-import { WhatsNewClient, WhatsNewFull } from "../WhatsNewClient";
+import { WhatsNewClient } from "../WhatsNewClient";
 import "./AllNewsPage.css"
 import * as AppContext from "@framework/AppContext"
 import { WhatsNewEntity, WhatsNewMessage } from '../Signum.WhatsNew';
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 import { Navigator } from '@framework/Navigator';
 
 export default function AllNews() {
-  const news: WhatsNewFull[] | undefined = useAPI(() => WhatsNewClient.API.getAllNews().then(w => w), []);
+  const news: WhatsNewClient.WhatsNewFull[] | undefined = useAPI(() => WhatsNewClient.API.getAllNews().then(w => w), []);
 
   if (news == undefined)
     return <div>{JavascriptMessage.loading.niceToString()}</div>;
@@ -30,7 +30,7 @@ export default function AllNews() {
   );
 }
 
-export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
+export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}) {
 
   const whatsnew = p.news;
 
@@ -78,7 +78,7 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewFull}) {
   );
 }
 
-export function NewsBadge(p: { news: WhatsNewFull }) {
+export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }) {
   if (!p.news.read)
     return (
       <span className="sf-news-notify-badge" style={{ right: "0", top: "0" }}>NEW</span>
@@ -88,7 +88,7 @@ export function NewsBadge(p: { news: WhatsNewFull }) {
   }
 }
 
-export function Attachments(p: { news: WhatsNewFull }) {
+export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }) {
   return (
     <div>
       <hr />
