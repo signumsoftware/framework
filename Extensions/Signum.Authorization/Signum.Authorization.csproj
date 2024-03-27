@@ -2,7 +2,6 @@
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
-		<TypeScriptBuildMode>true</TypeScriptBuildMode>
 		<Nullable>enable</Nullable>
 		<WarningsAsErrors>nullable</WarningsAsErrors>
 		<OutputType>Library</OutputType>
