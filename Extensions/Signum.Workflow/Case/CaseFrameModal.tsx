@@ -11,11 +11,11 @@ import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Workflow'
-import { WorkflowClient } from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
+import { WorkflowClient } from '../WorkflowClient';
 import { ErrorBoundary, ModalHeaderButtons } from '@framework/Components';
 import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"

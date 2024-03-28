@@ -10,16 +10,8 @@ import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate, useAPI, useAPIWithReload } from '@framework/Hooks'
 
-interface WorkflowConditionComponentProps {
-  ctx: TypeContext<WorkflowConditionEntity>;
-}
 
-interface WorkflowConditionComponentState {
-  exampleEntity?: ICaseMainEntity;
-  response?: WorkflowClient.WorkflowConditionTestResponse;
-}
-
-export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps) {
+export default function WorkflowConditionComponent(p: { ctx: TypeContext<WorkflowConditionEntity> }) {
 
   const exampleEntityRef = React.useRef<ICaseMainEntity | null>(null);
 

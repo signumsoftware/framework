@@ -5,14 +5,12 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { AutoLine, EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lines'
 import { Entity } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
-import { DynamicValidationClient, DynamicValidationTestResponse } from '../DynamicValidationClient'
+import { DynamicValidationClient } from '../DynamicValidationClient'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import PropertyRouteCombo from "@framework/Components/PropertyRouteCombo";
-import { ModifiableEntity } from '@framework/Signum.Entities';
-import { Lite } from '@framework/Signum.Entities';
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicValidationEntity, DynamicValidationMessage } from '../Signum.Dynamic.Validations'
@@ -28,7 +26,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
   const dv = p.ctx.value;
   const routeTypeName = useAPI(() => dv.subEntity ? DynamicValidationClient.API.routeTypeName(dv.subEntity) : dv.entityType ? Promise.resolve(dv.entityType.className) : Promise.resolve(undefined), [dv.subEntity, dv.entityType]);
 
-  const [response, setResponse] = React.useState<DynamicValidationTestResponse | undefined>(undefined);
+  const [response, setResponse] = React.useState<DynamicValidationClient.DynamicValidationTestResponse | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
 
@@ -117,7 +115,7 @@ export default function DynamicValidation(p: DynamicValidationProps) {
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  function renderMessage(res: DynamicValidationTestResponse) {
+  function renderMessage(res: DynamicValidationClient.DynamicValidationTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 

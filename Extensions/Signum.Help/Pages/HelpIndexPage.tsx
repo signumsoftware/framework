@@ -4,7 +4,7 @@ import { useLocation, useParams, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from '@framework/Navigator'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { HelpClient, Urls } from '../HelpClient'
+import { HelpClient } from '../HelpClient'
 import { SearchControl } from '@framework/Search';
 import { useAPI } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, AppendixHelpEntity } from '../Signum.Help';
@@ -26,10 +26,10 @@ export default function HelpIndexPage() {
         <div className="my-4 ms-4">
         <h2 className="display-6">
           {HelpMessage.Appendices.niceToString()}
-          {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={Urls.appendixUrl(null)} style={{ fontSize: "20px" }} ><FontAwesomeIcon icon="plus" className="ms-2" title={HelpMessage.Appendices.niceToString()} /></Link>}
+            {Navigator.isCreable(AppendixHelpEntity, { customComponent: true, isSearch: true }) && <Link to={HelpClient.Urls.appendixUrl(null)} style={{ fontSize: "20px" }} ><FontAwesomeIcon icon="plus" className="ms-2" title={HelpMessage.Appendices.niceToString()} /></Link>}
         </h2>
         <ul className="responsive-columns">
-          {index.appendices.map(ap => <li key={ap.uniqueName}><h4 className="display-7"><Link to={Urls.appendixUrl(ap.uniqueName)} className={"fw-bold"}>{ap.title}</Link></h4></li>)}
+            {index.appendices.map(ap => <li key={ap.uniqueName}><h4 className="display-7"><Link to={HelpClient.Urls.appendixUrl(ap.uniqueName)} className={"fw-bold"}>{ap.title}</Link></h4></li>)}
           </ul>
         </div>
 
@@ -40,11 +40,11 @@ export default function HelpIndexPage() {
               {gr.elements.orderBy(a => a.namespace).map(nh =>
                 <li className="mb-4" key={nh.namespace}>
                   <h4 className="display-7">
-                    <Link to={Urls.namespaceUrl(nh.namespace)} className={nh.hasEntity ? "fw-bold" : undefined}>{nh.title}</Link>
+                    <Link to={HelpClient.Urls.namespaceUrl(nh.namespace)} className={nh.hasEntity ? "fw-bold" : undefined}>{nh.title}</Link>
                     {nh.namespace.after(".").tryBeforeLast(".") && <small> {HelpMessage.In0.niceToString(nh.namespace.after(".").tryBeforeLast("."))}</small>}
                   </h4>
                   <ul>
-                    {nh.allowedTypes.map(ei => <li key={ei.cleanName}><Link to={Urls.typeUrl(ei.cleanName)} className={ei.hasEntity ? "fw-bold" : undefined}>{getTypeInfo(ei.cleanName).niceName}</Link></li>)}
+                    {nh.allowedTypes.map(ei => <li key={ei.cleanName}><Link to={HelpClient.Urls.typeUrl(ei.cleanName)} className={ei.hasEntity ? "fw-bold" : undefined}>{getTypeInfo(ei.cleanName).niceName}</Link></li>)}
                   </ul>
                 </li>
               )}

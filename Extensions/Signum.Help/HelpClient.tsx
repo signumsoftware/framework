@@ -207,11 +207,11 @@ export namespace HelpClient {
     }
   
   }
-  
-  declare module '@framework/Signum.Entities' {
-  
-    export interface EntityPack<T extends ModifiableEntity> {
-      typeHelp?: TypeHelpEntity;
-    }
+}
+
+declare module '@framework/Signum.Entities' {
+
+  export interface EntityPack<T extends ModifiableEntity> {
+    typeHelp?: TypeHelpEntity;
   }
 }

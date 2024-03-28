@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { OmniboxClient, OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
 import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
-import { HelpClient, Urls } from './HelpClient';
+import { HelpClient } from './HelpClient';
 
 export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmniboxResult>
 {
@@ -34,15 +34,15 @@ export default class HelpOmniboxProvider extends OmniboxProvider<HelpModuleOmnib
   navigateTo(result: HelpModuleOmniboxResult) {
 
     if (result.typeName != null)
-      return Promise.resolve(Urls.typeUrl(result.typeName));
+      return Promise.resolve(HelpClient.Urls.typeUrl(result.typeName));
 
     if (result.searchString != null)
-      return Promise.resolve(Urls.searchUrl(result.searchString));
+      return Promise.resolve(HelpClient.Urls.searchUrl(result.searchString));
 
     if (result.keywordMatch == undefined)
       return undefined;
 
-    return Promise.resolve(Urls.indexUrl());
+    return Promise.resolve(HelpClient.Urls.indexUrl());
   }
 
   toString(result: HelpModuleOmniboxResult) {
