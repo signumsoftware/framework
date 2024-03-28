@@ -212,7 +212,7 @@ export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V 
       if (requestStarted.current)
         console.warn(`The 'data' was set too late. Consider using [] as default value to avoid automatic query. EntityCombo: ${p.type!.name}`);
       setData(p.data);
-    } else if (loadData) {
+    } else if (!p.ctx.readOnly && loadData) {
       requestStarted.current = true;
 
       if (p.type.name.contains(",") && !p.findOptions) {
@@ -226,7 +226,7 @@ export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V 
           .then(data => setData(data));
       }
     }
-  }, [normalizeEmptyArray(p.data), p.type.name, loadData, p.findOptions && Finder.findOptionsPath(p.findOptions), ...(p.deps ?? [])]);
+  }, [normalizeEmptyArray(p.data), p.type.name, loadData, p.ctx.readOnly, p.findOptions && Finder.findOptionsPath(p.findOptions), ...(p.deps ?? [])]);
 
   const lite = getLite();
 
