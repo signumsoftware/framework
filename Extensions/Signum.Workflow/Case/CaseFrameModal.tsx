@@ -16,7 +16,6 @@ import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
-import { WorkflowClient, IHasCaseActivity } from '../WorkflowClient';
 import { ErrorBoundary, ModalHeaderButtons } from '@framework/Components';
 import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"
@@ -192,7 +191,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
   var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = pack;
 
-  var frameComponent: FunctionalFrameComponent & IHasCaseActivity = {
+  var frameComponent: FunctionalFrameComponent & WorkflowClient.IHasCaseActivity = {
     forceUpdate,
     type: CaseFrameModalExt,
     getCaseActivity(): CaseActivityEntity | undefined {

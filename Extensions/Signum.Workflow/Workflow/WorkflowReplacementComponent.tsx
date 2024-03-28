@@ -3,7 +3,7 @@ import { WorkflowReplacementModel, WorkflowReplacementItemEmbedded, CaseActivity
 import { TypeContext } from '@framework/Lines'
 import { SearchValueLine } from '@framework/Search'
 import { symbolNiceName } from '@framework/Reflection'
-import { WorkflowClient, PreviewTask } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import { getToString, is } from "@framework/Signum.Entities";
 import { useForceUpdate } from '@framework/Hooks'
 

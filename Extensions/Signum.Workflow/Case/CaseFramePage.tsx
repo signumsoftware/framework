@@ -13,7 +13,6 @@ import { WorkflowClient } from '../WorkflowClient'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
-import { WorkflowClient, IHasCaseActivity } from '../WorkflowClient';
 import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
@@ -112,7 +111,7 @@ export default function CaseFramePage() {
 
   var pack = state.pack;
 
-  var frameComponent: FunctionalFrameComponent & IHasCaseActivity = {
+  var frameComponent: FunctionalFrameComponent & WorkflowClient.IHasCaseActivity = {
     forceUpdate,
     type: CaseFramePage,
     getCaseActivity(): CaseActivityEntity | undefined {
