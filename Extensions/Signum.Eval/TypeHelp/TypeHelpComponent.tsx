@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { isTypeEnum, PropertyRoute } from '@framework/Reflection'
 import { Typeahead } from '@framework/Components'
-import * as TypeHelpClient from './TypeHelpClient'
+import { TypeHelpClient } from './TypeHelpClient'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import "./TypeHelpComponent.css"

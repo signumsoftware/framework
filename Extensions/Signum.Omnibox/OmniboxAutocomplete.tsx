@@ -3,7 +3,7 @@ import { AbortableRequest } from '@framework/Services';
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { Typeahead, ErrorBoundary } from '@framework/Components'
-import * as OmniboxClient from './OmniboxClient'
+import { OmniboxClient, OmniboxResult } from './OmniboxClient'
 import { OmniboxMessage } from './Signum.Omnibox'
 import '@framework/Frames/MenuIcons.css'
 import { TypeaheadController } from '@framework/Components/Typeahead';
@@ -17,7 +17,7 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
   const typeahead = React.useRef<TypeaheadController>(null);
   const abortRequest = React.useMemo(() => new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac)), []);
 
-  function handleOnSelect(result: OmniboxClient.OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) {
+  function handleOnSelect(result: OmniboxResult, e: React.KeyboardEvent<any> | React.MouseEvent<any>) {
     abortRequest.abort();
 
     const ke = e as React.KeyboardEvent<any>;
@@ -46,10 +46,10 @@ export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
   return (
     <ErrorBoundary>
       <Typeahead ref={typeahead } getItems={str => abortRequest.getData(str)}
-        renderItem={item => OmniboxClient.renderItem(item as OmniboxClient.OmniboxResult)}
-        isHeader={item => (item as OmniboxClient.OmniboxResult).resultTypeName == "HelpOmniboxResult" && (item as OmniboxClient.HelpOmniboxResult).referencedTypeName == null}
-        isDisabled={item => (item as OmniboxClient.OmniboxResult).resultTypeName == "HelpOmniboxResult"}
-        onSelect={(item, e) => handleOnSelect(item as OmniboxClient.OmniboxResult, e)}
+        renderItem={item => OmniboxClient.renderItem(item as OmniboxResult)}
+        isHeader={item => (item as OmniboxResult).resultTypeName == "HelpOmniboxResult" && (item as OmniboxClient.HelpOmniboxResult).referencedTypeName == null}
+        isDisabled={item => (item as OmniboxResult).resultTypeName == "HelpOmniboxResult"}
+        onSelect={(item, e) => handleOnSelect(item as OmniboxResult, e)}
         inputAttrs={inputAttr}
         minLength={0} />
     </ErrorBoundary>

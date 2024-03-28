@@ -89,7 +89,6 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
   handleCreateClick = async (event: React.SyntheticEvent<any>) => {
 
     event.preventDefault();
-
     var pr = this.props.ctx.propertyRoute!.addMember("Indexer", "", true);
 
     if (this.props.getLiteFromElement)
@@ -100,7 +99,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
     if (e == undefined)
       return undefined;
 
-    if (!this.props.viewOnCreate) {
+    if (this.props.viewOnCreate) {
       e = await this.doView(await this.convert(e));
     }
 

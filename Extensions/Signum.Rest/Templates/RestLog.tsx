@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { RestLogEntity } from '../Signum.Rest'
 import { TypeContext, AutoLine, EntityLine, EntityRepeater, EntityTable } from "@framework/Lines";
 import { } from "@framework/ConfigureReactWidgets";
-import { API } from '../RestClient'
+import { RestClient } from '../RestClient'
 import { DiffDocument } from '../../Signum.DiffLog/Templates/DiffDocument';
 import * as AppContext from '@framework/AppContext'
 import { Tab, Tabs, Button } from 'react-bootstrap';
@@ -76,7 +76,7 @@ export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }) {
             <input type="text" className="form-control" value={newURL} onChange={e => setReplayResult(e.currentTarget.value)} />
           </div>
           <div className="col-sm-2">
-            <Button variant="info" onClick={() => { API.replayRestLog(ctx.value.id!, encodeURIComponent(newURL)).then(d => setReplayResult(d)) }}>Replay</Button>
+            <Button variant="info" onClick={() => { RestClient.API.replayRestLog(ctx.value.id!, encodeURIComponent(newURL)).then(d => setReplayResult(d)) }}>Replay</Button>
           </div>
         </div>
       }

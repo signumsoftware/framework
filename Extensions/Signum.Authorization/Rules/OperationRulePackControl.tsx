@@ -4,7 +4,7 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { getToString } from '@framework/Signum.Entities'
-import { API } from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
@@ -16,8 +16,8 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.saveOperationRulePack(pack)
-      .then(() => API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
+    AuthAdminClient.API.saveOperationRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchOperationRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });

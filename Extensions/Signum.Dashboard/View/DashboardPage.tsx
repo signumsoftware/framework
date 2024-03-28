@@ -10,7 +10,7 @@ import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import * as DashboardClient from "../DashboardClient"
+import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 

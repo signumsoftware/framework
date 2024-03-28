@@ -11,19 +11,18 @@ import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, ICaseMainEntity, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Workflow'
-import * as WorkflowClient from '../WorkflowClient'
 import CaseFromSenderInfo from './CaseFromSenderInfo'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
-import { IHasCaseActivity } from '../WorkflowClient';
+import { WorkflowClient } from '../WorkflowClient';
 import { ErrorBoundary, ModalHeaderButtons } from '@framework/Components';
 import { Modal } from 'react-bootstrap';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import { FunctionalAdapter } from '@framework/Modals';
-import * as AuthClient from '../../Signum.Authorization/AuthClient'
+import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
 
 interface CaseFrameModalProps extends IModalProps<CaseActivityEntity | undefined> {
@@ -192,7 +191,7 @@ export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFr
 
   var { activity, canExecuteActivity, canExecuteMainEntity, ...extension } = pack;
 
-  var frameComponent: FunctionalFrameComponent & IHasCaseActivity = {
+  var frameComponent: FunctionalFrameComponent & WorkflowClient.IHasCaseActivity = {
     forceUpdate,
     type: CaseFrameModalExt,
     getCaseActivity(): CaseActivityEntity | undefined {

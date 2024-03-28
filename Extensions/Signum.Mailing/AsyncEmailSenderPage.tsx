@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { useLocation, useParams } from 'react-router'
 import { Navigator } from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
-import { API, AsyncEmailSenderState } from './MailingClient'
+import { MailingClient } from './MailingClient'
 import { EmailMessageEntity } from './Signum.Mailing'
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
@@ -14,7 +14,7 @@ export default function AsyncEmailSenderPage() {
 
   useTitle("AsyncEmailSender state");
 
-  const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
+  const [state, reloadState] = useAPIWithReload(() => MailingClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
 
@@ -24,12 +24,12 @@ export default function AsyncEmailSenderPage() {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState());
+    MailingClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState());
+    MailingClient.API.start().then(() => reloadState());
   }
 
   if (state == undefined)

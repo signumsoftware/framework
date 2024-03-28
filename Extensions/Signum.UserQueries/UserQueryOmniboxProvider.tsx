@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Lite, liteKey } from '@framework/Signum.Entities'
-import { OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
+import { OmniboxClient, OmniboxResult, OmniboxMatch } from '../Signum.Omnibox/OmniboxClient'
 import { OmniboxProvider } from '../Signum.Omnibox/OmniboxProvider'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import * as UserQueryClient from './UserQueryClient'
+import { UserQueryClient } from './UserQueryClient'
 import { UserQueryEntity } from './Signum.UserQueries'
 
 export default class UserQueryOmniboxProvider extends OmniboxProvider<UserQueryOmniboxResult>

@@ -4,7 +4,7 @@ import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
-import { API } from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
@@ -15,8 +15,8 @@ export default React.forwardRef(function PropertyRulesPackControl({ ctx }: { ctx
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.savePropertyRulePack(pack)
-      .then(() => API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
+    AuthAdminClient.API.savePropertyRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchPropertyRulePack(pack.type.cleanName!, pack.role.id!))
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });

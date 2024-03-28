@@ -2,19 +2,18 @@
 import * as React from 'react'
 import * as d3 from 'd3'
 import { Navigator } from '@framework/Navigator';
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import * as GoogleMapsChartUtils from './GoogleMapsChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from '../D3Scripts/Components/ChartUtils';
-import { ChartRow } from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function renderMarkermapChart(p: ChartClient.ChartScriptProps) {
+export default function renderMarkermapChart(p: ChartScriptProps) {
   return <MarkermapChartImp {...p} />
 }
 
-export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: ChartClient.ChartScriptProps) {
+export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: ChartScriptProps) {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 
@@ -41,8 +40,8 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
     var minZoom = parameters["MinZoom"];
     var maxZoom = parameters["MaxZoom"];
 
-    var latitudeColumn = data?.columns.c0! as ChartClient.ChartColumn<number> | undefined;
-    var longitudeColumn = data?.columns.c1! as ChartClient.ChartColumn<number> | undefined;
+    var latitudeColumn = data?.columns.c0! as ChartColumn<number> | undefined;
+    var longitudeColumn = data?.columns.c1! as ChartColumn<number> | undefined;
 
     var centerMap = new google.maps.LatLng(
       data?.rows.length ? latitudeColumn!.getValue(data.rows[0]) : 0,
@@ -91,10 +90,10 @@ export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: Chart
 
     if (data) {
       var labelColumn = data.columns.c2;
-      var iconColumn = data.columns.c3 as ChartClient.ChartColumn<string> | undefined;
+      var iconColumn = data.columns.c3 as ChartColumn<string> | undefined;
       var titleColumn = data.columns.c4;
       var infoColumn = data.columns.c5;
-      var colorScaleColumn = data.columns.c6 as ChartClient.ChartColumn<number> | undefined;
+      var colorScaleColumn = data.columns.c6 as ChartColumn<number> | undefined;
       var colorSchemeColumn = data.columns.c7;
 
       var color: ((r: ChartRow) => string) | null = null;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import * as d3 from 'd3'
 import { } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
-import { API, HeavyProfilerEntry, StackTraceTS } from '../ProfilerClient'
+import { ProfilerClient } from '../ProfilerClient'
 import { useLocation, useParams } from "react-router";
 import "./Profiler.css"
 import { useAPI, useSize, useAPIWithReload } from '@framework/Hooks'
@@ -16,13 +16,13 @@ export default function HeavyEntry() {
 
   const selectedIndex = params.selectedIndex;
   const rootIndex = selectedIndex.tryBefore("-") ?? selectedIndex;
-  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.details(rootIndex), [rootIndex]);
-  const stackTrace = useAPI(() => API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
+  const [entries, reloadEntries] = useAPIWithReload(() => ProfilerClient.API.Heavy.details(rootIndex), [rootIndex]);
+  const stackTrace = useAPI(() => ProfilerClient.API.Heavy.stackTrace(selectedIndex), [selectedIndex]);
   const [asyncDepth, setAsyncDepth] = React.useState<boolean>(false);
 
   function handleDownload() {
     let selectedIndex = params.selectedIndex;
-    API.Heavy.download(selectedIndex.tryBefore("-") ?? selectedIndex);
+    ProfilerClient.API.Heavy.download(selectedIndex.tryBefore("-") ?? selectedIndex);
   }
 
   const index = params.selectedIndex;
@@ -73,7 +73,7 @@ export default function HeavyEntry() {
 }
 
 
-export function StackFrameTable(p: { stackTrace: StackTraceTS[] }) {
+export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }) {
   if (p.stackTrace == undefined)
     return <span>No StackTrace</span>;
 
@@ -114,8 +114,8 @@ function lerp(min: number, ratio: number, max: number) {
 }
 
 interface HeavyProfilerDetailsD3Props {
-  entries: HeavyProfilerEntry[];
-  selected: HeavyProfilerEntry;
+  entries: ProfilerClient.HeavyProfilerEntry[];
+  selected: ProfilerClient.HeavyProfilerEntry;
   asyncDepth: boolean;
 }
 
@@ -130,7 +130,7 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
   const chartContainer = React.useRef<HTMLDivElement | null>(null);
 
-  function resetZoom(current: HeavyProfilerEntry): MinMax {
+  function resetZoom(current: ProfilerClient.HeavyProfilerEntry): MinMax {
     return ({
       min: lerp(current.beforeStart, -0.1, current.end),
       max: lerp(current.beforeStart, 1.1, current.end)
@@ -177,8 +177,8 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
   const data = p.entries;
 
   const getDepth = p.asyncDepth ?
-    (e: HeavyProfilerEntry) => e.asyncDepth :
-    (e: HeavyProfilerEntry) => e.depth;
+    (e: ProfilerClient.HeavyProfilerEntry) => e.asyncDepth :
+    (e: ProfilerClient.HeavyProfilerEntry) => e.depth;
 
   const fontSize = 12;
   const fontPadding = 3;
@@ -211,7 +211,7 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
 
     var filteredData = data.filter(a => a.end > min && a.beforeStart < max && (x(a.end)! - x(a.beforeStart)!) > 1);
 
-    function handleOnClick(e: React.MouseEvent<SVGGElement>, d: HeavyProfilerEntry) {
+    function handleOnClick(e: React.MouseEvent<SVGGElement>, d: ProfilerClient.HeavyProfilerEntry) {
       if (d == p.selected) {
 
       }

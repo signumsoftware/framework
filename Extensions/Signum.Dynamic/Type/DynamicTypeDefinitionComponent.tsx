@@ -2,17 +2,16 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Combobox } from 'react-widgets'
 import { classes, Dic } from '@framework/Globals'
-import { Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute } from '@framework/Reflection'
+import { Binding, EntityDataValues, EntityKindValues, EntityKind, PropertyRoute, Type } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
 import { StyleContext } from '@framework/TypeContext'
 import { EntityControlMessage, toLite } from '@framework/Signum.Entities'
 import SelectorModal from '@framework/SelectorModal';
 import MessageModal from '@framework/Modals/MessageModal'
-import * as DynamicTypeClient from '../DynamicTypeClient';
-import * as EvalClient from '../../Signum.Eval/EvalClient'
-import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
-import { Validators, DynamicTypeDefinition, DynamicProperty } from '../DynamicTypeClient';
+import { DynamicTypeClient } from '../DynamicTypeClient';
+import { EvalClient } from '../../Signum.Eval/EvalClient'
+import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import ValueComponent from './ValueComponent';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror';
@@ -25,6 +24,10 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { DynamicTypeEntity, DynamicTypeMessage } from '../Signum.Dynamic.Types'
 import { DynamicMixinConnectionEntity } from '../Signum.Dynamic.Mixins'
 import { TextAreaLine } from '@framework/Lines'
+
+import Validators = DynamicTypeClient.Validators;
+import DynamicProperty = DynamicTypeClient.DynamicProperty;
+import DynamicTypeDefinition = DynamicTypeClient.DynamicTypeDefinition;
 
 export interface DynamicTypeDesignContext {
   refreshView: () => void;
@@ -1445,6 +1448,9 @@ function isEntity(type: string) {
 function isEmbedded(type: string) {
   return type.endsWith("Embedded");
 }
+
+
+
 
 export interface ValidatorOptions<T extends Validators.DynamicValidator> {
   name: string;

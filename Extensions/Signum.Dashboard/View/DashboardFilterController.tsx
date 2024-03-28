@@ -5,7 +5,7 @@ import { Entity, is, Lite } from '@framework/Signum.Entities';
 import { Finder } from '@framework/Finder';
 import { getQueryKey } from '@framework/Reflection';
 import { Dic, softCast } from '@framework/Globals';
-import { hasWaitForInvalidation } from '../DashboardClient';
+import { DashboardClient } from '../DashboardClient';
 
 
 
@@ -34,7 +34,7 @@ export class DashboardController {
 
   setIsLoading() {
     this.isLoading = !this.dashboard.parts
-      .filter(p => hasWaitForInvalidation(p.element.content.Type))
+      .filter(p => DashboardClient.hasWaitForInvalidation(p.element.content.Type))
       .every(p => this.invalidationMap.has(p.element));
   }
 

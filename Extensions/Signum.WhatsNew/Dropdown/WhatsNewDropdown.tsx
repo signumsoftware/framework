@@ -8,14 +8,13 @@ import { DateTime } from 'luxon'
 import { useAPI, useAPIWithReload, useForceUpdate, useUpdatedRef } from '@framework/Hooks';
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as WhatsNewClient from '../WhatsNewClient'
+import { WhatsNewClient } from '../WhatsNewClient'
 import "./WhatsNewDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'
 import MessageModal from '@framework/Modals/MessageModal'
 import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, WhatsNewState } from '../Signum.WhatsNew'
 import * as AppContext from "@framework/AppContext"
-import { API, NumWhatsNews, WhatsNewFull, WhatsNewShort } from '../WhatsNewClient'
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
 export default function WhatsNewDropdown() {
@@ -48,7 +47,7 @@ function WhatsNewDropdownImp() {
 
   Navigator.useEntityChanged(WhatsNewLogEntity, () => reloadCount(), []);
 
-  const [whatsNew, setNews] = React.useState<WhatsNewShort[] | undefined>(undefined);
+  const [whatsNew, setNews] = React.useState<WhatsNewClient.WhatsNewShort[] | undefined>(undefined);
 
   function handleOnToggle() {
 
@@ -65,7 +64,7 @@ function WhatsNewDropdownImp() {
     AppContext.navigate("/news/");
   }
 
-  function handleOnCloseNews(toRemove: WhatsNewShort[]) {
+  function handleOnCloseNews(toRemove: WhatsNewClient.WhatsNewShort[]) {
 
     //Optimistic
     let wasClosed = false;
@@ -80,7 +79,7 @@ function WhatsNewDropdownImp() {
       countResult.numWhatsNews -= 1;
     forceUpdate();
 
-    API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
+    WhatsNewClient.API.setNewsLogRead(toRemove.map(r => r.whatsNew)).then(res => {
 
       // Pesimistic
       WhatsNewClient.API.myNews()
@@ -143,7 +142,7 @@ function WhatsNewDropdownImp() {
   );
 }
 
-export function WhatsNewToast(p: { whatsnew: WhatsNewShort, onClose: (e: WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
+export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClose: (e: WhatsNewClient.WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
 {
   //ignoring open tags other than img
   function HTMLSubstring(text: string) {

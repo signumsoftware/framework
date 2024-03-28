@@ -4,8 +4,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic } from '@framework/Globals'
 import { Operations } from '@framework/Operations'
 import { getToString } from '@framework/Signum.Entities'
-import * as CultureClient from '@framework/Basics/CultureClient'
-import { API } from '../TranslationClient'
+import { CultureClient } from '@framework/Basics/CultureClient'
+import { TranslationClient } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Translation'
 import { TranslationTypeTable } from './TranslationTypeTable'
 import "../Translation.css"
@@ -25,7 +25,7 @@ export default function TranslationCodeView() {
 
   const [filter, setFilter] = React.useState(() => QueryString.parse(location.search).filter);
 
-  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
+  const result = useAPI(() => filter == "" ? Promise.resolve(undefined) : TranslationClient.API.retrieve(assembly, culture ?? "", filter), [assembly, culture, filter]);
 
   function renderTable() {
     if (result == undefined)
@@ -44,7 +44,7 @@ export default function TranslationCodeView() {
 
   function handleSave(e: React.FormEvent<any>) {
     e.preventDefault();
-    API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => Operations.notifySuccess());
+    TranslationClient.API.save(decodeDots(params.assembly), params.culture ?? "", result!).then(() => Operations.notifySuccess());
   }
 
   const message = TranslationMessage.View0In1.niceToString(decodeDots(assembly),

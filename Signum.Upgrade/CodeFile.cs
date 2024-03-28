@@ -289,7 +289,7 @@ public class CodeFile
     public void ReplaceMethod(Expression<Predicate<string>> methodLine, string text) =>
         ReplaceBetween(
             new(methodLine, 0),
-            new(s => s.Contains("}"), 0) { SameIdentation = true }, 
+            new(s => s.Contains("}"), 0) { SameIdentation = true },
             text);
 
 
@@ -421,7 +421,41 @@ public class CodeFile
             throw new InvalidOperationException("");
     }
 
-    internal void ReplaceTypeScriptImports(Expression<Func<string, bool>> pathPredicate, Func<HashSet<string>, HashSet<string>?> importedPartsSelector)
+    internal void ReplacPartsInTypeScriptImport(Expression<Func<string, bool>> pathPredicate, Func<string /*path*/, HashSet<string> /*parts*/, HashSet<string>?> importedPartsSelector)
+    {
+        AssertExtension(".ts", ".tsx");
+
+        var compiled = pathPredicate.Compile();
+        ProcessLines(lines =>
+        {
+            bool changed = false;
+            int pos = 0;
+            while ((pos = lines.FindIndex(pos, a => a.StartsWith("import ") && !a.StartsWith("import type") && a.Contains(" from ") && compiled(a.After("from").Trim(' ', '\'', '\"', ';')))) != -1)
+            {
+                var line = lines[pos];
+                var importPart = line.After("import").Before("from").Trim();
+                string after = line.After("from");
+
+                var parts = importPart.StartsWith('*') ? new[] { importPart.Trim() }.ToHashSet() : importPart.Between("{", "}").SplitNoEmpty(",").Select(a => a.Trim()).ToHashSet();
+                var newParts = importedPartsSelector(after.Trim(' ', '\'', '\"', ';'), parts);
+
+                if (newParts != null) {
+
+                    if (newParts.Count == 1 && newParts.SingleEx().StartsWith("*"))
+                        lines[pos] = "import " + newParts.SingleEx() + " from" + after;
+                    else
+                        lines[pos] = "import { " + newParts.ToString(", ") + " } from" + after;
+                    changed = true;
+                }
+                pos++;
+            }
+
+            return changed;
+
+        });
+    }
+
+    internal void ReplaceAndCombineTypeScriptImports(Expression<Func<string, bool>> pathPredicate, Func<HashSet<string>, HashSet<string>?> importedPartsSelector)
     {
         AssertExtension(".ts", ".tsx");
 
@@ -432,7 +466,7 @@ public class CodeFile
             int pos = 0;
             var initialPos = -1;
             var after = (string?)null;
-            while ((pos = lines.FindIndex(pos, a => a.StartsWith("import ") && a.Contains(" from ") && compiled(a.After("from").Trim(' ', '\'', '\"', ';')))) != -1)
+            while ((pos = lines.FindIndex(pos, a => a.StartsWith("import ") && !a.StartsWith("import type") && a.Contains(" from ") && compiled(a.After("from").Trim(' ', '\'', '\"', ';')))) != -1)
             {
                 if (initialPos == -1)
                     initialPos = pos;

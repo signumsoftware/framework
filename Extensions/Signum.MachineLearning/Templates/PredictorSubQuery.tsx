@@ -6,7 +6,7 @@ import { PredictorSubQueryEntity, PredictorSubQueryColumnEmbedded, PredictorEnti
 import { Finder } from '@framework/Finder'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
-import * as UserAssetsClient from '../../Signum.UserAssets/UserAssetClient'
+import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient'
 import { QueryDescription, SubTokensOptions } from '@framework/FindOptions'
 import { initializeColumn } from './Predictor';
 import { newMListElement } from '@framework/Signum.Entities';
@@ -30,16 +30,16 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
     var sq = p.ctx.value;
 
     Finder.getQueryDescription(sq.query!.key).then(sqd =>
-      UserAssetsClient.API.parseFilters({
+      UserAssetClient.API.parseFilters({
         queryKey: sqd.queryKey,
         canAggregate: true,
         entity: undefined,
-        filters: (getMainFilters() ?? []).concat(sq.filters).map(mle => UserAssetsClient.Converter.toQueryFilterItem(mle.element))
+        filters: (getMainFilters() ?? []).concat(sq.filters).map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       }).then(filters => {
         var fo: FindOptions = {
           queryName: sq.query!.key,
           groupResults: true,
-          filterOptions: filters.map(f => UserAssetsClient.Converter.toFilterOption(f)),
+          filterOptions: filters.map(f => UserAssetClient.Converter.toFilterOption(f)),
           columnOptions: [{ token: QueryTokenString.count() } as ColumnOption]
             .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
           columnOptionsMode: "ReplaceAll",

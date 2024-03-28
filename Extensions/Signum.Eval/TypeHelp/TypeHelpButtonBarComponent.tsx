@@ -1,10 +1,10 @@
 import * as React from 'react'
-import { TypeHelpMode } from './TypeHelpClient';
+import { TypeHelpClient } from './TypeHelpClient';
 import { TypeContext } from '@framework/Lines';
 
 interface TypeHelpButtonBarComponentProps {
   typeName: string;
-  mode: TypeHelpMode;
+  mode: TypeHelpClient.TypeHelpMode;
   extraButtons?: React.ReactNode;
   ctx?: TypeContext<any>;
 }

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { Dic } from '@framework/Globals'
 import { JavascriptMessage } from '@framework/Signum.Entities'
-import { API, TranslationFileStatus } from '../TranslationClient'
+import { TranslationClient } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { useAPI } from '@framework/Hooks'
@@ -11,7 +11,7 @@ import { saveFile } from '@framework/Services'
 
 export default function TranslationCodeStatus() {
 
-  const result = useAPI(() => API.status(), []);
+  const result = useAPI(() => TranslationClient.API.status(), []);
 
   return (
     <div>
@@ -23,7 +23,7 @@ export default function TranslationCodeStatus() {
 }
 
 
-function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
+function TranslationTable({ result }: { result: TranslationClient.TranslationFileStatus[] }) {
   const tree = result.groupBy(a => a.assembly)
     .toObject(gr => gr.key, gr => gr.elements.toObject(a => a.culture));
 
@@ -55,7 +55,7 @@ function TranslationTable({ result }: { result: TranslationFileStatus[] }) {
             {cultures.map(culture =>
               <td key={culture}>
                 <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                {tree[assembly][culture].status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon icon="download" />}</a>}
+                {tree[assembly][culture].status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon icon="download" />}</a>}
                 <br />
                 {
                   !tree[assembly][culture].isDefault &&

@@ -8,7 +8,7 @@ import { SearchMessage, JavascriptMessage, parseLite, toLite } from '@framework/
 import { getQueryNiceName, newLite } from '@framework/Reflection'
 import SearchControl, { SearchControlHandler } from '@framework/SearchControl/SearchControl'
 import { UserQueryEntity } from '../Signum.UserQueries'
-import * as UserQueryClient from '../UserQueryClient'
+import { UserQueryClient } from '../UserQueryClient'
 import { useParams } from "react-router";
 import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { useState } from 'react'

@@ -31,6 +31,10 @@ public class RestApiKeyLogic
             {
                 return Database.Query<RestApiKeyEntity>().ToFrozenDictionaryEx(rak => rak.ApiKey);
             }, new InvalidateWith(typeof(RestApiKeyEntity)));
+
+
+            if (sb.WebServerBuilder != null)
+                RestApiKeyServer.Start(sb.WebServerBuilder.WebApplication);
         }
     }
 

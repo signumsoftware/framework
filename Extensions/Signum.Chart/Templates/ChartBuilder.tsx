@@ -3,10 +3,9 @@ import * as React from 'react'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
 import { is } from '@framework/Signum.Entities'
 import { ChartColumnEmbedded, ChartMessage, ChartParameterEmbedded } from '../Signum.Chart'
-import * as ChartClient from '../ChartClient'
-import { ChartScript, ChartScriptParameter, EnumValueList } from '../ChartClient'
+import { ChartClient } from '../ChartClient'
 import { ChartColumn } from './ChartColumn'
-import { ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
+import { ColorPaletteClient, ColorInterpolate, ColorScheme } from '../ColorPalette/ColorPaletteClient'
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { colorInterpolators, colorSchemes } from '../ColorPalette/ColorUtils'
 import { Dic } from '@framework/Globals'
@@ -29,7 +28,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
 
-  function chartTypeImgClass(script: ChartScript): string {
+  function chartTypeImgClass(script: ChartClient.ChartScript): string {
     const cb = p.ctx.value;
 
     let css = "sf-chart-img";
@@ -57,7 +56,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
     p.onTokenChange();
   }
 
-  function handleChartScriptOnClick(cs: ChartScript) {
+  function handleChartScriptOnClick(cs: ChartClient.ChartScript) {
     const chart = p.ctx.value;
     let compatible = ChartClient.isCompatibleWith(cs, chart)
     chart.chartScript = cs.symbol;
@@ -134,7 +133,7 @@ export default function ChartBuilder(p: ChartBuilderProps) {
 }
 
 export function Parameters(props: {
-  chartScript: ChartScript,
+  chartScript: ChartClient.ChartScript,
   chart: IChartBase,
   onRedraw?: () => void,
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
@@ -176,7 +175,7 @@ export function Parameters(props: {
     );
 }
 
-function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
+function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: TypeContext<ChartParameterEmbedded>, scriptParameter: ChartClient.ChartScriptParameter, onRedraw?: () => void, chart: IChartBase }) {
 
   if (scriptParameter.type == "Special") {
     var sp = scriptParameter.valueDefinition as ChartClient.SpecialParameter;
@@ -238,7 +237,7 @@ function ParameterValueLine({ ctx, scriptParameter, chart, onRedraw }: { ctx: Ty
     };
     el.type = { name: "string", isNotNullable: true };
 
-    const compatible = (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
+    const compatible = (scriptParameter.valueDefinition as ChartClient.EnumValueList).filter(a => a.typeFilter == undefined || token == undefined || ChartClient.isChartColumnType(token, a.typeFilter));
 
     if (compatible.length <= 1)
       el.ctx.styleOptions.readOnly = true;

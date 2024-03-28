@@ -8,7 +8,7 @@ import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, GraphExplorer } from '@framework/Reflection'
 import SelectorModal from '@framework/SelectorModal'
-import * as DynamicTypeClient from '../DynamicTypeClient'
+import { DynamicTypeClient } from '../DynamicTypeClient'
 import { DynamicTypeDefinitionComponent, PropertyRepeaterComponent } from './DynamicTypeDefinitionComponent'
 import { DynamicTypeEntity } from '../Signum.Dynamic.Types'
 

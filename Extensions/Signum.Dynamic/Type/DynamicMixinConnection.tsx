@@ -6,7 +6,7 @@ import { Navigator } from '@framework/Navigator'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
 import { ModifiableEntity, Entity, Lite, JavascriptMessage, getToString } from '@framework/Signum.Entities'
 import { getTypeInfo, Binding, PropertyRoute, symbolNiceName, getQueryNiceName } from '@framework/Reflection'
-import * as DynamicTypeClient from '../DynamicTypeClient'
+import { DynamicTypeClient } from '../DynamicTypeClient'
 import { Typeahead } from '@framework/Components';
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicMixinConnectionEntity } from '../Signum.Dynamic.Mixins'

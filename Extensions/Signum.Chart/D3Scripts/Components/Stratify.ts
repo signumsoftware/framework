@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { ChartTable, ChartColumn, ChartRow } from "../../ChartClient";
+import { ChartClient, ChartTable, ChartColumn, ChartRow } from "../../ChartClient";
 
 export function stratifyTokens(
   data: ChartTable,

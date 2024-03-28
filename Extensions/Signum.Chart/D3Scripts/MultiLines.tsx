@@ -1,10 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
-import { ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
+import { ChartClient, ChartTable, ChartColumn, ChartScriptProps } from '../ChartClient';
 import { XKeyTicks, XScaleTicks, YScaleTicks } from './Components/Ticks';
 import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';

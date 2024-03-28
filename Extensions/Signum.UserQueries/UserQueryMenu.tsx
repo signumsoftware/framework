@@ -8,8 +8,8 @@ import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, M
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { SystemTimeEmbedded, UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
-import * as UserQueryClient from './UserQueryClient'
-import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
+import { UserQueryClient } from './UserQueryClient'
+import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
 import { getQueryKey } from '@framework/Reflection';
 import { Operations } from '@framework/Operations';

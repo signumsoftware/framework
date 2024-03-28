@@ -1,7 +1,7 @@
 ﻿import * as React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
-import { OmniboxResult, OmniboxMatch } from './OmniboxClient';
+import { OmniboxClient, OmniboxResult, OmniboxMatch } from './OmniboxClient';
 
 
 export abstract class OmniboxProvider<T extends OmniboxResult> {

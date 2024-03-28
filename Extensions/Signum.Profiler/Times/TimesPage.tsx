@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { Navigator } from '@framework/Navigator'
-import { API, HeavyProfilerEntry, TimeTrackerEntry, TimeTrackerTime } from '../ProfilerClient'
+import { ProfilerClient } from '../ProfilerClient'
 import { useLocation, useParams } from "react-router";
 
 import "./Times.css"
@@ -17,11 +17,11 @@ import { getToString } from '@framework/Signum.Entities';
 
 export default function TimesPage() {
 
-  const [times, reloadTimes] = useAPIWithReload(() => API.Times.fetchInfo(), []);
+  const [times, reloadTimes] = useAPIWithReload(() => ProfilerClient.API.Times.fetchInfo(), []);
   useTitle("Times state");
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.Times.clear().then(() => reloadTimes());
+    ProfilerClient.API.Times.clear().then(() => reloadTimes());
   }
 
   if (times == undefined)
@@ -58,7 +58,7 @@ function toHumanMilis(milis: number) {
   return Duration.fromObject(result).toHuman();
 }
 
-function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
+function TimesBars({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
 
   var nf = toNumberFormat("C0");
   function formatMilis(milis: number) {
@@ -71,7 +71,7 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
 
   const ratio = maxWidth / maxDuration;
 
-  function drawLineRow(label: string, time: TimeTrackerTime, className: string) {
+  function drawLineRow(label: string, time: ProfilerClient.TimeTrackerTime, className: string) {
     return (
       <tr>
         <td>{label}</td>
@@ -124,7 +124,7 @@ function TimesBars({ times }: { times: TimeTrackerEntry[] }) {
   );
 }
 
-function TimesTable({ times }: { times: TimeTrackerEntry[] }) {
+function TimesTable({ times }: { times: ProfilerClient.TimeTrackerEntry[] }) {
 
   var white = Color.White;
   var blue = Color.parse("#2980B9");
@@ -142,7 +142,7 @@ function TimesTable({ times }: { times: TimeTrackerEntry[] }) {
 
   var nf = toNumberFormat("C0");
 
-  function getTimeCell(time?: TimeTrackerTime) {
+  function getTimeCell(time?: ProfilerClient.TimeTrackerTime) {
     if (time == null)
       return <td></td>;
 

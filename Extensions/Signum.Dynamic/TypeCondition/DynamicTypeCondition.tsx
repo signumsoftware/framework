@@ -5,11 +5,13 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicTypeConditionTestResponse, API } from '../DynamicTypeConditionClient'
+import { DynamicTypeConditionClient } from '../DynamicTypeConditionClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicTypeConditionEntity } from '../Signum.Dynamic.Types'
+import { DynamicClient } from '../DynamicClient'
+import { DynamicTypeClient } from '../DynamicTypeClient'
 
 interface DynamicTypeConditionComponentProps {
   ctx: TypeContext<DynamicTypeConditionEntity>;
@@ -18,7 +20,7 @@ interface DynamicTypeConditionComponentProps {
 export default function DynamicTypeConditionComponent(p: DynamicTypeConditionComponentProps) {
 
 
-  const [response, setResponse] = React.useState<DynamicTypeConditionTestResponse | undefined>(undefined);
+  const [response, setResponse] = React.useState<DynamicTypeConditionClient.DynamicTypeConditionTestResponse | undefined>(undefined);
   const exampleEntityRef = React.useRef<Entity | null>(null);
   const forceUpdate = useForceUpdate();
 
@@ -81,7 +83,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
     if (exampleEntityRef == undefined)
       setResponse(undefined);
     else {
-      API.typeConditionTest({
+      DynamicTypeConditionClient.API.typeConditionTest({
         dynamicTypeCondition: p.ctx.value,
         exampleEntity: exampleEntityRef.current!,
       })
@@ -114,7 +116,7 @@ export default function DynamicTypeConditionComponent(p: DynamicTypeConditionCom
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  function renderMessage(res: DynamicTypeConditionTestResponse) {
+  function renderMessage(res: DynamicTypeConditionClient.DynamicTypeConditionTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 

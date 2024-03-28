@@ -7,7 +7,7 @@ import SelectorModal from '@framework/SelectorModal'
 import { TypeContext } from '@framework/TypeContext'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, InteractionGroup, CacheQueryConfigurationEmbedded, CachedQueryEntity, DashboardOperation, TokenEquivalenceGroupEntity, TokenEquivalenceEmbedded } from '../Signum.Dashboard'
 import { EntityGridRepeater, EntityGridItem } from './EntityGridRepeater'
-import * as DashboardClient from "../DashboardClient";
+import { DashboardClient } from "../DashboardClient";
 import { iconToString, parseIcon } from "@framework/Components/IconTypeahead";
 import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';

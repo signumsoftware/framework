@@ -1,6 +1,7 @@
 using Microsoft.Data.SqlClient;
 using Signum.Authorization;
 using Signum.Cache;
+using System.Threading.Channels;
 
 namespace Signum.Processes;
 
@@ -26,8 +27,15 @@ public static class ProcessRunner
 
     static AutoResetEvent autoResetEvent = new AutoResetEvent(false);
 
+    public static StringBuilder? LogStringBuilder;
+
     public static ProcessLogicState ExecutionState()
     {
+        string? log = null;
+        if (LogStringBuilder != null)
+            lock (LogStringBuilder)
+                log = LogStringBuilder?.ToString();
+
         return new ProcessLogicState
         {
             Running = running,
@@ -37,6 +45,7 @@ public static class ProcessRunner
             JustMyProcesses = ProcessLogic.JustMyProcesses,
             MachineName = Schema.Current.MachineName,
             ApplicationName = Schema.Current.ApplicationName,
+            Log = log,
             Executing = executing.Values.Select(p => new ExecutionState
             {
                 IsCancellationRequested = p.CancelationSource.IsCancellationRequested,
@@ -49,6 +58,14 @@ public static class ProcessRunner
         };
     }
 
+    public static void Log(string line, ExecutingProcess? ep = null)
+    {
+        if (LogStringBuilder != null)
+            lock (LogStringBuilder)
+                LogStringBuilder.AppendLine(DateTime.Now.ToString("o") + (ep == null ? null : " " + ep.ToString()) + " " + line);
+
+    }
+
     public static SimpleStatus GetSimpleStatus()
     {
         return running ? SimpleStatus.Ok :
@@ -58,6 +75,7 @@ public static class ProcessRunner
 
     public static void StartRunningProcessesAfter(int delayMilliseconds)
     {
+        Log("Starting after " + delayMilliseconds);
         initialDelayMilliseconds = delayMilliseconds;
 
         Task.Run(() =>
@@ -122,12 +140,16 @@ public static class ProcessRunner
 
     public static void StartRunningProcesses()
     {
+        Log("StartRunningProcesses");
+
         if (running)
             throw new InvalidOperationException("ProcessLogic is running");
 
         using (ExecutionContext.SuppressFlow())
             Task.Factory.StartNew(() =>
-            {  
+            {
+                Log("StartRunningProcesses StartNew");
+
                 var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
                 SystemEventLogLogic.Log("Start ProcessRunner");
@@ -138,14 +160,18 @@ public static class ProcessRunner
                     {
                         running = true;
 
-                        (from p in Database.Query<ProcessEntity>()
-                         where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
-                         p.IsShared() && p.State == ProcessState.Suspended
-                         select p).SetAsQueued();
+                        int changed = (from p in Database.Query<ProcessEntity>()
+                                       where p.IsMine() && (p.State == ProcessState.Executing || p.State == ProcessState.Suspending || p.State == ProcessState.Suspended) ||
+                                       p.IsShared() && p.State == ProcessState.Suspended
+                                       select p).SetAsQueued();
+
+                        Log("SetAsQueued " + changed);
 
                         CancelNewProcesses = new CancellationTokenSource();
 
                         autoResetEvent.Set();
+
+                        Log("AutoResetEvent Set");
 
                         timerNextExecution = new Timer(ob => WakeUp("TimerNextExecution", null), // main timer
                              null,
@@ -155,27 +181,41 @@ public static class ProcessRunner
                         if (!CacheLogic.WithSqlDependency)
                             timerPeriodic = new Timer(ob => WakeUp("TimerPeriodic", null), null, PoolingPeriodMilliseconds, PoolingPeriodMilliseconds);
 
+                        Log("Waiting ARE");
                         while (autoResetEvent.WaitOne())
                         {
+                            Log("Loop");
+
                             if (CancelNewProcesses.IsCancellationRequested)
+                            {
+                                Log("CancelNewProcesses.IsCancellationRequested = true");
                                 return;
+                            }
 
                             using (HeavyProfiler.Log("PWL", () => "Process Runner"))
                             {
-                                (from p in Database.Query<ProcessEntity>()
-                                 where p.State == ProcessState.Planned && p.PlannedDate <= Clock.Now
-                                 select p).SetAsQueued();
+                                changed = (from p in Database.Query<ProcessEntity>()
+                                           where p.State == ProcessState.Planned && p.PlannedDate <= Clock.Now
+                                           select p).SetAsQueued();
 
-                                var list = Database.Query<ProcessEntity>()
+
+                                Log("SetAsQueued " + changed);
+
+                                var dates = Database.Query<ProcessEntity>()
                                         .Where(p => p.IsMine() || p.IsShared())
                                         .Where(p => p.State == ProcessState.Planned)
                                         .Select(p => p.PlannedDate)
                                         .ToListWakeup("Planned dependency");
 
-                                SetNextPannedExecution(list.Min());
+                                Log("DatesList Count = " + dates.Count + " MinDate = " + dates.Min());
 
+                                SetNextPannedExecution(dates.Min());
+
+                                Log("Waiting Lock");
                                 lock (executing)
                                 {
+                                    Log("Inside Lock");
+
                                     int remaining = MaxDegreeOfParallelism - executing.Count;
 
                                     if (remaining > 0)
@@ -188,15 +228,20 @@ public static class ProcessRunner
                                             .Select(a => new { Process = a.ToLite(), a.QueuedDate, a.MachineName })
                                             .ToListWakeup("Planned dependency");
 
+
                                         var afordable = queued
                                             .OrderByDescending(p => p.MachineName == Schema.Current.MachineName)
                                             .OrderBy(a => a.QueuedDate)
                                             .Take(remaining).ToList();
 
+                                        Log($"Queued Count = {queued.Count} Affordable = {afordable.Count} Executing = {executing.Count}");
+
                                         var taken = afordable.Where(p => p.MachineName == ProcessEntity.None).Select(a => a.Process).ToList();
 
                                         if (taken.Any())
                                         {
+                                            Log($"Taken Count = {taken.Count}");
+
                                             using (var tr = Transaction.ForceNew())
                                             {
                                                 Database.Query<ProcessEntity>()
@@ -216,14 +261,17 @@ public static class ProcessRunner
 
                                         foreach (var pair in afordable)
                                         {
+                                            Log($" Foreach {pair}");
+
                                             ProcessEntity pro = pair.Process!.RetrieveAndRemember();
 
                                             IProcessAlgorithm algorithm = ProcessLogic.GetProcessAlgorithm(pro.Algorithm);
 
                                             ExecutingProcess executingProcess = new ExecutingProcess(algorithm, pro);
-
+                                            Log($" Created", executingProcess);
                                             executing.Add(pro.ToLite(), executingProcess);
 
+                                            Log($" TakeForThisMachine", executingProcess);
                                             executingProcess.TakeForThisMachine();
 
                                             using (ExecutionContext.SuppressFlow())
@@ -231,6 +279,7 @@ public static class ProcessRunner
                                                 {
                                                     try
                                                     {
+                                                        Log($" Task.Run / Execute", executingProcess);
                                                         using (ProcessLogic.OnApplySession(executingProcess.CurrentProcess))
                                                         {
                                                             executingProcess.Execute();
@@ -241,21 +290,27 @@ public static class ProcessRunner
                                                     {
                                                         try
                                                         {
-                                                            ex.LogException(edn =>
+
+                                                            Log($" Task.Run / ERROR " + ex.Message, executingProcess);
+                                                            var exEnt = ex.LogException(edn =>
                                                             {
                                                                 edn.ControllerName = "ProcessWorker";
                                                                 edn.ActionName = executingProcess.CurrentProcess.ToLite().Key();
                                                             });
+                                                            Log($" Task.Run / ERROR ExceptionID = " + exEnt.Id, executingProcess);
+
                                                         }
                                                         catch { }
                                                     }
                                                     finally
                                                     {
+                                                        Log($"Task.Run / Finishing", executingProcess);
                                                         lock (executing)
                                                         {
                                                             executing.Remove(pro.ToLite());
                                                             WakeUp("Process ended", null);
                                                         }
+                                                        Log($"Task.Run / Finished", executingProcess);
                                                     }
                                                 });
 
@@ -266,6 +321,8 @@ public static class ProcessRunner
                                                 .Where(p => p.IsMine())
                                                 .Select(a => a.ToLite())
                                                 .ToListWakeup("Suspending dependency");
+
+                                        Log($"Suspending Count= {suspending.Count}");
 
                                         foreach (var s in suspending)
                                         {
@@ -280,6 +337,8 @@ public static class ProcessRunner
                                     }
                                 }
                             }
+
+                            Log("Waiting ARE");
                         }
                     }
                     catch (ThreadAbortException)
@@ -323,6 +382,7 @@ public static class ProcessRunner
 
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
     {
+        Log("WakeUp " + reason);
         using (HeavyProfiler.Log("WakeUp", () => "WakeUp! "+ reason + ToString(args)))
         {
             return autoResetEvent.Set();
@@ -540,6 +600,7 @@ public class ProcessLogicState
     public required string ApplicationName;
     public required bool Running;
     public required bool JustMyProcesses;
+    public string? Log;
     public required DateTime? NextPlannedExecution;
     public required List<ExecutionState> Executing;
 }

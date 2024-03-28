@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { Lite } from '@framework/Signum.Entities'
-import { OmniboxResult, OmniboxMatch } from '../../Signum.Omnibox/OmniboxClient'
+import { OmniboxClient, OmniboxResult, OmniboxMatch } from '../../Signum.Omnibox/OmniboxClient'
 import { OmniboxProvider } from '../../Signum.Omnibox/OmniboxProvider'
 import { Navigator } from '@framework/Navigator'
-import * as ChartClient from '../ChartClient'
-import * as UserChartClient from '../UserChart/UserChartClient'
+import { ChartClient } from '../ChartClient'
+import { UserChartClient } from '../UserChart/UserChartClient'
 import { UserChartEntity } from './Signum.Chart.UserChart'
 
 export default class UserChartOmniboxProvider extends OmniboxProvider<UserChartOmniboxResult>

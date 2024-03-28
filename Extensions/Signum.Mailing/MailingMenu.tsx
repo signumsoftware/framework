@@ -4,7 +4,7 @@ import { getToString, Lite } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
 import { EmailMessageEntity } from './Signum.Mailing'
-import * as MailingClient from './MailingClient'
+import { MailingClient } from './MailingClient'
 import { DropdownButton, Dropdown } from 'react-bootstrap';
 import { EmailTemplateEntity } from './Signum.Mailing.Templates'
 

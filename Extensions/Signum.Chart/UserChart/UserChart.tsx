@@ -7,7 +7,7 @@ import { getQueryNiceName } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import "../Chart.css"
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { getCustomDrilldownsFindOptions, hasAggregates } from '../ChartClient'
+import { ChartClient } from '../ChartClient'
 import { getToString } from '@framework/Signum.Entities'
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
@@ -20,10 +20,10 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
   const entity = ctx.value;
   const queryKey = entity.query!.key;
 
-  const hasAggregatesRef = React.useRef<boolean>(hasAggregates(ctx.value));
+  const hasAggregatesRef = React.useRef<boolean>(ChartClient.hasAggregates(ctx.value));
 
   React.useEffect(() => {
-    const ha = hasAggregates(ctx.value);
+    const ha = ChartClient.hasAggregates(ctx.value);
     if (ha == hasAggregatesRef.current)
       return;
 
@@ -69,7 +69,7 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
         onRedraw={() => forceUpdate()}
         onOrderChanged={() => forceUpdate()} />
       <EntityStrip ctx={ctx.subCtx(e => e.customDrilldowns)}
-        findOptions={getCustomDrilldownsFindOptions(queryKey, qd, hasAggregatesRef.current)}
+        findOptions={ChartClient.getCustomDrilldownsFindOptions(queryKey, qd, hasAggregatesRef.current)}
         avoidDuplicates={true}
         vertical={true}
         iconStart={true} />

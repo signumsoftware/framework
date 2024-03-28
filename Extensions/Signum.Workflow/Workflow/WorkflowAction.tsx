@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowActionEntity } from '../Signum.Workflow'
-import { API, showWorkflowTransitionContextCodeHelp } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from "../../Signum.Eval/TypeHelp/TypeHelpComponent";
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
@@ -46,7 +46,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
       <AutoLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
-        autocomplete={new LiteAutocompleteConfig((signal, str) => API.findMainEntityType({ subString: str, count: 5 }, signal))}
+        autocomplete={new LiteAutocompleteConfig((signal, str) => WorkflowClient.API.findMainEntityType({ subString: str, count: 5 }, signal))}
         find={false} />
       {ctx.value.mainEntityType &&
         <div>
@@ -55,7 +55,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
             <div className="col-sm-7">
               <div className="code-container">
                 <div className="btn-group" style={{ marginBottom: "3px" }}>
-                  <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => showWorkflowTransitionContextCodeHelp()} />
+                  <input type="button" className="btn btn-success btn-sm sf-button" value="ctx" onClick={() => WorkflowClient.showWorkflowTransitionContextCodeHelp()} />
                 </div>
                 <pre style={{ border: "0px", margin: "0px" }}>{"void Action(" + ctx.value.mainEntityType.cleanName + "Entity e, WorkflowTransitionContext ctx)\n{"}</pre>
                 <CSharpCodeMirror script={ctx.value.eval!.script ?? ""} onChange={handleCodeChange} onInit={cm => cm.setSize(null, 600)} />
