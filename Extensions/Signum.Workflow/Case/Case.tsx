@@ -4,7 +4,7 @@ import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity, WorkflowEntity } from '../Signum.Workflow'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
-import { WorkflowClient, CaseFlow } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
@@ -121,7 +121,7 @@ function CaseActivityStatsButtonComponent(p: CaseActivityButtonBaseProps) {
 
   function handleOnClick(rr: ResultRow) {
     if (rr.entity)
-      Navigator.WorkflowClient.API.fetch(rr.entity).then(caseActivity => {
+      Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.showCaseActivityStatsModal(bpmnElementID);
       });
@@ -152,7 +152,7 @@ function WorkflowActivityLocateButtonComponent(p: WorkflowActivityLocateButtonCo
 
   function handleOnClick(rr: ResultRow) {
     if (rr.entity) {
-      Navigator.WorkflowClient.API.fetch(rr.entity).then(caseActivity => {
+      Navigator.API.fetch(rr.entity).then(caseActivity => {
         const bpmnElementID = ((caseActivity as CaseActivityEntity).workflowActivity as any).bpmnElementId;
         p.caseFlowViewer.focusElement(bpmnElementID);
 

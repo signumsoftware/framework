@@ -10,7 +10,6 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
-import { TreeClient } from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
@@ -325,7 +324,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   handleAddRoot = () => {
-    Operations.TreeClient.API.construct(this.props.typeName, TreeOperation.CreateRoot)
+    Operations.API.construct(this.props.typeName, TreeOperation.CreateRoot)
       .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
@@ -337,7 +336,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   handleAddChildren = () => {
     var parent = this.state.selectedNode!;
-    Operations.TreeClient.API.constructFromLite(parent.lite, TreeOperation.CreateChild)
+    Operations.API.constructFromLite(parent.lite, TreeOperation.CreateChild)
       .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
@@ -354,7 +353,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     var sibling = this.state.selectedNode!;
 
-    Operations.TreeClient.API.constructFromLite(sibling.lite, TreeOperation.CreateNextSibling)
+    Operations.API.constructFromLite(sibling.lite, TreeOperation.CreateNextSibling)
       .then(ep => Navigator.view(ep!, { requiresSaveOperation: true }))
       .then(te => {
         if (!te)
@@ -543,7 +542,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     if (this.state.draggedKind == "Move") {
       const treeModel = MoveTreeModel.New(partial);
-      Operations.TreeClient.API.executeLite(dragged.lite, TreeOperation.Move, treeModel).then(() =>
+      Operations.API.executeLite(dragged.lite, TreeOperation.Move, treeModel).then(() =>
 
         this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {
           if (toExpand)
@@ -557,7 +556,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       const s = TreeClient.settings[this.props.typeName];
       var promise = s?.createCopyModel ? s.createCopyModel(dragged.lite, partial) : Promise.resolve(MoveTreeModel.New(partial));
       promise.then(treeModel => treeModel &&
-        Operations.TreeClient.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
+        Operations.API.constructFromLite(dragged.lite, TreeOperation.Copy, treeModel).then(() =>
           this.setState({ draggedNode: undefined, draggedOver: undefined, draggedKind: undefined, selectedNode: dragged }, () => {
             if (toExpand)
               toExpand.nodeState = "Expanded";

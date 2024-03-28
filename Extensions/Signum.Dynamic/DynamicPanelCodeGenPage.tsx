@@ -5,7 +5,7 @@ import { classes } from '@framework/Globals'
 import { StyleContext } from '@framework/TypeContext'
 import * as AppContext from '@framework/AppContext'
 import { WebApiHttpError } from '@framework/Services'
-import { DynamicClient, CompilationError, DynamicPanelInformation } from './DynamicClient'
+import { DynamicClient } from './DynamicClient'
 import CSharpCodeMirror from '../Signum.CodeMirror/CSharpCodeMirror'
 import { DynamicPanelPermission } from './Signum.Dynamic'
 import { useLocation } from "react-router";
@@ -16,7 +16,7 @@ import { useForceUpdate, useAPI, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
 import { EvalPanelPermission } from '../Signum.Eval/Signum.Eval'
 import { CheckEvalsStep, SearchPanel } from '../Signum.Eval/EvalPanelPage'
-import { EvalClient, Options } from '../Signum.Eval/EvalClient'
+import { EvalClient } from '../Signum.Eval/EvalClient'
 
 
 
@@ -76,17 +76,17 @@ export default function DynamicPanelPage() {
             refreshView={() => setRefreshKey(refreshKey + 1)} />
         </Tab>
 
-        {Options.getDynaicMigrationsStep &&
+        {EvalClient.Options.getDynaicMigrationsStep &&
 
           <Tab eventKey="migrations" title="3. Sql Migrations">
-            {Options.getDynaicMigrationsStep()}
+            {EvalClient.Options.getDynaicMigrationsStep()}
           </Tab>
         }
-        <Tab eventKey="checkEvals" title={(Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
+        <Tab eventKey="checkEvals" title={(EvalClient.Options.getDynaicMigrationsStep ? "4." : "3.") + " Check Evals"}>
           <CheckEvalsStep />
         </Tab>
 
-        <Tab eventKey="refreshClients" title={(Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
+        <Tab eventKey="refreshClients" title={(EvalClient.Options.getDynaicMigrationsStep ? "5." : "6.") + " Refresh Clients"}>
           <RefreshClientsStep />
         </Tab>
       </Tabs>
@@ -97,12 +97,12 @@ export default function DynamicPanelPage() {
 
 interface DynamicCompileStepProps {
   refreshView?: () => void;
-  panelInformation?: DynamicPanelInformation;
+  panelInformation?: DynamicClient.DynamicPanelInformation;
 }
 
 export function CompileStep(p: DynamicCompileStepProps) {
 
-  const [compilationErrors, setCompilationErrors] = React.useState<CompilationError[] | undefined>(undefined);
+  const [compilationErrors, setCompilationErrors] = React.useState<DynamicClient.CompilationError[] | undefined>(undefined);
 
   const [selectedErrorIndex, setSelectedErrorIndex] = React.useState<number | undefined>(undefined);
 
@@ -165,7 +165,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
     );
   }
 
-  function renderCompileResult(errors: CompilationError[]) {
+  function renderCompileResult(errors: DynamicClient.CompilationError[]) {
     return (
       <div>
         <br />
@@ -180,7 +180,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
     );
   }
 
-  function renderErrorTable(errors: CompilationError[]) {
+  function renderErrorTable(errors: DynamicClient.CompilationError[]) {
     var err = selectedErrorIndex == null ? undefined : errors[selectedErrorIndex]
 
     return (
@@ -220,7 +220,7 @@ export function CompileStep(p: DynamicCompileStepProps) {
   }
   var sc = new StyleContext(undefined, { labelColumns: { sm: 6 } });
 
-  const lines = Options.onGetDynamicLineForPanel.map(f => f(sc));
+  const lines = EvalClient.Options.onGetDynamicLineForPanel.map(f => f(sc));
   const lineContainer = React.cloneElement(<div />, undefined, ...lines);
 
   return (

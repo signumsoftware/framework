@@ -3,7 +3,7 @@ import { Duration } from 'luxon'
 import { WorkflowModel, WorkflowActivityModel } from '../Signum.Workflow'
 import { Color, Gradient } from '@framework/Basics/Color'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowClient, WorkflowActivityStats, WorkflowActivityMonitor } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { WorkflowActivityMonitorConfig } from "../ActivityMonitor/WorkflowActivityMonitorPage";
@@ -11,7 +11,7 @@ import { QueryToken } from "@framework/FindOptions";
 import { getToString, is } from "@framework/Signum.Entities";
 
 export class WorkflowActivityMonitorRenderer extends CustomRenderer {
-  workflowActivityMonitor!: WorkflowActivityMonitor;
+  workflowActivityMonitor!: WorkflowClient.WorkflowActivityMonitor;
   workflowConfig!: WorkflowActivityMonitorConfig;
   workflowModel!: WorkflowModel;
 
@@ -59,7 +59,7 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
   }
 }
 
-function getTitle(stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig) {
+function getTitle(stats: WorkflowClient.WorkflowActivityStats, config: WorkflowActivityMonitorConfig) {
   let result = `${getToString(stats.workflowActivity)} (${stats.caseActivityCount})`;
 
   if (config.columns.length) {

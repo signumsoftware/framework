@@ -8,7 +8,7 @@ import { PropertyRouteEntity } from '@framework/Signum.Basics'
 import { Constructor } from '@framework/Constructor'
 import { EvalClient } from '../Signum.Eval/EvalClient'
 import { globalModules } from './View/GlobalModules'
-import { Signum.Dynamic.Client, DynamicClientEntity } from './Signum.Dynamic.Client';
+import { DynamicClientEntity } from './Signum.Dynamic.Client';
 
 export namespace DynamicClientClient {
   

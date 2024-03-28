@@ -5,21 +5,13 @@ import { PropertyRoute, Binding } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowConditionEntity, ICaseMainEntity } from '../Signum.Workflow'
-import { WorkflowClient, WorkflowConditionTestResponse } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate, useAPI, useAPIWithReload } from '@framework/Hooks'
 
-interface WorkflowConditionComponentProps {
-  ctx: TypeContext<WorkflowConditionEntity>;
-}
 
-interface WorkflowConditionComponentState {
-  exampleEntity?: ICaseMainEntity;
-  response?: WorkflowConditionTestResponse;
-}
-
-export default function WorkflowConditionComponent(p: WorkflowConditionComponentProps) {
+export default function WorkflowConditionComponent(p: { ctx: TypeContext<WorkflowConditionEntity> }) {
 
   const exampleEntityRef = React.useRef<ICaseMainEntity | null>(null);
 
@@ -86,7 +78,7 @@ export default function WorkflowConditionComponent(p: WorkflowConditionComponent
     return Navigator.view(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  function renderMessage(res: WorkflowConditionTestResponse) {
+  function renderMessage(res: WorkflowClient.WorkflowConditionTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 

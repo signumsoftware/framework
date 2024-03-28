@@ -4,7 +4,7 @@ import { Finder } from '@framework/Finder'
 import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Workflow'
 import { Navigator } from '@framework/Navigator'
-import { WorkflowClient, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';
 import { useLocation, useParams } from "react-router";
@@ -21,7 +21,7 @@ export interface WorkflowActivityMonitorConfig {
 
 interface WorkflowActivityMonitorPageState {
   lastConfig: WorkflowActivityMonitorConfig;
-  workflowActivityMonitor: WorkflowActivityMonitor;
+  workflowActivityMonitor: WorkflowClient.WorkflowActivityMonitor;
 }
 
 export default function WorkflowActivityMonitorPage() {
@@ -29,7 +29,7 @@ export default function WorkflowActivityMonitorPage() {
 
   var workflow = useAPI(() => {
     const lite = newLite(WorkflowEntity, params.workflowId);
-    return Navigator.WorkflowClient.API.fillLiteModels(lite).then(() => lite);
+    return Navigator.API.fillLiteModels(lite).then(() => lite);
   }, [params.workflowId]);
 
   const config = React.useMemo(() => workflow == null ? undefined : ({
@@ -77,7 +77,7 @@ export default function WorkflowActivityMonitorPage() {
   );
 }
 
-function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
+function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowClient.WorkflowActivityMonitorRequest {
   return {
     workflow: conf.workflow,
     filters: Finder.toFilterRequests(conf.filters),

@@ -6,7 +6,7 @@ import { timeToString, toNumberFormat } from '@framework/Reflection';
 import { Finder } from '@framework/Finder';
 import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage } from '@framework/Signum.Entities'
-import { WorkflowClient, CaseActivityStats } from "../WorkflowClient";
+import { WorkflowClient } from "../WorkflowClient";
 import { FormGroup, StyleContext } from "@framework/Lines";
 import { CaseActivityEntity, WorkflowActivityEntity, WorkflowActivityMessage, DoneType, CaseNotificationEntity, CaseActivityMessage, WorkflowActivityType, CaseEntity, WorkflowEventType } from "../Signum.Workflow";
 import { EntityLink, SearchControl } from "@framework/Search";
@@ -15,7 +15,7 @@ import { OperationLogEntity } from '@framework/Signum.Operations';
 
 interface CaseActivityStatsModalProps extends IModalProps<undefined> {
   case: CaseEntity;
-  caseActivityStats: CaseActivityStats[];
+  caseActivityStats: WorkflowClient.CaseActivityStats[];
 }
 
 export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
@@ -63,13 +63,13 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
   );
 }
 
-CaseActivityStatsModal.show = (caseEntity: CaseEntity, caseActivityStats: CaseActivityStats[]): Promise<any> => {
+CaseActivityStatsModal.show = (caseEntity: CaseEntity, caseActivityStats: WorkflowClient.CaseActivityStats[]): Promise<any> => {
   return openModal<any>(<CaseActivityStatsModal case={caseEntity} caseActivityStats={caseActivityStats} />);
 };
 
 interface CaseActivityStatsComponentProps {
   caseEntity: CaseEntity;
-  stats: CaseActivityStats;
+  stats: WorkflowClient.CaseActivityStats;
 }
 
 export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){

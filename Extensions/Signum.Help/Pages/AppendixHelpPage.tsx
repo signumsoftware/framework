@@ -3,7 +3,7 @@ import { useLocation, useParams, Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
-import { HelpClient, Urls } from '../HelpClient'
+import { HelpClient } from '../HelpClient'
 import { Operations } from '@framework/Operations';
 import { useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation, AppendixHelpEntity, AppendixHelpOperation } from '../Signum.Help';
@@ -30,7 +30,7 @@ export default function AppendixHelpHelp() {
 
   return (
     <div className="container">
-      <h1 className="display-6"><Link to={Urls.indexUrl()}>
+      <h1 className="display-6"><Link to={HelpClient.Urls.indexUrl()}>
         {HelpMessage.Help.niceToString()}</Link>
         {" > "}
         <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} onChange={() => { ctx.value.isNew && (ctx.value.uniqueName = ctx.value.title.replace(/[^a-zA-Z0-9]/g, "")); forceUpdate(); }} defaultEditable={appendix.isNew} />
@@ -47,7 +47,7 @@ export default function AppendixHelpHelp() {
 
       <EditableHtmlComponent ctx={ctx.subCtx(a => a.description)} onChange={forceUpdate} defaultEditable={appendix.isNew} />
       <div className={classes("btn-toolbar", "sf-button-bar", "mt-4")}>
-        <SaveButton ctx={ctx} onSuccess={() => ctx.value.isNew ? AppContext.navigate(Urls.appendixUrl(ctx.value.uniqueName)) : reloadAppendix()} />
+        <SaveButton ctx={ctx} onSuccess={() => ctx.value.isNew ? AppContext.navigate(HelpClient.Urls.appendixUrl(ctx.value.uniqueName)) : reloadAppendix()} />
         <DeleteButton ctx={ctx} />
       </div>
     </div>
@@ -87,9 +87,9 @@ function DeleteButton({ ctx }: { ctx: TypeContext<AppendixHelpEntity> }) {
     }).then(result => {
       if (result == "yes") {
 
-        Operations.HelpClient.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
+        Operations.API.deleteLite(toLite(ctx.value), AppendixHelpOperation.Delete.key)
           .then((() => {
-            AppContext.navigate(Urls.indexUrl());
+            AppContext.navigate(HelpClient.Urls.indexUrl());
             Operations.notifySuccess();
           }));
       }

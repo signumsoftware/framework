@@ -3,7 +3,7 @@ import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import { DateTime, Duration } from 'luxon'
 import { CaseActivityEntity, CaseNotificationEntity, DoneType, CaseFlowColor } from '../Signum.Workflow'
 import { CustomRenderer } from './CustomRenderer'
-import { WorkflowClient, CaseFlow, CaseActivityStats } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import * as BpmnUtils from './BpmnUtils'
 import { calculatePoint } from "../../Signum.Map/Utils"
 import { getToString } from "@framework/Signum.Entities"
@@ -16,7 +16,7 @@ export class CaseFlowRenderer extends CustomRenderer {
     super(config, eventBus, styles, pathMap, canvas, textRenderer, 1200);
   }
 
-  caseFlow!: CaseFlow;
+  caseFlow!: WorkflowClient.CaseFlow;
   maxDuration!: number;
   viewer!: NavigatedViewer;
   caseFlowColor?: CaseFlowColor;
@@ -171,7 +171,7 @@ function getDoneColor(doneType: DoneType) {
   }
 }
 
-function getTitle(stats: CaseActivityStats) {
+function getTitle(stats: WorkflowClient.CaseActivityStats) {
   let result = `${getToString(stats.workflowActivity)} (${CaseNotificationEntity.nicePluralName()} ${stats.notifications})
 ${CaseActivityEntity.nicePropertyName(a => a.startDate)}: ${DateTime.fromISO(stats.startDate).toFormat("FFF")} (${DateTime.fromISO(stats.startDate).toRelative()})`;
 

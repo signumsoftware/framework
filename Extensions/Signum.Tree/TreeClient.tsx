@@ -221,18 +221,7 @@ export namespace TreeClient {
     settings[type.typeName] = setting;
   }
   
-  
-  export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
-  
-  export interface TreeNode {
-    lite: Lite<TreeEntity>;
-    name: string;
-    disabled: boolean;
-    childrenCount: number;
-    level: number;
-    loadedChildren: Array<TreeNode>;
-    nodeState: TreeNodeState;
-  }
+
   
   export function fixState(node: TreeNode) {
   
@@ -264,11 +253,24 @@ export namespace TreeClient {
       expandedNodes: Array<Lite<TreeEntity>>;
     }
   }
-  
-  declare module '@framework/SearchControl/SearchControlLoaded' {
-  
-    export interface ShowBarExtensionOption {
-      showTreeButton?: boolean;
-    }
+
+}
+
+export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
+
+export interface TreeNode {
+  lite: Lite<TreeEntity>;
+  name: string;
+  disabled: boolean;
+  childrenCount: number;
+  level: number;
+  loadedChildren: Array<TreeNode>;
+  nodeState: TreeNodeState;
+}
+
+declare module '@framework/SearchControl/SearchControlLoaded' {
+
+  export interface ShowBarExtensionOption {
+    showTreeButton?: boolean;
   }
 }

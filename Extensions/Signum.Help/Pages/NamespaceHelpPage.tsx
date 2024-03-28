@@ -2,7 +2,7 @@ import * as React from 'react'
 import { useLocation, useParams, Link } from 'react-router-dom'
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { HelpClient, Urls } from '../HelpClient'
+import { HelpClient } from '../HelpClient'
 import { useAPI, useForceUpdate, useAPIWithReload } from '@framework/Hooks';
 import { HelpMessage, NamespaceHelpEntity, NamespaceHelpOperation } from '../Signum.Help';
 import { getTypeInfo, GraphExplorer, symbolNiceName, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection';
@@ -30,7 +30,7 @@ export default function NamespaceHelpPage() {
   return (
     <div className="container">
       <div className={classes("mb-2 shortcut-container")}>
-        <h1 className="display-6"><Link to={Urls.indexUrl()}>
+        <h1 className="display-6"><Link to={HelpClient.Urls.indexUrl()}>
           {HelpMessage.Help.niceToString()}</Link>
           {" > "}
           <EditableTextComponent ctx={ctx.subCtx(a => a.title, { formSize: "lg" })} defaultText={namespace.title} onChange={forceUpdate} />
@@ -45,7 +45,7 @@ export default function NamespaceHelpPage() {
       </div>
       <h2 className="display-7 mt-4">Types</h2>
       <ul className="mt-4">
-        {namespace.allowedTypes.map(t => <li key={t.cleanName}><Link to={Urls.typeUrl(t.cleanName)} >{getTypeInfo(t.cleanName).niceName}</Link></li>)}
+        {namespace.allowedTypes.map(t => <li key={t.cleanName}><Link to={HelpClient.Urls.typeUrl(t.cleanName)} >{getTypeInfo(t.cleanName).niceName}</Link></li>)}
       </ul>
     </div>
   );

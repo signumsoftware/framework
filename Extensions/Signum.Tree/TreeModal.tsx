@@ -3,7 +3,6 @@ import { openModal, IModalProps } from '@framework/Modals';
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { getTypeInfo } from '@framework/Reflection'
 import { TreeEntity } from './Signum.Tree'
-import { TreeClient } from './TreeClient'
 import { TreeClient, TreeNode } from './TreeClient'
 import { TreeViewer } from './TreeViewer'
 import { FilterOption } from "@framework/FindOptions";

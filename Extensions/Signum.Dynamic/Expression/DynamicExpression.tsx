@@ -5,7 +5,7 @@ import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicExpressionClient, DynamicExpressionTestResponse } from '../DynamicExpressionClient'
+import { DynamicExpressionClient } from '../DynamicExpressionClient'
 import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
@@ -26,7 +26,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
 
   const exampleEntity = React.useRef<Entity | null>(null);
-  const [response, setResponse] = React.useState<DynamicExpressionTestResponse | undefined>(undefined);
+  const [response, setResponse] = React.useState<DynamicExpressionClient.DynamicExpressionTestResponse | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
 
@@ -52,7 +52,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
 
   function handleGetItems(query: string, type: "ReturnType" | "FromType") {
-    return TypeHelpClient.DynamicExpressionClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeModelEntities: type == "ReturnType", includeQueriable: type == "ReturnType" });
+    return TypeHelpClient.API.autocompleteType({ query: query, limit: 5, includeBasicTypes: true, includeEntities: true, includeModelEntities: type == "ReturnType", includeQueriable: type == "ReturnType" });
   }
 
   function renderTypeAutocomplete(ctx: TypeContext<string | null | undefined>) {
@@ -120,7 +120,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
     return Navigator.view<Entity>(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  function renderMessage(res: DynamicExpressionTestResponse) {
+  function renderMessage(res: DynamicExpressionClient.DynamicExpressionTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 

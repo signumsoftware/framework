@@ -4,7 +4,7 @@ import { useLocation, useParams } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { SearchControl } from '@framework/Search'
-import { WorkflowClient, WorkflowScriptRunnerState } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import { CaseActivityEntity, WorkflowActivityType, WorkflowPermission, CaseActivityOperation, WorkflowActivityEntity } from '../Signum.Workflow'
 import { Tabs, Tab } from 'react-bootstrap';
 import { useAPIWithReload, useInterval } from '@framework/Hooks'
