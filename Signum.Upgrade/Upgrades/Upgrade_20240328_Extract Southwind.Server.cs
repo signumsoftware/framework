@@ -27,7 +27,7 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         });
 
-        uctx.ChangeCodeFile("deployToAzure.ps1", c =>
+        uctx.ForeachCodeFile("deploy*.ps1", c =>
         {
             c.Replace(@$".\{uctx.ApplicationName}\Dockerfile", $@".\{uctx.ApplicationName}.Server\Dockerfile");
         });
@@ -57,8 +57,8 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
                 $@"WORKDIR ""/src/{uctx.ApplicationName}.Server"""
                 );
             c.ReplaceLine(a => 
-            a.Contains($@"RUN dotnet restore ""{uctx.ApplicationName}/Spitzlei.csproj"""),
-                $@"RUN dotnet restore ""{uctx.ApplicationName}.Server/Spitzlei.Server.csproj"""
+            a.Contains($@"RUN dotnet restore ""{uctx.ApplicationName}/{uctx.ApplicationName}.csproj"""),
+                $@"RUN dotnet restore ""{uctx.ApplicationName}.Server/{uctx.ApplicationName}.Server.csproj"""
                 );
             c.ReplaceLine(a => a.Contains($@"RUN dotnet publish ""{uctx.ApplicationName}.csproj"" -c Release -o /app/publish"),
                 $@"RUN dotnet publish ""{uctx.ApplicationName}.Server.csproj"" -c Release -o /app/publish"
@@ -164,9 +164,6 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind/web.config", c =>
         {
-            c.Replace(
-                "<environmentVariable name=\"ASPNETCORE_ENVIRONMENT\" value=\"production_public_ip\" />",
-                "<environmentVariable name=\"ASPNETCORE_ENVIRONMENT\" value=\"\" />");
             c.MoveFile(ToServer(c.FilePath));
         });
 
@@ -187,10 +184,7 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
             uctx.AbsolutePathSouthwind("Southwind/wwwroot"),
             uctx.AbsolutePathSouthwind("Southwind.Server/wwwroot"));
 
-        uctx.ChangeCodeFile("Southwind/yarn.lock", c =>
-        {
-            c.MoveFile(ToServer(c.FilePath));
-        });
+        uctx.DeleteFile("Southwind/yarn.lock", WarningLevel.None);
 
         uctx.ChangeCodeFile("Southwind.sln", c =>
         {
