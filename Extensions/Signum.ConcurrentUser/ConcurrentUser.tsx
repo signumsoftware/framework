@@ -106,8 +106,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     return () => clearTimeout(handle);
   }, [ticks, p.entity.ticks]);
 
-  console.log("Render", { ticks, entityTicks: p.entity.ticks });
-
+  //console.log("Render", { ticks, entityTicks: p.entity.ticks });
 
   var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 
