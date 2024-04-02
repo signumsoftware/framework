@@ -20,10 +20,10 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile(".gitignore", c =>
         {
-            c.Replace($"/{uctx.ApplicationName}/CodeGen/**", $"/{uctx.ApplicationName}.Server/CodeGen/**");
-            c.Replace($"/{uctx.ApplicationName}/wwwroot/dist/**", $"/{uctx.ApplicationName}.Server/wwwroot/dist/**");
-            c.Replace($"/{uctx.ApplicationName}/web.config/**", $"/{uctx.ApplicationName}.Server/web.config/**");
-            c.Replace($"/{uctx.ApplicationName}/TensorFlowModels/**", $"/{uctx.ApplicationName}.Server/TensorFlowModels/**");
+            c.Replace($"/{uctx.ApplicationName}/CodeGen/*", $"/{uctx.ApplicationName}.Server/CodeGen/*");
+            c.Replace($"/{uctx.ApplicationName}/wwwroot/dist/*", $"/{uctx.ApplicationName}.Server/wwwroot/dist/*");
+            c.Replace($"/{uctx.ApplicationName}/web.config/*", $"/{uctx.ApplicationName}.Server/web.config/*");
+            c.Replace($"/{uctx.ApplicationName}/TensorFlowModels/*", $"/{uctx.ApplicationName}.Server/TensorFlowModels/*");
 
         });
 
@@ -99,12 +99,12 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
         });
 
         List<string> publisProfiles = new List<string>();
-
-        uctx.ForeachCodeFile("*.*", "Southwind/Properties/PublishProfiles", c =>
-        {
-            publisProfiles.Add(Path.GetFileName(c.FilePath));
-            c.MoveFile(ToServer(c.FilePath));
-        });
+        if (Directory.Exists(uctx.AbsolutePathSouthwind("Southwind/Properties/PublishProfiles")))
+            uctx.ForeachCodeFile("*.*", "Southwind/Properties/PublishProfiles", c =>
+            {
+                publisProfiles.Add(Path.GetFileName(c.FilePath));
+                c.MoveFile(ToServer(c.FilePath));
+            });
 
         uctx.CreateCodeFile("Southwind.Server/Southwind.Server.csproj", $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
