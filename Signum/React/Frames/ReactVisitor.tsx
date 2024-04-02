@@ -7,7 +7,7 @@ import { ColumnOption, OrderOption, Pagination } from '../Search';
 import { Tab, Tabs } from 'react-bootstrap'
 
 export class ReactVisitor {
-  visitChild(child: React.ReactNode | string | number | boolean | undefined | null): React.ReactNode | string | number | undefined | null {
+  visitChild(child: React.ReactNode): React.ReactNode {
     if (child == undefined)
       return child;
 
@@ -30,7 +30,7 @@ export class ReactVisitor {
 
     const oldChildren = React.Children.toArray(element.props.children);
 
-    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c as React.ReactChild));
+    const newChildren = React.Children.map(oldChildren, c => this.visitChild(c as React.ReactNode | string | number | boolean | undefined | null));
 
     if (newChildren.length != oldChildren.length || newChildren.some((n, i) => n !== oldChildren[i]))
       return React.cloneElement(element, undefined, newChildren);
@@ -38,11 +38,11 @@ export class ReactVisitor {
     return element;
   }
 
-  visit(element: React.ReactElement | null): React.ReactElement | null {
+  visit(element: React.ReactNode): React.ReactNode {
     if (element == null)
       return element;
 
-    const result = this.visitElement(element);
+    const result = this.visitChild(element);
 
     if (Array.isArray(result))
       return React.createElement("div", {}, ...result);
@@ -53,6 +53,8 @@ export class ReactVisitor {
 
 
 export class ReplaceVisitor extends ReactVisitor {
+
+  validator = new ReactValidator();
 
   constructor(
     public predicate: (e: React.ReactElement) => boolean,
@@ -66,7 +68,7 @@ export class ReplaceVisitor extends ReactVisitor {
 
       var node = this.replacement(element);
 
-      var validatedNode = React.Children.map(node, c => new ReactValidator().visitChild(c));
+      var validatedNode = React.Children.map(node, c => this.validator.visitChild(c));
 
       return validatedNode;
     }
@@ -88,7 +90,7 @@ export class ReactValidator extends ReactVisitor {
 export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
-    public result: React.ReactElement | null,
+    public result: React.ReactNode,
     public ctx: TypeContext<T>
   ) {
   }
