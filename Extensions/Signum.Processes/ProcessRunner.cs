@@ -153,6 +153,7 @@ public static class ProcessRunner
                 var database = Schema.Current.Table(typeof(ProcessEntity)).Name.Schema?.Database;
 
                 SystemEventLogLogic.Log("Start ProcessRunner");
+                Exception? ex = null;
                 ExceptionEntity? exception = null;
                 using (AuthLogic.Disable())
                 {
@@ -341,12 +342,15 @@ public static class ProcessRunner
                             Log("Waiting ARE");
                         }
                     }
-                    catch (ThreadAbortException)
+                    catch (ThreadAbortException tae)
                     {
+                        Log("ThreadAbortException " + tae.Message);
                         //Ignore
                     }
                     catch (Exception e)
                     {
+                        ex = e;
+                        Log(e.GetType() + " " + e.Message);
                         try
                         {
                             exception = e.LogException(edn =>
@@ -359,6 +363,7 @@ public static class ProcessRunner
                     }
                     finally
                     {
+                        Log("finally Stopping");
                         lock (executing)
                             executing.Clear();
 
@@ -368,7 +373,7 @@ public static class ProcessRunner
                     }
                 }
 
-                if (exception != null)
+                if (ex != null)
                 {
                     using (ExecutionContext.SuppressFlow())
                         Task.Delay(1 * 60 * 1000).ContinueWith(t =>

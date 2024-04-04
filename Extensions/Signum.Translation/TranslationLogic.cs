@@ -173,7 +173,7 @@ public static class TranslationLogic
         var appName = rootDir.AfterLast(@"\");
         rootDir = rootDir.BeforeLast(@"\");
 
-        var parentDir = $@"{rootDir}\{appName}\bin\";
+        var parentDir = $@"{rootDir}\{appName}.Server\bin\";
 
         var reactDirs = new DirectoryInfo(parentDir).GetDirectories("Translations", SearchOption.AllDirectories).ToList();
 
