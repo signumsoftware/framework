@@ -135,9 +135,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  removeLine(propertyRoute: (entity: T) => any): this {
+  removeLine(propertyRoute: ((entity: T) => any) | PropertyRoute): this {
 
-    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
+    var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -160,9 +160,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  replaceAttributes<P>(propertyRoute: (entity: T) => any, newAttrs: Partial<P>): this {
+  replaceAttributes<P>(propertyRoute: ((entity: T) => any) | PropertyRoute, newAttrs: Partial<P>): this {
 
-    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
+    var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -172,9 +172,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertAfterLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined | false | null)[]): this {
+  insertAfterLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined | false | null)[]): this {
 
-    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
+    var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -184,9 +184,9 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  insertBeforeLine(propertyRoute: (entity: T) => any, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined)[]): this {
+  insertBeforeLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (ctx: TypeContext<T>) => (React.ReactElement | undefined)[]): this {
 
-    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
+    var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
@@ -204,8 +204,8 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return parentCtx as TypeContext<T>;
   }
 
-  replaceLine(propertyRoute: (entity: T) => any, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]) {
-    var pr = this.ctx.propertyRoute!.addLambda(propertyRoute);
+  replaceLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]) {
+    var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(
       e => hasPropertyRoute(e, pr),
