@@ -13,14 +13,16 @@ class Upgrade_20240405_Fix_Southwind_Server : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile("settings.*.json", "Southwind.Terminal", c =>
+        uctx.ForeachCodeFile("*.json", "Southwind.Terminal", c =>
         {
-            c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
+            if (c.FilePath.Contains("settings."))
+                c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
         });
 
-        uctx.ForeachCodeFile("settings.*.json", "Southwind.Test.Environment", c =>
+        uctx.ForeachCodeFile("*.json", "Southwind.Test.Environment", c =>
         {
-            c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
+            if (c.FilePath.Contains("settings."))
+                c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
         });
 
         uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", c =>
@@ -31,6 +33,26 @@ class Upgrade_20240405_Fix_Southwind_Server : CodeUpgradeBase
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/SpitzleiEnvironment.cs", c =>
         {
             c.Replace("settings.", "appsettings.");
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", c =>
+        {
+            c.Replace("settings.", "appsettings.");
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Terminal/Southwind.Terminal.csproj", c =>
+        {
+            c.Replace("settings.", "appsettings.");
+        });
+
+        uctx.ChangeCodeFile(@"Southwind.Test.Environment/Southwind.Test.Environment.csproj", c =>
+        {
+            c.Replace("settings.", "appsettings.");
+        });
+
+        uctx.ChangeCodeFile(@"Southwind/Home.tsx", c =>
+        {
+            c.Replace("DashboardClient => DashboardClient.API.home()", "file => file.DashboardClient.API.home()");
         });
     }
 }
