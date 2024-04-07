@@ -31,6 +31,8 @@ import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
 import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
+import Dashboard from './Admin/Dashboard';
+import { parseIcon } from '../../Signum/React/Components/IconTypeahead';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
@@ -74,7 +76,6 @@ export function start(options: { routes: RouteObject[] }) {
   Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
-  Navigator.addSettings(new EntitySettings(PanelPartEmbedded, e => import('./Admin/PanelPart'), { modalSize: "xs" }));
   Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
@@ -124,7 +125,7 @@ export function start(options: { routes: RouteObject[] }) {
         position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
         embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
         eventKey: liteKey(toLite(d)),
-        title: translated(d, d => d.displayName),
+        title: Options.customTitle(d),
       } as EmbeddedWidget;
     });
   });
@@ -280,3 +281,25 @@ export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQuerie
   return result;
 }
 
+export function DashboardTitle(p: { dashboard: DashboardEntity }) {
+
+  const icon = parseIcon(p.dashboard.iconName);
+  const title = <span style={{ color: p.dashboard.titleColor ?? undefined }}>
+    {translated(p.dashboard, d => d.displayName)}
+  </span>;
+
+  if (icon == null)
+    return title;
+
+  return (
+    <div className="dashboard-title">
+      <FontAwesomeIcon icon={icon} color={p.dashboard.iconColor ?? undefined} />
+      &nbsp;{title}
+    </div>
+  );
+}
+
+export namespace Options {
+
+  export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
+}

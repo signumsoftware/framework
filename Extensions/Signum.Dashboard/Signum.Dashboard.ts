@@ -61,6 +61,9 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
   key: string | null;
   hideQuickLink: boolean;
+  iconName: string | null;
+  iconColor: string | null;
+  titleColor: string | null;
 }
 
 export const DashboardLiteModel = new Type<DashboardLiteModel>("DashboardLiteModel");
