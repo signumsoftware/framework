@@ -75,12 +75,14 @@ public static class DashboardLogic
 
             sb.Schema.WhenIncluded<ToolbarEntity>(() =>
             {
-                sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
+            sb.Schema.Settings.AssertImplementedBy((ToolbarEntity t) => t.Elements.First().Content, typeof(DashboardEntity));
 
-                ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
-                ToolbarLogic.RegisterContentConfig<DashboardEntity>(
-                  lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
-                  lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName));
+            ToolbarLogic.RegisterDelete<DashboardEntity>(sb);
+            ToolbarLogic.RegisterContentConfig<DashboardEntity>(
+              lite => ToolbarLogic.InMemoryFilter(Dashboards.Value.GetOrCreate(lite)),
+              lite => PropertyRouteTranslationLogic.TranslatedField(Dashboards.Value.GetOrCreate(lite), a => a.DisplayName),
+              lite => Dashboards.Value.GetOrCreate(lite).IconName,
+              lite => Dashboards.Value.GetOrCreate(lite).IconColor);
             });
 
             sb.Include<CachedQueryEntity>()
