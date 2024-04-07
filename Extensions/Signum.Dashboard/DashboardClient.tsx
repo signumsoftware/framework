@@ -31,8 +31,7 @@ import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
 import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
-import Dashboard from './Admin/Dashboard';
-import { parseIcon } from '../../Signum/React/Components/IconTypeahead';
+import { parseIcon } from '@framework/Components/IconTypeahead';
 
 export interface PanelPartContentProps<T extends IPartEntity> {
   partEmbedded: PanelPartEmbedded;
