@@ -251,7 +251,7 @@ export function PanelPart(p: PanelPartProps) {
 
         {renderer.handleTitleClick == undefined ? title :
           <a className="sf-pointer"
-            style={{ color: part.useIconColorForTitle ? iconColor : part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined, textDecoration: "none" }}
+            style={{ color: part.titleColor ?? (part.customColor ? getColorContrasColorBWByHex(part.customColor) : undefined), textDecoration: "none" }}
             onClick={e => { e.preventDefault(); renderer.handleTitleClick!(content, lite, customDataRef, e); }}>
           {title}
           </a>

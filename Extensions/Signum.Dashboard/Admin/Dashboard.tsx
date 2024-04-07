@@ -84,7 +84,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
                 if (a) {
                   tc.value.iconName = a.iconName;
                   tc.value.iconColor = a.iconColor;
-                  tc.value.useIconColorForTitle = (a as PanelPartEmbedded).useIconColorForTitle;
+                  tc.value.titleColor = a.titleColor;
                   tc.value.modified = true;
                   forceUpdate();
                 }
