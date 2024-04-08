@@ -50,7 +50,7 @@ export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbed
       {ctx4.value.type != "Divider" &&
         <div className="row">
           <div className="col-sm-5">
-            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} />
+            <IconTypeaheadLine ctx={ctx4.subCtx(t => t.iconName)} onChange={() => forceUpdate()} extraIcons={["none"]} />
             <AutoLine ctx={ctx4.subCtx(t => t.iconColor)} onChange={() => forceUpdate()} />
             {content && (content.EntityType == "UserQuery" || content.EntityType == "Query") && <AutoLine ctx={ctx4.subCtx(a => a.showCount)} onChange={() => forceUpdate()} />}
           </div>
