@@ -37,7 +37,7 @@ export function renderWidgets(wc: WidgetContext<ModifiableEntity>, stickyHeader?
 export interface EmbeddedWidget {
   embeddedWidget: React.ReactElement;
   position: EmbeddedWidgetPosition;
-  title: string;
+  title: React.ReactNode;
   eventKey: string;
 }
 

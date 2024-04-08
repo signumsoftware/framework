@@ -321,9 +321,9 @@ public static class ToolbarLogic
             type = element.Type,
             content = element.Content,
             url = element.Url,
-            label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(element.Content!),
-            iconName = element.IconName,
-            iconColor = element.IconColor,
+            label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(element.Content!),
+            iconName = element.IconName.DefaultToNull() ?? config?.DefaultIconName(element.Content!),
+            iconColor = element.IconColor.DefaultToNull() ?? config?.DefaultIconColor(element.Content!),
             showCount = element.ShowCount,
             autoRefreshPeriod = element.AutoRefreshPeriod,
             openInPopup = element.OpenInPopup,
@@ -348,9 +348,9 @@ public static class ToolbarLogic
                     type = extraElement.Type,
                     content = extraElement.Content,
                     url = extraElement.Url,
-                    label = transElement.TranslatedElement(a => a.Label!).DefaultText(null) ?? config?.DefaultLabel(extraElement.Content!),
-                    iconName = extraElement.IconName,
-                    iconColor = extraElement.IconColor,
+                    label = transElement.TranslatedElement(a => a.Label!).DefaultToNull() ?? config?.DefaultLabel(extraElement.Content!),
+                    iconName = extraElement.IconName.DefaultToNull() ?? config?.DefaultIconName(extraElement.Content!),
+                    iconColor = extraElement.IconColor.DefaultToNull() ?? config?.DefaultIconColor(extraElement.Content!),
                     showCount = extraElement.ShowCount,
                     autoRefreshPeriod = extraElement.AutoRefreshPeriod,
                     openInPopup = extraElement.OpenInPopup,
@@ -369,10 +369,10 @@ public static class ToolbarLogic
         return new[] { result };
     }
 
-    public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel) 
+    public static void RegisterContentConfig<T>(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null) 
         where T : Entity
     {
-        ContentConfigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel));
+        ContentConfigDictionary.Add(typeof(T), new ContentConfig<T>(isAuthorized, defaultLabel, defaultIconName, defaultIconColor));
     }
 
     public static ContentConfig<T> GetContentConfig<T>() where T: Entity
@@ -386,6 +386,8 @@ public static class ToolbarLogic
     {
         bool IsAuhorized(Lite<Entity> lite);
         string DefaultLabel(Lite<Entity> lite);
+        string? DefaultIconName(Lite<Entity> lite);
+        string? DefaultIconColor(Lite<Entity> lite);
 
         List<ToolbarResponse>? CustomResponses(Lite<Entity> lite);
     }
@@ -394,16 +396,22 @@ public static class ToolbarLogic
     {
         public Func<Lite<T>, bool> IsAuthorized;
         public Func<Lite<T>, string> DefaultLabel;
+        public Func<Lite<T>, string?>? DefaultIconName;
+        public Func<Lite<T>, string?>? DefaultIconColor;
         public Func<Lite<T>, List<ToolbarResponse>?>? CustomResponses;
 
-        public ContentConfig(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel)
+        public ContentConfig(Func<Lite<T>, bool> isAuthorized, Func<Lite<T>, string> defaultLabel, Func<Lite<T>, string?>? defaultIconName = null, Func<Lite<T>, string?>? defaultIconColor = null)
         {
             IsAuthorized = isAuthorized;
             DefaultLabel = defaultLabel;
+            DefaultIconName = defaultIconName;
+            DefaultIconColor = defaultIconColor;
         }
 
         bool IContentConfig.IsAuhorized(Lite<Entity> lite) => IsAuthorized((Lite<T>)lite);
         string IContentConfig.DefaultLabel(Lite<Entity> lite) => DefaultLabel((Lite<T>)lite);
+        string? IContentConfig.DefaultIconName(Lite<Entity> lite) => DefaultIconName?.Invoke((Lite<T>)lite);
+        string? IContentConfig.DefaultIconColor(Lite<Entity> lite) => DefaultIconColor?.Invoke((Lite<T>)lite);
         List<ToolbarResponse>? IContentConfig.CustomResponses(Lite<Entity> lite)
         {
             foreach (var item in CustomResponses.GetInvocationListTyped())
