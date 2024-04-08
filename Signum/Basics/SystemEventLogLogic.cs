@@ -71,7 +71,14 @@ public static class SystemEventLogLogic
         }
         catch (Exception e)
         {
-            e.LogException(ex => ex.ControllerName = "SystemEventLog.Log");
+            try
+            {
+                e.LogException(ex => ex.ControllerName = "SystemEventLog.Log");
+            }
+            catch
+            {
+
+            }
 
             return false;
         }
