@@ -66,6 +66,8 @@ export module TreeViewerMessage {
   export const AddSibling = new MessageKey("TreeViewerMessage", "AddSibling");
   export const Remove = new MessageKey("TreeViewerMessage", "Remove");
   export const None = new MessageKey("TreeViewerMessage", "None");
+  export const ExpandAll = new MessageKey("TreeViewerMessage", "ExpandAll");
+  export const CollapseAll = new MessageKey("TreeViewerMessage", "CollapseAll");
 }
 
 export const UserTreePartEntity = new Type<UserTreePartEntity>("UserTreePart");

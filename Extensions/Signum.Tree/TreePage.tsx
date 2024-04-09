@@ -44,6 +44,7 @@ export default function TreePage() {
         allowMove={tryGetOperationInfo(TreeOperation.Move, ti.name) != null}
         filterOptions={filterOptions}
         showToolbar={true}
+        showExpandCollapseButtons={true}
         key={ti.name}
         onSearch={() => changeUrl()} />
     </div>
