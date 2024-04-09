@@ -260,6 +260,7 @@ export namespace API {
     userFilters: Array<FilterRequest>;
     frozenFilters: Array<FilterRequest>;
     expandedNodes: Array<Lite<TreeEntity>>;
+    loadDescendants: boolean;
   }
 }
 
