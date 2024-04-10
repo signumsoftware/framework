@@ -262,6 +262,7 @@ export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
 export interface TreeNode {
   lite: Lite<TreeEntity>;
   name: string;
+  fullName: string;
   disabled: boolean;
   childrenCount: number;
   level: number;
