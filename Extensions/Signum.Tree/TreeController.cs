@@ -85,6 +85,7 @@ public class TreeController : ControllerBase
                         {
                             route = t.Route,
                             name = t.Name,
+                            fullName = t.FullName,
                             lite = t.ToLite(),
                             level = t.Level(),
                             disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -99,6 +100,7 @@ public class TreeController : ControllerBase
                         {
                             route = t.Route,
                             name = t.Name,
+                            fullName = t.FullName,
                             lite = t.ToLite(),
                             level = t.Level(),
                             disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -113,6 +115,7 @@ public class TreeController : ControllerBase
                        {
                            route = t.Route,
                            name = t.Name,
+                           fullName = t.FullName,
                            lite = t.ToLite(),
                            level = t.Level(),
                            disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -129,6 +132,7 @@ public class TreeController : ControllerBase
                       {
                           route = t.Route,
                           name = t.Name,
+                          fullName = t.FullName,
                           lite = t.ToLite(),
                           level = t.Level(),
                           disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
@@ -157,6 +161,7 @@ public class TreeController : ControllerBase
 class TreeInfo
 {
     public string name { get; set; }
+    public string fullName { get; set; }
     public Lite<TreeEntity> lite { get; set; }
     public bool disabled { get; set; }
     public int childrenCount { get; set; }
@@ -170,6 +175,7 @@ public class TreeNode
     internal TreeNode(Node<TreeInfo> node)
     {
         this.name = node.Value.name;
+        this.fullName = node.Value.fullName;
         this.lite = node.Value.lite;
         this.disabled = node.Value.disabled;
         this.childrenCount = node.Value.childrenCount;
@@ -178,6 +184,7 @@ public class TreeNode
     }
 
     public string name { set; get; }
+    public string fullName { get; set; }
     public Lite<TreeEntity> lite { set; get; }
     public bool disabled { get; set; }
     public int childrenCount { set; get; }

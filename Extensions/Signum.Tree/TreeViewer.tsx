@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
 import { classes } from '@framework/Globals'
@@ -287,7 +288,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   search(clearExpanded: boolean, loadDescendants: boolean = false) {
     this.getFilterOptionsWithSFB().then(filters => {
-      debugger;
       let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
         this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
@@ -611,6 +611,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
   return {
     lite: toLite(treeEntity),
     name: treeEntity.name!,
+    fullName: treeEntity.fullName,
     childrenCount: 0,
     disabled: dm != null && Boolean(dm.isDisabled),
     level: 0,
@@ -668,7 +669,14 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
             onDoubleClick={e => tv.handleNodeTextDoubleClick(node, e)}
             onClick={() => tv.handleNodeTextClick(node)}
             onContextMenu={tv.props.showContextMenu != false ? e => tv.handleNodeTextContextMenu(node, e) : undefined}>
-            {node.name}
+            {node.fullName != node.name ? <OverlayTrigger
+              overlay={
+                <Tooltip>
+                  <span>{node.fullName}</span>
+                </Tooltip>
+              }>
+              <span>{node.name}</span>
+            </OverlayTrigger> : node.name} 
           </span>
         </div>
 
