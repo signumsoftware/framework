@@ -1449,7 +1449,7 @@ public partial class FieldPrimaryKey
 {
     protected internal override void CreateParameter(List<Table.Trio> trios, List<Expression> assigments, Expression value, Expression forbidden, Expression suffix)
     {
-        trios.Add(new Table.Trio(this, Expression.Field(Expression.Property(value, "Value"), "Object"), suffix));
+        trios.Add(new Table.Trio(this, Expression.Call(FieldReference.miUnWrap, value), suffix));
     }
 }
 
@@ -1586,7 +1586,7 @@ public partial class FieldReference
         trios.Add(new Table.Trio(this, Expression.Call(miUnWrap, this.GetIdFactory(value, forbidden)), suffix));
     }
 
-    static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => Signum.Entities.PrimaryKey.Unwrap(null));
+    internal static MethodInfo miUnWrap = ReflectionTools.GetMethodInfo(() => Signum.Entities.PrimaryKey.Unwrap(null));
 }
 
 public partial class FieldEnum
