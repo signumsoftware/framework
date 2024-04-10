@@ -95,6 +95,7 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind/Properties/launchSettings.json", c =>
         {
+            c.Replace("localhost/" + uctx.ApplicationName, "localhost/" + uctx.ApplicationName + ".Server");
             c.MoveFile(ToServer(c.FilePath));
         });
 
