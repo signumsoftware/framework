@@ -139,7 +139,7 @@ public static class MigrationLogic
 
             SafeConsole.WriteColor(ConsoleColor.Red, e.GetType() + ": ");
             SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.Message);
-            SafeConsole.WriteSameLineColor(ConsoleColor.DarkRed, e.StackTrace);
+            SafeConsole.WriteLineColor(ConsoleColor.DarkRed, e.StackTrace);
             if (log != null)
             {
                 var exLog = e.LogException();
