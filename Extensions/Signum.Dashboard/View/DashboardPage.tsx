@@ -10,7 +10,7 @@ import { useLocation, useParams } from "react-router";
 import "../Dashboard.css"
 import { useAPI, useAPIWithReload, useInterval } from '@framework/Hooks'
 import { QueryString } from '@framework/QueryString'
-import * as DashboardClient from "../DashboardClient"
+import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 
@@ -41,7 +41,7 @@ export default function DashboardPage() {
     <div>
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="d-flex">
-          {!dashboard.hideDisplayName && <h2 className="display-5">{translated(dashboard, d => d.displayName)}</h2>}
+          {!dashboard.hideDisplayName && <h2 className="display-5">{DashboardClient.Options.customTitle(dashboard)}</h2>}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from '@framework/Navigator'
 import { mlistItemContext, TypeContext } from '@framework/TypeContext'
 import { getTypeInfo } from '@framework/Reflection'
-import { API } from './UserAssetClient'
+import { UserAssetClient } from './UserAssetClient'
 import { UserAssetMessage, UserAssetPreviewModel, EntityAction, LiteConflictEmbedded } from './Signum.UserAssets'
 import { useForceUpdate } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
@@ -15,7 +15,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 
 export default function ImportAssetsPage() {
 
-  const [file, setFile] = React.useState<API.FileUpload | undefined>(undefined);
+  const [file, setFile] = React.useState<UserAssetClient.API.FileUpload | undefined>(undefined);
   const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);
   const [success, setSuccess] = React.useState<boolean | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0);
@@ -34,11 +34,11 @@ export default function ImportAssetsPage() {
         let content = ((e.target as any).result as string).after("base64,");
         let fileName = f.name;
 
-        var file: API.FileUpload = { content, fileName };
+        var file: UserAssetClient.API.FileUpload = { content, fileName };
         setFile(file);
         setFileVer(fileVer + 1);
 
-        API.importPreview(file!).then(model => { setModel(model); setSuccess(false); });
+        UserAssetClient.API.importPreview(file!).then(model => { setModel(model); setSuccess(false); });
       };
       fileReader.readAsDataURL(f);
     }
@@ -56,7 +56,7 @@ export default function ImportAssetsPage() {
   function renderModel() {
 
     function handleImport() {
-      API.importAssets({
+      UserAssetClient.API.importAssets({
         file: file!,
         model: model!
       })

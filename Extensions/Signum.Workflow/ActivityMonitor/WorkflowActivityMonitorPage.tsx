@@ -4,7 +4,7 @@ import { Finder } from '@framework/Finder'
 import { getToString, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { WorkflowEntity, WorkflowModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from '../Signum.Workflow'
 import { Navigator } from '@framework/Navigator'
-import { API, WorkflowActivityMonitor, WorkflowActivityMonitorRequest } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import WorkflowActivityMonitorViewerComponent from '../Bpmn/WorkflowActivityMonitorViewerComponent'
 import { ColumnOptionParsed, FilterOptionParsed, SubTokensOptions, QueryDescription, ColumnRequest } from '@framework/FindOptions';
 import { useLocation, useParams } from "react-router";
@@ -21,7 +21,7 @@ export interface WorkflowActivityMonitorConfig {
 
 interface WorkflowActivityMonitorPageState {
   lastConfig: WorkflowActivityMonitorConfig;
-  workflowActivityMonitor: WorkflowActivityMonitor;
+  workflowActivityMonitor: WorkflowClient.WorkflowActivityMonitor;
 }
 
 export default function WorkflowActivityMonitorPage() {
@@ -43,14 +43,14 @@ export default function WorkflowActivityMonitorPage() {
       return Promise.resolve(undefined);
 
     const clone = JSON.parse(JSON.stringify(config)) as WorkflowActivityMonitorConfig;
-    return API.workflowActivityMonitor(toRequest(config))
+    return WorkflowClient.API.workflowActivityMonitor(toRequest(config))
       .then(result => ({
         workflowActivityMonitor: result,
         lastConfig: clone,
       }));
   }, [config]);
 
-  const workflowModel = useAPI(() => workflow == null ? Promise.resolve(undefined) : API.getWorkflowModel(workflow).then(wmi => wmi.model), [workflow]);
+  const workflowModel = useAPI(() => workflow == null ? Promise.resolve(undefined) : WorkflowClient.API.getWorkflowModel(workflow).then(wmi => wmi.model), [workflow]);
 
   return (
     <div>
@@ -77,7 +77,7 @@ export default function WorkflowActivityMonitorPage() {
   );
 }
 
-function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowActivityMonitorRequest {
+function toRequest(conf: WorkflowActivityMonitorConfig): WorkflowClient.WorkflowActivityMonitorRequest {
   return {
     workflow: conf.workflow,
     filters: Finder.toFilterRequests(conf.filters),

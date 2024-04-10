@@ -5,8 +5,8 @@ import { PropertyRoute, Binding, isTypeEntity } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { Entity } from '@framework/Signum.Entities'
-import { DynamicExpressionTestResponse, API } from '../DynamicExpressionClient'
-import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient';
+import { DynamicExpressionClient } from '../DynamicExpressionClient'
+import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient';
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { ModifiableEntity } from '@framework/Signum.Entities';
@@ -26,7 +26,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
 
 
   const exampleEntity = React.useRef<Entity | null>(null);
-  const [response, setResponse] = React.useState<DynamicExpressionTestResponse | undefined>(undefined);
+  const [response, setResponse] = React.useState<DynamicExpressionClient.DynamicExpressionTestResponse | undefined>(undefined);
 
   const forceUpdate = useForceUpdate();
 
@@ -87,7 +87,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
     if (exampleEntity.current == undefined)
       setResponse(undefined);
     else {
-      API.expressionTest({
+      DynamicExpressionClient.API.expressionTest({
         dynamicExpression: p.ctx.value,
         exampleEntity: exampleEntity.current,
       })
@@ -120,7 +120,7 @@ export default function DynamicExpressionComponent(p: DynamicExpressionComponent
     return Navigator.view<Entity>(exampleEntity, { requiresSaveOperation: false, isOperationVisible: eoc => false });
   }
 
-  function renderMessage(res: DynamicExpressionTestResponse) {
+  function renderMessage(res: DynamicExpressionClient.DynamicExpressionTestResponse) {
     if (res.compileError)
       return <div className="alert alert-danger">COMPILE ERROR: {res.compileError}</div >;
 

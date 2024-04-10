@@ -11,12 +11,12 @@ import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, 
 import * as QuickLinks from '@framework/QuickLinks'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
+import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel
 } from './Signum.Dashboard'
-import * as UserAssetClient from '../Signum.UserAssets/UserAssetClient'
+import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { useAPI } from '@framework/Hooks';
 import { DashboardController } from "./View/DashboardFilterController";
@@ -26,23 +26,16 @@ import { QueryEntity } from '@framework/Signum.Basics';
 import { downloadFile } from '../Signum.Files/Components/FileDownloader';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { QueryDescription } from '@framework/FindOptions';
-import * as ToolbarClient from '../Signum.Toolbar/ToolbarClient';
-import * as OmniboxClient from '../Signum.Omnibox/OmniboxClient';
+import { ToolbarClient } from '../Signum.Toolbar/ToolbarClient';
+import { OmniboxClient } from '../Signum.Omnibox/OmniboxClient';
 import DashboardToolbarConfig from './DashboardToolbarConfig';
 import DashboardOmniboxProvider from './DashboardOmniboxProvider';
-import { registerChangeLogModule } from '@framework/Basics/ChangeLogClient';
+import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { parseIcon } from '@framework/Components/IconTypeahead';
 
-export interface PanelPartContentProps<T extends IPartEntity> {
-  partEmbedded: PanelPartEmbedded;
-  content: T;
-  entity?: Lite<Entity>;
-  deps?: React.DependencyList;
-  dashboardController: DashboardController;
-  customDataRef: React.MutableRefObject<any>;
-  cachedQueries: {
-    [userAssetKey: string]: Promise<CachedQueryJS>
-  }
-}
+export namespace DashboardClient {
+  
+
 
 interface IconColor {
   icon: IconProp;
@@ -66,7 +59,7 @@ export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = 
 
 export function start(options: { routes: RouteObject[] }) {
 
-  registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
+    ChangeLogClient.registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
 
   UserAssetClient.start({ routes: options.routes });
   UserAssetClient.registerExportAssertLink(DashboardEntity);
@@ -74,7 +67,6 @@ export function start(options: { routes: RouteObject[] }) {
   Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
   Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
-  Navigator.addSettings(new EntitySettings(PanelPartEmbedded, e => import('./Admin/PanelPart'), { modalSize: "xs" }));
   Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
@@ -124,7 +116,7 @@ export function start(options: { routes: RouteObject[] }) {
         position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
         embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
         eventKey: liteKey(toLite(d)),
-        title: translated(d, d => d.displayName),
+        title: Options.customTitle(d),
       } as EmbeddedWidget;
     });
   });
@@ -195,30 +187,6 @@ export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer:
   partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
 }
 
-export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }) {
-
-  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
-
-  if (qd == null)
-    return null;
-
-  const tis = getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
-
-  if (tis.length == 0)
-    return null;
-
-  const types = tis.map(ti => ti.niceName).join(", ");
-  const gender = tis.first().gender;
-
-  var title =  SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
-
-  return (
-    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-light sf-create me-2" title={title}>
-      <FontAwesomeIcon icon={"plus"} /> {title}
-    </a>
-  );
-}
-
 export module API {
   export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
     return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
@@ -236,14 +204,6 @@ export module API {
 export interface DashboardWithCachedQueries {
   dashboard: DashboardEntity
   cachedQueries: Array<CachedQueryEntity>;
-}
-
-declare module '@framework/Signum.Entities' {
-
-  export interface EntityPack<T extends ModifiableEntity> {
-    dashboards?: Array<Lite<DashboardEntity>>;
-    embeddedDashboards?: DashboardEntity[];
-  }
 }
 
 export interface DashboardWidgetProps {
@@ -279,4 +239,75 @@ export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQuerie
 
   return result;
 }
+
+export namespace Options {
+
+  export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
+}
+
+}
+
+declare module '@framework/Signum.Entities' {
+
+  export interface EntityPack<T extends ModifiableEntity> {
+    dashboards?: Array<Lite<DashboardEntity>>;
+    embeddedDashboards?: DashboardEntity[];
+  }
+}
+
+
+export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }) {
+
+  const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
+
+  if (qd == null)
+    return null;
+
+  const tis = getTypeInfos(qd.columns["Entity"].type).filter(ti => Navigator.isCreable(ti, { isSearch: true }));
+
+  if (tis.length == 0)
+    return null;
+
+  const types = tis.map(ti => ti.niceName).join(", ");
+  const gender = tis.first().gender;
+
+  var title = SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(gender).formatWith(types);
+
+  return (
+    <a onClick={e => { e.preventDefault(); p.onClick(tis, qd); }} href="#" className="btn btn-sm btn-light sf-create me-2" title={title}>
+      <FontAwesomeIcon icon={"plus"} /> {title}
+    </a>
+  );
+}
+
+export interface PanelPartContentProps<T extends IPartEntity> {
+  partEmbedded: PanelPartEmbedded;
+  content: T;
+  entity?: Lite<Entity>;
+  deps?: React.DependencyList;
+  dashboardController: DashboardController;
+  customDataRef: React.MutableRefObject<any>;
+  cachedQueries: {
+    [userAssetKey: string]: Promise<CachedQueryJS>
+  }
+}
+
+export function DashboardTitle(p: { dashboard: DashboardEntity }) {
+
+  const icon = parseIcon(p.dashboard.iconName);
+  const title = <span style={{ color: p.dashboard.titleColor ?? undefined }}>
+    {translated(p.dashboard, d => d.displayName)}
+  </span>;
+
+  if (icon == null)
+    return title;
+
+  return (
+    <div className="dashboard-title">
+      <FontAwesomeIcon icon={icon} color={p.dashboard.iconColor ?? undefined} />
+      &nbsp;{title}
+    </div>
+  );
+}
+
 

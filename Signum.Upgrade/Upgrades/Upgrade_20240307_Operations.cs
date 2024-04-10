@@ -42,7 +42,7 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
                 return part; 
             });
 
-            file.ReplaceTypeScriptImports(path => path.EndsWith("/Operations"), parts =>
+            file.ReplaceAndCombineTypeScriptImports(path => path.EndsWith("/Operations"), parts =>
             {
                 var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
                 if (ask.Any())
@@ -71,7 +71,7 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
             if (file.FilePath.EndsWith("ContextualOperations.tsx"))
                 return;
 
-            file.ReplaceTypeScriptImports(path => path.EndsWith("/ContextualOperations"), parts =>
+            file.ReplaceAndCombineTypeScriptImports(path => path.EndsWith("/ContextualOperations"), parts =>
             {
                 var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
                 if (ask.Any())
@@ -98,7 +98,7 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
             if (file.FilePath.EndsWith("EntityOperations.tsx"))
                 return;
 
-            file.ReplaceTypeScriptImports(path => path.EndsWith("/EntityOperations"), parts =>
+            file.ReplaceAndCombineTypeScriptImports(path => path.EndsWith("/EntityOperations"), parts =>
             {
                 var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
                 if (ask.Any())

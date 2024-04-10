@@ -2,7 +2,7 @@
 import * as React from 'react'
 import { Popover, OverlayTrigger  } from 'react-bootstrap'
 import { Entity, getToString } from '@framework/Signum.Entities'
-import * as HelpClient from './HelpClient';
+import { HelpClient } from './HelpClient';
 import * as AppContext from '@framework/AppContext';
 import { WidgetContext } from '@framework/Frames/Widgets';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

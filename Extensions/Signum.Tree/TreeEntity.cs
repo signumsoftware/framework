@@ -114,6 +114,8 @@ public enum TreeViewerMessage
     AddSibling,
     Remove,
     None,
+    ExpandAll,
+    CollapseAll,
 }
 
 public class MoveTreeModel : ModelEntity

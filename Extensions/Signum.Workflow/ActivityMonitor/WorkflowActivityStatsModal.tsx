@@ -4,11 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '@framework/Modals';
 import { Navigator } from '@framework/Navigator';
 import { getToString, JavascriptMessage, toLite } from '@framework/Signum.Entities'
-import { WorkflowActivityStats } from "../WorkflowClient";
+import { WorkflowClient } from "../WorkflowClient";
 import { FormGroup, StyleContext, FormControlReadonly } from "@framework/Lines";
 import { WorkflowActivityEntity, WorkflowActivityModel, WorkflowActivityMonitorMessage, CaseActivityEntity } from "../Signum.Workflow";
 import { SearchControl, ColumnOption } from "@framework/Search";
-import * as WorkflowClient from '../WorkflowClient';
 import { WorkflowActivityMonitorConfig } from './WorkflowActivityMonitorPage';
 import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
@@ -16,7 +15,7 @@ import { Finder } from '@framework/Finder';
 import { toAbsoluteUrl } from '@framework/AppContext';
 
 interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
-  stats: WorkflowActivityStats;
+  stats: WorkflowClient.WorkflowActivityStats;
   config: WorkflowActivityMonitorConfig;
   activity: WorkflowActivityModel;
 }
@@ -110,6 +109,6 @@ const [show, setShow] = React.useState<boolean>(true);
   </Modal>;
 }
 
-WorkflowActivityStatsModal.show = (stats: WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> => {
+WorkflowActivityStatsModal.show = (stats: WorkflowClient.WorkflowActivityStats, config: WorkflowActivityMonitorConfig, activity: WorkflowActivityModel): Promise<any> => {
   return openModal<any>(<WorkflowActivityStatsModal stats={stats} config={config} activity={activity} />);
 }

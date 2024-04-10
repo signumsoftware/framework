@@ -13,7 +13,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 
 import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
 import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList } from '@framework/Signum.Entities'
-import { API, properties, queries, operations } from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 import {
   TypeRulePack, TypeAllowed, TypeAllowedRule,
   TypeAllowedAndConditions, TypeAllowedBasic, TypeConditionRuleModel, AuthThumbnail,
@@ -51,8 +51,8 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.saveTypeRulePack(pack)
-      .then(() => API.fetchTypeRulePack(pack.role.id!))
+    AuthAdminClient.API.saveTypeRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchTypeRulePack(pack.role.id!))
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -62,7 +62,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
   function handleResetChangesClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.fetchTypeRulePack(pack.role.id!)
+    AuthAdminClient.API.fetchTypeRulePack(pack.role.id!)
       .then(newPack => {
         bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
@@ -75,7 +75,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
       if (!r)
         return;
 
-      API.fetchTypeRulePack(r.id!)
+      AuthAdminClient.API.fetchTypeRulePack(r.id!)
         .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
     });
   }
@@ -162,13 +162,13 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
             <th style={{ textAlign: "center" }}>
               {AuthAdminMessage.Overriden.niceToString()}
             </th>
-            {properties && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.properties && <th style={{ textAlign: "center" }}>
               {PropertyRouteEntity.niceName()}
             </th>}
-            {operations && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.operations && <th style={{ textAlign: "center" }}>
               {OperationSymbol.niceName()}
             </th>}
-            {queries && <th style={{ textAlign: "center" }}>
+            {AuthAdminClient.queries && <th style={{ textAlign: "center" }}>
               {QueryEntity.niceName()}
             </th>}
           </tr>
@@ -264,22 +264,22 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
             updateFrame();
           }} />
         </td>
-        {properties && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
           {link("edit", tctx.value.modified ? "Invalidated" : tctx.value.properties,
-            () => API.fetchPropertyRulePack(tctx.value.resource.cleanName, roleId),
+            () => AuthAdminClient.API.fetchPropertyRulePack(tctx.value.resource.cleanName, roleId),
             m => tctx.value.properties = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Write") ? "All" : "Mix"
           )}
         </td>}
-        {operations && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
           {link("bolt", tctx.value.modified ? "Invalidated" : tctx.value.operations,
-            () => API.fetchOperationRulePack(tctx.value.resource.cleanName, roleId),
+            () => AuthAdminClient.API.fetchOperationRulePack(tctx.value.resource.cleanName, roleId),
             m => tctx.value.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
-        {queries && <td style={{ textAlign: "center" }}>
+        {AuthAdminClient.queries && <td style={{ textAlign: "center" }}>
           {link("search", tctx.value.modified ? "Invalidated" : tctx.value.queries,
-            () => API.fetchQueryRulePack(tctx.value.resource.cleanName, roleId),
+            () => AuthAdminClient.API.fetchQueryRulePack(tctx.value.resource.cleanName, roleId),
             m => tctx.value.queries = m.rules.every(a => a.element.allowed == "None") ? "None" :
               m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
         </td>}
@@ -306,7 +306,7 @@ export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: T
           <td style={{ textAlign: "center" }}>
             {colorRadio(b, "None", "red")}
           </td>
-          <td style={{ textAlign: "center" }} colSpan={1 + Number(properties) + Number(operations) + Number(queries) }>
+          <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries) }>
           </td>
         </tr>
       );

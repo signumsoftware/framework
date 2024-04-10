@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { WorkflowActivityModel, WorkflowModel, WorkflowActivityMonitorMessage } from '../Signum.Workflow'
-import { WorkflowActivityMonitor } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import NavigatedViewer from "bpmn-js/lib/NavigatedViewer"
 import searchPad from 'bpmn-js/lib/features/search'
 import * as WorkflowActivityMonitorRenderer from './WorkflowActivityMonitorRenderer'
@@ -14,7 +14,7 @@ import "./Bpmn.css"
 
 export interface WorkflowActivityMonitorViewerComponentProps {
   workflowModel: WorkflowModel;
-  workflowActivityMonitor: WorkflowActivityMonitor;
+  workflowActivityMonitor: WorkflowClient.WorkflowActivityMonitor;
   workflowConfig: WorkflowActivityMonitorConfig;
   onDraw: () => void;
 }

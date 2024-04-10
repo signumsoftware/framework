@@ -5,11 +5,11 @@ import { FormGroup, TypeContext } from '@framework/Lines';
 import { UserEntity, UserLiteModel } from '../../Signum.Authorization/Signum.Authorization';
 import { useAPI, useForceUpdate } from '@framework/Hooks';
 import { classes } from '@framework/Globals';
-import { API } from './RemoteEmailsClient';
+import { RemoteEmailsClient } from './RemoteEmailsClient';
 
 export function FolderLine(p: { ctx: TypeContext<RemoteEmailFolderModel | null>; user: Lite<UserEntity> | undefined; label?: string; mandatory?: boolean; onChange: () => void }) {
   var oid = (p.user?.model as UserLiteModel)?.oID;
-  var folders = useAPI(() => oid == null ? Promise.resolve([]) : API.getRemoteFolders(oid), [oid]);
+  var folders = useAPI(() => oid == null ? Promise.resolve([]) : RemoteEmailsClient.API.getRemoteFolders(oid), [oid]);
   const forceUpdate = useForceUpdate();
 
   var allFolders = [

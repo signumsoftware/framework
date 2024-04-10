@@ -1,6 +1,6 @@
 import * as React from 'react'
 import EntityLink from '@framework/SearchControl/EntityLink'
-import { API } from './ProcessClient'
+import { ProcessClient } from './ProcessClient'
 import { ProcessEntity } from './Signum.Processes'
 import { SearchControl } from '@framework/Search';
 import * as AppContext from '@framework/AppContext'
@@ -14,7 +14,7 @@ import { ProcessProgressBar } from './Templates/Process'
 export default function ProcessPanelPage() {
 
   
-  const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
+  const [state, reloadState] = useAPIWithReload(() => ProcessClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
 
@@ -26,12 +26,12 @@ export default function ProcessPanelPage() {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState());
+    ProcessClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState());
+    ProcessClient.API.start().then(() => reloadState());
   }
 
 
@@ -107,6 +107,9 @@ export default function ProcessPanelPage() {
           deps={[state?.executing.map(a => a.process.id!.toString()).join(",")]}
         />
       </div>
+      <pre>
+        {s.log}
+      </pre>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import * as React from 'react'
 import { ServiceError } from '@framework/Services'
 import { JavascriptMessage, liteKey, toLite } from '@framework/Signum.Entities'
-import * as UserChartClient from '../../UserChart/UserChartClient'
-import * as ChartClient from '../../ChartClient'
+import { UserChartClient } from '../../UserChart/UserChartClient'
+import { ChartClient, ChartRow } from '../../ChartClient'
 import { ChartMessage, ChartRequestModel } from '../../Signum.Chart'
 import ChartRenderer, { handleDrillDown } from '../../Templates/ChartRenderer'
 import ChartTableComponent from '../../Templates/ChartTable'
@@ -11,10 +11,9 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { FilterOptionParsed, isActive, isFilterGroup, QueryToken, tokenStartsWith } from '@framework/FindOptions'
 import { DashboardBehaviour } from '@framework/Signum.DynamicQuery'
 import { softCast } from '@framework/Globals'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { UserChartPartEntity } from '../../UserChart/Signum.Chart.UserChart'
 import { DashboardFilter, DashboardFilterRow, DashboardPinnedFilters, equalsDFR } from '../../../Signum.Dashboard/View/DashboardFilterController'
-import { executeChartCached } from '../../ChartClient'
 
 export interface UserChartPartHandler {
   chartRequest: ChartRequestModel | undefined;
@@ -91,7 +90,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 
     if (cachedQuery)
       return ChartClient.getChartScript(chartRequest!.chartScript)
-        .then(cs => cachedQuery.then(cq => executeChartCached(chartRequest, cs, cq)))
+        .then(cs => cachedQuery.then(cq => ChartClient.executeChartCached(chartRequest, cs, cq)))
         .then(result => ({ result }), error => ({ error }));
 
     return ChartClient.getChartScript(chartRequest!.chartScript)
@@ -226,7 +225,7 @@ export default function UserChartPart(p: PanelPartContentProps<UserChartPartEnti
 }
 
 
-function toDashboardFilterRow(row: ChartClient.ChartRow, chartRequest: ChartRequestModel): DashboardFilterRow {
+function toDashboardFilterRow(row: ChartRow, chartRequest: ChartRequestModel): DashboardFilterRow {
   var filters = chartRequest.columns.map((c, i) => ({
     token: c.element.token?.token,
     value: (row as any)["c" + i],

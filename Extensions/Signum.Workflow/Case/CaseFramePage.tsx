@@ -9,16 +9,15 @@ import { renderWidgets, WidgetContext } from '@framework/Frames/Widgets'
 import { ValidationErrors, ValidationErrorsHandle } from '@framework/Frames/ValidationErrors'
 import { ButtonBar, ButtonBarHandle } from '@framework/Frames/ButtonBar'
 import { CaseActivityEntity, WorkflowEntity, ICaseMainEntity, WorkflowMainEntityStrategy, WorkflowActivityEntity, WorkflowPermission } from '../Signum.Workflow'
-import * as WorkflowClient from '../WorkflowClient'
 import CaseButtonBar from './CaseButtonBar'
 import CaseFlowButton from './CaseFlowButton'
 import InlineCaseTags from './InlineCaseTags'
-import { IHasCaseActivity } from '../WorkflowClient';
+import { WorkflowClient } from '../WorkflowClient';
 import { ErrorBoundary } from '@framework/Components';
 import "@framework/Frames/Frames.css"
 import "./CaseAct.css"
 import { AutoFocus } from '@framework/Components/AutoFocus';
-import * as AuthClient from '../../Signum.Authorization/AuthClient'
+import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { FunctionalAdapter } from '@framework/Modals'
 import { useForceUpdate, useStateWithPromise } from '@framework/Hooks'
 
@@ -112,7 +111,7 @@ export default function CaseFramePage() {
 
   var pack = state.pack;
 
-  var frameComponent: FunctionalFrameComponent & IHasCaseActivity = {
+  var frameComponent: FunctionalFrameComponent & WorkflowClient.IHasCaseActivity = {
     forceUpdate,
     type: CaseFramePage,
     getCaseActivity(): CaseActivityEntity | undefined {

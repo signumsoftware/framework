@@ -5,7 +5,7 @@ import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeCont
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
 
-import { API } from '../AuthAdminClient'
+import { AuthAdminClient } from '../AuthAdminClient'
 import { PermissionRulePack, PermissionAllowedRule, AuthAdminMessage } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 
@@ -31,8 +31,8 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   function handleSaveClick(bc: ButtonsContext) {
     let pack = p.ctx.value;
 
-    API.savePermissionRulePack(pack)
-      .then(() => API.fetchPermissionRulePack(pack.role.id!))
+    AuthAdminClient.API.savePermissionRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchPermissionRulePack(pack.role.id!))
       .then(newPack => {
         Operations.notifySuccess();
         bc.frame.onReload({ entity: newPack, canExecute: {} });
@@ -42,7 +42,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   function handleResetChangesClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
-    API.fetchPermissionRulePack(pack.role.id!)
+    AuthAdminClient.API.fetchPermissionRulePack(pack.role.id!)
       .then(newPack => { bc.frame.onReload({ entity: newPack, canExecute: {} }); });
   }
 
@@ -52,7 +52,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
       if (!r)
         return;
 
-      API.fetchPermissionRulePack(r.id!)
+      AuthAdminClient.API.fetchPermissionRulePack(r.id!)
         .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
     });
   }

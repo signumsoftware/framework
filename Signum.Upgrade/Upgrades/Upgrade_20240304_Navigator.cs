@@ -41,7 +41,7 @@ class Upgrade_20240304_Navigator : CodeUpgradeBase
             var es = ReplaceIfNecessary("Navigator.EntitySettings", "EntitySettings");
             var enc = ReplaceIfNecessary("Navigator.EnumConverter", "EnumConverter");
 
-            file.ReplaceTypeScriptImports(path => path.EndsWith("/Navigator"), parts =>
+            file.ReplaceAndCombineTypeScriptImports(path => path.EndsWith("/Navigator"), parts =>
             {
                 var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
                 if (ask.Any())

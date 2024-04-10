@@ -4,12 +4,12 @@ import { FindOptions } from '@framework/FindOptions'
 import { getQueryKey, getQueryNiceName } from '@framework/Reflection'
 import { JavascriptMessage, toLite, liteKey, translated } from '@framework/Signum.Entities'
 import { SearchControl, SearchValue, SearchValueController } from '@framework/Search'
-import * as UserQueryClient from '../../UserQueryClient'
+import { UserQueryClient } from '../../UserQueryClient'
 import { classes, getColorContrasColorBWByHex, softCast } from '@framework/Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Finder } from '@framework/Finder'
 import { useAPI } from '@framework/Hooks'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
 import { parseIcon } from '@framework/Components/IconTypeahead'
 import { CachedQueryJS, executeQueryCached, executeQueryValueCached } from '../../../Signum.Dashboard/CachedQueryExecutor'
@@ -71,7 +71,7 @@ export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEnti
       deps={[...p.deps ?? [], refreshKey]}
       cachedQuery={cachedQuery}
       customColor={p.partEmbedded.customColor}
-      sameColor={p.partEmbedded.useIconColorForTitle}
+      titleColor={p.partEmbedded.titleColor}
       userQuery={p.content.userQuery}
     />;
   }
@@ -138,7 +138,7 @@ interface BigValueBadgeProps {
   text?: string;
   iconName?: string;
   iconColor?: string;
-  sameColor: boolean;
+  titleColor?: string | null;
   deps?: React.DependencyList;
   cachedQuery?: Promise<CachedQueryJS>;
   customColor: string | null;
@@ -157,7 +157,7 @@ export function BigValueSearchCounter(p: BigValueBadgeProps) {
     }}>
       <div className={classes("card-body")} onClick={e => vsc.current!.handleClick(e)} style={{
         cursor: "pointer",
-        color: p.sameColor ? p.iconColor : (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
+        color: p.titleColor ?? (Boolean(p.customColor) ? getColorContrasColorBWByHex(p.customColor!) : "black")
       }}>
         <div className="row">
           <div className="col-lg-3">

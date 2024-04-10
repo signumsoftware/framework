@@ -8,8 +8,11 @@ import { EntityLine, AutoLine } from '@framework/Lines'
 import { Tab } from 'react-bootstrap';
 import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3'
 
-export function start(options: {  routes: RouteObject[] }) {
-
-  Navigator.addSettings(new EntitySettings(Pop3EmailReceptionServiceEntity, e => import('./Pop3EmailReceptionService')));
-
+export namespace MailingPop3Client {
+  
+  export function start(options: {  routes: RouteObject[] }) {
+  
+    Navigator.addSettings(new EntitySettings(Pop3EmailReceptionServiceEntity, e => import('./Pop3EmailReceptionService')));
+  
+  }
 }

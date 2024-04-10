@@ -2,7 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityLine, EntityCombo, FormGroup, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { AlertEntity, AlertMessage } from '../Signum.Alerts'
-import * as AlertsClient from '../AlertsClient'
+import { AlertsClient } from '../AlertsClient'
 import { useForceUpdate } from '@framework/Hooks';
 
 export default function Alert(p: { ctx: TypeContext<AlertEntity> }) {

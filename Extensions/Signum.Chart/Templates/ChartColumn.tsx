@@ -6,9 +6,8 @@ import { tryGetTypeInfos, TypeInfo, isTypeEnum } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import { AutoLine, FormGroup, TextBoxLine } from '@framework/Lines'
 import { ChartColumnEmbedded, ChartMessage, ChartColumnType, ChartParameterEmbedded } from '../Signum.Chart'
-import * as ChartClient from '../ChartClient'
-import { ChartScriptColumn, ChartScript } from '../ChartClient'
-import * as ColorPaletteClient from '../ColorPalette/ColorPaletteClient'
+import { ChartClient } from '../ChartClient'
+import { ColorPaletteClient } from '../ColorPalette/ColorPaletteClient'
 import { JavascriptMessage, toLite } from '@framework/Signum.Entities';
 import { useAPI, useAPIWithReload, useForceUpdate } from '@framework/Hooks'
 import { Parameters } from './ChartBuilder'
@@ -19,8 +18,8 @@ import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryToke
 export interface ChartColumnProps {
   ctx: TypeContext<ChartColumnEmbedded>;
   columnIndex: number;
-  scriptColumn: ChartScriptColumn;
-  chartScript: ChartScript;
+  scriptColumn: ChartClient.ChartScriptColumn;
+  chartScript: ChartClient.ChartScript;
   chartBase: IChartBase;
   queryKey: string;
   onRedraw: () => void;

@@ -7,7 +7,7 @@ import { Entity } from '@framework/Signum.Entities';
 import { Type } from '@framework/Reflection';
 import { parseIcon } from '@framework/Components/IconTypeahead';
 import { ToolbarNavItem, renderExtraIcons } from './Renderers/ToolbarRenderer';
-import { ToolbarResponse } from './ToolbarClient';
+import { ToolbarClient, ToolbarResponse } from './ToolbarClient';
 
 
 export abstract class ToolbarConfig<T extends Entity> {

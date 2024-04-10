@@ -2,25 +2,25 @@
 import * as React from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { Tab, Tabs } from 'react-bootstrap'
-import { API, CacheTableStats, ResetLazyStats, CacheState } from './CacheClient'
+import { CacheClient } from './CacheClient'
 import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 
 export default function CacheStatisticsPage() {
 
-  var [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
+  var [state, reloadState] = useAPIWithReload(() => CacheClient.API.view(), [], { avoidReset: true });
 
   function handleDisabled(e: React.MouseEvent<any>) {
-    API.disable().then(() => reloadState());
+    CacheClient.API.disable().then(() => reloadState());
   }
 
   function handleEnabled(e: React.MouseEvent<any>) {
-    API.enable().then(() => reloadState());
+    CacheClient.API.enable().then(() => reloadState());
   }
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.clear().then(() => reloadState());
+    CacheClient.API.clear().then(() => reloadState());
   }
 
   if (state == null)
@@ -70,7 +70,7 @@ export default function CacheStatisticsPage() {
     </div>
   );
 
-  function renderLazies(state: CacheState) {
+  function renderLazies(state: CacheClient.CacheState) {
     return (
       <table className="table table-sm">
         <thead>
@@ -94,7 +94,7 @@ export default function CacheStatisticsPage() {
       </table>);
   }
 
-  function renderTables(state: CacheState) {
+  function renderTables(state: CacheClient.CacheState) {
 
     return (
       <table className="table table-sm">
@@ -116,7 +116,7 @@ export default function CacheStatisticsPage() {
   }
 
 
-  function renderTree(table: CacheTableStats, depth: number): React.ReactNode {
+  function renderTree(table: CacheClient.CacheTableStats, depth: number): React.ReactNode {
 
     const opacity =
       depth == 0 ? 1 :

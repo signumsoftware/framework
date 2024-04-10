@@ -27,8 +27,6 @@ public class RestLogLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteRestLogs;
 
-            if (sb.WebServerBuilder != null)
-                RestServer.Start(sb.WebServerBuilder.WebApplication);
 
         }
     }

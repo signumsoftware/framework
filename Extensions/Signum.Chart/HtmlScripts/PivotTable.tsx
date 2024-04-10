@@ -2,8 +2,7 @@ import * as React from 'react'
 import { Navigator } from '@framework/Navigator';
 import { Finder } from '@framework/Finder';
 import { Constructor } from '@framework/Constructor';
-import * as ChartClient from '../ChartClient';
-import { ChartColumn, ChartRow } from '../ChartClient';
+import { ChartClient, ChartScriptProps, ChartColumn, ChartRow } from '../ChartClient';
 import * as ChartUtils from '../D3Scripts/Components/ChartUtils';
 import { Dic, softCast } from '@framework/Globals';
 import InitialMessage from '../D3Scripts/Components/InitialMessage';
@@ -253,7 +252,7 @@ interface DimParameters {
 }
 
 
-export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, onReload, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPivotTable({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, onReload, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   if (data == null)
     return (

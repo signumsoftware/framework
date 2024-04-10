@@ -128,7 +128,8 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
       <Accordion className="sf-accordion-elements" activeKey={c.selectedIndex?.toString()} onSelect={handleSelectTab}>
         {
           c.getMListItemContext(ctx).map((mlec, i) => (
-            <EntityAccordionElement<V> key={i}              
+            <EntityAccordionElement<V> key={i}
+              onSelectTab={() => handleSelectTab(mlec.index!.toString())}
               onRemove={c.canRemove(mlec.value) && !readOnly ? e => c.handleRemoveElementClick(e, mlec.index!) : undefined}
               ctx={mlec}
               move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
@@ -137,7 +138,7 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
               getComponent={p.getComponent as (ctx: TypeContext<V>) => React.ReactElement}
               getViewPromise={p.getViewPromise as (entity: V) => undefined | string | ViewPromise<V>}
               getTitle={p.getTitle}
-              htmlAttributes={p.itemHtmlAttributes?.(mlec, c)}
+              htmlAttributes={p.itemHtmlAttributes?.(mlec, c) }
               headerHtmlAttributes={p.headerHtmlAttributes?.(mlec, c)}
               title={showType ? <TypeBadge entity={mlec.value} /> : undefined} />))
         }
@@ -158,6 +159,7 @@ export const EntityAccordion = genericForwardRef(function EntityAccordion<V exte
 
 export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   ctx: TypeContext<V>;
+  onSelectTab: () => void;
   getComponent?: (ctx: TypeContext<V>) => React.ReactElement;
   getViewPromise?: (entity: V) => undefined | string | ViewPromise<V>;
   getTitle?: (ctx: TypeContext<V>) => React.ReactElement | string;
@@ -170,10 +172,26 @@ export interface EntityAccordionElementProps<V extends ModifiableEntity> {
   headerHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
-export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes }: EntityAccordionElementProps<V>)
+export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getComponent, getViewPromise, onRemove, move, drag, itemExtraButtons, title, getTitle, htmlAttributes, headerHtmlAttributes, onSelectTab }: EntityAccordionElementProps<V>)
 {
 
   const forceUpdate = useForceUpdate();
+  const refHtml = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    var div = refHtml.current;
+    if (div) {
+
+      function listener(e: Event) {
+        onSelectTab();
+      }
+
+      div.addEventListener("openError", listener);
+      return () => {
+        div!.removeEventListener("openError", listener);
+      }
+    }
+  }, [refHtml.current]);
 
   if (ctx.binding == null && ctx.previousVersion) {
     return (
@@ -192,10 +210,13 @@ export function EntityAccordionElement<V extends ModifiableEntity>({ ctx, getCom
   }
 
   return (
-    <Accordion.Item {...htmlAttributes} className = { classes(drag?.dropClass, "sf-accordion-element") } eventKey = { ctx.index!.toString() }
+    <Accordion.Item {...htmlAttributes} className={classes(drag?.dropClass, "sf-accordion-element")} eventKey={ctx.index!.toString()}
+      ref={refHtml }
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
-      onDrop={drag?.onDrop}>
+      onDrop={drag?.onDrop}
+      data-error-container={ctx.prefix}
+    >
 
       <Accordion.Header {...EntityBaseController.entityHtmlAttributes(ctx.value)} {...headerHtmlAttributes}>
         <div className="d-flex align-items-center flex-grow-1">

@@ -5,10 +5,10 @@ import { Entity, getToString, is, JavascriptMessage, liteKey, parseLite, toLite 
 import { Toast } from 'react-bootstrap'
 import { DateTime } from 'luxon'
 import { useAPIWithReload, useForceUpdate, useThrottle, useUpdatedRef } from '@framework/Hooks';
-import * as AuthClient from '../Signum.Authorization/AuthClient'
+import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { Navigator } from '@framework/Navigator'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import * as AlertsClient from './AlertsClient'
+import { AlertsClient } from './AlertsClient'
 import "./AlertDropdown.css"
 import { Link } from 'react-router-dom';
 import { classes, Dic } from '@framework/Globals'

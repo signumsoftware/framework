@@ -4,10 +4,10 @@ import { EntityLine, TypeContext, FormGroup, TextAreaLine } from '@framework/Lin
 import { Entity, JavascriptMessage, SaveChangesMessage } from '@framework/Signum.Entities'
 import { Binding, PropertyRoute, ReadonlyBinding } from '@framework/Reflection'
 import JavascriptCodeMirror from '../../Signum.CodeMirror/JavascriptCodeMirror'
-import * as DynamicViewClient from '../DynamicViewClient'
+import { DynamicViewClient } from '../DynamicViewClient'
 import { Navigator, ViewPromise } from '@framework/Navigator'
 import { ViewReplacer } from '@framework/Frames/ReactVisitor';
-import * as TypeHelpClient from '../../Signum.Eval/TypeHelp/TypeHelpClient'
+import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import TypeHelpButtonBarComponent from '../../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import AutoLineModal from '@framework/AutoLineModal'

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import { ChartColumn } from '../../ChartClient';
+import { ChartClient, ChartColumn } from '../../ChartClient';
 import * as ChartUtils from './ChartUtils';
 import { translate, rotate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';

@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
+import { ChartClient, ChartTable, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import { Dic } from '@framework/Globals';
 import { XKeyTicks } from './Components/Ticks';
 import { Rule } from './Components/Rule';

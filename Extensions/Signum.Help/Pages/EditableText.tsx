@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useForceUpdate, useWindowEvent } from '@framework/Hooks';
-import * as HelpClient from '../HelpClient';
+import { HelpClient } from '../HelpClient';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Binding, PropertyRoute, ReadonlyBinding, TypeContext, AutoLine, TextAreaLine } from '@framework/Lines';
 import { classes } from '@framework/Globals';
@@ -11,7 +11,7 @@ import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
 import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
 import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
 import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
-import * as FilesClient from '../../Signum.Files/FilesClient';
+import { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';

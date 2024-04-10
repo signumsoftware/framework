@@ -19,7 +19,7 @@ import MessageModal from '@framework/Modals/MessageModal'
 import { ResultRow } from '@framework/FindOptions'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '@framework/Globals'
-import { EntityDump, API } from './TimeMachineClient'
+import { TimeMachineClient } from './TimeMachineClient'
 import { TimeMachineMessage } from './Signum.TimeMachine'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
@@ -139,8 +139,8 @@ export function TimeMachine(p: {lite: Lite<Entity>, isModal?: boolean }) {
 }
 
 interface RenderEntityVersionProps {
-  current: ()=> Promise<EntityDump>;
-  previous: (() => Promise<EntityDump>) | undefined;
+  current: () => Promise<TimeMachineClient.EntityDump>;
+  previous: (() => Promise<TimeMachineClient.EntityDump>) | undefined;
   currentDate?: string;
   previousDate?: string;
 }
@@ -170,8 +170,8 @@ export function RenderEntityVersion(p: RenderEntityVersionProps) {
 }
 
 interface DiffEntityVersionProps {
-  previous?: () => Promise<EntityDump>;
-  current: () => Promise<EntityDump>;
+  previous?: () => Promise<TimeMachineClient.EntityDump>;
+  current: () => Promise<TimeMachineClient.EntityDump>;
 }
 
 export function DiffEntityVersion(p: DiffEntityVersionProps) {
@@ -196,16 +196,16 @@ export function TimeMachineTabs(p: { lite: Lite<Entity>, versionDatesUTC: string
   if (p.versionDatesUTC == null || p.versionDatesUTC.length < 1)
     return null;
 
-  function memoized(dateUtc: string): () => Promise<EntityDump> {
+  function memoized(dateUtc: string): () => Promise<TimeMachineClient.EntityDump> {
 
-    var memo: Promise<EntityDump>;
+    var memo: Promise<TimeMachineClient.EntityDump>;
 
-    return () => (memo ??= API.getEntityDump(p.lite, dateUtc));
+    return () => (memo ??= TimeMachineClient.API.getEntityDump(p.lite, dateUtc));
   }
 
   var hasPrevious = p.versionDatesUTC.length > 1;
 
-  var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<EntityDump> }>({});
+  var refs = React.useRef<{ [versionDateUTC: string]: () => Promise<TimeMachineClient.EntityDump> }>({});
 
   refs.current = p.versionDatesUTC.toObject(a => a, a => refs.current[a] ?? memoized(a));
   var dates = p.versionDatesUTC.orderBy(a => a);

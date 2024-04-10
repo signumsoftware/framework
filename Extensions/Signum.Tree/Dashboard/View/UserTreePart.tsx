@@ -3,9 +3,9 @@ import * as React from 'react'
 import { Finder } from '@framework/Finder'
 import { getTypeInfos, tryGetOperationInfo } from '@framework/Reflection'
 import { JavascriptMessage } from '@framework/Signum.Entities'
-import * as UserQueryClient from '../../../Signum.UserQueries/UserQueryClient'
+import { UserQueryClient } from '../../../Signum.UserQueries/UserQueryClient'
 import { useAPI } from '@framework/Hooks'
-import { PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
+import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboard/DashboardClient'
 import { TreeViewer } from '../../TreeViewer'
 import { TreeOperation, UserTreePartEntity } from '../../Signum.Tree'
 import { Operations } from '@framework/Operations'
@@ -29,6 +29,7 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
       typeName={ti.name}
       allowMove={tryGetOperationInfo(TreeOperation.Move, ti) !== null}
       filterOptions={fo.filterOptions}
+      showExpandCollapseButtons={true}
       key={ti.name}
     />
   );

@@ -5,7 +5,7 @@ import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Map'
-import * as MapClient from '../MapClient'
+import { MapClient } from '../MapClient'
 import { OperationMapInfo, OperationMapD3, ForceNode, ForceLink, Transition } from './OperationMap'
 import "./operationMap.css"
 import { useAPI, useSize } from '@framework/Hooks'

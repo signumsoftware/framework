@@ -3,18 +3,17 @@ import * as React from 'react'
 
 import ReactChart, { MemoRepository } from './ReactChart';
 import { ChartRequestModel } from '../../Signum.Chart';
-import * as ChartClient from '../../ChartClient';
+import { ChartClient, ChartRow, ChartTable } from '../../ChartClient';
 import { useSize, useThrottle } from '@framework/Hooks';
 import { classes } from '@framework/Globals';
 import { renderCombinedLinesAndColumns } from '../CombinedLinesAndColumns';
 
 export interface ReactChartCombinedInfo {
   chartRequest: ChartRequestModel;
-  data?: ChartClient.ChartTable;
+  data?: ChartTable;
   parameters: { [parameter: string]: string };
   memo: MemoRepository;
-  onDrillDown: (row: ChartClient.ChartRow, e: React.MouseEvent | MouseEvent) => void;
-
+  onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
 }
 
 export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null }) {

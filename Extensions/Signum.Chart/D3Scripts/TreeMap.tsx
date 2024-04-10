@@ -1,15 +1,14 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartScriptProps, ChartRow, ChartColumn } from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { Folder, isFolder, Root, isRoot, stratifyTokens } from './Components/Stratify';
-import { ChartRow } from '../ChartClient';
 import TextEllipsis from './Components/TextEllipsis';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderTreeMap({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -19,9 +18,9 @@ export default function renderTreeMap({ data, width, height, parameters, loading
     );
 
   var keyColumn = data.columns.c0!;
-  var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
+  var valueColumn = data.columns.c1! as ChartColumn<number>;
   var parentColumn = data.columns.c2;
-  var colorScaleColumn = data.columns.c3 as ChartClient.ChartColumn<number> | undefined;
+  var colorScaleColumn = data.columns.c3 as ChartColumn<number> | undefined;
   var colorSchemeColumn = data.columns.c4;
 
   var color: (v: ChartRow) => string | undefined;
