@@ -25,12 +25,7 @@ class Upgrade_20240405_Fix_Southwind_Server : CodeUpgradeBase
                 c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
         });
 
-        uctx.ChangeCodeFile(@"Southwind.Terminal/Program.cs", c =>
-        {
-            c.Replace("settings.", "appsettings.");
-        });
-
-        uctx.ChangeCodeFile(@"Southwind.Test.Environment/SpitzleiEnvironment.cs", c =>
+        uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", c =>
         {
             c.Replace("settings.", "appsettings.");
         });
