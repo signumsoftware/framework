@@ -20,14 +20,14 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile(".gitignore", c =>
         {
-            c.Replace($"/{uctx.ApplicationName}/CodeGen/**", $"/{uctx.ApplicationName}.Server/CodeGen/**");
-            c.Replace($"/{uctx.ApplicationName}/wwwroot/dist/**", $"/{uctx.ApplicationName}.Server/wwwroot/dist/**");
-            c.Replace($"/{uctx.ApplicationName}/web.config/**", $"/{uctx.ApplicationName}.Server/web.config/**");
-            c.Replace($"/{uctx.ApplicationName}/TensorFlowModels/**", $"/{uctx.ApplicationName}.Server/TensorFlowModels/**");
+            c.Replace($"/{uctx.ApplicationName}/CodeGen/*", $"/{uctx.ApplicationName}.Server/CodeGen/*");
+            c.Replace($"/{uctx.ApplicationName}/wwwroot/dist/*", $"/{uctx.ApplicationName}.Server/wwwroot/dist/*");
+            c.Replace($"/{uctx.ApplicationName}/web.config/*", $"/{uctx.ApplicationName}.Server/web.config/*");
+            c.Replace($"/{uctx.ApplicationName}/TensorFlowModels/*", $"/{uctx.ApplicationName}.Server/TensorFlowModels/*");
 
         });
 
-        uctx.ChangeCodeFile("deployToAzure.ps1", c =>
+        uctx.ForeachCodeFile("deploy*.ps1", c =>
         {
             c.Replace(@$".\{uctx.ApplicationName}\Dockerfile", $@".\{uctx.ApplicationName}.Server\Dockerfile");
         });
@@ -57,8 +57,8 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
                 $@"WORKDIR ""/src/{uctx.ApplicationName}.Server"""
                 );
             c.ReplaceLine(a => 
-            a.Contains($@"RUN dotnet restore ""{uctx.ApplicationName}/Spitzlei.csproj"""),
-                $@"RUN dotnet restore ""{uctx.ApplicationName}.Server/Spitzlei.Server.csproj"""
+            a.Contains($@"RUN dotnet restore ""{uctx.ApplicationName}/{uctx.ApplicationName}.csproj"""),
+                $@"RUN dotnet restore ""{uctx.ApplicationName}.Server/{uctx.ApplicationName}.Server.csproj"""
                 );
             c.ReplaceLine(a => a.Contains($@"RUN dotnet publish ""{uctx.ApplicationName}.csproj"" -c Release -o /app/publish"),
                 $@"RUN dotnet publish ""{uctx.ApplicationName}.Server.csproj"" -c Release -o /app/publish"
@@ -95,16 +95,17 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind/Properties/launchSettings.json", c =>
         {
+            c.Replace("localhost/" + uctx.ApplicationName, "localhost/" + uctx.ApplicationName + ".Server");
             c.MoveFile(ToServer(c.FilePath));
         });
 
         List<string> publisProfiles = new List<string>();
-
-        uctx.ForeachCodeFile("*.*", "Southwind/Properties/PublishProfiles", c =>
-        {
-            publisProfiles.Add(Path.GetFileName(c.FilePath));
-            c.MoveFile(ToServer(c.FilePath));
-        });
+        if (Directory.Exists(uctx.AbsolutePathSouthwind("Southwind/Properties/PublishProfiles")))
+            uctx.ForeachCodeFile("*.*", "Southwind/Properties/PublishProfiles", c =>
+            {
+                publisProfiles.Add(Path.GetFileName(c.FilePath));
+                c.MoveFile(ToServer(c.FilePath));
+            });
 
         uctx.CreateCodeFile("Southwind.Server/Southwind.Server.csproj", $"""
             <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -164,9 +165,6 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
 
         uctx.ChangeCodeFile("Southwind/web.config", c =>
         {
-            c.Replace(
-                "<environmentVariable name=\"ASPNETCORE_ENVIRONMENT\" value=\"production_public_ip\" />",
-                "<environmentVariable name=\"ASPNETCORE_ENVIRONMENT\" value=\"\" />");
             c.MoveFile(ToServer(c.FilePath));
         });
 
@@ -187,10 +185,7 @@ class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
             uctx.AbsolutePathSouthwind("Southwind/wwwroot"),
             uctx.AbsolutePathSouthwind("Southwind.Server/wwwroot"));
 
-        uctx.ChangeCodeFile("Southwind/yarn.lock", c =>
-        {
-            c.MoveFile(ToServer(c.FilePath));
-        });
+        uctx.DeleteFile("Southwind/yarn.lock", WarningLevel.None);
 
         uctx.ChangeCodeFile("Southwind.sln", c =>
         {

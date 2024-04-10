@@ -61,6 +61,9 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
   key: string | null;
   hideQuickLink: boolean;
+  iconName: string | null;
+  iconColor: string | null;
+  titleColor: string | null;
 }
 
 export const DashboardLiteModel = new Type<DashboardLiteModel>("DashboardLiteModel");
@@ -143,12 +146,12 @@ export interface PanelPartEmbedded extends Entities.EmbeddedEntity {
   title: string | null;
   iconName: string | null;
   iconColor: string | null;
+  titleColor: string | null;
   row: number;
   startColumn: number;
   columns: number;
   interactionGroup: InteractionGroup | null;
   customColor: string | null;
-  useIconColorForTitle: boolean;
   content: IPartEntity;
 }
 

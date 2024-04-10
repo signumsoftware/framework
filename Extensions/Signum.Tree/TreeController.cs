@@ -49,6 +49,7 @@ public class TreeController : ControllerBase
         public List<FilterTS> userFilters;
         public List<FilterTS> frozenFilters;
         public List<Lite<TreeEntity>> expandedNodes;
+        public bool loadDescendants;
     }
 
     static GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>> giFindNodesGeneric =
@@ -84,11 +85,27 @@ public class TreeController : ControllerBase
                         {
                             route = t.Route,
                             name = t.Name,
+                            fullName = t.FullName,
                             lite = t.ToLite(),
                             level = t.Level(),
                             disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
                             childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
                         }).ToList();
+
+        var listDescendants = new List<TreeInfo>();
+        if (request.loadDescendants)
+            listDescendants.AddRange(filteredQuery
+                        .SelectMany(t => t.Descendants())
+                        .Select(t => new TreeInfo
+                        {
+                            route = t.Route,
+                            name = t.Name,
+                            fullName = t.FullName,
+                            lite = t.ToLite(),
+                            level = t.Level(),
+                            disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
+                            childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
+                        }).ToList());
 
         var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
                         frozenQuery
@@ -98,13 +115,34 @@ public class TreeController : ControllerBase
                        {
                            route = t.Route,
                            name = t.Name,
+                           fullName = t.FullName,
                            lite = t.ToLite(),
                            level = t.Level(),
                            disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
                            childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
                        }).ToList();
 
-        return list.Concat(expandedChildren).ToList();
+        var expandedChildrenDescendants = new List<TreeInfo>();
+        if (request.loadDescendants)
+            expandedChildrenDescendants.AddRange(request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
+                       frozenQuery
+                      .Where(t => request.expandedNodes.Contains(t.Parent()!.ToLite()))
+                      .SelectMany(t => t.Descendants())
+                      .Select(t => new TreeInfo
+                      {
+                          route = t.Route,
+                          name = t.Name,
+                          fullName = t.FullName,
+                          lite = t.ToLite(),
+                          level = t.Level(),
+                          disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
+                          childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
+                      }).ToList());
+
+        return list.Concat(listDescendants)
+            .Concat(expandedChildren)
+            .Concat(expandedChildrenDescendants)
+            .ToList();
     }
 
     static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
@@ -123,6 +161,7 @@ public class TreeController : ControllerBase
 class TreeInfo
 {
     public string name { get; set; }
+    public string fullName { get; set; }
     public Lite<TreeEntity> lite { get; set; }
     public bool disabled { get; set; }
     public int childrenCount { get; set; }
@@ -136,6 +175,7 @@ public class TreeNode
     internal TreeNode(Node<TreeInfo> node)
     {
         this.name = node.Value.name;
+        this.fullName = node.Value.fullName;
         this.lite = node.Value.lite;
         this.disabled = node.Value.disabled;
         this.childrenCount = node.Value.childrenCount;
@@ -144,6 +184,7 @@ public class TreeNode
     }
 
     public string name { set; get; }
+    public string fullName { get; set; }
     public Lite<TreeEntity> lite { set; get; }
     public bool disabled { get; set; }
     public int childrenCount { set; get; }

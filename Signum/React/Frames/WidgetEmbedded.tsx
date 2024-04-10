@@ -33,8 +33,8 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
  
   const widgets = onEmbeddedWidgets.map(a => a(p.widgetContext)).filter(a => a !== undefined).map(a => a!).flatMap(a => a);
 
-  const top = widgets.filter(ew => ew.position === "Top").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }));
-  const bottom = widgets.filter(ew => ew.position === "Bottom").map((ew, i) => React.cloneElement(ew.embeddedWidget, { key: i }));
+  const top = widgets.filter(ew => ew.position === "Top").map((ew, i) => React.cloneElement(WidgetEmbedded.customPanel(ew), { key: i }));
+  const bottom = widgets.filter(ew => ew.position === "Bottom").map((ew, i) => React.cloneElement(WidgetEmbedded.customPanel(ew), { key: i }));
 
   const tab = widgets.filter(ew => ew.position === "Tab");
   const es = Navigator.getSettings(p.widgetContext.frame.pack.entity.Type);
@@ -62,3 +62,9 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
       </>);
   }
 }
+
+WidgetEmbedded.customPanel = (ew: EmbeddedWidget) =>
+  <fieldset>
+    <legend>{ew.title}</legend>
+    {ew.embeddedWidget}
+  </fieldset>;

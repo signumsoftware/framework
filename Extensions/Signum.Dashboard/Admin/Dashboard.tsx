@@ -13,7 +13,7 @@ import "../Dashboard.css"
 import { getToString, toLite } from '@framework/Signum.Entities';
 import { useForceUpdate } from '@framework/Hooks'
 import { SearchValueLine } from '@framework/Search';
-import { Navigator } from '@framework/Navigator';
+import { Navigator, ViewPromise } from '@framework/Navigator';
 import { classes } from '@framework/Globals';
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations';
 import { EntityOperationContext } from '@framework/Operations';
@@ -65,7 +65,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   function renderPart(tc: TypeContext<PanelPartEmbedded>) {
     const tcs = tc.subCtx({ formGroupStyle: "SrOnly", formSize: "xs", placeholderLabels: true });
 
-    var icon = parseIcon(tc.value.iconName);
+    var icon = parseIcon(tc.value.iconName) ?? "border-none";
 
     var avoidDrag: React.HTMLAttributes<any> = {
       draggable: true,
@@ -80,11 +80,11 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         <div className="d-flex">
           {icon && <div className="mx-2">
             <FontAwesomeIcon icon={icon} style={{ color: tc.value.iconColor ?? undefined, fontSize: "25px" }} {...avoidDrag}
-              onClick={() => Navigator.view(tc.value, { propertyRoute: tc.propertyRoute }).then(a => {
+              onClick={() => selectIcon(tc).then(a => {
                 if (a) {
                   tc.value.iconName = a.iconName;
                   tc.value.iconColor = a.iconColor;
-                  tc.value.useIconColorForTitle = a.useIconColorForTitle;
+                  tc.value.titleColor = a.titleColor;
                   tc.value.modified = true;
                   forceUpdate();
                 }
@@ -120,6 +120,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   const ctx = p.ctx;
   const ctxBasic = ctx.subCtx({ formGroupStyle: "Basic" });
   const ctxLabel5 = ctx.subCtx({ labelColumns: 5 });
+  const icon = parseIcon(ctx.value.iconName) ?? "border-none";
   return (
     <div>
       <div>
@@ -134,7 +135,21 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         <div className="row">
           <div className="col-sm-8">
             <AutoLine ctx={ctx.subCtx(cp => cp.displayName)}
-              helpText={<CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />} />
+              helpText={<div className="d-flex">
+                {icon && <div className="mx-2">
+                  <FontAwesomeIcon icon={icon} style={{ color: ctx.value.iconColor ?? undefined, fontSize: "25px", cursor: "pointer" }}
+                    onClick={() => selectIcon(ctx).then(a => {
+                      if (a) {
+                        ctx.value.iconName = a.iconName;
+                        ctx.value.iconColor = a.iconColor;
+                        ctx.value.titleColor = (a as DashboardEntity).titleColor;
+                        ctx.value.modified = true;
+                        forceUpdate();
+                      }
+                    })} />
+                </div>}
+                <CheckboxLine ctx={ctx.subCtx(cp => cp.hideDisplayName)} inlineCheckbox />
+              </div>} />
           </div>
           <div className="col-sm-4">
             <AutoLine ctx={ctxLabel5.subCtx(cp => cp.autoRefreshPeriod)} />
@@ -206,6 +221,17 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
         </Tabs>
     </div>
   );
+
+  function selectIcon(ctx: TypeContext<DashboardEntity | PanelPartEmbedded>) {
+    return Navigator.view(ctx.value, {
+      propertyRoute: ctx.propertyRoute,
+      getViewPromise: e => new ViewPromise(import("./PanelIcon")),
+      modalSize: "md",
+      buttons: "ok_cancel",
+      isOperationVisible: e => false,
+      requiresSaveOperation: false,
+    })
+  }
 }
 
 export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {

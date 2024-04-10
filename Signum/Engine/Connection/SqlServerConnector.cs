@@ -39,6 +39,7 @@ public static class SqlServerVersionDetector
         {
             using (var con = new SqlConnection(connectionString))
             {
+                //Login failed? System.Security.Principal.WindowsIdentity.GetCurrent().Name
                 con.Open();
                 var sql =
 @"SELECT
