@@ -17,10 +17,6 @@ export interface IUserAssetEntity extends Entities.Entity {
   guid: string /*Guid*/;
 }
 
-export interface IUserAssetLikedEntity extends IUserAssetEntity, Entities.Entity {
-  entityType: Entities.Lite<Basics.TypeEntity> | null;
-}
-
 export const LiteConflictEmbedded = new Type<LiteConflictEmbedded>("LiteConflictEmbedded");
 export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
   Type: "LiteConflictEmbedded";
