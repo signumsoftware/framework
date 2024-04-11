@@ -398,7 +398,7 @@ Consider the following options:
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
-            HasCanExecuteExpression = (oper as IEntityOperation)?.CanExecuteExpression() != null,
+            HasCanExecuteExpression = (oper as IOperation)?.CanExecuteExpression() != null,
             CanBeModified = (oper as IEntityOperation)?.CanBeModified,
             CanBeNew = (oper as IEntityOperation)?.CanBeNew,
             ForReadonlyEntity = (oper as IExecuteOperation)?.ForReadonlyEntity,
@@ -741,7 +741,7 @@ Consider the following options:
         {
             foreach (var grLites in lites.GroupBy(a => a.EntityType))
             {
-                var operations = operationSymbols.Select(opKey => (IEntityOperation)FindOperation(grLites.Key, opKey)).ToList();
+                var operations = operationSymbols.Select(opKey => FindOperation(grLites.Key, opKey)).ToList();
 
                 foreach (var grOperations in operations.Where(a => a.StateType != null).GroupBy(a => a.StateType!))
                 {
@@ -761,7 +761,6 @@ Consider the following options:
                 }
 
                 var operationsWithCanExecute = operations.Where(a => a.CanExecuteExpression() != null && !result.ContainsKey(a.OperationSymbol));
-
                 var dic2 = giGetCanExecuteExpression.GetInvoker(grLites.Key)(grLites, operationsWithCanExecute);
                 if (result.IsEmpty())
                     result.AddRange(dic2);
@@ -779,9 +778,9 @@ Consider the following options:
         return result;
     }
 
-    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IEntityOperation>, Dictionary<OperationSymbol, string>>> giGetContextualGraphCanExecute =
+    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IOperation>, Dictionary<OperationSymbol, string>>> giGetContextualGraphCanExecute =
         new((lites, operations) => GetContextualGraphCanExecute<Entity, Entity, DayOfWeek>(lites, operations));
-    internal static Dictionary<OperationSymbol, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IEntityOperation> operations)
+    internal static Dictionary<OperationSymbol, string> GetContextualGraphCanExecute<T, E, S>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IOperation> operations)
         where E : Entity
         //where S : struct (nullable enums)
         where T : E
@@ -800,9 +799,9 @@ Consider the following options:
                     invalid.CommaOr(v => ((Enum)(object)v).NiceToString())))).ToDictionary();
     }
 
-    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IEntityOperation>, Dictionary<OperationSymbol, string>>> giGetCanExecuteExpression =
+    internal static GenericInvoker<Func<IEnumerable<Lite<IEntity>>, IEnumerable<IOperation>, Dictionary<OperationSymbol, string>>> giGetCanExecuteExpression =
         new((lites, operation) => GetCanExecuteExpression<Entity>(lites, operation));
-    internal static Dictionary<OperationSymbol, string> GetCanExecuteExpression<E>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IEntityOperation> operations)
+    internal static Dictionary<OperationSymbol, string> GetCanExecuteExpression<E>(IEnumerable<Lite<IEntity>> lites, IEnumerable<IOperation> operations)
         where E : Entity
     {
         var eParam = Expression.Parameter(typeof(E));
@@ -819,6 +818,20 @@ Consider the following options:
             .ToDictionaryEx();
     }
 
+    internal static GenericInvoker<Func<IOperation, IEnumerable<Lite<IEntity>>, Dictionary<PrimaryKey, string>>> giGetCanExecute =
+        new GenericInvoker<Func<IOperation, IEnumerable<Lite<IEntity>>, Dictionary<PrimaryKey, string>>>((op, lites) => GetCanExecute<Entity>(op, lites));
+    static Dictionary<PrimaryKey, string> GetCanExecute<FF>(IOperation operation, IEnumerable<Lite<IEntity>> lites)
+        where FF : Entity
+    {
+        var casted = lites.Cast<Lite<FF>>();
+        var eParam = Expression.Parameter(typeof(FF));
+        var canExecutes = Expression.Lambda<Func<FF, string?>>(Expression.Invoke(operation.CanExecuteExpression()!, eParam), eParam);
+        return Database.Query<FF>().Where(a => lites.Contains(a.ToLite()))
+            .Select(e => KeyValuePair.Create(e.Id, canExecutes.Evaluate(e)))
+            .ToList()
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(a => a.Key, a => a.Value!);
+    }
 
 
     public static Func<OperationLogEntity, bool> LogOperation = (request) => true;
@@ -894,6 +907,8 @@ public interface IOperation
 
     Type? StateType { get; }
     LambdaExpression? GetStateExpression();
+
+    LambdaExpression? CanExecuteExpression();
 }
 
 public interface IEntityOperation : IOperation
@@ -901,8 +916,6 @@ public interface IEntityOperation : IOperation
     bool CanBeModified { get; }
     bool CanBeNew { get; }
     string? CanExecute(IEntity entity);
-    LambdaExpression? CanExecuteExpression();
-
 
     bool HasCanExecute { get; }
     Type BaseType { get; }

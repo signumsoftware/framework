@@ -4,7 +4,7 @@ import { Dic } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { FrameMessage, JavascriptMessage } from '@framework/Signum.Entities'
 import { MapMessage } from '../Signum.Map'
-import * as MapClient from '../MapClient'
+import { MapClient } from '../MapClient'
 import { SchemaMapD3 } from './SchemaMap'
 import { useLocation, useParams, Location } from "react-router";
 import "./schemaMap.css"

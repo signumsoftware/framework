@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { JavascriptMessage } from '@framework/Signum.Entities'
-import { API, NamespaceSyncStats } from '../TranslationClient'
+import { TranslationClient } from '../TranslationClient'
 import { TranslationMessage } from '../Signum.Translation'
 import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
@@ -12,7 +12,7 @@ export default function TranslationCodeSyncNamespaces() {
   const assembly = decodeDots(params.assembly);
   const culture = params.culture;
 
-  const result = useAPI(() => API.namespaceStatus(assembly, culture), [assembly, culture]);
+  const result = useAPI(() => TranslationClient.API.namespaceStatus(assembly, culture), [assembly, culture]);
   
 
   function renderTable() {

@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartRow, ChartScriptProps } from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import { XKeyTicks, YScaleTicks, YKeyTicks, XScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import { Rule } from './Components/Rule';
@@ -53,7 +52,7 @@ export default function renderBars({ data, width, height, parameters, loading, o
     );
 
   var keyColumn = data.columns.c0!;
-  var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
+  var valueColumn = data.columns.c1! as ChartColumn<number>;
 
 
   var x = scaleFor(valueColumn, data.rows.map(r => valueColumn.getValue(r)), 0, xRule.size('content') - (isInside ? labelsMargin + labelsPadding : 0), parameters['Scale']);

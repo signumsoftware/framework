@@ -1,6 +1,6 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import {  ChartTable } from '../../ChartClient';
+import { ChartClient, ChartTable } from '../../ChartClient';
 import { Rule } from './Rule';
 import { JavascriptMessage, SearchMessage } from '@framework/Signum.Entities';
 import { SearchControl } from '@framework/Search';

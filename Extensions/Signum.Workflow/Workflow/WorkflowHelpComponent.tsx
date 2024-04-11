@@ -1,14 +1,14 @@
 import * as React from 'react'
 import { WorkflowEntity, WorkflowActivityEntity, WorkflowActivityMessage } from '../Signum.Workflow';
 import { Finder } from '@framework/Finder'
-import { TypeHelpMode } from '../../Signum.Eval/TypeHelp/TypeHelpClient'
+import { TypeHelpClient } from '../../Signum.Eval/TypeHelp/TypeHelpClient'
 import AutoLineModal from '@framework/AutoLineModal';
 import { getToString } from '@framework/Signum.Entities';
 import { TextAreaLine } from '../../../Signum/React/Lines';
 
 interface WorkflowHelpComponentProps {
   typeName: string;
-  mode: TypeHelpMode;
+  mode: TypeHelpClient.TypeHelpMode;
 }
 
 export default function WorkflowHelpComponent(p : WorkflowHelpComponentProps){

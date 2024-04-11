@@ -6,7 +6,7 @@ import { SearchControl, SearchValueLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { Operations } from '@framework/Operations'
 import { tryGetTypeInfos, getTypeInfos } from '@framework/Reflection'
-import { API, SchedulerState, SchedulerItemState, SchedulerRunningTaskState } from './SchedulerClient'
+import { SchedulerClient } from './SchedulerClient'
 import { ScheduledTaskLogEntity, ScheduledTaskEntity, ScheduledTaskLogOperation } from './Signum.Scheduler'
 import { Lite } from "@framework/Signum.Entities";
 import { StyleContext } from "@framework/Lines";
@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function SchedulerPanelPage() {
 
-  const [state, reloadState] = useAPIWithReload(() => API.view(), [], { avoidReset: true });
+  const [state, reloadState] = useAPIWithReload(() => SchedulerClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
 
@@ -32,12 +32,12 @@ export default function SchedulerPanelPage() {
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.stop().then(() => reloadState());
+    SchedulerClient.API.stop().then(() => reloadState());
   }
 
   function handleStart(e: React.MouseEvent<any>) {
     e.preventDefault();
-    API.start().then(() => reloadState());
+    SchedulerClient.API.start().then(() => reloadState());
   }
 
   
@@ -100,7 +100,7 @@ export default function SchedulerPanelPage() {
   );
 }
 
-function InMemoryQueue({ queue, onReload }: { queue: SchedulerItemState[], onReload : ()=> void }) {
+function InMemoryQueue({ queue, onReload }: { queue: SchedulerClient.SchedulerItemState[], onReload : ()=> void }) {
   return (
     <div>
       <h4>In Memory Queue</h4>
@@ -127,7 +127,7 @@ function InMemoryQueue({ queue, onReload }: { queue: SchedulerItemState[], onRel
   );
 }
 
-function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerRunningTaskState[], onReload: () => void }) {
+function RunningTasks({ runningTasks, onReload }: { runningTasks: SchedulerClient.SchedulerRunningTaskState[], onReload: () => void }) {
 
   function handleCancelClick(e: React.MouseEvent<any>, taskLog: Lite<ScheduledTaskLogEntity>) {
     e.preventDefault();

@@ -101,7 +101,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
     if (p.onFiltersChanged)
       p.onFiltersChanged(p.filterOptions);
 
-      forceUpdate();
+    forceUpdate();
   };
 
   function handleHeightChanged() {
@@ -159,7 +159,7 @@ export default function FilterBuilder(p: FilterBuilderProps) {
                   showDashboardBehaviour={showDashboardBehaviour}
                   disableValue={false}
                   setHighlightFilter={showPinnedFiltersOptions ? setHighlightFilter : undefined}
-                  
+
                   level={0}
                 /> :
                 <FilterConditionComponent key={keyGenerator.getKey(f)} filter={f} readOnly={Boolean(p.readOnly)} onDeleteFilter={handlerDeleteFilter}
@@ -325,13 +325,11 @@ export function FilterGroupComponent(p: FilterGroupComponentsProps) {
       >
         <td style={{ paddingLeft: paddingLeft }} colSpan={2}>
           <div className="d-flex">
-            {!readOnly &&
-              <a href="#"
-                className="sf-line-button sf-remove sf-remove-filter-icon"
-                onClick={handleDeleteFilter}>
-                <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
-              </a>}
-
+            <a href={!readOnly ? "#" : undefined}
+              className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
+              onClick={!readOnly ? handleDeleteFilter : undefined}>
+              <FontAwesomeIcon icon="xmark" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined} />
+            </a>
 
             <div className="align-items-center d-flex">
               <select className="form-select form-select-xs sf-group-selector fw-bold me-2 w-auto" value={fg.groupOperation as any} disabled={readOnly} onChange={handleChangeOperation}>
@@ -551,7 +549,7 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
     if (isList(operation) != isList(p.filter.operation!))
       p.filter.value = isList(operation) && p.filter.token?.filterType == "Lite" ? [p.filter.value].notNull() :
         isList(operation) ? [p.filter.value] :
-        p.filter.value[0];
+          p.filter.value[0];
 
     p.filter.operation = operation;
     if (p.filter.pinned?.splitValue && !canSplitValue(p.filter))
@@ -577,12 +575,11 @@ export function FilterConditionComponent(p: FilterConditionComponentProps) {
       >
         <td style={{ paddingLeft: (25 * p.level) }}>
           <div className="d-flex">
-            {!readOnly &&
-              <a href="#" title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
-                className="sf-line-button sf-remove sf-remove-filter-icon"
-                onClick={handleDeleteFilter}>
-                <FontAwesomeIcon icon="xmark" />
-              </a>}
+            <a href={!readOnly ? "#" : undefined} title={StyleContext.default.titleLabels ? SearchMessage.DeleteFilter.niceToString() : undefined}
+              className={classes("sf-line-button sf-remove sf-remove-filter-icon", readOnly && "disabled")}
+              onClick={!readOnly ? handleDeleteFilter : undefined}>
+              <FontAwesomeIcon icon="xmark" />
+            </a>
             <div className="rw-widget-xs">
               <QueryTokenBuilder
                 prefixQueryToken={p.prefixToken}
@@ -715,7 +712,7 @@ export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
     return (
       <NumberBox readonly={p.readonly} value={val == undefined ? null : val}
         format={numberFormat}
-        
+
         onChange={n => { binding.setValue(n == null ? undefined : n); p.onChange(); }}
         validateKey={isNumberKey} formControlClass="form-control form-control-xs" htmlAttributes={{ placeholder: placeholder.toString(), title: title, style: { width: "60px" } }} />
     );
@@ -780,10 +777,6 @@ function DashboardBehaviourComponent(p: { filter: FilterOptionParsed, readonly: 
   );
 }
 
-
-
-
-
 function fixDashboardBehaviour(fop: FilterOptionParsed) {
   if (fop.dashboardBehaviour == "PromoteToDasboardPinnedFilter" && fop.pinned == null)
     fop.dashboardBehaviour = undefined;
@@ -791,9 +784,6 @@ function fixDashboardBehaviour(fop: FilterOptionParsed) {
   if ((fop.dashboardBehaviour == "UseWhenNoFilters" || fop.dashboardBehaviour == "UseAsInitialSelection") && fop.pinned != null)
     fop.dashboardBehaviour = undefined;
 }
-
-
-
 
 function niceNameOrSymbol(fo: FilterOperation) {
   switch (fo) {

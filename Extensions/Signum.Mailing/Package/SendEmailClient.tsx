@@ -7,7 +7,10 @@ import { EntityLine } from '@framework/Lines'
 import { EmailMessagePackageMixin, EmailPackageEntity, SendEmailTaskEntity } from './Signum.Mailing.Package'
 import { EmailMessageEntity } from '../Signum.Mailing'
 
-export function start(options: { routes: RouteObject[] }) {
-
-  Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./SendEmailTask')));
+export namespace SendEmailClient {
+  
+  export function start(options: { routes: RouteObject[] }) {
+  
+    Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./SendEmailTask')));
+  }
 }

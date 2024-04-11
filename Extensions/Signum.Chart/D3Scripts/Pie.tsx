@@ -1,16 +1,15 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartScriptProps, ChartRow, ChartTable, ChartColumn } from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartRow, ChartTable } from '../ChartClient';
 import InitialMessage from './Components/InitialMessage';
 import { TextRectangle } from './StackedLines';
 import TextEllipsis from './Components/TextEllipsis';
 import { toNumberFormat } from '@framework/Reflection';
 import { Color } from '../../../Signum/React/Basics/Color';
 
-export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderPie({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, chartRequest, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -20,7 +19,7 @@ export default function renderPie({ data, width, height, parameters, loading, on
     );
 
   var keyColumn = data.columns.c0!;
-  var valueColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
+  var valueColumn = data.columns.c1! as ChartColumn<number>;
 
   var pInnerRadius = parameters.InnerRadious || "0";
   var pSort = parameters.Sort;

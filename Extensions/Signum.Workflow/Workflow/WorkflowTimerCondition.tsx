@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, TypeContext, LiteAutocompleteConfig, TextAreaLine
 import { PropertyRoute } from '@framework/Reflection'
 import CSharpCodeMirror from '../../Signum.CodeMirror/CSharpCodeMirror'
 import { WorkflowTimerConditionEntity } from '../Signum.Workflow'
-import { API } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import TypeHelpComponent from '../../Signum.Eval/TypeHelp/TypeHelpComponent'
 import AutoLineModal from '@framework/AutoLineModal'
 import { useForceUpdate } from '@framework/Hooks'
@@ -46,7 +46,7 @@ export default function WorkflowTimerConditionComponent(p : WorkflowTimerConditi
       <AutoLine ctx={ctx.subCtx(wc => wc.name)} />
       <EntityLine ctx={ctx.subCtx(wc => wc.mainEntityType)}
         onChange={handleMainEntityTypeChange}
-        autocomplete={new LiteAutocompleteConfig((ac, str) => API.findMainEntityType({ subString: str, count: 5 }, ac))}
+        autocomplete={new LiteAutocompleteConfig((ac, str) => WorkflowClient.API.findMainEntityType({ subString: str, count: 5 }, ac))}
         find={false} />
       {ctx.value.mainEntityType &&
         <div>

@@ -2,7 +2,7 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import * as d3 from 'd3'
 import * as AppContext from '@framework/AppContext'
-import { API, HeavyProfilerEntry } from '../ProfilerClient'
+import { ProfilerClient } from '../ProfilerClient'
 import "./Profiler.css"
 import { useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
@@ -13,8 +13,8 @@ export default function HeavyList() {
     const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
 
 
-  const [enabled, reloadEnabled] = useAPIWithReload(() => API.Heavy.isEnabled(), [], { avoidReset: true });
-  const [entries, reloadEntries] = useAPIWithReload(() => API.Heavy.entries(ignoreProfilerHeavyEntries), [], { avoidReset: true });
+  const [enabled, reloadEnabled] = useAPIWithReload(() => ProfilerClient.API.Heavy.isEnabled(), [], { avoidReset: true });
+  const [entries, reloadEntries] = useAPIWithReload(() => ProfilerClient.API.Heavy.entries(ignoreProfilerHeavyEntries), [], { avoidReset: true });
 
   const [fileToUpload, setFileToUpload] = React.useState<File | undefined>(undefined);
   const [fileVer, setFileVer] = React.useState<number>(0)
@@ -30,7 +30,7 @@ export default function HeavyList() {
   useTitle("Heavy Profiler");
 
   function handleClear(e: React.MouseEvent<any>) {
-    API.Heavy.clear()
+    ProfilerClient.API.Heavy.clear()
       .then(() => reloadEntries());
   }
 
@@ -40,12 +40,12 @@ export default function HeavyList() {
   }
 
   function handleSetEnabled(value: boolean) {
-    API.Heavy.setEnabled(value)
+    ProfilerClient.API.Heavy.setEnabled(value)
       .then(() => { reloadEntries(); reloadEnabled(); });
   }
 
   function handleDownload() {
-    API.Heavy.download(undefined);
+    ProfilerClient.API.Heavy.download(undefined);
   }
 
   function handleInputChange(e: React.FormEvent<any>) {
@@ -60,7 +60,7 @@ export default function HeavyList() {
       let content = ((e.target as any).result as string).after("base64,");
       let fileName = fileToUpload!.name;
 
-      API.Heavy.upload({ fileName, content })
+      ProfilerClient.API.Heavy.upload({ fileName, content })
         .then(() => {
           setFileToUpload(undefined);
           setFileVer(fileVer + 1);
@@ -106,7 +106,7 @@ export default function HeavyList() {
   );
 }
 
-function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfilerEntry[] }) {
+function EntrieListPath({ width, entries }: { width: number, entries: ProfilerClient.HeavyProfilerEntry[] }) {
 
   let data = entries!;
 
@@ -131,7 +131,7 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
 
   let entryHeight = y(1);
 
-  function handleOnClick(e: React.MouseEvent, v: HeavyProfilerEntry) {
+  function handleOnClick(e: React.MouseEvent, v: ProfilerClient.HeavyProfilerEntry) {
     let url = "/profiler/heavy/entry/" + v.fullIndex;
 
     if (e.ctrlKey) {
@@ -144,7 +144,7 @@ function EntrieListPath({ width, entries }: { width: number, entries: HeavyProfi
   return (
     <svg width={width + "px"} height={height + "px"}>
       {data.map((v, i) => {
-        var isPH = v.role == "Web.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
+        var isPH = v.role == "Web.ProfilerClient.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
         return (<g className="entry" data-full-key={v.fullIndex} key={v.fullIndex} onClick={e => handleOnClick(e, v)} opacity={isPH ? 0.5 : undefined}>
           <rect className="left-background" x={0} y={y(i)} width={labelWidth} height={entryHeight} fill="#ddd" stroke="#fff" />
           <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.role + " " + v.additionalData}</text>

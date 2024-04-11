@@ -13,7 +13,7 @@ import { ExpressionOrValueComponent, DesignerModal } from './Designer'
 import { DesignerNode, Expression } from './NodeUtils'
 import { BaseNode } from './Nodes'
 import { FindOptionsExpr, FilterOptionExpr, OrderOptionExpr, ColumnOptionExpr } from './FindOptionsExpression'
-import * as DynamicViewClient from '../DynamicViewClient'
+import { DynamicViewClient } from '../DynamicViewClient'
 import SelectorModal from '@framework/SelectorModal';
 import { TypeInfo } from '@framework/Reflection';
 import { useForceUpdate, useAPI } from '@framework/Hooks'

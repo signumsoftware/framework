@@ -14,7 +14,7 @@ public class WordTemplateParser : ITemplateParser
 {
     public List<TemplateError> Errors = new List<TemplateError>();
     public QueryDescription? QueryDescription { get; private set; }
-    public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = new ScopedDictionary<string, ValueProviderBase>(null);
+    public ScopedDictionary<string, ValueProviderBase> Variables { get; private set; } = null!;
     public Type? ModelType { get; private set; }
 
     OpenXmlPackage document;
@@ -183,141 +183,163 @@ public class WordTemplateParser : ITemplateParser
     {
         foreach (var root in document.AllRootElements())
         {
-            var lists = root.Descendants<MatchNode>().ToList();
-
-            foreach (var matchNode in lists)
+            using (NewScope())
             {
-                var m = matchNode.Match;
+                var lists = root.Descendants<MatchNode>().ToList();
 
-                var expr = m.Groups["expr"].Value;
-                var keyword = m.Groups["keyword"].Value;
-                var variable = m.Groups["dec"].Value;
-
-                switch (keyword)
+                foreach (var matchNode in lists)
                 {
-                    case "":
-                        var s = TemplateUtils.SplitToken(expr);
-                        if (s == null)
-                            AddError(true, "{0} has invalid format".FormatWith(expr));
-                        else
-                        {
-                            var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
+                    var m = matchNode.Match;
 
-                            matchNode.Parent!.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
-                            {
-                                RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
-                            }, matchNode);
+                    var expr = m.Groups["expr"].Value;
+                    var keyword = m.Groups["keyword"].Value;
+                    var variable = m.Groups["dec"].Value;
 
-                            DeclareVariable(vp);
-                        }
-                        break;
-                    case "declare":
-                        {
-                            var vp = ValueProviderBase.TryParse(expr, variable, this);
-                            matchNode.Parent!.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
+                    switch (keyword)
+                    {
+                        case "":
+                            var s = TemplateUtils.SplitToken(expr);
+                            if (s == null)
+                                AddError(true, "{0} has invalid format".FormatWith(expr));
+                            else
                             {
-                                RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
-                            }, matchNode);
+                                var vp = ValueProviderBase.TryParse(s.Value.Token, variable, this);
 
-                            DeclareVariable(vp);
-                        }
-                        break;
-                    case "any":
-                        {
-                            ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
-                            AnyNode any = new AnyNode(matchNode.NodeProvider, cond)
-                            {
-                                AnyToken = new MatchNodePair(matchNode)
-                            };
-                            PushBlock(any);
+                                matchNode.Parent!.ReplaceChild(new TokenNode(matchNode.NodeProvider, vp!, s.Value.Format!)
+                                {
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
+                                }, matchNode);
 
-                            if (cond is ConditionCompare cc)
-                                DeclareVariable(cc.ValueProvider);
-                            break;
-                        }
-                    case "notany":
-                        {
-                            var an = PeekBlock<AnyNode>();
-                            if (an != null)
-                            {
-                                an.NotAnyToken = new MatchNodePair(matchNode);
+                                DeclareVariable(vp);
                             }
                             break;
-                        }
-                    case "endany":
-                        {
-                            var an = PopBlock<AnyNode>();
-                            if (an != null)
+                        case "declare":
                             {
-                                an.EndAnyToken = new MatchNodePair(matchNode);
+                                var vp = ValueProviderBase.TryParse(expr, variable, this);
+                                matchNode.Parent!.ReplaceChild(new DeclareNode(matchNode.NodeProvider, vp!, this.AddError)
+                                {
+                                    RunProperties = (OpenXmlCompositeElement?)matchNode.RunProperties?.CloneNode(true)
+                                }, matchNode);
 
-                                an.ReplaceBlock();
+                                DeclareVariable(vp);
                             }
                             break;
-                        }
-                    case "if":
-                        {
-                            var cond = TemplateUtils.ParseCondition(expr, variable, this);
-                            IfNode ifn = new IfNode(matchNode.NodeProvider, cond)
+                        case "any":
                             {
-                                IfToken = new MatchNodePair(matchNode)
-                            };
-                            PushBlock(ifn);
+                                ConditionBase cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                AnyNode any = new AnyNode(matchNode.NodeProvider, cond)
+                                {
+                                    AnyToken = new MatchNodePair(matchNode)
+                                };
+                                PushBlock(any);
 
-                            if (cond is ConditionCompare cc)
-                                DeclareVariable(cc.ValueProvider);
-
-                            break;
-                        }
-                    case "else":
-                        {
-                            var an = PeekBlock<IfNode>();
-                            if (an != null)
-                            {
-                                an.ElseToken = new MatchNodePair(matchNode);
+                                if (cond is ConditionCompare cc)
+                                    DeclareVariable(cc.ValueProvider);
+                                break;
                             }
-                            break;
-                        }
-                    case "endif":
-                        {
-                            var ifn = PopBlock<IfNode>();
-                            if (ifn != null)
+                        case "notany":
                             {
-                                ifn.EndIfToken = new MatchNodePair(matchNode);
-
-                                ifn.ReplaceBlock();
+                                var an = PeekBlock<AnyNode>();
+                                if (an != null)
+                                {
+                                    an.NotAnyToken = new MatchNodePair(matchNode);
+                                }
+                                break;
                             }
-                            break;
-                        }
-                    case "foreach":
-                        {
-                            var vp = ValueProviderBase.TryParse(expr, variable, this);
-                            if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
-                                AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
-
-                            var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
-                            PushBlock(fn);
-
-                            DeclareVariable(vp);
-                            break;
-                        }
-                    case "endforeach":
-                        {
-                            var fn = PopBlock<ForeachNode>();
-                            if (fn != null)
+                        case "endany":
                             {
-                                fn.EndForeachToken = new MatchNodePair(matchNode);
+                                var an = PopBlock<AnyNode>();
+                                if (an != null)
+                                {
+                                    an.EndAnyToken = new MatchNodePair(matchNode);
 
-                                fn.ReplaceBlock();
+                                    an.ReplaceBlock();
+                                }
+                                break;
                             }
+                        case "if":
+                            {
+                                var cond = TemplateUtils.ParseCondition(expr, variable, this);
+                                IfNode ifn = new IfNode(matchNode.NodeProvider, cond)
+                                {
+                                    IfToken = new MatchNodePair(matchNode)
+                                };
+                                PushBlock(ifn);
+
+                                if (cond is ConditionCompare cc)
+                                    DeclareVariable(cc.ValueProvider);
+
+                                break;
+                            }
+                        case "else":
+                            {
+                                var an = PeekBlock<IfNode>();
+                                if (an != null)
+                                {
+                                    an.ElseToken = new MatchNodePair(matchNode);
+                                }
+                                break;
+                            }
+                        case "endif":
+                            {
+                                var ifn = PopBlock<IfNode>();
+                                if (ifn != null)
+                                {
+                                    ifn.EndIfToken = new MatchNodePair(matchNode);
+
+                                    ifn.ReplaceBlock();
+                                }
+                                break;
+                            }
+                        case "foreach":
+                            {
+                                var vp = ValueProviderBase.TryParse(expr, variable, this);
+                                if (vp is TokenValueProvider tvp && tvp.ParsedToken.QueryToken != null && QueryToken.IsCollection(tvp.ParsedToken.QueryToken.Type))
+                                    AddError(false, $"@foreach[{expr}] is a collection, missing 'Element' token at the end");
+
+                                var fn = new ForeachNode(matchNode.NodeProvider, vp!) { ForeachToken = new MatchNodePair(matchNode) };
+                                PushBlock(fn);
+
+                                DeclareVariable(vp);
+                                break;
+                            }
+                        case "endforeach":
+                            {
+                                var fn = PopBlock<ForeachNode>();
+                                if (fn != null)
+                                {
+                                    fn.EndForeachToken = new MatchNodePair(matchNode);
+
+                                    fn.ReplaceBlock();
+                                }
+                                break;
+                            }
+                        default:
+                            AddError(true, "'{0}' is deprecated".FormatWith(keyword));
                             break;
-                        }
-                    default:
-                        AddError(true, "'{0}' is deprecated".FormatWith(keyword));
-                        break;
+                    }
                 }
             }
         }
+    }
+
+
+    IDisposable NewScope()
+    {
+        if (!stack.IsEmpty())
+            throw new InvalidOperationException("Stack should be empty");
+
+            Variables = new ScopedDictionary<string, ValueProviderBase>(null);
+
+        return new Disposable(() =>
+        {
+            if (!stack.IsEmpty())
+                AddError(true, "Missing ".FormatWith(stack.ToString(a =>
+                a is IfNode ? "#endif" :
+                a is AnyNode ? "#endany" :
+                a is ForeachNode ? "#endforeach" :
+                throw new UnexpectedValueException(a), ", ")));
+        });
     }
 
     void PushBlock(BlockContainerNode node)

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using NpgsqlTypes;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
@@ -35,7 +36,22 @@ public static class SchemaSynchronizer
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
 
         var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
-        HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+
+
+        foreach (var kvp in databaseTables.Where(a=>a.Value.Name.Name.EndsWith("_History")).ToList()) // Disconnected History tables
+        {
+            var name = kvp.Value.Name;
+            var originalName = new ObjectName(name.Schema, name.Name.Before("_History"), name.IsPostgres);
+            var original = databaseTables.TryGetC(originalName.ToString());
+            if(original != null && SafeConsole.AskRetry($"Consider {name} a history table of {originalName} "))
+            {
+                original.InferredTemporalTableName = name;
+                databaseTablesHistory.Add(kvp.Key, kvp.Value);
+                databaseTables.Remove(kvp.Key);
+            }
+        }
+
+        HashSet <SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
@@ -97,9 +113,10 @@ public static class SchemaSynchronizer
             diff.Columns = replacements.ApplyReplacementsToOld(diff.Columns, key);
             diff.Indices = ApplyIndexAutoReplacements(diff, tab, modelIndices[tab]);
 
-            if (diff.TemporalTableName != null)
+            var temporalTableName = diff.InferredTemporalTableName ?? diff.TemporalTableName;
+            if (temporalTableName != null)
             {
-                var diffTemp = databaseTablesHistory.GetOrThrow(replacements.Apply(Replacements.KeyTables, diff.TemporalTableName.ToString()));
+                var diffTemp = databaseTablesHistory.GetOrThrow(replacements.Apply(Replacements.KeyTables, temporalTableName.ToString()));
                 diffTemp.Columns = replacements.ApplyReplacementsToOld(diffTemp.Columns, key);
                 diffTemp.Indices = ApplyIndexAutoReplacements(diffTemp, tab, modelIndices[tab]);
             }
@@ -200,7 +217,7 @@ public static class SchemaSynchronizer
             SqlPreCommand? dropIndicesHistory =
                 Synchronizer.SynchronizeScript(Spacing.Double, modelTablesHistory, databaseTablesHistory,
                 createNew: null,
-                removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !ix.IsPrimary).Select(ix => sqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
+                removeOld: (tn, dif) => dif.Indices.Values.Where(ix => !(ix.IsPrimary || ix.Type == DiffIndexType.Heap)).Select(ix => sqlBuilder.DropIndex(dif.Name, ix)).Combine(Spacing.Simple),
                 mergeBoth: (tn, tab, dif) =>
                 {
                     Dictionary<string, TableIndex> modelIxs = modelIndices[tab];

@@ -264,16 +264,20 @@ internal class CachedTableConstructor
                     }
                 case CacheType.Semi:
                     {
-                        string lastPartialJoin = CreatePartialInnerJoin(column);
+                        CachedTableBase ctb = cachedTable.subTables?.SingleOrDefaultEx(a => a.ParentColumn == column)!;
+                        if (ctb == null)
+                        {
+                            string lastPartialJoin = CreatePartialInnerJoin(column);
 
-                        CachedTableBase ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator!, lastPartialJoin, remainingJoins);
+                            ctb = ciCachedSemiTable.GetInvoker(type)(cachedTable.controller, aliasGenerator!, lastPartialJoin, remainingJoins);
 
-                        if (cachedTable.subTables == null)
-                            cachedTable.subTables = new List<CachedTableBase>();
+                            if (cachedTable.subTables == null)
+                                cachedTable.subTables = new List<CachedTableBase>();
 
-                        cachedTable.subTables.Add(ctb);
+                            cachedTable.subTables.Add(ctb);
 
-                        ctb.ParentColumn = column;
+                            ctb.ParentColumn = column;
+                        }
 
                         var modelType = customLiteModelType ?? Lite.DefaultModelType(type);
 

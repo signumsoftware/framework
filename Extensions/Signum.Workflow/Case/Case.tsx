@@ -4,14 +4,14 @@ import { classes } from '@framework/Globals'
 import { toLite, JavascriptMessage, is } from '@framework/Signum.Entities'
 import { CaseEntity, WorkflowEntitiesDictionary, CaseActivityEntity, WorkflowActivityMessage, WorkflowActivityEntity, WorkflowPermission, IWorkflowNodeEntity, WorkflowEntity } from '../Signum.Workflow'
 import { AutoLine, EntityLine, TypeContext } from '@framework/Lines'
-import { API, CaseFlow } from '../WorkflowClient'
+import { WorkflowClient } from '../WorkflowClient'
 import CaseFlowViewerComponent from '../Bpmn/CaseFlowViewerComponent'
 import InlineCaseTags from "../Case/InlineCaseTags";
 import { SearchControl, SearchControlLoaded } from "@framework/Search";
 import { Navigator } from "@framework/Navigator";
 import { Tooltip, Tab, Tabs, OverlayTrigger } from "react-bootstrap";
 import { ResultRow } from '@framework/FindOptions';
-import * as AuthClient from '../../Signum.Authorization/AuthClient'
+import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { useAPI } from '@framework/Hooks'
 import { isPermissionAuthorized } from '@framework/AppContext'
 
@@ -30,12 +30,12 @@ export default function CaseComponent(p: CaseComponentProps) {
 
   const model = useAPI(() =>
     !isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) :
-      API.getWorkflowModel(toLite(p.ctx.value.workflow)).then(pair => ({
+      WorkflowClient.API.getWorkflowModel(toLite(p.ctx.value.workflow)).then(pair => ({
         initialXmlDiagram: pair.model.diagramXml,
         entities: pair.model.entities.toObject(mle => mle.element.bpmnElementId, mle => mle.element.model!)
       })), [p.ctx.value.workflow]);
 
-  const caseFlow = useAPI(() => !isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) : API.caseFlow(toLite(p.ctx.value)), [p.ctx.value]);
+  const caseFlow = useAPI(() => !isPermissionAuthorized(WorkflowPermission.ViewCaseFlow) ? Promise.resolve(undefined) : WorkflowClient.API.caseFlow(toLite(p.ctx.value)), [p.ctx.value]);
 
   function handleToggle(eventKey: unknown) {
     if (activeEventKey !== eventKey)

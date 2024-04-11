@@ -5,7 +5,7 @@ import { ToolbarEntity, ToolbarElementEmbedded, ToolbarMenuEntity } from '../Sig
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Entity, MList } from '@framework/Signum.Entities';
 import { parseIcon } from '@framework/Components/IconTypeahead';
-import * as ToolbarClient from '../ToolbarClient';
+import { ToolbarClient } from '../ToolbarClient';
 import SelectorModal from '@framework/SelectorModal';
 import { getTypeInfos, TypeInfo } from '@framework/Reflection';
 import { Finder } from '@framework/Finder';

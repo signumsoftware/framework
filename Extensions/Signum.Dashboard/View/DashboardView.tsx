@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes, getColorContrasColorBWByHex} from '@framework/Globals'
 import { Entity, getToString, toLite, translated } from '@framework/Signum.Entities'
 import { TypeContext, mlistItemContext } from '@framework/TypeContext'
-import * as DashboardClient from '../DashboardClient'
+import { DashboardClient, PanelPartContentProps } from '../DashboardClient'
 import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } from '../Signum.Dashboard'
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
@@ -222,7 +222,7 @@ export function PanelPart(p: PanelPartProps) {
       dashboardController: p.dashboardController,
       cachedQueries: p.cachedQueries,
       customDataRef: customDataRef,
-    } as DashboardClient.PanelPartContentProps<IPartEntity>);
+    } as PanelPartContentProps<IPartEntity>);
   }
 
   const titleText = translated(part, p => p.title) ?? (renderer.defaultTitle ? renderer.defaultTitle(content) : getToString(content));
@@ -284,7 +284,7 @@ export function PanelPart(p: PanelPartProps) {
               dashboardController: p.dashboardController,
               cachedQueries: p.cachedQueries,
               customDataRef: customDataRef,
-            } as DashboardClient.PanelPartContentProps<IPartEntity>)
+            } as PanelPartContentProps<IPartEntity>)
           }
         </ErrorBoundary>
       </div>

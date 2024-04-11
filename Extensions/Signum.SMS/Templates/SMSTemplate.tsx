@@ -5,7 +5,7 @@ import { SMSTemplateEntity, SMSCharactersMessage, SMSTemplateMessageEmbedded, SM
 import { useForceUpdate, useAPI, useThrottle } from '@framework/Hooks';
 import AutoLineModal from '@framework/AutoLineModal';
 import TemplateControls from '../../Signum.Templating/TemplateControls';
-import * as SMSClient from '../SMSClient';
+import { SMSClient } from '../SMSClient';
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions';
 

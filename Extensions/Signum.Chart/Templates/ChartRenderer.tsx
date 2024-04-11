@@ -2,17 +2,16 @@ import * as React from 'react'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { ChartRequestModel} from '../Signum.Chart'
-import * as ChartClient from '../ChartClient'
 
 import "../Chart.css"
-import { ChartRow, extractFindOptions, onDrilldownUserChart } from '../ChartClient';
+import { ChartClient, ChartRow, ChartScriptProps, ChartTable } from '../ChartClient';
 import { ErrorBoundary } from '@framework/Components';
 
 import ReactChart from '../D3Scripts/Components/ReactChart';
 import { useAPI } from '@framework/Hooks'
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController'
 import { toAbsoluteUrl } from '@framework/AppContext'
-import * as UserQueryClient from '../../Signum.UserQueries/UserQueryClient'
+import { UserQueryClient } from '../../Signum.UserQueries/UserQueryClient'
 import { Lite } from '@framework/Signum.Entities'
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { FullscreenComponent } from '@framework/Components/FullscreenComponent'
@@ -22,7 +21,7 @@ export interface ChartRendererProps {
   chartRequest: ChartRequestModel;
   loading: boolean;
 
-  data?: ChartClient.ChartTable;
+  data?: ChartTable;
   lastChartRequest?: ChartRequestModel;
   onReload?: (e?: React.MouseEvent<any>) => void;
   autoRefresh: boolean;
@@ -58,7 +57,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
           onBackgroundClick={p.onBackgroundClick}
           parameters={parameters}
           onReload={p.onReload}
-          onRenderChart={cs.chartComponent as ((p: ChartClient.ChartScriptProps) => React.ReactNode)}
+          onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)}
           minHeight={p.minHeight}
         />
         }
@@ -72,7 +71,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;
 
-  onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
+  ChartClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
     .then(done => {
       if (done == false) {
   if (r.entity) {
@@ -82,7 +81,7 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
       Navigator.view(r.entity)
               .then(() => onReload?.());
   } else {
-          const fo = extractFindOptions(cr, r);
+          const fo = ChartClient.extractFindOptions(cr, r);
     if (newWindow)
       window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
     else

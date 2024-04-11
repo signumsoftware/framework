@@ -4,7 +4,7 @@ import { FormGroup, FormControlReadonly, AutoLine, EntityTable, StyleContext, Op
 import { SearchValue } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { NeuralNetworkSettingsEntity, PredictorEntity, PredictorColumnUsage, PredictorCodificationEntity, NeuralNetworkHidenLayerEmbedded, PredictorAlgorithmSymbol, TensorFlowOptimizer } from '../Signum.MachineLearning'
-import { API } from '../PredictorClient';
+import { PredictorClient } from '../PredictorClient';
 import { is } from '@framework/Signum.Entities';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'

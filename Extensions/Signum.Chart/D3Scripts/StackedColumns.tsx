@@ -1,10 +1,9 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
 import { PivotRow, toPivotTable, groupedPivotTable } from './Components/PivotTable';
-import { ChartTable, ChartColumn } from '../ChartClient';
+import { ChartClient, ChartScriptProps, ChartTable, ChartColumn } from '../ChartClient';
 import { XKeyTicks, YScaleTicks, XTitle } from './Components/Ticks';
 import Legend from './Components/Legend';
 import { XAxis, YAxis } from './Components/Axis';
@@ -14,7 +13,7 @@ import InitialMessage from './Components/InitialMessage';
 import TextIfFits from './Components/TextIfFits';
 
 
-export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderStackedColumns({ data, width, height, parameters, loading, onDrillDown, initialLoad, chartRequest, memo, dashboardFilter }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,

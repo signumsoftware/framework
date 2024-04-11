@@ -4,7 +4,7 @@ import { Lite, is, getToString } from '@framework/Signum.Entities'
 import { NavDropdown } from 'react-bootstrap'
 import { useAPI } from '@framework/Hooks';
 import { IsolationEntity, IsolationMessage } from './Signum.Isolation';
-import * as IsolationClient from './IsolationClient';
+import { IsolationClient } from './IsolationClient';
 
 export default function IsolationDropdown(props: {}) {
 

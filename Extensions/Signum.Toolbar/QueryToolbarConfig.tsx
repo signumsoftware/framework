@@ -4,7 +4,7 @@ import { IsByAll } from '@framework/Reflection'
 import { getToString } from '@framework/Signum.Entities'
 import { Finder } from '@framework/Finder'
 import { QueryEntity } from '@framework/Signum.Basics'
-import { ToolbarResponse } from './ToolbarClient'
+import { ToolbarClient, ToolbarResponse } from './ToolbarClient'
 import { ToolbarConfig, IconColor } from "./ToolbarConfig"
 import { SearchValue, FindOptions } from '@framework/Search';
 import { Navigator } from '@framework/Navigator';

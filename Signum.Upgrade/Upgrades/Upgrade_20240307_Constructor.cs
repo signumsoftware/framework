@@ -22,7 +22,7 @@ public class Upgrade_20240307_Constructor : CodeUpgradeBase
             if (file.FilePath.EndsWith("Constructor.tsx"))
                 return;
 
-            file.ReplaceTypeScriptImports(path => path.EndsWith("/Constructor"), parts =>
+            file.ReplaceAndCombineTypeScriptImports(path => path.EndsWith("/Constructor"), parts =>
             {
                 var ask = parts.Where(a => a.StartsWith("* as ")).ToList();
                 if (ask.Any())

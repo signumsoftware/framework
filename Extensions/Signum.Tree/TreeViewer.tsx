@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { API, TreeNode, TreeNodeState, fixState } from './TreeClient'
+import { TreeClient, TreeNode, TreeNodeState } from './TreeClient'
 import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
@@ -11,7 +11,6 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
-import * as TreeClient from './TreeClient'
 import { FilterOptionParsed, QueryDescription, SubTokensOptions, FilterOption } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
@@ -196,7 +195,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           {this.renderToolbar()}
           <br />
         </>}
-
+        
         {!this.props.showToolbar && this.props.showExpandCollapseButtons && this.renderExpandCollapseButtons()}
 
         <div className="tree-container">
@@ -298,7 +297,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       if (userFilters.length == 0)
         userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });
 
-      return API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes, loadDescendants });
+      return TreeClient.API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes, loadDescendants });
     })
       .then(nodes => {
         const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
@@ -350,7 +349,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         var newNode = toTreeNode(te);
         parent.loadedChildren.push(newNode);
         parent.childrenCount++;
-        fixState(parent);
+        TreeClient.fixState(parent);
         this.selectNode(newNode);
       });
   }

@@ -2,8 +2,8 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Dic, softCast } from '@framework/Globals'
 import { Operations } from '@framework/Operations'
-import * as CultureClient from '@framework/Basics/CultureClient'
-import { API, TranslatedInstanceView, TranslatedInstanceViewType, TranslatedTypeSummary, TranslationRecord } from '../TranslatedInstanceClient'
+import { CultureClient } from '@framework/Basics/CultureClient'
+import { TranslatedInstanceClient } from '../TranslatedInstanceClient'
 import { TranslationMessage } from '../Signum.Translation'
 import { useLocation, useParams } from "react-router";
 import { Link} from "react-router-dom";
@@ -32,7 +32,7 @@ export default function TranslationInstanceView() {
 
   const [filter, setFilter] = React.useState<string | undefined>(() => QueryString.parse(location.search).filter);
 
-  const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
+  const [result, reloadResult] = useAPIWithReload(() => filter == undefined ? Promise.resolve(undefined) : TranslatedInstanceClient.API.viewTranslatedInstanceData(type, culture, filter), [type, culture, filter]);
 
   function renderTable() {
     if (result == undefined || cultures == undefined)
@@ -60,7 +60,7 @@ export default function TranslationInstanceView() {
       const pr = k.tryBefore(";") ?? k;
       const rowId = k.tryAfter(";");
       const cultures = ins.translations[k];
-      return Dic.getKeys(cultures).filter(c => culture == null || culture == c).map(c => softCast<TranslationRecord>({
+      return Dic.getKeys(cultures).filter(c => culture == null || culture == c).map(c => softCast<TranslatedInstanceClient.TranslationRecord>({
         lite: ins.lite,
         propertyRoute: pr,
         rowId: rowId,
@@ -70,7 +70,7 @@ export default function TranslationInstanceView() {
       }));
     }));
 
-    lock(() => API.saveTranslatedInstanceData(records, type, false, culture)
+    lock(() => TranslatedInstanceClient.API.saveTranslatedInstanceData(records, type, false, culture)
       .then(() => { reloadResult(); Operations.notifySuccess(); }));
   }
 
@@ -124,7 +124,7 @@ export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: s
   );
 }
 
-export function TranslatedInstances(p: { data: TranslatedInstanceViewType, cultures: string[], currentCulture?: string | undefined }) {
+export function TranslatedInstances(p: { data: TranslatedInstanceClient.TranslatedInstanceViewType, cultures: string[], currentCulture?: string | undefined }) {
 
 
   return (
@@ -134,7 +134,7 @@ export function TranslatedInstances(p: { data: TranslatedInstanceViewType, cultu
   );
 }
 
-export function TranslatedInstance(p: { ins: TranslatedInstanceView, cultures: string[], currentCulture?: string | undefined, data: TranslatedInstanceViewType }) {
+export function TranslatedInstance(p: { ins: TranslatedInstanceClient.TranslatedInstanceView, cultures: string[], currentCulture?: string | undefined, data: TranslatedInstanceClient.TranslatedInstanceViewType }) {
 
   const ins = p.ins;
   const forceUpdate = useForceUpdate();

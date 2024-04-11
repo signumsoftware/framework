@@ -7,11 +7,14 @@ import { EntityLine } from '@framework/Lines'
 import { EmailMessagePackageMixin, EmailPackageEntity, SendEmailTaskEntity } from './Signum.Mailing.Package'
 import { EmailMessageEntity } from '../Signum.Mailing'
 
-export function start(options: { routes: RouteObject[] }) {
-  Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./EmailPackage')));
-  Navigator.getSettings(EmailMessageEntity)!.overrideView((rep) => {
-    rep.insertAfterLine(e => e.template, ctx => [
-      <EntityLine ctx={ctx.subCtx(EmailMessagePackageMixin).subCtx(e => e.package)} hideIfNull />
-    ]);
-  });
+export namespace EmailPackageClient {
+  
+  export function start(options: { routes: RouteObject[] }) {
+    Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./EmailPackage')));
+    Navigator.getSettings(EmailMessageEntity)!.overrideView((rep) => {
+      rep.insertAfterLine(e => e.template, ctx => [
+        <EntityLine ctx={ctx.subCtx(EmailMessagePackageMixin).subCtx(e => e.package)} hideIfNull />
+      ]);
+    });
+  }
 }

@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { classes } from '@framework/Globals';
 import MessageModal from '@framework/Modals/MessageModal'
 import './ConcurrentUser.css'
-import * as ConcurrentUserClient from './ConcurrentUserClient';
+import { ConcurrentUserClient } from './ConcurrentUserClient';
 import { HubConnectionState } from '@microsoft/signalr'
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
@@ -106,8 +106,7 @@ export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void 
     return () => clearTimeout(handle);
   }, [ticks, p.entity.ticks]);
 
-  console.log("Render", { ticks, entityTicks: p.entity.ticks });
-
+  //console.log("Render", { ticks, entityTicks: p.entity.ticks });
 
   var otherUsers = concurrentUsers?.filter(u => u.connectionID !== conn?.connectionId);
 

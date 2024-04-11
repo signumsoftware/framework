@@ -5,7 +5,7 @@ import { AutoLine, EntityLine } from '@framework/Lines'
 import { Entity, getMixin, is, JavascriptMessage, Lite } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 import { DiffLogMixin, DiffLogMessage } from '../Signum.DiffLog'
-import { API } from '../DiffLogClient'
+import { DiffLogClient } from '../DiffLogClient'
 import { TypeContext } from '@framework/TypeContext'
 import { DiffDocument } from './DiffDocument'
 import { Tabs, Tab } from 'react-bootstrap';
@@ -47,9 +47,9 @@ export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
   var log = p.ctx.value;
   var mixin = getMixin(log, DiffLogMixin);
 
-  const prev = useAPI(() => mixin.initialState.text == null ? Promise.resolve(null) : API.getPreviousOperationLog(log.id!), [log]);  
+  const prev = useAPI(() => mixin.initialState.text == null ? Promise.resolve(null) : DiffLogClient.API.getPreviousOperationLog(log.id!), [log]);  
 
-  const next = useAPI(() => mixin.finalState.text == null ? Promise.resolve(null) : API.getNextOperationLog(log.id!), [log]);  
+  const next = useAPI(() => mixin.finalState.text == null ? Promise.resolve(null) : DiffLogClient.API.getNextOperationLog(log.id!), [log]);  
 
   var mctx = p.ctx.subCtx(DiffLogMixin);
 

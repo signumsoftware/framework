@@ -4,7 +4,7 @@ import * as React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Navigator } from "@framework/Navigator";
 import { IModalProps, openModal } from "@framework/Modals";
-import { API, PredictRequest, PredictOutputTuple, PredictSubQueryTable, AlternativePrediction } from "../PredictorClient";
+import { PredictorClient } from "../PredictorClient";
 import { Lite, Entity, EntityControlMessage, getToString } from "@framework/Signum.Entities";
 import { StyleContext, FormGroup, TypeContext, EntityLine, EntityCombo, AutoLine, EnumLine } from "@framework/Lines";
 import { QueryToken } from "@framework/FindOptions";
@@ -19,7 +19,7 @@ import { AbortableRequest } from "@framework/Services";
 import { NumberBox } from "@framework/Lines/NumberLine";
 
 interface PredictModalProps extends IModalProps<undefined> {
-  initialPredict: PredictRequest;
+  initialPredict: PredictorClient.PredictRequest;
   isClassification: boolean;
   entity?: Lite<Entity>;
 }
@@ -28,9 +28,9 @@ export function PredictModal(p: PredictModalProps) {
 
   const [show, setShow] = React.useState<boolean>(true);
   const [hasChanged, setHasChanged] = React.useState<boolean>(false);
-  const [predict, setPredict] = React.useState<PredictRequest>(p.initialPredict);
+  const [predict, setPredict] = React.useState<PredictorClient.PredictRequest>(p.initialPredict);
 
-  const abortableUpdateRequest = React.useMemo(() => new AbortableRequest((abortController, request: PredictRequest) => API.updatePredict(request)), []);
+  const abortableUpdateRequest = React.useMemo(() => new AbortableRequest((abortController, request: PredictorClient.PredictRequest) => PredictorClient.API.updatePredict(request)), []);
 
   function handleOnClose() {
     setShow(false);
@@ -76,7 +76,7 @@ export function PredictModal(p: PredictModalProps) {
 }
 
 
-PredictModal.show = (predict: PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> => {
+PredictModal.show = (predict: PredictorClient.PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> => {
   return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
 }
 
@@ -109,7 +109,7 @@ export default function PredictLine(p : PredictLineProps){
   function renderValue() {
     if (p.usage == "Output") {
       if (p.hasOriginal) {
-        var tuple = p.binding.getValue() as PredictOutputTuple;
+        var tuple = p.binding.getValue() as PredictorClient.PredictOutputTuple;
 
         const octx = new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.original));
         const pctx = new TypeContext<any>(p.sctx, { readOnly: true }, undefined as any, Binding.create(tuple, a => a.predicted));
@@ -138,7 +138,7 @@ export default function PredictLine(p : PredictLineProps){
     if (!Array.isArray(pctx.value)) {
       return <PredictValue token={p.token} ctx={pctx} label={<FontAwesomeIcon icon={["far", "lightbulb"]} color={getColor(pctx.value, originalValue)} />} />
     } else {
-      const predictions = pctx.value as AlternativePrediction[];
+      const predictions = pctx.value as PredictorClient.AlternativePrediction[];
       const numberFormat = toNumberFormat("P2");
       return (
         <div>
@@ -166,7 +166,7 @@ export default function PredictLine(p : PredictLineProps){
 
 interface PredictTableProps {
   sctx: StyleContext;
-  table: PredictSubQueryTable;
+  table: PredictorClient.PredictSubQueryTable;
   hasChanged: boolean;
   hasOriginal: boolean;
   onChange: () => void;

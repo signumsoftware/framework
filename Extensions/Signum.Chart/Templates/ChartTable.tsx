@@ -3,8 +3,7 @@ import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import { ResultTable, ColumnOptionParsed, OrderOptionParsed, OrderType, ResultRow, hasAggregate, ColumnOption, FilterOptionParsed, withoutAggregate } from '@framework/FindOptions'
 import { ChartRequestModel, ChartColumnEmbedded } from '../Signum.Chart'
-import * as ChartClient from '../ChartClient'
-import { ChartRow } from '../ChartClient';
+import { ChartClient, ChartRow } from '../ChartClient';
 import { ChartColumn } from './ChartColumn';
 import { TypeInfo } from '@framework/Reflection'
 import { toAbsoluteUrl } from '@framework/AppContext'

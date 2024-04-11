@@ -10,8 +10,8 @@ import { SearchValue, FindOptions, SearchValueLine } from '@framework/Search'
 import EntityLink from '@framework/SearchControl/EntityLink'
 import { QueryEntitiesRequest } from '@framework/FindOptions'
 import { getQueryNiceName, QueryTokenString } from '@framework/Reflection'
-import { API, CompilationError, EvalEntityError, Options } from './EvalClient'
-import * as AuthClient from '../Signum.Authorization/AuthClient'
+import { EvalClient } from './EvalClient'
+import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { useLocation, useParams } from "react-router";
 import { Tab, Tabs } from 'react-bootstrap';
 import { FormGroup } from '@framework/Lines';
@@ -62,7 +62,7 @@ export function SearchPanel(props: {}) {
   const [search, setSearch] = React.useState("");
   var sc = new StyleContext(undefined, { labelColumns: 3 });
 
-  const elements = Options.onGetDynamicPanelSearch.map(f => f(sc, search));
+  const elements = EvalClient.Options.onGetDynamicPanelSearch.map(f => f(sc, search));
 
   return (
     <div>
@@ -91,7 +91,7 @@ export function CheckEvalsStep() {
   var ctx = new StyleContext(undefined, {});
   return (
     <div>
-      {Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
+      {EvalClient.Options.checkEvalFindOptions.map((fo, i) => <CheckEvalType key={i} ctx={ctx} findOptions={fo} autoStart={autoStart} />)}
       <button className="btn btn-success" onClick={handleOnClick}><FontAwesomeIcon icon="arrows-rotate" /> Refresh all</button>
     </div>
   );
@@ -106,7 +106,7 @@ interface CheckEvalTypeProps {
 
 interface CheckEvalTypeState {
   state: "initial" | "loading" | "success" | "failed";
-  errors?: EvalEntityError[];
+  errors?: EvalClient.EvalEntityError[];
 }
 
 
@@ -132,7 +132,7 @@ export function CheckEvalType(p: CheckEvalTypeProps) {
           orders: [{ token: QueryTokenString.entity().append(e => e.id).toString(), orderType: "Ascending" }],
           count: 10000,
         } as QueryEntitiesRequest;
-        API.getEvalErrors(request)
+        EvalClient.API.getEvalErrors(request)
           .then(errors => setState({ state: "success", errors: errors }),
             e => {
               setState({ state: "failed", errors: undefined });

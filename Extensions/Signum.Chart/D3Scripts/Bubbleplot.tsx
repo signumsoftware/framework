@@ -1,9 +1,8 @@
 import * as React from 'react'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartRow } from '../ChartClient';
 import { XScaleTicks, YScaleTicks } from './Components/Ticks';
 import { XAxis, YAxis } from './Components/Axis';
 import TextEllipsis from './Components/TextEllipsis';
@@ -11,7 +10,7 @@ import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 
 
-export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderBubbleplot({ data, width, height, parameters, loading, onDrillDown, initialLoad, memo, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
   var xRule = Rule.create({
     _1: 5,
@@ -49,10 +48,10 @@ export default function renderBubbleplot({ data, width, height, parameters, load
     );
 
   var keyColumn = data.columns.c0!;
-  var horizontalColumn = data.columns.c1! as ChartClient.ChartColumn<number>;
-  var verticalColumn = data.columns.c2 as ChartClient.ChartColumn<number>;
-  var sizeColumn = data.columns.c3 as ChartClient.ChartColumn<number>;
-  var colorScaleColumn = data.columns.c4 as ChartClient.ChartColumn<number> | undefined;
+  var horizontalColumn = data.columns.c1! as ChartColumn<number>;
+  var verticalColumn = data.columns.c2 as ChartColumn<number>;
+  var sizeColumn = data.columns.c3 as ChartColumn<number>;
+  var colorScaleColumn = data.columns.c4 as ChartColumn<number> | undefined;
   var colorSchemeColumn = data.columns.c5;
 
   var x = scaleFor(horizontalColumn, data.rows.map(r => horizontalColumn.getValue(r)), 0, xRule.size('content'), parameters["HorizontalScale"]);
@@ -83,7 +82,7 @@ export default function renderBubbleplot({ data, width, height, parameters, load
 
   var sizeScale = scaleFor(sizeColumn, sizeList, 0, (xRule.size('content') * yRule.size('content')) / (totalSizeTemp * 3), parameters["SizeScale"]);
 
-  var keyColumns: ChartClient.ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
+  var keyColumns: ChartColumn<any>[] = data.columns.entity ? [data.columns.entity] :
     [keyColumn, horizontalColumn, verticalColumn].filter(a => a.token && a.token.queryTokenType != "Aggregate")
 
   var detector = ChartClient.getActiveDetector(dashboardFilter, chartRequest);

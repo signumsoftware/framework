@@ -4,6 +4,7 @@ import * as AppContext from '../AppContext';
 import { Navigator, ViewPromise } from '../Navigator';
 import { Link } from 'react-router-dom';
 import { StyleContext } from "../Lines";
+import { classes } from "../Globals";
 
 export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement> {
   lite: Lite<Entity>;
@@ -15,6 +16,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
   stopPropagation?: boolean;
   extraProps?: any;
   extraQuery?: string;
+  shy?: boolean
 }
 
 export default function EntityLink(p: EntityLinkProps) {
@@ -33,7 +35,7 @@ export default function EntityLink(p: EntityLinkProps) {
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}
-      className={settings?.allowWrapEntityLink ? undefined : "try-no-wrap"}
+      className={classes(settings?.allowWrapEntityLink ? undefined : "try-no-wrap", p.shy ? "sf-shy-link" : null)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >

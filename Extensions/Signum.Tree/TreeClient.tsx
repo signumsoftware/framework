@@ -18,10 +18,12 @@ import { toLite } from "@framework/Signum.Entities";
 import { SearchControlLoaded } from "@framework/Search";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
-import * as DashboardClient from '../Signum.Dashboard/DashboardClient'
-import * as UserQueryClient from '../Signum.UserQueries/UserQueryClient'
+import { DashboardClient } from '../Signum.Dashboard/DashboardClient'
+import { UserQueryClient } from '../Signum.UserQueries/UserQueryClient'
 import { DisabledMixin } from '@framework/Signum.Basics';
 
+export namespace TreeClient {
+  
 export function start(options: { routes: RouteObject[] }) {
   options.routes.push({ path: "/tree/:typeName", element: <ImportComponent onImport={() => import("./TreePage")} /> });
 
@@ -220,18 +222,6 @@ export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSetti
 }
 
 
-export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
-
-export interface TreeNode {
-  lite: Lite<TreeEntity>;
-  name: string;
-  fullName: string;
-  disabled: boolean;
-  childrenCount: number;
-  level: number;
-  loadedChildren: Array<TreeNode>;
-  nodeState: TreeNodeState;
-}
 
 export function fixState(node: TreeNode) {
 
@@ -263,6 +253,21 @@ export namespace API {
     expandedNodes: Array<Lite<TreeEntity>>;
     loadDescendants: boolean;
   }
+}
+
+}
+
+export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
+
+export interface TreeNode {
+  lite: Lite<TreeEntity>;
+  name: string;
+  fullName: string;
+  disabled: boolean;
+  childrenCount: number;
+  level: number;
+  loadedChildren: Array<TreeNode>;
+  nodeState: TreeNodeState;
 }
 
 declare module '@framework/SearchControl/SearchControlLoaded' {

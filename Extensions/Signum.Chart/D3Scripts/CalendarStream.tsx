@@ -1,10 +1,9 @@
 import * as React from 'react'
 import { DateTime, Settings } from 'luxon'
 import * as d3 from 'd3'
-import * as ChartClient from '../ChartClient';
+import { ChartClient, ChartColumn, ChartRow, ChartScriptProps, ChartTable } from '../ChartClient';
 import * as ChartUtils from './Components/ChartUtils';
 import { translate, scale, rotate, skewX, skewY, matrix, scaleFor } from './Components/ChartUtils';
-import { ChartRow } from '../ChartClient';
 import { Rule } from './Components/Rule';
 import InitialMessage from './Components/InitialMessage';
 import { MemoRepository } from './Components/ReactChart';
@@ -12,7 +11,7 @@ import { ChartRequestModel } from '../Signum.Chart';
 import { DashboardFilter } from '../../Signum.Dashboard/View/DashboardFilterController';
 
 
-export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartClient.ChartScriptProps): React.ReactElement<any> {
+export default function renderCalendarStream({ data, width, height, parameters, loading, onDrillDown, initialLoad, dashboardFilter, chartRequest }: ChartScriptProps): React.ReactElement<any> {
 
   if (data == null || data.rows.length == 0)
     return (
@@ -21,8 +20,8 @@ export default function renderCalendarStream({ data, width, height, parameters, 
       </svg>
     );
 
-  var dateColumn = data.columns.c0! as ChartClient.ChartColumn<string>;
-  var valueColumn = data.columns.c1 as ChartClient.ChartColumn<number>;
+  var dateColumn = data.columns.c0! as ChartColumn<string>;
+  var valueColumn = data.columns.c1 as ChartColumn<number>;
 
   var monday = parameters["StartDate"] == "Monday"
 
@@ -154,7 +153,7 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
   year: number;
   rowByDate: { [date: string] : ChartRow }
   rules: Rules;
-  data?: ChartClient.ChartTable;
+  data?: ChartTable;
   onDrillDown: (row: ChartRow, e: React.MouseEvent<any> | MouseEvent) => void;
   width: number;
   height: number;
@@ -162,7 +161,7 @@ export function CalendarYear({ year, rules, rowByDate, width, height, onDrillDow
   isHorizontal: boolean;
   transform: string; 
   monday: boolean;
-  valueColumn: ChartClient.ChartColumn<number>
+  valueColumn: ChartColumn<number>
   color: (cr: ChartRow) => string;
   dashboardFilter?: DashboardFilter,
   chartRequest: ChartRequestModel
