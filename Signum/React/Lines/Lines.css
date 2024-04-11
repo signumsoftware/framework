@@ -505,6 +505,9 @@ ul.dropdown-menu > li > a.disabled {
     opacity: .65;
 }
 
+.sticky-top {
+    z-index: 900; /*Avoid wining over dropdown-menu*/
+}
 
 .help-block {
     display: block;
