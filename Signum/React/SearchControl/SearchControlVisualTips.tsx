@@ -12,6 +12,7 @@ import { JavascriptMessage, SearchMessage } from "../Signum.Entities";
 import { OverlayInjectedProps } from "react-bootstrap/esm/Overlay";
 import { QueryDescription } from "../FindOptions";
 import { getNiceTypeName } from "../Operations/MultiPropertySetter";
+import SearchControl from "./SearchControl";
 
 export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInjectedProps }) {
   var sc = p.sc;
@@ -118,7 +119,7 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
         <div className="my-2">You are editing a column, let me explain what each field does:</div>
         <ul>
           <li>
-            <strong>{FilterFieldMessage.Field.niceToString()}: </strong>          
+            <strong>{SearchMessage.ColumnField.niceToString()}: </strong>          
             {!isDefaultQuery && ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity.niceToString().formatHtml(<strong>{getQueryNiceName(p.queryDescription.queryKey)}</strong>, <strong>{type}</strong>)}
             {isDefaultQuery && ColumnFieldMessage.YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity.niceToString().formatHtml(<strong>{type}</strong>)}
             <LearnMoreAboutFieldExpressions expanded={expressionExpanded} onSetExpanded={setExpressionExpanded} showAny={false} />

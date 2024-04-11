@@ -57,7 +57,7 @@ export default function ColumnsBuilder(p: ColumnsBuilderProps) {
           <thead>
             <tr>
               <th style={{ minWidth: "24px" }}></th>
-              <th>{SearchMessage.Field.niceToString()}</th>
+              <th>{SearchMessage.ColumnField.niceToString()}</th>
             </tr>
           </thead>
           <tbody>
