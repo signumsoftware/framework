@@ -15,6 +15,7 @@ public class UserAssetPreviewLineEmbedded : EmbeddedEntity
     public TypeEntity? Type { get; set; }
 
     public string Text { get; set; }
+
     public TypeEntity? EntityType { get; set; }
 
     public EntityAction Action { get; set; }
