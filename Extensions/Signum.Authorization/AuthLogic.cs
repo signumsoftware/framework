@@ -44,6 +44,10 @@ public static class AuthLogic
     public static IQueryable<UserEntity> Users(this RoleEntity r) =>
         As.Expression(() => Database.Query<UserEntity>().Where(u => u.Role.Is(r)));
 
+    [AutoExpressionField]
+    public static IQueryable<RoleEntity> UsedByRoles(this RoleEntity r) =>
+        As.Expression(() => Database.Query<RoleEntity>().Where(u => u.InheritsFrom.Contains(r.ToLite())));
+
     static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesGraph = null!;
     static ResetLazy<DirectedGraph<Lite<RoleEntity>>> rolesInverse = null!;
     static ResetLazy<FrozenDictionary<string, Lite<RoleEntity>>> rolesByName = null!;
@@ -93,6 +97,8 @@ public static class AuthLogic
                   e.State,
                   e.CultureInfo,
               });
+
+            QueryLogic.Expressions.Register((RoleEntity r) => r.UsedByRoles(), AuthAdminMessage.UsedByRoles);
 
             sb.Include<RoleEntity>()
                 .WithSave(RoleOperation.Save)
