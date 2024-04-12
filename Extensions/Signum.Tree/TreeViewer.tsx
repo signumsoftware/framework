@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TreeClient, TreeNode, TreeNodeState } from './TreeClient'
 import { classes } from '@framework/Globals'
@@ -35,6 +36,7 @@ interface TreeViewerProps {
   filterOptions?: (FilterOption | null | undefined)[];
   initialShowFilters?: boolean;
   showToolbar?: boolean;
+  showExpandCollapseButtons?: boolean;
   deps?: React.DependencyList;
 }
 
@@ -194,6 +196,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           <br />
         </>}
         
+        {!this.props.showToolbar && this.props.showExpandCollapseButtons && this.renderExpandCollapseButtons()}
+
         <div className="tree-container">
           <ul>
             {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
@@ -281,7 +285,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
 
-  search(clearExpanded: boolean) {
+  search(clearExpanded: boolean, loadDescendants: boolean = false) {
     this.getFilterOptionsWithSFB().then(filters => {
       let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
         this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
@@ -293,12 +297,13 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       if (userFilters.length == 0)
         userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });
 
-      return TreeClient.API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes });
+      return TreeClient.API.findNodes(this.props.typeName, { userFilters, frozenFilters, expandedNodes, loadDescendants });
     })
       .then(nodes => {
         const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
         var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
         this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
+        this.forceUpdate();
 
         if (this.props.onSearch)
           this.props.onSearch();
@@ -411,6 +416,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           onClick={this.handleToggleFilters}
           title={s.showFilters ? JavascriptMessage.hideFilters.niceToString() : JavascriptMessage.showFilters.niceToString()}><FontAwesomeIcon icon="filter" /></a>
         <button className="btn btn-primary" onClick={this.handleSearchSubmit}>{JavascriptMessage.search.niceToString()}</button>
+        {this.props.showExpandCollapseButtons && <button className="btn btn-light" onClick={this.handleExpandAll} disabled={s.treeNodes == null}>{TreeViewerMessage.ExpandAll.niceToString()}</button>}
+        {this.props.showExpandCollapseButtons && <button className="btn btn-light" onClick={this.handleCollapseAll} disabled={s.treeNodes == null}>{TreeViewerMessage.CollapseAll.niceToString()}</button>}
         {tryGetOperationInfo(TreeOperation.CreateRoot, this.props.typeName) && <button className="btn btn-light" onClick={this.handleAddRoot} disabled={s.treeNodes == null} > <FontAwesomeIcon icon="star" />&nbsp;{TreeViewerMessage.AddRoot.niceToString()}</button>}
         <Dropdown
           onToggle={this.handleSelectedToggle}
@@ -429,6 +436,30 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {TreeMessage.ListView.niceToString()}</button>
       </div>
     );
+  }
+
+  renderExpandCollapseButtons() {
+    const s = this.state;
+
+    return (
+      <div className="btn-toolbar">
+        <button className="btn btn-sm btn-light" onClick={this.handleExpandAll} disabled={s.treeNodes == null} title={TreeViewerMessage.ExpandAll.niceToString()}>
+          <FontAwesomeIcon icon="plus" />
+        </button>
+
+        <button className="btn btn-sm btn-light" onClick={this.handleCollapseAll} disabled={s.treeNodes == null} title={TreeViewerMessage.CollapseAll.niceToString()}>
+          <FontAwesomeIcon icon="minus" />
+        </button>
+      </div>
+    );
+  }
+
+  handleExpandAll = () => {
+    this.search(true, true);
+  }
+
+  handleCollapseAll = () => {
+    this.search(true);
   }
 
   handleSelectedToggle = () => {
@@ -579,6 +610,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
   return {
     lite: toLite(treeEntity),
     name: treeEntity.name!,
+    fullName: treeEntity.fullName,
     childrenCount: 0,
     disabled: dm != null && Boolean(dm.isDisabled),
     level: 0,
@@ -636,7 +668,14 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
             onDoubleClick={e => tv.handleNodeTextDoubleClick(node, e)}
             onClick={() => tv.handleNodeTextClick(node)}
             onContextMenu={tv.props.showContextMenu != false ? e => tv.handleNodeTextContextMenu(node, e) : undefined}>
-            {node.name}
+            {node.fullName != node.name ? <OverlayTrigger
+              overlay={
+                <Tooltip>
+                  <span>{node.fullName}</span>
+                </Tooltip>
+              }>
+              <span>{node.name}</span>
+            </OverlayTrigger> : node.name} 
           </span>
         </div>
 

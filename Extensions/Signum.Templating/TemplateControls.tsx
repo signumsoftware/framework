@@ -97,7 +97,7 @@ export default function TemplateControls(p: TemplateControlsProps) {
 
   return (
     <div className="d-flex">
-      <select className="form-select form-select-sm w-auto" onChange={(e: React.FormEvent<any>) => setCurrentToken({ type: (e.currentTarget as HTMLSelectElement).value as "Query" | "Global" })} >
+      <select className="form-select form-select-sm w-auto" value={currentToken?.type} onChange={e => setCurrentToken({ type: e.currentTarget.value as "Query" | "Global" })} >
         {p.queryKey && <option value="Query">Query</option>}
         <option value="Global">Global</option>
       </select>

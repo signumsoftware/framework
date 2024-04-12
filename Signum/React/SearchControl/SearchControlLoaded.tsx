@@ -528,6 +528,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <div onKeyUp={this.handleFiltersKeyUp}>
             {
               this.state.filterMode != 'Simple' ? <FilterBuilder
+                title={SearchMessage.Filters.niceToString()}
                 queryDescription={qd}
                 filterOptions={fo.filterOptions}
                 lastToken={this.state.lastToken}
@@ -661,7 +662,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       {
         order: -3,
-        button: < button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))}
+        button: <button className={classes("sf-query-button sf-search btn ms-2", changesExpected ? (isManualOrAll ? "btn-danger" : "btn-primary") : (isManualOrAll ? "border-danger text-danger btn-light" : "border-primary text-primary btn-light"))}
           onClick={this.handleSearchClick} title={changesExpected ? SearchMessage.Search.niceToString() : SearchMessage.Refresh.niceToString()} >
           <FontAwesomeIcon icon={changesExpected ? "magnifying-glass" : "refresh"} />{changesExpected && <span className="d-none d-sm-inline ms-1">{SearchMessage.Search.niceToString()}</span>}
         </button>
@@ -1714,6 +1715,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             mark?.status == "Muted" ? "text-muted" :
               undefined;
 
+
+      const selected = this.state.selectedRows?.contains(row);
+
       var ra = this.getRowAttributes(row);
 
       function equals(a: unknown, b: unknown) {
@@ -1743,7 +1747,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <tr key={i} data-row-index={i} data-entity={row.entity && liteKey(row.entity)}
           onDoubleClick={e => this.handleDoubleClick(e, row, resultTable.columns)}
           {...ra}
-          className={classes(markClassName, ra?.className)}>
+          className={classes(markClassName, ra?.className, selected && "sf-row-selected")}>
           {this.props.allowSelection &&
             <td className="centered-cell">
               {this.props.selectionFormatter ? this.props.selectionFormatter(this, row, i) :
@@ -2176,7 +2180,7 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
   var filterMode = p.sc.state.filterMode;
   const active = filterMode == "Advanced" || filterMode == "Pinned";
   return (
-    <Dropdown as={ButtonGroup}>
+    <Dropdown as={ButtonGroup} title={SearchMessage.Filters.niceToString()}>
       <Button variant="light" id="" className="sf-filter-button" active={active} onClick={e => p.sc.handleChangeFiltermode(active ? 'Simple' : 'Advanced')}>
         <FontAwesomeIcon icon="filter" />
       </Button>
@@ -2191,16 +2195,5 @@ function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boole
     </Dropdown>
   );
 }
-
-const EllipseToggle = React.forwardRef(function EllipseToggle(p: { children?: React.ReactNode, onClick?: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
-  return (
-    <a className="sf-query-button btn btn-light" style={{ height: '100%' }} ref={ref}
-      href=""
-      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      <FontAwesomeIcon icon="filter" />
-      {p.children}
-    </a>
-  );
-});
 
 export default SearchControlLoaded;

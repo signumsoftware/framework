@@ -163,7 +163,7 @@ public static class AuthLogic
             return roles.SingleEx();
 
         var flatRoles = roles
-            .Select(a => RolesByLite.Value.GetOrThrow(a))
+            .Select(a => RolesByLite.Value.TryGetC(a) ?? a.EntityOrNull ?? a.Retrieve())
             .ToList()
             .SelectMany(a => a.IsTrivialMerge ? a.InheritsFrom.ToArray() : new[] { a.ToLite() })
             .Distinct()

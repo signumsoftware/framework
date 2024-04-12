@@ -29,6 +29,7 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
       typeName={ti.name}
       allowMove={tryGetOperationInfo(TreeOperation.Move, ti) !== null}
       filterOptions={fo.filterOptions}
+      showExpandCollapseButtons={true}
       key={ti.name}
     />
   );

@@ -9,7 +9,7 @@ using Signum.UserAssets.Queries;
 namespace Signum.Dashboard;
 
 [EntityKind(EntityKind.Main, EntityData.Master)]
-public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
+public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEntity
 {
     public DashboardEntity()
     {
@@ -59,6 +59,17 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
     public string? Key { get; set; }
 
     public bool HideQuickLink { get; set; }
+
+    [StringLengthValidator(Min = 3, Max = 100)]
+    public string? IconName { get; set; }
+
+    [StringLengthValidator(Min = 3, Max = 20)]
+    [Format(FormatAttribute.Color)]
+    public string? IconColor { get; set; }
+
+    [StringLengthValidator(Min = 3, Max = 20)]
+    [Format(FormatAttribute.Color)]
+    public string? TitleColor { get; set; }
 
     [AutoExpressionField]
     public bool ContainsContent(IPartEntity content) => 
@@ -166,6 +177,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
+            IconName == null ? null! : new XAttribute("IconName", IconName),
+            IconColor == null ? null! : new XAttribute("IconColor", IconColor),
+            TitleColor == null ? null! : new XAttribute("TitleColor", TitleColor),
             CacheQueryConfiguration?.ToXml(ctx),
             new XElement("Parts", Parts.Select(p => p.ToXml(ctx))),
             new XElement(nameof(TokenEquivalencesGroups), TokenEquivalencesGroups.Select(teg => teg.ToXml(ctx)))
@@ -182,6 +196,9 @@ public class DashboardEntity : Entity, IUserAssetEntity, ITaskEntity
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
+        IconName = element.Attribute("IconName")?.Value;
+        IconColor = element.Attribute("IconColor")?.Value;
+        TitleColor = element.Attribute("TitleColor")?.Value; 
         CacheQueryConfiguration = CacheQueryConfiguration.CreateOrAssignEmbedded(element.Element(nameof(CacheQueryConfiguration)), (cqc, elem) => cqc.FromXml(elem));
         Parts.Synchronize(element.Element("Parts")!.Elements().ToList(), (pp, x) => pp.FromXml(x, ctx));
         TokenEquivalencesGroups.Synchronize(element.Element(nameof(TokenEquivalencesGroups))?.Elements().ToList() ?? new List<XElement>(), (teg, x) => teg.FromXml(x, ctx));

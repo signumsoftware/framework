@@ -17,6 +17,10 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
+    [StringLengthValidator(Min = 3, Max = 20)]
+    [Format(FormatAttribute.Color)]
+    public string? TitleColor { get; set; }
+
     [NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 0)]
     public int Row { get; set; }
 
@@ -30,8 +34,6 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
 
     [Format(FormatAttribute.Color)]
     public string? CustomColor { get; set; }
-
-    public bool UseIconColorForTitle { get; set; }
 
     [BindParent]
     [ImplementedBy(
@@ -70,8 +72,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             InteractionGroup = InteractionGroup,
             IconColor = IconColor,
             IconName = IconName,
+            TitleColor = TitleColor,
             CustomColor = CustomColor,
-            UseIconColorForTitle = UseIconColorForTitle,
         };
     }
 
@@ -90,9 +92,9 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
             Title == null ? null! : new XAttribute("Title", Title),
             IconName == null ? null! : new XAttribute("IconName", IconName),
             IconColor == null ? null! : new XAttribute("IconColor", IconColor),
+            TitleColor == null ? null! : new XAttribute("TitleColor", TitleColor),
             InteractionGroup == null ? null! : new XAttribute("InteractionGroup", InteractionGroup),
             string.IsNullOrEmpty(CustomColor) ? null! : new XAttribute("CustomColor", CustomColor),
-            UseIconColorForTitle == false ? null! : new XAttribute("UseIconColorForTitle", true),
             Content.ToXml(ctx));
     }
 
@@ -104,9 +106,9 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
         Title = x.Attribute("Title")?.Value;
         IconName = x.Attribute("IconName")?.Value;
         IconColor = x.Attribute("IconColor")?.Value;
+        TitleColor = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value) ? IconColor : null) ?? x.Attribute("TitleColor")?.Value;
         InteractionGroup = x.Attribute("InteractionGroup")?.Value.ToEnum<InteractionGroup>();
         CustomColor = x.Attribute("CustomColor")?.Value;
-        UseIconColorForTitle = x.Attribute("UseIconColorForTitle")?.Let(a => bool.Parse(a.Value)) ?? false;
         Content = DashboardLogic.GetPart(ctx, Content, x.Elements().Single());
     }
 
