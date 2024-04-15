@@ -15,7 +15,7 @@ import { getAllTypes, getTypeInfo } from "@framework/Reflection";
 import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
 import { toLite } from "@framework/Signum.Entities";
-import { FindOptions, FindOptionsParsed, Pagination, SearchControlLoaded } from "@framework/Search";
+import { FindOptions, FindOptionsParsed, Pagination, ResultTable, SearchControlLoaded } from "@framework/Search";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 import { DashboardClient } from '../Signum.Dashboard/DashboardClient'
@@ -126,7 +126,8 @@ export namespace TreeClient {
     if (to.columnOptions)
       Finder.Encoder.encodeColumns(query, to.columnOptions.notNull());
 
-    return "/tree/" + to.typeName + "?" + QueryString.stringify(query);
+    const qs = QueryString.stringify(query);
+    return "/tree/" + to.typeName + (qs && "?") + qs;
   }
 
   export function toFindOptions(to: TreeOptions): FindOptions {
@@ -297,8 +298,11 @@ export namespace TreeClient {
       return ajaxGet({ url: `/api/tree/findLiteLikeByName/${typeName}/${subString}/${count}`, signal: abortSignal });
     }
 
-    export function findNodes(typeName: string, request: FindNodesRequest): Promise<Array<TreeNode>> {
-      return ajaxPost<Array<TreeNode>>({ url: `/api/tree/findNodes/${typeName}` }, request).then(ns => fixNodes(ns));
+    export function findNodes(typeName: string, request: FindNodesRequest): Promise<FindNodesResponse> {
+      return ajaxPost<FindNodesResponse>({ url: `/api/tree/findNodes/${typeName}` }, request).then(response => {
+        fixNodes(response.nodes);
+        return response;
+      });
     }
 
     export interface FindNodesRequest {
@@ -307,6 +311,11 @@ export namespace TreeClient {
       columns: Array<ColumnRequest>;
       expandedNodes: Array<Lite<TreeEntity>>;
       loadDescendants: boolean;
+    }
+
+    export interface FindNodesResponse {
+      columns: string[];
+      nodes: TreeNode[];
     }
   }
 
@@ -327,7 +336,7 @@ export interface TreeOptionsParsed {
 export type TreeNodeState = "Collapsed" | "Expanded" | "Filtered" | "Leaf";
 
 export interface TreeNode {
-  row: ResultRow;
+  values: any[];
   lite: Lite<TreeEntity>;
   name: string;
   fullName: string;

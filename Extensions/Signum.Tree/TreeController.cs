@@ -35,13 +35,19 @@ public class TreeController : ControllerBase
     }
 
     [HttpPost("api/tree/findNodes/{typeName}")]
-    public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
+    public FindNodesResponse FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
 
         Type type = TypeLogic.GetType(typeName);
 
-        var list =  giFindNodesGeneric.GetInvoker(type)(request);
+        var list = giFindNodesGeneric.GetInvoker(type)(request);
 
-        return ToTreeNodes(list);
+        var nodes = ToTreeNodes(list);
+
+        return new FindNodesResponse()
+        {
+            columns = request.columns.Select(c => RebaseToken(c.token, "Entity.Ascendants.Element")).ToList(),
+            nodes = nodes,
+        };
     }
 
     public class FindNodesRequest
@@ -51,6 +57,12 @@ public class TreeController : ControllerBase
         public List<ColumnTS> columns;
         public List<Lite<TreeEntity>> expandedNodes;
         public bool loadDescendants;
+    }
+
+    public class FindNodesResponse
+    {
+        public List<string> columns { get; set; }
+        public List<TreeNode> nodes { get; set; }
     }
 
     static GenericInvoker<Func<FindNodesRequest, List<ResultRow>>> giFindNodesGeneric =
@@ -84,24 +96,45 @@ public class TreeController : ControllerBase
             return r;
         }).ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
 
-        var list = QueryLogic.Queries.ExecuteQuery(qrFiltered).Rows?.ToList() ?? new();
+        var result = new List<ResultRow>();
 
-        var listDescendants = new List<ResultRow>();
+        result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFiltered).Rows?.ToList() ?? new());
+
         if (request.loadDescendants)
-            listDescendants.AddRange(QueryLogic.Queries.ExecuteQuery(qrFilteredDesc).Rows?.ToList() ?? new());
+            result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFilteredDesc).Rows?.ToList() ?? new());
 
-        var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<ResultRow>() :
-            QueryLogic.Queries.ExecuteQuery(qrFrozen).Rows?.ToList() ?? new();
+        if (!request.expandedNodes.IsNullOrEmpty())
+        {
+            result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFrozen).Rows?.ToList() ?? new());
 
-        var expandedChildrenDescendants = new List<ResultRow>();
+            if (request.loadDescendants)
+                result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFrozenDesc).Rows?.ToList() ?? new());
+        }
+
+        return result;
+
+        /*
+        var result = new List<ResultTable>();
+        result.Add(QueryLogic.Queries.ExecuteQuery(qrFiltered));
+
         if (request.loadDescendants)
-            expandedChildrenDescendants.AddRange(request.expandedNodes.IsNullOrEmpty() ? new List<ResultRow>() :
-                       QueryLogic.Queries.ExecuteQuery(qrFrozenDesc).Rows?.ToList() ?? new());
+            result.Add(QueryLogic.Queries.ExecuteQuery(qrFilteredDesc));
 
-        return list.Concat(listDescendants)
-            .Concat(expandedChildren)
-            .Concat(expandedChildrenDescendants)
-            .ToList();
+        if (!request.expandedNodes.IsNullOrEmpty()) {
+            result.Add(QueryLogic.Queries.ExecuteQuery(qrFrozen));
+
+            if (request.loadDescendants)
+                result.Add(QueryLogic.Queries.ExecuteQuery(qrFrozenDesc));
+        }
+
+        return result;
+        */
+    }
+
+    static string RebaseToken(string token, string prefix)
+    {
+        var _token = token.TryAfter("Entity.") ?? token;
+        return $"{prefix}.{_token}";
     }
 
     static QueryRequestTS RebaseRequest<T>(FindNodesRequest request, string prefix) where T : TreeEntity
@@ -113,8 +146,8 @@ public class TreeController : ControllerBase
             columns = (new List<ColumnTS>() { new ColumnTS() { token = $"{prefix}.TreeInfo", displayName = TreeMessage.TreeInfo.NiceToString() } })
                 .Concat(request.columns.Select(c =>
                 {
-                    var token = c.token.TryAfter("Entity.") ?? c.token;
-                    return new ColumnTS() { token = $"{prefix}.{token}", displayName = c.displayName };
+                    var token = RebaseToken(c.token, prefix);
+                    return new ColumnTS() { token = token, displayName = c.displayName };
                 }))
                 .ToList(),
             filters = request.userFilters.Concat(request.frozenFilters).ToList(),
@@ -144,7 +177,7 @@ public class TreeNode
     internal TreeNode(Node<ResultRow> node)
     {
         var ti = (TreeInfo)node.Value[0]!;
-        this.row = node.Value;
+        this.values = node.Value.GetValues(node.Value.Table.Columns).Skip(1).ToArray();
         this.name = ti.name;
         this.fullName = ti.fullName;
         this.lite = ti.lite;
@@ -154,7 +187,7 @@ public class TreeNode
         this.level = ti.level;
     }
 
-    public ResultRow row { get; set; }
+    public object?[] values { get; set; }
     public string name { set; get; }
     public string fullName { get; set; }
     public Lite<TreeEntity> lite { set; get; }

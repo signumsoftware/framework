@@ -89,6 +89,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
+    debugger;
     var path = TreeClient.treePath(newProps.treeOptions);
     if (path == TreeClient.treePath(this.props.treeOptions)) {
       this.searchIfDeps(newProps);
@@ -224,7 +225,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   renderRows = () => {
-    debugger;
     return !this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
       this.state.treeNodes.map((node, i) =>
         <TreeNodeControl key={i} treeViewer={this} treeNode={node} dropDisabled={node == this.state.draggedNode} />);
@@ -316,19 +316,19 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
         this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
 
-      debugger;
       const userFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == false));
       const frozenFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == true));
 
       const qr = this.getQueryRequest();
-      const columns = qr.columns;
+      const columns = qr.columns.distinctBy(c => c.token); 
 
       if (userFilters.length == 0)
         userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });
 
       return TreeClient.API.findNodes(this.props.treeOptions.typeName, { userFilters, frozenFilters, columns, expandedNodes, loadDescendants });
     })
-      .then(nodes => {
+      .then(response => {
+        const nodes = response.nodes;
         const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
         var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
         this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
@@ -502,9 +502,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   handleExplore = (e: React.MouseEvent<any>) => {
-    debugger;
     const fop = TreeClient.toFindOptionsParsed(this.state.treeOptionsParsed!);
     const fo = Finder.toFindOptions(fop, this.state.queryDescription!, false);
+    fo.columnOptionsMode = "ReplaceAll";
     var path = Finder.findOptionsPath(fo);
 
     if (this.props.avoidChangeUrl)
