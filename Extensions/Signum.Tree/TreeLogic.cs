@@ -1,4 +1,5 @@
 using Microsoft.SqlServer.Types;
+using Signum.Basics;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Tree;
@@ -62,6 +63,31 @@ public static class TreeLogic
          where T : TreeEntity
     {
         return ParentMethodExpander<T>.Expression.Evaluate(e);
+    }
+
+    public class TreeInfoMethodExpander<T> : GenericMethodExpander
+        where T : TreeEntity
+    {
+        public static Expression<Func<T, TreeInfo>> Expression =
+            t => new TreeInfo()
+            {
+                route = t.Route,
+                name = t.Name,
+                fullName = t.FullName,
+                lite = t.ToLite(),
+                level = t.Level(),
+                disabled = false, //MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin)) && t.Mixin<DisabledMixin>().IsDisabled,
+                childrenCount = t.Children().Count(),
+            };
+
+        public TreeInfoMethodExpander() : base(Expression) { }
+    }
+
+    [MethodExpander(typeof(TreeInfoMethodExpander<>))]
+    public static TreeInfo TreeInfo<T>(this T e)
+         where T : TreeEntity
+    {
+        return TreeInfoMethodExpander<T>.Expression.Evaluate(e);
     }
 
     [AutoExpressionField]
@@ -216,6 +242,7 @@ public static class TreeLogic
         QueryLogic.Expressions.Register((T c) => c.Descendants(), () => TreeMessage.Descendants.NiceToString(), TreeMessage.Descendants.ToString());
         QueryLogic.Expressions.Register((T c) => c.Ascendants(), () => TreeMessage.Ascendants.NiceToString(), TreeMessage.Ascendants.ToString());
         QueryLogic.Expressions.Register((T c) => c.Level(), () => TreeMessage.Level.NiceToString(), TreeMessage.Level.ToString());
+        QueryLogic.Expressions.Register((T c) => c.TreeInfo(), () => TreeMessage.TreeInfo.NiceToString(), TreeMessage.TreeInfo.ToString());
     }
 
     public static void RegisterOperations<T>(Func<T, MoveTreeModel, T>? copy) where T : TreeEntity, new()

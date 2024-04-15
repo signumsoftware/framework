@@ -9,6 +9,7 @@ import { DashboardClient, PanelPartContentProps } from '../../../Signum.Dashboar
 import { TreeViewer } from '../../TreeViewer'
 import { TreeOperation, UserTreePartEntity } from '../../Signum.Tree'
 import { Operations } from '@framework/Operations'
+import { TreeOptions } from '../../TreeClient'
 
 
 export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity>) {
@@ -22,13 +23,17 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
     return <span>{JavascriptMessage.loading.niceToString()}</span>;
 
   const ti = getTypeInfos(qd.columns["Entity"].type).single();
+  const to = {
+    typeName: ti.name,
+    filterOptions: fo.filterOptions,
+    columnOptions: fo.columnOptions,
+  } as TreeOptions;
 
   return (
     <TreeViewer ref={treeViewRef}
+      treeOptions={to}
       initialShowFilters={false}
-      typeName={ti.name}
       allowMove={tryGetOperationInfo(TreeOperation.Move, ti) !== null}
-      filterOptions={fo.filterOptions}
       showExpandCollapseButtons={true}
       key={ti.name}
     />
