@@ -171,6 +171,7 @@ public enum SearchMessage
 {
     ChooseTheDisplayNameOfTheNewColumn,
     Field,
+    ColumnField,
     [Description("Add column")]
     AddColumn,
     CollectionsCanNotBeAddedAsColumns,

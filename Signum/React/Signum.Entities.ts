@@ -566,6 +566,7 @@ export module SaveChangesMessage {
 export module SearchMessage {
   export const ChooseTheDisplayNameOfTheNewColumn = new MessageKey("SearchMessage", "ChooseTheDisplayNameOfTheNewColumn");
   export const Field = new MessageKey("SearchMessage", "Field");
+  export const ColumnField = new MessageKey("SearchMessage", "ColumnField");
   export const AddColumn = new MessageKey("SearchMessage", "AddColumn");
   export const CollectionsCanNotBeAddedAsColumns = new MessageKey("SearchMessage", "CollectionsCanNotBeAddedAsColumns");
   export const InvalidColumnExpression = new MessageKey("SearchMessage", "InvalidColumnExpression");
