@@ -135,6 +135,7 @@ export namespace TreeClient {
       queryName: to.typeName,
       filterOptions: to.filterOptions,
       columnOptions: to.columnOptions,
+      columnOptionsMode: (to.columnOptions ?? []).notNull().length == 0 ? "Add" : "ReplaceAll",
     } as FindOptions;
 
     return fo;

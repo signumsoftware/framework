@@ -43,9 +43,12 @@ public class TreeController : ControllerBase
 
         var nodes = ToTreeNodes(list);
 
+        var qd = QueryLogic.Queries.QueryDescription(QueryLogic.ToQueryName(typeName));
+        var columns = request.columns.Where(c => RebaseToken(qd, c, "") != null).Select(c => c.token).ToList();
+
         return new FindNodesResponse()
         {
-            columns = request.columns.Select(c => RebaseToken(c.token, "Entity.Ascendants.Element")).ToList(),
+            columns = columns,
             nodes = nodes,
         };
     }
@@ -112,33 +115,12 @@ public class TreeController : ControllerBase
         }
 
         return result;
-
-        /*
-        var result = new List<ResultTable>();
-        result.Add(QueryLogic.Queries.ExecuteQuery(qrFiltered));
-
-        if (request.loadDescendants)
-            result.Add(QueryLogic.Queries.ExecuteQuery(qrFilteredDesc));
-
-        if (!request.expandedNodes.IsNullOrEmpty()) {
-            result.Add(QueryLogic.Queries.ExecuteQuery(qrFrozen));
-
-            if (request.loadDescendants)
-                result.Add(QueryLogic.Queries.ExecuteQuery(qrFrozenDesc));
-        }
-
-        return result;
-        */
-    }
-
-    static string RebaseToken(string token, string prefix)
-    {
-        var _token = token.TryAfter("Entity.") ?? token;
-        return $"{prefix}.{_token}";
     }
 
     static QueryRequestTS RebaseRequest<T>(FindNodesRequest request, string prefix) where T : TreeEntity
     {
+        var qd = QueryLogic.Queries.QueryDescription(typeof(T));
+
         var result = new QueryRequestTS()
         {
             queryKey = QueryUtils.GetKey(typeof(T)),
@@ -146,16 +128,93 @@ public class TreeController : ControllerBase
             columns = (new List<ColumnTS>() { new ColumnTS() { token = $"{prefix}.TreeInfo", displayName = TreeMessage.TreeInfo.NiceToString() } })
                 .Concat(request.columns.Select(c =>
                 {
-                    var token = RebaseToken(c.token, prefix);
+                    var token = RebaseToken(qd, c, prefix);
+                    if (token == null)
+                        return null;
+
                     return new ColumnTS() { token = token, displayName = c.displayName };
-                }))
-                .ToList(),
+                }).NotNull()).ToList(),
             filters = request.userFilters.Concat(request.frozenFilters).ToList(),
             orders = new(),
             pagination = new PaginationTS() { mode = PaginationMode.All },
         };
 
         return result;
+    }
+
+    static string? RebaseToken(QueryDescription qd, ColumnTS c, string prefix)
+    {
+        if (c.token == "Entity")
+            return c.token;
+
+        string _token;
+
+        if (c.token.StartsWith("Entity."))
+            _token = c.token;
+        else
+        if (c.token.Contains("."))
+            return null;
+        else
+        {
+            var cd = qd.Columns.SingleOrDefaultEx(qc => qc.Name == c.token);
+            var qk = QueryUtils.GetKey(qd.QueryName);
+
+            if (cd == null || cd.PropertyRoutes.IsNullOrEmpty())
+                return null;
+
+            var parts = GetParts(qd, cd);
+            if (parts.IsEmpty() || parts.Any(p => p == ""))
+                return null;
+
+            _token = GetParts(qd, cd).ToString(".");
+        }
+
+        var token = _token.StartsWith("Entity.") ? _token.After("Entity.") : _token;
+
+        return $"{prefix}.{token}";
+    }
+
+    static List<string> GetParts(QueryDescription qd, ColumnDescription cd) 
+    {
+        List<string> result = new();
+
+        var pr = cd.PropertyRoutes;
+        if (pr.IsNullOrEmpty() || pr[0].Parent == null)
+        {
+            result.Insert(0, "");
+            return result;
+        }
+
+        var parent = pr[0].Parent!.ToString().Replace("(", "").Replace(")", "");
+        if (parent == QueryUtils.GetKey(qd.QueryName))
+        {
+            result.Insert(0, GetName(cd));
+            return result;
+        }
+
+        var pcd = qd.Columns.SingleOrDefaultEx(qc => qc.Name == parent);
+        if (pcd == null)
+        {
+            result.Insert(0, "");
+            return result;
+        }
+
+        result.Insert(0, GetName(cd));
+
+        result.InsertRange(0, GetParts(qd, pcd)!);
+
+        return result;
+
+        string GetName(ColumnDescription cd)
+        {
+            if (cd.PropertyRoutes.IsNullOrEmpty())
+                return cd.Name;
+
+            var pr = cd.PropertyRoutes[0].ToString();
+            pr = pr.TryAfter(".") ?? pr;
+
+            return pr;
+        }
     }
 
     static List<TreeNode> ToTreeNodes(List<ResultRow> infos)

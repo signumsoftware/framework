@@ -11,7 +11,7 @@ import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
-import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOptions, FilterOption, ColumnOption, QueryRequest } from "@framework/FindOptions";
+import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOptions, FilterOption, ColumnOption, QueryRequest, hasToArray, ResultRow } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
@@ -20,9 +20,10 @@ import { Entity } from "@framework/Signum.Entities";
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Dropdown, DropdownButton } from 'react-bootstrap';
 import "./TreeViewer.css"
-import { QueryTokenString, tryGetOperationInfo } from '@framework/Reflection';
+import { QueryTokenString, getTypeInfo, tryGetOperationInfo } from '@framework/Reflection';
 import * as Hooks from '@framework/Hooks'
 import { DisabledMixin } from '@framework/Signum.Basics'
+import { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
@@ -45,8 +46,13 @@ export interface DraggedOver {
   position: DraggedPosition;
 }
 
+interface VisibleColumnsWithFormatter extends ColumnParsed {
+  columnIndex: number;
+}
+
 interface TreeViewerState {
   treeNodes?: Array<TreeNode>;
+  resultColumns?: string[];
   selectedNode?: TreeNode;
   treeOptionsParsed?: TreeOptionsParsed;
   queryDescription?: QueryDescription;
@@ -69,6 +75,8 @@ interface TreeViewerState {
 
 export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState>{
 
+  static maxToArrayElements = 100;
+
   constructor(props: TreeViewerProps) {
     super(props);
     this.state = {
@@ -89,7 +97,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
-    debugger;
     var path = TreeClient.treePath(newProps.treeOptions);
     if (path == TreeClient.treePath(this.props.treeOptions)) {
       this.searchIfDeps(newProps);
@@ -194,7 +201,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         
         {!this.props.showToolbar && this.props.showExpandCollapseButtons && this.renderExpandCollapseButtons()}
 
-        <div className="tree-container">
+        <div className="tree-container sf-scroll-table-container table-responsive">
           <table className="sf-search-results table table-hover table-sm">
             <thead>
               {this.renderHeaders()}
@@ -203,31 +210,63 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
               {this.renderRows()}
             </tbody>
           </table>
-          {/*
-          <ul>
-            {!this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
-              this.state.treeNodes.map((node, i) =>
-                <TreeNodeControl key={i} treeViewer={this} treeNode={node} dropDisabled={node == this.state.draggedNode} />)}
-          </ul>*/}
         </div>
         {this.state.contextualMenu && this.renderContextualMenu()}
       </div>
     );
   }
 
-  renderHeaders = () => { 
+  renderHeaders = () => {
+    const visibleColumns = this.getVisibleColumnsWithFormatter();
     return (
       <tr>
-        <th>Name</th>
-        <th>Full Name</th>
+        <th
+          className="noOrder"
+          data-column-name="Name">
+          {getTypeInfo(this.props.treeOptions.typeName).members["Name"].niceName}
+        </th>
+        {visibleColumns.map(({ column: co, columnIndex: ci }, i) =>
+          <th key={i}
+            className={classes(co.hiddenColumn && "sf-hidden-column", "noOrder")}
+            data-column-name={co.token && co.token.fullKey}
+            data-column-index={ci}>
+            {co.displayName}
+          </th>)}
       </tr>
     );
   }
 
   renderRows = () => {
-    return !this.state.treeNodes ? JavascriptMessage.loading.niceToString() :
-      this.state.treeNodes.map((node, i) =>
-        <TreeNodeControl key={i} treeViewer={this} treeNode={node} dropDisabled={node == this.state.draggedNode} />);
+    if (!this.state.treeNodes)
+      return JavascriptMessage.loading.niceToString();
+
+    const visibleColumns = this.getVisibleColumnsWithFormatter();
+    return this.state.treeNodes.map((node, i) =>
+      <TreeNodeControl key={i} treeViewer={this} treeNode={node} columns={visibleColumns} dropDisabled={node == this.state.draggedNode} />);
+  }
+
+  getVisibleColumnsWithFormatter = () => {
+    if (!this.state.resultColumns)
+      return [];
+
+    debugger;  
+    const qs = Finder.getSettings(this.props.treeOptions.typeName);
+    const resultColumns = this.state.resultColumns;
+    const columnOptions = this.state.treeOptionsParsed!.columnOptions
+      .map((co, i) => ({ co, i }))
+      .filter(({ co, i }) => !co.hiddenColumn &&
+        co.token?.fullKey != "Id" &&
+        co.token?.fullKey != "Name" &&
+        co.token?.fullKey != "FullName" &&
+        resultColumns.some(rc => rc == co.token?.fullKey));
+
+    return columnOptions.map(({ co, i }) => ({
+      column: co,
+      columnIndex: i,
+      hasToArray: hasToArray(co.token),
+      cellFormatter: (co.token && Finder.getCellFormatter(qs, co.token, undefined)),
+      resultIndex: co.token == undefined || resultColumns == null ? -1 : resultColumns.indexOf(co.token.fullKey)
+    } as VisibleColumnsWithFormatter));
   }
 
   handleNodeTextContextMenu = (n: TreeNode, e: React.MouseEvent<any>) => {
@@ -307,8 +346,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   getQueryRequest(avoidHiddenColumns?: boolean): QueryRequest {
     const fo = TreeClient.toFindOptionsParsed(this.state.treeOptionsParsed!);
     const qs = Finder.getSettings(this.props.treeOptions.typeName);
+    const result = Finder.getQueryRequest(fo, qs, avoidHiddenColumns);
 
-    return Finder.getQueryRequest(fo, qs, avoidHiddenColumns);
+    return result;
   }
 
   search(clearExpanded: boolean, loadDescendants: boolean = false) {
@@ -319,7 +359,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       const userFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == false));
       const frozenFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == true));
 
-      const qr = this.getQueryRequest();
+      const qr = this.getQueryRequest(true);
       const columns = qr.columns.distinctBy(c => c.token); 
 
       if (userFilters.length == 0)
@@ -331,7 +371,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         const nodes = response.nodes;
         const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
         var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
-        this.setState({ treeNodes: nodes, selectedNode: newSeleted || undefined });
+        this.setState({ treeNodes: nodes, resultColumns: response.columns, selectedNode: newSeleted || undefined });
         this.forceUpdate();
 
         if (this.props.onSearch)
@@ -504,7 +544,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   handleExplore = (e: React.MouseEvent<any>) => {
     const fop = TreeClient.toFindOptionsParsed(this.state.treeOptionsParsed!);
     const fo = Finder.toFindOptions(fop, this.state.queryDescription!, false);
-    fo.columnOptionsMode = "ReplaceAll";
+
     var path = Finder.findOptionsPath(fo);
 
     if (this.props.avoidChangeUrl)
@@ -639,7 +679,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
 
   var dm = tryGetMixin(treeEntity, DisabledMixin);
   return {
-    row: null!,
+    values: [],
     lite: toLite(treeEntity),
     name: treeEntity.name!,
     fullName: treeEntity.fullName,
@@ -654,6 +694,7 @@ function toTreeNode(treeEntity: TreeEntity): TreeNode {
 interface TreeNodeControlProps {
   treeViewer: TreeViewer;
   treeNode: TreeNode;
+  columns: VisibleColumnsWithFormatter[];
   dropDisabled: boolean;
 }
 
@@ -677,7 +718,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
           <FontAwesomeIcon icon="square" title={EntityControlMessage.Expand.niceToString()}/>
           <FontAwesomeIcon icon="filter" inverse transform="shrink-2" title={EntityControlMessage.Expand.niceToString()} />
         </span>);
-      default: return <span className="place-holder" />;
+      default: return <span className="place-holder"></span>;
     }
   }
 
@@ -689,7 +730,8 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
       <>
         <tr>
           <td>
-            <div draggable={tv.props.allowMove}
+            <div className="try-no-wrap"
+              draggable={tv.props.allowMove}
               onDragStart={de => tv.handleDragStart(node, de)}
               onDragEnter={de => tv.handleDragOver(node, de)}
               onDragOver={de => tv.handleDragOver(node, de)}
@@ -713,17 +755,50 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
               </span>
             </div>
           </td>
-          <td>
-            {node.fullName}
-          </td>
+          {this.renderExtraColumns(node)}
         </tr>
 
         {
           node.loadedChildren.length > 0 && (node.nodeState == "Expanded" || node.nodeState == "Filtered") &&
           node.loadedChildren.map((n, i) =>
-            <TreeNodeControl key={i} treeViewer={tv} treeNode={n} dropDisabled={this.props.dropDisabled || n == tv.state.draggedNode} />)
+            <TreeNodeControl key={i} treeViewer={tv} treeNode={n} columns={this.props.columns} dropDisabled={this.props.dropDisabled || n == tv.state.draggedNode} />)
         }
       </>
+    );
+  }
+
+  renderExtraColumns = (node: TreeNode) => {
+    return this.props.columns.map(c =>
+      <td>
+        {this.getColumnElement(node, c)}
+      </td>);
+  }
+
+  getColumnElement(node: TreeNode, c: ColumnParsed) {
+
+    var fctx: Finder.CellFormatterContext = {
+      refresh: () => { },
+      columns: this.props.columns.map(c => c.column.token!.key),
+      row: ({
+        entity: node.lite,
+        columns: node.values,
+      }) as ResultRow,
+      rowIndex: -1,
+    };
+
+    return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
+      c.hasToArray != null ? this.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
+        c.cellFormatter.formatter(node.values[c.resultIndex], fctx, c.column.token!);
+  }
+
+  joinNodes(values: (React.ReactElement | string | null | undefined)[], separator: React.ReactElement | string) {
+
+    if (values.length > (TreeViewer.maxToArrayElements - 1))
+      values = [...values.filter((a, i) => i < TreeViewer.maxToArrayElements - 1), "…"];
+
+    return React.createElement(React.Fragment, undefined,
+      ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
     );
   }
 
