@@ -10,8 +10,9 @@ import { ifError } from "@framework/Globals";
 import { Cookies } from "@framework/Cookies";
 import { tryGetTypeInfo } from "@framework/Reflection";
 import * as Reflection from "@framework/Reflection";
-import { UserEntity} from './Signum.Authorization';
+import { UserEntity, UserOperation} from './Signum.Authorization';
 import { PermissionSymbol } from "@framework/Signum.Basics";
+import { EntityOperationSettings, Operations } from "../../Signum/React/Operations";
 
 export namespace AuthClient {
   
@@ -21,7 +22,9 @@ export namespace AuthClient {
     options.routes.push({ path: "/auth/login", element: <ImportComponent onImport={() => import("./Login/LoginPage")} /> });
     options.routes.push({ path: "/auth/changePassword", element: <ImportComponent onImport={() => import("./Login/ChangePasswordPage")} /> });
     options.routes.push({ path: "/auth/changePasswordSuccess", element: <ImportComponent onImport={() => import("./Login/ChangePasswordSuccessPage")} /> });
-  
+
+    Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
+
     if (options.notifyLogout) {
       notifyLogout = options.notifyLogout;
   
