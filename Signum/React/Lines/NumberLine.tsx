@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
-import { Dic, addClass, classes } from '../Globals'
+import { Dic, classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, timeToString, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder, toLuxonDurationFormat } from '../Reflection'
 import { LineBaseController, LineBaseProps, setRefProp, tasks, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
@@ -134,7 +134,7 @@ export function NumberBox(p: NumberBoxProps) {
     readOnly={p.readonly}
     type="text"
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
-    className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))} value={value}
+    className={classes(p.htmlAttributes?.className, p.formControlClass, "numeric")} value={value}
     onBlur={handleOnBlur}
     onChange={handleOnChange}
     onKeyDown={handleKeyDown}

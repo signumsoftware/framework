@@ -47,6 +47,7 @@ export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
   type: Basics.TypeEntity | null;
   text: string;
+  entityType: Basics.TypeEntity | null;
   action: EntityAction;
   overrideEntity: boolean;
   guid: string /*Guid*/;

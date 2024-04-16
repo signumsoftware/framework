@@ -126,14 +126,14 @@ export function initFormatRules(): Finder.FormatRule[] {
     {
       name: "Lite",
       isApplicable: qt => qt.filterType == "Lite",
-      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, true)
+      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" shy />, true)
     },
     {
       name: "LiteNoFill",
       isApplicable: qt => {
         return qt.filterType == "Lite" && tryGetTypeInfos(qt.type)?.every(ti => ti && Navigator.getSettings(ti)?.avoidFillSearchColumnWidth);
       },
-      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" />, false)
+      formatter: qt => new Finder.CellFormatter((cell: Lite<Entity> | undefined, ctx) => !cell ? undefined : <EntityLink lite={cell} onNavigated={ctx.refresh} inSearch="related" shy />, false)
     },
     {
       name: "Guid",

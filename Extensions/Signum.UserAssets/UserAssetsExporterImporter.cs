@@ -137,6 +137,7 @@ public static class UserAssetsImporter
                 {
                     Text = entity.ToString()!,
                     Type = entity.GetType().ToTypeEntity(),
+                    EntityType = (entity as IHasEntityType)?.EntityType?.ToType().ToTypeEntity(),
                     Guid = guid,
                     Action = action,
                     OverrideEntity = action == EntityAction.Different,

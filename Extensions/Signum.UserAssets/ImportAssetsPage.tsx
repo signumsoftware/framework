@@ -98,6 +98,7 @@ export default function ImportAssetsPage() {
             <tr>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.type)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.text)} </th>
+              <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.entityType)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.action)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.overrideEntity)} </th>
               <th> {UserAssetPreviewModel.nicePropertyName(a => a.lines![0].element.customResolution)} </th>
@@ -115,6 +116,7 @@ export default function ImportAssetsPage() {
                     <tr key={ea.type!.cleanName}>
                       <td> {getTypeInfo(ea.type!.cleanName).niceName} </td>
                       <td> {ea.text}</td>
+                      <td> {ea.entityType? getTypeInfo(ea.entityType!.cleanName)?.niceName:""}</td>
                       <td> {EntityAction.niceToString(ea.action!)} </td>
                       <td>
                         {ea.action == "Different" &&

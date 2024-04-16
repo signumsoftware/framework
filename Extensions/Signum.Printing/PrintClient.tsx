@@ -9,6 +9,7 @@ import { FileTypeSymbol } from '../Signum.Files/Signum.Files'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { ImportComponent } from '@framework/ImportComponent'
+import { isPermissionAuthorized } from '@framework/AppContext';
 
 export namespace PrintClient {
   

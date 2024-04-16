@@ -73,7 +73,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
           <div className="d-flex" title={!StyleContext.default.titleLabels ? undefined :
             isCollection ? SearchMessage.CollectionsCanNotBeAddedAsColumns.niceToString() :
               isInvalid ? SearchMessage.InvalidColumnExpression.niceToString() : undefined}>
-            <label className="col-form-label col-form-label-xs me-2">{SearchMessage.Field.niceToString()}</label>
+            <label className="col-form-label col-form-label-xs me-2 fw-bold">{SearchMessage.ColumnField.niceToString()}</label>
             <div className="flex-grow-1">
               <div className="rw-widget-xs">
                 <QueryTokenBuilder
@@ -91,7 +91,7 @@ export default function ColumnEditor(p: ColumnEditorProps) {
             title={StyleContext.default.titleLabels && summaryNotAggregate ? SearchMessage.SummaryHeaderMustBeAnAggregate.niceToString() : undefined}>
             <label className="col-form-label col-form-label-xs me-2">
               <input type="checkbox" disabled={co.token == null} className="form-check-input me-2" checked={co.summaryToken != null} onChange={handleSummaryCheck} />
-              {SearchMessage.SummaryHeader.niceToString()}
+              {SearchMessage.SummaryHeader.niceToString()} (Ʃ)
             </label>
             <div className="rw-widget-xs">
               {co.summaryToken && <QueryTokenBuilder
