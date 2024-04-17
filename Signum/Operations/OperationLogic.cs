@@ -17,7 +17,7 @@ public static class OperationLogic
 
     [AutoExpressionField]
     public static OperationLogEntity? PreviousOperationLog(this Entity e) =>
-        As.Expression(() => e.OperationLogs().Where(ol => ol.Exception == null && ol.End.HasValue && e.SystemPeriod().Contains(ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
+        As.Expression(() => e.OperationLogs().Where(ol => ol.Exception == null && ol.End.HasValue && e.SystemPeriod().Contains(Schema.Current.TimeZoneMode == TimeZoneMode.Local ? ol.End.Value.ToLocalTime().ToUniversalTime() : ol.End.Value)).OrderBy(a => a.End!.Value).FirstOrDefault());
 
     [AutoExpressionField]
     public static OperationLogEntity? LastOperationLog(this Entity e) =>

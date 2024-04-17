@@ -269,6 +269,14 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
   {c.extraButtons()}
 </div>;
 
+export const simpleToolbarButtons = (c: HtmlEditorController) => <div className="sf-draft-toolbar">
+  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)" />
+  <InlineStyleButton controller={c} style="ITALIC" icon="italic" title="Italic (Ctrl + I)" />
+  <InlineStyleButton controller={c} style="UNDERLINE" icon="underline" title="Underline (Ctrl + U)" />
+  <InlineStyleButton controller={c} style="CODE" icon="code" title="Code" />
+  {c.extraButtons()}
+</div>;
+
 
 export interface HtmlEditorPlugin {
   getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
