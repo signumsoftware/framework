@@ -31,6 +31,7 @@ export interface EntityTableProps<V extends ModifiableEntity, RS> extends Entity
   createMessage?: string;
   createOnBlurLastRow?: boolean;
   responsive?: boolean;
+  customKey?: (entity: V) => string | undefined; 
   afterView?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
   afterRow?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, NoInfer<RS>>, rowState: NoInfer<RS>) => React.ReactElement | boolean | null | undefined;
 }
@@ -139,7 +140,7 @@ export class EntityTableController<V extends ModifiableEntity, RS> extends Entit
     }
   }
 
-  handleBlur = (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => {
+  handleCreateLastRowBlur = (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => {
     const p = this.props;
     var tr = DomUtils.closest(e.target, "tr")!;
 
@@ -261,7 +262,7 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
           <tbody>
             {
               elementCtxs
-                .map((mlec, i, array) => <EntityTableRow key={c.keyGenerator.getKey(mlec.value)}
+                .map((mlec, i, array) => <EntityTableRow key={p.customKey?.(mlec.value) ?? c.keyGenerator.getKey(mlec.value)}
                   ctx={p.rowSubContext ? p.rowSubContext(mlec) : mlec}
                   array={array}
                   index={i}
@@ -273,7 +274,7 @@ export const EntityTable = genericForwardRef(function EntityTable<V extends Modi
                   move={c.canMove(mlec.value) && p.moveMode == "MoveIcons" && !readOnly ? c.getMoveConfig(false, mlec.index!, "v") : undefined}
                   drag={c.canMove(mlec.value) && p.moveMode == "DragIcon" && !readOnly ? c.getDragConfig(mlec.index!, "v") : undefined}
                   columns={cleanColumns}
-                  onBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleBlur : undefined}
+                  onCreateLastRowBlur={p.createOnBlurLastRow && p.create && !readOnly ? c.handleCreateLastRowBlur : undefined}
                   onKeyDown={p.createOnBlurLastRow && p.create && !readOnly ? c.handleKeyDown : undefined}
                   afterRow={p.afterRow}
                   afterView={p.afterView}
@@ -328,7 +329,7 @@ export interface EntityTableRowProps<V extends ModifiableEntity, RS> {
   move?: MoveConfig;
   rowHooks?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, unknown>) => RS;
   onRowHtmlAttributes?: (ctx: TypeContext<V>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.HTMLAttributes<any> | null | undefined;
-  onBlur?: (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => void;
+  onCreateLastRowBlur?: (sender: EntityTableRowHandle<V, RS>, e: React.FocusEvent<HTMLTableRowElement>) => void;
   onKeyDown?: (sender: EntityTableRowHandle<V, RS>, e: React.KeyboardEvent<HTMLTableRowElement>) => void;
   afterView?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | boolean | null | undefined;
   afterRow?: (ctx: TypeContext<NoInfer<V>>, row: EntityTableRowHandle<V, RS>, rowState: RS) => React.ReactElement | boolean | null | undefined;
@@ -358,11 +359,12 @@ export function EntityTableRow<V extends ModifiableEntity, RS>(p: EntityTableRow
   var rowAtts = p.onRowHtmlAttributes && p.onRowHtmlAttributes(ctx, rowHandle, rowState);
   const drag = p.drag;
   var row =  (
-    <tr {...rowAtts}
+    <tr
+      onBlur={p.onCreateLastRowBlur && (e => p.onCreateLastRowBlur!(rowHandle, e))}
+      {...rowAtts}
       onDragEnter={drag?.onDragOver}
       onDragOver={drag?.onDragOver}
       onDrop={drag?.onDrop}
-      onBlur={p.onBlur && (e => p.onBlur!(rowHandle, e))}
       onKeyDown={p.onKeyDown && (e => p.onKeyDown!(rowHandle, e))}
       className={classes(drag?.dropClass, rowAtts?.className)}
     >
