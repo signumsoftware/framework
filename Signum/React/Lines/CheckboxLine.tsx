@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Dic, addClass, classes } from '../Globals'
+import { Dic, classes } from '../Globals'
 import { LineBaseController, LineBaseProps, setRefProp, useController, useInitiallyFocused } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { getTimeMachineIcon } from './TimeMachineIcon'
@@ -34,7 +34,7 @@ export const CheckboxLine = React.memo(React.forwardRef(function CheckboxLine(pr
       <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(s.ctx.labelClass, c.props.ctx.errorClass, className)}>
         {getTimeMachineIcon({ ctx: s.ctx })}
         <input type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
-          className={addClass(c.props.valueHtmlAttributes, classes("form-check-input"))}
+          className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")}
         />
         {" "}{s.label}
         {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
@@ -47,7 +47,7 @@ export const CheckboxLine = React.memo(React.forwardRef(function CheckboxLine(pr
         {inputId => <>
           {getTimeMachineIcon({ ctx: s.ctx })}
           <input id={inputId} type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-            className={addClass(c.props.valueHtmlAttributes, classes("form-check-input"))} disabled={s.ctx.readOnly} />
+            className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")} disabled={s.ctx.readOnly} />
         </>
         }
       </FormGroup>

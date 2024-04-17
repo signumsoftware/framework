@@ -1097,15 +1097,6 @@ export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {
 export function classes(...classNames: (string | null | undefined | boolean /*false*/)[]) {
   return classNames.filter(a => a && a != "").join(" ");
 }
-
-export function addClass(props: { className?: string } | null | undefined, newClasses?: string | null): string | undefined {
-  if (!props || !props.className)
-    return newClasses || undefined;
-
-  return classes(props.className, newClasses)
-}
-
-
 export function combineFunction<F extends Function>(func1?: F | null, func2?: F | null): F | null | undefined {
   if (!func1)
     return func2;
