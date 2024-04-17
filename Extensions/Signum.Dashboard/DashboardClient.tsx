@@ -295,9 +295,10 @@ export interface PanelPartContentProps<T extends IPartEntity> {
 export function DashboardTitle(p: { dashboard: DashboardEntity }) {
 
   const icon = parseIcon(p.dashboard.iconName);
-  const title = <span style={{ color: p.dashboard.titleColor ?? undefined }}>
-    {translated(p.dashboard, d => d.displayName)}
-  </span>;
+  const title = p.dashboard.hideDisplayName ? undefined :
+    <span style={{ color: p.dashboard.titleColor ?? undefined }} >
+      {translated(p.dashboard, d => d.displayName)}
+    </span>;
 
   if (icon == null)
     return title;

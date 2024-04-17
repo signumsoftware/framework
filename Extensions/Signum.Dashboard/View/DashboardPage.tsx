@@ -41,7 +41,7 @@ export default function DashboardPage() {
     <div>
       {!dashboard ? <h2 className="display-5">{JavascriptMessage.loading.niceToString()}</h2> :
         <div className="d-flex">
-          {!dashboard.hideDisplayName && <h2 className="display-5">{DashboardClient.Options.customTitle(dashboard)}</h2>}
+          {<h2 className="display-5">{DashboardClient.Options.customTitle(dashboard)}</h2>}
           {!Navigator.isReadOnly(DashboardEntity) &&
             <div className="ms-auto">
               {dashboardWithQueries.cachedQueries.length ? <span className="mx-4" title={DashboardMessage.ForPerformanceReasonsThisDashboardMayShowOutdatedInformation.niceToString() + "\n" +

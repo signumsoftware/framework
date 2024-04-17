@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { addClass, classes } from '../Globals';
+import { classes } from '../Globals';
 import { timeToString, timePlaceholder, toLuxonDurationFormat } from '../Reflection';
 import { LineBaseController, genericForwardRef, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
@@ -35,7 +35,7 @@ export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: Tim
     return (
       <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => c.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={s.ctx} className={addClass(c.props.valueHtmlAttributes, "numeric")} innerRef={c.setRefs}>
+          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={s.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
             {timeToString(s.ctx.value, s.format)}
           </FormControlReadonly>
         )}
@@ -105,7 +105,7 @@ export function TimeTextBox(p: TimeTextBoxProps) {
     {...p.htmlAttributes}
     type="text"
     autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
-    className={addClass(p.htmlAttributes, classes(p.formControlClass, "numeric"))}
+    className={classes(p.htmlAttributes?.className, p.formControlClass, "numeric")}
     value={value}
     onBlur={handleOnBlur}
     onChange={handleOnChange}

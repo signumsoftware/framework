@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { openModal, IModalProps } from '../Modals';
-import { addClass, classes } from '../Globals';
+import { classes } from '../Globals';
 import { JavascriptMessage, BooleanEnum } from '../Signum.Entities'
 import { IconProp } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -94,7 +94,7 @@ export default function MessageModal(p: MessageModalProps) {
       <button
         {...htmlAtts}
         ref={res == 'yes' || res == 'ok' ? setFocus : undefined}
-        className={addClass(htmlAtts, baseButtonClass)}
+        className={classes(htmlAtts?.className, baseButtonClass)}
         onClick={() => handleButtonClicked(res)}
         name={res}>
         {getButtonContent(res)}

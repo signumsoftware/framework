@@ -2,7 +2,7 @@ import * as React from 'react'
 import { DateTime, Duration } from 'luxon'
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { DatePicker, DropdownList, Combobox } from 'react-widgets'
-import { addClass, classes } from '../Globals'
+import { classes } from '../Globals'
 import { MemberInfo, TypeReference, toLuxonFormat, toNumberFormat, isTypeEnum, tryGetTypeInfo, toFormatWithFixes, splitLuxonFormat, dateTimePlaceholder, timePlaceholder } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
@@ -45,7 +45,7 @@ export const DateTimeSplittedLine = React.memo(React.forwardRef(function DateTim
   if (s.ctx.readOnly)
     return (
       <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={addClass(c.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
+        {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
           {dt && toFormatWithFixes(dt, luxonFormat)}
         </FormControlReadonly>)}
       </FormGroup>

@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { StyleContext, TypeContext } from '../Lines';
-import { classes, addClass } from '../Globals';
+import { classes } from '../Globals';
 import "./Lines.css"
 
 export interface FormGroupProps {
@@ -40,7 +40,7 @@ export function FormGroup(p: FormGroupProps) {
   let pr = tCtx.propertyRoute;
   var labelText = p.label ?? (pr?.member?.niceName);
   const label = (
-    <label htmlFor={controlId} {...p.labelHtmlAttributes} className={addClass(p.labelHtmlAttributes, labelClasses)} >
+    <label htmlFor={controlId} {...p.labelHtmlAttributes} className={classes(p.labelHtmlAttributes?.className, labelClasses)} >
       {labelText} {p.labelIcon}
     </label>
   );
@@ -53,7 +53,7 @@ export function FormGroup(p: FormGroupProps) {
     <div
       title={ctx.titleLabels && typeof labelText == "string" ? labelText : undefined}
       {...p.htmlAttributes}
-      className={addClass(p.htmlAttributes, formGroupClasses)}
+      className={classes(p.htmlAttributes?.className, formGroupClasses)}
       {...errorAtts}>
       {(ctx.formGroupStyle == "Basic" || ctx.formGroupStyle == "LabelColumns" || ctx.formGroupStyle == "SrOnly") && label}
       {
