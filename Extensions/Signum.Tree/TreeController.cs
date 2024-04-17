@@ -68,6 +68,55 @@ public class TreeController : ControllerBase
         public List<TreeNode> nodes { get; set; }
     }
 
+    [HttpPost("api/tree/getNode/{typeName}")]
+    public TreeNode GetNode(string typeName, [Required, FromBody] GetNodeRequest request)
+    {
+        Type type = TypeLogic.GetType(typeName);
+
+        var resultRow = giGetNodeGeneric.GetInvoker(type)(request);
+
+        var node = new Node<ResultRow>(resultRow);
+
+        var result = new TreeNode(node);
+
+        return result;
+    }
+
+    public class GetNodeRequest
+    {
+        public Lite<TreeEntity> lite;
+        public List<ColumnTS> columns;
+    }
+
+    static GenericInvoker<Func<GetNodeRequest, ResultRow>> giGetNodeGeneric =
+        new(request => GetNodeGeneric<TreeEntity>(request));
+    static ResultRow GetNodeGeneric<T>(GetNodeRequest request)
+        where T : TreeEntity
+    {
+        var qn = QueryUtils.GetKey(typeof(T));
+        var req = new FindNodesRequest()
+        {
+            userFilters = new List<FilterTS>() {
+                new FilterConditionTS()
+                {
+                    token = "Entity",
+                    operation = FilterOperation.EqualTo,
+                    value = request.lite,
+                }
+            },
+            frozenFilters = new(),
+            columns = request.columns,
+            expandedNodes = new(),
+        };
+
+        var reqTS = RebaseRequest<T>(req, "Entity");
+        var query = reqTS.ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+
+        var result = QueryLogic.Queries.ExecuteQuery(query).Rows!.SingleEx();
+
+        return result;
+    }
+
     static GenericInvoker<Func<FindNodesRequest, List<ResultRow>>> giFindNodesGeneric =
         new(request => FindNodesGeneric<TreeEntity>(request));
     static List<ResultRow> FindNodesGeneric<T>(FindNodesRequest request)

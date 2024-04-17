@@ -167,6 +167,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
     else if (n.nodeState == "Expanded") {
       n.nodeState = "Collapsed";
+      allNodes(n).forEach(n => n.nodeState = "Collapsed");
       this.forceUpdate();
     }
   }
@@ -249,7 +250,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     if (!this.state.resultColumns)
       return [];
 
-    debugger;  
     const qs = Finder.getSettings(this.props.treeOptions.typeName);
     const resultColumns = this.state.resultColumns;
     const columnOptions = this.state.treeOptionsParsed!.columnOptions
@@ -360,7 +360,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       const frozenFilters = Finder.toFilterRequests(filters.filter(fo => fo.frozen == true));
 
       const qr = this.getQueryRequest(true);
-      const columns = qr.columns.distinctBy(c => c.token); 
+      const columns = qr.columns;
 
       if (userFilters.length == 0)
         userFilters.push({ token: QueryTokenString.entity<TreeEntity>().append(e => e.level).toString(), operation: "EqualTo", value: 1 });
@@ -403,8 +403,15 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       .then(te => {
         if (!te)
           return;
-        this.state.treeNodes!.push(toTreeNode(te));
-        this.forceUpdate();
+
+        const qr = this.getQueryRequest(true);
+        const columns = qr.columns;
+
+        TreeClient.API.getNode(this.props.treeOptions.typeName, { lite: toLite(te), columns })
+          .then((node) => {
+            this.state.treeNodes!.push(toTreeNode(te, node));
+            this.forceUpdate();
+          });
       });
   }
 
@@ -415,11 +422,18 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       .then(te => {
         if (!te)
           return;
-        var newNode = toTreeNode(te);
-        parent.loadedChildren.push(newNode);
-        parent.childrenCount++;
-        TreeClient.fixState(parent);
-        this.selectNode(newNode);
+
+        const qr = this.getQueryRequest(true);
+        const columns = qr.columns;
+
+        TreeClient.API.getNode(this.props.treeOptions.typeName, { lite: toLite(te), columns })
+          .then(node => {
+            var newNode = toTreeNode(te, node);
+            parent.loadedChildren.push(newNode);
+            parent.childrenCount++;
+            TreeClient.fixState(parent);
+            this.selectNode(newNode);
+          })
       });
   }
 
@@ -432,11 +446,18 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       .then(te => {
         if (!te)
           return;
-        const newNode = toTreeNode(te);
-        const parent = this.findParent(sibling);
-        const array = parent ? parent.loadedChildren : this.state.treeNodes!;
-        array.insertAt(array.indexOf(sibling) + 1, newNode);
-        this.selectNode(newNode);
+
+        const qr = this.getQueryRequest(true);
+        const columns = qr.columns;
+
+        TreeClient.API.getNode(this.props.treeOptions.typeName, { lite: toLite(te), columns })
+          .then(node => {
+            const newNode = toTreeNode(te, node);
+            const parent = this.findParent(sibling);
+            const array = parent ? parent.loadedChildren : this.state.treeNodes!;
+            array.insertAt(array.indexOf(sibling) + 1, newNode);
+            this.selectNode(newNode);
+          });
       });
   }
 
@@ -675,17 +696,17 @@ function allNodes(node: TreeNode): TreeNode[] {
   return [node].concat(node.loadedChildren ? node.loadedChildren.flatMap(allNodes) : []);
 }
 
-function toTreeNode(treeEntity: TreeEntity): TreeNode {
+function toTreeNode(treeEntity: TreeEntity, newNode: TreeNode): TreeNode {
 
   var dm = tryGetMixin(treeEntity, DisabledMixin);
   return {
-    values: [],
+    values: newNode.values,
     lite: toLite(treeEntity),
     name: treeEntity.name!,
     fullName: treeEntity.fullName,
     childrenCount: 0,
     disabled: dm != null && Boolean(dm.isDisabled),
-    level: 0,
+    level: newNode.level,
     loadedChildren: [],
     nodeState: "Leaf"
   };
@@ -737,7 +758,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
               onDragOver={de => tv.handleDragOver(node, de)}
               onDragEnd={de => tv.handleDragEnd(node, de)}
               onDrop={this.props.dropDisabled ? undefined : de => tv.handleDrop(node, de)}
-              style={{ marginLeft: `${(node.level - 1) * 16}px`, ...this.getDragAndDropStyle(node) }}>
+              style={{ marginLeft: `${(node.level - 1) * 32}px`, ...this.getDragAndDropStyle(node) }}>
               {this.renderIcon(node.nodeState)}
 
               <span className={classes("tree-label", node == tv.state.selectedNode && "tree-selected", node.disabled && "tree-disabled")}
@@ -777,7 +798,7 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
   getColumnElement(node: TreeNode, c: ColumnParsed) {
 
     var fctx: Finder.CellFormatterContext = {
-      refresh: () => { },
+      refresh: undefined,
       columns: this.props.columns.map(c => c.column.token!.key),
       row: ({
         entity: node.lite,

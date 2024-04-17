@@ -5,7 +5,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import { Type, tryGetTypeInfo } from '@framework/Reflection'
+import { PseudoType, QueryKey, Type, tryGetTypeInfo } from '@framework/Reflection'
 import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
 import { TreeEntity, TreeOperation, MoveTreeModel, TreeMessage, UserTreePartEntity } from './Signum.Tree'
 import TreeModal from './TreeModal'
@@ -15,7 +15,7 @@ import { getAllTypes, getTypeInfo } from "@framework/Reflection";
 import { TypeInfo } from "@framework/Reflection";
 import TreeButton from './TreeButton'
 import { toLite } from "@framework/Signum.Entities";
-import { FindOptions, FindOptionsParsed, Pagination, ResultTable, SearchControlLoaded } from "@framework/Search";
+import { ColumnOptionsMode, FindOptions, FindOptionsParsed, Pagination, ResultTable, SearchControlLoaded } from "@framework/Search";
 import { LiteAutocompleteConfig } from '@framework/Lines';
 import { QueryString } from '@framework/QueryString';
 import { DashboardClient } from '../Signum.Dashboard/DashboardClient'
@@ -117,17 +117,12 @@ export namespace TreeClient {
   }
 
 
-  export function treePath(to: TreeOptions): string {
+  export function treePath(to: TreeOptions, extra?: any): string {
 
-    const query: any = {};
-    if (to.filterOptions)
-      Finder.Encoder.encodeFilters(query, to.filterOptions.notNull());
-
-    if (to.columnOptions)
-      Finder.Encoder.encodeColumns(query, to.columnOptions.notNull());
-
-    const qs = QueryString.stringify(query);
-    return "/tree/" + to.typeName + (qs && "?") + qs;
+    const fo = toFindOptions(to);
+    const result = Finder.findOptionsPath(fo).replace("/find/", "/tree/");
+    
+    return result;
   }
 
   export function toFindOptions(to: TreeOptions): FindOptions {
@@ -135,7 +130,7 @@ export namespace TreeClient {
       queryName: to.typeName,
       filterOptions: to.filterOptions,
       columnOptions: to.columnOptions,
-      columnOptionsMode: (to.columnOptions ?? []).notNull().length == 0 ? "Add" : "ReplaceAll",
+      columnOptionsMode: to.columnOptionsMode, 
     } as FindOptions;
 
     return fo;
@@ -164,6 +159,7 @@ export namespace TreeClient {
       typeName: fo.queryName,
       filterOptions: fo.filterOptions,
       columnOptions: fo.columnOptions,
+      columnOptionsMode: fo.columnOptionsMode,
     } as TreeOptions;
 
     return to;
@@ -179,6 +175,18 @@ export namespace TreeClient {
           columnOptions: fop.columnOptions,
         } as TreeOptionsParsed;
       });
+  }
+
+  export function parseTreeOptionsPath(queryName: PseudoType | QueryKey, query: any): TreeOptions {
+    const fo = Finder.parseFindOptionsPath(queryName, query);
+    const to = {
+      typeName: fo.queryName,
+      filterOptions: fo.filterOptions,
+      columnOptions: fo.columnOptions,
+      columnOptionsMode: fo.columnOptionsMode,
+    } as TreeOptions;
+
+    return to;
   }
 
   export function hideSiblingsAndIsDisabled(ti: TypeInfo) {
@@ -248,9 +256,6 @@ export namespace TreeClient {
     return getAllTypes().filter(t => isTree(t));
   }
 
-//  export function openTree<T extends TreeEntity>(type: Type<T>, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<T> | undefined>;
-//  export function openTree(typeName: string, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined>;
-  //  export function openTree(type: Type<TreeEntity> | string, filterOptions?: (FilterOption | null | undefined)[], options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
   export function openTree(to: TreeOptions, options?: TreeModalOptions): Promise<Lite<TreeEntity> | undefined> {
 
     return import("./TreeModal")
@@ -306,6 +311,10 @@ export namespace TreeClient {
       });
     }
 
+    export function getNode(typeName: string, request: GetNodeRequest): Promise<TreeNode> {
+      return ajaxPost<TreeNode>({ url: `/api/tree/getNode/${typeName}` }, request);
+    }
+
     export interface FindNodesRequest {
       userFilters: Array<FilterRequest>;
       frozenFilters: Array<FilterRequest>;
@@ -318,14 +327,19 @@ export namespace TreeClient {
       columns: string[];
       nodes: TreeNode[];
     }
-  }
 
+    export interface GetNodeRequest {
+      lite: Lite<TreeEntity>;
+      columns: Array<ColumnRequest>;
+    }
+  }
 }
 
 export interface TreeOptions {
   typeName: string;
   filterOptions?: (FilterOption | null | undefined)[];
   columnOptions?: (ColumnOption | null | undefined)[];
+  columnOptionsMode?: ColumnOptionsMode;
 }
 
 export interface TreeOptionsParsed {
