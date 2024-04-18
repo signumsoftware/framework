@@ -589,6 +589,12 @@ internal class QueryFormatter : DbExpressionVisitor
             if (sqlFunction.Arguments[1] is SqlConstantExpression ce)
                 sb.Append((string)ce.Value!);
         }
+        else if (sqlFunction.SqlFunction == SqlFunction.AtTimeZone.ToString())
+        {
+            this.Visit(sqlFunction.Object);
+            sb.Append(" AT TIME ZONE ");
+            this.Visit(sqlFunction.Arguments.SingleEx());
+        }
         else
 		{
             if (sqlFunction.Object != null)
