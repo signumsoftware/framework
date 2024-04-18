@@ -23,8 +23,6 @@ export namespace AuthClient {
     options.routes.push({ path: "/auth/changePassword", element: <ImportComponent onImport={() => import("./Login/ChangePasswordPage")} /> });
     options.routes.push({ path: "/auth/changePasswordSuccess", element: <ImportComponent onImport={() => import("./Login/ChangePasswordSuccessPage")} /> });
 
-    Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
-
     if (options.notifyLogout) {
       notifyLogout = options.notifyLogout;
   
