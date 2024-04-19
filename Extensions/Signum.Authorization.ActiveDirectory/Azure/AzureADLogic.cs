@@ -80,7 +80,13 @@ public static class AzureADLogic
                             if (u.State == UserState.Active && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) != true)
                             {
                                 stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been deactivated in Azure AD");
-                                u.Execute(UserOperation.Deactivate);
+                                u.Execute(UserOperation.AutoDeactivate);
+                            }
+
+                            if (u.State == UserState.AutoDeactivate && isEnabledDictionary.TryGetS(u.Mixin<UserADMixin>().OID!.Value) == true)
+                            {
+                                stc.StringBuilder.AppendLine($"User {u.Id} ({u.UserName}) with OID {u.Mixin<UserADMixin>().OID} has been reactivated in Azure AD");
+                                u.Execute(UserOperation.Reactivate);
                             }
                         }
                     });
