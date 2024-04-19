@@ -9,7 +9,7 @@ import { Finder } from '@framework/Finder'
 import ContextMenu from '@framework/SearchControl/ContextMenu'
 import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import { Operations } from '@framework/Operations'
-import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString } from '@framework/Signum.Entities'
+import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString, Lite } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
 import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOptions, FilterOption, ColumnOption, QueryRequest, hasToArray, ResultRow } from "@framework/FindOptions";
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
@@ -27,6 +27,7 @@ import { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
+  defaultSelectedLite?: Lite<TreeEntity>;
   showContextMenu?: boolean | "Basic";
   allowMove?: boolean;
   avoidChangeUrl?: boolean;
@@ -93,7 +94,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   componentWillMount() {
-    this.initilize(this.props.treeOptions);
+    this.initialize(this.props.treeOptions);
   }
 
   componentWillReceiveProps(newProps: TreeViewerProps) {
@@ -116,7 +117,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     };
     this.forceUpdate();
 
-    this.initilize(newProps.treeOptions);
+    this.initialize(newProps.treeOptions);
   }
 
   searchIfDeps(newProps: TreeViewerProps) {
@@ -125,7 +126,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     }
   }
 
-  initilize(to: TreeOptions) {
+  initialize(to: TreeOptions) {
 
     Finder.getQueryDescription(to.typeName)
       .then(qd => {
@@ -138,7 +139,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
             if (sfb)
               this.setState({ showFilters: false });
 
-            this.search(true);
+            this.search(true, false, true);
           });
         });
       });
@@ -351,7 +352,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     return result;
   }
 
-  search(clearExpanded: boolean, loadDescendants: boolean = false) {
+  search(clearExpanded: boolean, loadDescendants: boolean = false, considerDefaultSelectedLite: boolean = false) {
+
+    const defaultSelectedLite = considerDefaultSelectedLite ? this.props.defaultSelectedLite : undefined;
+
     this.getFilterOptionsWithSFB().then(filters => {
       let expandedNodes = clearExpanded || !this.state.treeNodes ? [] :
         this.state.treeNodes!.flatMap(allNodes).filter(a => a.nodeState == "Expanded").map(a => a.lite);
@@ -369,13 +373,20 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     })
       .then(response => {
         const nodes = response.nodes;
-        const selectedLite = this.state.selectedNode && this.state.selectedNode.lite;
-        var newSeleted = selectedLite && nodes.filter(a => is(a.lite, selectedLite)).singleOrNull();
+        const selectedLite = this.state.selectedNode?.lite;
+        var newSeleted = selectedLite && nodes.flatMap(allNodes).filter(a => is(a.lite, selectedLite)).singleOrNull();
+
+        if (newSeleted == null)
+          newSeleted = defaultSelectedLite && nodes.flatMap(allNodes).filter(a => is(a.lite, defaultSelectedLite)).singleOrNull();
+
         this.setState({ treeNodes: nodes, resultColumns: response.columns, selectedNode: newSeleted || undefined });
         this.forceUpdate();
 
         if (this.props.onSearch)
           this.props.onSearch(this.state.treeOptionsParsed!);
+
+        if (defaultSelectedLite && newSeleted && is(newSeleted?.lite, defaultSelectedLite))
+          this.selectNode(newSeleted!);
       });
   }
 
@@ -547,11 +558,11 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
   }
 
   handleExpandAll = () => {
-    this.search(true, true);
+    this.search(true, true, true);
   }
 
   handleCollapseAll = () => {
-    this.search(true);
+    this.search(true, false, true);
   }
 
   handleSelectedToggle = () => {
