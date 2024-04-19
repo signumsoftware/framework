@@ -27,6 +27,7 @@ export default function UserTreePart(p: PanelPartContentProps<UserTreePartEntity
     typeName: ti.name,
     filterOptions: fo.filterOptions,
     columnOptions: fo.columnOptions,
+    columnOptionsMode: fo.columnOptionsMode,
   } as TreeOptions;
 
   return (
