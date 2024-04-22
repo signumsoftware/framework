@@ -227,7 +227,7 @@ export namespace TreeClient {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.onFind)
-      qs.onFind = (fo, mo) => openTree({ typeName: ti.name, filterOptions: fo.filterOptions, columnOptions: fo.columnOptions }, { title: mo?.title });
+      qs.onFind = (fo, mo) => openTree({ typeName: ti.name, filterOptions: fo.filterOptions, columnOptions: fo.columnOptions, columnOptionsMode: fo.columnOptionsMode }, { title: mo?.title });
   }
 
   export function overrideAutocomplete(ti: TypeInfo) {
