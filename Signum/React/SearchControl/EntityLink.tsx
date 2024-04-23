@@ -21,7 +21,7 @@ export interface EntityLinkProps extends React.HTMLAttributes<HTMLAnchorElement>
 
 export default function EntityLink(p: EntityLinkProps) {
 
-  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, ...htmlAtts } = p;
+  const { lite, inSearch, children, onNavigated, getViewPromise, inPlaceNavigation, shy, ...htmlAtts } = p;
 
   const settings = Navigator.getSettings(p.lite.EntityType);
 
@@ -35,7 +35,7 @@ export default function EntityLink(p: EntityLinkProps) {
       to={Navigator.navigateRoute(lite)}
       title={StyleContext.default.titleLabels ? p.title ?? getToString(lite) : undefined}
       data-entity={liteKey(lite)}
-      className={classes(settings?.allowWrapEntityLink ? undefined : "try-no-wrap", p.shy ? "sf-shy-link" : null)}
+      className={classes(settings?.allowWrapEntityLink ? undefined : "try-no-wrap", shy ? "sf-shy-link" : null)}
       {...(htmlAtts as React.HTMLAttributes<HTMLAnchorElement>)}
       onClick={handleClick}
     >
