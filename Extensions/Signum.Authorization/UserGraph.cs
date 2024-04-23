@@ -32,9 +32,20 @@ public class UserGraph : Graph<UserEntity, UserState>
             },
         }.Register();
 
+        new Execute(UserOperation.AutoDeactivate)
+        {
+            FromStates = { UserState.Active },
+            ToStates = { UserState.AutoDeactivate },
+            Execute = (u, _) =>
+            {
+                u.DisabledOn = Clock.Now;
+                u.State = UserState.AutoDeactivate;
+            },
+        }.Register();
+
         new Execute(UserOperation.Reactivate)
         {
-            FromStates = { UserState.Deactivated },
+            FromStates = { UserState.Deactivated, UserState.AutoDeactivate },
             ToStates = { UserState.Active },
             Execute = (u, _) =>
             {
@@ -54,7 +65,7 @@ public class UserGraph : Graph<UserEntity, UserState>
 
         new Delete(UserOperation.Delete)
         {
-            FromStates = { UserState.Deactivated, UserState.Active },
+            FromStates = { UserState.Deactivated, UserState.AutoDeactivate, UserState.Active },
             Delete = (u, _) =>
             {
                 u.Delete();

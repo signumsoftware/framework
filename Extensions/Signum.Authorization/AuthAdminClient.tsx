@@ -67,7 +67,8 @@ export namespace AuthAdminClient {
   
     Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
-  
+    Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
+
     AppContext.clearSettingsActions.push(() => queryAuditorTokens.clear());
   
     Finder.addSettings({
