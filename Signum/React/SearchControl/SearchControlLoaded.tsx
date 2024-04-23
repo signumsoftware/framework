@@ -1596,10 +1596,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
   }
 
-  joinNodes(values: (React.ReactElement | string | null | undefined)[], separator: React.ReactElement | string) {
+  static joinNodes(values: (React.ReactElement | string | null | undefined)[], separator: React.ReactElement | string, maxToArrayElements: number) {
 
-    if (values.length > (SearchControlLoaded.maxToArrayElements - 1))
-      values = [...values.filter((a, i) => i < SearchControlLoaded.maxToArrayElements - 1), "…"];
+    if (values.length > (maxToArrayElements - 1))
+      values = [...values.filter((a, i) => i < maxToArrayElements - 1), "…"];
 
     return React.createElement(React.Fragment, undefined,
       ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
@@ -1679,8 +1679,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? this.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
-        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, SearchControlLoaded.maxToArrayElements) :
         c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
   }
 

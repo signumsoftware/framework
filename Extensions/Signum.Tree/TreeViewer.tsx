@@ -23,7 +23,7 @@ import "./TreeViewer.css"
 import { QueryTokenString, getTypeInfo, tryGetOperationInfo } from '@framework/Reflection';
 import * as Hooks from '@framework/Hooks'
 import { DisabledMixin } from '@framework/Signum.Basics'
-import { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
+import SearchControlLoaded, { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
@@ -819,19 +819,9 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? this.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
-        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />) :
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+        c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, TreeViewer.maxToArrayElements) :
         c.cellFormatter.formatter(node.values[c.resultIndex], fctx, c.column.token!);
-  }
-
-  joinNodes(values: (React.ReactElement | string | null | undefined)[], separator: React.ReactElement | string) {
-
-    if (values.length > (TreeViewer.maxToArrayElements - 1))
-      values = [...values.filter((a, i) => i < TreeViewer.maxToArrayElements - 1), "…"];
-
-    return React.createElement(React.Fragment, undefined,
-      ...values.flatMap((v, i) => i == values.length - 1 ? [v] : [v, separator])
-    );
   }
 
   getDragAndDropStyle(node: TreeNode): React.CSSProperties | undefined {
