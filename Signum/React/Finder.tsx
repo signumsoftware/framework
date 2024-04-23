@@ -781,8 +781,16 @@ export namespace Finder {
 
     if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
       var defaultFilters = getDefaultFilter(qd, qs);
-      if (defaultFilters)
-        fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
+      if (defaultFilters) {
+        var filterOptions = fo.filterOptions?.notNull() ?? [];
+        if (defaultFilters && defaultFilters.length <= filterOptions.length) {
+          if (equalFilters(defaultFilters, filterOptions.slice(0, defaultFilters.length))) {
+            filterOptions = filterOptions.slice(defaultFilters.length);
+          }
+        }
+
+        fo.filterOptions = [...defaultFilters, ...filterOptions];
+      }
     }
 
     if (fo.filterOptions)

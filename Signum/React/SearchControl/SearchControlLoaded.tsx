@@ -41,7 +41,7 @@ import { VisualTipIcon } from '../Basics/VisualTipIcon'
 import { SearchVisualTip } from '../Signum.Basics'
 import { KeyNames } from '../Components'
 
-interface ColumnParsed {
+export interface ColumnParsed {
   column: ColumnOptionParsed;
   hasToArray?: QueryToken;
   cellFormatter?: Finder.CellFormatter;

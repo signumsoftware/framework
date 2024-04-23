@@ -35,154 +35,267 @@ public class TreeController : ControllerBase
     }
 
     [HttpPost("api/tree/findNodes/{typeName}")]
-    public List<TreeNode> FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
+    public FindNodesResponse FindNodes(string typeName, [Required, FromBody]FindNodesRequest request) {
 
         Type type = TypeLogic.GetType(typeName);
 
-        var list =  giFindNodesGeneric.GetInvoker(type)(request);
+        var list = giFindNodesGeneric.GetInvoker(type)(request);
 
-        return ToTreeNodes(list);
+        var nodes = ToTreeNodes(list);
+
+        var qd = QueryLogic.Queries.QueryDescription(QueryLogic.ToQueryName(typeName));
+        var columns = request.columns.Where(c => RebaseToken(qd, c, "") != null).Select(c => c.token).ToList();
+
+        return new FindNodesResponse()
+        {
+            columns = columns,
+            nodes = nodes,
+        };
     }
 
     public class FindNodesRequest
     {
         public List<FilterTS> userFilters;
         public List<FilterTS> frozenFilters;
+        public List<ColumnTS> columns;
         public List<Lite<TreeEntity>> expandedNodes;
         public bool loadDescendants;
     }
 
-    static GenericInvoker<Func<FindNodesRequest, List<TreeInfo>>> giFindNodesGeneric =
-        new(request => FindNodesGeneric<TreeEntity>(request));
-    static List<TreeInfo> FindNodesGeneric<T>(FindNodesRequest request)
-        where T : TreeEntity
+    public class FindNodesResponse
     {
-        var qd = QueryLogic.Queries.QueryDescription(typeof(T));
-        var userFilters = request.userFilters.Select(f => f.ToFilter(qd, false, SignumServer.JsonSerializerOptions)).ToList();
-        var frozenFilters = request.frozenFilters.Select(f => f.ToFilter(qd, false, SignumServer.JsonSerializerOptions)).ToList();
-
-
-        var frozenQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest
-        {
-            QueryName = typeof(T),
-            Filters = frozenFilters,
-            Orders = new List<Order>(),
-            Count = null
-        }).Select(a => (T)a.Entity);
-
-        var filteredQuery = QueryLogic.Queries.GetEntitiesLite(new QueryEntitiesRequest
-        {
-            QueryName = typeof(T),
-            Filters = userFilters.Concat(frozenFilters).ToList(),
-            Orders = new List<Order>(),
-            Count = null
-        }).Select(a => (T)a.Entity);
-
-        var disabledMixin = MixinDeclarations.IsDeclared(typeof(T), typeof(DisabledMixin));
-        var list = filteredQuery
-                        .SelectMany(t => t.Ascendants())
-                        .Select(t => new TreeInfo
-                        {
-                            route = t.Route,
-                            name = t.Name,
-                            fullName = t.FullName,
-                            lite = t.ToLite(),
-                            level = t.Level(),
-                            disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                            childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
-                        }).ToList();
-
-        var listDescendants = new List<TreeInfo>();
-        if (request.loadDescendants)
-            listDescendants.AddRange(filteredQuery
-                        .SelectMany(t => t.Descendants())
-                        .Select(t => new TreeInfo
-                        {
-                            route = t.Route,
-                            name = t.Name,
-                            fullName = t.FullName,
-                            lite = t.ToLite(),
-                            level = t.Level(),
-                            disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                            childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
-                        }).ToList());
-
-        var expandedChildren = request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
-                        frozenQuery
-                       .Where(t => request.expandedNodes.Contains(t.Parent()!.ToLite()))
-                       .SelectMany(t => t.Ascendants())
-                       .Select(t => new TreeInfo
-                       {
-                           route = t.Route,
-                           name = t.Name,
-                           fullName = t.FullName,
-                           lite = t.ToLite(),
-                           level = t.Level(),
-                           disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                           childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
-                       }).ToList();
-
-        var expandedChildrenDescendants = new List<TreeInfo>();
-        if (request.loadDescendants)
-            expandedChildrenDescendants.AddRange(request.expandedNodes.IsNullOrEmpty() ? new List<TreeInfo>() :
-                       frozenQuery
-                      .Where(t => request.expandedNodes.Contains(t.Parent()!.ToLite()))
-                      .SelectMany(t => t.Descendants())
-                      .Select(t => new TreeInfo
-                      {
-                          route = t.Route,
-                          name = t.Name,
-                          fullName = t.FullName,
-                          lite = t.ToLite(),
-                          level = t.Level(),
-                          disabled = disabledMixin && t.Mixin<DisabledMixin>().IsDisabled,
-                          childrenCount = frozenQuery.Count(a => (bool)(a.Route.GetAncestor(1) == t.Route)),
-                      }).ToList());
-
-        return list.Concat(listDescendants)
-            .Concat(expandedChildren)
-            .Concat(expandedChildrenDescendants)
-            .ToList();
+        public List<string> columns { get; set; }
+        public List<TreeNode> nodes { get; set; }
     }
 
-    static List<TreeNode> ToTreeNodes(List<TreeInfo> infos)
+    [HttpPost("api/tree/getNode/{typeName}")]
+    public TreeNode GetNode(string typeName, [Required, FromBody] GetNodeRequest request)
     {
-        var dictionary = infos.Distinct(a => a.route).ToDictionary(a => a.route);
+        Type type = TypeLogic.GetType(typeName);
 
-        var parentNodes = TreeHelper.ToTreeC(dictionary.Values, a => a.route.GetLevel() == 1 ? null :
-             dictionary.GetOrThrow(a.route.GetAncestor(1)));
+        var resultRow = giGetNodeGeneric.GetInvoker(type)(request);
 
-        return parentNodes.OrderBy(a => a.Value.route).Select(n => new TreeNode(n)).ToList();
+        var node = new Node<ResultRow>(resultRow);
+
+        var result = new TreeNode(node);
+
+        return result;
+    }
+
+    public class GetNodeRequest
+    {
+        public Lite<TreeEntity> lite;
+        public List<ColumnTS> columns;
+    }
+
+    static GenericInvoker<Func<GetNodeRequest, ResultRow>> giGetNodeGeneric =
+        new(request => GetNodeGeneric<TreeEntity>(request));
+    static ResultRow GetNodeGeneric<T>(GetNodeRequest request)
+        where T : TreeEntity
+    {
+        var qn = QueryUtils.GetKey(typeof(T));
+        var req = new FindNodesRequest()
+        {
+            userFilters = new List<FilterTS>() {
+                new FilterConditionTS()
+                {
+                    token = "Entity",
+                    operation = FilterOperation.EqualTo,
+                    value = request.lite,
+                }
+            },
+            frozenFilters = new(),
+            columns = request.columns,
+            expandedNodes = new(),
+        };
+
+        var reqTS = RebaseRequest<T>(req, "Entity");
+        var query = reqTS.ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+
+        var result = QueryLogic.Queries.ExecuteQuery(query).Rows!.SingleEx();
+
+        return result;
+    }
+
+    static GenericInvoker<Func<FindNodesRequest, List<ResultRow>>> giFindNodesGeneric =
+        new(request => FindNodesGeneric<TreeEntity>(request));
+    static List<ResultRow> FindNodesGeneric<T>(FindNodesRequest request)
+        where T : TreeEntity
+    {
+        var expandedNodesFilter = request.expandedNodes.IsNullOrEmpty() ? new List<FilterConditionTS>() : new List<FilterConditionTS>() {
+            new FilterConditionTS()
+            {
+                token = "Entity.Parent",
+                operation = FilterOperation.IsIn,
+                value = request.expandedNodes,
+            }
+        };
+
+        var qn = QueryUtils.GetKey(typeof(T));
+        var reqTS = RebaseRequest<T>(request, "Entity.Ascendants.Element");
+        var qrFiltered = reqTS.ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+        var qrFrozen = reqTS.Let(r =>
+        {
+            r.filters = request.frozenFilters.Concat(expandedNodesFilter).ToList();
+            return r;
+        }).ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+
+        var reqDescTS = RebaseRequest<T>(request, "Entity.Descendants.Element");
+        var qrFilteredDesc = reqDescTS.ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+        var qrFrozenDesc = reqDescTS.Let(r =>
+        {
+            r.filters = request.frozenFilters.Concat(expandedNodesFilter).ToList();
+            return r;
+        }).ToQueryRequest(qn, SignumServer.JsonSerializerOptions, null);
+
+        var result = new List<ResultRow>();
+
+        result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFiltered).Rows?.ToList() ?? new());
+
+        if (request.loadDescendants)
+            result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFilteredDesc).Rows?.ToList() ?? new());
+
+        if (!request.expandedNodes.IsNullOrEmpty())
+        {
+            result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFrozen).Rows?.ToList() ?? new());
+
+            if (request.loadDescendants)
+                result.AddRange(QueryLogic.Queries.ExecuteQuery(qrFrozenDesc).Rows?.ToList() ?? new());
+        }
+
+        return result;
+    }
+
+    static QueryRequestTS RebaseRequest<T>(FindNodesRequest request, string prefix) where T : TreeEntity
+    {
+        var qd = QueryLogic.Queries.QueryDescription(typeof(T));
+
+        var result = new QueryRequestTS()
+        {
+            queryKey = QueryUtils.GetKey(typeof(T)),
+            groupResults = false,
+            columns = (new List<ColumnTS>() { new ColumnTS() { token = $"{prefix}.TreeInfo", displayName = TreeMessage.TreeInfo.NiceToString() } })
+                .Concat(request.columns.Select(c =>
+                {
+                    var token = RebaseToken(qd, c, prefix);
+                    if (token == null)
+                        return null;
+
+                    return new ColumnTS() { token = token, displayName = c.displayName };
+                }).NotNull()).ToList(),
+            filters = request.userFilters.Concat(request.frozenFilters).ToList(),
+            orders = new(),
+            pagination = new PaginationTS() { mode = PaginationMode.All },
+        };
+
+        return result;
+    }
+
+    static string? RebaseToken(QueryDescription qd, ColumnTS c, string prefix)
+    {
+        if (c.token == "Entity")
+            return c.token;
+
+        string _token;
+
+        if (c.token.StartsWith("Entity."))
+            _token = c.token;
+        else
+        if (c.token.Contains("."))
+            return null;
+        else
+        {
+            var cd = qd.Columns.SingleOrDefaultEx(qc => qc.Name == c.token);
+            var qk = QueryUtils.GetKey(qd.QueryName);
+
+            if (cd == null || cd.PropertyRoutes.IsNullOrEmpty())
+                return null;
+
+            var parts = GetParts(qd, cd);
+            if (parts.IsEmpty() || parts.Any(p => p == ""))
+                return null;
+
+            _token = GetParts(qd, cd).ToString(".");
+        }
+
+        var token = _token.StartsWith("Entity.") ? _token.After("Entity.") : _token;
+
+        return $"{prefix}.{token}";
+    }
+
+    static List<string> GetParts(QueryDescription qd, ColumnDescription cd) 
+    {
+        List<string> result = new();
+
+        var pr = cd.PropertyRoutes;
+        if (pr.IsNullOrEmpty() || pr[0].Parent == null)
+        {
+            result.Insert(0, "");
+            return result;
+        }
+
+        var parent = pr[0].Parent!.ToString().Replace("(", "").Replace(")", "");
+        if (parent == QueryUtils.GetKey(qd.QueryName))
+        {
+            result.Insert(0, GetName(cd));
+            return result;
+        }
+
+        var pcd = qd.Columns.SingleOrDefaultEx(qc => qc.Name == parent);
+        if (pcd == null)
+        {
+            result.Insert(0, "");
+            return result;
+        }
+
+        result.Insert(0, GetName(cd));
+
+        result.InsertRange(0, GetParts(qd, pcd)!);
+
+        return result;
+
+        string GetName(ColumnDescription cd)
+        {
+            if (cd.PropertyRoutes.IsNullOrEmpty())
+                return cd.Name;
+
+            var pr = cd.PropertyRoutes[0].ToString();
+            pr = pr.TryAfter(".") ?? pr;
+
+            return pr;
+        }
+    }
+
+    static List<TreeNode> ToTreeNodes(List<ResultRow> infos)
+    {
+        var dictionary = infos.Distinct(a => ((TreeInfo)a[0]!).route).ToDictionary(a => ((TreeInfo)a[0]!).route);
+
+        var parentNodes = TreeHelper.ToTreeC(dictionary.Values, a => ((TreeInfo)a[0]!).route.GetLevel() == 1 ? null :
+             dictionary.GetOrThrow(((TreeInfo)a[0]!).route.GetAncestor(1)));
+
+        return parentNodes.OrderBy(a => ((TreeInfo)a.Value[0]!).route).Select(n => new TreeNode(n)).ToList();
     }
 
 }
 
 #pragma warning disable IDE1006 // Naming Styles
-class TreeInfo
-{
-    public string name { get; set; }
-    public string fullName { get; set; }
-    public Lite<TreeEntity> lite { get; set; }
-    public bool disabled { get; set; }
-    public int childrenCount { get; set; }
-    public SqlHierarchyId route { get; set; }
-    public short level { get; set; }
-}
-
 public class TreeNode
 {
     public TreeNode() { }
-    internal TreeNode(Node<TreeInfo> node)
+    internal TreeNode(Node<ResultRow> node)
     {
-        this.name = node.Value.name;
-        this.fullName = node.Value.fullName;
-        this.lite = node.Value.lite;
-        this.disabled = node.Value.disabled;
-        this.childrenCount = node.Value.childrenCount;
-        this.loadedChildren = node.Children.OrderBy(a => a.Value.route).Select(a => new TreeNode(a)).ToList();
-        this.level = node.Value.level;
+        var ti = (TreeInfo)node.Value[0]!;
+        this.values = node.Value.GetValues(node.Value.Table.Columns).Skip(1).ToArray();
+        this.name = ti.name;
+        this.fullName = ti.fullName;
+        this.lite = ti.lite;
+        this.disabled = ti.disabled;
+        this.childrenCount = ti.childrenCount;
+        this.loadedChildren = node.Children.OrderBy(a => ((TreeInfo)a.Value[0]!).route).Select(a => new TreeNode(a)).ToList();
+        this.level = ti.level;
     }
 
+    public object?[] values { get; set; }
     public string name { set; get; }
     public string fullName { get; set; }
     public Lite<TreeEntity> lite { set; get; }
