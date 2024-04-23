@@ -451,7 +451,7 @@ export class AbortableRequest<Q, A> {
 
     this.abortController = new AbortController();
 
-    return this.makeCall(this.abortController.signal, query).then(result => {
+    return this.makeCall(this.abortController!.signal, query).then(result => {
 
       if (this.abortController == undefined)
         return new Promise<A>(resolve => { /*never*/ });

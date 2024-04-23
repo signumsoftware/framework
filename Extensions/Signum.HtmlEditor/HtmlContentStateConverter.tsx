@@ -10,7 +10,7 @@ interface DraftToHtmlOptions {
 }
 
 interface HtmlToDraftOptions {
-  customChunkRenderer?: (nodeName: string, node: HTMLElement) => draftjs.RawDraftEntity | null | undefined
+  customChunkRenderer?: (nodeName: string, node: HTMLElement) => draftjs.RawDraftEntity | undefined
 }
 
 export class HtmlContentStateConverter implements IContentStateConverter {
