@@ -1683,6 +1683,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateTime.ToLongTimeString": return GetDateTimeToStringSqlFunction(m, "T");
             case "DateOnly.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
             case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
+            case "DateTime.ToUniversalTime": return TrySqlFunction(m.Object, SqlFunction.AtTimeZone, m.Type, new SqlConstantExpression("UTC"));
+            case "DateTime.ToLocalTime": return TrySqlFunction(m.Object, SqlFunction.AtTimeZone, m.Type, new SqlConstantExpression(TimeZoneInfo.Local.Id));
 
             //dateadd(month, datediff(month, 0, SomeDate),0);
             case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);

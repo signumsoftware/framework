@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { addClass, classes } from '../Globals'
+import { classes } from '../Globals'
 import { LineBaseController, LineBaseProps, tasks, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { EntityControlMessage } from '../Signum.Entities'
@@ -38,7 +38,7 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
       <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => <>
           {getTimeMachineIcon({ ctx: s.ctx })}
-          <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={addClass(htmlAtts, classes(s.ctx.formControlClass, c.mandatoryClass))} value={s.ctx.value || ""}
+          <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, s.ctx.formControlClass, c.mandatoryClass)} value={s.ctx.value || ""}
             disabled />
         </>}
       </FormGroup>
@@ -93,7 +93,7 @@ export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(pr
       {inputId => c.withItemGroup(
         <TextArea {...c.props.valueHtmlAttributes}
           autoResize={autoResize}
-          className={addClass(c.props.valueHtmlAttributes, classes(s.ctx.formControlClass, c.mandatoryClass))}
+          className={classes(c.props.valueHtmlAttributes?.className, s.ctx.formControlClass, c.mandatoryClass)}
           value={c.getValue() ?? ""}
           id={inputId}
           minHeight={c.props.valueHtmlAttributes?.style?.minHeight?.toString()}

@@ -14,6 +14,7 @@ import { Dropdown, ButtonProps, DropdownButton, Button, OverlayTrigger, Tooltip,
 import { BsColor } from "../Components";
 import { FunctionalAdapter } from "../Modals";
 import {  } from "../Finder";
+import { faDigitalOcean } from "@fortawesome/free-brands-svg-icons";
 
 export namespace EntityOperations {
   export function getEntityOperationButtons(ctx: ButtonsContext): Array<ButtonBarElement | undefined> | undefined {
@@ -147,12 +148,7 @@ export namespace EntityOperations {
         return;
 
       return Operations.API.constructFromEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(eoc.onConstructFromSuccess ?? (pack => {
-          Operations.notifySuccess();
-          if (pack?.entity.id != null)
-            Navigator.raiseEntityChanged(pack.entity);
-          return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
-        }))
+        .then(eoc.onConstructFromSuccess ?? eoc.onConstructFromSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     });
   }
@@ -164,12 +160,7 @@ export namespace EntityOperations {
         return;
 
       return Operations.API.constructFromLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(eoc.onConstructFromSuccess ?? (pack => {
-          Operations.notifySuccess();
-          if (pack?.entity.id != null)
-            Navigator.raiseEntityChanged(pack.entity);
-          return Navigator.createNavigateOrTab(pack, eoc.event ?? ({} as React.MouseEvent));
-        }))
+        .then(eoc.onConstructFromSuccess ?? eoc.onConstructFromSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")))
     });
   }
@@ -182,13 +173,7 @@ export namespace EntityOperations {
         return;
 
       return Operations.API.executeEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(eoc.onExecuteSuccess ?? (pack => {
-          eoc.frame.onReload(pack);
-          if (pack?.entity.id != null)
-            Navigator.raiseEntityChanged(pack.entity);
-          Operations.notifySuccess();
-          return;
-        }))
+        .then(eoc.onExecuteSuccess ?? eoc.onExecuteSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     });
   }
@@ -204,13 +189,7 @@ export namespace EntityOperations {
         Operations.API.executeLite(toLite(eoc.entity), eoc.operationInfo.key, ...args);
 
       return promise
-        .then(eoc.onExecuteSuccess ?? (pack => {
-          eoc.frame.onReload(pack);
-          if (pack?.entity.id != null)
-            Navigator.raiseEntityChanged(pack.entity);
-          Operations.notifySuccess();
-          return;
-        }))
+        .then(eoc.onExecuteSuccess ?? eoc.onExecuteSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     });
   }
@@ -222,12 +201,7 @@ export namespace EntityOperations {
         return;
 
       return Operations.API.deleteEntity(eoc.entity, eoc.operationInfo.key, ...args)
-        .then(eoc.onDeleteSuccess ?? (() => {
-          eoc.frame.onClose();
-          Navigator.raiseEntityChanged(eoc.entity.Type);
-          Operations.notifySuccess();
-          return;
-        }))
+        .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     });
   }
@@ -239,12 +213,7 @@ export namespace EntityOperations {
         return;
 
       return Operations.API.deleteLite(toLite(eoc.entity), eoc.operationInfo.key, ...args)
-        .then(eoc.onDeleteSuccess ?? (() => {
-          eoc.frame.onClose();
-          Navigator.raiseEntityChanged(eoc.entity.Type);
-          Operations.notifySuccess();
-          return;
-        }))
+        .then(eoc.onDeleteSuccess ?? eoc.onDeleteSuccess_Default)
         .catch(ifError(ValidationError, e => eoc.frame.setError(e.modelState, "entity")));
     });
   }

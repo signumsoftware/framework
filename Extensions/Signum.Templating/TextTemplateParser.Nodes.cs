@@ -3,6 +3,7 @@ using Signum.Utilities.DataStructures;
 using Microsoft.AspNetCore.Html;
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
+using System.Text.RegularExpressions;
 
 namespace Signum.Templating;
 
@@ -10,6 +11,9 @@ public static partial class TextTemplateParser
 {
     public abstract class TextNode
     {
+        public const string EmptyPlaceholder = "(∅)";
+
+
         public abstract void PrintList(TextTemplateParameters p);
         public abstract void FillQueryTokens(List<QueryToken> list);
 
@@ -76,6 +80,8 @@ public static partial class TextTemplateParser
 
                 p.RuntimeVariables.Add(ValueProvider.Variable, obj);
             }
+
+            p.StringBuilder.Append(EmptyPlaceholder);
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
@@ -156,9 +162,40 @@ public static partial class TextTemplateParser
         public string Print(TextTemplateParameters p)
         {
             this.PrintList(p);
-            return p.StringBuilder.ToString();
+            var text = p.StringBuilder.ToString();
+            var result = p.IsHtml ? CleanHtml(text) : CleanText(text);
+            return result;
         }
 
+        static string CleanText(string text)
+        {
+            var result = LineRegex.Replace(text, "");
+            return result.Replace(EmptyPlaceholder, "");
+        }
+
+        static Regex TagRegex = new Regex(@"<(?<tag>p|li|tr|td|strong|em)>( |&nbsp;)*\(∅\)( |&nbsp;)*</\k<tag>>");
+        static Regex CommentRegex = new Regex(@"<!-- *\(∅\) *-->");
+        static Regex LineRegex = new Regex(@"^ *\(∅\) *$\r?\n", RegexOptions.Multiline);
+        static string CleanHtml(string text)
+        {
+            
+        retry:
+            string newText = TagRegex.Replace(text, EmptyPlaceholder);
+
+            if (newText != text)
+            {
+                text = newText;
+                goto retry;
+            }
+
+            var text2 = CommentRegex.Replace(text, EmptyPlaceholder);
+
+            var result = LineRegex.Replace(text2, "");
+            result = result.Replace(EmptyPlaceholder, "");
+            return result;
+        }
+
+   
         public override void PrintList(TextTemplateParameters p)
         {
             foreach (var node in Nodes)
@@ -219,12 +256,17 @@ public static partial class TextTemplateParser
 
         public override void PrintList(TextTemplateParameters p)
         {
-            ValueProvider!.Foreach(p, () => Block.PrintList(p));
+            p.StringBuilder.Append(EmptyPlaceholder);
+            ValueProvider!.Foreach(p, () =>
+            {
+                Block.PrintList(p);
+                p.StringBuilder.Append(EmptyPlaceholder);
+            });
         }
 
         public override void FillQueryTokens(List<QueryToken> list)
         {
-            ValueProvider!.FillQueryTokens(list, forForeach: true);
+                ValueProvider!.FillQueryTokens(list, forForeach: true);
             Block.FillQueryTokens(list);
         }
 
@@ -281,6 +323,7 @@ public static partial class TextTemplateParser
 
             using (filtered is IEnumerable<ResultRow> rr ? p.QueryContext!.OverrideRows(rr) : null)
             {
+                p.StringBuilder.Append(EmptyPlaceholder);
                 if (filtered.Any())
                 {
                     AnyBlock.PrintList(p);
@@ -376,6 +419,7 @@ public static partial class TextTemplateParser
 
         public override void PrintList(TextTemplateParameters p)
         {
+            p.StringBuilder.Append(EmptyPlaceholder);
             if (Condition.Evaluate(p))
             {
                 IfBlock.PrintList(p);
@@ -384,6 +428,7 @@ public static partial class TextTemplateParser
             {
                 ElseBlock.PrintList(p);
             }
+            p.StringBuilder.Append(EmptyPlaceholder);
         }
 
         public override void ToString(StringBuilder sb, ScopedDictionary<string, ValueProviderBase> variables)

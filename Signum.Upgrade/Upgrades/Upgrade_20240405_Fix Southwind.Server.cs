@@ -19,11 +19,13 @@ class Upgrade_20240405_Fix_Southwind_Server : CodeUpgradeBase
                 c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
         });
 
-        uctx.ForeachCodeFile("*.json", "Southwind.Test.Environment", c =>
-        {
-            if (c.FilePath.Contains("settings."))
-                c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
-        });
+        if (Directory.Exists(uctx.AbsolutePathSouthwind("Southwind.Test.Environment"))){
+            uctx.ForeachCodeFile("*.json", "Southwind.Test.Environment", c =>
+            {
+                if (c.FilePath.Contains("settings."))
+                    c.MoveFile(c.FilePath.Replace("settings.", "appsettings."));
+            });
+        }
 
         uctx.ChangeCodeFile(@"Southwind.Test.Environment/SouthwindEnvironment.cs", c =>
         {

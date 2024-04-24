@@ -646,6 +646,7 @@ internal enum SqlFunction
     FREETEXT,
     FREETEXTTABLE,
     DATETRUNC,
+    AtTimeZone,
 }
 
 internal enum PostgresFunction

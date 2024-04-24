@@ -2,7 +2,7 @@ import * as React from 'react';
 import { DateTime } from 'luxon';
 import { CalendarProps } from 'react-widgets/cjs/Calendar'
 import { DatePicker } from 'react-widgets';
-import { addClass, classes } from '../Globals';
+import { classes } from '../Globals';
 import { toLuxonFormat, toFormatWithFixes, dateTimePlaceholder } from '../Reflection';
 import { LineBaseController, useController } from '../Lines/LineBase';
 import { FormGroup } from '../Lines/FormGroup';
@@ -44,12 +44,12 @@ export const DateTimeLine = React.memo(React.forwardRef(function DateTimeLine(pr
 
     if (s.ctx.readOnly)
         return (
-            <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-                {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={addClass(c.props.valueHtmlAttributes, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
+          <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+            {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={s.ctx} innerRef={c.setRefs}>
                     {m && toFormatWithFixes(m, luxonFormat)}
                 </FormControlReadonly>)}
             </FormGroup>
-        );
+    );
 
     const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
 

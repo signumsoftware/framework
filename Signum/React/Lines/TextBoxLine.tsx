@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { addClass, classes } from '../Globals'
+import { classes } from '../Globals'
 import { LineBaseController, genericForwardRefWithMemo, useController } from '../Lines/LineBase'
 import { FormGroup } from '../Lines/FormGroup'
 import { FormControlReadonly } from '../Lines/FormControlReadonly'
@@ -134,9 +134,9 @@ function internalTextBox<V extends string | null>(vl: TextBoxLineController, typ
         {vl.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}
             id={inputId}
-            autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+            autoComplete="off" 
             {...vl.props.valueHtmlAttributes}
-            className={addClass(vl.props.valueHtmlAttributes, classes(s.ctx.formControlClass, vl.mandatoryClass))}
+            className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formControlClass, vl.mandatoryClass)}
             value={vl.getValue() ?? ""}
             onBlur={handleBlur || htmlAtts?.onBlur}
             onChange={handleTextOnChange}

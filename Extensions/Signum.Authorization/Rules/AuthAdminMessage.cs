@@ -72,6 +72,8 @@ public enum AuthAdminMessage
     [Description("Role {0} is trivial merge")]
     Role0IsTrivialMerge,
 
+    UsedByRoles,
+
     Check,
     Uncheck,
 

@@ -91,11 +91,6 @@ public class WriteJsonPropertyContext
     public EntityJsonConverterFactory Factory { get; set; }
 }
 
-public static class EntityJsonConverter
-{
-
-}
-
 public enum EntityJsonConverterStrategy
 {
     /// <summary>

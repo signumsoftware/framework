@@ -781,16 +781,8 @@ export namespace Finder {
 
     if (fo.includeDefaultFilters == null ? defaultIncludeDefaultFilters : fo.includeDefaultFilters) {
       var defaultFilters = getDefaultFilter(qd, qs);
-      if (defaultFilters) {
-        var filterOptions = fo.filterOptions?.notNull() ?? [];
-        if (defaultFilters && defaultFilters.length <= filterOptions.length) {
-          if (equalFilters(defaultFilters, filterOptions.slice(0, defaultFilters.length))) {
-            filterOptions = filterOptions.slice(defaultFilters.length);
-          }
-        }
-
-        fo.filterOptions = [...defaultFilters, ...filterOptions];
-      }
+      if (defaultFilters)
+        fo.filterOptions = [...defaultFilters, ...fo.filterOptions ?? []];
     }
 
     if (fo.filterOptions)
@@ -1561,6 +1553,7 @@ export namespace Finder {
 
   export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
     var fo2: FindOptions = {
+      pagination: { mode: "All" },
       ...fo,
       columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
       columnOptionsMode: "ReplaceAll",
@@ -1568,6 +1561,20 @@ export namespace Finder {
 
     return getResultTable(fo2)
       .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
+  }
+
+  export function getResultTableTypedWithPagination<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
+    var fo2: FindOptions = {
+      ...fo,
+      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptionsMode: "ReplaceAll",
+    };
+
+    return getResultTable(fo2)
+      .then(fop => ({
+        totalElements: fop.totalElements,
+        rows: fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>)
+      }));
   }
 
   export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {

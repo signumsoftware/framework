@@ -497,7 +497,7 @@ export interface IOperationVisible {
 }
 
 export interface IHasChanges {
-  entityHasChanges?: () => boolean;
+  entityHasChanges?: () => boolean | undefined;
 }
 
 export interface FunctionalFrameComponent {
