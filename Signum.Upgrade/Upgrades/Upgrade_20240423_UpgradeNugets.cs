@@ -19,6 +19,7 @@ class Upgrade_20240424_UpgradeNugets : CodeUpgradeBase
                 <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.4.4"/>
                 <PackageReference Include="SixLabors.ImageSharp" Version="2.1.8" />
                 <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
+                <PackageReference Include="Microsoft.Graph" Version="5.49.0" />
                 <PackageReference Include="xunit" Version="2.7.1" />
                 <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8">
                 """);
