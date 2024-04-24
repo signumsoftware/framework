@@ -129,11 +129,12 @@ export function NumberBox(p: NumberBoxProps) {
     p.value != undefined ? p.format?.format(p.value) :
       "";
 
-  return <input ref={p.innerRef} {...p.htmlAttributes}
+  return <input ref={p.innerRef}
+    autoComplete="off" 
+    {...p.htmlAttributes}
     id={p.id}
     readOnly={p.readonly}
     type="text"
-    autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={classes(p.htmlAttributes?.className, p.formControlClass, "numeric")} value={value}
     onBlur={handleOnBlur}
     onChange={handleOnChange}
