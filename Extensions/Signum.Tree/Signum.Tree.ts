@@ -40,6 +40,7 @@ export module TreeMessage {
   export const Ascendants = new MessageKey("TreeMessage", "Ascendants");
   export const Children = new MessageKey("TreeMessage", "Children");
   export const Level = new MessageKey("TreeMessage", "Level");
+  export const TreeInfo = new MessageKey("TreeMessage", "TreeInfo");
   export const TreeType = new MessageKey("TreeMessage", "TreeType");
   export const LevelShouldNotBeGreaterThan0 = new MessageKey("TreeMessage", "LevelShouldNotBeGreaterThan0");
   export const ImpossibleToMove0InsideOf1 = new MessageKey("TreeMessage", "ImpossibleToMove0InsideOf1");
