@@ -237,7 +237,7 @@ export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, 
   React.useImperativeHandle(ref, () => controller, []);
 
   const input =
-    <input ref={controller.setInput} type="text" autoComplete="asdfsdf" {...p.inputAttrs}
+    <input ref={controller.setInput} type="text" autoComplete="off" {...p.inputAttrs}
       id={p.inputId}
       value={p.value}
       onFocus={controller.handleFocus}

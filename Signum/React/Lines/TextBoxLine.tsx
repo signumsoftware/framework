@@ -134,7 +134,7 @@ function internalTextBox<V extends string | null>(vl: TextBoxLineController, typ
         {vl.withItemGroup(
           <input type={type == "color" || type == "guid" ? "text" : type}
             id={inputId}
-            autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
+            autoComplete="off" 
             {...vl.props.valueHtmlAttributes}
             className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formControlClass, vl.mandatoryClass)}
             value={vl.getValue() ?? ""}

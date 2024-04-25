@@ -171,8 +171,11 @@ export const FrameModal = genericForwardRef(function FrameModal<T extends Modifi
   function hasChanges() {
 
     const hc = FunctionalAdapter.innerRef(entityComponent.current) as IHasChanges | null;
-    if (hc?.entityHasChanges)
-      return hc.entityHasChanges();
+    if (hc?.entityHasChanges) {
+      var result = hc.entityHasChanges();
+      if (result != null)
+        return result;
+    }
 
     if (state == null)
       return false;

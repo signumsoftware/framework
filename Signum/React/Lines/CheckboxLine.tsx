@@ -37,7 +37,7 @@ export const CheckboxLine = React.memo(React.forwardRef(function CheckboxLine(pr
           className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")}
         />
         {" "}{s.label}
-        {s.helpText && <small className="form-text text-muted">{s.helpText}</small>}
+        {s.helpText && <small className="d-block form-text text-muted">{s.helpText}</small>}
       </label>
     );
   }

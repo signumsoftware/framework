@@ -102,9 +102,9 @@ export function TimeTextBox(p: TimeTextBoxProps) {
   return <input
     id={p.id}
     ref={p.innerRef}
+    autoComplete="off"
     {...p.htmlAttributes}
     type="text"
-    autoComplete="asdfasf" /*Not in https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill*/
     className={classes(p.htmlAttributes?.className, p.formControlClass, "numeric")}
     value={value}
     onBlur={handleOnBlur}

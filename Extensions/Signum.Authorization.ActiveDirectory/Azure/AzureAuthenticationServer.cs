@@ -24,7 +24,10 @@ public class AzureADAuthenticationServer
                     return false;
 
                 var principal = ValidateToken(request.idToken, out var jwtSecurityToken);
-                var ctx = new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
+
+                var ctx = config.AzureB2C != null ?
+                    new AzureB2CClaimsAutoCreateUserContext(principal, request.accessToken) :
+                    new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
@@ -72,16 +75,24 @@ public class AzureADAuthenticationServer
     public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
     {
         var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
+        var adaConfig = ada.GetConfig();
 
-        string stsDiscoveryEndpoint = "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
+        string stsDiscoveryEndpoint =
+            adaConfig.AzureB2C != null ?
+            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.AzureB2C.TenantName}.onmicrosoft.com/{adaConfig.AzureB2C.SignInSignUpPolicy}/v2.0/.well-known/openid-configuration?p={adaConfig.AzureB2C.SignInSignUpPolicy}" :
+            "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
-
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
+
+        var issuer = adaConfig.AzureB2C != null ? 
+            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.Azure_DirectoryID}/v2.0/": 
+            $"https://login.microsoftonline.com/{adaConfig.Azure_DirectoryID}/v2.0/";
+
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
             ValidAudience = ada.GetConfig().Azure_ApplicationID.ToString(),
-            ValidIssuer = "https://login.microsoftonline.com/" + ada.GetConfig().Azure_DirectoryID + "/v2.0",
+            ValidIssuer = issuer,
 
             ValidateAudience = true,
             ValidateIssuer = true,

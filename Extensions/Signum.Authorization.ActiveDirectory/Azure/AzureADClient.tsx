@@ -20,6 +20,22 @@ export namespace AzureADClient {
       </>;
     LoginPage.showLoginForm = "initially_not";
     AuthClient.authenticators.push(loginWithAzureAD);
+
+    var msalConfig: msal.Configuration = {
+      auth: {
+        clientId: window.__azureApplicationId!, //This is your client ID
+        authority: window.__azureB2CAuthority ?? ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
+        redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+        knownAuthorities: window.__azureB2CAuthorityDomain ? [window.__azureB2CAuthorityDomain] : undefined,
+        postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
+      },
+      cache: {
+        cacheLocation: "localStorage",
+        storeAuthStateInCookie: true
+      }
+    };
+
+    msalClient = new msal.PublicClientApplication(msalConfig);
   }
   
   
@@ -30,20 +46,9 @@ export namespace AzureADClient {
   
 
   
-  var msalConfig: msal.Configuration = {
-    auth: {
-      clientId: window.__azureApplicationId!, //This is your client ID
-      authority: "https://login.microsoftonline.com/" + window.__azureTenantId!, //This is your tenant info
-      redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
-      postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
-    },
-    cache: {
-      cacheLocation: "localStorage",
-      storeAuthStateInCookie: true
-    }
-  };
+ 
   
-  var msalClient = new msal.PublicClientApplication(msalConfig);
+  let msalClient: msal.PublicClientApplication;
   
   export namespace Config {
     export let scopes = ["user.read"];
@@ -72,12 +77,13 @@ export namespace AzureADClient {
           })
       })
       .catch(e => {
+        debugger;
         ctx.setLoading(undefined);
         if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return;
   
-        if (e instanceof msal.AuthError)
-          throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
+        //if (e instanceof msal.AuthError)
+        //  throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
   
         throw e;
       });
@@ -190,5 +196,9 @@ declare global {
   interface Window {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
+
+    __azureB2CAuthority: string | null;
+    __azureB2CAuthorityDomain: string | null;
+    __azureB2CTenantName: string | null;
   }
 }

@@ -76,6 +76,7 @@ public enum UserState
     New = -1,
     Active,
     Deactivated,
+    AutoDeactivate, // manuall reactivate, new button und deactivatead is hidden in ui, über logic cann autodeactivated
 }
 
 [AutoInit]
@@ -85,6 +86,7 @@ public static class UserOperation
     public static ExecuteSymbol<UserEntity> Save;
     public static ExecuteSymbol<UserEntity> Reactivate;
     public static ExecuteSymbol<UserEntity> Deactivate;
+    public static ExecuteSymbol<UserEntity> AutoDeactivate;
     public static ExecuteSymbol<UserEntity> SetPassword;
     public static DeleteSymbol<UserEntity> Delete;
 }

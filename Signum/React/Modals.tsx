@@ -110,10 +110,10 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
       throw new Error("Not a valid react element: " + only);
 
     if (isForwardRef(only.type)) {
-      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } } as any);
+      return React.cloneElement(only, { ref: (a: any) => { this.innerRef = a; } } as any);//TODO: while forwardRef exists
     }
 
-    return this.props.children;
+    return React.cloneElement(only, { innerRef: (a: any) => { this.innerRef = a; } } as any); //TODO: To avoid having to use forward Ref until is removed
   }
 
   static withRef(element: React.ReactElement, ref: React.Ref<React.Component>) {

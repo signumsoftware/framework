@@ -125,6 +125,7 @@ export module UserOperation {
   export const Save : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
   export const Reactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Reactivate");
   export const Deactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Deactivate");
+  export const AutoDeactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.AutoDeactivate");
   export const SetPassword : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.SetPassword");
   export const Delete : Operations.DeleteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Delete");
 }
@@ -133,7 +134,8 @@ export const UserState = new EnumType<UserState>("UserState");
 export type UserState =
   "New" |
   "Active" |
-  "Deactivated";
+  "Deactivated" |
+  "AutoDeactivate";
 
 export module UserTypeCondition {
   export const DeactivatedUsers : Rules.TypeConditionSymbol = registerSymbol("TypeCondition", "UserTypeCondition.DeactivatedUsers");

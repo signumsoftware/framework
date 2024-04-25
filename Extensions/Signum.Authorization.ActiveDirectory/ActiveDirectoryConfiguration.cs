@@ -22,6 +22,9 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
     [Description("Azure Directory (tenant) ID")]
     public Guid? Azure_DirectoryID { get; set; }
 
+    [Description("Azure B2C")]
+    public AzureB2CEmbedded? AzureB2C { get; set; }
+
     //Only for Microsoft Graph / Sending Emails 
     //Your App Registration -> Certificates & secrets -> + New client secret
     [StringLengthValidator(Max = 100), Description("Azure Client Secret Value")]
@@ -62,6 +65,20 @@ public class ActiveDirectoryConfigurationEmbedded : EmbeddedEntity
 
         return base.PropertyValidation(pi);
     }
+}
+
+//https://learn.microsoft.com/en-us/azure/active-directory-b2c/configure-authentication-sample-spa-app
+public class AzureB2CEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string TenantName { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string SignInSignUpPolicy { get; set; }
+
+
+    public string GetAuthority() => $"https://{TenantName}.b2clogin.com/{TenantName}.onmicrosoft.com/{SignInSignUpPolicy}";
+    public string GetAuthorityDomain() => $"{TenantName}.b2clogin.com";
 }
 
 public class RoleMappingEmbedded : EmbeddedEntity
