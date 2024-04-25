@@ -35,9 +35,12 @@
     <Member Name="Guid" Description="Guid" />
     <Member Name="HideDisplayName" Description="Anzeigename ausblenden" />
     <Member Name="HideQuickLink" Description="Quick Link verstecken" />
+    <Member Name="IconColor" Description="Symbolfarbe" />
+    <Member Name="IconName" Description="Symbolname" />
     <Member Name="Key" Description="Schlüssel" />
     <Member Name="Owner" Description="Eigentümer" />
     <Member Name="Parts" Description="Teile" />
+    <Member Name="TitleColor" Description="Titel Farbe" />
     <Member Name="TokenEquivalencesGroups" Description="Tokenäquivalenzengruppen" />
   </Type>
   <Type Name="DashboardLiteModel" Description="Dashboard lite">
@@ -107,7 +110,7 @@
     <Member Name="Row" Description="Zeile" />
     <Member Name="StartColumn" Description="Spalte Start" />
     <Member Name="Title" Description="Titel" />
-    <Member Name="UseIconColorForTitle" Description="Symbolfarbe für Titel verwenden" />
+    <Member Name="TitleColor" Description="Titel Farbe" />
   </Type>
   <Type Name="SeparatorPartEntity" Description="Trennzeichenteil" PluralDescription="Separatorteile" Gender="n">
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
