@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Authorization;
 using Signum.Authorization.ActiveDirectory.Azure;
 using System.DirectoryServices.AccountManagement;
@@ -51,20 +52,20 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 {
     public ClaimsPrincipal ClaimsPrincipal { get; private set; }
 
-    string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
+    public string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
-    string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
+    public string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
 
     public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
     public string? SID => null;
 
-    public string UserName => GetClaim("preferred_username");
-    public string? EmailAddress => GetClaim("preferred_username");
+    public virtual string UserName => GetClaim("preferred_username");
+    public virtual string? EmailAddress => GetClaim("preferred_username");
 
-    public string? FullName => TryGetClain("name");
+    public virtual string? FullName => TryGetClain("name");
 
-    public string FirstName
+    public virtual string FirstName
     {
         get
         {
@@ -76,7 +77,7 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
         }
     }
 
-    public string LastName
+    public virtual string LastName
     {
         get
         {
@@ -97,6 +98,20 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
     }
 }
 
+public class AzureB2CClaimsAutoCreateUserContext : AzureClaimsAutoCreateUserContext
+{
+  
+    public override string UserName => GetClaim("emails");
+    public override string? EmailAddress => GetClaim("emails");
+
+    public override string? FullName => " ".Combine(FirstName, LastName);
+    public override string FirstName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
+    public override string LastName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
+
+    public AzureB2CClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken) : base(claimsPrincipal, accessToken)
+    {
+    }
+}
 
 public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 {
@@ -230,7 +245,7 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                 var found = groups.Any(g => g.Name == m.ADNameOrGuid || g.Guid == guid);
 
                 return found;
-            }).Select(a=>a.Role).Distinct().NotNull().ToList();
+            }).Select(a => a.Role).Distinct().NotNull().ToList();
 
             if (roles.Any())
             {
@@ -251,25 +266,26 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         }
         else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
         {
-            var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
-                AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
-
-            var roles = config.RoleMapping.Where(m =>
+            if (config.RoleMapping.Any())
             {
-                Guid.TryParse(m.ADNameOrGuid, out var guid);
-                var found = groups.Any(g => g.DisplayName == m.ADNameOrGuid || g.Id == guid);
+                var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
+                    AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
 
-                return found;
-            }).Select(a => a.Role).Distinct().NotNull().ToList();
+                var roles = config.RoleMapping.Where(m =>
+                {
+                    Guid.TryParse(m.ADNameOrGuid, out var guid);
+                    var found = groups.Any(g => g.DisplayName == m.ADNameOrGuid || g.Id == guid);
 
-            if (roles.Any())
-            {
-                var result = AuthLogic.GetOrCreateTrivialMergeRole(roles);
+                    return found;
+                }).Select(a => a.Role).Distinct().NotNull().ToList();
 
-                return result;
-            }
-            else
-            {
+                if (roles.Any())
+                {
+                    var result = AuthLogic.GetOrCreateTrivialMergeRole(roles);
+
+                    return result;
+                }
+
                 if (config.DefaultRole != null)
                     return config.DefaultRole;
 
@@ -278,6 +294,19 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                 else
                     return null;
             }
+            else
+            {
+                if (config.DefaultRole != null)
+                    return config.DefaultRole;
+
+                if (throwIfNull)
+                    throw new InvalidOperationException("No Default Role set");
+                else
+                    return null;
+            }
+
+         
+
         }
         else
         {
