@@ -36,9 +36,6 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
     var prevKeyBindingFn = props.keyBindingFn;
     props.keyBindingFn = (e) => {
 
-      if (prevKeyBindingFn)
-        prevKeyBindingFn(e);
-
       if ((e.key == KeyNames.space || e.key == KeyNames.backspace || e.key == KeyNames.tab)) {
         var block = getSelectedBlock(controller.editorState);
         var blockText = block.getText();
@@ -64,6 +61,8 @@ export default class ListCommandsPlugin implements HtmlEditorPlugin {
           return 'end-list';
         }
       } 
+      if (prevKeyBindingFn)
+        return prevKeyBindingFn(e);
 
       return getDefaultKeyBinding(e);
     }

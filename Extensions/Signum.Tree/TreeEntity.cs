@@ -91,6 +91,7 @@ public enum TreeMessage
     Ascendants,
     Children,
     Level,
+    TreeInfo,
     TreeType,
     [Description("Level should not be greater than {0}")]
     LevelShouldNotBeGreaterThan0,
@@ -146,4 +147,15 @@ public enum InsertPlace
     After,
     Before,
     LastNode,
+}
+
+public class TreeInfo
+{
+    public string name { get; set; }
+    public string fullName { get; set; }
+    public Lite<TreeEntity> lite { get; set; }
+    public bool disabled { get; set; }
+    public int childrenCount { get; set; }
+    public SqlHierarchyId route { get; set; }
+    public short level { get; set; }
 }

@@ -24,14 +24,14 @@ export default function MoveTreeModelComponent(p : MoveTreeModelComponentProps){
           queryName: typeName,
           filterOptions: [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: p.lite, frozen: true }]
         }}
-        onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: p.lite, frozen: true }])} />
+        onFind={() => TreeClient.openTree({ typeName, filterOptions: [{ token: QueryTokenString.entity(), operation: "DistinctTo", value: p.lite, frozen: true }] })} />
 
       <AutoLine ctx={ctx.subCtx(a => a.insertPlace)} onChange={() => forceUpdate()} />
 
       {(ctx.value.insertPlace == "Before" || ctx.value.insertPlace == "After") &&
         <EntityLine ctx={ctx.subCtx(a => a.sibling)} type={type}
-          findOptions={{ queryName: typeName, filterOptions: [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }]}}
-          onFind={() => TreeClient.openTree(typeName, [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }])} />}
+          findOptions={{ queryName: typeName, filterOptions: [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }] }}
+          onFind={() => TreeClient.openTree({ typeName, filterOptions: [{ token: QueryTokenString.entity<TreeEntity>().expression("Parent"), value: ctx.value.newParent }] })} />}
     </div>
   );
 }

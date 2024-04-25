@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@types/draft-js": "0.11.10",
+    "@types/html-to-draftjs": "1.4.3",
+    "@types/draftjs-to-html": "0.8.4",
     "draft-js": "0.11.7",
     "draftjs-to-html": "0.9.1",
     "html-to-draftjs": "1.5.0"
