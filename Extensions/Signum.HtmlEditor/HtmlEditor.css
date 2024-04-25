@@ -85,6 +85,10 @@
 .sf-html-editor.small-mode {
     box-shadow: none;
     margin-bottom: 0px;
+
+}
+
+.sf-html-editor.small-mode:not(:has(.sf-draft-toolbar)){
     padding: 0px;
 }
 

@@ -218,7 +218,7 @@ export default React.forwardRef(function HtmlEditor({
         className={classes("sf-html-editor",
           mandatory && !c.editorState.getCurrentContent().hasText() && (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
           error && "has-error",
-          c.small ? "small-mode" : "",
+        c.small ? "small-mode" : "",
           htmlAttributes?.className,
         )}
       >
@@ -269,13 +269,7 @@ const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-dr
   {c.extraButtons()}
 </div>;
 
-export const simpleToolbarButtons = (c: HtmlEditorController) => <div className="sf-draft-toolbar">
-  <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)" />
-  <InlineStyleButton controller={c} style="ITALIC" icon="italic" title="Italic (Ctrl + I)" />
-  <InlineStyleButton controller={c} style="UNDERLINE" icon="underline" title="Underline (Ctrl + U)" />
-  <InlineStyleButton controller={c} style="CODE" icon="code" title="Code" />
-  {c.extraButtons()}
-</div>;
+
 
 
 export interface HtmlEditorPlugin {
