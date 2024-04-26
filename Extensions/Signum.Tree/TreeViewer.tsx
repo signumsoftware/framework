@@ -405,7 +405,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
         {s.treeOptionsParsed && s.queryDescription && (s.showFilters ?
           <FilterBuilder
             queryDescription={s.queryDescription}
-            filterOptions={s.treeOptionsParsed!.filterOptions}
+            filterOptions={s.treeOptionsParsed.filterOptions}
             subTokensOptions={SubTokensOptions.CanAnyAll} /> :
           sfb && <div className="simple-filter-builder">{sfb}</div>)}
       </form>
