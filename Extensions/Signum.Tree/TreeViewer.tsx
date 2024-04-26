@@ -402,7 +402,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     return (
       <form onSubmit={this.handleSearchSubmit}>
-        {s.queryDescription && (s.showFilters ?
+        {s.treeOptionsParsed && s.queryDescription && (s.showFilters ?
           <FilterBuilder
             queryDescription={s.queryDescription}
             filterOptions={s.treeOptionsParsed!.filterOptions}
