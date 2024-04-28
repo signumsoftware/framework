@@ -91,14 +91,33 @@ export default function renderBars({ data, width, height, parameters, loading, o
           var row: ChartRow | undefined = rowsByKey[key];
           var active = detector?.(row);
 
-          var posx = row ? x(valueColumn.getValue(row))! : 0;
+          var posx: number;
+          var insidex: number;
+          var marginx: number;
+          var _width: number;
+
+          const scaleName = parameters["Scale"];
+          const value = row ? valueColumn.getValue(row) : 0;
+
+          if (scaleName == "MinZeroMax") {
+            posx = value < 0 ? x(value) : x(0);
+            _width = value < 0 ? x(0) - x(value) : x(value) - x(0);
+            insidex = _width;
+            marginx = -posx - labelsPadding;
+          }
+          else {
+            posx = 0;
+            _width = x(value);
+            insidex = _width;
+            marginx = -labelsPadding;
+          }
 
           return (
-            <g className="hover-group" key={key} transform={translate(0, y(key)! + bandMargin)}>
+            <g className="hover-group" key={key} transform={translate(posx, y(key)! + bandMargin)}>
               {row && <rect className="shape sf-transition hover-target"
                 opacity={active == false ? .5 : undefined}
                 transform={(initialLoad ? scale(0, 1) : scale(1, 1))}
-                width={x(valueColumn.getValue(row))}
+                width={_width}
                 height={y.bandwidth() - bandMargin * 2}
                 fill={keyColumn.getValueColor(row) ?? color(key)}
                 onClick={e => onDrillDown(row!, e)}
@@ -110,8 +129,8 @@ export default function renderBars({ data, width, height, parameters, loading, o
               }
               {y.bandwidth() > 15 && (isAll || row != null) &&
                 (isMargin ?
-                <g className="y-label" transform={translate(-labelsPadding, y.bandwidth() / 2)}>
-                    <TextEllipsis 
+                  <g className="y-label" transform={translate(marginx, y.bandwidth() / 2)}>
+                    <TextEllipsis
                       maxWidth={xRule.size('labels')}
                       className="y-label sf-transition"
                       fill={(keyColumn.getColor(k) ?? color(key))}
@@ -124,10 +143,10 @@ export default function renderBars({ data, width, height, parameters, loading, o
                     </TextEllipsis>)
                   </g> :
                   isInside ?
-                  <g className="y-label" transform={translate(labelsPadding, y.bandwidth() / 2)}>
-                      <TextEllipsis 
-                        transform={translate(posx, 0)}
-                        maxWidth={size - posx}
+                    <g className="y-label" transform={translate(labelsPadding, y.bandwidth() / 2)}>
+                      <TextEllipsis
+                        transform={translate(insidex, 0)}
+                        maxWidth={size - insidex}
                         className="y-label sf-transition"
                         fill={(keyColumn.getColor(k) ?? color(key))}
                         dominantBaseline="middle"
@@ -141,8 +160,8 @@ export default function renderBars({ data, width, height, parameters, loading, o
               {y.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 && row &&
                 <g className="numbers-label">
                   <TextIfFits
-                    transform={translate(x(valueColumn.getValue(row))! / 2, y.bandwidth() / 2)}
-                    maxWidth={x(valueColumn.getValue(row))!}
+                    transform={translate(_width / 2, y.bandwidth() / 2)}
+                    maxWidth={_width}
                     className="number-label sf-transition"
                     fill={parameters["NumberColor"] ?? "#000"}
                     dominantBaseline="middle"

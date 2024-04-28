@@ -57,7 +57,7 @@ export function scaleFor(column: ChartColumn<any>, values: number[], minRange: n
 
   }
 
-  if (scaleName == "MinMax") {
+  if (scaleName == "MinMax" || scaleName == "MinZeroMax") {
     if (column.type == "DateOnly" || column.type == "DateTime") {
       var dates = values.map(d => new Date(d));
 
