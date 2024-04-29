@@ -25,4 +25,5 @@
   <Type Name="NoteTypeOperation">
     <Member Name="Save" Description="Salva" />
   </Type>
+  <Type Name="NoteTypeSymbol" Description="il tipo di nota" PluralDescription="Tipi di note" />
 </Translations>
