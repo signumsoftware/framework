@@ -142,18 +142,7 @@ export namespace FilesClient {
   };
   
   
-  interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
-    file: IFile & ModifiableEntity;
-  }
-  
-  export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
-    return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
-  }
-  
-  FileThumbnail.defaultProps = {
-    style: { maxWidth: "150px" }
-  } as Partial<FileThumbnailProps>;
-  
+
   function isImage(propertyRoute: string | undefined) {
   
     if (propertyRoute == null)
@@ -167,6 +156,19 @@ export namespace FilesClient {
     return Boolean(pr?.member?.defaultFileTypeInfo?.onlyImages);
   }
 }
+
+interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  file: IFile & ModifiableEntity;
+}
+
+export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
+  return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
+}
+
+FileThumbnail.defaultProps = {
+  style: { maxWidth: "150px" }
+} as Partial<FileThumbnailProps>;
+
 
 declare module '@framework/Reflection' {
 
