@@ -36,6 +36,7 @@ public static class UserQueryLogic
             QueryLogic.Start(sb);
 
             PermissionLogic.RegisterPermissions(UserQueryPermission.ViewUserQuery);
+            PermissionLogic.RegisterPermissions(UserQueryPermission.BackToDefaultQuery);
 
             CurrentUserConverter.GetCurrentUserEntity = () => UserEntity.Current.Retrieve();
 
