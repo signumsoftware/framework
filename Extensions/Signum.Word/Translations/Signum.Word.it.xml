@@ -1,23 +1,45 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="WordAttachmentEntity" Description="l'allegato di Parola" PluralDescription="Allegati di Word">
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="ModelConverter" Description="Convertitore di modelli" />
+    <Member Name="OverrideModel" Description="Sostituisci modello" />
+    <Member Name="WordTemplate" Description="Modello Word" />
+  </Type>
   <Type Name="WordConverterSymbol" Description="Word converter" />
+  <Type Name="WordModelEntity" Description="il modello Word" PluralDescription="Modelli di parole">
+    <Member Name="FullClassName" Description="Nome completo della classe" />
+  </Type>
   <Type Name="WordTemplateEntity" Description="Modello Word" PluralDescription="Modelli Word">
+    <Member Name="Applicable" Description="Applicabile" />
     <Member Name="Culture" Description="Cultura" />
     <Member Name="DisableAuthorization" Description="Disattivare l'autorizzazione" />
     <Member Name="FileName" Description="Nome del file" />
+    <Member Name="Filters" Description="Filtri" />
+    <Member Name="GroupResults" Description="Risultati del Gruppo" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="Model" Description="Modello" />
     <Member Name="Name" Description="Nome" />
+    <Member Name="Orders" Description="Ordini" />
     <Member Name="Query" Description="Query" />
     <Member Name="Template" Description="Modello" />
     <Member Name="WordConverter" Description="Word converter" />
     <Member Name="WordTransformer" Description="Word transformer" />
   </Type>
   <Type Name="WordTemplateMessage">
+    <Member Name="_01RequiresExtraParameters" Description="{0} {1} richiede parametri aggiuntivi" />
     <Member Name="ChooseAReportTemplate" Description="Scegli un modello di rapporto" />
     <Member Name="ModelShouldBeSetToUseModel0" Description="Modello deve essere impostato per utilizzare il modello {0}" />
+    <Member Name="NoDefaultTemplateDefined" Description="Non è stato definito alcun modello predefinito" />
+    <Member Name="SelectTheSourceOfDataForYourTableOrChart" Description="Selezionare l'origine dei dati per la tabella o il grafico" />
     <Member Name="Type0DoesNotHaveAPropertyWithName1" Description="Tipo {0} non ha una proprietà con nome {1}" />
+    <Member Name="WordReport" Description="Rapporto di Word" />
+    <Member Name="WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart" Description="Scrivi questa chiave come Titolo nel &quot;Testo alternativo&quot; della tabella o del grafico" />
   </Type>
   <Type Name="WordTemplateOperation">
     <Member Name="CreateWordReport" Description="Crea rapporto Word" />
+    <Member Name="CreateWordTemplateFromWordModel" Description="Crea un modello di Word dal modello di Word" />
+    <Member Name="Delete" Description="Cancellare" />
     <Member Name="Save" Description="Salva" />
   </Type>
   <Type Name="WordTemplatePermission">

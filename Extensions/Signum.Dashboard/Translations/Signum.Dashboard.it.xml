@@ -1,35 +1,92 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="CachedQueryEntity" Description="la query memorizzata nella cache" PluralDescription="Query memorizzate nella cache">
+    <Member Name="CreationDate" Description="Data di creazione" />
+    <Member Name="Dashboard" Description="Cruscotto" />
+    <Member Name="File" Description="File" />
+    <Member Name="NumColumns" Description="Colonne Num" />
+    <Member Name="NumRows" Description="Num righe" />
+    <Member Name="QueryDuration" Description="Durata della query" />
+    <Member Name="UploadDuration" Description="Durata del caricamento" />
+    <Member Name="UserAssets" Description="Risorse dell'utente" />
+  </Type>
+  <Type Name="CachedQueryFileType">
+    <Member Name="CachedQuery" Description="Query memorizzata nella cache" />
+  </Type>
+  <Type Name="CacheQueryConfigurationEmbedded" Description="Configurazione delle query della cache">
+    <Member Name="AutoRegenerateWhenOlderThan" Description="Rigenerazione automatica quando è più vecchio di" />
+    <Member Name="MaxRows" Description="Numero massimo di righe" />
+    <Member Name="TimeoutForQueries" Description="Timeout per le query" />
+  </Type>
   <Type Name="DashboardEmbedededInEntity" Description="Pannello di controllo incorporato all'entità">
     <Member Name="Bottom" Description="In basso" />
     <Member Name="None" Description="Nessuno" />
+    <Member Name="Tab" Description="Scheda" />
     <Member Name="Top" Description="In alto" />
   </Type>
   <Type Name="DashboardEntity" Description="Pannello di controllo">
     <Member Name="AutoRefreshPeriod" Description="Periodo di aggiornamento automatico" />
+    <Member Name="CacheQueryConfiguration" Description="Configurazione delle query della cache" />
+    <Member Name="CombineSimilarRows" Description="Combinare righe simili" />
     <Member Name="DashboardPriority" Description="Priorità pannello informazioni" />
     <Member Name="DisplayName" Description="Nome visualizzato" />
     <Member Name="EmbeddedInEntity" Description="Incorporato nell'entità" />
     <Member Name="EntityType" Description="Tipo di entità" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideDisplayName" Description="Nascondi nome visualizzato" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
+    <Member Name="IconColor" Description="Colore dell'icona" />
+    <Member Name="IconName" Description="Nome dell'icona" />
+    <Member Name="Key" Description="Chiave" />
     <Member Name="Owner" Description="Proprietario" />
     <Member Name="Parts" Description="Parti" />
+    <Member Name="TitleColor" Description="Colore del titolo" />
+    <Member Name="TokenEquivalencesGroups" Description="Gruppi di equivalenze dei token" />
+  </Type>
+  <Type Name="DashboardLiteModel" Description="Cruscotto lite">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
   </Type>
   <Type Name="DashboardMessage">
     <Member Name="_0Is1InstedOf2In3" Description="{0} è {1} (anziché {2}) in {3}" />
+    <Member Name="AltClickToOpenResultsInAModalWindow" Description="[Alt] + Clic per aprire i risultati in una finestra modale" />
+    <Member Name="CLickInOneChartToFilterInTheOthers" Description="Fare clic su un grafico per filtrare gli altri" />
     <Member Name="CreateNewPart" Description="Creare una nuova parte" />
+    <Member Name="CtrlClickToFilterByMultipleElements" Description="[Ctrl] + clic per filtrare in base a più elementi" />
     <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="È necessario specificare il titolo per {0}" />
+    <Member Name="Edit" Description="Redigere" />
+    <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Per motivi di prestazioni, questo dashboard potrebbe mostrare informazioni obsolete" />
+    <Member Name="LasUpdateWasOn0" Description="L'ultimo aggiornamento è stato il {0}" />
     <Member Name="Part0IsTooLarge" Description="Parte {0} è troppo grande" />
     <Member Name="Part0OverlapsWith1" Description="Parte {0} si sovrappone a {1}" />
     <Member Name="Preview" Description="Anteprima" />
+    <Member Name="RowsSelected" Description="Riga/e selezionata" />
+    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="La query utente '{0}' non ha una colonna con intestazione di riepilogo" />
   </Type>
   <Type Name="DashboardOperation">
     <Member Name="Clone" Description="Clone" />
     <Member Name="Delete" Description="Eliminare" />
+    <Member Name="RegenerateCachedQueries" Description="Rigenerare le query memorizzate nella cache" />
     <Member Name="Save" Description="Salvare" />
   </Type>
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Vista pannello di controllo" />
+  </Type>
+  <Type Name="ImagePartEntity" Description="la parte Immagine" PluralDescription="Parti dell'immagine">
+    <Member Name="AltText" Description="Testo alternativo" />
+    <Member Name="ClickActionURL" Description="Fai clic sull'URL dell'azione" />
+    <Member Name="ImageSrcContent" Description="Contenuto dell'immagine src" />
+    <Member Name="RequiresTitle" Description="Richiede titolo" />
+  </Type>
+  <Type Name="InteractionGroup" Description="Gruppo di interazione">
+    <Member Name="Group1" Description="Gruppo 1" />
+    <Member Name="Group2" Description="Gruppo 2" />
+    <Member Name="Group3" Description="Gruppo 3" />
+    <Member Name="Group4" Description="Gruppo 4" />
+    <Member Name="Group5" Description="Gruppo 5" />
+    <Member Name="Group6" Description="Gruppo 6" />
+    <Member Name="Group7" Description="Gruppo 7" />
+    <Member Name="Group8" Description="Gruppo 8" />
   </Type>
   <Type Name="IPartEntity">
     <Member Name="RequiresTitle" Description="Titolo richiesto" />
@@ -37,6 +94,7 @@
   <Type Name="LinkElementEmbedded" Description="Collegamento all'elemento">
     <Member Name="Label" Description="Etichetta" />
     <Member Name="Link" Description="Collegamento" />
+    <Member Name="OpensInNewTab" Description="Si apre in una nuova scheda" />
   </Type>
   <Type Name="LinkListPartEntity" Description="Parte di elenco link">
     <Member Name="Links" Description="Links" />
@@ -45,8 +103,26 @@
   <Type Name="PanelPartEmbedded" Description="Parte del pannello">
     <Member Name="Columns" Description="Colonne" />
     <Member Name="Content" Description="Contenuto" />
+    <Member Name="CustomColor" Description="Colore personalizzato" />
+    <Member Name="IconColor" Description="Colore dell'icona" />
+    <Member Name="IconName" Description="Nome dell'icona" />
+    <Member Name="InteractionGroup" Description="Gruppo di interazione" />
     <Member Name="Row" Description="Riga" />
     <Member Name="StartColumn" Description="Colonna di inizio" />
     <Member Name="Title" Description="Titolo" />
+    <Member Name="TitleColor" Description="Colore del titolo" />
+  </Type>
+  <Type Name="SeparatorPartEntity" Description="la parte Separatore" PluralDescription="Parti del separatore">
+    <Member Name="RequiresTitle" Description="Richiede titolo" />
+    <Member Name="Title" Description="Titolo" />
+  </Type>
+  <Type Name="TokenEquivalenceEmbedded" Description="Equivalenza dei token">
+    <Member Name="Query" Description="Quesito" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="TokenEquivalenceGroupEntity" Description="il gruppo di equivalenza dei token" PluralDescription="Gruppi di equivalenza dei token">
+    <Member Name="Dashboard" Description="Cruscotto" />
+    <Member Name="InteractionGroup" Description="Gruppo di interazione" />
+    <Member Name="TokenEquivalences" Description="Equivalenze dei token" />
   </Type>
 </Translations>

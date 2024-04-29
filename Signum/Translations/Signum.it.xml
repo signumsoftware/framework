@@ -14,24 +14,76 @@
     <Member Name="False" Description="No" />
     <Member Name="True" Description="Sì" />
   </Type>
+  <Type Name="BootstrapStyle" Description="Stile bootstrap">
+    <Member Name="Danger" Description="Pericolo" />
+    <Member Name="Dark" Description="Oscuro" />
+    <Member Name="Info" Description="Informazioni" />
+    <Member Name="Light" Description="Leggero" />
+    <Member Name="Primary" Description="Primario" />
+    <Member Name="Secondary" Description="Secondario" />
+    <Member Name="Success" Description="Successo" />
+    <Member Name="Warning" Description="Avvertimento" />
+  </Type>
   <Type Name="CalendarMessage">
     <Member Name="Today" Description="Oggi" />
+  </Type>
+  <Type Name="ChangeLogMessage">
+    <Member Name="SeeMore" Description="Scopri di più..." />
+    <Member Name="ThereIsNotAnyNewChangesFrom0" Description="Non ci sono nuovi cambiamenti da {0}" />
+  </Type>
+  <Type Name="ChangeLogViewLogEntity" Description="il registro delle modifiche" PluralDescription="Modificare i log di visualizzazione dei log">
+    <Member Name="LastDate" Description="Ultima data" />
+    <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="ChangeLogViewLogOperation">
+    <Member Name="Delete" Description="Cancellare" />
+  </Type>
+  <Type Name="ClientErrorModel" Description="Errore del client">
+    <Member Name="ErrorType" Description="Tipo di errore" />
+    <Member Name="Message" Description="Messaggio" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="Stack" Description="Pila" />
+  </Type>
+  <Type Name="CollapsableCardMessage">
+    <Member Name="Collapse" Description="Collasso" />
+    <Member Name="Expand" Description="Espandere" />
   </Type>
   <Type Name="CollectionAnyAllType">
     <Member Name="All" Description="Tutti" />
     <Member Name="Any" Description="Qualsiasi" />
-    <Member Name="AnyNo" Description="Qualcuno no" />
-    <Member Name="NoOne" Description="Nessuno" />
+    <Member Name="NotAll" Description="Non tutti" />
+    <Member Name="NotAny" Description="Nessuno" />
   </Type>
   <Type Name="CollectionElementType">
     <Member Name="Element" Description="Elemento" />
     <Member Name="Element2" Description="Elemento (2)" />
     <Member Name="Element3" Description="Elemento (3)" />
   </Type>
+  <Type Name="CollectionToArrayType">
+    <Member Name="SeparatedByComma" Description="separati da virgola" />
+    <Member Name="SeparatedByCommaDistinct" Description="Separati da virgola (distinti)" />
+    <Member Name="SeparatedByNewLine" Description="Separati da una nuova linea" />
+    <Member Name="SeparatedByNewLineDistinct" Description="Separati da una nuova riga (distinta)" />
+  </Type>
+  <Type Name="ColumnFieldMessage">
+    <Member Name="ColumnsHelp" Description="Guida alle colonne" />
+    <Member Name="NoteTheAggregationIncludesRowsThatMayNotBeVisibleDueToPagination" Description="Nota: L'aggregazione include righe che potrebbero non essere visibili a causa dell'impaginazione." />
+    <Member Name="TheColumnHeaderTextIsTypicallyAutomaticallySetDependingOnTheFieldExpression" Description="Il testo dell'intestazione di colonna viene in genere impostato automaticamente in base all'espressione del campo, ma può essere personalizzato impostando {0} manualmente." />
+    <Member Name="WhenATableHasManyRepeatedValuesInAColumnYouCanCombineThemVertically01" Description="Quando una tabella contiene molti valori ripetuti in una colonna, è possibile combinarli verticalmente ({0}) quando il valore è lo stesso o quando è lo stesso e appartiene allo stesso {1}." />
+    <Member Name="YouCanAddOneNumericValueToTheColumnHeaderLikeTheTotalSumOfTheInvoices" Description="È possibile aggiungere un valore numerico all'intestazione di colonna (ad esempio la somma totale delle fatture), utilizzando un'espressione di campo che termina con un'aggregazione (ad esempio {0},...). Nota: l'aggregazione include righe che potrebbero non essere visibili a causa dell'impaginazione." />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity" Description="È possibile selezionare un'espressione di campo che punti a qualsiasi colonna del {0} di query o a qualsiasi campo di {1} o a qualsiasi entità correlata." />
+    <Member Name="YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity" Description="È possibile selezionare un'espressione di campo in modo che punti a qualsiasi campo del {0} o a qualsiasi entità correlata." />
+  </Type>
   <Type Name="ColumnOptionsMode" Description="Opzioni di colonna">
     <Member Name="Add" Description="Aggiungere" />
     <Member Name="InsertStart" Description="Inserisci inizio" />
     <Member Name="Remove" Description="Rimuovere" />
+    <Member Name="ReplaceAll" Description="Sostituisci tutto" />
+    <Member Name="ReplaceOrAdd" Description="Sostituisci o aggiungi" />
+  </Type>
+  <Type Name="CombineRows" Description="Combinare le righe">
+    <Member Name="EqualEntity" Description="Entità uguale" />
+    <Member Name="EqualValue" Description="Uguale valore" />
   </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="diverso da" />
@@ -46,9 +98,33 @@
     <Member Name="ANewVersionHasJustBeenDeployedSaveChangesAnd0" Description="È stata appena distribuita una nuova versione! Salva le modifiche e {0}" />
     <Member Name="OutdatedClientApplication" Description="Applicazione cliente obsoleta" />
     <Member Name="Refresh" Description="Aggiorna" />
+    <Member Name="VersionInfo" Description="Informazioni sulla versione" />
+  </Type>
+  <Type Name="ContainerToggleMessage">
+    <Member Name="Compress" Description="Comprimere" />
+    <Member Name="Expand" Description="Espandere" />
+  </Type>
+  <Type Name="ContainerTokenKey" Description="la chiave del token del contenitore" PluralDescription="Chiavi dei token del contenitore">
+    <Member Name="Operations" Description="[Operazioni]" />
+    <Member Name="QuickLinks" Description="[Collegamenti rapidi]" />
   </Type>
   <Type Name="CorruptMixin">
     <Member Name="Corrupt" Description="Corrompere" />
+  </Type>
+  <Type Name="CultureInfoEntity" Description="le info sulla Cultura" PluralDescription="Informazioni sulla cultura">
+    <Member Name="EnglishName" Description="Nome inglese" />
+    <Member Name="IsNeutral" Description="È neutro" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="NativeName" Description="Nome nativo" />
+  </Type>
+  <Type Name="CultureInfoOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="DashboardBehaviour" Description="Comportamento del cruscotto">
+    <Member Name="PromoteToDasboardPinnedFilter" Description="Promuovi a filtro appuntato dasboard" />
+    <Member Name="UseAsInitialSelection" Description="Usa come selezione iniziale" />
+    <Member Name="UseWhenNoFilters" Description="Utilizzare in assenza di filtri" />
   </Type>
   <Type Name="DeleteLogParametersEmbedded" Description="Parametri di eliminazione del registro">
     <Member Name="ChunkSize" Description="Dimensione del blocco" />
@@ -61,12 +137,30 @@
     <Member Name="DeleteLogsWithExceptionsOlderThan" Description="Delete logs with exceptions older than" />
     <Member Name="Type" Description="Type" />
   </Type>
+  <Type Name="DisabledMessage">
+    <Member Name="ParentIsDisabled" Description="Il genitore è disabilitato" />
+  </Type>
+  <Type Name="DisabledMixin">
+    <Member Name="IsDisabled" Description="È disabilitato" />
+  </Type>
+  <Type Name="DisableOperation">
+    <Member Name="Disable" Description="Disabilitare" />
+    <Member Name="Enabled" Description="Abilitato" />
+  </Type>
+  <Type Name="EmailOwnerData" Description="Dati del proprietario dell'e-mail">
+    <Member Name="AzureUserId" Description="ID utente di Azure" />
+    <Member Name="CultureInfo" Description="Informazioni sulla cultura" />
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="Email" Description="E-mail" />
+    <Member Name="Owner" Description="Proprietario" />
+  </Type>
   <Type Name="EmbeddedEntity" Description="Entità incorporato" />
   <Type Name="EngineMessage">
     <Member Name="ConcurrencyErrorOnDatabaseTable0Id1" Description="Concorrenza nel database, tabella errore = {0}, Id = {1}" />
     <Member Name="EntityWithType0AndId1NotFound" Description="Entità di tipo {0} con Id {1} non trovata" />
     <Member Name="NoWayOfMappingType0Found" Description="Mappatura di {0} non trovata" />
     <Member Name="TheEntity0IsNew" Description="L'entità {0} è nuovo" />
+    <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Ci sono '{0}' che si riferiscono a questa entità con la proprietà '{1}'" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Ci sono record in '{0}' che fanno riferimento a questa tabella mediante la colonna '{1}'" />
     <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="C'è già [m:un|f:una] {0} con {1} uguale a {2}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Accesso negato a {0} a causa di {1}" />
@@ -75,15 +169,38 @@
     <Member Name="Id" Description="Id" />
   </Type>
   <Type Name="EntityControlMessage">
+    <Member Name="_0Characters" Description="{0} personaggio(i)" />
+    <Member Name="_0CharactersRemaining" Description="{0} carattere rimanente" />
     <Member Name="Add" Description="Aggiungere..." />
+    <Member Name="Added" Description="Aggiunto" />
+    <Member Name="Changed" Description="Cambiato" />
+    <Member Name="Collapse" Description="Collasso" />
     <Member Name="Create" Description="Creare" />
     <Member Name="Detail" Description="Dettaglio" />
+    <Member Name="Download" Description="Scaricare" />
+    <Member Name="Edit" Description="Redigere" />
+    <Member Name="Expand" Description="Espandere" />
     <Member Name="Find" Description="Cercare" />
+    <Member Name="Maximize" Description="Massimizzare" />
+    <Member Name="Minimize" Description="Minimizzare" />
     <Member Name="Move" Description="Sposta" />
+    <Member Name="Moved" Description="Trasferito" />
     <Member Name="MoveDown" Description="Sposta giù" />
+    <Member Name="MoveLeft" Description="Sposta a sinistra" />
+    <Member Name="MoveRight" Description="Sposta a destra" />
     <Member Name="MoveUp" Description="Sposta su" />
+    <Member Name="MoveWithDragAndDropOrCtrlLeftRight" Description="Spostati con Drag and Drop o Ctrl + Sinistra / Destra" />
+    <Member Name="MoveWithDragAndDropOrCtrlUpDown" Description="Spostati con Drag and Drop o Ctrl + Su / Giù" />
     <Member Name="Navigate" Description="Navigare" />
+    <Member Name="NoChanges" Description="Nessuna modifica" />
+    <Member Name="Paste" Description="Incollare" />
+    <Member Name="PreviousValueWas0" Description="Il valore precedente era: {0}" />
+    <Member Name="Reload" Description="Ricaricare" />
     <Member Name="Remove" Description="Rimuovere" />
+    <Member Name="Removed0" Description="Rimossa {0}" />
+    <Member Name="RemovedAndSelectedAgain" Description="Rimosso e selezionato di nuovo" />
+    <Member Name="Selected" Description="Selezionato" />
+    <Member Name="ToggleSideBar" Description="Attiva/disattiva barra laterale" />
     <Member Name="View" Description="Vedere" />
   </Type>
   <Type Name="ExceptionEntity" Description="Eccezione" PluralDescription="Eccezioni">
@@ -99,6 +216,7 @@
     <Member Name="Form" Description="Modulo" />
     <Member Name="HResult" Description="H result" />
     <Member Name="MachineName" Description="Nome della macchina" />
+    <Member Name="Origin" Description="Origine" />
     <Member Name="QueryString" Description="Stringa di query" />
     <Member Name="Referenced" Description="Fa riferimento a" />
     <Member Name="RequestUrl" Description="Url richiesto" />
@@ -113,15 +231,56 @@
     <Member Name="UserHostName" Description="Nome host dell'utente" />
     <Member Name="Version" Description="Versione" />
   </Type>
+  <Type Name="ExceptionOrigin" Description="Origine dell'eccezione">
+    <Member Name="Backend_DotNet" Description="Backend DotNet" />
+    <Member Name="Frontend_React" Description="Frontend React" />
+  </Type>
+  <Type Name="FieldExpressionMessage">
+    <Member Name="_0And1YouCanExtractsPartsOfTheDateByContinuingTheExpressionWith2ReturnANumberOr3ReturnADate" Description="{0} e {1}, è possibile estrarre parti della data continuando l'espressione con {2} (restituisce un numero) o {3} (restituisce una data)" />
+    <Member Name="Aggregates" Description="Aggregati" />
+    <Member Name="AllowsToAddFiltersThatUseConditionsOnTheCollectionElemens" Description="Permette di aggiungere filtri che utilizzano condizioni sugli elementi di raccolta (senza moltiplicare il numero di righe) ({0} {1}). Per combinare condizioni diverse, utilizzare {2} / {3} gruppi con un prefisso (vedi sotto)." />
+    <Member Name="AStringLikeHelloANumberLike" Description="Una stringa (ad esempio &quot;Hello&quot;), un numero (ad esempio 3.14) o un valore booleano (true). A volte sarà possibile continuare l'espressione, ad esempio il {0} di una stringa o il calcolo della {1} o {2} di un numero (per gli istogrammi)." />
+    <Member Name="CanOnlyBeUsedAfterAnotherField" Description="Può essere utilizzato solo dopo un altro campo." />
+    <Member Name="CollectionOfEntitiesOrRelationships" Description="Raccolta di entità o relazioni." />
+    <Member Name="CollectionOperators" Description="Operatori di riscossione" />
+    <Member Name="Collections" Description="Collezioni" />
+    <Member Name="CountDistinct" Description="Conteggio distinto" />
+    <Member Name="CountNotNull" Description="Conteggio non nullo" />
+    <Member Name="Dates" Description="Datteri" />
+    <Member Name="EntityRelationships" Description="Relazioni tra entità" />
+    <Member Name="EntityRelationshipsAllowYouToNavigateToOtherTablesToGetFields" Description="Le relazioni di entità consentono di passare ad altre tabelle per ottenere i campi" />
+    <Member Name="FinallyRememberThatYouCan01FullFieldExpression" Description="Infine, ricorda che puoi {0} / {1} espressione di campo completo ad altri filtri o colonne aprendo l'elenco a discesa e utilizzando {2} / {3}." />
+    <Member Name="InSql" Description="in SQL" />
+    <Member Name="LearnMoreAboutFieldExpressions" Description="Scopri di più sulle espressioni di campo" />
+    <Member Name="MultipliesTheNumberOfRowsByAllTheElementsInTheCollection012" Description="Moltiplica il numero di righe per tutti gli elementi dell'insieme. ({0} / {1} {2}). Tutte le espressioni di campo che utilizzano lo stesso {3} riutilizzano lo stesso {4}, per evitare questo uso {5} / {6}." />
+    <Member Name="SimpleValues" Description="Valori semplici" />
+    <Member Name="WhenGroupingAllowsToCollapseManyValuesInOneValue" Description="Quando permette di comprimere molti valori in un unico valore" />
+    <Member Name="YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems" Description="È possibile esplorare le relazioni di database continuando l'espressione con altri elementi." />
+  </Type>
+  <Type Name="FilterFieldMessage">
+    <Member Name="AFilterConsistsOfA0AComparison1AndAConstant2" Description="Un filtro è costituito da un {0}, da un {1} di confronto e da un {2} costante." />
+    <Member Name="AndOrGroups" Description="Gruppi AND / Or" />
+    <Member Name="Field" Description="Campo" />
+    <Member Name="FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1" Description="Il campo può essere qualsiasi colonna della {0} di query o qualsiasi campo di {1}." />
+    <Member Name="FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity" Description="Il campo può essere qualsiasi campo del {0} o qualsiasi entità correlata." />
+    <Member Name="FilterGroupsCanAlsoBeUsedToCombineFiltersForTheSameElement012" Description="I gruppi di filtri possono essere utilizzati anche per combinare i filtri per {0} di una raccolta quando si utilizza un operatore come {1} o {2} nel campo del prefisso." />
+    <Member Name="FiltersHelp" Description="Aiuto per i filtri" />
+    <Member Name="Operator" Description="Operatore" />
+    <Member Name="TheSameElement" Description="lo stesso elemento" />
+    <Member Name="Using0YouCanGroupAFewFiltersTogether" Description="Utilizzando {0} è possibile raggruppare alcuni filtri in modo che sia soddisfatta una sola condizione. All'interno di un {1} è possibile creare un {2} nidificato e così via. " />
+    <Member Name="Value" Description="Valore" />
+  </Type>
   <Type Name="FilterGroupOperation" Description="Filtrare operazione di gruppo">
     <Member Name="And" Description="E" />
     <Member Name="Or" Description="O" />
   </Type>
   <Type Name="FilterOperation" Description="Funzionamento del filtro">
+    <Member Name="ComplexCondition" Description="Condizione complessa" />
     <Member Name="Contains" Description="contiene" />
     <Member Name="DistinctTo" Description="diverso da" />
     <Member Name="EndsWith" Description="finisce con" />
     <Member Name="EqualTo" Description="uguale a" />
+    <Member Name="FreeText" Description="testo libero" />
     <Member Name="GreaterThan" Description="maggiore di" />
     <Member Name="GreaterThanOrEqual" Description="maggiore o uguale a" />
     <Member Name="IsIn" Description="è in" />
@@ -135,8 +294,17 @@
     <Member Name="NotStartsWith" Description="Non inizia con" />
     <Member Name="StartsWith" Description="inizia con" />
   </Type>
+  <Type Name="FrameMessage">
+    <Member Name="Copied" Description="Copiato" />
+    <Member Name="CopyToClipboard" Description="Copia negli Appunti" />
+    <Member Name="Fullscreen" Description="Schermo intero" />
+    <Member Name="Main" Description="Principale" />
+    <Member Name="New0_G" Description="Nuovo {0}" />
+    <Member Name="ThereAreErrors" Description="Ci sono errori" />
+  </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
+    <Member Name="PartitionId" Description="ID partizione" />
   </Type>
   <Type Name="ImmutableEntity" Description="Entità immutabile">
     <Member Name="AllowChange" Description="Consentire modifiche" />
@@ -154,9 +322,11 @@
     <Member Name="error" Description="Errore" />
     <Member Name="executed" Description="Eseguito" />
     <Member Name="find" Description="Cerca" />
+    <Member Name="groupByThisColumn" Description="Raggruppa in base a questa colonna" />
     <Member Name="groupResults" Description="Raggruppare i risultati" />
     <Member Name="hideFilters" Description="Nascondi filtri" />
     <Member Name="insertColumn" Description="Inserisci colonna" />
+    <Member Name="joinMode" Description="Modalità di partecipazione" />
     <Member Name="loading" Description="Caricamento..." />
     <Member Name="loseCurrentChanges" Description="Perdere le modifiche correnti?" />
     <Member Name="moveDown" Description="Sposta giù" />
@@ -171,6 +341,7 @@
     <Member Name="popupErrorsStop" Description="Ci sono errori nell'entità" />
     <Member Name="remove" Description="Rimuovere" />
     <Member Name="removeColumn" Description="Eliminare colonna" />
+    <Member Name="removeOtherColumns" Description="Rimuovi altre colonne" />
     <Member Name="restoreDefaultColumns" Description="Ripristinare colonne predefinite" />
     <Member Name="saveChangesBeforeOrPressCancel" Description="Salvare le modifiche prima o premere Annulla" />
     <Member Name="saved" Description="Salvato" />
@@ -196,6 +367,8 @@
   <Type Name="ModelEntity" Description="Entità modello" />
   <Type Name="ModifiableEntity" Description="Valore modificabile" />
   <Type Name="NormalControlMessage">
+    <Member Name="CopyEntityTypeAndIdForAutocomplete" Description="Copia il tipo di entità e l'ID (per il completamento automatico)" />
+    <Member Name="CopyEntityUrl" Description="Copia l'URL dell'entità" />
     <Member Name="SaveChangesFirst" Description="Salvare prima le modifiche" />
     <Member Name="ViewForType0IsNotAllowed" Description="Non è consentita la visualizzazione del tipo {0}" />
   </Type>
@@ -212,22 +385,33 @@
   <Type Name="OperationMessage">
     <Member Name="_0AndClose" Description="{0} &amp; Chiudi" />
     <Member Name="_0AndNew" Description="{0} &amp; Nuovo" />
+    <Member Name="_0Errors" Description="{0} errori(i)" />
     <Member Name="AddSetter" Description="Aggiungi setter" />
+    <Member Name="AreYouSureYouWantToCancelTheOperation" Description="Sei sicuro di voler annullare l'operazione?" />
     <Member Name="BulkModifications" Description="Modifiche in gruppo" />
+    <Member Name="CancelOperation" Description="Annullare l'operazione?" />
+    <Member Name="ClosingThisModalOrBrowserTabWillCancelTheOperation" Description="La chiusura di questa finestra modale (o scheda del browser!) annullerà l'operazione sul server" />
     <Member Name="Condition" Description="Condizione" />
     <Member Name="Confirm" Description="Confermare" />
     <Member Name="Create" Description="Crea..." />
+    <Member Name="Create0" Description="Creare {0}" />
     <Member Name="CreateFromRegex" Description="^Crea (.*) da .*$" />
+    <Member Name="Deleting" Description="Eliminazione" />
+    <Member Name="Executing0" Description="Esecuzione di {0}" />
     <Member Name="InUserInterface" Description="(nell'interfaccia utente)" />
+    <Member Name="LastOperationLog" Description="Registro delle ultime operazioni" />
     <Member Name="Logs" Description="Registri" />
     <Member Name="MultiSetter" Description="multi-setter" />
+    <Member Name="Operation" Description="Operazione" />
     <Member Name="Operation01IsNotAuthorized" Description="Operazione {0} ({1}) non autorizzata" />
     <Member Name="PleaseConfirmThatYouWouldLikeToApplyTheAboveChangesAndExecute0Over12" Description="Confermare che si desidera applicare le modifiche sopra ed eseguire {0} su {1} {2}" />
+    <Member Name="PleaseConfirmYouWouldLikeTo01" Description="Si prega di confermare che si desidera {0} {1}" />
     <Member Name="PleaseConfirmYouWouldLikeToDelete0FromTheSystem" Description="Confermare che si desidera eliminare {0} dal sistema" />
     <Member Name="PreviousOperationLog" Description="Registro operazioni precedente" />
     <Member Name="Setters" Description="Setter" />
     <Member Name="StateShouldBe0InsteadOf1" Description="Lo stato dovrebbe essere {0} (anziché {1})" />
     <Member Name="TheOperation0DidNotReturnAnEntity" Description="{0} non ha restituito un'entità" />
+    <Member Name="TheStateOf0ShouldBe1InsteadOf2" Description="Lo stato di {0} dovrebbe essere {1} (invece di {2})" />
   </Type>
   <Type Name="OperationSymbol" Description="Operazione" PluralDescription="Operazioni" />
   <Type Name="OrderType" Description="Tipo di ordine">
@@ -237,13 +421,18 @@
   <Type Name="PaginationMessage">
     <Member Name="All" Description="Tutti" />
   </Type>
-  <Type Name="PaginationMode">
+  <Type Name="PaginationMode" Description="Modalità di impaginazione">
     <Member Name="All" Description="Tutti" />
     <Member Name="Firsts" Description="Primi" />
     <Member Name="Paginate" Description="Impaginare" />
   </Type>
+  <Type Name="PermissionSymbol" Description="l'autorizzazione" PluralDescription="Autorizzazioni" />
   <Type Name="PinnedFilterActive" Description="Filtro fisso attivo">
     <Member Name="Always" Description="Sempre" />
+    <Member Name="Checkbox_Checked" Description="Casella di controllo (selezionata)" />
+    <Member Name="Checkbox_Unchecked" Description="Casella di controllo (deselezionata)" />
+    <Member Name="NotCheckbox_Checked" Description="Casella di controllo Non selezionata (selezionata)" />
+    <Member Name="NotCheckbox_Unchecked" Description="Casella di controllo Non selezionata (deselezionata)" />
     <Member Name="WhenHasValue" Description="Quando ha valore" />
   </Type>
   <Type Name="PropertyOperation" Description="Operazione di proprietà">
@@ -260,58 +449,85 @@
     <Member Name="Path" Description="Path" />
     <Member Name="RootType" Description="Root type" />
   </Type>
+  <Type Name="PropertyRouteMessage">
+    <Member Name="Translated" Description="Tradotta" />
+  </Type>
   <Type Name="QueryEntity" Description="Query" PluralDescription="Queries">
     <Member Name="Key" Description="Key" />
+  </Type>
+  <Type Name="QueryTokenDateMessage">
+    <Member Name="Date" Description="Dattero" />
+    <Member Name="DateTimePart" Description="Parte DateTime" />
+    <Member Name="Day" Description="Giorno" />
+    <Member Name="DayOfWeek" Description="Giorno della settimana" />
+    <Member Name="DayOfYear" Description="Giorno dell'anno" />
+    <Member Name="Days" Description="Giorni" />
+    <Member Name="Every0Hours" Description="Ogni {0} ore" />
+    <Member Name="Every0Milliseconds" Description="Ogni {0} millisecondi" />
+    <Member Name="Every0Minutes" Description="Ogni {0} minuti" />
+    <Member Name="Every0Seconds" Description="Ogni {0} secondi" />
+    <Member Name="Hour" Description="Ora" />
+    <Member Name="HourStart" Description="Inizio dell'ora" />
+    <Member Name="Millisecond" Description="Millisecondo" />
+    <Member Name="Minute" Description="Minuto" />
+    <Member Name="MinuteStart" Description="Inizio minuto" />
+    <Member Name="Month" Description="Mese" />
+    <Member Name="MonthStart" Description="Inizio mese" />
+    <Member Name="Quarter" Description="Quarto" />
+    <Member Name="QuarterStart" Description="Inizio trimestre" />
+    <Member Name="Second" Description="Secondo" />
+    <Member Name="SecondStart" Description="Seconda partenza" />
+    <Member Name="TimeOfDay" Description="Ora del giorno" />
+    <Member Name="TotalDays" Description="Giorni totali" />
+    <Member Name="TotalHours" Description="Ore totali" />
+    <Member Name="TotalMilliseconds" Description="Millisecondi totali" />
+    <Member Name="TotalMinutes" Description="Minuti totali" />
+    <Member Name="TotalSeconds" Description="Secondi totali" />
+    <Member Name="UtcDateTime" Description="UTC - Data/ora" />
+    <Member Name="WeekNumber" Description="Numero della settimana" />
+    <Member Name="WeekStart" Description="Inizio della settimana" />
+    <Member Name="Year" Description="Anno" />
   </Type>
   <Type Name="QueryTokenMessage">
     <Member Name="_0As1" Description="{0} come {1}" />
     <Member Name="_0HasValue" Description="{0} ha valore" />
     <Member Name="_0Mod1" Description="{0} mod {1}" />
+    <Member Name="_0Of1" Description="{0} di {1}" />
     <Member Name="_0Steps1" Description="passo di {0} {1}" />
     <Member Name="And" Description=" e " />
     <Member Name="AnyEntity" Description="qualsiasi entità" />
     <Member Name="As0" Description="Come {0}" />
+    <Member Name="CellOperation" Description="Funzionamento della cella" />
     <Member Name="Check" Description="Verifica" />
     <Member Name="Column0NotFound" Description="Colonna {0} non trovata" />
+    <Member Name="ContainerOfCellOperations" Description="Contenitore delle operazioni di cella" />
     <Member Name="Count" Description="[Num]" />
     <Member Name="Date" Description="Data" />
     <Member Name="DateTime" Description="Data e ora" />
     <Member Name="DateTimeOffset" Description="data e ora con fuso orario" />
-    <Member Name="Day" Description="Giorno" />
-    <Member Name="DayOfWeek" Description="Giorno della settimana" />
-    <Member Name="DayOfYear" Description="Giorno dell'anno" />
     <Member Name="DecimalNumber" Description="numero decimale" />
     <Member Name="Distinct" Description="Distinto" />
     <Member Name="Embedded0" Description="{0} incorporato" />
+    <Member Name="EntityType" Description="Tipo di entità" />
     <Member Name="GlobalUniqueIdentifier" Description="Identificatore univoco globale" />
     <Member Name="HasValue" Description="Ha valore" />
-    <Member Name="Hour" Description="Ora" />
-    <Member Name="HourStart" Description="Ora di inizio" />
     <Member Name="Length" Description="Lunghezza" />
     <Member Name="ListOf0" Description="elenco di {0}" />
-    <Member Name="Millisecond" Description="Millisecondo" />
-    <Member Name="Minute" Description="Minuto" />
-    <Member Name="MinuteStart" Description="Minuto di inizio" />
+    <Member Name="MatchRank" Description="Classifica partita" />
+    <Member Name="MatchRankFor0" Description="Classifica della partita per {0}" />
+    <Member Name="MatchSnippet" Description="Frammento di partita" />
     <Member Name="Modulo0" Description="Modulo {0}" />
-    <Member Name="Month" Description="Mese" />
-    <Member Name="MonthStart" Description="Inizio mese " />
     <Member Name="MoreThanOneColumnNamed0" Description="Più di una colonna denominata {0}" />
     <Member Name="Not" Description="Non" />
     <Member Name="Null" Description="nullo" />
     <Member Name="Number" Description="numero" />
-    <Member Name="Quarter" Description="Trimestre" />
-    <Member Name="QuarterStart" Description="Inizio trimestre" />
-    <Member Name="Second" Description="Secondo" />
-    <Member Name="SecondStart" Description="Secondo di inizio" />
+    <Member Name="PartitionId" Description="ID partizione" />
+    <Member Name="RowId" Description="ID riga" />
+    <Member Name="RowOrder" Description="Ordine di riga" />
+    <Member Name="SnippetOf0" Description="Frammento di codice per {0}" />
     <Member Name="Step0" Description="Passo {0}" />
     <Member Name="Text" Description="testo" />
-    <Member Name="TotalDays" Description="Giorni totali" />
-    <Member Name="TotalHours" Description="Ore totali" />
-    <Member Name="TotalMilliseconds" Description="Millisecondi totali" />
-    <Member Name="TotalSeconds" Description="Secondi totali" />
-    <Member Name="WeekNumber" Description="Numero di settimana" />
-    <Member Name="WeekStart" Description="Inizio settimana" />
-    <Member Name="Year" Description="Anno" />
+    <Member Name="TimeOfDay" Description="Ora del giorno" />
   </Type>
   <Type Name="QuickLinkMessage">
     <Member Name="No0Found" Description="Nessun {0} trovato" />
@@ -335,6 +551,10 @@
     <Member Name="SelectedItems0" Description="Elementi selezionati: {0}" />
     <Member Name="TagsLabel" Description="Elementi selezionati" />
   </Type>
+  <Type Name="RefreshMode">
+    <Member Name="Auto" Description="Automatico" />
+    <Member Name="Manual" Description="Manuale" />
+  </Type>
   <Type Name="RoundingType">
     <Member Name="Ceil" Description="Ceil" />
     <Member Name="Floor" Description="Floor" />
@@ -350,39 +570,65 @@
     <Member Name="_01of2Results_N" Description="{0} - {1} di {2} risultati." />
     <Member Name="_0FiltersCollapsed" Description="{0} filtri compressi" />
     <Member Name="_0Results_N" Description="{0} risultato[i]." />
+    <Member Name="AddAndGroup" Description="Aggiungi gruppo AND" />
     <Member Name="AddColumn" Description="Aggiungi colonna" />
     <Member Name="AddFilter" Description="Aggiungi filtro" />
-    <Member Name="AddGroup" Description="Aggiungi gruppo" />
+    <Member Name="AddOrGroup" Description="Aggiungi gruppo OR" />
     <Member Name="AddValue" Description="Aggiungi valore" />
+    <Member Name="AdvancedFilters" Description="Filtri avanzati" />
+    <Member Name="AndGroup" Description="E gruppo" />
     <Member Name="ChooseTheDisplayNameOfTheNewColumn" Description="Scegliere il nome della nuova colonna" />
     <Member Name="CollectionsCanNotBeAddedAsColumns" Description="Gli insiemi non possono essere aggiunti come colonne" />
+    <Member Name="ColSpan" Description="Portata del colle" />
     <Member Name="Column" Description="Colonna" />
+    <Member Name="ColumnField" Description="Campo colonna" />
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="CombineRowsWith" Description="Combina righe con" />
+    <Member Name="Copy" Description="Copiare" />
     <Member Name="Create" Description="Creare" />
     <Member Name="CreateNew0_G" Description="Creare nuov[m:o|f:a] {0}" />
     <Member Name="DeleteAllFilter" Description="Rimuovere tutti i filtri" />
     <Member Name="DeleteFilter" Description="Elimina filtro" />
+    <Member Name="DerivedGroupKey" Description="Chiave di gruppo derivata" />
     <Member Name="DisplayName" Description="Nome visualizzato" />
     <Member Name="DoYouWantToSelectTheNew01_G" Description="Restituire il nuovo {0} ({1})?" />
-    <Member Name="Explore" Description="Esplora" />
+    <Member Name="EditPinnedFilters" Description="Modificare i filtri bloccati" />
+    <Member Name="Equal0" Description="Uguale {0}" />
     <Member Name="Field" Description="Campo" />
+    <Member Name="FilterDesigner" Description="Finestra di progettazione filtri" />
     <Member Name="Filters" Description="Filtri" />
     <Member Name="Find" Description="Cerca" />
     <Member Name="FinderOf0" Description="Ricerca per {0}" />
     <Member Name="First0Results_N" Description="primi {0} risultati." />
+    <Member Name="GoBackToPageOne" Description="Torna alla prima pagina" />
+    <Member Name="GroupKey" Description="Chiave di gruppo" />
+    <Member Name="GroupPrefix" Description="Prefisso di gruppo" />
+    <Member Name="HiddenColumn" Description="Colonna nascosta" />
+    <Member Name="HideHiddenColumns" Description="Nascondi colonne nascoste" />
+    <Member Name="InvalidColumnExpression" Description="Espressione di colonna non valida" />
+    <Member Name="IsActive" Description="Attiva" />
     <Member Name="Label" Description="Etichetta" />
+    <Member Name="MoreThanOne0Selected" Description="Più di un {0} selezionato" />
     <Member Name="Name" Description="Nome" />
     <Member Name="NewColumnSName" Description="Nome della nuova colonna" />
     <Member Name="NoActionsFound" Description="Le azioni non sono state trovate" />
     <Member Name="NoColumnSelected" Description="Nessuna colonna selezionata" />
     <Member Name="NoFiltersSpecified" Description="Nessun filtro specificato" />
     <Member Name="NoResultsFound" Description="Nessun risultato trovato" />
+    <Member Name="NoResultsFoundBecauseTheRule0DoesNotAllowedToExplore1WithoutFilteringFirst" Description="Nessun risultato trovato perché la regola {0} non consente di esplorare {1} senza prima filtrare" />
+    <Member Name="NoResultsFoundBecauseYouAreNotAllowedToExplore0WithoutFilteringBy1First" Description="Nessun risultato trovato perché non è consentito esplorare {0} senza prima filtrare per {1}" />
+    <Member Name="NoResultsFoundInPage01" Description="Nessun risultato trovato a pagina {0}, {1}" />
+    <Member Name="NoResultsInThisPage" Description="Nessun risultato in questa pagina" />
     <Member Name="Of" Description="di" />
-    <Member Name="Operation" Description="Operazione" />
     <Member Name="Operations" Description="Operazioni" />
+    <Member Name="Operator" Description="Operatore" />
+    <Member Name="Options" Description="Opzioni" />
+    <Member Name="OrGroup" Description="Gruppo OR" />
     <Member Name="PaginationAll_0Elements" Description="{0} elementi" />
     <Member Name="PaginationFirst_01Elements" Description="{0} {1} elementi" />
     <Member Name="PaginationPages_0Of01lements" Description="{0} di {1} elementi" />
     <Member Name="ParentValue" Description="Valore padre" />
+    <Member Name="PinFilter" Description="Filtro a spillo" />
     <Member Name="PinnedFilter" Description="Filtro fisso" />
     <Member Name="PleaseSelectA0_G" Description="Selezionare un {0}" />
     <Member Name="PleaseSelectAnEntity" Description="Selezionare un'entità" />
@@ -396,23 +642,41 @@
     <Member Name="ReturnNewEntity" Description="Restituire la nuova entità?" />
     <Member Name="Row" Description="Fila" />
     <Member Name="Search" Description="Cerca" />
-    <Member Name="SplitText" Description="Dividere il testo" />
+    <Member Name="ShowHiddenColumns" Description="Mostra colonne nascoste" />
+    <Member Name="SimpleFilters" Description="Filtri semplici" />
+    <Member Name="Split" Description="Diviso" />
+    <Member Name="SplitsTheStringValueBySpaceAndSearchesEachPartIndependentlyInAnANDGroup" Description="Divide il valore della stringa in base allo spazio e cerca ogni parte in modo indipendente in un gruppo AND" />
+    <Member Name="SplitsTheValuesAndSearchesEachOneIndependentlyInAnANDGroup" Description="Suddivide i valori e cerca ciascuno di essi in modo indipendente in un gruppo AND" />
+    <Member Name="SummaryHeader" Description="Intestazione di riepilogo" />
+    <Member Name="SummaryHeaderMustBeAnAggregate" Description="L'intestazione di riepilogo deve essere un'aggregazione (come Somma, Conteggio, ecc.)" />
+    <Member Name="SwitchViewMode" Description="Cambia modalità di visualizzazione" />
     <Member Name="ThereIsNo0" Description="Non c'è nessun {0}" />
+    <Member Name="TimeMachine" Description="Macchina del tempo" />
     <Member Name="ToPreventPerformanceIssuesAutomaticSearchIsDisabledCheckYourFiltersAndThenClickSearchButton" Description="Per evitare problemi di prestazioni, la ricerca automatica è disabilitata, controllare prima i filtri e quindi fare clic sul pulsante [Cerca]." />
+    <Member Name="UnpinFilter" Description="Sblocca filtro" />
     <Member Name="Value" Description="Valore" />
     <Member Name="View" Description="Visualizza" />
     <Member Name="ViewSelected" Description="Visualizzazione selezionata" />
     <Member Name="WhenPressedTheFilterValueWillBeSplittedAndAllTheWordsHaveToBeFound" Description="Quando viene premuto, il valore del filtro verrà diviso e tutte le parole devono essere trovate" />
     <Member Name="WhenPressedTheFilterWillTakeNoEffectIfTheValueIsNull" Description="Quando viene premuto, il filtro non ha alcun effetto se il valore è null" />
   </Type>
+  <Type Name="SearchVisualTip">
+    <Member Name="ColumnHelp" Description="Colonna di aiuto" />
+    <Member Name="FilterHelp" Description="Filtro aiuto" />
+    <Member Name="GroupHelp" Description="Aiuto di gruppo" />
+    <Member Name="SearchHelp" Description="Guida alla ricerca" />
+  </Type>
   <Type Name="SelectorMessage">
     <Member Name="_0Selector" Description="{0} selettore" />
     <Member Name="ChooseAValue" Description="Scegliere un valore" />
+    <Member Name="ChooseValues" Description="Scegliere i valori" />
     <Member Name="ConstructorSelector" Description="Costruttore selettore" />
+    <Member Name="CreationOf0Cancelled" Description="La creazione di {0} annullata" />
     <Member Name="PleaseChooseA0ToContinue" Description="Scegliere un/a {0} per continuare:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Si prega scegliere un valore prima di continuare:" />
     <Member Name="PleaseSelectAConstructor" Description="Si prega di selezionare un costruttore" />
     <Member Name="PleaseSelectAnElement" Description="Si prega di selezionare un elemento" />
+    <Member Name="PleaseSelectAtLeastOneValueToContinue" Description="Seleziona almeno un valore per continuare:" />
     <Member Name="PleaseSelectAType" Description="Seleziona uno dei seguenti tipi: " />
     <Member Name="SelectAnElement" Description="Selezionare un elemento" />
     <Member Name="TypeSelector" Description="Selettore di tipo" />
@@ -432,6 +696,18 @@
   <Type Name="SynchronizerMessage">
     <Member Name="EndOfSyncScript" Description="--- FINE DELLO SCRIPT DI SINCRONIZZAZIONE" />
     <Member Name="StartOfSyncScriptGeneratedOn0" Description="--- INIZIO DELLO SCRIPT DI SINCRONIZZAZIONE GENERATO SU {0}" />
+  </Type>
+  <Type Name="SystemEventLogEntity" Description="il registro eventi di sistema" PluralDescription="Registri eventi di sistema">
+    <Member Name="Date" Description="Dattero" />
+    <Member Name="EventType" Description="Tipo di evento" />
+    <Member Name="Exception" Description="Eccezione" />
+    <Member Name="MachineName" Description="Nome del computer" />
+    <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="SystemTimeJoinMode">
+    <Member Name="AllCompatible" Description="Tutti compatibili" />
+    <Member Name="Current" Description="Corrente" />
+    <Member Name="FirstCompatible" Description="Primo compatibile" />
   </Type>
   <Type Name="SystemTimeMode">
     <Member Name="All" Description="Tutto" />
@@ -474,11 +750,16 @@
     <Member Name="_0IsNotA1_G" Description="{0} non è [m:un|f:una] {1}" />
     <Member Name="_0IsNotAllowed" Description="{0} non è consentito" />
     <Member Name="_0IsNotAllowedOnState1" Description="{0} non è consentito nello stato {1}" />
+    <Member Name="_0IsNotCompatibleWith1" Description="{0} non è compatibile con {1}" />
     <Member Name="_0IsNotSet" Description="{0} non è impostato" />
+    <Member Name="_0IsNotSetIn1" Description="{0} non è impostato in {1}" />
+    <Member Name="_0IsRepeated" Description="{0} si ripete" />
     <Member Name="_0IsSet" Description="{0} è impostato" />
     <Member Name="_0Or1ShouldBeSet" Description="{0} o {1} devono essere impostati" />
+    <Member Name="_0ShouldBe1" Description="{0} dovrebbe essere {1}" />
     <Member Name="_0ShouldBe12" Description="{0} dovrebbe essere {1} {2}" />
     <Member Name="_0ShouldBe1InsteadOf2" Description="{0} dovrebbe essere {1} invece di {2}" />
+    <Member Name="_0ShouldBeADateInTheFuture" Description="{0} dovrebbe essere una data nel futuro" />
     <Member Name="_0ShouldBeADateInThePast" Description="{0} deve essere una data nel passato" />
     <Member Name="_0ShouldBeEmpty" Description="{0} dovrebbe essere vuoto" />
     <Member Name="_0ShouldBeGreaterThan1" Description="{0} deve essere maggiore di {1}" />
@@ -503,6 +784,7 @@
     <Member Name="BeBetween0And1" Description="essere tra {0} e {1}" />
     <Member Name="BeInThePast" Description="Essere nel passato" />
     <Member Name="BeNotNull" Description="non essere nullo" />
+    <Member Name="EachRowRepresentsAGroupOf0WithSame1" Description="Ogni riga rappresenta un gruppo di {0} con lo stesso {1}" />
     <Member Name="FileName" Description="Nome del file" />
     <Member Name="Have0Decimals" Description="avere {0} decimali" />
     <Member Name="HaveANumberOfElements01" Description="ha un numero di elementi {0} {1}" />
@@ -530,6 +812,15 @@
     <Member Name="TheRowsAreBeingGroupedBy0" Description="Le righe sono raggruppate per {0}" />
     <Member Name="Type0NotAllowed" Description="Tipo {0} non consentito" />
   </Type>
+  <Type Name="VisualTipConsumedEntity" Description="il suggerimento visivo consumato" PluralDescription="Suggerimento visivo consumato">
+    <Member Name="ConsumedOn" Description="Consumato il" />
+    <Member Name="User" Description="Utente" />
+    <Member Name="VisualTip" Description="Suggerimento visivo" />
+  </Type>
+  <Type Name="VisualTipConsumedOperation">
+    <Member Name="Delete" Description="Cancellare" />
+  </Type>
+  <Type Name="VisualTipSymbol" Description="il suggerimento visivo" PluralDescription="Suggerimenti visivi" />
   <Type Name="VoidEnumMessage">
     <Member Name="Instance" Description="-" />
   </Type>

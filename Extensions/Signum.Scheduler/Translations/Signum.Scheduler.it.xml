@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="HolidayCalendarEntity" Description="Calendario vacanze" PluralDescription="Calendari vacanze">
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holidays" Description="Vacanze" />
     <Member Name="Name" Description="Nome" />
   </Type>
@@ -11,6 +12,18 @@
   <Type Name="HolidayEmbedded" Description="Festivi">
     <Member Name="Date" Description="Data" />
     <Member Name="Name" Description="Nome" />
+  </Type>
+  <Type Name="IScheduleRuleEntity">
+    <Member Name="StartingOn" Description="A partire dal" />
+  </Type>
+  <Type Name="ITaskMessage">
+    <Member Name="ExceptionLines" Description="Righe di eccezione" />
+    <Member Name="Execute" Description="Eseguire" />
+    <Member Name="Executions" Description="Esecuzioni" />
+    <Member Name="LastExecution" Description="Ultima esecuzione" />
+  </Type>
+  <Type Name="ITaskOperation">
+    <Member Name="ExecuteSync" Description="Eseguire la sincronizzazione" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Attività pianificata">
     <Member Name="ApplicationName" Description="Nome applicazione" />
@@ -27,35 +40,72 @@
     <Member Name="Exception" Description="Eccezione" />
     <Member Name="MachineName" Description="Nome della macchina" />
     <Member Name="ProductEntity" Description="Entità del prodotto" />
+    <Member Name="Remarks" Description="Osservazioni" />
     <Member Name="ScheduledTask" Description="Operazione pianificata" />
     <Member Name="StartTime" Description="Ora di inizio" />
     <Member Name="Task" Description="Compito" />
     <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="ScheduledTaskLogOperation">
+    <Member Name="CancelRunningTask" Description="Annulla l'attività in esecuzione" />
   </Type>
   <Type Name="ScheduledTaskOperation">
     <Member Name="Delete" Description="Elimina" />
     <Member Name="Save" Description="Salva" />
   </Type>
   <Type Name="SchedulerMessage">
+    <Member Name="Day0At1In2" Description="Giorno {0} a {1} a {2}" />
     <Member Name="Each0Minutes" Description="Ogni {0} minuti" />
     <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="e festivi" />
     <Member Name="ScheduleRuleWeekDaysDN_At" Description="alle" />
     <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="eccetto festivi" />
+    <Member Name="ScheduleRuleWeekDaysDN_Fr" Description="Fr" />
+    <Member Name="ScheduleRuleWeekDaysDN_Mo" Description="Mo" />
     <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="S" />
+    <Member Name="ScheduleRuleWeekDaysDN_Su" Description="Su" />
     <Member Name="ScheduleRuleWeekDaysDN_Th" Description="G" />
+    <Member Name="ScheduleRuleWeekDaysDN_Tu" Description="Tu" />
+    <Member Name="ScheduleRuleWeekDaysDN_We" Description="Noi" />
+    <Member Name="TaskIsNotRunning" Description="L'attività non è in esecuzione" />
   </Type>
   <Type Name="SchedulerPermission">
     <Member Name="ViewSchedulerPanel" Description="Vedi pannello di incarichi programmati" />
   </Type>
+  <Type Name="SchedulerTaskExceptionLineEntity" Description="la riga di eccezione dell'attività dell'utilità di pianificazione" PluralDescription="Righe di eccezione delle attività dell'utilità di pianificazione">
+    <Member Name="ElementInfo" Description="Informazioni sull'elemento" />
+    <Member Name="Exception" Description="Eccezione" />
+    <Member Name="SchedulerTaskLog" Description="Registro delle attività dell'utilità di pianificazione" />
+  </Type>
   <Type Name="ScheduleRuleMinutelyEntity" Description="Regola al minuto" PluralDescription="Regole al minuto">
     <Member Name="EachMinutes" Description="Ogni minuti" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="IsAligned" Description="È allineato" />
+    <Member Name="StartingOn" Description="A partire dal" />
+  </Type>
+  <Type Name="ScheduleRuleMonthsEntity" Description="la regola Pianifica mesi" PluralDescription="Mesi della regola di pianificazione">
+    <Member Name="April" Description="Aprile" />
+    <Member Name="August" Description="Agosto" />
+    <Member Name="December" Description="Dicembre" />
+    <Member Name="February" Description="Febbraio" />
+    <Member Name="Guid" Description="Guid" />
+    <Member Name="January" Description="Gennaio" />
+    <Member Name="July" Description="Luglio" />
+    <Member Name="June" Description="Giugno" />
+    <Member Name="March" Description="Marzo" />
+    <Member Name="May" Description="Maggio" />
+    <Member Name="November" Description="Novembre" />
+    <Member Name="October" Description="Ottobre" />
+    <Member Name="September" Description="Settembre" />
+    <Member Name="StartingOn" Description="A partire dal" />
   </Type>
   <Type Name="ScheduleRuleWeekDaysEntity" Description="Regola a giorni della settimana" PluralDescription="Regole a giorni della settimana">
     <Member Name="Calendar" Description="Calendario" />
     <Member Name="Friday" Description="Venerdì" />
+    <Member Name="Guid" Description="Guid" />
     <Member Name="Holiday" Description="Festivo" />
     <Member Name="Monday" Description="Lunedì" />
     <Member Name="Saturday" Description="Sabato" />
+    <Member Name="StartingOn" Description="A partire dal" />
     <Member Name="Sunday" Description="Domenica" />
     <Member Name="Thursday" Description="Giovedì" />
     <Member Name="Tuesday" Description="Martedì" />

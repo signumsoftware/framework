@@ -1,5 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="CollectionElementEmbedded" Description="Elemento della collezione">
+    <Member Name="CollectionElement" Description="Elemento della collezione" />
+    <Member Name="MatchByColumn" Description="Corrispondenza per colonna" />
+  </Type>
+  <Type Name="ExcelAttachmentEntity" Description="l'allegato Excel" PluralDescription="Allegati di Excel">
+    <Member Name="FileName" Description="Nome del file" />
+    <Member Name="Related" Description="Imparentato" />
+    <Member Name="Title" Description="Titolo" />
+    <Member Name="UserQuery" Description="Query dell'utente" />
+  </Type>
   <Type Name="ExcelMessage">
     <Member Name="Administer" Description="Amministrare" />
     <Member Name="CreateNew" Description="Creare un nuovo" />
@@ -13,6 +23,10 @@
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Il modello Excel ha una colonna {0} non presente nel motore di ricerca" />
     <Member Name="ThereAreNoResultsToWrite" Description="Nessun risultato da riportare" />
   </Type>
+  <Type Name="ExcelPermission">
+    <Member Name="ImportFromExcel" Description="Importazione da excel" />
+    <Member Name="PlainExcel" Description="Semplice excel" />
+  </Type>
   <Type Name="ExcelReportEntity" Description="Report di Excel">
     <Member Name="DisplayName" Description="Nome del report" />
     <Member Name="File" Description="File" />
@@ -21,5 +35,42 @@
   <Type Name="ExcelReportOperation">
     <Member Name="Delete" Description="Elimina" />
     <Member Name="Save" Description="Salva" />
+  </Type>
+  <Type Name="ImportExcelMode" Description="Importa modalità excel">
+    <Member Name="Insert" Description="Inserire" />
+    <Member Name="InsertOrUpdate" Description="Inserire o aggiornare" />
+    <Member Name="Update" Description="Aggiornare" />
+  </Type>
+  <Type Name="ImportExcelModel" Description="Importa excel">
+    <Member Name="Collections" Description="Collezioni" />
+    <Member Name="ExcelFile" Description="File Excel" />
+    <Member Name="IdentityInsert" Description="Inserto di identità" />
+    <Member Name="MatchByColumn" Description="Corrispondenza per colonna" />
+    <Member Name="Mode" Description="Modo" />
+    <Member Name="OperationKey" Description="Tasto operativo" />
+    <Member Name="Transactional" Description="Transazionale" />
+    <Member Name="TypeName" Description="Nome del tipo" />
+  </Type>
+  <Type Name="ImportFromExcelMessage">
+    <Member Name="_01CanAlsoBeUsed" Description="{0}. [{1}] può essere utilizzato anche" />
+    <Member Name="_01CanNotBeAssignedDirectylEachNestedFieldShouldBeAssignedIndependently" Description="{0} ({1}) non possono essere assegnati direttamente. Ogni campo nidificato deve essere assegnato in modo indipendente." />
+    <Member Name="_01IsIncompatible" Description="{0} ({1}) è incompatibile" />
+    <Member Name="_0Errors" Description="{0} errori" />
+    <Member Name="_0IsNotSupported" Description="{0} non è supportato" />
+    <Member Name="_0IsReadOnly" Description="{0} è di sola lettura" />
+    <Member Name="Columns0AlreadyHaveConstanValuesFromFilters" Description="Le colonne {0} hanno già valori costanti dai filtri" />
+    <Member Name="ColumnsDoNotMatchExcelColumns0QueryColumns1" Description="Le colonne non corrispondono.&#xA;Colonne di Excel: {0}&#xA;Colonne di query: {1}" />
+    <Member Name="DownloadTemplate" Description="Scarica il modello di Excel per questa query" />
+    <Member Name="DuplicatedNonConsecutive0Found1" Description="Duplicati non consecutivi {0} trovati: {1}" />
+    <Member Name="ErrorsIn0Rows_N" Description="Errori nelle righe {0}" />
+    <Member Name="Import0FromExcel" Description="Importare {0} da Excel" />
+    <Member Name="ImportFromExcel" Description="Importazione da Excel" />
+    <Member Name="Importing0" Description="Importazione di {0}" />
+    <Member Name="ManyFiltersTryToAssignTheSameProperty0WithDifferentValues1" Description="Molti filtri tentano di assegnare la stessa proprietà {0} con valori diversi {1}" />
+    <Member Name="No0FoundInThisQueryWith1EqualsTo2" Description="In questa query non è stato trovato alcun {0} con {1} uguale a {2}" />
+    <Member Name="Operation0IsNotSupported" Description="L'operazione {0} non è supportata" />
+    <Member Name="SomeColumnsAreIncompatibleWithImportingFromExcel" Description="Alcune colonne non sono compatibili con l'importazione da Excel:" />
+    <Member Name="ThisQueryHasMultipleImplementations0" Description="Questa query ha più implementazioni {0}" />
+    <Member Name="UnableToAssignMoreThanOneUnrelatedCollections0" Description="Impossibile assegnare più di una raccolta non correlata: {0}" />
   </Type>
 </Translations>

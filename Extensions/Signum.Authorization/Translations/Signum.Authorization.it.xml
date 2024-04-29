@@ -15,24 +15,47 @@
     <Member Name="_0InUI" Description="{0} (in UI)" />
     <Member Name="_0of1" Description="{0} di {1}" />
     <Member Name="_0RulesFor1" Description="{0} regole per {1}" />
+    <Member Name="AddCondition" Description="Aggiungi condizione" />
     <Member Name="Allow" Description="Consentire" />
     <Member Name="CanNotBeModified" Description="Non può essere modificato" />
+    <Member Name="CanNotBeModifiedBecauseIsInCondition0" Description="Non può essere modificato perché è in condizioni {0}" />
+    <Member Name="CanNotBeModifiedBecauseIsNotInCondition0" Description="Non può essere modificato perché non è in condizioni {0}" />
+    <Member Name="CanNotBeReadBecauseIsInCondition0" Description="Non può essere letto perché è in condizioni {0}" />
+    <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Non può essere letto perché non è in condizioni {0}" />
+    <Member Name="Check" Description="Assegno" />
     <Member Name="Deny" Description="Negare" />
-    <Member Name="Everything" Description="Tutto" />
     <Member Name="Filter" Description="Filter" />
-    <Member Name="Nothing" Description="Niente" />
     <Member Name="Overriden" Description="Sovrascritto" />
     <Member Name="PermissionRules" Description="Regole di autorizzazione" />
     <Member Name="PleaseSaveChangesFirst" Description="Salvare prima le modifiche" />
+    <Member Name="RemoveCondition" Description="Rimuovi condizione" />
+    <Member Name="RepeatedTypeCondition" Description="Condizioni di tipo ripetute" />
     <Member Name="ResetChanges" Description="Reimpostare le modifiche" />
+    <Member Name="Role0InheritsFromTrivialMergeRole1" Description="Ruolo {0} eredita dal ruolo di unione semplice {1}" />
+    <Member Name="Role0IsTrivialMerge" Description="Il ruolo {0} è un'unione banale" />
     <Member Name="Save" Description="Salva" />
+    <Member Name="SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime" Description="Selezionarne più di uno per eseguire l'override dell'accesso per {0} che soddisfano tutte le condizioni contemporaneamente." />
+    <Member Name="SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition" Description="Selezionarne uno per eseguire l'override dell'accesso per {0} che soddisfano questa condizione." />
+    <Member Name="SelectTypeConditions" Description="Seleziona Tipo Condizione(i)" />
     <Member Name="SwitchTo" Description="Switch to" />
+    <Member Name="TheFollowingTypeConditionsHaveAlreadyBeenUsed" Description="Sono già state utilizzate le seguenti condizioni di tipo:" />
+    <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Per {1} sono definite {0} condizioni di tipo." />
     <Member Name="TheUserStateMustBeDisabled" Description="Lo stato dell'utente deve essere disabilitato" />
     <Member Name="TypeRules" Description="Regole di tipo" />
+    <Member Name="Uncheck" Description="Deselezionare" />
+    <Member Name="UsedByRoles" Description="Utilizzato dai ruoli" />
   </Type>
   <Type Name="AuthMessage">
+    <Member Name="DefaultAuthorization" Description="Autorizzazione predefinita: " />
+    <Member Name="Everything" Description="Tutto" />
+    <Member Name="IncludeTrivialMerges" Description="Includi unioni semplici" />
+    <Member Name="MaximumOfThe0" Description="Massimo della {0}" />
+    <Member Name="MinumumOfThe0" Description="Minimo della {0}" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Non autorizzato a {0} entità {1} con Id {2}" />
     <Member Name="NotAuthorizedToRetrieve0" Description="Non autorizzato al recupero di '{0}'" />
+    <Member Name="Nothing" Description="Niente" />
+    <Member Name="OnlyActive" Description="Solo attivo" />
+    <Member Name="SameAs0" Description="Come {0}" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth thumbnail">
     <Member Name="All" Description="All" />
@@ -60,6 +83,8 @@
     <Member Name="ChangePassword" Description="Modificare la password" />
     <Member Name="ConfirmNewPassword" Description="Confermare la nuova password" />
     <Member Name="CurrentPassword" Description="Password corrente" />
+    <Member Name="EMailAddress" Description="Indirizzo e-mail" />
+    <Member Name="EmailAddressOrUsername" Description="Indirizzo e-mail o nome utente" />
     <Member Name="EnterActualPasswordAndNewOne" Description="Inserisci la password corrente e quella nuova" />
     <Member Name="EnterTheNewPassword" Description="Immettere la nuova password" />
     <Member Name="EnterYourUserEmail" Description="Immettere l'indirizzo e-mail dell'utente" />
@@ -76,6 +101,7 @@
     <Member Name="LoginWithWindowsUser" Description="Accedere con l'utente di Windows" />
     <Member Name="Logout" Description="Logout" />
     <Member Name="LooksLikeYourWindowsUserIsNotAllowedToUseThisApplication" Description="Sembra che all'utente di Windows non sia consentito utilizzare questa applicazione, che il browser non fornisca informazioni sull'identità o che il server non sia configurato correttamente." />
+    <Member Name="MyProfile" Description="Il mio profilo" />
     <Member Name="NewPassword" Description="Nuova password" />
     <Member Name="NotUserLogged" Description="Nessun utente registrato" />
     <Member Name="NoWindowsUserFound" Description="Nessun utente di Windows trovato" />
@@ -89,12 +115,13 @@
     <Member Name="RequestAccepted" Description="Richiesta accettata" />
     <Member Name="SendEmail" Description="Inviare e-mail" />
     <Member Name="ShowLoginForm" Description="Mostra modulo di accesso" />
+    <Member Name="SignInWithMicrosoft" Description="Accedere con Microsoft" />
     <Member Name="Success" Description="Successo" />
     <Member Name="SwitchUser" Description="Cambia utente" />
     <Member Name="ThePasswordMustHaveAtLeast0Characters" Description="La password deve avere almeno {0} caratteri" />
     <Member Name="TheUserIsNotLongerInTheDatabase" Description="L'utente non è più nel database" />
     <Member Name="TryToLogInWithIt" Description="Prova ad accedere con esso!" />
-    <Member Name="User0IsDisabled" Description="L'utente {0} è disabilitato" />
+    <Member Name="User0IsDeactivated" Description="Il {0} utente è disattivato" />
     <Member Name="Username" Description="Nome utente" />
     <Member Name="Username0IsNotValid" Description="Il nome utente {0} non è valido" />
     <Member Name="UserNameMustHaveAValue" Description="Il nome utente deve avere un valore" />
@@ -138,6 +165,9 @@
     <Member Name="Type" Description="Type" />
   </Type>
   <Type Name="RoleEntity" Description="Ruolo">
+    <Member Name="Description" Description="Descrizione" />
+    <Member Name="InheritsFrom" Description="Eredita da" />
+    <Member Name="IsTrivialMerge" Description="È un'unione banale" />
     <Member Name="MergeStrategy" Description="Strategia di unione" />
     <Member Name="Name" Description="Nome" />
   </Type>
@@ -154,7 +184,15 @@
   <Type Name="RulePermissionEntity" Description="Regola di permesso" PluralDescription="Regole di permesso" />
   <Type Name="RulePropertyEntity" Description="Regola di proprietà" PluralDescription="Regole di proprietà" />
   <Type Name="RuleQueryEntity" Description="Regola di query" PluralDescription="Regole di query" />
-  <Type Name="RuleTypeEntity" Description="Regola di tipo" PluralDescription="Regole di tipo" />
+  <Type Name="RuleTypeConditionEntity" Description="la condizione Tipo di regola" PluralDescription="Condizioni del tipo di regola">
+    <Member Name="Allowed" Description="Permesso" />
+    <Member Name="Conditions" Description="Condizioni" />
+    <Member Name="Order" Description="Ordine" />
+    <Member Name="RuleType" Description="Tipo di regola" />
+  </Type>
+  <Type Name="RuleTypeEntity" Description="Regola di tipo" PluralDescription="Regole di tipo">
+    <Member Name="ConditionRules" Description="Regole di condizione" />
+  </Type>
   <Type Name="SessionLogEntity" Description="Registro di sessione" PluralDescription="Registri di sessione">
     <Member Name="Duration" Description="Durata" />
     <Member Name="SessionEnd" Description="Fine sessione" />
@@ -176,6 +214,7 @@
     <Member Name="Write" Description="Write" />
   </Type>
   <Type Name="TypeAllowedAndConditions" Description="Type allowed and conditions">
+    <Member Name="ConditionRules" Description="Regole di condizione" />
     <Member Name="Fallback" Description="Fallback" />
   </Type>
   <Type Name="TypeAllowedBasic">
@@ -189,6 +228,10 @@
     <Member Name="Properties" Description="Properties" />
     <Member Name="Queries" Description="Queries" />
   </Type>
+  <Type Name="TypeConditionRuleModel" Description="Regola di condizione del tipo">
+    <Member Name="Allowed" Description="Permesso" />
+    <Member Name="TypeConditions" Description="Condizioni del tipo" />
+  </Type>
   <Type Name="TypeConditionSymbol" Description="Simbolo di condizione di tipo" />
   <Type Name="TypeRulePack" Description="Pacchetto di regole di tipo" />
   <Type Name="UserEntity" Description="Utente">
@@ -196,17 +239,32 @@
     <Member Name="DisabledOn" Description="&#x9;Disabled on" />
     <Member Name="Email" Description="e-Mail" />
     <Member Name="EmailOwnerData" Description="Dati proprietario email" />
+    <Member Name="LoginFailedCounter" Description="Contatore accesso non riuscito" />
     <Member Name="PasswordHash" Description="Password Hash" />
     <Member Name="Role" Description="Ruolo" />
     <Member Name="State" Description="Stato" />
     <Member Name="UserName" Description="Nome utente" />
   </Type>
+  <Type Name="UserLiteModel" Description="Utente lite">
+    <Member Name="OID" Description="OID" />
+    <Member Name="PhotoSuffix" Description="Suffisso foto" />
+    <Member Name="SID" Description="SID" />
+    <Member Name="ToStringValue" Description="Al valore stringa" />
+    <Member Name="UserName" Description="Nome utente" />
+  </Type>
   <Type Name="UserOperation">
+    <Member Name="AutoDeactivate" Description="Disattivazione automatica" />
     <Member Name="Create" Description="Creare" />
+    <Member Name="Deactivate" Description="Disattivare" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Reactivate" Description="Riattivare" />
     <Member Name="Save" Description="Salvare" />
     <Member Name="SetPassword" Description="Impostare la password" />
   </Type>
   <Type Name="UserState" Description="Stato utente">
+    <Member Name="Active" Description="Attivo" />
+    <Member Name="AutoDeactivate" Description="Disattivazione automatica" />
+    <Member Name="Deactivated" Description="Disattivato" />
     <Member Name="New" Description="Nuovo" />
   </Type>
   <Type Name="UserTicketEntity" Description="Ticket utente">
@@ -214,5 +272,8 @@
     <Member Name="Device" Description="Dispositivo" />
     <Member Name="Ticket" Description="Ticket" />
     <Member Name="User" Description="Utente" />
+  </Type>
+  <Type Name="UserTypeCondition">
+    <Member Name="DeactivatedUsers" Description="Utenti disattivati" />
   </Type>
 </Translations>
