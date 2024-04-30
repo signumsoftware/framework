@@ -86,8 +86,8 @@ public class AzureADAuthenticationServer
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
 
         var issuer = adaConfig.AzureB2C != null ? 
-            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.Azure_DirectoryID}/v2.0/": 
-            $"https://login.microsoftonline.com/{adaConfig.Azure_DirectoryID}/v2.0/";
+            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.Azure_DirectoryID}/v2.0": 
+            $"https://login.microsoftonline.com/{adaConfig.Azure_DirectoryID}/v2.0";
 
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
