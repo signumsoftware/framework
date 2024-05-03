@@ -88,17 +88,17 @@ function toLongPrefix(prefix: IconPrefix): string | undefined{
   };
 }
 
-//function toPrefix(family: string): IconPrefix | undefined  {
-//  switch (family) {
-//    case "fa-solid": return "fas"; 
-//    case "fa-brands": return "fab";
-//    case "fa-regular": return "far";
-//    case "fa-light": return "fal";
-//    case "fa-thin": return "fat"; 
-//    case "fa-duotone": return "fad"; 
-//    default: return undefined;
-//  };
-//}
+function toSortPrefix(family: string): IconPrefix | undefined  {
+  switch (family) {
+    case "fa-solid": return "fas"; 
+    case "fa-brands": return "fab";
+    case "fa-regular": return "far";
+    case "fa-light": return "fal";
+    case "fa-thin": return "fat"; 
+    case "fa-duotone": return "fad"; 
+    default: return undefined;
+  };
+}
 
 export function IconTypeahead(p: IconTypeaheadProps) {
   const forceUpdate = useForceUpdate();
@@ -216,12 +216,43 @@ export function parseIcon(iconName: string | undefined | null): IconProp | undef
     return undefined;
 
   if (iconName.contains(" "))
-    return {
-      prefix: iconName.tryBefore(" ") as IconPrefix,
-      iconName: iconName.tryAfter(" fa-") as IconName,
-    };
+    return (
+      {
+        prefix: iconName.tryBefore(" ") as IconPrefix,
+        iconName: iconName.tryAfter(" fa-") as IconName,
+      } satisfies IconLookup);
 
   return (iconName.tryAfter("fa-") ?? iconName) as IconName;
+}
+
+export function fallbackIcon(icon: IconProp) : IconProp {
+  if (isIconDefined(icon))
+    return icon;
+
+  console.error("Icon not found " + JSON.stringify(icon));
+
+  return ({ prefix: "fas", iconName: "question" });
+}
+
+export function isIconDefined(icon: IconProp) {
+
+  if (Array.isArray(icon))
+    return lib.definitions[toSortPrefix(icon[0]) ?? icon[0]]?.[icon[1]]
+
+  if (typeof icon == "object")
+    return lib.definitions[toSortPrefix(icon.prefix) ?? icon.prefix]?.[icon.iconName];
+
+  debugger;
+  if (typeof icon == "string") {
+
+    if (lib.definitions["fas"]?.[icon])
+      return true;
+    else {
+      debugger;
+      return false;
+    }
+  }
+  return false;
 }
 
 export function iconToString(icon: IconProp) {

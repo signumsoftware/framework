@@ -9,7 +9,7 @@ import { DashboardEntity, PanelPartEmbedded, IPartEntity, DashboardMessage } fro
 import "../Dashboard.css"
 import { ErrorBoundary } from '@framework/Components';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { parseIcon } from '@framework/Components/IconTypeahead'
+import { fallbackIcon, parseIcon } from '@framework/Components/IconTypeahead'
 import { DashboardController } from './DashboardFilterController'
 import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
@@ -232,7 +232,7 @@ export function PanelPart(p: PanelPartProps) {
 
   const title = !icon ? titleText :
     <span>
-      <FontAwesomeIcon icon={icon} color={iconColor} className="me-1" />{titleText}
+      <FontAwesomeIcon icon={fallbackIcon(icon)} color={iconColor} className="me-1" />{titleText}
     </span>;
 
   var style = part.customColor != null ?  "customColor": "light";

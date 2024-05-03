@@ -26,7 +26,6 @@ export namespace AzureADClient {
         clientId: window.__azureApplicationId!, //This is your client ID
         authority: window.__azureB2CAuthority ?? ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
         redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
-        knownAuthorities: window.__azureB2CAuthorityDomain ? [window.__azureB2CAuthorityDomain] : undefined,
         postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
       },
       cache: {
@@ -35,18 +34,17 @@ export namespace AzureADClient {
       }
     };
 
+    if (window.__azureB2CAuthorityDomain)
+      msalConfig.auth.knownAuthorities = [window.__azureB2CAuthorityDomain];
+
     msalClient = new msal.PublicClientApplication(msalConfig);
   }
   
-  
   /*     Add this to Index.cshtml
-         var __azureApplicationId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_ApplicationID);
-         var __azureTenantId = @Json.Serialize(TenantLogic.GetCurrentTenant()!.ActiveDirectoryConfiguration.Azure_DirectoryID);
+        var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
+        var __azureTenantId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_DirectoryID);
   */
   
-
-  
- 
   
   let msalClient: msal.PublicClientApplication;
   
