@@ -346,7 +346,7 @@ public static class TranslatedInstanceLogic
     }
 
     public static T SyncTranslation<T>(this T entity, Dictionary<PropertyRouteEntity, TranslatedInstanceEntity>? translation, CultureInfoEntity ci, Expression<Func<T, string?>> propertyRoute, string? translatedText)
-    where T : Entity
+        where T : Entity
     {
         var pr = PropertyRoute.Construct(propertyRoute).ToPropertyRouteEntity();
 
@@ -356,9 +356,13 @@ public static class TranslatedInstanceLogic
             var current = translation?.TryGetC(pr);
             if (current != null)
             {
-                current.OriginalText = originalText;
-                current.TranslatedText = translatedText;
-                current.Save();
+                if (current.OriginalText != originalText ||
+                    current.TranslatedText != translatedText)
+                {
+                    current.OriginalText = originalText;
+                    current.TranslatedText = translatedText;
+                    current.Save();
+                }
             }
             else
             {
