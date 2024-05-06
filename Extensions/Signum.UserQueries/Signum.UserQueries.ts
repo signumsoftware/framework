@@ -99,7 +99,6 @@ export type UserQueryPartRenderMode =
 
 export module UserQueryPermission {
   export const ViewUserQuery : Basics.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
-  export const BackToDefaultQuery : Basics.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.BackToDefaultQuery");
 }
 
 export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
