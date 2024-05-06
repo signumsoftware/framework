@@ -100,6 +100,10 @@ export namespace SearchControlOptions {
   export let showSelectedButton = (sc: SearchControlHandler) => is_touch_device();
   export let showSystemTimeButton = (sc: SearchControlHandler) => true;
   export let showGroupButton = (sc: SearchControlHandler) => true;
+  export let showFilterButton = (sc: SearchControlHandler) => true;
+  export let allowChangeColumns = (sc: SearchControlHandler) => true;
+  export let allowOrderColumns = (sc: SearchControlHandler) => true;
+  export let showFooter = (sc: SearchControlHandler) => sc.searchControlLoaded?.props.showFooter;
 }
 
 const SearchControl = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
@@ -217,13 +221,13 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
         pinnedFilterVisible={p.pinnedFilterVisible}
         showFilters={p.showFilters != null ? p.showFilters : false}
         showSimpleFilterBuilder={p.showSimpleFilterBuilder != null ? p.showSimpleFilterBuilder : true}
-        showFilterButton={p.showFilterButton != null ? p.showFilterButton : true}
+        showFilterButton={SearchControlOptions.showFilterButton(handler) && (p.showFilterButton ?? true)}
         showSystemTimeButton={SearchControlOptions.showSystemTimeButton(handler) && (p.showSystemTimeButton ?? false) && (qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true))}
         showGroupButton={SearchControlOptions.showGroupButton(handler) && (p.showGroupButton ?? false)}
         showSelectedButton={SearchControlOptions.showSelectedButton(handler) && (p.showSelectedButton ?? true)}
-        showFooter={p.showFooter}
-        allowChangeColumns={p.allowChangeColumns != null ? p.allowChangeColumns : true}
-        allowChangeOrder={p.allowChangeOrder != null ? p.allowChangeOrder : true}
+        showFooter={SearchControlOptions.showFooter(handler)}
+        allowChangeColumns={SearchControlOptions.allowChangeColumns(handler) && (p.allowChangeColumns ?? true)}
+        allowChangeOrder={SearchControlOptions.allowOrderColumns(handler) && (p.allowChangeOrder ?? true)}
         create={p.create != null ? p.create : (qs?.allowCreate ?? true) && tis.some(ti => Navigator.isCreable(ti, {isSearch: true }))}
         createButtonClass={p.createButtonClass}
 

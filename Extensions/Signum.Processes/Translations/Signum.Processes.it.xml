@@ -16,6 +16,11 @@
   <Type Name="PackageOperationProcess">
     <Member Name="PackageOperation" Description="Operazione del pacchetto" />
   </Type>
+  <Type Name="PackageQuery">
+    <Member Name="PackageLastProcess" Description="Ultimo processo del pacchetto" />
+    <Member Name="PackageLineLastProcess" Description="Ultimo processo della riga di confezionamento" />
+    <Member Name="PackageOperationLastProcess" Description="Ultimo processo dell'operazione del pacchetto" />
+  </Type>
   <Type Name="ProcessAlgorithmSymbol" Description="Algoritmo di processo" />
   <Type Name="ProcessEntity" Description="Processo">
     <Member Name="Algorithm" Description="Algoritmo di" />
@@ -24,6 +29,7 @@
     <Member Name="CreationDate" Description="Data di creazione" />
     <Member Name="Data" Description="Dati" />
     <Member Name="Duration" Description="Durata" />
+    <Member Name="DurationSpan" Description="Intervallo di durata" />
     <Member Name="Exception" Description="Eccezione" />
     <Member Name="ExceptionDate" Description="Data di eccezione" />
     <Member Name="ExecutionEnd" Description="Termine di esecuzione" />
@@ -33,10 +39,12 @@
     <Member Name="Progress" Description="Progresso" />
     <Member Name="QueuedDate" Description="Data in coda" />
     <Member Name="State" Description="Stato" />
+    <Member Name="Status" Description="Stato" />
     <Member Name="SuspendDate" Description="Sospendere la data" />
     <Member Name="User" Description="Utente" />
   </Type>
   <Type Name="ProcessExceptionLineEntity" Description="Linea di processo di eccezione">
+    <Member Name="ElementInfo" Description="Informazioni sull'elemento" />
     <Member Name="Exception" Description="Eccezione" />
     <Member Name="Line" Description="Linea" />
     <Member Name="Process" Description="Processo" />
@@ -45,9 +53,12 @@
     <Member Name="ExceptionLines" Description="Linee di eccezione" />
     <Member Name="LastProcess" Description="Ultimo processo" />
     <Member Name="Lines" Description="Linee" />
+    <Member Name="OnlyActive" Description="Solo attivo" />
     <Member Name="Process0IsNotRunningAnymore" Description="Processo {0} non è più in esecuzione" />
+    <Member Name="ProcessSettings" Description="Impostazioni di processo" />
     <Member Name="ProcessStartIsGreaterThanProcessEnd" Description="Avvio Processo maggiore di Fine Processo" />
     <Member Name="ProcessStartIsNullButProcessEndIsNot" Description="Avvio Processo nullo, ma Fine Processo non lo è" />
+    <Member Name="SuspendIsTheSaferWayOfStoppingARunningProcessCancelAnyway" Description="Sospendi in modo più sicuro per arrestare un processo in esecuzione. Annullare comunque?" />
   </Type>
   <Type Name="ProcessOperation">
     <Member Name="Cancel" Description="Annullare" />

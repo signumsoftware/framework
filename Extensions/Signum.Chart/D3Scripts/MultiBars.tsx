@@ -101,15 +101,28 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
               var active = detector?.(row.rowClick);
               var key = keyColumn.getKey(r.rowValue);
 
+              var posx: number;
+              var width: number;
+
+              const scaleName = parameters["Scale"];
+
+              if (scaleName == "MinZeroMax") {
+                posx = row.value < 0 ? x(row.value) : x(0);
+                width = row.value < 0 ? x(0) - x(row.value) : x(row.value) - x(0);
+              }
+              else {
+                posx = 0;
+                width = x(row.value);
+              }
 
               return (
-                <g className="hover-group" key={key}>
+                <g className="hover-group" key={key} transform={translate(posx, -y(key)! - ySubscale(s.key)! - ySubscale.bandwidth())}>
                   <rect className="shape sf-transition hover-target"
                     opacity={active == false ? .5 : undefined}
                     fill={s.color || color(s.key)}
-                    transform={translate(0, -y(key)! - ySubscale(s.key)! - ySubscale.bandwidth()) + (initialLoad ? scale(0, 1) : scale(1, 1))}
+                    transform={initialLoad ? scale(0, 1) : scale(1, 1)}
                     height={ySubscale.bandwidth()}
-                    width={x(row.value)}
+                    width={width}
                     onClick={e => onDrillDown(row.rowClick, e)}
                     cursor="pointer">
                     <title>
@@ -119,24 +132,20 @@ export default function renderMultiBars({ data, width, height, parameters, loadi
                   {
                     ySubscale.bandwidth() > 15 && parseFloat(parameters["NumberOpacity"]) > 0 &&
                     <TextIfFits className="number-label sf-transition"
-                      maxWidth={x(r.values[s.key]?.value)}
-                      transform={translate(
-                        x(r.values[s.key]?.value)! / 2,
-                        -y(keyColumn.getKey(r.rowValue))! - ySubscale(s.key)! - ySubscale.bandwidth() / 2
-                      )}
-                      onClick={e => onDrillDown(r.values[s.key].rowClick, e)}
+                      maxWidth={width}
+                      transform={translate(width / 2, (ySubscale.bandwidth() / 2) + interMagin)}
+                      onClick={e => onDrillDown(row.rowClick, e)}
                       opacity={parameters["NumberOpacity"]}
                       fill={parameters["NumberColor"]}
                       dominantBaseline="middle"
                       textAnchor="middle"
                       fontWeight="bold">
-                      {r.values[s.key].valueNiceName}
+                      {row.valueNiceName}
                       <title>
-                        {r.values[s.key].valueTitle}
+                        {row.valueTitle}
                       </title>
                     </TextIfFits>
                   }
-
                 </g>
               )
             })

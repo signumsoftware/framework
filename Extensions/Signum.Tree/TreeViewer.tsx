@@ -130,18 +130,19 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     Finder.getQueryDescription(to.typeName)
       .then(qd => {
+        this.setState({ queryDescription: qd }, () =>
         TreeClient.parseTreeOptions(to, qd)
           .then((top) => {
             this.setState({ treeOptionsParsed: top }, () => {
               const qs = Finder.getSettings(to.typeName);
-              const sfb = qs?.simpleFilterBuilder && qs.simpleFilterBuilder({ queryDescription: qd, initialFilterOptions: this.state.treeOptionsParsed!.filterOptions, search: () => this.search(true) });
-            this.setState({ queryDescription: qd, simpleFilterBuilder: sfb });
-            if (sfb)
-              this.setState({ showFilters: false });
+              const sfb = qs?.simpleFilterBuilder && qs.simpleFilterBuilder({ queryDescription: this.state.queryDescription!, initialFilterOptions: this.state.treeOptionsParsed!.filterOptions, search: () => this.search(true) });
+              this.setState({ simpleFilterBuilder: sfb });
+              if (sfb)
+                this.setState({ showFilters: false });
 
-            this.search(true, false, true);
-          });
-        });
+              this.search(true, false, true);
+            });
+          }));
       });
   }
 
@@ -354,6 +355,9 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
   search(clearExpanded: boolean, loadDescendants: boolean = false, considerDefaultSelectedLite: boolean = false) {
 
+    if (!this.state.treeOptionsParsed || !this.state.queryDescription)
+      return;
+
     const defaultSelectedLite = considerDefaultSelectedLite ? this.props.defaultSelectedLite : undefined;
 
     this.getFilterOptionsWithSFB().then(filters => {
@@ -398,10 +402,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     return (
       <form onSubmit={this.handleSearchSubmit}>
-        {s.queryDescription && (s.showFilters ?
+        {s.treeOptionsParsed && s.queryDescription && (s.showFilters ?
           <FilterBuilder
             queryDescription={s.queryDescription}
-            filterOptions={s.treeOptionsParsed!.filterOptions}
+            filterOptions={s.treeOptionsParsed.filterOptions}
             subTokensOptions={SubTokensOptions.CanAnyAll} /> :
           sfb && <div className="simple-filter-builder">{sfb}</div>)}
       </form>

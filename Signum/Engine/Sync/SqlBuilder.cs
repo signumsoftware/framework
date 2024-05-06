@@ -365,7 +365,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         }
         else
             return new SqlPreCommandSimple("EXEC {0}.dbo.sp_executesql N'DROP INDEX {1} ON {2}';"
-                .FormatWith(objectName.Schema.Database.ToString().SqlEscape(isPostgres), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));
+                .FormatWith(objectName.Schema.Database.ToString(), indexName.SqlEscape(isPostgres), objectName.OnDatabase(null).ToString()));
     }
 
     public SqlPreCommand DisconnectTableFromPartitionSchema(DiffTable table)
