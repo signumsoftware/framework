@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="ExchangeWebServiceEmailServiceEntity" Description="il servizio di posta elettronica del servizio Web di Exchange" PluralDescription="Servizi di posta elettronica del servizio Web di Exchange">
+    <Member Name="ExchangeVersion" Description="Versione di Exchange" />
+    <Member Name="Password" Description="Parola d’ordine" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="UseDefaultCredentials" Description="Usare le credenziali predefinite" />
+    <Member Name="Username" Description="Nome utente" />
+  </Type>
+</Translations>

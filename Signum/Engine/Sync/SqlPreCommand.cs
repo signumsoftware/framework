@@ -448,14 +448,21 @@ public class SqlPreCommandSimple : SqlPreCommand
 
     protected internal override void PlainSql(StringBuilder sb)
     {
+        string finalSql;
+
         if (Parameters.IsNullOrEmpty())
-            sb.Append(Sql);
+            finalSql = Sql;
         else
         {
             var dic = Parameters.ToDictionary(a => a.ParameterName, a => LiteralValue(a.Value));
 
-            sb.Append(regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value));
+            finalSql = regex.Replace(Sql, m => dic.TryGetC(m.Value) ?? m.Value);
         }
+
+        if (sb.ToString().Contains(finalSql, StringComparison.OrdinalIgnoreCase))
+            return;
+
+        sb.Append(finalSql);
     }
 
     public string sp_executesql()

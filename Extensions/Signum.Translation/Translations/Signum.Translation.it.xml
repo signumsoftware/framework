@@ -8,6 +8,9 @@
     <Member Name="RowId" Description="RowId" />
     <Member Name="TranslatedText" Description="Testo tradotto" />
   </Type>
+  <Type Name="TranslatedInstanceOperation">
+    <Member Name="Delete" Description="Cancellare" />
+  </Type>
   <Type Name="TranslationJavascriptMessage">
     <Member Name="RememberChange" Description="Ricordare il cambiamento" />
     <Member Name="RightTranslation" Description="Traduzione corretta" />
@@ -15,13 +18,26 @@
   </Type>
   <Type Name="TranslationMessage">
     <Member Name="_0AlreadySynchronized" Description="{0} già sincronizzato" />
+    <Member Name="_0OutdatedTranslationsFor1HaveBeenDeleted" Description="{0} translatiosn obsoleti per {1} sono stati eliminati" />
     <Member Name="All" Description="Tutti" />
     <Member Name="AllLanguages" Description="tutte le lingue" />
+    <Member Name="AreYouSureToContinueAutoTranslation0For1WithoutRevision" Description="Sei sicuro di continuare {0} di traduzione automatica per {1} senza revisione?" />
+    <Member Name="AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision" Description="Si è sicuri di continuare la traduzione automatica di tutti gli assiemi per {0} senza revisione?" />
+    <Member Name="AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision" Description="Sei sicuro di continuare la traduzione automatica di tutti i tipi per {0} senza revisione?" />
+    <Member Name="AutoTranslate" Description="Traduzione automatica" />
+    <Member Name="BackToSyncAssembly0" Description="Torna alla sincronizzazione dell'assembly {0}" />
+    <Member Name="BackToTranslationStatus" Description="Torna allo stato della traduzione" />
     <Member Name="CodeTranslations" Description="Traduzioni di codice" />
+    <Member Name="Download" Description="Scaricare" />
+    <Member Name="DownloadSync" Description="Sincronizzazione dei download" />
+    <Member Name="DownloadView" Description="Scarica la vista" />
     <Member Name="Edit" Description="modifica" />
     <Member Name="Instance" Description="Entità" />
     <Member Name="InstanceTranslations" Description="Traduzione di entità" />
     <Member Name="Member" Description="Membro" />
+    <Member Name="Namespace" Description="Spazio dei nomi" />
+    <Member Name="NewTranslations" Description="Nuove traduzioni" />
+    <Member Name="NewTypes" Description="Nuovi tipi" />
     <Member Name="None" Description="niente" />
     <Member Name="NoResultsFound" Description="Nessun risultato trovato" />
     <Member Name="NothingToTranslate" Description="Niente da tradurre" />
@@ -33,6 +49,7 @@
     <Member Name="Search" Description="Cerca" />
     <Member Name="Sync" Description="sinc" />
     <Member Name="Synchronize0In1" Description="Sincronizzare {0} in {1}" />
+    <Member Name="ThisFieldIsTranslatable" Description="Questo campo è traducibile" />
     <Member Name="Type" Description="Tipo" />
     <Member Name="View" Description="vedere" />
     <Member Name="View0In1" Description="Vedere {0} in {1}" />

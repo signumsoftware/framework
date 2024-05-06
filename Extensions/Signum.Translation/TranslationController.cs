@@ -103,7 +103,7 @@ public class TranslationController : ControllerBase
         Dictionary<string, LocalizableTypeTS> types =
             (from ci in cultures
              let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-             where la != null || ci == defaultCulture || ci == targetCulture
+             where la != null || ci.Equals(defaultCulture) || ci.Equals(targetCulture)
              let la2 = la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: true)
              from t in la2.Types.Values
              let lt = new LocalizedTypeTS
@@ -175,8 +175,8 @@ public class TranslationController : ControllerBase
         var cultures = TranslationLogic.CurrentCultureInfos(defaultCulture);
         Dictionary<CultureInfo, LocalizedAssembly> reference = (from ci in cultures
                                                                 let la = DescriptionManager.GetLocalizedAssembly(ass, ci)
-                                                                where la != null || ci == defaultCulture || ci == targetCulture
-                                                                select KeyValuePair.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci == defaultCulture || ci == targetCulture))).ToDictionary();
+                                                                where la != null || ci.Equals(defaultCulture) || ci.Equals(targetCulture)
+                                                                select KeyValuePair.Create(ci, la ?? LocalizedAssembly.ImportXml(ass, ci, forceCreate: ci.Equals(defaultCulture) || ci.Equals(targetCulture)))).ToDictionary();
 
         var master = reference.Extract(defaultCulture);
         var target = reference.Extract(targetCulture);
@@ -204,6 +204,76 @@ public class TranslationController : ControllerBase
         var defaultAssembly = DescriptionManager.GetLocalizedAssembly(ass, defaultCulture) ?? LocalizedAssembly.ImportXml(ass, defaultCulture, forceCreate: true)!;
 
         return TranslationSynchronizer.SyncNamespaceStats(targetAssembly, defaultAssembly);
+    }
+
+    [HttpGet("api/translation/autoTranslate")]
+    public void AutoTranslate(string assembly, string culture)
+    {
+        var changes = Sync(assembly, culture);
+        while (changes.types.Any())
+        {
+            changes.types.Values
+            .ToList()
+            .ForEach(t =>
+            {
+                var locType = t.cultures.GetOrThrow(culture);
+
+                if (t.hasDescription)
+                {
+                    var td = locType.typeDescription;
+                    if (td != null)
+                    {
+                        var translates = t.cultures
+                            .Where(a => a.Key != culture)
+                            .SelectMany(a => a.Value.typeDescription?.automaticTranslations ?? new List<AutomaticTypeTranslation>().ToArray())
+                            .ToList();
+
+                        if (!td.description.HasText())
+                            td.description = translates.FirstEx().Singular;
+
+                        if (!td.pluralDescription.HasText())
+                            td.pluralDescription = translates.FirstEx().Plural;
+
+                        if (!td.gender.HasText())
+                            td.gender = translates.FirstEx().Gender?.ToString();
+                    }
+                }
+
+                if (t.hasMembers)
+                {
+                    var members = locType.members
+                        .Where(kvp => !kvp.Value.description.HasText())
+                        .ToList();
+
+                    members.ForEach(m =>
+                    {
+                        var translates = t.cultures
+                            .Where(kvp => kvp.Key != culture)
+                            .SelectMany(kvp => kvp.Value.members)
+                            .Where(kvp => kvp.Key == m.Key)
+                            .SelectMany(kvp => kvp.Value.automaticTranslations ?? new List<AutomaticTranslation>().ToArray())
+                            .ToList();
+
+                        m.Value.description = translates.FirstEx().Text;
+                    });
+                }
+            });
+
+            SaveTypes(assembly, culture, changes);
+
+            changes = Sync(assembly, culture);
+        }
+    }
+
+    [HttpGet("api/translation/autoTranslateAll")]
+    public void AutoTranslateAll(string culture)
+    {
+        var states = GetState();
+
+        states
+            .Where(s => s.status != TranslatedSummaryState.Completed)
+            .ToList()
+            .ForEach(s => AutoTranslate(s.assembly, culture));
     }
 
     private LocalizedTypeTS GetLocalizedType(LocalizedTypeChanges t, CultureInfo ci, bool isTarget)
@@ -304,7 +374,7 @@ public class TranslationController : ControllerBase
     {
         var currentAssembly = GetAssembly(assembly);
 
-        foreach (var cult in result.cultures.Keys.Where(ci => culture == null  || culture == ci))
+        foreach (var cult in result.cultures.Keys.Where(ci => culture == null  || culture.Equals(ci)))
         {
             LocalizedAssembly locAssembly = LocalizedAssembly.ImportXml(currentAssembly, CultureInfo.GetCultureInfo(cult), forceCreate: true)!;
 

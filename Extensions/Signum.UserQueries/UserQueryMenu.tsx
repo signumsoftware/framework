@@ -7,7 +7,7 @@ import { Finder } from '@framework/Finder'
 import { parseLite, is, Lite, toLite, newMListElement, liteKey, SearchMessage, MList, MListElement, getToString, Entity, toMList, translated } from '@framework/Signum.Entities'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
-import { SystemTimeEmbedded, UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation } from './Signum.UserQueries'
+import { SystemTimeEmbedded, UserQueryEntity, UserQueryLiteModel, UserQueryMessage, UserQueryOperation, UserQueryPermission } from './Signum.UserQueries'
 import { UserQueryClient } from './UserQueryClient'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { Dropdown } from 'react-bootstrap';
@@ -312,7 +312,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        <Dropdown.Item onClick={handleBackToDefault} ><FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>
+        {AppContext.isPermissionAuthorized(UserQueryPermission.BackToDefaultQuery) && <Dropdown.Item onClick={handleBackToDefault} > <FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>}
         {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={"share-from-square"} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
         {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={"pen-to-square"} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
         {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={"plus"} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>

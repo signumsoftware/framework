@@ -83,6 +83,9 @@ public enum TranslationMessage
 
     [Description("Are you sure to continue auto translation all types for {0} without revision?")]
     AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision,
+
+    [Description("Are you sure to continue auto translation all assemblies for {0} without revision?")]
+    AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision,
 }
 
 public enum TranslationJavascriptMessage

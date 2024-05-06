@@ -55,6 +55,14 @@ export namespace TranslationClient {
       return ajaxPost({ url: `/api/translation/save?assembly=${assembly}&culture=${culture}` }, result);
     }
   
+    export function autoTranslate(assembly: string, culture: string): Promise<void> {
+      return ajaxGet({ url: `~/api/translation/autoTranslate?assembly=${assembly}&culture=${culture}` });
+    }
+
+    export function autoTranslateAll(culture: string): Promise<void> {
+      return ajaxGet({ url: `~/api/translation/autoTranslateAll?culture=${culture}` });
+    }
+
     export function pluralize(culture: string, singular: string): Promise<string> {
       return ajaxPost({ url: `/api/translation/pluralize?culture=${culture}` }, singular);
     }

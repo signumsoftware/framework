@@ -50,6 +50,7 @@ export module TranslationMessage {
   export const AutoTranslate = new MessageKey("TranslationMessage", "AutoTranslate");
   export const AreYouSureToContinueAutoTranslation0For1WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslation0For1WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision");
+  export const AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision");
 }
 
 export module TranslationPermission {

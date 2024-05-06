@@ -15,7 +15,11 @@
     <Member Name="StateWhenTheOperationStarted" Description="Stato quando è iniziata l'operazione" />
   </Type>
   <Type Name="DiffLogMixin">
+    <Member Name="Cleaned" Description="Pulito" />
     <Member Name="FinalState" Description="Stato finale" />
     <Member Name="InitialState" Description="Stato iniziale" />
+  </Type>
+  <Type Name="OperationLogTypeCondition">
+    <Member Name="FilteringByTarget" Description="Filtraggio in base alla destinazione" />
   </Type>
 </Translations>
