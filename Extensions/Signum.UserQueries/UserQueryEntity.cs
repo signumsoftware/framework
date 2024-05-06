@@ -262,7 +262,6 @@ public class UserQueryLiteModel : ModelEntity
 public static class UserQueryPermission
 {
     public static PermissionSymbol ViewUserQuery;
-    public static PermissionSymbol BackToDefaultQuery;
 }
 
 [AutoInit]
