@@ -312,7 +312,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
           })}
         </div>
         {userQueries && userQueries.length > 0 && <Dropdown.Divider />}
-        {AppContext.isPermissionAuthorized(UserQueryPermission.BackToDefaultQuery) && <Dropdown.Item onClick={handleBackToDefault} > <FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>}
+        {p.searchControl.props.allowChangeColumns && <Dropdown.Item onClick={handleBackToDefault} > <FontAwesomeIcon icon={"arrow-rotate-left"} className="me-2" />{UserQueryMessage.BackToDefault.niceToString()}</Dropdown.Item>}
         {currentUserQuery && canSave && <Dropdown.Item onClick={handleApplyChanges} ><FontAwesomeIcon icon={"share-from-square"} className="me-2" />{UserQueryMessage.ApplyChanges.niceToString()}</Dropdown.Item>}
         {currentUserQuery && canSave && <Dropdown.Item onClick={handleEdit} ><FontAwesomeIcon icon={"pen-to-square"} className="me-2" />{UserQueryMessage.Edit.niceToString()}</Dropdown.Item>}
         {canSave && <Dropdown.Item onClick={handleCreateUserQuery}><FontAwesomeIcon icon={"plus"} className="me-2" />{UserQueryMessage.CreateNew.niceToString()}</Dropdown.Item>}</Dropdown.Menu>
