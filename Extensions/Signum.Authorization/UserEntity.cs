@@ -44,7 +44,7 @@ public class UserEntity : Entity, IEmailOwnerEntity, IUserEntity
     {
         if (pi.Name == nameof(State))
         {
-            if (DisabledOn != null && State != UserState.Deactivated)
+            if (DisabledOn != null && State is not (UserState.Deactivated or UserState.AutoDeactivate))
                 return AuthAdminMessage.TheUserStateMustBeDisabled.NiceToString();
         }
 

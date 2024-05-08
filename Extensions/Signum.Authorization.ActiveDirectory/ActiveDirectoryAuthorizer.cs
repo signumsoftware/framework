@@ -11,7 +11,7 @@ public interface IAutoCreateUserContext
 {
     public string UserName { get; }
     public string? EmailAddress { get; }
-    public string FirstName { get; }
+public string FirstName { get; }
     public string LastName { get; }
     public Guid? OID { get;  }
     public string? SID { get; }
@@ -324,6 +324,12 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
 
     public virtual void UpdateUserInternal(UserEntity user, IAutoCreateUserContext ctx)
     {
+        if (user.State == UserState.AutoDeactivate)
+        {
+            user.State = UserState.Active;
+            user.DisabledOn = null;
+        }
+
         if (ctx.OID != null)
         {
             user.Mixin<UserADMixin>().OID = ctx.OID;

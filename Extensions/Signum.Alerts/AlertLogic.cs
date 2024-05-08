@@ -314,6 +314,7 @@ public static class AlertLogic
             return null;
 
         using (AllowSaveAlerts())
+        using (OperationLogic.AllowSave<AlertEntity>())
         {
             var result = new AlertEntity
             {
@@ -327,10 +328,11 @@ public static class AlertLogic
                 GroupTarget = groupTarget,
                 AlertType = alertType,
                 Recipient = recipient,
-                AvoidSendMail = avoidSendMail
-            };
+                AvoidSendMail = avoidSendMail,
+                State = AlertState.Saved,
+            }.Save();
 
-            return result.Execute(AlertOperation.Save);
+            return result;
         }
     }
 

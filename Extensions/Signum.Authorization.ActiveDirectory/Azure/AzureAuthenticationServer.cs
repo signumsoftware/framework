@@ -79,14 +79,14 @@ public class AzureADAuthenticationServer
 
         string stsDiscoveryEndpoint =
             adaConfig.AzureB2C != null ?
-            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.AzureB2C.TenantName}.onmicrosoft.com/{adaConfig.AzureB2C.SignInSignUpPolicy}/v2.0/.well-known/openid-configuration?p={adaConfig.AzureB2C.SignInSignUpPolicy}" :
+            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.AzureB2C.TenantName}.onmicrosoft.com/{adaConfig.AzureB2C.SignInSignUp_UserFlow}/v2.0/.well-known/openid-configuration?p={adaConfig.AzureB2C.SignInSignUp_UserFlow}" :
             "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
 
-        var issuer = adaConfig.AzureB2C != null ? 
-            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.Azure_DirectoryID}/v2.0": 
+        var issuer = adaConfig.AzureB2C != null ?
+            config.Issuer: 
             $"https://login.microsoftonline.com/{adaConfig.Azure_DirectoryID}/v2.0";
 
         TokenValidationParameters validationParameters = new TokenValidationParameters
@@ -97,7 +97,7 @@ public class AzureADAuthenticationServer
             ValidateAudience = true,
             ValidateIssuer = true,
             IssuerSigningKeys = config.SigningKeys, //2. .NET Core equivalent is "IssuerSigningKeys" and "SigningKeys"
-            ValidateLifetime = true
+            ValidateLifetime = true,
         };
         JwtSecurityTokenHandler tokendHandler = new JwtSecurityTokenHandler();
 
