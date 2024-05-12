@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Signum.Upgrade.Upgrades;
 
-class Upgrade_20240424_UpgradeNugets : CodeUpgradeBase
+class Upgrade_20240512_UpgradeNugets : CodeUpgradeBase
 {
     public override string Description => "Upgrade nugets";
 
@@ -14,14 +14,14 @@ class Upgrade_20240424_UpgradeNugets : CodeUpgradeBase
         uctx.ForeachCodeFile("*.csproj", file =>
         {
             file.UpdateNugetReferences("""
-                <PackageReference Include="Selenium.WebDriver" Version="4.19.0" />
-                <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="124.0.6367.6000" />
-                <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.4.4"/>
-                <PackageReference Include="SixLabors.ImageSharp" Version="2.1.8" />
-                <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="2.88.8" />
-                <PackageReference Include="Microsoft.Graph" Version="5.49.0" />
-                <PackageReference Include="xunit" Version="2.7.1" />
-                <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8">
+                <PackageReference Include="Npgsql" Version="8.0.3" />
+                <PackageReference Include="Microsoft.Graph" Version="5.52.0" />
+                <PackageReference Include="Selenium.Support" Version="4.20.0" />
+                <PackageReference Include="Selenium.WebDriver" Version="4.20.0" />
+                <PackageReference Include="HtmlAgilityPack" Version="1.11.61" />
+                <PackageReference Include="xunit" Version="2.8.0" /> 
+                <PackageReference Include="xunit.runner.visualstudio" Version="2.8.0">
+                <PackageReference Include="Net.Codecrete.QrCodeGenerator" Version="2.0.5" />
                 """);
         });
     }
