@@ -294,10 +294,13 @@ public static class TranslatedInstanceLogic
         return result;
     }
 
-  
-
-
     public static TranslatedInstanceEntity? GetTranslatedInstance(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId)
+    {
+        return GetTranslatedInstance(lite, route, rowId, CultureInfo.CurrentUICulture);
+
+    }
+
+    public static TranslatedInstanceEntity? GetTranslatedInstance(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, CultureInfo cultureInfo)
     {
         var hastMList = route.GetMListItemsRoute() != null;
 
@@ -312,15 +315,15 @@ public static class TranslatedInstanceLogic
 
         var key = new LocalizedInstanceKey(route, lite, rowId);
 
-        var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture)?.TryGetC(key);
+        var result = LocalizationCache.Value.TryGetC(cultureInfo)?.TryGetC(key);
 
         if (result != null)
             return result;
 
-        if (CultureInfo.CurrentUICulture.IsNeutralCulture)
+        if (cultureInfo.IsNeutralCulture)
             return null;
 
-        result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent)?.TryGetC(key);
+        result = LocalizationCache.Value.TryGetC(cultureInfo.Parent)?.TryGetC(key);
 
         if (result != null)
             return result;
@@ -346,7 +349,7 @@ public static class TranslatedInstanceLogic
     }
 
     public static T SyncTranslation<T>(this T entity, Dictionary<PropertyRouteEntity, TranslatedInstanceEntity>? translation, CultureInfoEntity ci, Expression<Func<T, string?>> propertyRoute, string? translatedText)
-    where T : Entity
+        where T : Entity
     {
         var pr = PropertyRoute.Construct(propertyRoute).ToPropertyRouteEntity();
 
@@ -356,9 +359,13 @@ public static class TranslatedInstanceLogic
             var current = translation?.TryGetC(pr);
             if (current != null)
             {
-                current.OriginalText = originalText;
-                current.TranslatedText = translatedText;
-                current.Save();
+                if (current.OriginalText != originalText ||
+                    current.TranslatedText != translatedText)
+                {
+                    current.OriginalText = originalText;
+                    current.TranslatedText = translatedText;
+                    current.Save();
+                }
             }
             else
             {

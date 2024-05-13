@@ -56,7 +56,8 @@ public class ResetLazy<T>: IResetLazy
     public int Loads;
     public int Hits;
     public int Invalidations;
-    public TimeSpan SumLoadtime;  
+    public TimeSpan SumLoadtime;
+    public DateTimeOffset? LoadedOn; 
 
     object syncLock = new();
 
@@ -121,6 +122,7 @@ public class ResetLazy<T>: IResetLazy
     {
         Stopwatch sw = Stopwatch.StartNew();
         var result = valueFactory();
+        LoadedOn = DateTimeOffset.UtcNow;
         sw.Stop();
         this.SumLoadtime += sw.Elapsed;
         Interlocked.Increment(ref Loads);
@@ -145,12 +147,13 @@ public class ResetLazy<T>: IResetLazy
             lock (syncLock)
             {
                 this.box = null;
+                this.LoadedOn = null;
             }
         }
         else
         {
             this.box = null;
-
+            this.LoadedOn = null;
         }
 
         Interlocked.Increment(ref Invalidations);

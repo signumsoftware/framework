@@ -70,7 +70,7 @@
     <Member Name="SearchControl" Description="Controllo della ricerca" />
   </Type>
   <Type Name="UserQueryPermission">
-    <Member Name="BackToDefaultQuery" Description="Torna alla query predefinita" />
+   
     <Member Name="ViewUserQuery" Description="Vedi query di utente" />
   </Type>
   <Type Name="ValueUserQueryElementEmbedded" Description="Elemento di query utente valore">
