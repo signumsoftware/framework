@@ -222,7 +222,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       return Promise.resolve(t.name);
 
     if (t.name == IsByAll)
-      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => getToString(t) /*CleanName*/);
+      return Finder.find(TypeEntity, { title: SelectorMessage.PleaseSelectAType.niceToString() }).then(t => t && getToString(t) /*CleanName*/);
 
     const tis = tryGetTypeInfos(t).notNull().filter(ti => predicate(ti));
 
