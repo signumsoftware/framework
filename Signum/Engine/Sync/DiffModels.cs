@@ -188,7 +188,7 @@ public class DiffIndex
         if (this.ViewName != mix.ViewName)
             return false;
 
-        if (this.ColumnsChanged(dif, mix))
+        if (this.ColumnsChanged(dif, mix) && Type != DiffIndexType.Heap)
             return false;
 
         if (this.IsPrimary != mix.PrimaryKey)
