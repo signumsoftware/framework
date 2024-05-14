@@ -294,10 +294,13 @@ public static class TranslatedInstanceLogic
         return result;
     }
 
-  
-
-
     public static TranslatedInstanceEntity? GetTranslatedInstance(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId)
+    {
+        return GetTranslatedInstance(lite, route, rowId, CultureInfo.CurrentUICulture);
+
+    }
+
+    public static TranslatedInstanceEntity? GetTranslatedInstance(Lite<Entity> lite, PropertyRoute route, PrimaryKey? rowId, CultureInfo cultureInfo)
     {
         var hastMList = route.GetMListItemsRoute() != null;
 
@@ -312,15 +315,15 @@ public static class TranslatedInstanceLogic
 
         var key = new LocalizedInstanceKey(route, lite, rowId);
 
-        var result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture)?.TryGetC(key);
+        var result = LocalizationCache.Value.TryGetC(cultureInfo)?.TryGetC(key);
 
         if (result != null)
             return result;
 
-        if (CultureInfo.CurrentUICulture.IsNeutralCulture)
+        if (cultureInfo.IsNeutralCulture)
             return null;
 
-        result = LocalizationCache.Value.TryGetC(CultureInfo.CurrentUICulture.Parent)?.TryGetC(key);
+        result = LocalizationCache.Value.TryGetC(cultureInfo.Parent)?.TryGetC(key);
 
         if (result != null)
             return result;

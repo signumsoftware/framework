@@ -27,7 +27,7 @@ public abstract class ImmutableEntity : Entity
             base.PreSaving(ctx);
         else
             if (Modified == ModifiedState.SelfModified)
-                throw new InvalidOperationException("Attempt to save a not new modified ImmutableEntity");
+                throw new InvalidOperationException($"Attempt to save a not new modified ImmutableEntity ({this.GetType().TypeName()})");
     }
 
     public IDisposable AllowChanges()

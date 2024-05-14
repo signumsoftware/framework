@@ -1,6 +1,7 @@
 using Signum.Engine.Linq;
 using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
+using System.Data;
 
 namespace Signum.Engine.Maps;
 
@@ -72,7 +73,7 @@ public partial class Table
 
         var result = Schema.Current.Settings.IsPostgres ?
         new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = COALESCE(({queryCommandString}), 1 / 0);");
+        new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = COALESCE(({queryCommandString}), {(this.PrimaryKey.DbType.SqlServer == SqlDbType.UniqueIdentifier ? "CAST(CAST(1 / 0 AS BINARY) AS UNIQUEIDENTIFIER)" : "1 / 0")});");
 
         return result;
     }
