@@ -243,13 +243,13 @@ export function fallbackIcon(icon: IconProp) : IconProp {
 export function isIconDefined(icon: IconProp) {
 
   if (Array.isArray(icon))
-    return lib.definitions[toSortPrefix(icon[0]) ?? icon[0]]?.[icon[1]]
+    return lib.definitions[icon[0] as IconPrefix]?.[icon[1] as IconName]
 
   if (typeof icon == "object")
-    return lib.definitions[toSortPrefix(icon.prefix) ?? icon.prefix]?.[icon.iconName];
+    return lib.definitions[icon.prefix]?.[icon.iconName];
 
   if (typeof icon == "string") {
-    if (lib.definitions[toSortPrefix(config.styleDefault)!]?.[icon])
+    if (lib.definitions[toSortPrefix(config.styleDefault as CssStyleClass | IconStyle) ?? config.styleDefault as IconPrefix]?.[icon])
       return true;
     else {
       debugger;
