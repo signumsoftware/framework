@@ -2,7 +2,7 @@ import * as React from 'react'
 import { classes, Dic } from '../Globals'
 import { FormGroup } from '../Lines'
 import { TypeContext } from '../TypeContext'
-import { library, config, IconLookup } from '@fortawesome/fontawesome-svg-core'
+import { library, config, IconLookup, CssStyleClass, IconStyle } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useForceUpdate } from '../Hooks'
 import { TextHighlighter, Typeahead, TypeaheadOptions } from './Typeahead'
@@ -88,14 +88,20 @@ function toLongPrefix(prefix: IconPrefix): string | undefined{
   };
 }
 
-function toSortPrefix(family: string): IconPrefix | undefined  {
+function toSortPrefix(family: CssStyleClass | IconStyle): IconPrefix | undefined  {
   switch (family) {
-    case "fa-solid": return "fas"; 
+    case "fa-solid": return "fas";
     case "fa-brands": return "fab";
     case "fa-regular": return "far";
     case "fa-light": return "fal";
     case "fa-thin": return "fat"; 
     case "fa-duotone": return "fad"; 
+    case "solid": return "fas";
+    case "brands": return "fab";
+    case "regular": return "far";
+    case "light": return "fal";
+    case "thin": return "fat";
+    case "duotone": return "fad"; 
     default: return undefined;
   };
 }
@@ -243,8 +249,7 @@ export function isIconDefined(icon: IconProp) {
     return lib.definitions[toSortPrefix(icon.prefix) ?? icon.prefix]?.[icon.iconName];
 
   if (typeof icon == "string") {
-
-    if (lib.definitions["fas"]?.[icon])
+    if (lib.definitions[toSortPrefix(config.styleDefault)!]?.[icon])
       return true;
     else {
       debugger;
