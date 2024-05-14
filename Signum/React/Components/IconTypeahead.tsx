@@ -88,7 +88,7 @@ function toLongPrefix(prefix: IconPrefix): string | undefined{
   };
 }
 
-function toSortPrefix(family: CssStyleClass | IconStyle): IconPrefix | undefined  {
+function toSortPrefix(family: CssStyleClass | IconStyle | IconPrefix): IconPrefix  {
   switch (family) {
     case "fa-solid": return "fas";
     case "fa-brands": return "fab";
@@ -102,7 +102,7 @@ function toSortPrefix(family: CssStyleClass | IconStyle): IconPrefix | undefined
     case "light": return "fal";
     case "thin": return "fat";
     case "duotone": return "fad"; 
-    default: return undefined;
+    default: return family;
   };
 }
 
@@ -243,13 +243,13 @@ export function fallbackIcon(icon: IconProp) : IconProp {
 export function isIconDefined(icon: IconProp) {
 
   if (Array.isArray(icon))
-    return lib.definitions[icon[0] as IconPrefix]?.[icon[1] as IconName]
+    return lib.definitions[toSortPrefix(icon[0])]?.[icon[1]]
 
   if (typeof icon == "object")
-    return lib.definitions[icon.prefix]?.[icon.iconName];
+    return lib.definitions[toSortPrefix(icon.prefix)]?.[icon.iconName];
 
   if (typeof icon == "string") {
-    if (lib.definitions[toSortPrefix(config.styleDefault as CssStyleClass | IconStyle) ?? config.styleDefault as IconPrefix]?.[icon])
+    if (lib.definitions[toSortPrefix(config.styleDefault)]?.[icon])
       return true;
     else {
       debugger;
