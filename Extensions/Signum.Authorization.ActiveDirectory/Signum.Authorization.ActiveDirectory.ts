@@ -82,7 +82,7 @@ export const AzureB2CEmbedded = new Type<AzureB2CEmbedded>("AzureB2CEmbedded");
 export interface AzureB2CEmbedded extends Entities.EmbeddedEntity {
   Type: "AzureB2CEmbedded";
   tenantName: string;
-  signInSignUpPolicy: string;
+  signInSignUp_UserFlow: string;
 }
 
 export const CachedProfilePhotoEntity = new Type<CachedProfilePhotoEntity>("CachedProfilePhoto");

@@ -1,6 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="IContainsQuery">
+    <Member Name="Query" Description="Quesito" />
+  </Type>
+  <Type Name="ModelConverterSymbol" Description="il convertitore di modelli" PluralDescription="Convertitori di modelli" />
+  <Type Name="MultiEntityModel" Description="Entità multipla">
+    <Member Name="Entities" Description="Entità" />
+  </Type>
+  <Type Name="QueryModel" Description="Quesito">
+    <Member Name="Filters" Description="Filtri" />
+    <Member Name="Orders" Description="Ordini" />
+    <Member Name="Pagination" Description="Impaginazione" />
+    <Member Name="QueryName" Description="Nome della query" />
+  </Type>
+  <Type Name="QueryModelMessage">
+    <Member Name="ConfigureYourQueryAndPressSearchBeforeOk" Description="Configura la tua query e premi [Cerca] prima di [Ok]" />
+  </Type>
+  <Type Name="TemplateApplicableEval" Description="Modello di valutazione applicabile" />
   <Type Name="TemplateTokenMessage">
+    <Member Name="ImpossibleToAccess0BecauseTheTemplateHAsNo1" Description="Impossibile accedere {0} perché il modello non ha {1}" />
+    <Member Name="Insert" Description="Inserire" />
     <Member Name="NoColumnSelected" Description="Nessuna colonna selezionata" />
     <Member Name="YouCannotAddBlocksWithAllOrAny" Description="Non è possibile aggiungere blocchi con 'Tutti' o 'Alcuno'" />
     <Member Name="YouCannotAddIfBlocksOnCollectionFields" Description="Non è possibile aggiungere blocchi 'If' sui campi di elenchi" />

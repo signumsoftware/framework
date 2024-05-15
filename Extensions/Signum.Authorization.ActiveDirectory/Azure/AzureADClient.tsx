@@ -24,7 +24,7 @@ export namespace AzureADClient {
     var msalConfig: msal.Configuration = {
       auth: {
         clientId: window.__azureApplicationId!, //This is your client ID
-        authority: window.__azureB2CAuthority ?? ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
+        authority: window.__azureB2CTenantName ? getAzureB2C_Authority(window.__azureB2CSignInSignUp_UserFlow!) : ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
         redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
         postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
       },
@@ -34,8 +34,8 @@ export namespace AzureADClient {
       }
     };
 
-    if (window.__azureB2CAuthorityDomain)
-      msalConfig.auth.knownAuthorities = [window.__azureB2CAuthorityDomain];
+    if (window.__azureB2CTenantName)
+      msalConfig.auth.knownAuthorities = [getAzureB2C_AuthorityDomain()];
 
     msalClient = new msal.PublicClientApplication(msalConfig);
   }
@@ -188,6 +188,16 @@ export namespace AzureADClient {
       return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });
     }
   }
+
+
+  export function getAzureB2C_AuthorityDomain() {
+    return `${window.__azureB2CTenantName}.b2clogin.com`;
+  }
+
+  export function getAzureB2C_Authority(userFlow: string) {
+    return `https://${window.__azureB2CTenantName}.b2clogin.com/${window.__azureB2CTenantName}.onmicrosoft.com/${window.__azureB2CSignInSignUp_UserFlow}`;
+  }
+
 }
 
 declare global {
@@ -195,8 +205,7 @@ declare global {
     __azureApplicationId: string | null;
     __azureTenantId: string | null;
 
-    __azureB2CAuthority: string | null;
-    __azureB2CAuthorityDomain: string | null;
     __azureB2CTenantName: string | null;
+    __azureB2CSignInSignUp_UserFlow: string | null;
   }
 }

@@ -74,11 +74,7 @@ public class AzureB2CEmbedded : EmbeddedEntity
     public string TenantName { get; set; }
 
     [StringLengthValidator(Max = 100)]
-    public string SignInSignUpPolicy { get; set; }
-
-
-    public string GetAuthority() => $"https://{TenantName}.b2clogin.com/{TenantName}.onmicrosoft.com/{SignInSignUpPolicy}";
-    public string GetAuthorityDomain() => $"{TenantName}.b2clogin.com";
+    public string SignInSignUp_UserFlow { get; set; }
 }
 
 public class RoleMappingEmbedded : EmbeddedEntity

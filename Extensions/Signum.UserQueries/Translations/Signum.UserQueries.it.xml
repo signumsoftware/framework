@@ -1,9 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="AutoUpdate" Description="Aggiornamento automatico">
+    <Member Name="Dashboard" Description="Cruscotto" />
+    <Member Name="InteractionGroup" Description="Gruppo di interazione" />
+    <Member Name="None" Description="Nessuno" />
+  </Type>
+  <Type Name="SystemTimeEmbedded" Description="Tempo di sistema">
+    <Member Name="EndDate" Description="Data di fine" />
+    <Member Name="JoinMode" Description="Modalità di partecipazione" />
+    <Member Name="Mode" Description="Modo" />
+    <Member Name="StartDate" Description="Data di inizio" />
+  </Type>
   <Type Name="UserQueryEntity" Description="Query utente">
     <Member Name="AppendFilters" Description="Aggiungere filtri" />
     <Member Name="Columns" Description="Colonne" />
     <Member Name="ColumnsMode" Description="Modalità colonne" />
+    <Member Name="CustomDrilldowns" Description="Drill-down personalizzati" />
     <Member Name="DisplayName" Description="Nome visualizzato" />
     <Member Name="ElementsPerPage" Description="Elementi per pagina" />
     <Member Name="EntityType" Description="Tipo di entità" />
@@ -16,10 +28,25 @@
     <Member Name="Owner" Description="Proprietario" />
     <Member Name="PaginationMode" Description="Modalità di impaginazione" />
     <Member Name="Query" Description="Query" />
+    <Member Name="RefreshMode" Description="Modalità di aggiornamento" />
+    <Member Name="SystemTime" Description="Tempo di sistema" />
+  </Type>
+  <Type Name="UserQueryLiteModel" Description="Query utente lite">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
+    <Member Name="Query" Description="Quesito" />
   </Type>
   <Type Name="UserQueryMessage">
+    <Member Name="ApplyChanges" Description="Applicare le modifiche" />
+    <Member Name="BackToDefault" Description="Torna alle impostazioni predefinite" />
+    <Member Name="CreateNew" Description="Creare" />
+    <Member Name="Date" Description="Dattero" />
     <Member Name="Edit" Description="Modifica" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Rende disponibile il {0} come collegamento rapido di {1}" />
+    <Member Name="MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0" Description="Rende disponibile il {0} per i drilldown personalizzati e nel menu contestuale durante il raggruppamento {1}" />
+    <Member Name="Pagination" Description="Impaginazione" />
     <Member Name="Preview" Description="Anteprima" />
+    <Member Name="TheSelected0" Description="il {0} selezionato" />
     <Member Name="Use0ToFilterCurrentEntity" Description="Utilizzare {0} per filtrare l'attuale entità" />
   </Type>
   <Type Name="UserQueryOperation">
@@ -27,10 +54,33 @@
     <Member Name="Save" Description="Salva" />
   </Type>
   <Type Name="UserQueryPartEntity" Description="Parte di query utente" PluralDescription="Parti di query utente">
+    <Member Name="AggregateFromSummaryHeader" Description="Aggrega dall'intestazione di riepilogo" />
+    <Member Name="AllowMaxHeight" Description="Consenti altezza massima" />
+    <Member Name="AllowSelection" Description="Consenti selezione" />
+    <Member Name="AutoUpdate" Description="Aggiornamento automatico" />
+    <Member Name="CreateNew" Description="Crea nuovo" />
+    <Member Name="IsQueryCached" Description="La query viene memorizzata nella cache" />
+    <Member Name="RenderMode" Description="Modalità di rendering" />
     <Member Name="RequiresTitle" Description="Titolo richiesto" />
+    <Member Name="ShowFooter" Description="Mostra piè di pagina" />
     <Member Name="UserQuery" Description="Query utente" />
   </Type>
+  <Type Name="UserQueryPartRenderMode" Description="Modalità di rendering della parte query utente">
+    <Member Name="BigValue" Description="Grande valore" />
+    <Member Name="SearchControl" Description="Controllo della ricerca" />
+  </Type>
   <Type Name="UserQueryPermission">
+   
     <Member Name="ViewUserQuery" Description="Vedi query di utente" />
+  </Type>
+  <Type Name="ValueUserQueryElementEmbedded" Description="Elemento di query utente valore">
+    <Member Name="Href" Description="Href" />
+    <Member Name="IsQueryCached" Description="La query viene memorizzata nella cache" />
+    <Member Name="Label" Description="Etichetta" />
+    <Member Name="UserQuery" Description="Query dell'utente" />
+  </Type>
+  <Type Name="ValueUserQueryListPartEntity" Description="la parte dell'elenco di query utente Valore" PluralDescription="Parti dell'elenco di query utente di valore">
+    <Member Name="RequiresTitle" Description="Richiede titolo" />
+    <Member Name="UserQueries" Description="Query degli utenti" />
   </Type>
 </Translations>

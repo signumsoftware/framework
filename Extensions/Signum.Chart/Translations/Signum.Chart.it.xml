@@ -2,9 +2,76 @@
 <Translations>
   <Type Name="ChartColumnEmbedded" Description="Colonna del grafico">
     <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="Format" Description="Formato" />
+    <Member Name="OrderByIndex" Description="Ordina per indice" />
+    <Member Name="OrderByType" Description="Ordina per tipo" />
     <Member Name="Token" Description="Token" />
   </Type>
+  <Type Name="ChartColumnMessage">
+    <Member Name="Angle" Description="Angolo" />
+    <Member Name="Areas" Description="Aree" />
+    <Member Name="Bars" Description="Bar" />
+    <Member Name="Bubble" Description="Bolla" />
+    <Member Name="Color" Description="Colore" />
+    <Member Name="ColorCategory" Description="Categoria di colore" />
+    <Member Name="ColorScale" Description="Scala dei colori" />
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="Date" Description="Dattero" />
+    <Member Name="Dimension1" Description="Dimensione (1)" />
+    <Member Name="Dimension2" Description="Dimensione (2)" />
+    <Member Name="Dimension3" Description="Dimensione (3)" />
+    <Member Name="Dimension4" Description="Dimensione (4)" />
+    <Member Name="Dimension5" Description="Dimensione (5)" />
+    <Member Name="Dimension6" Description="Dimensione (6)" />
+    <Member Name="Dimension7" Description="Dimensione (7)" />
+    <Member Name="Dimension8" Description="Dimensione (8)" />
+    <Member Name="Height" Description="Altezza" />
+    <Member Name="Height2" Description="Altezza (2)" />
+    <Member Name="Height3" Description="Altezza (3)" />
+    <Member Name="Height4" Description="Altezza (4)" />
+    <Member Name="Height5" Description="Altezza (5)" />
+    <Member Name="HorizontalAxis" Description="Asse orizzontale" />
+    <Member Name="HorizontalAxis2" Description="Asse orizzontale (2)" />
+    <Member Name="HorizontalAxis3" Description="Asse orizzontale (3)" />
+    <Member Name="HorizontalAxis4" Description="Asse orizzontale (4)" />
+    <Member Name="Icon" Description="Icona" />
+    <Member Name="Info" Description="Informazioni" />
+    <Member Name="InnerSize" Description="Dimensione interna" />
+    <Member Name="Label" Description="Etichetta" />
+    <Member Name="Latitude" Description="Latitudine" />
+    <Member Name="Line" Description="Linea" />
+    <Member Name="Location" Description="Ubicazione" />
+    <Member Name="LocationCode" Description="Codice località" />
+    <Member Name="Longitude" Description="Longitudine" />
+    <Member Name="Opacity" Description="Opacità" />
+    <Member Name="Order" Description="Ordine" />
+    <Member Name="Parent" Description="Genitore" />
+    <Member Name="Point" Description="Punto" />
+    <Member Name="Sections" Description="Sezioni" />
+    <Member Name="Size" Description="Grandezza" />
+    <Member Name="SplitBars" Description="Barre divise" />
+    <Member Name="SplitColumns" Description="Dividere le colonne" />
+    <Member Name="SplitLines" Description="Linee di divisione" />
+    <Member Name="Square" Description="Quadrato" />
+    <Member Name="Title" Description="Titolo" />
+    <Member Name="Value" Description="Valore" />
+    <Member Name="Value2" Description="Rapporto qualità/prezzo (2)" />
+    <Member Name="Value3" Description="Rapporto qualità/prezzo (3)" />
+    <Member Name="Value4" Description="Rapporto qualità/prezzo (4)" />
+    <Member Name="VerticalAxis" Description="Asse verticale" />
+    <Member Name="VerticalAxis2" Description="Asse verticale (2)" />
+    <Member Name="VerticalAxis3" Description="Asse verticale (3)" />
+    <Member Name="VerticalAxis4" Description="Asse verticale (4)" />
+    <Member Name="Weight" Description="Peso" />
+    <Member Name="Width" Description="Larghezza" />
+    <Member Name="Width2" Description="Larghezza2" />
+    <Member Name="Width3" Description="Larghezza3" />
+    <Member Name="Width4" Description="Larghezza4" />
+    <Member Name="Width5" Description="Larghezza5" />
+  </Type>
   <Type Name="ChartColumnType">
+    <Member Name="Any" Description="Qualunque" />
+    <Member Name="DateOnly" Description="Solo data" />
     <Member Name="DateTime" Description="Data ora" />
     <Member Name="Enum" Description="Enum" />
     <Member Name="Groupable" Description="Raggruppabile" />
@@ -13,7 +80,9 @@
     <Member Name="Magnitude" Description="Grandezza" />
     <Member Name="Positionable" Description="Posizionabile" />
     <Member Name="Real" Description="Reale" />
+    <Member Name="RealGroupable" Description="Reale raggruppabile" />
     <Member Name="String" Description="Stringa" />
+    <Member Name="Time" Description="Ore" />
   </Type>
   <Type Name="ChartMessage">
     <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} può essere creato solo dalla finestra del grafico" />
@@ -25,9 +94,11 @@
     <Member Name="_0ShouldBeAnAggregate" Description="{0} deve essere un aggregato" />
     <Member Name="_0ShouldBeNull" Description="{0} deve essere nullo" />
     <Member Name="_0ShouldBeSet" Description="{0} deve essere impostato" />
+    <Member Name="ApplyChanges" Description="Applicare le modifiche" />
     <Member Name="Chart" Description="Grafico" />
     <Member Name="ChartFor" Description="Grafico per" />
     <Member Name="ChartOf0" Description="Grafico di {0}" />
+    <Member Name="ChartSettings" Description="Impostazioni del grafico" />
     <Member Name="ChartToken" Description="Grafico" />
     <Member Name="ChooseABasePalette" Description="Scegliere una tavolozza di base" />
     <Member Name="ColorsFor0" Description="Colori per {0}" />
@@ -35,29 +106,259 @@
     <Member Name="CreatePalette" Description="Creare tavolozza" />
     <Member Name="Data" Description="Dati" />
     <Member Name="DeletePalette" Description="Eliminare la tavolozza" />
+    <Member Name="Dimension" Description="Dimensione" />
+    <Member Name="DrawChart" Description="Disegna grafico" />
+    <Member Name="Edit" Description="Redigere" />
+    <Member Name="Group" Description="Gruppo" />
+    <Member Name="HideChartSettings" Description="Nascondi le impostazioni del grafico" />
+    <Member Name="ListView" Description="Visualizzazione elenco" />
+    <Member Name="Maximize" Description="Massimizzare" />
+    <Member Name="Minimize" Description="Minimizzare" />
     <Member Name="MyCharts" Description="I miei grafici" />
     <Member Name="NewPalette" Description="Nuova tavolozza" />
+    <Member Name="Preview" Description="Anteprima" />
+    <Member Name="Query0IsNotAllowed" Description="Il {0} di query non è consentito" />
+    <Member Name="QueryResultReachedMaxRows0" Description="Il risultato della query ha raggiunto il numero massimo di righe ({0})" />
+    <Member Name="Reload" Description="Ricaricare" />
     <Member Name="SavePalette" Description="Salva tavolozza" />
+    <Member Name="ShowChartSettings" Description="Mostra le impostazioni del grafico" />
+    <Member Name="ToggleInfo" Description="Attiva/disattiva informazioni" />
+    <Member Name="Type0NotFoundInTheDatabase" Description="Il tipo {0} non è presente nel database" />
+    <Member Name="TypeNotFound" Description="Tipo non trovato" />
     <Member Name="ViewPalette" Description="Vedere la tavolozza" />
+  </Type>
+  <Type Name="ChartParameterEmbedded" Description="Parametro del grafico">
+    <Member Name="Name" Description="Nome" />
+    <Member Name="ScriptParameter" Description="Parametro di script" />
+    <Member Name="Value" Description="Valore" />
+  </Type>
+  <Type Name="ChartParameterGroupMessage">
+    <Member Name="Arrange" Description="Ordinare" />
+    <Member Name="Circle" Description="Cerchio" />
+    <Member Name="Color" Description="Colore" />
+    <Member Name="ColorCategory" Description="Categoria di colore" />
+    <Member Name="ColorGradient" Description="Gradiente di colore" />
+    <Member Name="ColorScale" Description="Scala dei colori" />
+    <Member Name="Fill" Description="Riempire" />
+    <Member Name="FillColor" Description="Colore di riempimento" />
+    <Member Name="InnerSize" Description="Dimensione interna" />
+    <Member Name="Label" Description="Etichetta" />
+    <Member Name="Location" Description="Ubicazione" />
+    <Member Name="Map" Description="Mappa" />
+    <Member Name="Margin" Description="Margine" />
+    <Member Name="Margins" Description="Margini" />
+    <Member Name="Number" Description="Numero" />
+    <Member Name="Numbers" Description="Numeri" />
+    <Member Name="Opacity" Description="Opacità" />
+    <Member Name="Performance" Description="Prestazione" />
+    <Member Name="Points" Description="Scambio ferroviario" />
+    <Member Name="Scale" Description="Scala" />
+    <Member Name="Shape" Description="Forma" />
+    <Member Name="ShowPercent" Description="Mostra percentuale" />
+    <Member Name="ShowValue" Description="Mostra valore" />
+    <Member Name="Size" Description="Grandezza" />
+    <Member Name="Stroke" Description="Infarto" />
+    <Member Name="Url" Description="URL" />
+    <Member Name="Zoom" Description="Zoom" />
+  </Type>
+  <Type Name="ChartParameterMessage">
+    <Member Name="AnimateDrop" Description="Rilascio di Animate" />
+    <Member Name="AnimateOnClick" Description="Anima al clic" />
+    <Member Name="CircleAutoReduce" Description="Riduzione automatica del cerchio" />
+    <Member Name="CircleRadius" Description="Raggio del cerchio" />
+    <Member Name="CircleRadiusHover" Description="Raggio del cerchio al passaggio del mouse" />
+    <Member Name="CircleStroke" Description="Tratto del cerchio" />
+    <Member Name="ClusterMap" Description="Mappa del cluster" />
+    <Member Name="Color" Description="Colore" />
+    <Member Name="ColorCategory" Description="Categoria di colore" />
+    <Member Name="ColorInterpolate" Description="Interpolazione del colore" />
+    <Member Name="ColorInterpolation" Description="Interpolazione dei colori" />
+    <Member Name="ColorScale" Description="Scala dei colori" />
+    <Member Name="ColorScaleMaxValue" Description="Valore massimo della scala dei colori" />
+    <Member Name="Complete" Description="Completo" />
+    <Member Name="CompleteHorizontalValues" Description="Valori orizzontali completi" />
+    <Member Name="CompleteValues" Description="Valori completi" />
+    <Member Name="CompleteVerticalValues" Description="Valori verticali completi" />
+    <Member Name="CSSStyle" Description="Stile CSS" />
+    <Member Name="CSSStyleDiv" Description="Stile CSS (div)" />
+    <Member Name="DrawingMode" Description="Modalità di disegno" />
+    <Member Name="FillColor" Description="Colore di riempimento" />
+    <Member Name="FillOpacity" Description="Opacità di riempimento" />
+    <Member Name="ForceColor" Description="Forza colore" />
+    <Member Name="Gradient" Description="Gradiente" />
+    <Member Name="HorizontalLineColor" Description="Colore della linea orizzontale" />
+    <Member Name="HorizontalMargin" Description="Margine orizzontale" />
+    <Member Name="HorizontalScale" Description="Scala orizzontale" />
+    <Member Name="InfoLinkPosition" Description="Posizione del collegamento informativo" />
+    <Member Name="InnerFillColor" Description="Colore di riempimento interno" />
+    <Member Name="InnerRadious" Description="Radioso interno" />
+    <Member Name="InnerSizeType" Description="Tipo di dimensione interna" />
+    <Member Name="Interpolate" Description="Interpolare" />
+    <Member Name="LabelColor" Description="Colore dell'etichetta" />
+    <Member Name="LabelMargin" Description="Margine etichetta" />
+    <Member Name="Labels" Description="Etichette" />
+    <Member Name="LabelsMargin" Description="Etichetta margine" />
+    <Member Name="LocationAttribute" Description="Attributo location" />
+    <Member Name="LocationMatch" Description="Corrispondenza della posizione" />
+    <Member Name="LocationSelector" Description="Selettore di posizione" />
+    <Member Name="MapStyle" Description="Stile della mappa" />
+    <Member Name="MapType" Description="Tipo di mappa" />
+    <Member Name="MaxTextLength" Description="Lunghezza massima del testo" />
+    <Member Name="MaxZoom" Description="Zoom massimo" />
+    <Member Name="MinZoom" Description="Zoom minimo" />
+    <Member Name="MultiValueFormat" Description="Formato multivalore" />
+    <Member Name="NoDataColor" Description="Nessun colore dei dati" />
+    <Member Name="NumberColor" Description="Colore del numero" />
+    <Member Name="NumberMinWidth" Description="Larghezza minima del numero" />
+    <Member Name="NumberOpacity" Description="Opacità dei numeri" />
+    <Member Name="NumberSizeLimit" Description="Limite di dimensione del numero" />
+    <Member Name="Opacity" Description="Opacità" />
+    <Member Name="OpacityScale" Description="Scala di opacità" />
+    <Member Name="Order" Description="Ordine" />
+    <Member Name="Padding" Description="Imbottitura" />
+    <Member Name="Percent" Description="Percento" />
+    <Member Name="Placeholder" Description="Segnaposto" />
+    <Member Name="PointSize" Description="Dimensione del punto" />
+    <Member Name="RadiousPx" Description="Radious(px)" />
+    <Member Name="RightMargin" Description="Margine destro" />
+    <Member Name="Scale" Description="Scala" />
+    <Member Name="Scale1" Description="Scala (1)" />
+    <Member Name="Scale2" Description="Scala (2)" />
+    <Member Name="Scale3" Description="Scala (3)" />
+    <Member Name="Scale4" Description="Scala (4)" />
+    <Member Name="Scale5" Description="Scala (5)" />
+    <Member Name="Scale6" Description="Scala (6)" />
+    <Member Name="Scale7" Description="Scala (7)" />
+    <Member Name="Scale8" Description="Scala (8)" />
+    <Member Name="Shape" Description="Forma" />
+    <Member Name="ShowAggregateValues" Description="Mostra valori aggregati" />
+    <Member Name="ShowCreateButton" Description="Mostra il pulsante Crea" />
+    <Member Name="ShowLabel" Description="Mostra etichetta" />
+    <Member Name="SizeScale" Description="Scala dimensionale" />
+    <Member Name="Sort" Description="Sorta" />
+    <Member Name="Stack" Description="Pila" />
+    <Member Name="StartDate" Description="Data di inizio" />
+    <Member Name="StrokeColor" Description="Colore del tratto" />
+    <Member Name="StrokeWidth" Description="Larghezza del tratto" />
+    <Member Name="SubTotal" Description="Totale parziale" />
+    <Member Name="SvgUrl" Description="Url Svg" />
+    <Member Name="TopMargin" Description="Margine superiore" />
+    <Member Name="Total" Description="Totale" />
+    <Member Name="UnitMargin" Description="Margine unitario" />
+    <Member Name="Value" Description="Valore" />
+    <Member Name="ValueAsPercent" Description="Valore in percentuale" />
+    <Member Name="VerticalLineColor" Description="Colore della linea verticale" />
+    <Member Name="VerticalScale" Description="Scala verticale" />
+    <Member Name="XMargin" Description="Margine X" />
+    <Member Name="XSort" Description="Ordinamento X" />
+    <Member Name="YSort" Description="Ordinamento Y" />
+    <Member Name="Zoom" Description="Zoom" />
   </Type>
   <Type Name="ChartPermission">
     <Member Name="ViewCharting" Description="Visualizzazione di grafici" />
   </Type>
+  <Type Name="ChartRequestModel" Description="Richiesta di grafico">
+    <Member Name="ChartScript" Description="Script per grafici" />
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="Filters" Description="Filtri" />
+    <Member Name="MaxRows" Description="Numero massimo di righe" />
+    <Member Name="Multiplications" Description="Moltiplicazioni" />
+    <Member Name="Parameters" Description="Parametri" />
+    <Member Name="QueryName" Description="Nome della query" />
+  </Type>
+  <Type Name="ChartScriptSymbol" Description="lo script Grafico" PluralDescription="Script per grafici" />
+  <Type Name="ColorPaletteEntity" Description="la tavolozza dei colori" PluralDescription="Tavolozze">
+    <Member Name="CategoryName" Description="Nome della categoria" />
+    <Member Name="Seed" Description="Seme" />
+    <Member Name="SpecificColors" Description="Colori specifici" />
+    <Member Name="Type" Description="Digitare" />
+  </Type>
+  <Type Name="ColorPaletteMessage">
+    <Member Name="FillAutomatically" Description="Riempimento automatico" />
+    <Member Name="Select0OnlyIfYouWantToOverrideTheAutomaticColor" Description="Selezionare {0} solo se si desidera sostituire il colore automatico" />
+    <Member Name="ShowList" Description="Mostra l'elenco" />
+    <Member Name="ShowPalette" Description="Mostra tavolozza" />
+  </Type>
+  <Type Name="ColorPaletteOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="CombinedUserChartElementEmbedded" Description="Elemento del grafico utente combinato">
+    <Member Name="IsQueryCached" Description="La query viene memorizzata nella cache" />
+    <Member Name="UserChart" Description="Grafico utente" />
+  </Type>
+  <Type Name="CombinedUserChartPartEntity" Description="la parte Grafico utente combinato" PluralDescription="Parti combinate del grafico utente">
+    <Member Name="AllowChangeShowData" Description="Consenti modifica mostra dati" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Combina i filtri appuntati con la stessa etichetta" />
+    <Member Name="MinHeight" Description="Altezza minima" />
+    <Member Name="RequiresTitle" Description="Richiede titolo" />
+    <Member Name="ShowData" Description="Mostra dati" />
+    <Member Name="UserCharts" Description="Grafici utente" />
+    <Member Name="UseSameScale" Description="Usa la stessa scala" />
+  </Type>
+  <Type Name="D3ChartScript">
+    <Member Name="Bars" Description="Bar" />
+    <Member Name="BubblePack" Description="Pacchetto a bolle d'aria" />
+    <Member Name="Bubbleplot" Description="Grafico a bolle" />
+    <Member Name="CalendarStream" Description="Flusso del calendario" />
+    <Member Name="Columns" Description="Colonne" />
+    <Member Name="Line" Description="Linea" />
+    <Member Name="MultiBars" Description="Barre multiple" />
+    <Member Name="MultiColumns" Description="Colonne multiple" />
+    <Member Name="MultiLines" Description="Multi linee" />
+    <Member Name="ParallelCoordinates" Description="Coordinate parallele" />
+    <Member Name="Pie" Description="Torta" />
+    <Member Name="Punchcard" Description="Scheda perforata" />
+    <Member Name="Scatterplot" Description="Grafico a dispersione" />
+    <Member Name="StackedBars" Description="Barre impilate" />
+    <Member Name="StackedColumns" Description="Colonne impilate" />
+    <Member Name="StackedLines" Description="Linee impilate" />
+    <Member Name="Treemap" Description="Mappa ad albero" />
+  </Type>
+  <Type Name="GoogleMapsChartScript">
+    <Member Name="Heatmap" Description="Mappa di calore" />
+    <Member Name="Markermap" Description="Mappa dei marcatori" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Tabella pivot" />
+  </Type>
+  <Type Name="SpecificColorEmbedded" Description="Colore specifico">
+    <Member Name="Color" Description="Colore" />
+    <Member Name="Entity" Description="Entità" />
+  </Type>
+  <Type Name="SvgMapsChartScript">
+    <Member Name="SvgMap" Description="Mappa Svg" />
+  </Type>
   <Type Name="UserChartEntity" Description="Tabella utente">
     <Member Name="ChartScript" Description="Script di grafico" />
     <Member Name="Columns" Description="Colonne" />
+    <Member Name="CustomDrilldowns" Description="Drill-down personalizzati" />
     <Member Name="DisplayName" Description="Nome visualizzato" />
     <Member Name="EntityType" Description="Tipo di entità" />
     <Member Name="Filters" Description="Filtri" />
     <Member Name="Guid" Description="Guid" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
+    <Member Name="IncludeDefaultFilters" Description="Includi filtri predefiniti" />
+    <Member Name="MaxRows" Description="Numero massimo di righe" />
     <Member Name="Owner" Description="Proprietario" />
+    <Member Name="Parameters" Description="Parametri" />
     <Member Name="Query" Description="Query" />
+  </Type>
+  <Type Name="UserChartLiteModel" Description="Grafico utente lite">
+    <Member Name="DisplayName" Description="Nome visualizzato" />
+    <Member Name="HideQuickLink" Description="Nascondi collegamento rapido" />
+    <Member Name="Query" Description="Quesito" />
   </Type>
   <Type Name="UserChartOperation">
     <Member Name="Delete" Description="Eliminare" />
     <Member Name="Save" Description="Salvare" />
   </Type>
   <Type Name="UserChartPartEntity" Description="Parte di grafico utente" PluralDescription="Parti di grafico utente">
+    <Member Name="AllowChangeShowData" Description="Consenti modifica mostra dati" />
+    <Member Name="AutoRefresh" Description="Aggiornamento automatico" />
+    <Member Name="CreateNew" Description="Crea nuovo" />
+    <Member Name="IsQueryCached" Description="La query viene memorizzata nella cache" />
+    <Member Name="MinHeight" Description="Altezza minima" />
     <Member Name="RequiresTitle" Description="Titolo richiesto" />
     <Member Name="ShowData" Description="Visualizza dati" />
     <Member Name="UserChart" Description="Grafico utente" />

@@ -4,7 +4,17 @@
     <Member Name="ExecutionDate" Description="Data di esecuzione" />
     <Member Name="UniqueName" Description="Nome univoco" />
   </Type>
+  <Type Name="LoadMethodLogEntity" Description="il log del metodo Load" PluralDescription="Caricare i log dei metodi">
+    <Member Name="ClassName" Description="Nome della classe" />
+    <Member Name="Description" Description="Descrizione" />
+    <Member Name="Duration" Description="Durata" />
+    <Member Name="End" Description="Fine" />
+    <Member Name="Exception" Description="Eccezione" />
+    <Member Name="MethodName" Description="Nome del metodo" />
+    <Member Name="Start" Description="Inizio" />
+  </Type>
   <Type Name="SqlMigrationEntity" Description="Migrazione di SQL">
+    <Member Name="Comment" Description="Commento" />
     <Member Name="VersionNumber" Description="Numero di versione" />
   </Type>
 </Translations>

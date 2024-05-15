@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="InsertPlace" Description="Inserire il posto">
+    <Member Name="After" Description="Dopo" />
+    <Member Name="Before" Description="Prima" />
+    <Member Name="FirstNode" Description="Primo nodo" />
+    <Member Name="LastNode" Description="Ultimo nodo" />
+  </Type>
+  <Type Name="MoveTreeModel" Description="Sposta albero">
+    <Member Name="InsertPlace" Description="Inserire il posto" />
+    <Member Name="NewParent" Description="Nuovo genitore" />
+    <Member Name="Sibling" Description="Fratello" />
+  </Type>
+  <Type Name="TreeEntity" Description="l'Albero" PluralDescription="Alberi">
+    <Member Name="FullName" Description="Nome e cognome" />
+    <Member Name="IsSibling" Description="È fratello e sorella" />
+    <Member Name="Level" Description="Livello" />
+    <Member Name="Name" Description="Nome" />
+    <Member Name="ParentOrSibling" Description="Genitore o fratello" />
+    <Member Name="ParentRoute" Description="Percorso principale" />
+    <Member Name="Route" Description="Rotta" />
+    <Member Name="RouteToString" Description="Indirizza a stringa" />
+  </Type>
+  <Type Name="TreeMessage">
+    <Member Name="Ascendants" Description="Ascendenti" />
+    <Member Name="Children" Description="Bambini" />
+    <Member Name="Copy0" Description="Copia {0}" />
+    <Member Name="Descendants" Description="Discendenti" />
+    <Member Name="ImpossibleToMove01Of2" Description="Impossibile da spostare {0} {1} di {2}" />
+    <Member Name="ImpossibleToMove0InsideOf1" Description="Impossibile spostare {0}'interno di {1}" />
+    <Member Name="Level" Description="Livello" />
+    <Member Name="LevelShouldNotBeGreaterThan0" Description="Il livello non deve essere superiore a {0}" />
+    <Member Name="ListView" Description="Visualizzazione elenco" />
+    <Member Name="Move0" Description="Sposta {0}" />
+    <Member Name="Parent" Description="Genitore" />
+    <Member Name="Tree" Description="Albero" />
+    <Member Name="TreeInfo" Description="Informazioni sull'albero" />
+    <Member Name="TreeType" Description="Tipo di albero" />
+  </Type>
+  <Type Name="TreeOperation">
+    <Member Name="Copy" Description="Copiare" />
+    <Member Name="CreateChild" Description="Crea figlio" />
+    <Member Name="CreateNextSibling" Description="Creare un elemento di pari livello successivo" />
+    <Member Name="CreateRoot" Description="Creare radice" />
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Move" Description="Sposta" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="TreeViewerMessage">
+    <Member Name="AddChild" Description="Aggiungi figlio" />
+    <Member Name="AddRoot" Description="Aggiungi radice" />
+    <Member Name="AddSibling" Description="Aggiungi elemento di pari livello" />
+    <Member Name="CollapseAll" Description="Comprimi tutto" />
+    <Member Name="ExpandAll" Description="Espandi tutto" />
+    <Member Name="None" Description="Nessuno" />
+    <Member Name="Remove" Description="Togliere" />
+    <Member Name="Search" Description="Ricerca" />
+  </Type>
+  <Type Name="UserTreePartEntity" Description="la parte Albero utente" PluralDescription="Parti dell'albero utente">
+    <Member Name="RequiresTitle" Description="Richiede titolo" />
+    <Member Name="UserQuery" Description="Query dell'utente" />
+  </Type>
+</Translations>

@@ -5,6 +5,11 @@
     <Member Name="Attended" Description="Risolta" />
     <Member Name="Future" Description="Futura" />
   </Type>
+  <Type Name="AlertDropDownGroup">
+    <Member Name="ByType" Description="Per tipologia" />
+    <Member Name="ByTypeAndUser" Description="Per tipo e utente" />
+    <Member Name="ByUser" Description="Per utente" />
+  </Type>
   <Type Name="AlertEntity" Description="Avviso" PluralDescription="Avvisi">
     <Member Name="AlertDate" Description="Data avviso" />
     <Member Name="Alerted" Description="Avvisati" />
@@ -12,31 +17,63 @@
     <Member Name="Attended" Description="Risolta" />
     <Member Name="AttendedBy" Description="Risolta da" />
     <Member Name="AttendedDate" Description="Data di revisione" />
+    <Member Name="AvoidSendMail" Description="Evita di inviare posta" />
     <Member Name="CreatedBy" Description="Creato da" />
     <Member Name="CreationDate" Description="Data di creazione" />
     <Member Name="CurrentState" Description="Stato attuale" />
+    <Member Name="EmailNotificationsSent" Description="Notifiche e-mail inviate" />
     <Member Name="Future" Description="Futuro" />
+    <Member Name="GroupTarget" Description="Target di gruppo" />
+    <Member Name="LinkTarget" Description="Destinazione del collegamento" />
     <Member Name="NotAttended" Description="Non eseguito" />
+    <Member Name="Recipient" Description="Destinatario" />
     <Member Name="State" Description="Stato" />
     <Member Name="Target" Description="Destinazione" />
     <Member Name="Text" Description="Testo" />
+    <Member Name="TextArguments" Description="Argomenti di testo" />
+    <Member Name="TextField" Description="Campo di testo" />
+    <Member Name="TextFromAlertType" Description="Testo dal tipo di avviso" />
     <Member Name="Title" Description="Titolo" />
+    <Member Name="TitleField" Description="Campo del titolo" />
   </Type>
   <Type Name="AlertMessage">
+    <Member Name="_0HiddenAlerts" Description="{0} avvisi nascosti" />
+    <Member Name="_0SimilarAlerts" Description="{0} avvisi simili" />
     <Member Name="Alert" Description="Avvisare" />
     <Member Name="Alerts" Description="Avvisi" />
     <Member Name="Alerts_Attended" Description="Eseguiti" />
     <Member Name="Alerts_Future" Description="Futuri" />
     <Member Name="Alerts_NotAttended" Description="Non eseguiti" />
+    <Member Name="AllMyAlerts" Description="Tutti i miei avvisi" />
     <Member Name="CheckedAlerts" Description="Controllo" />
+    <Member Name="CloseAll" Description="Chiudi tutto" />
+    <Member Name="Collapse" Description="Collasso" />
     <Member Name="CreateAlert" Description="Creare avviso" />
+    <Member Name="CustomDelay" Description="Ritardo personalizzato" />
+    <Member Name="DelayDuration" Description="Durata del ritardo" />
+    <Member Name="Expand" Description="Espandere" />
     <Member Name="FutureAlerts" Description="Futuri" />
+    <Member Name="Hi0" Description="Ciao {0}," />
+    <Member Name="MyActiveAlerts" Description="I miei avvisi attivi" />
     <Member Name="NewAlert" Description="Nuovo avviso" />
+    <Member Name="NewUnreadNotifications" Description="Nuove notifiche non lette" />
+    <Member Name="OtherNotifications" Description="Altre notifiche" />
+    <Member Name="PleaseVisit0" Description="Si prega di visitare {0}" />
+    <Member Name="Ringing" Description="Suonare!" />
+    <Member Name="Show0AlertsMore" Description="Mostra {0} avvisi di più" />
+    <Member Name="Show0GroupsMore1Remaining" Description="Mostra altri gruppi {0} ({1} rimanenti)" />
+    <Member Name="Text" Description="Testo" />
+    <Member Name="Title" Description="Titolo" />
+    <Member Name="ViewMore" Description="Scopri di più" />
     <Member Name="WarnedAlerts" Description="Avvisi" />
+    <Member Name="YouDoNotHaveAnyActiveAlert" Description="Non hai alcun avviso attivo" />
+    <Member Name="YouHaveSomePendingAlerts" Description="Sono presenti alcuni avvisi in sospeso:" />
   </Type>
   <Type Name="AlertOperation">
     <Member Name="Attend" Description="Esegui" />
+    <Member Name="Create" Description="Creare" />
     <Member Name="CreateAlertFromEntity" Description="Crea avviso dall'entità" />
+    <Member Name="Delay" Description="Ritardo" />
     <Member Name="Save" Description="Salva" />
     <Member Name="Unattend" Description="Non eseguire" />
   </Type>
@@ -46,6 +83,31 @@
     <Member Name="Saved" Description="Salvato" />
   </Type>
   <Type Name="AlertTypeOperation">
+    <Member Name="Delete" Description="Cancellare" />
+    <Member Name="Save" Description="Salvare" />
+  </Type>
+  <Type Name="AlertTypeSymbol" Description="il tipo di avviso" PluralDescription="Tipi di avviso" />
+  <Type Name="DelayOption">
+    <Member Name="_15Mins" Description=" 15 minuti" />
+    <Member Name="_1Day" Description=" 1Giorno" />
+    <Member Name="_1Hour" Description=" 1 ora" />
+    <Member Name="_2Hours" Description=" 2Ore" />
+    <Member Name="_30Mins" Description=" 30 minuti" />
+    <Member Name="_5Mins" Description=" 5 minuti" />
+    <Member Name="Custom" Description="Costume" />
+  </Type>
+  <Type Name="SendAlertTypeBehavior" Description="Comportamento del tipo di avviso di invio">
+    <Member Name="All" Description="Tutto" />
+    <Member Name="Exclude" Description="Escludere" />
+    <Member Name="Include" Description="Includere" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskEntity" Description="l'attività Invia e-mail di notifica" PluralDescription="Inviare attività e-mail di notifica">
+    <Member Name="AlertTypes" Description="Tipi di avviso" />
+    <Member Name="IgnoreNotificationsOlderThan" Description="Ignora le notifiche più vecchie di" />
+    <Member Name="SendBehavior" Description="Comportamento di invio" />
+    <Member Name="SendNotificationsOlderThan" Description="Inviare notifiche più vecchie di" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskOperation">
     <Member Name="Save" Description="Salvare" />
   </Type>
 </Translations>

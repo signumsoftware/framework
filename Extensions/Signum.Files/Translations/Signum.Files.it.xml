@@ -16,6 +16,7 @@
     <Member Name="DownloadFile" Description="Scarica il file" />
     <Member Name="ErrorSavingFile" Description="Errore durante il salvataggio del file" />
     <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="Il file '{0}' è troppo grande, la dimensione massima è {1}" />
+    <Member Name="FileImage" Description="Immagine del file" />
     <Member Name="FileTypes" Description="Tipi di file" />
     <Member Name="OnlyOneFileIsSupported" Description="È supportato un solo file" />
     <Member Name="Open" Description="Apri" />
@@ -39,6 +40,7 @@
     <Member Name="FileName" Description="Nome file" />
     <Member Name="FileType" Description="Tipo file" />
     <Member Name="Hash" Description="Hash" />
+    <Member Name="KeepSuffix" Description="Mantieni suffisso" />
     <Member Name="MListRowId" Description="M list row id" />
     <Member Name="PropertyRoute" Description="Property route" />
     <Member Name="RootType" Description="Root type" />
@@ -52,6 +54,7 @@
     <Member Name="FileName" Description="Nome del file" />
     <Member Name="FileType" Description="Tipo di file" />
     <Member Name="Hash" Description="Hash" />
+    <Member Name="KeepSuffix" Description="Mantieni suffisso" />
     <Member Name="Suffix" Description="Suffix" />
   </Type>
   <Type Name="FilePathOperation">

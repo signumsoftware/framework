@@ -226,7 +226,7 @@ public static class SchemaSynchronizer
 
                     var changes = Synchronizer.SynchronizeScript(Spacing.Simple,
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.PrimaryKey && !kvp.Value.Unique).ToDictionary(),
-                        dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
+                        dif.Indices.Where(kvp => !kvp.Value.IsPrimary && kvp.Value.Type != DiffIndexType.Heap).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
@@ -759,7 +759,7 @@ WHERE From_HasValue = 1"))!;
         }
 
 
-        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn || avoidDefault)
+        if (!NeedsDefaultValue(table, column) || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
         if (column.Nullable == IsNullable.Forced)
@@ -828,7 +828,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
     private static SqlPreCommand AlterTableAddColumnDefaultZero(SqlBuilder sqlBuilder, ITable table, IColumn column)
     {
-        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
+        if (!NeedsDefaultValue(table, column))
             return sqlBuilder.AlterTableAddColumn(table, column);
 
         var defaultValue =
@@ -847,6 +847,14 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         return SqlPreCommand.Combine(Spacing.Simple,
             sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
             sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
+    }
+
+    private static bool NeedsDefaultValue(ITable table, IColumn column)
+    {
+        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || (column is ImplementationColumn && table.Columns.Values.Count(c => c.Name.StartsWith($"{column.Name.Before("_")}_")) > 1))
+            return false;
+
+        return true;
     }
 
     public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn, string? forceDefaultValue = null)
