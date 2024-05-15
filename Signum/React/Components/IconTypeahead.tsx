@@ -242,13 +242,11 @@ export function isIconDefined(icon: IconProp) {
   if (typeof icon == "object")
     return lib.definitions[toSortPrefix(icon.prefix) ?? icon.prefix]?.[icon.iconName];
 
-  debugger;
   if (typeof icon == "string") {
 
     if (lib.definitions["fas"]?.[icon])
       return true;
     else {
-      debugger;
       return false;
     }
   }
