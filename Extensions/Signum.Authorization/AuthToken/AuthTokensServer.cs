@@ -151,7 +151,7 @@ public static class AuthTokenServer
                 var bytes = ds.ReadAllBytes();
                 var authToken = JsonExtensions.FromJsonBytes<AuthToken>(bytes, EntityJsonContext.FullJsonSerializerOptions);
 
-                authToken.Claims = authToken.Claims.SelectDictionary(key => key, obj => obj is JsonElement elem ? OperationController.BaseOperationRequest.ConvertObject(elem, null) : obj);
+                authToken.Claims = authToken.Claims.SelectDictionary(key => key, obj => obj is JsonElement elem ? OperationController.BaseOperationRequest.ConvertObject(elem, EntityJsonContext.FullJsonSerializerOptions, null) : obj);
 
                 return authToken;
             }
