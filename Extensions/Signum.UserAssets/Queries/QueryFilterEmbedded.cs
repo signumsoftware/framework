@@ -29,7 +29,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
 
     public FilterOperation? Operation { get; set; }
 
-    [StringLengthValidator(Max = 600)]
+    [StringLengthValidator(Max = int.MaxValue)]
     public string? ValueString { get; set; }
 
     public PinnedQueryFilterEmbedded? Pinned { get; set; }
