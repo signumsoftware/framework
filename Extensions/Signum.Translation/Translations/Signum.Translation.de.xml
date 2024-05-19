@@ -22,6 +22,7 @@
     <Member Name="All" Description="Alle" />
     <Member Name="AllLanguages" Description="Alle Sprachen" />
     <Member Name="AreYouSureToContinueAutoTranslation0For1WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung {0} für {1} ohne Revision fortsetzen wollen?" />
+    <Member Name="AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung aller Assemblys für {0} ohne Überarbeitung fortsetzen können?" />
     <Member Name="AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung aller Typen für {0} ohne Revision fortsetzen wollen?" />
     <Member Name="AutoTranslate" Description="Automatisch übersetzen" />
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
