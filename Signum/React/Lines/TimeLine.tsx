@@ -7,8 +7,6 @@ import { FormControlReadonly } from '../Lines/FormControlReadonly';
 import { ValueBaseController, ValueBaseProps } from './ValueBase';
 import { Duration } from 'luxon';
 import { isNumberKey } from './NumberLine';
-import { Value } from 'react-widgets/cjs';
-import { render } from 'react-dom';
 
 export interface TimeLineProps extends ValueBaseProps<string | null> {
 
@@ -86,7 +84,7 @@ export interface TimeTextBoxProps {
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   durationFormat?: string;
-  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
   innerRef?: React.Ref<HTMLInputElement>;
   id?: string;
 }
