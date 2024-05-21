@@ -134,7 +134,7 @@ public class OperationController : ControllerBase
 
         public object?[]? ParseArgs(OperationSymbol op)
         {
-            return Args == null ? null : Args.Select(a => ConvertObject(a, op)).ToArray();
+            return Args == null ? null : Args.Select(a => ConvertObject(a, SignumServer.JsonSerializerOptions, op)).ToArray();
         }
 
 
@@ -147,7 +147,7 @@ public class OperationController : ControllerBase
             CustomOperationArgsConverters[operationSymbol] = a + converter;
         }
 
-        public static object? ConvertObject(JsonElement token, OperationSymbol? operationSymbol)
+        public static object? ConvertObject(JsonElement token, JsonSerializerOptions jsonOptions, OperationSymbol? operationSymbol)
         {
             switch (token.ValueKind)
             {
@@ -167,17 +167,17 @@ public class OperationController : ControllerBase
                 case JsonValueKind.Object:
                     {
                         if (token.TryGetProperty("EntityType", out var entityType))
-                            return token.ToObject<Lite<Entity>>(SignumServer.JsonSerializerOptions);
+                            return token.ToObject<Lite<Entity>>(jsonOptions);
 
                         if (token.TryGetProperty("Type", out var type))
-                            return token.ToObject<ModifiableEntity>(SignumServer.JsonSerializerOptions);
+                            return token.ToObject<ModifiableEntity>(jsonOptions);
 
                         var conv = operationSymbol == null ? null : CustomOperationArgsConverters.TryGetC(operationSymbol);
 
                         return conv.GetInvocationListTyped().Select(f => f(token)).NotNull().FirstOrDefault();
                     }
                 case JsonValueKind.Array:
-                    var result = token.EnumerateArray().Select(t => ConvertObject(t, operationSymbol)).ToList();
+                    var result = token.EnumerateArray().Select(t => ConvertObject(t, jsonOptions, operationSymbol)).ToList();
                     return result;
                 default: 
                     throw new UnexpectedValueException(token.ValueKind);

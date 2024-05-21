@@ -252,7 +252,6 @@ export function isIconDefined(icon: IconProp) {
     if (lib.definitions[toSortPrefix(config.styleDefault)]?.[icon])
       return true;
     else {
-      debugger;
       return false;
     }
   }
