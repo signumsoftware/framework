@@ -76,6 +76,11 @@ public interface Lite<out T> : IComparable, IComparable<Lite<Entity>>
     void SetModel(object? model);
 
     /// <summary>
+    /// Sets the id of the entity. Not checked in anyway. 
+    /// </summary>
+    void SetId(PrimaryKey id);
+
+    /// <summary>
     /// Copies the Id from the entity to this lite instance. Typically used after saving by the framework. 
     /// </summary>
     PrimaryKey RefreshId();

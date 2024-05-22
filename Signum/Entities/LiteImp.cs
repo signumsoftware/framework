@@ -208,6 +208,11 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
         this.model = (M?)model;
     }
 
+    public void SetId(PrimaryKey id)
+    {
+        this.id = id;
+    }
+
     public Lite<T> Clone()
     {
         return new LiteImp<T, M>(Id, model, this.PartitionId);
