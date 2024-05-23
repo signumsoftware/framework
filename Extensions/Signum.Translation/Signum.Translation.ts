@@ -29,6 +29,7 @@ export module TranslationMessage {
   export const View = new MessageKey("TranslationMessage", "View");
   export const None = new MessageKey("TranslationMessage", "None");
   export const Edit = new MessageKey("TranslationMessage", "Edit");
+  export const AutoSync = new MessageKey("TranslationMessage", "AutoSync");
   export const Member = new MessageKey("TranslationMessage", "Member");
   export const Type = new MessageKey("TranslationMessage", "Type");
   export const Instance = new MessageKey("TranslationMessage", "Instance");
@@ -47,7 +48,6 @@ export module TranslationMessage {
   export const DownloadView = new MessageKey("TranslationMessage", "DownloadView");
   export const DownloadSync = new MessageKey("TranslationMessage", "DownloadSync");
   export const Download = new MessageKey("TranslationMessage", "Download");
-  export const AutoTranslate = new MessageKey("TranslationMessage", "AutoTranslate");
   export const AreYouSureToContinueAutoTranslation0For1WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslation0For1WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision");
   export const AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision");
