@@ -10,6 +10,7 @@
     <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
     <Member Name="Azure_ClientSecret" Description="Azure Client Secret Value" />
     <Member Name="Azure_DirectoryID" Description="&#x9;Azure Directory (tenant) ID" />
+    <Member Name="AzureB2C" Description="Azure B2C" />
     <Member Name="DefaultRole" Description="Standardrolle" />
     <Member Name="DirectoryRegistry_Password" Description="DirectoryRegistry Passwort" />
     <Member Name="DirectoryRegistry_Username" Description="DirectoryRegistry Benutzername" />
@@ -57,6 +58,10 @@
   <Type Name="AzureADQuery">
     <Member Name="ActiveDirectoryGroups" Description="Active Directory-Gruppen" />
     <Member Name="ActiveDirectoryUsers" Description="Active Directory-Benutzer" />
+  </Type>
+  <Type Name="AzureB2CEmbedded" Description="Azure B2C">
+    <Member Name="SignInSignUp_UserFlow" Description="SignInSignUp UserFlow" />
+    <Member Name="TenantName" Description="Name des Mandanten" />
   </Type>
   <Type Name="CachedProfilePhotoEntity" Description="gecachte Profilfoto" PluralDescription="gecachte Profilfotos" Gender="n">
     <Member Name="CreationDate" Description="Erstellungsdatum" />
