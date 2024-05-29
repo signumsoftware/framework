@@ -130,7 +130,7 @@ export function EntityRepeaterElement<V extends ModifiableEntity | Lite<Entity>>
               {onRemove && <a href="#" className={classes("sf-line-button", "sf-remove")}
                 onClick={onRemove}
                 title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                {EntityBaseController.getRemoveIcon()}
+                {EntityBaseController.getTrashIcon()}
               </a>}
               &nbsp;
               {move?.renderMoveUp()}
