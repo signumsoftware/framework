@@ -1,3 +1,4 @@
+
 declare global {
 
   interface RegExpConstructor {
@@ -12,6 +13,8 @@ declare global {
     exploreGraphDebugMode: boolean;
   }
 
+  type Comparable = number | string | {valueOf: ()=> any };
+
 
   interface RegExpConstructor {
     escape(str: string): string;
@@ -23,17 +26,26 @@ declare global {
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
+    groupToMap<K>(this: Array<T>, keySelector: (element: T) => string): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
+    groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): Map<K, E[]>;
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
-    orderBy<V>(this: Array<T>, keySelector: (element: T) => V): T[];
-    orderByDescending<V>(this: Array<T>, keySelector: (element: T) => V): T[];
+    orderBy<V extends Comparable>(this: Array<T>, keySelector: (element: T) => V | null | undefined): T[];
+    orderByDescending<V extends Comparable>(this: Array<T>, keySelector: (element: T) => V | null | undefined): T[];
 
 
     toObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
     toObject<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
     toObjectDistinct(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T };
     toObjectDistinct<V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V): { [key: string]: V };
+
+
+    toMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
+    toMap<K, V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V):  Map<K, V>;
+    toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
+    toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
+
     distinctBy(this: Array<T>, keySelector?: (element: T) => string): T[];
 
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
@@ -43,11 +55,11 @@ declare global {
 
     minBy<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
     maxBy<V>(this: Array<T>, keySelector: (element: T) => V): T | undefined;
-    max(this: Array<number | null | undefined>): number | null;
-    max(this: Array<T>, selector: (element: T, index: number, array: T[]) => number | null | undefined): number | null;
-    min(this: Array<number | null | undefined>): number | null;
-    min(this: Array<T>, selector: (element: T, index: number, array: T[]) => number | null | undefined): number | null;
-
+    max<V extends Comparable>(this: Array<V | null | undefined>): V | null;
+    max<V extends Comparable>(this: Array<T>, selector: (element: T, index: number, array: T[]) => V | null | undefined): V | null;
+    min<V extends Comparable>(this: Array<V | null | undefined>): V | null;
+    min<V extends Comparable>(this: Array<T>, selector: (element: T, index: number, array: T[]) => V | null | undefined): V | null;
+    
     sum(this: Array<number>): number;
     sum(this: Array<T>, selector: (element: T, index: number, array: T[]) => number): number;
 
@@ -175,6 +187,20 @@ Array.prototype.groupToObject = function (this: any[], keySelector: (element: an
     if (!result[key])
       result[key] = [];
     result[key].push(elementSelector ? elementSelector(element) : element);
+  }
+  return result;
+};
+
+
+Array.prototype.groupToMap = function (this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): Map<any, any[]> {
+  const result = new Map<any, any[]>();
+
+  for (let i = 0; i < this.length; i++) {
+    const element: any = this[i];
+    const key = keySelector(element);
+    if (!result.has(key))
+      result.set(key, []);
+    result.get(key)!.push(elementSelector ? elementSelector(element) : element);
   }
   return result;
 };
@@ -321,6 +347,33 @@ Array.prototype.toObjectDistinct = function (this: any[], keySelector: (element:
   });
 
   return obj;
+};
+
+Array.prototype.toMap = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+  const map = new Map();
+
+  this.forEach(item => {
+    const key = keySelector(item);
+
+    if (map.has(key))
+      throw new Error("Repeated key {0}".formatWith(key));
+
+    map.set(key,  valueSelector ? valueSelector(item) : item);
+  });
+
+  return map;
+};
+
+Array.prototype.toMapDistinct = function (this: any[], keySelector: (element: any) => any, valueSelector?: (element: any) => any): any {
+  const map = new Map();
+
+  this.forEach(item => {
+    const key = keySelector(item);
+
+    map.set(key, valueSelector ? valueSelector(item) : item);
+  });
+
+  return map;
 };
 
 Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {

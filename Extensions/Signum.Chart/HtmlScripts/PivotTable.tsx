@@ -591,11 +591,11 @@ export default function renderPivotTable({ data, width, height, parameters, load
 
   function orderKeys(keys: unknown[], order: string, col: ChartColumn<unknown>, group: RowDictionary | undefined) {
     switch (order) {
-      case "Ascending": return keys.orderBy(a => a);
+      case "Ascending": return keys.orderBy(a => a as number | string);
       case "AscendingToStr": return keys.orderBy(a => col.getNiceName(a));
       case "AscendingKey": return keys.orderBy(a => col.getKey(a));
       case "AscendingSumValues": return keys.orderBy(a => group && sumValue(group[col.getKey(a)]?.dicOrRows));
-      case "Descending": return keys.orderByDescending(a => a);
+      case "Descending": return keys.orderByDescending(a => a as number | string);
       case "DescendingToStr": return keys.orderByDescending(a => col.getNiceName(a));
       case "DescendingKey": return keys.orderByDescending(a => col.getKey(a));
       case "DescendingSumValues": return keys.orderByDescending(a => group && sumValue(group[col.getKey(a)]?.dicOrRows));
