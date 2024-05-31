@@ -759,7 +759,7 @@ WHERE From_HasValue = 1"))!;
         }
 
 
-        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn || avoidDefault)
+        if (!NeedsDefaultValue(table, column) || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
         if (column.Nullable == IsNullable.Forced)
@@ -828,7 +828,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
     private static SqlPreCommand AlterTableAddColumnDefaultZero(SqlBuilder sqlBuilder, ITable table, IColumn column)
     {
-        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || column is ImplementationColumn)
+        if (!NeedsDefaultValue(table, column))
             return sqlBuilder.AlterTableAddColumn(table, column);
 
         var defaultValue =
@@ -847,6 +847,14 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
         return SqlPreCommand.Combine(Spacing.Simple,
             sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
             sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;
+    }
+
+    private static bool NeedsDefaultValue(ITable table, IColumn column)
+    {
+        if (column.Nullable == IsNullable.Yes || column.Identity || column.Default != null || (column is ImplementationColumn && table.Columns.Values.Count(c => c.Name.StartsWith($"{column.Name.Before("_")}_")) > 1))
+            return false;
+
+        return true;
     }
 
     public static string GetDefaultValue(ITable table, IColumn column, Replacements rep, bool forNewColumn, string? forceDefaultValue = null)
