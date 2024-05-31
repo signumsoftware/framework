@@ -36,7 +36,7 @@ export const CheckboxLine = React.memo(React.forwardRef(function CheckboxLine(pr
         <input type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
           className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")}
         />
-        {" "}{s.label}
+        {" "}{s.label}{s.labelIcon && " "}{s.labelIcon}
         {s.helpText && <small className="d-block form-text text-muted">{s.helpText}</small>}
       </label>
     );
