@@ -48,7 +48,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
             <th key={culture}>
               {culture}
               {result.some(r => !r.isDefault && r.culture == culture && r.status != "Completed") &&
-                <a href="#" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoTranslate.niceToString()}</a>}
+                <a href="#" className={classes("auto-translate-all", culture, "ms-2")} onClick={e => handleAutoTranslateClick(e, null, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>}
             </th>)}
         </tr>
       </thead>
@@ -59,25 +59,29 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
             <td>
               <Link to={`/translation/view/${encodeDots(assembly)}`}>{TranslationMessage.View.niceToString()}</Link>
             </td>
-            {cultures.map(culture =>
-              <td key={culture}>
-                <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
-                {tree[assembly][culture].status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon icon="download" />}</a>}
-                <br />
-                {
-                  !tree[assembly][culture].isDefault &&
-                  <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + tree[assembly][culture].status}>
-                    {TranslationMessage.Sync.niceToString()}
-                  </Link>
-                }
-                {
-                  tree[assembly][culture].status != "Completed" &&
-                  <>
-                    <br />
-                    <a href="#" className={classes("auto-translate", "status-" + tree[assembly][culture].status)} onClick={e => handleAutoTranslateClick(e, assembly, culture)}>{TranslationMessage.AutoTranslate.niceToString()}</a>
-                  </>
-                }
-              </td>
+            {cultures.map(culture => {
+              const fileStatus = tree[assembly][culture];
+              return (
+                <td key={culture}>
+                  <Link to={`/translation/view/${encodeDots(assembly)}/${culture}`}>{TranslationMessage.View.niceToString()}</Link>
+                  {fileStatus.status != "None" && <a href="#" className="ms-2" onClick={e => { e.preventDefault(); TranslationClient.API.download(assembly, culture).then(r => saveFile(r)); }} title={TranslationMessage.Download.niceToString()}>{<FontAwesomeIcon icon="download" />}</a>}
+                  <br />
+                  {
+                    !fileStatus.isDefault &&
+                    <Link to={`/translation/syncNamespaces/${encodeDots(assembly)}/${culture}`} className={"status-" + fileStatus.status}>
+                      {TranslationMessage.Sync.niceToString()}
+                    </Link>
+                  }
+                  {
+                    fileStatus.status != "Completed" && !fileStatus.isDefault &&
+                    <>
+                      <br />
+                      <a href="#" className={classes("auto-translate", "status-" + fileStatus.status)} onClick={e => handleAutoTranslateClick(e, assembly, culture)}>{TranslationMessage.AutoSync.niceToString()}</a>
+                    </>
+                  }
+                </td>
+              );
+            }
             )}
           </tr>
         )}
@@ -92,7 +96,7 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
       .then(cultures =>
         MessageModal.show(
           {
-            title: TranslationMessage.AutoTranslate.niceToString(),
+            title: TranslationMessage.AutoSync.niceToString(),
             message: assembly ? TranslationMessage.AreYouSureToContinueAutoTranslation0For1WithoutRevision.niceToString().formatHtml(<strong>{assembly}</strong>, <strong>{getToString(cultures[culture])}</strong>) :
               TranslationMessage.AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision.niceToString().formatHtml(<strong>{getToString(cultures[culture])}</strong>),
             buttons: "yes_no",

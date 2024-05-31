@@ -19,9 +19,10 @@ declare global {
   interface RegExpConstructor {
     escape(str: string): string;
   }
+  
 
   interface Array<T> {
-    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] }[];
+    groupBy<K extends string>(this: Array<T>, keySelector: (element: T) => K): { key: K; elements: T[] } [];
     groupBy<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K; elements: T[] }[];
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
@@ -178,8 +179,8 @@ Array.prototype.groupBy = function (this: any[],
   return result;
 };
 
-Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string, elementSelector?: (element: any) => unknown): { [key: string]: any[] } {
-  const result: { [key: string]: any[] } = {};
+Array.prototype.groupToObject = function (this: any[], keySelector: (element: any) => string | number, elementSelector?: (element: any) => unknown): { [key: string | number]: any[] } {
+  const result: { [key: string | number]: any[] } = {};
 
   for (let i = 0; i < this.length; i++) {
     const element: any = this[i];

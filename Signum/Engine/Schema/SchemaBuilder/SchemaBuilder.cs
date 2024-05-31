@@ -454,13 +454,24 @@ public class SchemaBuilder
 
                 if (Settings.FieldAttribute<IgnoreAttribute>(route) == null)
                 {
-                    if (Reflector.TryFindPropertyInfo(fi) == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
+                    if (route.PropertyInfo == null && !fi.IsPublic && !fi.HasAttribute<FieldWithoutPropertyAttribute>())
                         throw new InvalidOperationException("Field '{0}' of type '{1}' has no property".FormatWith(fi.Name, type.Name));
+
+                    if (route.PropertyInfo != null && !fi.IsPublic)
+                    {
+                        if (route.PropertyInfo.GetMethod == null)
+                            throw new InvalidOperationException($"Property '{route.PropertyInfo.Name}' in {route.PropertyInfo.DeclaringType!.TypeName()} has no 'get' method");
+
+                        if (route.PropertyInfo.SetMethod == null)
+                            throw new InvalidOperationException($"Property '{route.PropertyInfo.Name}' in {route.PropertyInfo.DeclaringType!.TypeName()} has no 'set' method, use 'private set;' instead");
+                    }
+
 
                     Field field = GenerateField(table, route, preName, forceNull, inMList);
 
                     if (result.ContainsKey(fi.Name))
                         throw new InvalidOperationException("Duplicated field with name '{0}' on '{1}', shadowing not supported".FormatWith(fi.Name, type.TypeName()));
+
 
                     var ef = new EntityField(type, fi, field);
 
