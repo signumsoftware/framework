@@ -2,7 +2,7 @@ namespace Signum.Entities.Internal;
 
 public abstract class LiteImp : Modifiable
 {
-
+    public abstract void SetId(PrimaryKey id);
 }
 
 public sealed class LiteImp<T, M> : LiteImp, Lite<T>
@@ -24,8 +24,7 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
             throw new InvalidOperationException(typeof(T).Name + " is abstract");
 
         if (PrimaryKey.Type(typeof(T)) != id.Object.GetType())
-            throw new InvalidOperationException(typeof(T).TypeName() + " requires ids of type "
-                + PrimaryKey.Type(typeof(T)).TypeName() + ", not " + id.Object.GetType().TypeName());
+            throw new InvalidOperationException($"{typeof(T).TypeName()} requires ids of type {PrimaryKey.Type(typeof(T)).TypeName()}, not {id.Object.GetType().TypeName()}");
 
         this.partitionId = partitionId;
         this.id = id;
@@ -206,6 +205,14 @@ public sealed class LiteImp<T, M> : LiteImp, Lite<T>
     public void SetModel(object? model)
     {
         this.model = (M?)model;
+    }
+
+    public override void SetId(PrimaryKey id)
+    {
+        if (PrimaryKey.Type(typeof(T)) != id.Object.GetType())
+            throw new InvalidOperationException($"{typeof(T).TypeName()} requires ids of type {PrimaryKey.Type(typeof(T)).TypeName()}, not {id.Object.GetType().TypeName()}");
+
+        this.id = id;
     }
 
     public Lite<T> Clone()

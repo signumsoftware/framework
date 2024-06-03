@@ -159,7 +159,7 @@ export const EntityTabRepeater = genericForwardRef(function EntityTabRepeater<V 
                       <span className={classes("sf-line-button", "sf-remove", "ms-2")}
                         onClick={e => { e.stopPropagation(); c.handleRemoveElementClick(e, mlec.index!) }}
                         title={ctx.titleLabels ? EntityControlMessage.Remove.niceToString() : undefined}>
-                        {EntityBaseController.getRemoveIcon()}
+                        {EntityBaseController.getTrashIcon()}
                       </span>
                     }
                     {drag && <span className={classes("sf-line-button", "sf-move", "ms-2")} onClick={e => { e.preventDefault(); e.stopPropagation(); }}
