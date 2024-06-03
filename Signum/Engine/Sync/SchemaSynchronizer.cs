@@ -304,7 +304,7 @@ public static class SchemaSynchronizer
                         SqlPreCommand.Combine(Spacing.Simple,
                             DropForeignKeys(tab.Name),
                             sqlBuilder.DropIndex(tab.Name, diffPK)) :
-                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(tab.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
                         null;
 
                         var diffHeap = dif.Indices.Values.SingleOrDefaultEx(a => a.Type == DiffIndexType.Heap || a.Type == DiffIndexType.Clustered);
