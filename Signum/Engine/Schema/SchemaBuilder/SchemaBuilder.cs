@@ -727,10 +727,14 @@ public class SchemaBuilder
             Scale = Settings.GetSqlScale(att, route, pair.DbType),
             Default = att?.GetDefault(Settings.IsPostgres),
             Check = att?.GetCheck(Settings.IsPostgres),
-            DateTimeKind = att?.DateTimeKind ?? 
+            DateTimeKind = att?.DateTimeKind ??
             (route.Type.UnNullify() != typeof(DateTime) ? DateTimeKind.Unspecified :
              this.Schema.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local),
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f =>
+        {
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 
     protected virtual FieldEnum GenerateFieldEnum(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
@@ -748,7 +752,11 @@ public class SchemaBuilder
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
             Default = att?.GetDefault(Settings.IsPostgres),
             Check = att?.GetCheck(Settings.IsPostgres),
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f =>
+        {
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 
     protected virtual FieldReference GenerateFieldReference(ITable table, PropertyRoute route, NameSequence name, bool forceNull)
@@ -773,7 +781,11 @@ public class SchemaBuilder
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null,
             Default = attr?.GetDefault(Settings.IsPostgres),
             Check = attr?.GetCheck(Settings.IsPostgres)
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f =>
+        {
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 
     protected virtual FieldImplementedBy GenerateFieldImplementedBy(ITable table, PropertyRoute route, NameSequence name, bool forceNull, IEnumerable<Type> types)
@@ -812,7 +824,11 @@ public class SchemaBuilder
             IsLite = isLite,
             SplitStrategy = strategy,
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f =>
+        {
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 
     protected virtual FieldImplementedByAll GenerateFieldImplementedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
@@ -840,7 +856,11 @@ public class SchemaBuilder
         {
             IsLite = route.Type.IsLite(),
             AvoidExpandOnRetrieving = Settings.FieldAttribute<AvoidExpandQueryAttribute>(route) != null
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f =>
+        {
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 
     protected virtual FieldMList GenerateFieldMList(Table table, PropertyRoute route, NameSequence name)
@@ -1286,7 +1306,11 @@ public class ViewBuilder : SchemaBuilder
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
             Default = att?.GetDefault(Settings.IsPostgres),
             Check = att?.GetCheck(Settings.IsPostgres),
-        }.Do(f => f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route)));
+        }.Do(f => 
+        { 
+            f.UniqueIndex = f.GenerateUniqueIndex(table, Settings.FieldAttribute<UniqueIndexAttribute>(route));
+            f.Index = f.GenerateIndex(table, Settings.FieldAttribute<IndexAttribute>(route));
+        });
     }
 }
 

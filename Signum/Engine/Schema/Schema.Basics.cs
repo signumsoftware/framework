@@ -418,6 +418,7 @@ public abstract partial class Field
 {
     public Type FieldType { get; private set; }
     public PropertyRoute Route { get; private set; }
+    public TableIndex? Index { get; set; }
     public TableIndex? UniqueIndex { get; set; }
 
     public Field(PropertyRoute route, Type? fieldType = null)
@@ -431,10 +432,16 @@ public abstract partial class Field
 
     public virtual IEnumerable<TableIndex> GenerateIndexes(ITable table)
     {
-        if (UniqueIndex == null)
-            return Enumerable.Empty<TableIndex>();
+        if (UniqueIndex != null && Index != null)
+            throw new InvalidOperationException($"Having both UniqueIndex and Index attributes on '{this.Route}' is not allowed");
 
-        return new[] { UniqueIndex };
+        if (UniqueIndex != null)
+            return new[] { UniqueIndex };
+
+        if (Index != null)
+            return new[] { Index };
+
+        return Enumerable.Empty<TableIndex>();
     }
 
     public virtual TableIndex? GenerateUniqueIndex(ITable table, UniqueIndexAttribute? attribute)
@@ -450,6 +457,16 @@ public abstract partial class Field
 
         if (attribute.AllowMultipleNulls)
             result.Where = IndexWhereExpressionVisitor.IsNull(this, false, Schema.Current.Settings.IsPostgres);
+
+        return result;
+    }
+
+    public virtual TableIndex? GenerateIndex(ITable table, IndexAttribute? attribute)
+    {
+        if (attribute == null)
+            return null;
+
+        var result = new TableIndex(table, TableIndex.GetColumnsFromFields(this));
 
         return result;
     }
