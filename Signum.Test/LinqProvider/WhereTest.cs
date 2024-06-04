@@ -451,11 +451,31 @@ public class WhereTest
     }
 
 
+
     [Fact]
     public void WhereFormat()
     {
         var album = Database.Query<ArtistEntity>()
             .Where(a => $"Hi {(a.IsMale ? "Mr." : "Ms.")} {a}".Contains("Mr. Michael"))
+            .Select(a => a.ToLite())
+            .ToList();
+    }
+
+    [Fact]
+    public void WhereFormat2()
+    {
+        var album = Database.Query<LabelEntity>()
+            .Where(a => $"Hi {(a.Owner == null ? a.Country : a.Owner)}".Contains("Hi Virgin"))
+            .Select(a => a.ToLite())
+            .ToList();
+    }
+
+
+    [Fact]
+    public void WhereFormat3()
+    {
+        var album = Database.Query<LabelEntity>()
+            .Where(a => $"Hi {((object?)a.Owner ?? a.Country)}".Contains("Hi Virgin"))
             .Select(a => a.ToLite())
             .ToList();
     }

@@ -74,6 +74,7 @@ export interface SearchControlProps {
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
   showTitle?: HeaderType;
+  title?: React.ReactElement | string;
 }
 
 export interface SearchControlState {
@@ -201,7 +202,7 @@ const SearchControl = React.forwardRef(function SearchControl(p: SearchControlPr
 
   return (
     <ErrorBoundary>
-      {p.showTitle && <Title type={p.showTitle}>{getQueryNiceName(qd.queryKey)}</Title>}
+      {p.showTitle && <Title type={p.showTitle}>{p.title ?? getQueryNiceName(qd.queryKey)}</Title>}
       <SearchControlLoaded ref={searchControlLoaded}
         findOptions={fop}
         queryDescription={qd}
