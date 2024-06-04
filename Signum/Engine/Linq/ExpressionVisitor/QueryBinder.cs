@@ -1614,6 +1614,11 @@ internal class QueryBinder : ExpressionVisitor
         if (source == null || m.Method.Name == "InSql" || m.Method.Name == "DisableQueryFilter")
             return m;
 
+        if (source is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && !ue.Type.IsValueType && ue.Method == null)
+        {
+            source = ue.Operand;
+        }
+
         if (source.NodeType == ExpressionType.Conditional)
         {
             var con = (ConditionalExpression)source;

@@ -515,6 +515,21 @@ internal class OverloadingSimplifier : ExpressionVisitor
         if (expression is ConstantExpression c && c.Value != null)
             return Expression.Call(expression, miToString);
 
+        if (expression is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Operand.Type == typeof(object))
+            return CallToString(ue.Operand);
+
+        if (expression is BinaryExpression be && be.NodeType == ExpressionType.Coalesce)
+            return Expression.Condition(Expression.NotEqual(be.Left, Expression.Constant(null)),
+                CallToString(be.Left),
+                CallToString(be.Right)
+            );
+
+        if (expression is ConditionalExpression ce && ce.NodeType == ExpressionType.Conditional)
+            return Expression.Condition(ce.Test,
+                CallToString(ce.IfTrue),
+                CallToString(ce.IfFalse)
+            );
+
         var toStrExp = ExpressionCleaner.Clean(Expression.Call(expression, miToString));
         var visitedToStrExp = Visit(toStrExp);
 
