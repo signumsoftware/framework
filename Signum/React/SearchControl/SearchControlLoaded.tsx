@@ -1710,8 +1710,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
-        mark?.status == "Warning" ? "table-warning" :
-          mark?.status == "Error" ? "table-danger" :
+        mark?.status == "Warning" ? "sf-row-warning" :
+          mark?.status == "Error" ? "sf-row-danger" :
             mark?.status == "Muted" ? "text-muted" :
               undefined;
 
