@@ -1,6 +1,6 @@
 import * as AppContext from './AppContext';
 import * as React from 'react'
-import { useStateWithPromise} from './Hooks';
+import { useStateWithPromise, useUpdatedRef} from './Hooks';
 import { useLocation } from 'react-router';
 
 declare global {
@@ -42,20 +42,20 @@ export function GlobalModalContainer() {
     return () => window.removeEventListener("keydown", hanldleKeyDown);
   }, []);
 
-  var [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
-
+  const [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
+  const modalsLengthRef = useUpdatedRef(modals.length);
   const location = useLocation();
 
   React.useEffect(() => { setModals([]); }, [location]);
 
   React.useEffect(() => {
     current = {
-      pushModal: e => setModals([...modals, e]),
-      popModal: e => setModals(modals.filter(a=>a != e)),
-      getCount: () => modals.length
+      pushModal: e => setModals(ms => [...ms, e]),
+      popModal: e => setModals(ms => ms.filter(a => a != e)),
+      getCount: () => modalsLengthRef.current
     };
     return () => { current = null!; };
-  }, [modals.length]);
+  }, []);
 
   function hanldleKeyDown(e: KeyboardEvent){
     if (modalInstances.length) {
@@ -68,9 +68,7 @@ export function GlobalModalContainer() {
     }
   }
 
-  React.useEffect(() => {
-    setModals([]);
-  }, [location.pathname])
+
 
   return React.createElement("div", { className: "sf-modal-container" }, ...modals);
 }
