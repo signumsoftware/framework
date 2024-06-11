@@ -10,14 +10,20 @@ If you make a mistake you'll typically find it at Upload-template-time. Not when
 
 ### Query fields
 
-* `@[TotalAmount]`: Access column TotalAmount in the Query (implicit query provider)
-* `@[q:TotalAmount]`: Access column TotalAmount in the Query (explicity query provider)
-* `@[Customer.Name]`: Access Customer column in the Query and joins with customer table to get the name
-* `@[Entity.CreationDate]`: Access CreationDate field in the main Entity that is not shown by default in the query.
+* `@[TotalAmount]`: Access column `TotalAmount` in the Query (implicit query provider)
+* `@[q:TotalAmount]`: Access column `TotalAmount` in the Query (explicity query provider)
+* `@[Customer.Name]`: Access `Customer` column in the Query and joins with customer table to get the `Name`
+* `@[Entity.CreationDate]`: Access `CreationDate` field in the main entity that is not shown by default in the query.
 
 ### Fields from the Model (requires properties in `SystemWordTemplate` or `SystemEmailTemplate`)
 
-* `@[m:ShortAddress]`: Access column Name in the Query (implicit query provider)
+* `@[m:ShortAddress]`: Access property `ShortAddress` in the model (EmailModel or WordModel)
+* `@[m:HtmlToWord(Content)]`: Calls method `HtmlToDocx` in the WordModel, useful for complex computations or for translating Html to Word markup.
+
+    public static IEnumerable<OpenXmlElement> HtmlToWord(string html, WordTemplateParameters p)
+    {
+        return HtmlToWordConverter.HtmlToWord(html, p);
+    }
 
 ### Global fields (registered with `GlobalValueProvider.RegisterGlobalVariable`)
 
@@ -25,8 +31,7 @@ If you make a mistake you'll typically find it at Upload-template-time. Not when
 
 ### Translate fields
 
-* `@[t:Product.Name]`: Joins with Product table, gets the name, and the `TranslatedInstanceEntity` name if exists
-
+* `@[t:Product.Name]`: Joins with Product table, gets the name, and the `TranslatedInstanceEntity` name if exists.
 
 
 ## Formating
