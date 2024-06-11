@@ -2,6 +2,7 @@ using Signum.Entities.Reflection;
 using OpenQA.Selenium;
 using Signum.UserAssets.QueryTokens;
 using Signum.UserAssets.Queries;
+using Signum.Selenium.LineProxies;
 
 namespace Signum.Selenium;
 
@@ -111,27 +112,176 @@ public static class LineContainerExtensions
         return new LineContainer<S>(element ?? lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
     }
 
- 
 
-
-    public static ValueLineProxy ValueLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+    public static CheckboxLineProxy CheckboxLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property)
         where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
 
-        return new ValueLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+        return new CheckboxLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
     }
 
-    public static void ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
+    public static void CheckboxLineValue<T>(this ILineContainer<T> lineContainer, Expression<Func<T, bool>> property, bool value, bool loseFocus = false)
         where T : IModifiableEntity
     {
-        var valueLine = lineContainer.ValueLine(property);
+        var valueLine = lineContainer.CheckboxLine(property);
 
         valueLine.SetValue(value);
 
         if (loseFocus)
-            valueLine.EditableElement.Find().LoseFocus();
+            valueLine.CheckboxLocator.Find().LoseFocus();
     }
+
+    public static DateTimeLineProxy DateTimeLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+    where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new DateTimeLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void DateTimeLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.DateTimeLine(property);
+
+        valueLine.SetValue((IFormattable?)value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
+    public static EnumLineProxy EnumLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+ where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new EnumLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void EnumLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.EnumLine(property);
+
+        valueLine.SetValue(value);
+
+        if (loseFocus)
+            valueLine.SelectLocator.Find().LoseFocus();
+    }
+
+    public static GuidBoxLineProxy GuidLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, Guid?>> property)
+where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new GuidBoxLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void GuidLineValue<T>(this ILineContainer<T> lineContainer, Expression<Func<T, Guid?>> property, Guid? value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.GuidLine(property);
+
+        valueLine.SetValue(value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
+    public static NumberLineProxy NumberLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new NumberLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void NumberLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.NumberLine(property);
+
+        valueLine.SetValue((IFormattable?)value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
+    public static TextAreaLineProxy TextAreaLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
+    where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new TextAreaLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void TextAreaLineValue<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.TextAreaLine(property);
+
+        valueLine.SetValue((string?)value);
+
+        if (loseFocus)
+            valueLine.TextAreaLocator.Find().LoseFocus();
+    }
+
+    public static TextBoxLineProxy TextBoxLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new TextBoxLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void TextBoxLineValue<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.TextBoxLine(property);
+
+        valueLine.SetValue((string?)value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
+
+    public static TimeLineProxy TimeLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new TimeLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void TimeLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.TimeLine(property);
+
+        valueLine.SetValue((IFormattable?)value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
+    public static BaseLineProxy AutoLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+      where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return EntityBaseProxy.AutoLine(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void AutoLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property, V value)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.AutoLine(property);
+
+        valueLine.SetValueUntyped(value);
+    }
+
 
     public static FileLineProxy FileLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
     where T : IModifiableEntity
@@ -139,12 +289,6 @@ public static class LineContainerExtensions
         var lineLocator = lineContainer.LineLocator(property);
 
         return new FileLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
-    }
-
-    public static V ValueLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-        where T : IModifiableEntity
-    {
-        return (V)lineContainer.ValueLine(property).GetValue()!;
     }
 
     public static EntityLineProxy EntityLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
