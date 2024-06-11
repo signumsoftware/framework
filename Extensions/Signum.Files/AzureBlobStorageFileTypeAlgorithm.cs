@@ -10,7 +10,7 @@ public enum BlobAction
     Download
 }
 
-public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
+public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
     public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
 
@@ -25,7 +25,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
     public Func<IFilePath, BlobAction> GetBlobAction { get; set; } = (IFilePath ifp) => BlobAction.Download;
 
-    public AzureBlobStoragebFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
+    public AzureBlobStorageFileTypeAlgorithm(Func<IFilePath, BlobContainerClient> getClient)
     {
         this.GetClient = getClient;
 
@@ -49,7 +49,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         if (!this.WebDownload())
             return PrefixPair.None();
 
-        return PrefixPair.WebOnly($"{client.Uri}");
+        return PrefixPair.WebOnly(client.Uri.ToString().Replace("?", "<suffix>?"));
     }
 
 
