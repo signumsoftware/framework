@@ -133,7 +133,12 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
         if (string.IsNullOrEmpty(pp.WebPrefix))
             return null;
 
-        var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
+        var suffix = "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
+
+        if (pp.WebPrefix.Contains("<suffix>"))
+            return pp.WebPrefix.Replace("<suffix>", suffix);
+
+        var result = ToAbsolute(pp.WebPrefix + suffix);
 
         return result;
     }
