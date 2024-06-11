@@ -20,11 +20,12 @@ If you make a mistake you'll typically find it at Upload-template-time. Not when
 * `@[m:ShortAddress]`: Access property `ShortAddress` in the model (EmailModel or WordModel)
 * `@[m:HtmlToWord(Content)]`: Calls method `HtmlToDocx` in the WordModel, useful for complex computations or for translating Html to Word markup.
 
+```CS
     public static IEnumerable<OpenXmlElement> HtmlToWord(string html, WordTemplateParameters p)
     {
         return HtmlToWordConverter.HtmlToWord(html, p);
     }
-
+```
 ### Global fields (registered with `GlobalValueProvider.RegisterGlobalVariable`)
 
 * `@[g:Now]`: Access keys globaly registered for every template (company address, date time, etc..)
