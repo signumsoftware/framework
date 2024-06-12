@@ -267,7 +267,7 @@ where T : IModifiableEntity
     }
 
     public static BaseLineProxy AutoLine<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
-      where T : IModifiableEntity
+        where T : IModifiableEntity
     {
         var lineLocator = lineContainer.LineLocator(property);
 
@@ -280,6 +280,14 @@ where T : IModifiableEntity
         var valueLine = lineContainer.AutoLine(property);
 
         valueLine.SetValueUntyped(value);
+    }
+
+    public static V AutoLineValue<T, V>(this ILineContainer<T> lineContainer, Expression<Func<T, V>> property)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.AutoLine(property);
+
+        return (V)valueLine.GetValueUntyped()!;
     }
 
 
