@@ -11,6 +11,9 @@ export default function PackageOperation(p : { ctx: TypeContext<PackageOperation
     <div>
       <AutoLine ctx={e.subCtx(f => f.name)} />
       <EntityLine ctx={e.subCtx(f => f.operation)} readOnly={true} />
+      <AutoLine ctx={e.subCtx(f => f.configString)} readOnly={false} />
+
+
       <fieldset>
         <legend>{PackageLineEntity.nicePluralName()}</legend>
         <SearchControl findOptions={{ queryName: PackageQuery.PackageLineLastProcess, filterOptions: [{ token: PackageLineEntity.token(e => e.package), value: e.value }]}} />

@@ -10,6 +10,11 @@ public class PackageEntity : Entity, IProcessDataEntity
     [DbType(Size = int.MaxValue)]
     public byte[]? OperationArguments { get; set; }
 
+
+    [StringLengthValidator(Max = 1000)]
+    public string? ConfigString { get; set; }
+
+
     public override string ToString()
     {
         return "Package {0}".FormatWith(Name);
