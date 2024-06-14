@@ -11,7 +11,7 @@ public class PackageEntity : Entity, IProcessDataEntity
     public byte[]? OperationArguments { get; set; }
 
 
-    [StringLengthValidator(Max = 1000)]
+    [StringLengthValidator(Max = 1000,MultiLine =true)]
     public string? ConfigString { get; set; }
 
 
