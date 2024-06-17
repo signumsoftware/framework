@@ -2,34 +2,34 @@ using OpenQA.Selenium;
 
 namespace Signum.Selenium;
 
-public class ValueLineModalProxy : ModalProxy
+public class AutoLineModalProxy : ModalProxy
 {
     PropertyRoute? route;
-    public ValueLineModalProxy(IWebElement element, PropertyRoute? route = null) : base(element)
+    public AutoLineModalProxy(IWebElement element, PropertyRoute? route = null) : base(element)
     {
         this.route = route;
     }
 
-    public ValueLineProxy ValueLine
+    public BaseLineProxy AutoLineLine
     {
         get
         {
             var formGroup = this.Element.FindElement(By.CssSelector("div.modal-body div.form-group"));
-            return new ValueLineProxy(formGroup, route!);
+            return BaseLineProxy.AutoLine(formGroup, route!);
         }
     }
 }
 
 public static class ValueLineModalProxyExtensions
 {
-    public static ValueLineModalProxy AsValueLineModal(this IWebElement element)
+    public static AutoLineModalProxy AsAutoLineModal(this IWebElement element)
     {
-        return new ValueLineModalProxy(element);
+        return new AutoLineModalProxy(element);
     }
 
-    public static ValueLineModalProxy AsValueLineModal<T, V>(this IWebElement element, Expression<Func<T, V>> propertyRoute)
+    public static AutoLineModalProxy AsValueLineModal<T, V>(this IWebElement element, Expression<Func<T, V>> propertyRoute)
         where T : IRootEntity
     {
-        return new ValueLineModalProxy(element, PropertyRoute.Construct(propertyRoute));
+        return new AutoLineModalProxy(element, PropertyRoute.Construct(propertyRoute));
     }
 }
