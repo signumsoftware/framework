@@ -20,6 +20,8 @@ public class EntityComboProxy : EntityBaseProxy
         get { return this.Element.FindElement(By.CssSelector(".rw-dropdown-list-input")); }
     }
 
+    public override object? GetValueUntyped() => this.LiteValue;
+    public override void SetValueUntyped(object? value) => this.LiteValue = value is Entity e ? e.ToLite() : (Lite<Entity>?)value;
 
     public Lite<IEntity>? LiteValue
     {

@@ -9,6 +9,9 @@ public class EntityLineProxy : EntityBaseProxy
     {
     }
 
+    public override object? GetValueUntyped() => this.GetLite();
+    public override void SetValueUntyped(object? value) => this.SetLite(value is Entity e ? e.ToLite() : (Lite<Entity>?)value);
+
     public void SetLite(Lite<IEntity>? value)
     {
         if (this.EntityInfo() != null)

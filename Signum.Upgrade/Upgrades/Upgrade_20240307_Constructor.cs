@@ -30,8 +30,8 @@ public class Upgrade_20240307_Constructor : CodeUpgradeBase
                     ask.ForEach(a => parts.Remove(a));
                     parts.Add("Constructor");
                 }
-               if (parts.RemoveWhere(simpleExportArray.Contains) > 0);
-                parts.Add("Constructor");
+                if (parts.RemoveWhere(simpleExportArray.Contains) > 0)
+                    parts.Add("Constructor");
 
                 return parts.OrderByDescending(a => a == "Constructor").ToHashSet();
             });

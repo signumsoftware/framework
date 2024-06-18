@@ -43,7 +43,7 @@ export default function QueryTokenBuilder(p: QueryTokenBuilderProps) {
     tokenList.push(undefined);
 
   return (
-    <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown}>
+    <div className={classes("sf-query-token-builder", p.className)} onKeyDown={handleKeyDown} data-token={p.queryToken?.fullKey}>
       {initialIndex != 0 && <button onClick={handleExpandButton} className="btn btn-sm sf-prefix-btn">…</button>}
       {tokenList.map((a, i) => {
         if (i < initialIndex)

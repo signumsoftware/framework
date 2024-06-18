@@ -789,15 +789,15 @@ export class EntityOperationContext<T extends Entity> {
 
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
-  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void>;
-  onExecuteSuccess_Default = (pack: EntityPack<T>) => {
+  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void> | undefined;
+  onExecuteSuccess_Default = (pack: EntityPack<T>)  => {
     this.frame.onReload(pack);
     if (pack?.entity.id != null)
       Navigator.raiseEntityChanged(pack.entity);
     Operations.notifySuccess();
   }
 
-  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void>;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void> | undefined;
   onConstructFromSuccess_Default = (pack: EntityPack<Entity> | undefined) => {
     Operations.notifySuccess();
     if (pack?.entity.id != null)
@@ -805,7 +805,7 @@ export class EntityOperationContext<T extends Entity> {
     return Navigator.createNavigateOrTab(pack, this.event ?? ({} as React.MouseEvent));
   }
 
-  onDeleteSuccess?: () => Promise<void>;
+  onDeleteSuccess?: () => Promise<void> | undefined;
   onDeleteSuccess_Default = () => {
     this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
