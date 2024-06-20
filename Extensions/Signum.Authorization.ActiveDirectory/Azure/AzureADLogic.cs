@@ -18,6 +18,7 @@ using Microsoft.Graph.Models.ODataErrors;
 using System;
 using Signum.Files;
 using Signum.Utilities.Synchronization;
+using Signum.Engine.Sync;
 
 namespace Signum.Authorization.ActiveDirectory.Azure;
 

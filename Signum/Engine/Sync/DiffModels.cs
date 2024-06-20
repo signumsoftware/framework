@@ -183,7 +183,7 @@ public class DiffIndex
         return "{0} ({1})".FormatWith(IndexName, Columns.ToString(", "));
     }
 
-    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix)
+    internal bool IndexEquals(DiffTable dif, Maps.TableIndex mix, bool isPostgress)
     {
         if (this.ViewName != mix.ViewName)
             return false;
@@ -194,16 +194,16 @@ public class DiffIndex
         if (this.IsPrimary != mix.PrimaryKey)
             return false;
 
-        if (this.DataSpaceName != (mix.PartitionSchemeName ?? "PRIMARY"))
+        if (this.DataSpaceName != null && this.DataSpaceName != (mix.PartitionSchemeName ?? "PRIMARY"))
             return false;
 
-        if (this.Type != GetIndexType(mix))
+        if (this.Type != GetIndexType(mix, isPostgress))
             return false;
 
         return true;
     }
 
-    private static DiffIndexType? GetIndexType(TableIndex mix)
+    private static DiffIndexType? GetIndexType(TableIndex mix, bool isPostgress)
     {
         if (mix.Unique && mix.ViewName != null)
             return null;
@@ -211,7 +211,7 @@ public class DiffIndex
         if (mix is FullTextTableIndex)
             return DiffIndexType.FullTextIndex;
 
-        if (mix.Clustered)
+        if (mix.Clustered && !isPostgress)
             return DiffIndexType.Clustered;
 
         return DiffIndexType.NonClustered;
