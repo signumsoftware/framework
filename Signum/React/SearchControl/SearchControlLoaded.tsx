@@ -602,8 +602,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true) => {
-    if (this.state.filterMode == mode)
+  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true, force = false) => {
+    if (this.state.filterMode == mode && !force)
       return;
 
     if (refreshFilters)

@@ -117,15 +117,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
 
-  function applyChangesToSearchControl(uq: Lite<UserQueryEntity>) {
+  function applyUserQueryToSearchControl(uq: Lite<UserQueryEntity>) {
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
-          if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-            sc.handleChangeFiltermode('Simple');
+          sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
           setCurrentUserQuery(uq, translated(userQuery, a=>a.displayName));
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -135,7 +134,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
   function handleSelectUserQuery(uq: Lite<UserQueryEntity>) {
-    applyChangesToSearchControl(uq);
+    applyUserQueryToSearchControl(uq);
   }
 
   async function handleEdit() {
@@ -144,7 +143,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     await reloadList();
     if (currentUserQuery  && await Navigator.API.exists(currentUserQuery))
-      applyChangesToSearchControl(currentUserQuery!);
+      applyUserQueryToSearchControl(currentUserQuery!);
      else
       setCurrentUserQuery(undefined, undefined);
   }
@@ -186,7 +185,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const list = await reloadList();
 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
-      applyChangesToSearchControl(currentUserQuery!);
+      applyUserQueryToSearchControl(currentUserQuery!);
     else
       setCurrentUserQuery(undefined, undefined);
   }
@@ -256,7 +255,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uq => {
         if (uq?.id) {
           reloadList().then(() => {
-            applyChangesToSearchControl(toLite(uq));
+            applyUserQueryToSearchControl(toLite(uq));
           });
         }
       });
