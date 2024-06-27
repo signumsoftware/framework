@@ -15,12 +15,9 @@ namespace Signum.Translation;
 
 public class TranslationServer
 {
-    public static ITranslator[] Translators;
 
-    public static void Start(IApplicationBuilder app, params ITranslator[] translators)
-    {
-        Translators = translators;
-        
+    public static void Start(IApplicationBuilder app)
+    {        
         ReflectionServer.RegisterLike(typeof(TranslationMessage), () => TranslationPermission.TranslateCode.IsAuthorized() || TranslationPermission.TranslateInstances.IsAuthorized());
 
         ReflectionServer.PropertyRouteExtension += (mi, pr) =>

@@ -5,6 +5,7 @@ using Signum.API;
 using Signum.Mailing;
 using Signum.Authorization.ActiveDirectory.Azure;
 using DocumentFormat.OpenXml.Vml.Office;
+using Signum.Engine.Sync;
 
 namespace Signum.Authorization.ActiveDirectory.Windows;
 
