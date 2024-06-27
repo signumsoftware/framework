@@ -91,7 +91,8 @@ export class ViewReplacer<T extends ModifiableEntity> {
 
   constructor(
     public result: React.ReactNode,
-    public ctx: TypeContext<T>
+    public ctx: TypeContext<T>,
+    public originalFunction: Function,
   ) {
   }
 

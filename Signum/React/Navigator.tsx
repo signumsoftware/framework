@@ -1192,7 +1192,7 @@ export class ViewPromise<T extends ModifiableEntity> {
     var result = function NewComponent(props: { ctx: TypeContext<T> }) {
       var view = functionComponent(props);
 
-      const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx);
+      const replacer = new ViewReplacer<T>(view! as React.ReactElement, props.ctx, functionComponent);
       viewOverrides.forEach(vo => vo.override(replacer));
       return replacer.result;
     };
@@ -1225,7 +1225,7 @@ function monkeyPatchClassComponent<T extends ModifiableEntity>(component: React.
 
     const view = baseRender.call(this);
 
-    const replacer = new ViewReplacer<T>(view!, ctx);
+    const replacer = new ViewReplacer<T>(view!, ctx, component);
     viewOverrides.forEach(vo => vo.override(replacer));
     return replacer.result;
   };
