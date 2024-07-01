@@ -353,7 +353,7 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
       <Dropdown.Item
         {...props as any}
         disabled={disabled}
-        title={main?.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut)}
+        title={props.title ?? (main?.keyboardShortcut && Operations.getShortcutToString(main.keyboardShortcut))}
         className={classes(disabled ? "disabled sf-pointer-events" : undefined, main?.classes, (main.color ? "text-" + main.color : undefined))}
         onClick={disabled ? undefined : e => { eoc.event = e; main.onClick(eoc); }}
         data-operation={eoc.operationInfo.key}>

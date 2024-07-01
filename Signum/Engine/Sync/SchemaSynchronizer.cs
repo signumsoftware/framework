@@ -208,7 +208,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.IsControlledIndex || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
                     return changes;
@@ -229,7 +229,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary && kvp.Value.Type != DiffIndexType.Heap).ToDictionary(),
                         createNew: null,
                         removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.DropIndex(dif.Name, dix) : null
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
                     return changes;
@@ -300,16 +300,16 @@ public static class SchemaSynchronizer
                         var modelPK = modelIndices[tab].Values.SingleOrDefaultEx(a => a.PrimaryKey);
                         var diffPK = dif.Indices.Values.SingleOrDefaultEx(a => a.IsPrimary);
 
-                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK)) ?
+                        var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ?
                         SqlPreCommand.Combine(Spacing.Simple,
                             DropForeignKeys(tab.Name),
                             sqlBuilder.DropIndex(tab.Name, diffPK)) :
-                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName) :
+                         diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName).Do(a => a.GoBefore = true) :
                         null;
 
                         var diffHeap = dif.Indices.Values.SingleOrDefaultEx(a => a.Type == DiffIndexType.Heap || a.Type == DiffIndexType.Clustered);
 
-                        var disconnectFromPartition = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK)) ?
+                        var disconnectFromPartition = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ?
                         (diffHeap != null && diffHeap.DataSpaceName != "PRIMARY" && !modelPK.Partitioned ? sqlBuilder.DisconnectTableFromPartitionSchema(dif) : null) : null;
 
                         //var modelClus = modelIndices[tab].Values.SingleOrDefaultEx(a => a.Clustered);
@@ -401,7 +401,7 @@ public static class SchemaSynchronizer
                         );
 
 
-                        var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
+                        var createPrimaryKey = modelPK != null && (diffPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ? sqlBuilder.CreateIndex(modelPK, null) : null;
 
 
                         var columnsHistory = columns != null && (disableEnableSystemVersioning || sqlBuilder.IsPostgres && tab.SystemVersioned != null && dif.TemporalType == SysTableTemporalType.SystemVersionTemporalTable) ?
@@ -549,7 +549,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
                         removeOld: (i, dix) => !dix.IsControlledIndex && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
                     return SqlPreCommand.Combine(Spacing.Simple, controlledIndexes);
@@ -572,7 +572,7 @@ public static class SchemaSynchronizer
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) : null,
                         removeOld: null,
-                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
+                        mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndexBasic(mix, forHistoryTable: true) :
                             mix.GetIndexName(tab.SystemVersioned!.TableName) != dix.IndexName ? sqlBuilder.RenameIndex(tab.SystemVersioned!.TableName, dix.IndexName, mix.GetIndexName(tab.SystemVersioned!.TableName)) : null);
 
 

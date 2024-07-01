@@ -62,6 +62,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   static getCreateIcon = () => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
   static getFindIcon = () => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
   static getRemoveIcon = () => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
+  static getTrashIcon = () => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
   static getViewIcon = () => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
   static getMoveIcon = () => <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
   static getPasteIcon = () => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;

@@ -470,7 +470,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
-  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
@@ -491,7 +491,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   isVisible?: (coc: ContextualOperationContext<T>) => boolean;
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
-  confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (coc: ContextualOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
@@ -625,7 +625,7 @@ export interface EntityOperationGroup {
 export class CellOperationSettings<T extends Entity> extends OperationSettings {
   text?: (coc: CellOperationContext<T>) => string;
   isVisible?: (coc: CellOperationContext<T>) => boolean;
-  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (coc: CellOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   onClick?: (coc: CellOperationContext<T>) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
@@ -648,7 +648,7 @@ export class CellOperationSettings<T extends Entity> extends OperationSettings {
 export interface CellOperationOptions<T extends Entity> {
   text?: (coc: CellOperationContext<T>) => string;
   isVisible?: (coc: CellOperationContext<T>) => boolean;
-  confirmMessage?: (coc: CellOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (coc: CellOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   onClick?: (coc: CellOperationContext<T>) => Promise<void>;
   hideOnCanExecute?: boolean;
   //showOnReadOnly?: boolean;
@@ -789,15 +789,15 @@ export class EntityOperationContext<T extends Entity> {
 
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
-  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void>;
-  onExecuteSuccess_Default = (pack: EntityPack<T>) => {
+  onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void> | undefined;
+  onExecuteSuccess_Default = (pack: EntityPack<T>)  => {
     this.frame.onReload(pack);
     if (pack?.entity.id != null)
       Navigator.raiseEntityChanged(pack.entity);
     Operations.notifySuccess();
   }
 
-  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void>;
+  onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void> | undefined;
   onConstructFromSuccess_Default = (pack: EntityPack<Entity> | undefined) => {
     Operations.notifySuccess();
     if (pack?.entity.id != null)
@@ -805,7 +805,7 @@ export class EntityOperationContext<T extends Entity> {
     return Navigator.createNavigateOrTab(pack, this.event ?? ({} as React.MouseEvent));
   }
 
-  onDeleteSuccess?: () => Promise<void>;
+  onDeleteSuccess?: () => Promise<void> | undefined;
   onDeleteSuccess_Default = () => {
     this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
@@ -882,7 +882,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   click() {
-    this.frame.execute(() => {
+    return this.frame.execute(() => {
       if (this.settings?.onClick)
         return this.settings.onClick(this);
       else if (this.settings?.commonOnClick)
@@ -946,7 +946,7 @@ export class EntityOperationSettings<T extends Entity> extends OperationSettings
   text?: (coc: EntityOperationContext<T>) => string;
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   isVisibleOnlyType?: (typeName: string) => boolean;
-  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   overrideCanExecute?: (ctx: EntityOperationContext<T>) => string | undefined | null;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext<T>) => Promise<void>;
@@ -985,7 +985,7 @@ export interface EntityOperationOptions<T extends Entity> {
   isVisible?: (eoc: EntityOperationContext<T>) => boolean;
   isVisibleOnlyType?: (typeName: string) => boolean;
   overrideCanExecute?: (eoc: EntityOperationContext<T>) => string | undefined | null;
-  confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null | true;
+  confirmMessage?: (eoc: EntityOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   onClick?: (eoc: EntityOperationContext<T>) => Promise<void>;
   commonOnClick?: (oc: EntityOperationContext<T> | ContextualOperationContext<T> | CellOperationContext<T>) => Promise<void>;
   createButton?: (eoc: EntityOperationContext<T>, group?: EntityOperationGroup) => ButtonBarElement[];

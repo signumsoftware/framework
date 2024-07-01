@@ -145,6 +145,10 @@ public class LambdaToJavascriptConverter
                     ExpressionType.GreaterThan => ">",
                     ExpressionType.GreaterThanOrEqual => ">=",
                     ExpressionType.Coalesce => "??",
+                    ExpressionType.And => "&",
+                    ExpressionType.AndAlso => "&&",
+                    ExpressionType.Or => "|",
+                    ExpressionType.OrElse => "||",
                     _ => null
                 };
             }
@@ -175,7 +179,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
             else if (be.NodeType is ExpressionType.Equal or ExpressionType.NotEqual && IsEnumConvertToNumber(be.Right, out var enumOp2) && IsNumberConstant(be.Left, out var num2))
             {
@@ -185,7 +189,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
             else
             {
@@ -195,7 +199,7 @@ public class LambdaToJavascriptConverter
                 var op = ToJsOperator(be.NodeType);
 
                 if (a != null && op != null && b != null)
-                    return a + op + b;
+                    return "(" + a + op + b + ")";
             }
         }
 

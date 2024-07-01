@@ -79,8 +79,8 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
                     ask.ForEach(a => parts.Remove(a));
                     parts.Add("ContextualOperations");
                 }
-                if (parts.RemoveWhere(simpleExportArray.Contains) > 0) ;
-                parts.Add("ContextualOperations");
+                if (parts.RemoveWhere(simpleExportArray.Contains) > 0)
+                    parts.Add("ContextualOperations");
 
                 return parts.OrderByDescending(a => a == "ContextualOperations").ToHashSet();
             });
@@ -106,8 +106,8 @@ class Upgrade_20240307_Operations : CodeUpgradeBase
                     ask.ForEach(a => parts.Remove(a));
                     parts.Add("EntityOperations");
                 }
-                if (parts.RemoveWhere(simpleExportArray.Contains) > 0) ;
-                parts.Add("EntityOperations");
+                if (parts.RemoveWhere(simpleExportArray.Contains) > 0)
+                    parts.Add("EntityOperations");
 
                 return parts.OrderByDescending(a => a == "EntityOperations").ToHashSet();
             });

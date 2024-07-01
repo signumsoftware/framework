@@ -602,8 +602,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   };
 
-  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true) => {
-    if (this.state.filterMode == mode)
+  handleChangeFiltermode = async (mode: SearchControlFilterMode, refreshFilters = true, force = false) => {
+    if (this.state.filterMode == mode && !force)
       return;
 
     if (refreshFilters)
@@ -1491,6 +1491,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token)));
 
     var keyFilters = resFo.columnOptions
+      .filter(col => col.token != null)
       .map(col => ({ col, value: row.columns[resTable.columns.indexOf(col.token!.fullKey)] }))
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
@@ -1710,8 +1711,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return resultTable.rows.map((row, i, rows) => {
       const mark = this.getMarkedRow(row);
       const markClassName = mark?.status == "Success" ? "sf-entity-ctxmenu-success" :
-        mark?.status == "Warning" ? "table-warning" :
-          mark?.status == "Error" ? "table-danger" :
+        mark?.status == "Warning" ? "sf-row-warning" :
+          mark?.status == "Error" ? "sf-row-danger" :
             mark?.status == "Muted" ? "text-muted" :
               undefined;
 

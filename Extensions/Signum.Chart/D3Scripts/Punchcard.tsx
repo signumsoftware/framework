@@ -60,11 +60,11 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
 
     var extendedValues = ChartUtils.completeValues(column, values, completeValues, chartRequest.filterOptions, "After");
     switch (shortType) {
-      case "Ascending": return extendedValues.orderBy(a => a);
+      case "Ascending": return extendedValues.orderBy(a => a as number | string);
       case "AscendingToStr": return extendedValues.orderBy(a => column.getNiceName(a));
       case "AscendingKey": return extendedValues.orderBy(a => column.getKey(a));
       case "AscendingSumOrder": return extendedValues.orderBy(a => getSum(dictionary["k" + column.getKey(a)]));
-      case "Descending": return extendedValues.orderByDescending(a => a);
+      case "Descending": return extendedValues.orderByDescending(a => a as number | string);
       case "DescendingToStr": return extendedValues.orderByDescending(a => column.getNiceName(a));
       case "DescendingKey": return extendedValues.orderByDescending(a => column.getKey(a));
       case "DescendingSumOrder": return extendedValues.orderByDescending(a => getSum(dictionary["k" + column.getKey(a)]));

@@ -27,7 +27,7 @@ export namespace HelpClient {
     OmniboxClient.registerProvider(new HelpOmniboxProvider());
   
     options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
-    options.routes.push({ path: "/help/namespace/:namespace*", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
+    options.routes.push({ path: "/help/namespace/:namespace", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
     options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
     options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
   

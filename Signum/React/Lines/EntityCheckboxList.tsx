@@ -32,6 +32,7 @@ export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entit
   data?: Lite<Entity>[];
   columnCount?: number | null;
   columnWidth?: number | null;
+  elementsHtmlAttributes?: React.HTMLAttributes<any>;
   avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   onRenderCheckbox?: (ric: RenderCheckboxItemContext<V>) => React.ReactElement;
@@ -181,8 +182,11 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions), c.refresh]);
 
+  
   return (
-    <div className="sf-checkbox-elements" style={getColumnStyle()}>
+    <div {...p.elementsHtmlAttributes}
+      className={classes("sf-checkbox-elements", p.elementsHtmlAttributes?.className)}
+      style={{ ...p.elementsHtmlAttributes?.style, ...getColumnStyle()}} >
       {renderContent()}
     </div>
   );

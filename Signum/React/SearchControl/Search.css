@@ -30,7 +30,18 @@ table.sf-search-results > tbody > tr > td {
     white-space: pre-wrap;
     vertical-align: middle;
     cursor: pointer;
-    background-color: unset;  /*Compenesate boostrap white */
+}
+
+table.sf-search-results > tbody > tr.sf-row-danger {
+    --bs-table-bg: var(--bs-danger) !important;
+    --bs-table-color: var(--bs-white) !important;
+    --bs-table-hover-bg: var(--bs-danger) !important;
+    --bs-table-hover-color: var(--bs-white) !important;
+}
+
+table.sf-search-results > tbody > tr.sf-row-warning {
+    --bs-table-bg: var(--bs-warning) !important;
+    --bs-table-hover-bg: var(--bs-warning) !important;
 }
 
     table.sf-search-results > tbody > tr > td > * {
@@ -385,6 +396,6 @@ a.sf-shy-link:not(:hover) {
     color: gray;
 }
 
-table.sf-search-results > tbody > tr.sf-row-selected > td {
-    background-color: #76ddff24;
+table.sf-search-results > tbody > tr.sf-row-selected {
+    --bs-table-bg: #76ddff24;
 }

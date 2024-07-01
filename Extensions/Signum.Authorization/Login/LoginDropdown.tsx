@@ -10,11 +10,11 @@ import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
 
 export default function LoginDropdown(p: {
-  renderName?: (u: UserEntity) => React.ReactChild;
+  renderName?: (u: UserEntity) => React.ReactElement | string | null;
   changePasswordVisible?: boolean;
   switchUserVisible?: boolean;
   profileVisible?: boolean;
-  extraMenuItems?: (user: UserEntity) => React.ReactNode;
+  extraMenuItems?: (user: UserEntity) => React.ReactNode | undefined | null;
 }) {
 
   const currentCulture = CultureClient.currentCulture;

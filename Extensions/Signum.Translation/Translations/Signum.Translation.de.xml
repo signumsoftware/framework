@@ -24,7 +24,7 @@
     <Member Name="AreYouSureToContinueAutoTranslation0For1WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung {0} für {1} ohne Revision fortsetzen wollen?" />
     <Member Name="AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung aller Assemblys für {0} ohne Überarbeitung fortsetzen können?" />
     <Member Name="AreYouSureToContinueAutoTranslationAllTypesFor0WithoutRevision" Description="Sind Sie sicher, dass Sie die automatische Übersetzung aller Typen für {0} ohne Revision fortsetzen wollen?" />
-    <Member Name="AutoTranslate" Description="Automatisch übersetzen" />
+    <Member Name="AutoSync" Description="auto-sync" />
     <Member Name="BackToSyncAssembly0" Description="Zurück zur Synchronisierung der Assembly {0}" />
     <Member Name="BackToTranslationStatus" Description="Zurück zum Übersetzungsstatus" />
     <Member Name="CodeTranslations" Description="Code-Übersetzungen" />
@@ -51,7 +51,7 @@
     <Member Name="Synchronize0In1" Description="Synchronisieren {0} in {1} " />
     <Member Name="ThisFieldIsTranslatable" Description="Dieses Feld ist übersetzbar" />
     <Member Name="Type" Description="Typ" />
-    <Member Name="View" Description="anzeigen" />
+    <Member Name="View" Description="view" />
     <Member Name="View0In1" Description="Anzeige {0} in {1}" />
   </Type>
   <Type Name="TranslationPermission">

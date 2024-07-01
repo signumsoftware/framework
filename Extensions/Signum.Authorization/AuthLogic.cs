@@ -115,7 +115,7 @@ public static class AuthLogic
 
 
 
-            RolesByLite = sb.GlobalLazy(() => Database.Query<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+            RolesByLite = sb.GlobalLazy(() => Database./*Query*/RetrieveAll<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
             rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToFrozenDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
             rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
             rolesInverse = sb.GlobalLazy(() => rolesGraph.Value.Inverse(), new InvalidateWith(typeof(RoleEntity)));

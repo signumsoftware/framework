@@ -16,7 +16,7 @@ export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<Modi
   var vos = es?.viewOverrides?.filter(a => a.viewName == viewName); //Should user viewDispatcher.getViewOverrides promise instead
 
   if (vos?.length) {
-    const replacer = new ViewReplacer(result, ctx);
+    const replacer = new ViewReplacer(result, ctx, AutoComponent);
     vos.forEach(vo => vo.override(replacer));
     return replacer.result;
   } else {

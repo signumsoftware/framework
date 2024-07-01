@@ -62,7 +62,7 @@ public static partial class TextTemplateParser
         public BlockNode TryParse(out string errorMessages)
         {
             ParseInternal();
-            errorMessages = this.errors.ToString(a => a.Message, ", ");
+            errorMessages = this.errors.ToString(a => a.Message, "\n");
             return mainBlock;
         }
 

@@ -180,7 +180,7 @@ public class TranslationController : ControllerBase
 
         var master = reference.Extract(defaultCulture);
         var target = reference.Extract(targetCulture);
-        var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationServer.Translators, target, master, reference.Values.ToList(), null, @namespace, out int totalTypes);
+        var changes = TranslationSynchronizer.GetAssemblyChanges(TranslationLogic.Translators, target, master, reference.Values.ToList(), null, @namespace, out int totalTypes);
 
         return new AssemblyResultTS
         {

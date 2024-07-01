@@ -110,16 +110,21 @@ public class FilePathEntity : Entity, IFile, IFilePath
     public static Func<string, string> ToAbsolute = str => str;
 
     public string? FullWebPath()
-        {
-            var pp = this.GetPrefixPair();
+    {
+        var pp = this.GetPrefixPair();
 
-            if (string.IsNullOrEmpty(pp.WebPrefix))
-                return null;
+        if (string.IsNullOrEmpty(pp.WebPrefix))
+            return null;
 
-            var result = ToAbsolute(pp.WebPrefix + "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/")));
+        var suffix = "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
 
-            return result;
-        }
+        if (pp.WebPrefix.Contains("<suffix>"))
+            return pp.WebPrefix.Replace("<suffix>", suffix);
+
+        var result = ToAbsolute(pp.WebPrefix + suffix);
+
+        return result;
+    }
 
     public override string ToString()
     {

@@ -1520,7 +1520,7 @@ export namespace Finder {
 
   export function useQuery(fo: FindOptions | null, additionalDeps?: any[], options?: APIHookOptions): ResultTable | undefined | null {
     return useAPI(
-      signal => fo == null ? Promise.resolve<ResultTable | null>(null) : getResultTable(fo, signal),
+      signal => fo == null ? null : getResultTable(fo, signal),
       [fo && findOptionsPath(fo), ...(additionalDeps || [])],
       options);
 
@@ -1536,7 +1536,7 @@ export namespace Finder {
 
 
 
-  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined | null {
+  export function useFetchLites<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): Lite<T>[] | undefined {
     return useAPI(() => fetchLites(fo),
       [
         findOptionsPath({
@@ -1550,6 +1550,22 @@ export namespace Finder {
       options,
     );
   }
+
+
+  export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
+    var fo2: FindOptions | null = fo && {
+      pagination: { mode: "All" },
+      ...fo,
+      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptionsMode: "ReplaceAll",
+    };
+
+    var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
+
+    return result && result.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>);
+  }
+
+
 
   export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
     var fo2: FindOptions = {
