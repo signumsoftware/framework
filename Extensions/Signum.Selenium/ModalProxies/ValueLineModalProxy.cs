@@ -10,7 +10,7 @@ public class AutoLineModalProxy : ModalProxy
         this.route = route;
     }
 
-    public BaseLineProxy AutoLineLine
+    public BaseLineProxy AutoLine
     {
         get
         {
