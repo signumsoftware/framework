@@ -31,6 +31,11 @@ class Upgrade_20240702_IsolatedDeclarations : CodeUpgradeBase
         {
             file.InsertAfterFirstLine(a => a.Contains(@"""target"":"), @"""isolatedDeclarations"": true,");
         });
+
+        uctx.ForeachCodeFile(@"Changelog.ts", file =>
+        {
+            file.Replace("satisfies ChangeLogDic", "as ChangeLogDic");
+        });
     }
 }
 
