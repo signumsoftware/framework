@@ -11,7 +11,7 @@ export module AzureADQuery {
   export const ActiveDirectoryGroups = new QueryKey("AzureADQuery", "ActiveDirectoryGroups");
 }
 
-export const OnPremisesExtensionAttributesModel = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
+export const OnPremisesExtensionAttributesModel: Type<OnPremisesExtensionAttributesModel> = new Type<OnPremisesExtensionAttributesModel>("OnPremisesExtensionAttributesModel");
 export interface OnPremisesExtensionAttributesModel extends Entities.ModelEntity {
   Type: "OnPremisesExtensionAttributesModel";
   extensionAttribute1: string | null;

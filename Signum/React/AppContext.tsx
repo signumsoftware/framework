@@ -11,17 +11,17 @@ import { Entity, EntityPack, Lite, ModifiableEntity } from "./Signum.Entities";
 Dic.skipClasses.push(React.Component);
 
 export let currentCulture: string | undefined;
-export function setCurrentCulture(culture: string | undefined) {
+export function setCurrentCulture(culture: string | undefined): void {
   currentCulture = culture;
 }
 
 export let currentUser: IUserEntity | undefined;
-export function setCurrentUser(user: IUserEntity | undefined) {
+export function setCurrentUser(user: IUserEntity | undefined): void {
   currentUser = user;
 }
 
 export let _internalRouter: Router;
-export function setRouter(r: Router) {
+export function setRouter(r: Router): void {
   _internalRouter = r
 }
 
@@ -44,13 +44,13 @@ export function location(): typeof _internalRouter.state.location {
   };
 }
 
-export function assertPermissionAuthorized(permission: PermissionSymbol | string) {
+export function assertPermissionAuthorized(permission: PermissionSymbol | string): void {
   var key = (permission as PermissionSymbol).key ?? permission as string;
   if (!isPermissionAuthorized(key))
     throw new Error(`Permission ${key} is denied`);
 }
 
-export function isPermissionAuthorized(permission: PermissionSymbol | string) {
+export function isPermissionAuthorized(permission: PermissionSymbol | string): boolean {
   var key = (permission as PermissionSymbol).key ?? permission as string;
   const type = tryGetTypeInfo(key.before("."));
 
@@ -81,11 +81,11 @@ export function navigate(to: To | number, options?: NavigateOptions): void {
 
 
 export let setTitle: (pageTitle?: string) => void;
-export function setTitleFunction(titleFunction: (pageTitle?: string) => void) {
+export function setTitleFunction(titleFunction: (pageTitle?: string) => void): void {
   setTitle = titleFunction;
 }
 
-export function useTitle(title: string, deps?: readonly any[]) {
+export function useTitle(title: string, deps?: readonly any[]): void {
   React.useEffect(() => {
     setTitle(title);
     return () => setTitle();
@@ -93,11 +93,11 @@ export function useTitle(title: string, deps?: readonly any[]) {
 }
 
 let rtl = false;
-export function isRtl() {
+export function isRtl(): boolean {
   return rtl;
 }
 
-export function setRtl(isRtl: boolean) {
+export function setRtl(isRtl: boolean): void {
   rtl = isRtl;
 }
 
@@ -105,14 +105,14 @@ export const clearSettingsActions: Array<() => void> = [
   clearContextHeaders,
 ];
 
-export function clearAllSettings() {
+export function clearAllSettings(): void {
   clearSettingsActions.forEach(a => a());
   clearSettingsActions.clear();
   clearSettingsActions.push(clearContextHeaders);
 }
 
 export let resetUI: () => void = () => { };
-export function setResetUI(reset: () => void) {
+export function setResetUI(reset: () => void): void {
   resetUI = reset;
 }
 
@@ -129,7 +129,7 @@ export namespace Expander {
   }
 }
 
-export function useExpand() {
+export function useExpand(): void {
   React.useEffect(() => {
     const wasExpanded = Expander.setExpanded(true);
     return () => { Expander.setExpanded(wasExpanded); }
@@ -137,7 +137,7 @@ export function useExpand() {
 
 }
 
-export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>) {
+export function pushOrOpenInTab(path: string, e: React.MouseEvent<any> | React.KeyboardEvent<any>): void {
   if ((e as React.MouseEvent<any>).button == 2)
     return;
 

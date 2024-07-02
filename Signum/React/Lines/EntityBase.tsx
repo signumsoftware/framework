@@ -59,32 +59,32 @@ export type AsLite<T> = NoInfer<
 
 export class EntityBaseController<P extends EntityBaseProps<V>, V extends ModifiableEntity | Lite<Entity> | null> extends LineBaseController<P, V>{
 
-  static getCreateIcon = () => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
-  static getFindIcon = () => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
-  static getRemoveIcon = () => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
-  static getTrashIcon = () => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
-  static getViewIcon = () => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
-  static getMoveIcon = () => <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
-  static getPasteIcon = () => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
+  static getCreateIcon = (): React.JSX.Element => <FontAwesomeIcon icon="plus" title={EntityControlMessage.Create.niceToString()} />;
+  static getFindIcon = (): React.JSX.Element => <FontAwesomeIcon icon="magnifying-glass" title={EntityControlMessage.Find.niceToString()} />;
+  static getRemoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
+  static getTrashIcon = (): React.JSX.Element => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
+  static getViewIcon = (): React.JSX.Element => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
+  static getMoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
+  static getPasteIcon = (): React.JSX.Element => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
 
-  static hasChildrens(element: React.ReactElement) {
+  static hasChildrens(element: React.ReactElement): any {
      
     return element.props.children && React.Children.toArray(element.props.children).length;
   }
 
-  static defaultIsCreable(type: TypeReference, customComponent: boolean) {
+  static defaultIsCreable(type: TypeReference, customComponent: boolean): boolean {
     return type.isEmbedded ? Navigator.isCreable(type.name, { customComponent, isEmbedded: type.isEmbedded }) :
       type.name == IsByAll ? false :
         tryGetTypeInfos(type).some(ti => ti && Navigator.isCreable(ti, { customComponent }));
   }
 
-  static defaultIsViewable(type: TypeReference, customComponent: boolean) {
+  static defaultIsViewable(type: TypeReference, customComponent: boolean): boolean {
     return type.isEmbedded ? Navigator.isViewable(type.name, { customComponent, isEmbedded: type.isEmbedded }) :
       type.name == IsByAll ? true :
         tryGetTypeInfos(type).some(ti => ti && Navigator.isViewable(ti, { customComponent }));
   }
 
-  static defaultIsFindable(type: TypeReference) {
+  static defaultIsFindable(type: TypeReference): boolean {
     return type.isEmbedded ? false :
       type.name == IsByAll ? true :
         tryGetTypeInfos(type).some(ti => ti && Navigator.isFindable(ti));
@@ -100,7 +100,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return LineBaseController.propEquals(prevProps, nextProps);
   }
 
-  getDefaultProps(state: P) {
+  getDefaultProps(state: P): void {
     if (state.type) {
       const type = state.type;
 
@@ -175,7 +175,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return undefined;
   }
 
-  handleViewClick = async (event: React.MouseEvent<any>) => {
+  handleViewClick = async (event: React.MouseEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -203,7 +203,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderViewButton(btn: boolean) {
+  renderViewButton(btn: boolean): React.JSX.Element | undefined {
 
     if (!this.props.view)
       return undefined;
@@ -231,7 +231,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       .then(ti => ti ? ti.name : undefined);
   }
 
-  getFindOptions(typeName: string) {
+  getFindOptions(typeName: string): FindOptions | undefined {
     if (this.props.findOptionsDictionary)
       return this.props.findOptionsDictionary[typeName];
 
@@ -254,7 +254,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     return result as Aprox<V>;
   }
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -317,7 +317,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     this.setValue(value);
   }
 
-  handlePasteClick = (event: React.SyntheticEvent<any>) => {
+  handlePasteClick = (event: React.SyntheticEvent<any>): void => {
 
     event.preventDefault();
 
@@ -325,7 +325,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       .then(text => this.paste(text));
   }
 
-  renderCreateButton(btn: boolean, createMessage?: string) {
+  renderCreateButton(btn: boolean, createMessage?: string): React.JSX.Element | undefined {
     if (!this.props.create || this.props.ctx.readOnly)
       return undefined;
 
@@ -338,7 +338,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     );
   }
 
-  renderPasteButton(btn: boolean) {
+  renderPasteButton(btn: boolean): React.JSX.Element | undefined {
     if (!this.props.paste || this.props.ctx.readOnly)
       return undefined;
 
@@ -381,7 +381,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   
   }
 
-  handleFindClick = async (event: React.SyntheticEvent<any>) => {
+  handleFindClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -395,7 +395,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     }
   }
 
-  renderFindButton(btn: boolean) {
+  renderFindButton(btn: boolean): React.JSX.Element | undefined {
     if (!this.props.find || this.props.ctx.readOnly)
       return undefined;
 
@@ -408,7 +408,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
     );
   }
 
-  handleRemoveClick = (event: React.SyntheticEvent<any>) => {
+  handleRemoveClick = (event: React.SyntheticEvent<any>): void => {
 
     event.preventDefault();
 
@@ -421,7 +421,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
       });
   };
 
-  renderRemoveButton(btn: boolean) {
+  renderRemoveButton(btn: boolean): React.JSX.Element | undefined {
     if (!this.props.remove || this.props.ctx.readOnly)
       return undefined;
 

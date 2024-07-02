@@ -30,7 +30,7 @@ export function useForceUpdatePromise(): () => Promise<void> {
   return () => setCount(c => c + 1) as Promise<any>;
 }
 
-export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>) {
+export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>): T {
   const [val, setVal] = React.useState(initialState);
 
   React.useEffect(() => {
@@ -59,7 +59,7 @@ export interface Size {
   height: number;
 }
 
-export function whenVisible<T extends HTMLElement>(element: T, callback: (visible: boolean) => void, options?: IntersectionObserverInit) {
+export function whenVisible<T extends HTMLElement>(element: T, callback: (visible: boolean) => void, options?: IntersectionObserverInit): IntersectionObserver {
 
   var observer = new IntersectionObserver((entries, observer) => {
     entries.forEach(entry => {
@@ -232,7 +232,7 @@ export function useAPI<T>(makeCall: (signal: AbortSignal, oldData: T | undefined
   return data && data.result;
 }
 
-export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList) {
+export function areEqualDeps(depsA: React.DependencyList, depsB: React.DependencyList): boolean {
 
   if (depsA.length !== depsB.length)
     return false;
@@ -245,7 +245,7 @@ export function areEqualDeps(depsA: React.DependencyList, depsB: React.Dependenc
   return true;
 }
 
-export function useMounted() {
+export function useMounted(): React.MutableRefObject<boolean> {
   const mounted = React.useRef<boolean>(true);
   React.useEffect(() => {
     return () => { mounted.current = false; };
@@ -312,7 +312,7 @@ export function useLock<T>(): [/*isLocked:*/boolean, /*lock:*/(makeCall: () => P
 }
 
 
-export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }) => {
+export const useDoubleClick = (doubleClick: React.MouseEventHandler, click: React.MouseEventHandler, options?: { timeout?: number }): (event: React.MouseEvent) => void => {
   options = {
     timeout: 200,
     ...options,

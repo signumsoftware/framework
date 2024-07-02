@@ -34,7 +34,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
 
   typeahead!: React.RefObject<TypeaheadController>;
 
-  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>) {
+  overrideProps(p: EntityStripProps<V>, overridenProps: EntityStripProps<V>): void {
     super.overrideProps(p, overridenProps);
     this.typeahead = React.useRef<TypeaheadController>(null);
 
@@ -85,7 +85,7 @@ export class EntityStripController<V extends ModifiableEntity | Lite<Entity>> ex
   }
 }
 
-export const EntityStrip = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
+export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V> & React.RefAttributes<EntityStripController<V>>) => React.ReactNode | null = genericForwardRef(function EntityStrip<V extends ModifiableEntity | Lite<Entity>>(props: EntityStripProps<V>, ref: React.Ref<EntityStripController<V>>) {
   const c = useController(EntityStripController, props, ref);
   const p = c.props;
 
@@ -210,7 +210,7 @@ export interface EntityStripElementProps<V extends ModifiableEntity | Lite<Entit
   vertical?: boolean;
 }
 
-export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>) {
+export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p: EntityStripElementProps<V>): React.JSX.Element {
   var currentEntityRef = React.useRef<{ entity: ModifiableEntity | Lite<Entity>, item?: unknown } | undefined>(undefined);
   const forceUpdate = useForceUpdate();
 

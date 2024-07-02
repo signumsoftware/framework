@@ -12,12 +12,12 @@ export interface IToolbarEntity extends Entities.Entity {
   elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
-export const ShowCount = new EnumType<ShowCount>("ShowCount");
+export const ShowCount: EnumType<ShowCount> = new EnumType<ShowCount>("ShowCount");
 export type ShowCount =
   "MoreThan0" |
   "Always";
 
-export const ToolbarElementEmbedded = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
+export const ToolbarElementEmbedded: Type<ToolbarElementEmbedded> = new Type<ToolbarElementEmbedded>("ToolbarElementEmbedded");
 export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ToolbarElementEmbedded";
   type: ToolbarElementType;
@@ -31,14 +31,14 @@ export interface ToolbarElementEmbedded extends Entities.EmbeddedEntity {
   autoRefreshPeriod: number | null;
 }
 
-export const ToolbarElementType = new EnumType<ToolbarElementType>("ToolbarElementType");
+export const ToolbarElementType: EnumType<ToolbarElementType> = new EnumType<ToolbarElementType>("ToolbarElementType");
 export type ToolbarElementType =
   "Header" |
   "Divider" |
   "Item" |
   "ExtraIcon";
 
-export const ToolbarEntity = new Type<ToolbarEntity>("Toolbar");
+export const ToolbarEntity: Type<ToolbarEntity> = new Type<ToolbarEntity>("Toolbar");
 export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "Toolbar";
   owner: Entities.Lite<Entities.Entity> | null;
@@ -49,13 +49,13 @@ export interface ToolbarEntity extends Entities.Entity, UserAssets.IUserAssetEnt
   guid: string /*Guid*/;
 }
 
-export const ToolbarLocation = new EnumType<ToolbarLocation>("ToolbarLocation");
+export const ToolbarLocation: EnumType<ToolbarLocation> = new EnumType<ToolbarLocation>("ToolbarLocation");
 export type ToolbarLocation =
   "Side" |
   "Top" |
   "Main";
 
-export const ToolbarMenuEntity = new Type<ToolbarMenuEntity>("ToolbarMenu");
+export const ToolbarMenuEntity: Type<ToolbarMenuEntity> = new Type<ToolbarMenuEntity>("ToolbarMenu");
 export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAssetEntity, IToolbarEntity {
   Type: "ToolbarMenu";
   owner: Entities.Lite<Entities.Entity> | null;
@@ -70,10 +70,10 @@ export module ToolbarMenuOperation {
 }
 
 export module ToolbarMessage {
-  export const RecursionDetected = new MessageKey("ToolbarMessage", "RecursionDetected");
-  export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
-  export const FirstElementCanNotBeExtraIcon = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
-  export const ExtraIconCanNotComeAfterDivider = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
+  export const RecursionDetected: MessageKey = new MessageKey("ToolbarMessage", "RecursionDetected");
+  export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships: MessageKey = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
+  export const FirstElementCanNotBeExtraIcon: MessageKey = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
+  export const ExtraIconCanNotComeAfterDivider: MessageKey = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
 }
 
 export module ToolbarOperation {

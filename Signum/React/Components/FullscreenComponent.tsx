@@ -9,7 +9,7 @@ interface FullscreenComponentProps {
   onReload?: (e: React.MouseEvent<any>) => void;
 }
 
-export function FullscreenComponent(p: FullscreenComponentProps) {
+export function FullscreenComponent(p: FullscreenComponentProps): React.JSX.Element {
 
   const [isFullScreen, setIsFullScreen] = React.useState(false);
 

@@ -13,7 +13,7 @@ import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Files from '../Signum.Files/Signum.Files'
 
 
-export const WordAttachmentEntity = new Type<WordAttachmentEntity>("WordAttachment");
+export const WordAttachmentEntity: Type<WordAttachmentEntity> = new Type<WordAttachmentEntity>("WordAttachment");
 export interface WordAttachmentEntity extends Entities.Entity, Templates.IAttachmentGeneratorEntity {
   Type: "WordAttachment";
   fileName: string | null;
@@ -22,18 +22,18 @@ export interface WordAttachmentEntity extends Entities.Entity, Templates.IAttach
   modelConverter: Templating.ModelConverterSymbol | null;
 }
 
-export const WordConverterSymbol = new Type<WordConverterSymbol>("WordConverter");
+export const WordConverterSymbol: Type<WordConverterSymbol> = new Type<WordConverterSymbol>("WordConverter");
 export interface WordConverterSymbol extends Basics.Symbol {
   Type: "WordConverter";
 }
 
-export const WordModelEntity = new Type<WordModelEntity>("WordModel");
+export const WordModelEntity: Type<WordModelEntity> = new Type<WordModelEntity>("WordModel");
 export interface WordModelEntity extends Entities.Entity {
   Type: "WordModel";
   fullClassName: string;
 }
 
-export const WordTemplateEntity = new Type<WordTemplateEntity>("WordTemplate");
+export const WordTemplateEntity: Type<WordTemplateEntity> = new Type<WordTemplateEntity>("WordTemplate");
 export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAssetEntity, Templating.IContainsQuery {
   Type: "WordTemplate";
   guid: string /*Guid*/;
@@ -53,14 +53,14 @@ export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAss
 }
 
 export module WordTemplateMessage {
-  export const ModelShouldBeSetToUseModel0 = new MessageKey("WordTemplateMessage", "ModelShouldBeSetToUseModel0");
-  export const Type0DoesNotHaveAPropertyWithName1 = new MessageKey("WordTemplateMessage", "Type0DoesNotHaveAPropertyWithName1");
-  export const ChooseAReportTemplate = new MessageKey("WordTemplateMessage", "ChooseAReportTemplate");
-  export const _01RequiresExtraParameters = new MessageKey("WordTemplateMessage", "_01RequiresExtraParameters");
-  export const SelectTheSourceOfDataForYourTableOrChart = new MessageKey("WordTemplateMessage", "SelectTheSourceOfDataForYourTableOrChart");
-  export const WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart = new MessageKey("WordTemplateMessage", "WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart");
-  export const NoDefaultTemplateDefined = new MessageKey("WordTemplateMessage", "NoDefaultTemplateDefined");
-  export const WordReport = new MessageKey("WordTemplateMessage", "WordReport");
+  export const ModelShouldBeSetToUseModel0: MessageKey = new MessageKey("WordTemplateMessage", "ModelShouldBeSetToUseModel0");
+  export const Type0DoesNotHaveAPropertyWithName1: MessageKey = new MessageKey("WordTemplateMessage", "Type0DoesNotHaveAPropertyWithName1");
+  export const ChooseAReportTemplate: MessageKey = new MessageKey("WordTemplateMessage", "ChooseAReportTemplate");
+  export const _01RequiresExtraParameters: MessageKey = new MessageKey("WordTemplateMessage", "_01RequiresExtraParameters");
+  export const SelectTheSourceOfDataForYourTableOrChart: MessageKey = new MessageKey("WordTemplateMessage", "SelectTheSourceOfDataForYourTableOrChart");
+  export const WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart: MessageKey = new MessageKey("WordTemplateMessage", "WriteThisKeyAsTileInTheAlternativeTextOfYourTableOrChart");
+  export const NoDefaultTemplateDefined: MessageKey = new MessageKey("WordTemplateMessage", "NoDefaultTemplateDefined");
+  export const WordReport: MessageKey = new MessageKey("WordTemplateMessage", "WordReport");
 }
 
 export module WordTemplateOperation {
@@ -74,13 +74,13 @@ export module WordTemplatePermission {
   export const GenerateReport : Basics.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
 }
 
-export const WordTemplateVisibleOn = new EnumType<WordTemplateVisibleOn>("WordTemplateVisibleOn");
+export const WordTemplateVisibleOn: EnumType<WordTemplateVisibleOn> = new EnumType<WordTemplateVisibleOn>("WordTemplateVisibleOn");
 export type WordTemplateVisibleOn =
   "Single" |
   "Multiple" |
   "Query";
 
-export const WordTransformerSymbol = new Type<WordTransformerSymbol>("WordTransformer");
+export const WordTransformerSymbol: Type<WordTransformerSymbol> = new Type<WordTransformerSymbol>("WordTransformer");
 export interface WordTransformerSymbol extends Basics.Symbol {
   Type: "WordTransformer";
 }

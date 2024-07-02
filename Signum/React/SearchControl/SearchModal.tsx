@@ -28,7 +28,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
-function SearchModal(p: SearchModalProps) {
+function SearchModal(p: SearchModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
 
@@ -215,7 +215,7 @@ namespace SearchModal {
 
 export default SearchModal;
 
-export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string) {
+export function defaultSelectMessage(queryName: PseudoType | QueryKey, plural: boolean, forProperty?: string): string {
 
   var type = queryName instanceof QueryKey ? null : getTypeInfo(queryName);
 

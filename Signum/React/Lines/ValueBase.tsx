@@ -14,24 +14,24 @@ export interface ValueBaseProps<V = any> extends LineBaseProps<V> {
 export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBaseController<T, V> {
 
   inputElement!: React.RefObject<HTMLElement>;
-  init(p: T) {
+  init(p: T): void {
     super.init(p);
 
     this.inputElement = React.useRef<HTMLElement>(null);
     useInitiallyFocused(this.props.initiallyFocused, this.inputElement);
   }
 
-  setRefs = (node: HTMLElement | null) => {
+  setRefs = (node: HTMLElement | null): void => {
       setRefProp(this.props.valueRef, node);
       (this.inputElement as React.MutableRefObject<HTMLElement | null>).current = node;
   };
 
-  assertType(tagName: string, types: string[]) {
+  assertType(tagName: string, types: string[]): void {
     if (!types.contains(this.props.type!.name))
       throw new Error(`Invalid type '${this.props.type?.name}'' in ${tagName} for ${this.props.ctx.propertyPath ?? this.props.ctx.prefix}`)
   }
 
-  overrideProps(state: T, overridenProps: T) {
+  overrideProps(state: T, overridenProps: T): void {
 
       const valueHtmlAttributes = { ...state.valueHtmlAttributes, ...Dic.simplify(overridenProps.valueHtmlAttributes) };
       super.overrideProps(state, overridenProps);
@@ -85,7 +85,7 @@ export function asString(reactChild: React.ReactNode | undefined): string | unde
 }
 
 tasks.push(taskSetFormat);
-export function taskSetFormat(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetFormat(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (lineBase instanceof ValueBaseController) {
     const vProps = state as ValueBaseProps<unknown>;
 
@@ -98,7 +98,7 @@ export function taskSetFormat(lineBase: LineBaseController<LineBaseProps, unknow
 }
 
 tasks.push(taskSetUnit);
-export function taskSetUnit(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetUnit(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
 
   if (lineBase instanceof ValueBaseController) {
     const vProps = state as ValueBaseProps<any>;

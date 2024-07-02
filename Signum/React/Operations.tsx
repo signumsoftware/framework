@@ -36,7 +36,7 @@ export namespace Operations {
 
   
 
-  export function start() {
+  export function start(): void {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);
     ContexualItems.onContextualItems.push(ContextualOperations.getOperationsContextualItems);
 
@@ -68,15 +68,15 @@ export namespace Operations {
 
   export const operationSettings: { [operationKey: string]: OperationSettings } = {};
 
-  export function clearOperationSettings() {
+  export function clearOperationSettings(): void {
     Dic.clear(operationSettings);
   }
 
-  export function addSettings(...settings: OperationSettings[]) {
+  export function addSettings(...settings: OperationSettings[]): void {
     settings.forEach(s => Dic.addOrThrow(operationSettings, s.operationSymbol, s));
   }
 
-  export function overrideEntitySettings<T extends Entity>(operation: ExecuteSymbol<T> | ConstructSymbol_From<T, any> | DeleteSymbol<T>, options: EntityOperationOptions<T>) {
+  export function overrideEntitySettings<T extends Entity>(operation: ExecuteSymbol<T> | ConstructSymbol_From<T, any> | DeleteSymbol<T>, options: EntityOperationOptions<T>): void {
     var es = getSettings(operation) as EntityOperationSettings<T>;
 
     var { contextual, contextualFromMany, cell, ...otherOptions } = options;
@@ -113,11 +113,11 @@ export namespace Operations {
     return operationSettings[operationKey];
   }
 
-  export function operationInfos(ti: TypeInfo) {
+  export function operationInfos(ti: TypeInfo): OperationInfo[] {
     return Dic.getValues(ti.operations!);
   }
 
-  export function notifySuccess(message?: string, timeout?: number) {
+  export function notifySuccess(message?: string, timeout?: number): void {
     Notify.singleton && Notify.singleton.notifyTimeout({ text: message ?? JavascriptMessage.executed.niceToString(), type: "success", priority: 20 }, timeout);
   }
 
@@ -126,7 +126,7 @@ export namespace Operations {
    */
   
 
-  export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut) {
+  export function isShortcut(e: KeyboardEvent, ks: KeyboardShortcut): boolean {
 
     function toLower(a: string | undefined) {
       return a?.toLowerCase();
@@ -140,7 +140,7 @@ export namespace Operations {
 
 
 
-  export function getShortcutToString(ks: KeyboardShortcut) {
+  export function getShortcutToString(ks: KeyboardShortcut): string {
 
     return (ks.ctrlKey ? "Ctrl+" : "") +
       (ks.altKey ? "Alt+" : "") +
@@ -226,7 +226,7 @@ export namespace Operations {
     }
   }
 
-  export function isEntityOperation(operationType: OperationType) {
+  export function isEntityOperation(operationType: OperationType): boolean {
     return operationType == "ConstructorFrom" ||
       operationType == "Execute" ||
       operationType == "Delete";
@@ -337,7 +337,7 @@ export namespace Operations {
       isFinished: boolean;
     }
 
-    export function getOperationKey(operationKey: string | OperationSymbol) {
+    export function getOperationKey(operationKey: string | OperationSymbol): string {
       return (operationKey as OperationSymbol).key || operationKey as string;
     }
 
@@ -449,7 +449,7 @@ export class ConstructorOperationContext<T extends Entity> {
     return Operations.API.construct<T>(this.typeInfo.name, this.operationInfo.key, ...args);
   }
 
-  assignProps(pack: EntityPack<T> | undefined, props?: Partial<T>) {
+  assignProps(pack: EntityPack<T> | undefined, props?: Partial<T>): EntityPack<T> | undefined {
     if (pack && props)
       Dic.assign(pack.entity, props);
 
@@ -602,7 +602,7 @@ export class ContextualOperationContext<T extends Entity> {
     return [<ContextualOperations.OperationMenuItem coc={this} />];
   }
 
-  raiseEntityChanged() {
+  raiseEntityChanged(): void {
     return this.context.lites.map(l => l.EntityType).distinctBy().forEach(type => Navigator.raiseEntityChanged(type));
   }
 }
@@ -693,19 +693,19 @@ export class CellOperationContext<T extends Entity> {
     this.settings = this.entityOperationSettings?.cell;
   }
 
-  raiseEntityChanged() {
+  raiseEntityChanged(): void {
     return Navigator.raiseEntityChanged(this.lite.EntityType);
   }
 
-  defaultClick(...args: any[]) {
+  defaultClick(...args: any[]): Promise<void> {
     return defaultCellOperationClick(this, ...args);
   }
 
-  getEntity() {
+  getEntity(): Promise<T> {
     return Navigator.API.fetch(this.lite);
   }
 
-  getLite() {
+  getLite(): Lite<T> {
     return this.lite;
   }
 
@@ -790,7 +790,7 @@ export class EntityOperationContext<T extends Entity> {
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
   onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void> | undefined;
-  onExecuteSuccess_Default = (pack: EntityPack<T>)  => {
+  onExecuteSuccess_Default = (pack: EntityPack<T>): void  => {
     this.frame.onReload(pack);
     if (pack?.entity.id != null)
       Navigator.raiseEntityChanged(pack.entity);
@@ -798,7 +798,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => Promise<void> | undefined;
-  onConstructFromSuccess_Default = (pack: EntityPack<Entity> | undefined) => {
+  onConstructFromSuccess_Default = (pack: EntityPack<Entity> | undefined): Promise<void> => {
     Operations.notifySuccess();
     if (pack?.entity.id != null)
       Navigator.raiseEntityChanged(pack.entity);
@@ -806,7 +806,7 @@ export class EntityOperationContext<T extends Entity> {
   }
 
   onDeleteSuccess?: () => Promise<void> | undefined;
-  onDeleteSuccess_Default = () => {
+  onDeleteSuccess_Default = (): void => {
     this.frame.onClose();
     Navigator.raiseEntityChanged(this.entity.Type);
     Operations.notifySuccess();
@@ -867,7 +867,7 @@ export class EntityOperationContext<T extends Entity> {
     }];
   }
 
-  complete() {
+  complete(): void {
     var s = this.settings;
     this.color = s?.color ?? Operations.Defaults.getColor(this.operationInfo);
     this.outline = s?.outline ?? Operations.Defaults.getOutline(this.operationInfo);
@@ -877,11 +877,11 @@ export class EntityOperationContext<T extends Entity> {
     this.alternatives = s?.alternatives != null ? s.alternatives(this) : Operations.Defaults.getAlternatives(this);
   }
 
-  defaultClick(...args: any[]) {
+  defaultClick(...args: any[]): Promise<void> {
     return EntityOperations.defaultOnClick(this, ...args);
   }
 
-  click() {
+  click(): Promise<void> {
     return this.frame.execute(() => {
       if (this.settings?.onClick)
         return this.settings.onClick(this);
@@ -892,7 +892,7 @@ export class EntityOperationContext<T extends Entity> {
     });
   }
 
-  textOrNiceName() {
+  textOrNiceName(): string {
     return (this.settings?.text?.(this)) ?? this.operationInfo.niceName
   }
 

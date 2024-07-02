@@ -4,7 +4,7 @@ import { Finder } from '../Finder'
 import { FindOptions, ResultRow } from '../FindOptions'
 import { TypeContext } from '../TypeContext'
 import { getTypeInfos, tryGetTypeInfos, TypeReference } from '../Reflection'
-import { EntityBaseController, EntityBaseProps, AsLite, AsEntity } from './EntityBase'
+import { EntityBaseController, EntityBaseProps, AsLite, AsEntity, Aprox } from './EntityBase'
 import { FormGroup } from './FormGroup'
 import { Navigator } from '../Navigator'
 import { FormControlReadonly } from './FormControlReadonly'
@@ -37,7 +37,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
 
   refresh = 0;
 
-  getDefaultProps(p: EntityComboProps<V>) {
+  getDefaultProps(p: EntityComboProps<V>): void {
     p.remove = false;
     p.create = false;
     p.view = false;
@@ -45,14 +45,14 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
     p.find = false;
   }
 
-  overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>) {
+  overrideProps(p: EntityComboProps<V>, overridenProps: EntityComboProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.onRenderItem === undefined && p.type && tryGetTypeInfos(p.type).some(a => a && Navigator.getSettings(a)?.renderLite)) {
       p.onRenderItem = (row, role, searchTerm) => row == null ? <span className="mx-2">-</span>: (row?.entity && Navigator.renderLite(row.entity, TextHighlighter.fromString(searchTerm))) ?? "";
     }
   }
-
-  async doView(entity: V) {
+  
+  async doView(entity: V): Promise<Aprox<V> | undefined> {
     var val = await super.doView(entity);
 
     this.refresh++;
@@ -60,7 +60,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
     return val;
   }
 
-  handleOnChange = async (e: React.SyntheticEvent | undefined, lite: AsLite<V> | null) => {
+  handleOnChange = async (e: React.SyntheticEvent | undefined, lite: AsLite<V> | null): Promise<void> => {
     if (lite == null)
       this.setValue(null!);
     else {
@@ -70,7 +70,7 @@ export class EntityComboController<V extends Entity | Lite<Entity> | null> exten
   }
 }
 
-export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
+export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V> & React.RefAttributes<EntityComboController<V>>) => React.ReactNode | null = genericForwardRefWithMemo(function EntityCombo<V extends Entity | Lite<Entity> | null>(props: EntityComboProps<V>, ref: React.Ref<EntityComboController<V>>) {
 
   const c = useController(EntityComboController, props, ref);
   const p = c.props;
@@ -145,7 +145,7 @@ export const EntityCombo = genericForwardRefWithMemo(function EntityCombo<V exte
       </div>}
     </FormGroup>
   );
-}, (prev, next) => EntityBaseController.propEquals(prev, next));
+}, (prev, next): boolean => EntityBaseController.propEquals(prev, next));
 
 export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity> | null> {
   ctx: TypeContext<V>;
@@ -169,7 +169,7 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
 
 
 const __normalized: Lite<Entity>[] = [];
-export function normalizeEmptyArray(data: Lite<Entity>[] | undefined) {
+export function normalizeEmptyArray(data: Lite<Entity>[] | undefined): Lite<Entity>[] | undefined {
   if (data == undefined)
     return undefined;
 
@@ -184,7 +184,7 @@ export interface  EntityComboSelectHandle {
   getData(): Lite<Entity>[] | ResultTable | undefined;
 }
 //Extracted to another component
-export const EntityComboSelect = genericForwardRef(function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>, ref: React.Ref<EntityComboSelectHandle>) {
+export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: EntityComboSelectProps<V> & React.RefAttributes<EntityComboSelectHandle>) => React.ReactNode | null = genericForwardRef(function EntityComboSelect<V extends Entity | Lite<Entity> | null>(p: EntityComboSelectProps<V>, ref: React.Ref<EntityComboSelectHandle>) {
 
   const [data, _setData] = React.useState<Lite<Entity>[] | ResultTable | undefined>(p.data);
   const requestStarted = React.useRef(false);

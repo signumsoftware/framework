@@ -152,7 +152,7 @@ export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, dur
   throw new Error("Unable to split " + luxonFormat);
 }
 
-export function dateTimePlaceholder(luxonFormat: string) {
+export function dateTimePlaceholder(luxonFormat: string): string {
   var result = DateTime.expandFormat(luxonFormat);
   
   return result
@@ -165,7 +165,7 @@ export function dateTimePlaceholder(luxonFormat: string) {
 
 }
 
-export function timePlaceholder(durationFormat: string) {
+export function timePlaceholder(durationFormat: string): string {
   return durationFormat;
 }
 
@@ -261,7 +261,7 @@ const oneDigitCulture = new Set([
   "zu", "zu-ZA"
 ]);
 
-export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions){
+export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions): string{
 
   if (!oneDigitCulture.has(dt.locale!)) {
 
@@ -395,21 +395,21 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   return result;
 }
 
-export function valToString(val: any) {
+export function valToString(val: any): any {
   if (val == null)
     return "";
 
   return val.toString();
 }
 
-export function numberToString(val: any, format?: string) {
+export function numberToString(val: any, format?: string): string {
   if (val == null)
     return "";
 
   return toNumberFormat(format).format(val);
 }
 
-export function dateToString(val: any, type: "DateOnly" | "DateTime", netFormat?: string) {
+export function dateToString(val: any, type: "DateOnly" | "DateTime", netFormat?: string): string {
   if (val == null)
     return "";
 
@@ -417,7 +417,7 @@ export function dateToString(val: any, type: "DateOnly" | "DateTime", netFormat?
   return m.toFormat(toLuxonFormat(netFormat, type));
 }
 
-export function timeToString(val: any, netFormat?: string) {
+export function timeToString(val: any, netFormat?: string): string {
   if (val == null)
     return "";
 
@@ -453,7 +453,7 @@ export interface TypeInfoDictionary {
 
 let _types: TypeInfoDictionary = {};
 
-export function isStarted() {
+export function isStarted(): boolean {
   return Object.keys(_types).length > 0;
 }
 
@@ -525,7 +525,7 @@ export function tryGetTypeInfo(type: PseudoType): TypeInfo | undefined {
   return ti;
 }
 
-export function isLowPopulationSymbol(type: PseudoType) {
+export function isLowPopulationSymbol(type: PseudoType): boolean | undefined {
 
   var ti = tryGetTypeInfo(type);
 
@@ -706,12 +706,12 @@ export function reloadTypes(): Promise<void> {
 
 export const onReloadTypesActions: Array<() => void> = [];
 
-export function onReloadTypes() {
+export function onReloadTypes(): void {
   onReloadTypesActions.forEach(a => a());
 }
 
 
-export function setTypes(types: TypeInfoDictionary) {
+export function setTypes(types: TypeInfoDictionary): void {
 
   Dic.foreach(types, (k, t) => {
     t.name = k;
@@ -809,14 +809,14 @@ export class Binding<T> implements IBinding<T> {
     this.suffix = suffix || ("." + member);
   }
 
-  static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T) {
+  static create<F, T>(parentValue: F, fieldAccessor: (from: F) => T): Binding<T> {
 
     const memberName = Binding.getSingleMember(fieldAccessor);
 
     return new Binding<T>(parentValue, memberName, "." + memberName);
   }
 
-  static getSingleMember(fieldAccessor: (from: any) => any) {
+  static getSingleMember(fieldAccessor: (from: any) => any): string {
     const members = getLambdaMembers(fieldAccessor);
 
     if (members.length != 1 || members[0].type != "Member")
@@ -833,7 +833,7 @@ export class Binding<T> implements IBinding<T> {
     return this.parentObject[this.member];
   }
 
-  setValue(val: T) {
+  setValue(val: T): void {
 
     if (!this.parentObject)
       throw new Error(`Impossible to set '${this.member}' from '${this.parentObject}'`);
@@ -850,7 +850,7 @@ export class Binding<T> implements IBinding<T> {
     this.initialValue = val;
   }
 
-  deleteValue() {
+  deleteValue(): void {
     if (!this.parentObject)
       throw new Error(`Impossible to delete '${this.member}' from '${this.parentObject}'`);
 
@@ -873,7 +873,7 @@ export class Binding<T> implements IBinding<T> {
     return readonlyProperties != null && readonlyProperties.contains(this.member as string);
   }
 
-  setError(value: string | undefined) {
+  setError(value: string | undefined): void {
     const parent = this.parentObject as ModifiableEntity;
 
     if (!value) {
@@ -898,10 +898,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
     public suffix: string) {
   }
 
-  getValue() {
+  getValue(): T {
     return this.value;
   }
-  setValue(val: T) {
+  setValue(val: T): void {
     throw new Error("Readonly Binding");
   }
 
@@ -926,7 +926,7 @@ export class MListElementBinding<T> implements IBinding<T>{
     this.suffix = "[" + this.index.toString() + "].element";
   }
 
-  getValue() {
+  getValue(): T {
     var mlist = this.mListBinding.getValue();
 
     if (mlist.length <= this.index) //Some animations?
@@ -940,7 +940,7 @@ export class MListElementBinding<T> implements IBinding<T>{
     return mlist[this.index];
   }
 
-  setValue(val: T) {
+  setValue(val: T): void {
     var mlist = this.mListBinding.getValue()
     const mle = mlist[this.index];
     mle.rowId = null;
@@ -1179,7 +1179,7 @@ function newGuid() {
   );
 }
 
-export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute) {
+export function clone<T>(original: ModifiableEntity, propertyRoute?: PropertyRoute): ModifiableEntity {
   const ti = tryGetTypeInfo(original.Type);
 
   const result = softCast<ModifiableEntity>({
@@ -1488,7 +1488,7 @@ In case of a collection of embedded entities, use something like: MyEntity.prope
       return new QueryTokenString(tokenSequence(lambdaToColumn, true));
   }
 
-  toString() {
+  toString(): string {
     return this.typeName;
   }
 }
@@ -1507,27 +1507,27 @@ export class QueryTokenString<T> {
     this.token = token;
   }
 
-  toString() {
+  toString(): string {
     return this.token;
   }
 
-  static entity<T extends Entity = Entity>() {
+  static entity<T extends Entity = Entity>(): QueryTokenString<T> {
     return new QueryTokenString<T>("Entity");
   }
 
-  static count() {
+  static count(): QueryTokenString<unknown> {
     return new QueryTokenString("Count");
   }
 
-  systemValidFrom() {
+  systemValidFrom(): QueryTokenString<unknown> {
     return new QueryTokenString(this.token + ".SystemValidFrom");
   }
 
-  systemValidTo() {
+  systemValidTo(): QueryTokenString<unknown> {
     return new QueryTokenString(this.token + ".SystemValidTo");
   }
 
-  getToString() {
+  getToString(): QueryTokenString<unknown> {
     return new QueryTokenString(this.token + ".ToString");
   }
 
@@ -1799,7 +1799,7 @@ export class PropertyRoute {
   member?: MemberInfo; //Member
   mixinName?: string; //Mixin
 
-  static root(type: PseudoType) {
+  static root(type: PseudoType): PropertyRoute {
     const typeInfo = getTypeInfo(type);
     if (!typeInfo) {
       throw Error(`No TypeInfo for "${getTypeName(type)}" found. Consider calling ReflectionServer.RegisterLike on the server side.`);
@@ -1807,11 +1807,11 @@ export class PropertyRoute {
     return new PropertyRoute(undefined, "Root", typeInfo, undefined, undefined);
   }
 
-  static member(parent: PropertyRoute, member: MemberInfo) {
+  static member(parent: PropertyRoute, member: MemberInfo): PropertyRoute {
     return new PropertyRoute(parent, "Field", undefined, member, undefined);
   }
 
-  static mixin(parent: PropertyRoute, mixinName: string, throwIfNotFound?: boolean) {
+  static mixin(parent: PropertyRoute, mixinName: string, throwIfNotFound?: boolean): PropertyRoute {
     var result = new PropertyRoute(parent, "Mixin", undefined, undefined, mixinName);
 
     if (throwIfNotFound) {
@@ -1825,7 +1825,7 @@ export class PropertyRoute {
     return result;
   }
 
-  static mlistItem(parent: PropertyRoute) {
+  static mlistItem(parent: PropertyRoute): PropertyRoute {
 
     if (!parent.typeReference().isCollection)
       throw new Error(`PropertyRoute ${this.toString()} is not a MList`);
@@ -1833,7 +1833,7 @@ export class PropertyRoute {
     return new PropertyRoute(parent, "MListItem", undefined, undefined, undefined);
   }
 
-  static liteEntity(parent: PropertyRoute) {
+  static liteEntity(parent: PropertyRoute): PropertyRoute {
 
     if (!parent.typeReference().isLite)
       throw new Error(`PropertyRoute ${this.toString()} is not a Lite`);
@@ -1863,7 +1863,7 @@ export class PropertyRoute {
     return result;
   }
 
-  static parseLambdaMembers(propertyString: string) {
+  static parseLambdaMembers(propertyString: string): LambdaMember[] {
     function splitMixin(text: string): LambdaMember[] {
 
       if (text.length == 0)
@@ -1961,7 +1961,7 @@ export class PropertyRoute {
     return [...this.parent == null ? [] : this.parent.allParents(includeMixins), this];
   }
 
-  addMixin<T extends MixinEntity>(mixin: Type<T>, property: ((val: T) => any) | string) {
+  addMixin<T extends MixinEntity>(mixin: Type<T>, property: ((val: T) => any) | string): PropertyRoute {
     return this.addMember("Mixin", mixin.typeName, true).addLambda(property);
   }
 
@@ -2180,7 +2180,7 @@ export class PropertyRoute {
     }
   }
 
-  toString() {
+  toString(): string {
     var rootTypeName = this.findRootType().name;
 
     if (this.propertyRouteType == "Root")
@@ -2210,7 +2210,7 @@ export type GraphExplorerMode = "collect" | "set" | "clean" | undefined;
 
 export class GraphExplorer {
 
-  static hasChanges(m: ModifiableEntity) {
+  static hasChanges(m: ModifiableEntity): boolean {
     this.propagateAll(m);
     return m.modified;
   }
@@ -2230,7 +2230,7 @@ export class GraphExplorer {
 
 
 
-  static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string) {
+  static setModelState(e: ModifiableEntity, modelState: ModelState | undefined, initialPrefix: string): void {
     const ge = new GraphExplorer("set", modelState == undefined ? {} : { ...modelState });
     ge.isModifiableObject(e, initialPrefix);
     if (Dic.getValues(ge.modelState).length) //Assign remaining
@@ -2296,7 +2296,7 @@ export class GraphExplorer {
     }
   }
 
-  public static specialProperties = ["Type", "id", "isNew", "ticks", "toStr", "modified", "temporalId"];
+  public static specialProperties: string[] = ["Type", "id", "isNew", "ticks", "toStr", "modified", "temporalId"];
 
   //The redundant return true / return false are there for debugging
   private isModifiableObject(obj: any, modelStatePrefix: string) : boolean {
@@ -2431,7 +2431,7 @@ export class GraphExplorer {
     return mod.modified;
   }
 
-  isModifiedMixinDictionary(mixins: { [name: string]: MixinEntity }, prefix: string) {
+  isModifiedMixinDictionary(mixins: { [name: string]: MixinEntity }, prefix: string): boolean {
     if (mixins == undefined)
       return false;
 

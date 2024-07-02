@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../../S
 import * as Entities from '../../../Signum/React/Signum.Entities'
 
 
-export const AuthTokenConfigurationEmbedded = new Type<AuthTokenConfigurationEmbedded>("AuthTokenConfigurationEmbedded");
+export const AuthTokenConfigurationEmbedded: Type<AuthTokenConfigurationEmbedded> = new Type<AuthTokenConfigurationEmbedded>("AuthTokenConfigurationEmbedded");
 export interface AuthTokenConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "AuthTokenConfigurationEmbedded";
   refreshTokenEvery: number;

@@ -19,9 +19,9 @@ interface MultiValueLineProps<V> extends LineBaseProps<MList<V>> {
 
 export class MultiValueLineController<V> extends LineBaseController<MultiValueLineProps<V>, MList<V>> {
 
-  keyGenerator = new KeyGenerator();
+  keyGenerator: KeyGenerator = new KeyGenerator();
 
-  getDefaultProps(p: MultiValueLineProps<V>) {
+  getDefaultProps(p: MultiValueLineProps<V>): void {
     if (p.ctx.value == undefined)
       p.ctx.value = [];
 
@@ -30,13 +30,13 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
     super.getDefaultProps(p);
   }
 
-  handleDeleteValue = (index: number) => {
+  handleDeleteValue = (index: number): void => {
     const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
-  handleAddValue = (e: React.MouseEvent<any>) => {
+  handleAddValue = (e: React.MouseEvent<any>): void => {
     e.preventDefault();
     const list = this.props.ctx.value;
     const newValuePromise = this.props.onCreate == null ? this.defaultCreate() : this.props.onCreate();
@@ -56,7 +56,7 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
     });
   }
 
-  defaultCreate() {
+  defaultCreate(): Promise<null> {
     return Promise.resolve(null);
   }
 
@@ -70,7 +70,7 @@ export class MultiValueLineController<V> extends LineBaseController<MultiValueLi
   }
 }
 
-export const MultiValueLine = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
+export const MultiValueLine: <V>(props: MultiValueLineProps<V> & React.RefAttributes<MultiValueLineController<V>>) => React.ReactNode | null = genericForwardRef(function MultiValueLine<V>(props: MultiValueLineProps<V>, ref: React.Ref<MultiValueLineController<V>>) {
   const c = useController(MultiValueLineController<V>, props, ref);
   const p = c.props;
 
@@ -132,7 +132,7 @@ export interface MultiValueLineElementProps {
   valueColumClass: string;
 }
 
-export function MultiValueLineElement(props: MultiValueLineElementProps) {
+export function MultiValueLineElement(props: MultiValueLineElementProps): React.JSX.Element {
   const mctx = props.ctx;
 
 

@@ -240,7 +240,7 @@ static class EntityDeclarationGenerator
     private static string EnumInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export const {type.Name} = new EnumType<{type.Name}>(\"{type.Name}\");");
+        sb.AppendLine($"export const {type.Name}: EnumType<{type.Name}> = new EnumType<{type.Name}>(\"{type.Name}\");");
 
         sb.AppendLine($"export type {type.Name} =");
         var fields = type.Fields.OrderBy(a => a.Constant as IComparable).Where(a => a.IsPublic && a.IsStatic).ToList();
@@ -266,7 +266,7 @@ static class EntityDeclarationGenerator
         foreach (var field in fields)
         {
             string context = $"By type {type.Name} and field {field.Name}";
-            sb.AppendLine($"  export const {field.Name} = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
+            sb.AppendLine($"  export const {field.Name}: MessageKey = new MessageKey(\"{type.Name}\", \"{field.Name}\");");
         }
         sb.AppendLine(@"}");
 
@@ -315,7 +315,7 @@ static class EntityDeclarationGenerator
     {
         StringBuilder sb = new StringBuilder();
         if (!type.IsAbstract)
-            sb.AppendLine($"export const {type.Name} = new Type<{type.Name}>(\"{CleanTypeName(type)}\");");
+            sb.AppendLine($"export const {type.Name}: Type<{type.Name}> = new Type<{type.Name}>(\"{CleanTypeName(type)}\");");
 
         List<string> baseTypes = new List<string>();
         if (type.BaseType != null)

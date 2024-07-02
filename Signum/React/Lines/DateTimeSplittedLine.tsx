@@ -22,14 +22,15 @@ export interface DateTimeSplittedLineProps extends ValueBaseProps<string /*Date 
 }
 
 export class DateTimeSplittedLineController extends ValueBaseController<DateTimeSplittedLineProps, string /*Date or DateTime*/ | null >{
-  init(p: DateTimeSplittedLineProps) {
+  init(p: DateTimeSplittedLineProps): void {
     super.init(p);
     this.assertType("DateTimeSplittedLine", ["DateOnly", "DateTime"]);
   }
 }
 
 
-export const DateTimeSplittedLine = React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeSplittedLineProps, ref: React.Ref<DateTimeSplittedLineController>) {
+export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeSplittedLineProps & React.RefAttributes<DateTimeSplittedLineController>>> =
+  React.memo(React.forwardRef(function DateTimeSplittedLine(props: DateTimeSplittedLineProps, ref: React.Ref<DateTimeSplittedLineController>) {
 
   const c = useController(DateTimeSplittedLineController, props, ref);
 

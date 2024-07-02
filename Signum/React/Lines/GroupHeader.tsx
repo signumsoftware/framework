@@ -2,7 +2,7 @@ import * as React from 'react';
 import { classes } from '../Globals';
 
 export type HeaderType = "h1" | "h2" | "h3" | "h4" | "h5" | "h6" | "display-1" | "display-2" | "display-3" | "display-4" | "display-5" | "display-6" | "display-7" | "lead";   
-export function Title(p: { children: React.ReactNode, type: HeaderType }) {
+export function Title(p: { children: React.ReactNode, type: HeaderType }): React.JSX.Element {
 
   var ElementType =
     p.type == "lead" ? "p" as const :
@@ -22,7 +22,7 @@ export function GroupHeader(p: {
   children: React.ReactNode;
   className?: string
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>
-}) {
+}): React.JSX.Element {
 
   if (p.avoidFieldSet) {
 

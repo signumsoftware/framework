@@ -94,14 +94,14 @@ export namespace Constructor {
       throw new Error("Member 'modified' expected after constructor");
   }
 
-  export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | EntityPack<T> | undefined>, options?: { override?: boolean }) {
+  export function registerConstructor<T extends ModifiableEntity>(type: Type<T>, constructor: (props?: Partial<T>, pr?: PropertyRoute) => T | Promise<T | EntityPack<T> | undefined>, options?: { override?: boolean }): void {
     if (customConstructors[type.typeName] && !(options?.override))
       throw new Error(`Constructor for ${type.typeName} already registered`);
 
     customConstructors[type.typeName] = constructor;
   }
 
-  export function clearCustomConstructors() {
+  export function clearCustomConstructors(): void {
     Dic.clear(customConstructors);
   }
 

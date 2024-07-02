@@ -52,7 +52,7 @@ interface FrameModalState<T extends ModifiableEntity> {
   executing?: boolean;
 }
 
-export const FrameModal = genericForwardRef(function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>, ref: React.Ref<IHandleKeyboard>) {
+export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> & React.RefAttributes<IHandleKeyboard>) => React.ReactNode | null = genericForwardRef(function FrameModal<T extends ModifiableEntity>(p: FrameModalProps<T>, ref: React.Ref<IHandleKeyboard>) {
 
   const [state, setState] = useStateWithPromise<FrameModalState<T> | undefined>(undefined);
   const [show, setShow] = React.useState(true);
@@ -135,7 +135,7 @@ export const FrameModal = genericForwardRef(function FrameModal<T extends Modifi
       .filter(eoc => eoc.isVisibleInButtonBar(buttonContext));
   }
 
-  function handleOkClicked() {
+  function handleOkClicked(): void {
     const pack = state?.pack;
     if (hasChanges() &&
       (p.requiresSaveOperation != undefined ? p.requiresSaveOperation : Navigator.typeRequiresSaveOperation(pack!.entity.Type))) {
@@ -369,7 +369,7 @@ export namespace FrameModalManager {
 
 export function FrameModalTitle({ pack, pr, title, subTitle, widgets, getViewPromise }: {
   pack?: EntityPack<ModifiableEntity>, pr?: PropertyRoute, title: React.ReactNode, subTitle?: React.ReactNode | null, widgets: React.ReactNode, getViewPromise?: (e: ModifiableEntity) => (undefined | string | ViewPromise<ModifiableEntity>);
-}) {
+}): React.JSX.Element {
 
   if (!pack)
     return <span className="sf-entity-title">{JavascriptMessage.loading.niceToString()}</span>;

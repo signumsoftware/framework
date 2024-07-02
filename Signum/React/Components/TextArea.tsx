@@ -7,7 +7,7 @@ interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement
   minHeight?: string;
 }
 
-export default function TextArea(p: TextAreaProps) {
+export default function TextArea(p: TextAreaProps): React.JSX.Element {
 
   var textAreaRef = React.useRef<HTMLTextAreaElement | null | undefined>();
   const visibleObserver = React.useRef<IntersectionObserver | null>(null);
@@ -67,4 +67,4 @@ export default function TextArea(p: TextAreaProps) {
   );
 }
 
-TextArea.defaultProps = { autoResize: true, minHeight: "50px" };
+(TextArea as any).defaultProps = { autoResize: true, minHeight: "50px" };

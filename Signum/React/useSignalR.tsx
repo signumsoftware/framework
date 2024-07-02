@@ -13,7 +13,7 @@ declare global {
 }
 
 let messageShownFor: string[] = [];
-export function useSignalRConnection(url: string, options?: signalR.IHttpConnectionOptions) {
+export function useSignalRConnection(url: string, options?: signalR.IHttpConnectionOptions): signalR.HubConnection | undefined {
 
   if (window.__disableSignalR) {
 
@@ -81,7 +81,7 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
   enterGroup: (connection: signalR.HubConnection) => Promise<void>,
   exitGroup: (connection: signalR.HubConnection) => Promise<void>,
   deps: any[]
-}) {
+}): void {
 
   React.useEffect(() => {
 
@@ -103,7 +103,7 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
   }, [connection, connection?.state, ...options.deps]);
 }
 
-export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]) {
+export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]): void {
 
   var callback = React.useCallback(callback, deps);
 

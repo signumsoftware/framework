@@ -204,7 +204,11 @@ function defaultHasConfirmMessage(coc: ContextualOperationContext<Entity>) {
     iconColor?: string;
   }
 
-  export function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps) {
+  export const OperationMenuItem: {
+    (p: OperationMenuItemProps): React.JSX.Element;
+    getText: (coc: ContextualOperationContext<any>) => React.ReactNode;
+    simplifyName: (niceName: string) => string;
+  } = function OperationMenuItem({ coc, onOperationClick, onClick, extraButtons, color, icon, iconColor, children }: OperationMenuItemProps): React.JSX.Element {
     const text = children ?? OperationMenuItem.getText(coc);
 
     const eos = coc.entityOperationSettings;
