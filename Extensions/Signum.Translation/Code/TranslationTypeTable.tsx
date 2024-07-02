@@ -6,7 +6,7 @@ import TextArea from '@framework/Components/TextArea';
 import { useForceUpdate } from '@framework/Hooks';
 import { KeyNames } from '@framework/Components';
 
-export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }){
+export function TranslationTypeTable(p: { type: TranslationClient.LocalizableType, result: TranslationClient.AssemblyResult, currentCulture: string }): React.JSX.Element{
 
   function renderMembers(type: TranslationClient.LocalizableType): React.ReactElement<any>[] {
 
@@ -59,7 +59,7 @@ export function TranslationTypeTable(p: { type: TranslationClient.LocalizableTyp
   );
 }
 
-export function TranslationMember({ type, member, loc, edit }: { type: TranslationClient.LocalizableType, loc: TranslationClient.LocalizedType; member: TranslationClient.LocalizedMember; edit: boolean }) {
+export function TranslationMember({ type, member, loc, edit }: { type: TranslationClient.LocalizableType, loc: TranslationClient.LocalizedType; member: TranslationClient.LocalizedMember; edit: boolean }): React.JSX.Element {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
   const forceUpdate = useForceUpdate();
@@ -120,11 +120,13 @@ export function TranslationMember({ type, member, loc, edit }: { type: Translati
   }
 }
 
-TranslationMember.normalizeString = (str: string | undefined): string | undefined => {
-  return str;
-};
+export namespace TranslationMember {
+  export function normalizeString(str: string | undefined): string | undefined {
+    return str;
+  };
+}
 
-export function initialElementIf(condition: boolean) {
+export function initialElementIf(condition: boolean): React.JSX.Element[] {
   return condition ? [<option key={""} value={""}>{" - "}</option>] : []
 }
 
@@ -135,7 +137,7 @@ export interface TranslationTypeDescriptionProps {
   result: TranslationClient.AssemblyResult
 };
 
-export function TranslationTypeDescription(p: TranslationTypeDescriptionProps) {
+export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): React.JSX.Element {
 
   const [avoidCombo, setAvoidCombo] = React.useState(false);
 

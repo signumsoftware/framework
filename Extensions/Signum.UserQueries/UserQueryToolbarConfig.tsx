@@ -17,7 +17,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<UserQueryEntity>) {
+  getIcon(element: ToolbarResponse<UserQueryEntity>): React.JSX.Element | null {
 
     if (element.showCount != null) {
       return (
@@ -38,7 +38,7 @@ export default class UserQueryToolbarConfig extends ToolbarConfig<UserQueryEntit
     });
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>) {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<UserQueryEntity>): void {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
@@ -74,7 +74,7 @@ interface CountUserQueryIconProps {
 }
 
 
-export function SearchUserQueryCount(p: CountUserQueryIconProps) {
+export function SearchUserQueryCount(p: CountUserQueryIconProps): React.JSX.Element {
 
   var userQuery = Navigator.useFetchInState(p.userQuery)
   var findOptions = useAPI(signal => userQuery ? UserQueryClient.Converter.toFindOptions(userQuery, undefined) : Promise.resolve(undefined), [userQuery]);

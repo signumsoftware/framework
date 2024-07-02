@@ -33,7 +33,7 @@ export interface EmailMasterTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComponentProps){
+export function EmailTemplateMessageComponent(p : EmailMasterTemplateMessageComponentProps): React.JSX.Element{
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(false);
 

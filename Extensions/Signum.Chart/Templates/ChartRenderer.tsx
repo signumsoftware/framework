@@ -66,7 +66,7 @@ export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element 
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void): void {
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;

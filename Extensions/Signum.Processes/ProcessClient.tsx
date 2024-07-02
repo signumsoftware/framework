@@ -77,7 +77,7 @@ export namespace ProcessClient {
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
-  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]) {
+  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]): void {
     settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
   }
   

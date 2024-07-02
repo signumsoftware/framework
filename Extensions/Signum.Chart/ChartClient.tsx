@@ -157,7 +157,7 @@ export namespace ChartClient {
   }
   const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};
   
-  export function registerChartScriptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>) {
+  export function registerChartScriptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>): void {
     registeredChartScriptComponents[symbol.key] = module;
   }
   
@@ -170,7 +170,7 @@ export namespace ChartClient {
     return result;
   }
   
-  export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean) {
+  export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean): FindOptions {
     var fos: FilterConditionOption[] = [];
   
     if (groupResults)
@@ -190,7 +190,7 @@ export namespace ChartClient {
   }
   
   
-  export function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
+  export function extractFindOptions(cr: ChartRequestModel, r: ChartRow): FindOptions {
   
     const filters = cr.filterOptions.map(f => {
       let f2 = withoutPinned(f);
@@ -255,7 +255,7 @@ export namespace ChartClient {
       return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
     }
   
-    export function clearOnButtonBarElements() {
+    export function clearOnButtonBarElements(): void {
       ButtonBarChart.onButtonBarElements.clear();
     }
   }
@@ -425,7 +425,7 @@ export namespace ChartClient {
   }
   
   
-  export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) {
+  export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript): void {
   
     if (chart.columns == null ||
       chart.parameters == null)
@@ -489,7 +489,7 @@ export namespace ChartClient {
   
   }
   
-  export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+  export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined): string {
     switch (scriptParameter.type) {
       case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
       case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
@@ -542,7 +542,7 @@ export namespace ChartClient {
     value: string;
   }
   
-  export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean) {
+  export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean): void {
   
     var newOrder = col.orderByType == "Ascending" ? "Descending" : "Ascending" as OrderType;
   
@@ -626,7 +626,7 @@ export namespace ChartClient {
   
     const scapeTilde = Finder.Encoder.scapeTilde;
   
-    export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined) {
+    export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined): void {
       if (columns)
         columns.forEach((co, i) => query["column" + i] =
           (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
@@ -635,7 +635,7 @@ export namespace ChartClient {
           (co.format ? "~" + scapeTilde(co.format) : ""));
     }
   
-    export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
+    export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined): void {
       if (parameters)
         parameters.map((p, i) => query["param" + i] = scapeTilde(p.name!) + "~" + scapeTilde(p.value!));
     }

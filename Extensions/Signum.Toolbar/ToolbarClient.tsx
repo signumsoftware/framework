@@ -35,7 +35,7 @@ export namespace ToolbarClient {
     UserAssetClient.registerExportAssertLink(ToolbarEntity);
   }
   
-  export function cleanConfigs() {
+  export function cleanConfigs(): void {
     Dic.clear(configs);
   }
   
@@ -43,11 +43,11 @@ export namespace ToolbarClient {
   
   export const configs: { [type: string]: ToolbarConfig<any>[] } = {};
   
-  export function registerConfig<T extends Entity>(config: ToolbarConfig<T>) {
+  export function registerConfig<T extends Entity>(config: ToolbarConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
   }
   
-  export function getConfig(res: ToolbarResponse<any>) {
+  export function getConfig(res: ToolbarResponse<any>): ToolbarConfig<any> | null {
     return configs[res.content!.EntityType]?.filter(c => c.isApplicableTo(res)).singleOrNull();
   }
   

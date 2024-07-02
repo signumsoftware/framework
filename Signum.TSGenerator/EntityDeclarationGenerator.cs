@@ -282,7 +282,7 @@ static class EntityDeclarationGenerator
         foreach (var field in fields)
         {
             string context = $"By type {type.Name} and field {field.Name}";
-            sb.AppendLine($"  export const {field.Name} = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
+            sb.AppendLine($"  export const {field.Name}: QueryKey = new QueryKey(\"{type.Name}\", \"{field.Name}\");");
         }
         sb.AppendLine(@"}");
 

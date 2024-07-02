@@ -65,7 +65,7 @@ export default function TranslationCodeView(): React.JSX.Element {
   );
 }
 
-export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }){
+export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }): React.JSX.Element{
 
   const [tmpFilter, setTmpFilter] = React.useState(p.filter);
 

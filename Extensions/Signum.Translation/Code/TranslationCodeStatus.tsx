@@ -112,11 +112,11 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
   }
 }
 
-export function encodeDots(value: string) {
+export function encodeDots(value: string): string {
   return value.replaceAll(".", "-");
 }
 
-export function decodeDots(value: string) {
+export function decodeDots(value: string): string {
   return value.replaceAll("-", ".");
 }
 

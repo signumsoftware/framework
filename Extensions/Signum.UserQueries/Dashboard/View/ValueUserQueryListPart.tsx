@@ -40,7 +40,7 @@ export interface ValueUserQueryElementProps {
   cachedQuery?: Promise<CachedQueryJS>;
 }
 
-export function ValueUserQueryElement(p: ValueUserQueryElementProps) {
+export function ValueUserQueryElement(p: ValueUserQueryElementProps): React.JSX.Element {
 
   let fo = useAPI(signal => UserQueryClient.Converter.toFindOptions(p.ctx.value.userQuery, p.entity),
     [p.ctx.value.userQuery, p.entity]);

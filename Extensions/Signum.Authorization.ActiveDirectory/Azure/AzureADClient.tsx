@@ -9,7 +9,7 @@ import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorizatio
 
 export namespace AzureADClient {
   
-  export function registerAzureADAuthenticator() {
+  export function registerAzureADAuthenticator(): void {
   
     if (Reflection.isStarted())
       throw new Error("call AzureADClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
@@ -49,11 +49,11 @@ export namespace AzureADClient {
   let msalClient: msal.PublicClientApplication;
   
   export namespace Config {
-    export let scopes = ["user.read"];
+    export let scopes: string[] = ["user.read"];
   }
   
   
-  export function signIn(ctx: LoginContext) {
+  export function signIn(ctx: LoginContext): void {
     ctx.setLoading("azureAD");
   
     var userRequest: msal.PopupRequest = {
@@ -115,14 +115,14 @@ export namespace AzureADClient {
       });
   }
   
-  export function setMsalAccount(accountName: string | null) {
+  export function setMsalAccount(accountName: string | null): void {
     if (accountName == null)
       localStorage.removeItem("msalAccount");
     else
       localStorage.setItem("msalAccount", accountName);
   }
   
-  export function getMsalAccount() {
+  export function getMsalAccount(): msal.AccountInfo | null | undefined {
     let account = localStorage.getItem('msalAccount');
     if (!account)
       return null;
@@ -159,7 +159,7 @@ export namespace AzureADClient {
           });
   }
   
-  export function signOut() {
+  export function signOut(): void {
     var account = getMsalAccount();
     if (account) {
       msalClient.logout({
@@ -168,7 +168,7 @@ export namespace AzureADClient {
     }
   }
   
-  export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }) {
+  export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }): React.JSX.Element {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
@@ -179,6 +179,9 @@ export namespace AzureADClient {
       </div>
     );
   }
+    export declare namespace MicrosoftSignIn {
+        export var iconUrl: string;
+    }
   
   MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
   

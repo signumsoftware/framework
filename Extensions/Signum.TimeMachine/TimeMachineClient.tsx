@@ -138,7 +138,7 @@ export namespace TimeMachineClient {
     }
   }
   
-  export function timeMachineRoute(lite: Lite<Entity>) {
+  export function timeMachineRoute(lite: Lite<Entity>): string {
     return "/timeMachine/" + lite.EntityType + "/" + lite.id;
   }
 }

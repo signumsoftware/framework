@@ -238,7 +238,7 @@ interface MultiLineOrExpressionProps {
   onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
 }
 
-export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
+export function MultiLineOrExpression(p: MultiLineOrExpressionProps): React.JSX.Element {
 
   const [values, setValues] = React.useState<string[]>([]);
 
@@ -263,7 +263,7 @@ interface EntityLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
+export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -327,7 +327,7 @@ interface ValueLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
+export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.Element {
 
   const foceUpdate = useForceUpdate();
   const valueRef = React.useRef<string | number | boolean | null | undefined>(undefined);

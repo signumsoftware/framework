@@ -40,7 +40,7 @@ export default function OperationLog(p : { ctx: TypeContext<OperationLogEntity> 
   );
 }
 
-export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }) {
+export function DiffMixinTabs(p: { ctx: TypeContext<OperationLogEntity> }): React.JSX.Element {
 
   var [simplify, setSimplify] = React.useState(true);
 

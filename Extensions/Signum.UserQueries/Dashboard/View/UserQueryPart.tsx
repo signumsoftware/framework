@@ -151,7 +151,7 @@ interface BigValueBadgeProps {
   userQuery: UserQueryEntity;
 }
 
-export function BigValueSearchCounter(p: BigValueBadgeProps) {
+export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element {
 
   const vsc = React.useRef<SearchValueController>(null);
 

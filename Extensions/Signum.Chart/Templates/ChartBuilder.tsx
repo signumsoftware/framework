@@ -138,7 +138,7 @@ export function Parameters(props: {
   onRedraw?: () => void,
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
   columnIndex: number | null
-}) {
+}): React.JSX.Element | null {
 
 
   var groups = props.chartScript.parameterGroups

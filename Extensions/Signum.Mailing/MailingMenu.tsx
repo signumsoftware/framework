@@ -12,7 +12,7 @@ export interface MailingMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default function MailingMenu(p : MailingMenuProps): React.JSX.Element {
+export default function MailingMenu(p : MailingMenuProps): React.JSX.Element | null {
   function handleClick(et: Lite<EmailTemplateEntity>) {
     Navigator.API.fetch(et)
       .then(emailTemplate => MailingClient.API.getConstructorType(emailTemplate.model!))

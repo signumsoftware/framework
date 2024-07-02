@@ -38,9 +38,9 @@ export module PackageOperationProcess {
 }
 
 export module PackageQuery {
-  export const PackageLineLastProcess = new QueryKey("PackageQuery", "PackageLineLastProcess");
-  export const PackageLastProcess = new QueryKey("PackageQuery", "PackageLastProcess");
-  export const PackageOperationLastProcess = new QueryKey("PackageQuery", "PackageOperationLastProcess");
+  export const PackageLineLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLineLastProcess");
+  export const PackageLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLastProcess");
+  export const PackageOperationLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageOperationLastProcess");
 }
 
 export const ProcessAlgorithmSymbol: Type<ProcessAlgorithmSymbol> = new Type<ProcessAlgorithmSymbol>("ProcessAlgorithm");

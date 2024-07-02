@@ -6,7 +6,7 @@ import './UserCircle.css'
 
 export namespace Options {
 
-  export let colors = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
+  export let colors: string[] = "#750b1c #a4262c #d13438 #ca5010 #986f0b #498205 #0b6a0b #038387 #005b70 #0078d4 #004e8c #4f6bed #5c2e91 #8764b8 #881798 #c239b3 #e3008c #8e562e #7a7574 #69797e".split(" ");
 
   export function getUserColor(u: Lite<UserEntity>): string {
 

@@ -36,12 +36,12 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
   drag!: EntityGridRepaterDragging<V> | undefined;
   setDrag!: React.Dispatch<EntityGridRepaterDragging<V> | undefined>;
 
-  init(p: EntityGridRepeaterProps<V>) {
+  init(p: EntityGridRepeaterProps<V>): void {
     super.init(p);
     [this.drag, this.setDrag] = React.useState<EntityGridRepaterDragging<V> | undefined>(undefined);
   }
   
-  getDefaultProps(state: EntityGridRepeaterProps<V>) {
+  getDefaultProps(state: EntityGridRepeaterProps<V>): void {
     super.getDefaultProps(state);
     state.viewOnCreate = false;
     state.move = true;
@@ -49,7 +49,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     state.remove = true;
   }
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<void> => {
 
     event.preventDefault();
 
@@ -78,7 +78,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     this.setValue(list);
   }
 
-  handleRowDragOver = (e: React.DragEvent<any>, row: number) => {
+  handleRowDragOver = (e: React.DragEvent<any>, row: number): void => {
     e.dataTransfer.dropEffect = "move";
     e.preventDefault();
     if (this.drag!.currentRow != row) {
@@ -86,11 +86,11 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     }
   };
 
-  handleRowDragLeave = () => {
+  handleRowDragLeave = (): void => {
     this.setDrag({ ...this.drag!, currentRow: undefined });
   };
 
-  handleRowDrop = (e: React.DragEvent<any>, row: number) => {
+  handleRowDrop = (e: React.DragEvent<any>, row: number): void => {
     e.preventDefault();
 
     const list = this.props.ctx.value!.map(a => a.element as ModifiableEntity & IGridEntity);
@@ -112,7 +112,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     this.setDrag(undefined);
   };
 
-  handleOnDrop = (event: React.SyntheticEvent<any>) => {
+  handleOnDrop = (event: React.SyntheticEvent<any>): void => {
     this.setDrag(undefined);
   };
 
@@ -122,20 +122,20 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
     this.setDrag({ currentItem: mlec, dragMode: resizer });
   };
 
-  handleMoveDragStart = (e: React.DragEvent<any>, mlec: V) => {
+  handleMoveDragStart = (e: React.DragEvent<any>, mlec: V): void => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
 
     this.setDrag({ dragMode: "move", initialPageX: de.pageX, originalStartColumn: mlec.startColumn, currentItem: mlec });
   };
 
-  handleMoveDragEnd = (e: React.DragEvent<any>, mlec: V) => {
+  handleMoveDragEnd = (e: React.DragEvent<any>, mlec: V): void => {
     e.dataTransfer.effectAllowed = "move";
     const de = e.nativeEvent as DragEvent;
     this.setDrag(undefined);
   };
 
-  handleItemsRowDragOver = (e: React.DragEvent<any>, row: number) => {
+  handleItemsRowDragOver = (e: React.DragEvent<any>, row: number): void => {
     if (this.drag == null)
       return;
     e.preventDefault();
@@ -202,7 +202,7 @@ export class EntityGridRepeaterController<V extends ModifiableEntity & IGridEnti
 }
 
 
-export const EntityGridRepeater = genericForwardRef(function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>, ref: React.Ref<EntityGridRepeaterController<V>>) {
+export const EntityGridRepeater: <V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V> & React.RefAttributes<EntityGridRepeaterController<V>>) => React.ReactNode | null = genericForwardRef(function EntityGridRepeater<V extends ModifiableEntity & IGridEntity>(props: EntityGridRepeaterProps<V>, ref: React.Ref<EntityGridRepeaterController<V>>) {
   const c = useController(EntityGridRepeaterController, props, ref)
   const p = c.props;
 
@@ -293,7 +293,7 @@ export interface EntityGridItemProps {
 }
 
 
-export function EntityGridItem(p : EntityGridItemProps){
+export function EntityGridItem(p : EntityGridItemProps): React.JSX.Element{
   var style = p.customColor == null ? "light" : "customColor";
 
     return (

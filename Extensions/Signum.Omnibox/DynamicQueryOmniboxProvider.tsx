@@ -13,13 +13,13 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     return "DynamicQueryOmniboxResult";
   }
 
-  icon() {
+  icon(): React.ReactElement {
     return this.coloredIcon("search", "orange");
   }
 
-  renderItem(result: DynamicQueryOmniboxResult): React.ReactChild[] {
+  renderItem(result: DynamicQueryOmniboxResult): React.ReactElement[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactElement[] = [];
 
     array.push(this.icon());
 
@@ -65,7 +65,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     return array;
   }
 
-  navigateTo(result: DynamicQueryOmniboxResult) {
+  navigateTo(result: DynamicQueryOmniboxResult): Promise<string> {
 
     const fo: FindOptions = {
       queryName: result.queryName,
@@ -83,7 +83,7 @@ export default class DynamicQueryOmniboxProvider extends OmniboxProvider<Dynamic
     return Promise.resolve(Finder.findOptionsPath(fo));
   }
 
-  toString(result: DynamicQueryOmniboxResult) {
+  toString(result: DynamicQueryOmniboxResult): string {
     const queryName = result.queryNameMatch.text;
 
     const filters = result.filters.map(f => {

@@ -13,7 +13,7 @@ export default function renderMarkermapChart(p: ChartScriptProps): React.JSX.Ele
   return <MarkermapChartImp {...p} />
 }
 
-export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: ChartScriptProps) {
+export function MarkermapChartImp({ data, parameters, onDrillDown, memo }: ChartScriptProps): React.JSX.Element {
 
   const divElement = React.useRef<HTMLDivElement>(null);
 

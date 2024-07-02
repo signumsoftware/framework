@@ -214,7 +214,7 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
 }
 
 export namespace UserChartMerger {
-  export function mergeColumns(oldUqColumns: MList<ChartColumnEmbedded>, newUqColumns: MList<ChartColumnEmbedded>) {
+  export function mergeColumns(oldUqColumns: MList<ChartColumnEmbedded>, newUqColumns: MList<ChartColumnEmbedded>): MList<ChartColumnEmbedded> {
     newUqColumns.forEach((newMle, i) => {
 
       var oldMle = oldUqColumns[i];

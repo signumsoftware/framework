@@ -55,7 +55,7 @@ function getDefaultIcon(ti: TypeInfo): IconColor | null {
   return  conf.first().getDefaultIcon();
 }
 
-export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }) {
+export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }): React.JSX.Element {
 
   function selectContentType(filter: (ti: TypeInfo) => boolean) {
     const pr = ctx.memberInfo(ml => ml[0].element.content);

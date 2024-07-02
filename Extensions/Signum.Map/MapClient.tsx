@@ -37,7 +37,7 @@ export namespace MapClient {
   
   }
   
-  export function clearProviders() {
+  export function clearProviders(): void {
     getColorProviders.clear();
   }
   

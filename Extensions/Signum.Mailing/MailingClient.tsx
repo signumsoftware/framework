@@ -153,7 +153,7 @@ export namespace MailingClient {
   
   export const settings: { [typeName: string]: EmailModelSettings<ModifiableEntity> } = {};
   
-  export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>) {
+  export function register<T extends ModifiableEntity>(type: Type<T>, setting: EmailModelSettings<T>): void {
     settings[type.typeName] = setting;
   }
   
@@ -185,7 +185,7 @@ export namespace MailingClient {
       });
   }
   
-  export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
+  export function handleMenuClick(et: Lite<EmailTemplateEntity>, ctx: ContextualItemsContext<Entity>): void {
   
     Navigator.API.fetch(et)
       .then(emailTemplate => emailTemplate.model ? API.getConstructorType(emailTemplate.model) : Promise.resolve(undefined))
@@ -205,7 +205,7 @@ export namespace MailingClient {
       });
   }
   
-  export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]) {
+  export function createAndViewEmail(template: Lite<EmailTemplateEntity>, ...args: any[]): void {
   
     Operations.API.constructFromLite(template, EmailMessageOperation.CreateEmailFromTemplate, ...args)
       .then(pack => pack && Navigator.view(pack));

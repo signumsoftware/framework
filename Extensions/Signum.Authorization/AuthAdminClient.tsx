@@ -216,17 +216,17 @@ export namespace AuthAdminClient {
   
   const queryAuditorTokens: { queryKey: string; token: string; typeCondition: TypeConditionSymbol }[] = []; 
   
-  export function registerQueryAuditorToken<T extends Entity>(queryName: Type<T> | QueryKey, token: QueryTokenString<any> | string, typeCondition: TypeConditionSymbol) {
+  export function registerQueryAuditorToken<T extends Entity>(queryName: Type<T> | QueryKey, token: QueryTokenString<any> | string, typeCondition: TypeConditionSymbol): void {
     queryAuditorTokens.push({ queryKey: getQueryKey(queryName), token: token.toString(), typeCondition: typeCondition });
   }
   
-  export function queryIsFindable(queryKey: string, fullScreen: boolean) {
+  export function queryIsFindable(queryKey: string, fullScreen: boolean): boolean {
     var allowed = getQueryInfo(queryKey).queryAllowed;
   
     return allowed == "Allow" || allowed == "EmbeddedOnly" && !fullScreen;
   }
   
-  export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+  export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
   
@@ -245,7 +245,7 @@ export namespace AuthAdminClient {
     }
   }
   
-  export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions) {
+  export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions): boolean {
   
     if (options?.isEmbedded)
       return false;
@@ -260,7 +260,7 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed == "None" || ti.maxTypeAllowed == "Read";
   }
   
-  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions) {
+  export function navigatorIsViewable(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsViewableOptions): boolean {
   
     if (options?.isEmbedded)
       return true;
@@ -276,7 +276,7 @@ export namespace AuthAdminClient {
     return ti.maxTypeAllowed != "None";
   }
   
-  export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsCreableOptions) {
+  export function navigatorIsCreable(typeName: PseudoType, options?: Navigator.IsCreableOptions): boolean {
   
     if (options?.isEmbedded)
       return true;
@@ -347,7 +347,7 @@ export namespace AuthAdminClient {
   }
 
   
-  export function QuerytokenRenderer(p: { queryKey: string, token: string, subTokenOptions?: SubTokensOptions }) {
+  export function QuerytokenRenderer(p: { queryKey: string, token: string, subTokenOptions?: SubTokensOptions }): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     var token = useAPI(() => Finder.parseSingleToken(p.queryKey, p.token, p.subTokenOptions ?? (SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll)), [p.queryKey, p.token, p.subTokenOptions]);
   
     return getTokenParents(token).map(a => <strong>[{a.niceName}]</strong>).joinCommaHtml(".");

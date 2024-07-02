@@ -232,7 +232,7 @@ export interface EmailTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentProps) {
+export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const [showPreview, setShowPreview] = React.useState(false);
   const showPreviewRef = useUpdatedRef(showPreview);

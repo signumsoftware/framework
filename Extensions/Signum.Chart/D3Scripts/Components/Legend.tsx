@@ -4,8 +4,6 @@ import { translate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
 import { PivotColumn, PivotTable } from './PivotTable';
-import { ChartClient, ChartRow } from '../../ChartClient';
-import { isActive } from '@framework/FindOptions';
 
 interface LegendProps {
   pivot: PivotTable;
@@ -16,7 +14,7 @@ interface LegendProps {
   onDrillDown?: (pc: PivotColumn, e: React.MouseEvent<any> | MouseEvent) => void;
 }
 
-export default function Legend(p: LegendProps): React.JSX.Element {
+export default function Legend(p: LegendProps): React.JSX.Element | null {
 
   const { pivot, xRule, yRule, color } = p;
 

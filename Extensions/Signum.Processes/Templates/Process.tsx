@@ -67,7 +67,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }): Re
   );
 }
 
-export function ProcessProgressBar({ state, status, progress }: { state: ProcessState, status?: string |null, progress: number | null }) {
+export function ProcessProgressBar({ state, status, progress }: { state: ProcessState, status?: string |null, progress: number | null }): React.JSX.Element {
 
   const color: BsColor | undefined =
     state == "Queued" ? "info" :

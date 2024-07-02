@@ -80,7 +80,7 @@ export interface EmailMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailMessageComponent(p: EmailMessageComponentProps) {
+export function EmailMessageComponent(p: EmailMessageComponentProps): React.JSX.Element {
   const [showPreview, setShowPreview] = React.useState(true);
 
   function handlePreviewClick(e: React.FormEvent<any>) {

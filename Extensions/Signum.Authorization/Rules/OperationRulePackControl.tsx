@@ -11,7 +11,7 @@ import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks'
 import { OperationSymbol } from '@framework/Signum.Operations'
 
-export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx: TypeContext<OperationRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeContext<OperationRulePack>; innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -32,7 +32,7 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
     ];
   }
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
 
   function handleRadioClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
 
@@ -119,4 +119,4 @@ export default React.forwardRef(function OperationRulePackControl({ ctx }: { ctx
     return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color}
       onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
-});
+}

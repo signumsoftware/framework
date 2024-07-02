@@ -96,7 +96,7 @@ function getSaveOperations(type: PseudoType, mode: ImportExcelMode | null) {
 }
 
 
-export async function onImportFromExcel(sc: SearchControlLoaded) {
+export async function onImportFromExcel(sc: SearchControlLoaded): Promise<void> {
 
   var qr = sc.getQueryRequest(true);
   qr.pagination = { mode: "All" };

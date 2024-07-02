@@ -43,7 +43,7 @@ export namespace UserAssetClient {
     started = true;
   }
   
-  export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
+  export function registerExportAssertLink(type: Type<IUserAssetEntity>): void {
     if (AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       QuickLinks.registerQuickLink(type,
         new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
