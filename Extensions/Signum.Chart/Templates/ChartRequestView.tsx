@@ -42,7 +42,7 @@ export interface ChartRequestViewHandle {
   hideFiltersAndSettings: () => void;
 }
 
-export default function ChartRequestView(p: ChartRequestViewProps) {
+export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const lastToken = React.useRef<QueryToken | undefined>(undefined);
 

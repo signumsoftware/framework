@@ -9,7 +9,7 @@ interface TypeHelpButtonBarComponentProps {
   ctx?: TypeContext<any>;
 }
 
-export default function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps){
+export default function TypeHelpButtonBarComponent(p : TypeHelpButtonBarComponentProps): React.JSX.Element {
   return (
     <div className="btn-toolbar">
       {p.extraButtons}

@@ -11,7 +11,7 @@ import { useTitle } from '@framework/AppContext'
 
 
 
-export default function HeavyEntry() {
+export default function HeavyEntry(): React.JSX.Element {
   const params = useParams() as { selectedIndex: string };
 
   const selectedIndex = params.selectedIndex;

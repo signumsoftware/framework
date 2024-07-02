@@ -9,7 +9,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { ToolbarCount } from '../QueryToolbarConfig'
 import { PermissionSymbol } from '@framework/Signum.Basics'
 
-export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }) {
+export default function ToolbarElement(p: { ctx: TypeContext<ToolbarElementEmbedded> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleTypeChanges() {
     var a = p.ctx.value;

@@ -4,7 +4,7 @@ import { SearchControl } from '@framework/Search'
 import { TypeContext } from '@framework/TypeContext'
 import { PackageEntity, PackageLineEntity, PackageQuery } from '../Signum.Processes'
 
-export default function Package(p : { ctx: TypeContext<PackageEntity> }){
+export default function Package(p : { ctx: TypeContext<PackageEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   return (

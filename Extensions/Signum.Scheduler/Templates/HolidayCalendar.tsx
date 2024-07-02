@@ -3,7 +3,7 @@ import { AutoLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { HolidayCalendarEntity, HolidayEmbedded } from '../Signum.Scheduler'
 
-export default function HolidayCalendar(p : { ctx: TypeContext<HolidayCalendarEntity> }){
+export default function HolidayCalendar(p : { ctx: TypeContext<HolidayCalendarEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   return (

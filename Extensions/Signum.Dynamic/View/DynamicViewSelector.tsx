@@ -15,7 +15,7 @@ import { ModulesHelp } from "./ModulesHelp";
 import { DynamicViewMessage, DynamicViewSelectorEntity } from '../Signum.Dynamic.Views'
 
 
-export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }) {
+export default function DynamicViewSelectorComponent(p: { ctx: TypeContext<DynamicViewSelectorEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
   const viewNames = useAPI(() => !p.ctx.value.entityType ? Promise.resolve(undefined) : Navigator.viewDispatcher.getViewNames(p.ctx.value.entityType!.cleanName), [p.ctx.value.entityType]);

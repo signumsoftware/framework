@@ -9,7 +9,7 @@ import { ChartClient, ChartColumn, ChartRow, ChartScriptProps } from '../ChartCl
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export default function renderMarkermapChart(p: ChartScriptProps) {
+export default function renderMarkermapChart(p: ChartScriptProps): React.JSX.Element {
   return <MarkermapChartImp {...p} />
 }
 

@@ -12,7 +12,7 @@ export namespace RestApiKeyClient {
     AuthClient.authenticators.insertAt(0, loginFromApiKey);
   }
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(RestApiKeyEntity, e => import('./Templates/RestApiKey')));
   }
   

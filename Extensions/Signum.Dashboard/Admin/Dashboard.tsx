@@ -20,7 +20,7 @@ import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
-export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
+export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleEntityTypeChange() {
     if (!p.ctx.value.entityType)

@@ -19,7 +19,7 @@ export interface ReactChartProps {
 }
 
 
-export default function ReactChart(p: ReactChartProps) {
+export default function ReactChart(p: ReactChartProps): React.JSX.Element {
 
   const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   const oldData = useThrottle(p.data, 200, { enabled: isSimple });

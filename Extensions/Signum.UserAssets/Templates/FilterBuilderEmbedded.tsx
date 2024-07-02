@@ -31,7 +31,7 @@ interface FilterBuilderEmbeddedProps {
   showDashboardBehaviour?: boolean;
 }
 
-export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
+export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.Element {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
   const filterOptions = useAPI(() => qd == null ? Promise.resolve(null) : FilterBuilderEmbedded.toFilterOptionParsed(qd, p.ctx.value, p.subTokenOptions), [qd, p.ctx.value, p.subTokenOptions]);

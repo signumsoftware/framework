@@ -11,7 +11,7 @@ import { saveFile } from '@framework/Services'
 import { CultureClient } from '@framework/Basics/CultureClient'
 import MessageModal from '@framework/Modals/MessageModal'
 
-export default function TranslationCodeStatus() {
+export default function TranslationCodeStatus(): React.JSX.Element {
 
   const [result, reloadResult] = useAPIWithReload(() => TranslationClient.API.status(), []);
 

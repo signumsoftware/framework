@@ -31,7 +31,7 @@ export interface ChartRendererProps {
   minHeight: number | null;
 }
 
-export default function ChartRenderer(p: ChartRendererProps) {
+export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element {
   const cs = useAPI(async signal => {
     const chartScriptPromise = ChartClient.getChartScript(p.chartRequest.chartScript);
     const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(p.chartRequest.chartScript);

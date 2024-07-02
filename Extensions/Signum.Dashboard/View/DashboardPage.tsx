@@ -14,7 +14,7 @@ import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 
-export default function DashboardPage() {
+export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
   const params = useParams() as { dashboardId: string };
 

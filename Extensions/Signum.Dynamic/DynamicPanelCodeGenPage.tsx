@@ -22,7 +22,7 @@ import { EvalClient } from '../Signum.Eval/EvalClient'
 
 type DynamicPanelTab = "search" | "compile" | "restartServerApp" | "migrations" | "checkEvals" | "refreshClients";
 
-export default function DynamicPanelPage() {
+export default function DynamicPanelPage(): React.JSX.Element {
   const location = useLocation();
 
   const [refreshKey, setRefreshKey] = React.useState(0);

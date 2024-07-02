@@ -11,7 +11,7 @@ export interface WordEntityMenuProps {
   entityPack: EntityPack<Entity>;
 }
 
-export default function WordEntityMenu(p : WordEntityMenuProps){
+export default function WordEntityMenu(p : WordEntityMenuProps): React.JSX.Element {
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
     Navigator.API.fetch(wt)
       .then<string | undefined>(wordTemplate => wordTemplate.model ? WordClient.API.getConstructorType(wordTemplate.model) : undefined)

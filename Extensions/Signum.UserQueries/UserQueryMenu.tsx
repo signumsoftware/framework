@@ -34,7 +34,7 @@ function decodeUserQueryFromUrl(location: Location) {
   return userQueryKey ? parseLite(userQueryKey) as Lite<UserQueryEntity> : undefined;
 }
 
-export default function UserQueryMenu(p: UserQueryMenuProps) {
+export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);

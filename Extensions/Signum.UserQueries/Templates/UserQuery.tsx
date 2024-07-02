@@ -13,7 +13,7 @@ import { QueryColumnEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../
 
 const CurrentEntityKey = "[CurrentEntity]";
 
-export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }) {
+export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

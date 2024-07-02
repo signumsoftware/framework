@@ -61,7 +61,7 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 
 export namespace WorkflowClient {
   
-  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
+  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }): void {
   
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(WorkflowEntity);

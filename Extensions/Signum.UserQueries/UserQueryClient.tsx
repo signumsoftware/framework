@@ -31,7 +31,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace UserQueryClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
   

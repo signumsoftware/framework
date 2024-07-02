@@ -20,7 +20,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace HelpClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Help", () => import("./Changelog"));
   

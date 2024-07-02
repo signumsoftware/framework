@@ -54,7 +54,7 @@ function getParsedQuery(location: Location): ParsedQueryString {
 }
 
 
-export default function SchemaMapPage() {
+export default function SchemaMapPage(): React.JSX.Element {
   const location = useLocation();
 
   const [filter, setFilter] = React.useState<string>("");

@@ -11,7 +11,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace OmniboxClient {
   
-  export function start() {
+  export function start(): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Omnibox", () => import("./Changelog"));
   

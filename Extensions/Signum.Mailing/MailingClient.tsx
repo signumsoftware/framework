@@ -40,7 +40,7 @@ export namespace MailingClient {
     contextual: boolean,
     queryButton: boolean,
     quickLinkInDefaultGroup?: boolean
-  }) {
+  }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Mailing", () => import("./Changelog"));
   

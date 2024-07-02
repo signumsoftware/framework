@@ -14,7 +14,7 @@ import { CachedQueryJS, executeQueryValueCached } from '../../../Signum.Dashboar
 import { ValueUserQueryElementEmbedded, ValueUserQueryListPartEntity } from '../../Signum.UserQueries'
 import { PanelPartEmbedded } from '../../../Signum.Dashboard/Signum.Dashboard'
 
-export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>) {
+export default function ValueUserQueryListPart(p: PanelPartContentProps<ValueUserQueryListPartEntity>): React.JSX.Element {
   const entity = p.content;
   const ctx = TypeContext.root(entity, { formGroupStyle: "None" });
   return (

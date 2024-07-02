@@ -27,7 +27,7 @@ import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicVie
 
 export namespace DynamicViewClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));

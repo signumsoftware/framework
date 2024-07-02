@@ -6,7 +6,7 @@ import { UserQueryPartEntity } from '../../Signum.UserQueries';
 import { DashboardEntity } from '../../../Signum.Dashboard/Signum.Dashboard';
 import { IsQueryCachedLine } from '../../../Signum.Dashboard/Admin/Dashboard';
 
-export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity> }) {
+export default function UserQueryPart(p: { ctx: TypeContext<UserQueryPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
   return (

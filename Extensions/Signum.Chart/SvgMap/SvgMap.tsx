@@ -8,7 +8,7 @@ import { scaleFor } from '../D3Scripts/Components/ChartUtils';
 import { MemoRepository } from '../D3Scripts/Components/ReactChart';
 
 
-export default function renderSvgMap(p: ChartScriptProps) {
+export default function renderSvgMap(p: ChartScriptProps): React.JSX.Element {
 
   return <SvgMap {...p} />
 }

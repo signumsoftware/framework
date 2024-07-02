@@ -12,7 +12,7 @@ import { TreeClient, TreeOptions } from './TreeClient'
 import { useTitle } from '@framework/AppContext'
 
 
-export default function TreePage() {
+export default function TreePage(): React.JSX.Element {
   const params = useParams() as { typeName: string };
   const location = useLocation();
 

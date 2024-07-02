@@ -21,7 +21,7 @@ export interface UserQueryPartHandler {
   refresh: () => void;
 }
 
-export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
+export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>): React.JSX.Element {
 
   const [fo, setFo] = React.useState<FindOptions>();
   const [refreshKey, setRefreshKey] = React.useState<number>(0);

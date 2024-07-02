@@ -15,7 +15,7 @@ export function clearCache() {
   urlCache = {};
 }
 
-export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
+export default function ProfilePhoto(p: { user: UserEntity, size: number }): React.JSX.Element {
   const [imageError, setImageError] = useState(false);
   let url = useCachedUrl(p.user, p.size!);
 

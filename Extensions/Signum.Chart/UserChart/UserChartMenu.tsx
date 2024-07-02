@@ -21,7 +21,7 @@ export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
 }
 
-export default function UserChartMenu(p: UserChartMenuProps) {
+export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
   const [filter, setFilter] = React.useState<string>();

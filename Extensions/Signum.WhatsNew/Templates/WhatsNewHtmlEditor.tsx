@@ -18,7 +18,7 @@ export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
   readonly?: boolean
   innerRef?: React.Ref<draftjs.Editor>;
-}) {
+}): React.JSX.Element {
 
   return (
     <ErrorBoundary>

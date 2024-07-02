@@ -14,7 +14,7 @@ import { CultureClient } from '@framework/Basics/CultureClient'
 import { useAPI } from '@framework/Hooks'
 import { Dic } from '@framework/Globals'
 
-export default function User(p: { ctx: TypeContext<UserEntity> }) {
+export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Element {
 
   const ctx = p.ctx.subCtx({ labelColumns: { sm: 3 } });
   const entity = p.ctx.value;

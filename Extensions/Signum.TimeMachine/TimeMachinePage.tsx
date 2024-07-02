@@ -24,7 +24,7 @@ import { TimeMachineMessage } from './Signum.TimeMachine'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
 
-export default function TimeMachinePage() {
+export default function TimeMachinePage(): React.JSX.Element {
   const params = useParams() as { type: string; id: string };
 
   const lite = useAPI(() => {

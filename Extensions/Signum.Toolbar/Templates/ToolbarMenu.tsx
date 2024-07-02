@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ToolbarMenuEntity } from '../Signum.Toolbar'
 import { ToolbarElementTable } from './Toolbar';
 
-export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> }){
+export default function ToolbarMenu(p : { ctx: TypeContext<ToolbarMenuEntity> }): React.JSX.Element {
   const ctx = p.ctx;
 
   return (

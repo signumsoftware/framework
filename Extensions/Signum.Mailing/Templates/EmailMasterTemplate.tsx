@@ -7,7 +7,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { Tabs, Tab } from 'react-bootstrap'
 import { EmailMasterTemplateEntity, EmailMasterTemplateMessageEmbedded, EmailTemplateMessage, EmailTemplateViewMessage } from '../Signum.Mailing.Templates'
 
-export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }){
+export default function EmailMasterTemplate(p : { ctx: TypeContext<EmailMasterTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
 

@@ -7,7 +7,7 @@ import { Modal } from 'react-bootstrap';
 import { ModalHeaderButtons } from '@framework/Components/ModalHeaderButtons';
 import { DynamicViewMessage } from '../Signum.Dynamic.Views';
 
-export default function NodeSelectorModal(p: IModalProps<any | undefined>) {
+export default function NodeSelectorModal(p: IModalProps<any | undefined>): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 

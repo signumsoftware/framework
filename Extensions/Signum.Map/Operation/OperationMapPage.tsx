@@ -53,7 +53,7 @@ function getParsedQuery(loc: Location): ParsedQueryString {
   return result;
 }
 
-export default function OperationMapPage() {
+export default function OperationMapPage(): React.JSX.Element {
   const params = useParams() as { type: string };
   const location = useLocation();
 

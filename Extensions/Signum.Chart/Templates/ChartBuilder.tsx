@@ -23,7 +23,7 @@ export interface ChartBuilderProps {
   onOrderChanged: () => void;
 }
 
-export default function ChartBuilder(p: ChartBuilderProps) {
+export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);

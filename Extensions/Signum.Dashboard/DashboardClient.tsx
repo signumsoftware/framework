@@ -57,7 +57,7 @@ export interface PartRenderer<T extends IPartEntity> {
 
 export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
 
-export function start(options: { routes: RouteObject[] }) {
+export function start(options: { routes: RouteObject[] }): void {
 
     ChangeLogClient.registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
 

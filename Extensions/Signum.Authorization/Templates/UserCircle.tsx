@@ -24,7 +24,7 @@ export function getUserInitials(u: Lite<UserEntity>): string {
   return str.split(" ").map(m => m[0]).filter((a, i) => i < 2).join("").toUpperCase() ?? "";
 }
 
-export default function UserCircle(p: { user: Lite<UserEntity>, className?: string }) {
+export default function UserCircle(p: { user: Lite<UserEntity>, className?: string }): React.JSX.Element {
   var color = Options.getUserColor(p.user);
   return (
     <span className={classes("user-circle", p.className)} style={{

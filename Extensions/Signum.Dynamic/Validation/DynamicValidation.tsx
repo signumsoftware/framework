@@ -20,7 +20,7 @@ interface DynamicValidationProps {
   ctx: TypeContext<DynamicValidationEntity>;
 }
 
-export default function DynamicValidation(p: DynamicValidationProps) {
+export default function DynamicValidation(p: DynamicValidationProps): React.JSX.Element {
 
   const exampleEntityRef = React.useRef<Entity | null>(null);
   const dv = p.ctx.value;

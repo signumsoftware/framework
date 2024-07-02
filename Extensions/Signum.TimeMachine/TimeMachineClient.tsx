@@ -27,7 +27,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace TimeMachineClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.TimeMachine", () => import("./Changelog"));
   
@@ -148,7 +148,7 @@ export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorEle
   inSearch?: "main" | "related";
 }
 
-export default function TimeMachineLink(p: TimeMachineLinkProps) {
+export default function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
 
   function handleClick(event: React.MouseEvent<any>) {
     const lite = p.lite;

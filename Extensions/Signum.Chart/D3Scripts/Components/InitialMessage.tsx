@@ -13,7 +13,7 @@ interface InitialMessageProps {
   data?: ChartTable;
 }
 
-export default function InitialMessage(p: InitialMessageProps) {
+export default function InitialMessage(p: InitialMessageProps): React.JSX.Element {
 
   var dots = useInterval(p.loading ? 1000 : null, 0, d => (d + 1) % 4);
 

@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
-export default function TypeHelpPage() {
+export default function TypeHelpPage(): React.JSX.Element {
   const params = useParams() as { cleanName: string };
 
   var hash = useHash();

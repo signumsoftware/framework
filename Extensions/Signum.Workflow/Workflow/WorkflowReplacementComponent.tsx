@@ -6,7 +6,7 @@ import { symbolNiceName } from '@framework/Reflection'
 import { getToString, is } from "@framework/Signum.Entities";
 import { useForceUpdate } from '@framework/Hooks'
 
-export default function WorkflowReplacementComponent(p: { ctx: TypeContext<WorkflowReplacementModel> }) {
+export default function WorkflowReplacementComponent(p: { ctx: TypeContext<WorkflowReplacementModel> }): React.JSX.Element {
   var ctx = p.ctx;
   var newTasks = ctx.value.newTasks.map(a => a.element);
   return (

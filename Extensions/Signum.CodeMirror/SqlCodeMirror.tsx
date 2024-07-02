@@ -26,7 +26,7 @@ interface SqlCodeMirrorProps {
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }
 
-export default function SqlCodeMirror(p: SqlCodeMirrorProps) {
+export default function SqlCodeMirror(p: SqlCodeMirrorProps): React.JSX.Element {
 
   const options = {
     lineNumbers: true,

@@ -19,7 +19,7 @@ import { TypeContext } from '@framework/Lines'
 
 export namespace FilesClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Files", () => import("./Changelog"));
   

@@ -19,7 +19,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace EvalClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Eval", () => import("./Changelog"));
   

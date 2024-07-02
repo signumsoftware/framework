@@ -15,7 +15,7 @@ import { QueryTokenString } from '@framework/Reflection';
 import { useForceUpdate } from '@framework/Hooks'
 import { QueryFilterEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 
-export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }){
+export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQueryEntity>, mainQuery: PredictorMainQueryEmbedded, mainQueryDescription: QueryDescription }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleOnChange() {
     const e = p.ctx.value;

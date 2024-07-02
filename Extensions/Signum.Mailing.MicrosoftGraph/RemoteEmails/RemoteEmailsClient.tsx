@@ -24,7 +24,7 @@ export namespace RemoteEmailsClient {
   
   export function start(options: {
     routes: RouteObject[],
-  }) {
+  }): void {
     Navigator.addSettings(new EntitySettings(RemoteEmailMessageModel, e => import('./RemoteEmailMessage'), {
       renderSubTitle: r => <span>
         {getTypeInfo(r.Type).niceName}

@@ -9,7 +9,7 @@ import { SMSClient } from '../SMSClient';
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import { SubTokensOptions } from '@framework/FindOptions';
 
-export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }) {
+export default function SMSTemplate(p: { ctx: TypeContext<SMSTemplateEntity> }): React.JSX.Element {
   var forceUpdate = useForceUpdate();
   var ctx = p.ctx.subCtx({ labelColumns: 3 });
   var ctx8 = p.ctx.subCtx({ labelColumns: 8 });

@@ -15,7 +15,7 @@ import { PermissionSymbol, QueryEntity, TypeEntity } from '@framework/Signum.Bas
 import { OperationSymbol } from '@framework/Signum.Operations';
 import { Entity } from '../../../Signum/React/Signum.Entities';
 
-export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
+export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
 

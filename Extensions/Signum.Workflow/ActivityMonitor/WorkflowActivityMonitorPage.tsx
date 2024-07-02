@@ -24,7 +24,7 @@ interface WorkflowActivityMonitorPageState {
   workflowActivityMonitor: WorkflowClient.WorkflowActivityMonitor;
 }
 
-export default function WorkflowActivityMonitorPage() {
+export default function WorkflowActivityMonitorPage(): React.JSX.Element {
   const params = useParams() as { workflowId: string };
 
   var workflow = useAPI(() => {

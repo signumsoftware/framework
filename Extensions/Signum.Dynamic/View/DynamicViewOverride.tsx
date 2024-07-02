@@ -24,7 +24,7 @@ interface DynamicViewOverrideComponentProps {
   ctx: TypeContext<DynamicViewOverrideEntity>;
 }
 
-export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps) {
+export default function DynamicViewOverrideComponent(p: DynamicViewOverrideComponentProps): React.JSX.Element {
 
   const typeName: string | null = p.ctx.value.entityType?.cleanName;
   const typeHelp = useAPI(() => typeName ? TypeHelpClient.API.typeHelp(typeName, "CSharp") : Promise.resolve(undefined), [typeName]);

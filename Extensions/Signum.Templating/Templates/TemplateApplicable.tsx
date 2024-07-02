@@ -15,7 +15,7 @@ interface TemplateApplicableProps {
   query: QueryEntity;
 }
 
-export default function TemplateApplicable(p: TemplateApplicableProps) {
+export default function TemplateApplicable(p: TemplateApplicableProps): React.JSX.Element {
 
   const typeName = useAPI(() => p.query && Finder.getQueryDescription(p.query.key).then(qd => qd.columns["Entity"].type.name.split(",")[0] ?? "Entity"), [p.query.key]);
 

@@ -17,7 +17,7 @@ export interface LoginContext {
   userName?: React.RefObject<HTMLInputElement>;
 }
 
-export default function LoginPage() {
+export default function LoginPage(): React.JSX.Element {
 
   AppContext.useTitle(AuthClient.currentUser() ? LoginAuthMessage.SwitchUser.niceToString() : LoginAuthMessage.Login.niceToString());
 

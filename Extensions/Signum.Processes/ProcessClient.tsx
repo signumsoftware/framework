@@ -21,7 +21,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ProcessClient {
   
-  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
   

@@ -18,7 +18,7 @@ import { EmailMessageFormat, EmailTemplateEntity, EmailTemplateFromEmbedded, Ema
 import { QueryOrderEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation'
 
-export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }) {
+export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ec = p.ctx.subCtx({ labelColumns: { sm: 2 } });
   const ctx = p.ctx;

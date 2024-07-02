@@ -14,7 +14,7 @@ import { ColorPaletteEntity } from './Signum.Chart.ColorPalette';
 
 export namespace ColorPaletteClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));
   
     Finder.registerPropertyFormatter(ColorPaletteEntity.tryPropertyRoute(a => a.categoryName),

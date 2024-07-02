@@ -21,7 +21,7 @@ import { UserQueryEntity } from '../../Signum.UserQueries/Signum.UserQueries'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 
-export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }) {
+export default function WordTemplate(p: { ctx: TypeContext<WordTemplateEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

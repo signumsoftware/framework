@@ -17,7 +17,7 @@ interface TypeHelpComponentProps {
   renderContextMenu?: (pr: PropertyRoute) => React.ReactElement<any>;
 }
 
-export default function TypeHelpComponent(p: TypeHelpComponentProps) {
+export default function TypeHelpComponent(p: TypeHelpComponentProps): React.JSX.Element {
 
   const history = React.useMemo<string[]>(() => [], []);
 

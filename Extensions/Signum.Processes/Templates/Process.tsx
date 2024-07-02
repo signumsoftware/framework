@@ -9,7 +9,7 @@ import { BsColor } from '@framework/Components';
 import ProgressBar from '@framework/Components/ProgressBar';
 import { useInterval } from '@framework/Hooks'
 
-export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
+export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }): React.JSX.Element {
   const isActive = ctx.value.state == "Executing" || ctx.value.state == "Queued";
 
   const tick = useInterval(isActive ? 500 : null, 0, n => n + 1);

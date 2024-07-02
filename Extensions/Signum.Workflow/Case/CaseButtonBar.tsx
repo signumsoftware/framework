@@ -13,7 +13,7 @@ interface CaseButtonBarProps {
   pack: EntityPack<CaseActivityEntity>;
 }
 
-export default function CaseButtonBar(p : CaseButtonBarProps){
+export default function CaseButtonBar(p : CaseButtonBarProps): React.JSX.Element {
   var ca = p.pack.entity;
 
   if (ca.doneDate != null) {

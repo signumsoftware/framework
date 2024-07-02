@@ -14,7 +14,7 @@ import { useAPI } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
-export default function TranslationCodeView() {
+export default function TranslationCodeView(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string };
   const location = useLocation();
 

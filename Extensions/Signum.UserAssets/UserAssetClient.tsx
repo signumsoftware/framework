@@ -26,7 +26,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 export namespace UserAssetClient {
   
   let started = false;
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     if (started)
       return;
   

@@ -18,7 +18,7 @@ interface CaseActivityStatsModalProps extends IModalProps<undefined> {
   caseActivityStats: WorkflowClient.CaseActivityStats[];
 }
 
-export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
+export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 

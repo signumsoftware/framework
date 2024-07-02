@@ -104,7 +104,7 @@ interface PredictLineProps {
   onChange: () => void;
 }
 
-export default function PredictLine(p : PredictLineProps){
+export default function PredictLine(p : PredictLineProps): React.JSX.Element {
 
   function renderValue() {
     if (p.usage == "Output") {

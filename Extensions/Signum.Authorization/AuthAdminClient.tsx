@@ -38,7 +38,7 @@ export namespace AuthAdminClient {
   export let queries: boolean;
   export let permissions: boolean;
   
-  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }) {
+  export function start(options: { routes: RouteObject[], types: boolean; properties: boolean, operations: boolean, queries: boolean; permissions: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Authorization", () => import("./Changelog"));
   

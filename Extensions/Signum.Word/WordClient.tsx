@@ -25,7 +25,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace WordClient {
   
-  export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
+  export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Word", () => import("./Changelog"));
   

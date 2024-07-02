@@ -7,7 +7,7 @@ import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTo
 import { SubTokensOptions } from '@framework/FindOptions';
 import { ValidationMessage } from '../../../Signum/React/Signum.Entities.Validation';
 
-export default function FileTokenAttachment(p: { ctx: TypeContext<FileTokenAttachmentEntity> }) {
+export default function FileTokenAttachment(p: { ctx: TypeContext<FileTokenAttachmentEntity> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
   var et = p.ctx.findParent(EmailTemplateEntity);
 

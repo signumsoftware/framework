@@ -6,7 +6,7 @@ import { DashboardClient, PanelPartContentProps } from '../DashboardClient';
 import { Dic } from '@framework/Globals';
 import { urlVariables } from '../../Signum.Toolbar/UrlVariables';
 
-export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity >){
+export default function LinkListPart(p: PanelPartContentProps<LinkListPartEntity >): React.JSX.Element {
   return (
     <ul className="sf-cp-link-list">
       {

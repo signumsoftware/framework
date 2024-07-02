@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
-export default function WorkflowPanelPage(){
+export default function WorkflowPanelPage(): React.JSX.Element {
 
   return (
     <div>

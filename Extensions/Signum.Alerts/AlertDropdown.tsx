@@ -23,7 +23,7 @@ import { AlertEntity, AlertMessage, AlertOperation } from './Signum.Alerts'
 const MaxNumberOfAlerts = 3;
 const MaxNumberOfGroups = 3;
 
-export default function AlertDropdown(props: { keepRingingFor?: number }) {
+export default function AlertDropdown(props: { keepRingingFor?: number }): React.JSX.Element {
 
   if (!Navigator.isViewable(AlertEntity))
     return null;

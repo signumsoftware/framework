@@ -34,7 +34,7 @@ export interface DynamicViewComponentState {
   
 }
 
-export default function DynamicViewComponent(p: DynamicViewComponentProps) {
+export default function DynamicViewComponent(p: DynamicViewComponentProps): React.JSX.Element {
 
   const [isDesignerOpen, setIsDesignerOpen] = React.useState<boolean>(false);
   const rootNodeMemo = React.useMemo(() => JSON.parse(p.initialDynamicView.viewContent!) as BaseNode, []);

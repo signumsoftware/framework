@@ -16,7 +16,7 @@ interface DynamicMixinConnectionComponentProps {
   ctx: TypeContext<DynamicMixinConnectionEntity>;
 }
 
-export default function DynamicMixinConnectionComponent(p : DynamicMixinConnectionComponentProps){
+export default function DynamicMixinConnectionComponent(p : DynamicMixinConnectionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
 

@@ -14,7 +14,7 @@ interface DynamicSqlMigrationComponentProps {
   ctx: TypeContext<DynamicSqlMigrationEntity>;
 }
 
-export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComponentProps){
+export default function DynamicSqlMigrationComponent(p : DynamicSqlMigrationComponentProps): React.JSX.Element {
   function handleScriptChange(newScript: string) {
     const ctxValue = p.ctx.value;
     ctxValue.script = newScript;

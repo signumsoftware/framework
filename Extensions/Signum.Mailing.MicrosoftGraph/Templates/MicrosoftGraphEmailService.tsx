@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks';
 import { MicrosoftGraphEmailServiceEntity } from '../Signum.Mailing.MicrosoftGraph';
 
-export default function MicrosoftGraphEmailService(p: { ctx: TypeContext<MicrosoftGraphEmailServiceEntity> }) {
+export default function MicrosoftGraphEmailService(p: { ctx: TypeContext<MicrosoftGraphEmailServiceEntity> }): React.JSX.Element {
   const sc = p.ctx;
   const forceUpdate = useForceUpdate();
 

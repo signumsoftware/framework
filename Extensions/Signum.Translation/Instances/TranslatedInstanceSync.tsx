@@ -21,7 +21,7 @@ import { CultureInfoEntity } from '@framework/Signum.Basics'
 
 
 
-export default function TranslatedInstanceSync() {
+export default function TranslatedInstanceSync(): React.JSX.Element {
   const params = useParams() as { type: string; culture: string; };
 
   const type = params.type;

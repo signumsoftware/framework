@@ -17,7 +17,7 @@ import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 import { getToString } from '@framework/Signum.Entities'
 
-export default function TranslationInstanceView() {
+export default function TranslationInstanceView(): React.JSX.Element {
   const params = useParams() as { type: string; culture?: string; };
   const location = useLocation();
 

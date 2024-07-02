@@ -16,7 +16,7 @@ interface LegendProps {
   onDrillDown?: (pc: PivotColumn, e: React.MouseEvent<any> | MouseEvent) => void;
 }
 
-export default function Legend(p: LegendProps) {
+export default function Legend(p: LegendProps): React.JSX.Element {
 
   const { pivot, xRule, yRule, color } = p;
 

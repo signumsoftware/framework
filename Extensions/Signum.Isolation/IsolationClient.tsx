@@ -10,7 +10,7 @@ import { getColorProviders } from '../Signum.Map/Schema/ClientColorProvider';
 
 export namespace IsolationClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     onWidgets.push(getIsolationWidget);
   

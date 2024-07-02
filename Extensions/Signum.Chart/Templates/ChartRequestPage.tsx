@@ -14,7 +14,7 @@ import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 
 
 
-export default function ChartRequestPage() {
+export default function ChartRequestPage(): React.JSX.Element {
   const params = useParams() as { queryName: string; };
   const location = useLocation();
   const [pair, setPair] = useStateWithPromise<{ chartRequest: ChartRequestModel; userChart?: Lite<UserChartEntity>; } | undefined>(undefined);

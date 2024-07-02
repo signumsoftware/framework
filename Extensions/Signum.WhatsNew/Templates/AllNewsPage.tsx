@@ -9,7 +9,7 @@ import { HtmlViewer } from './WhatsNewHtmlEditor';
 import { Link } from 'react-router-dom';
 import { Navigator } from '@framework/Navigator';
 
-export default function AllNews() {
+export default function AllNews(): React.JSX.Element {
   const news: WhatsNewClient.WhatsNewFull[] | undefined = useAPI(() => WhatsNewClient.API.getAllNews().then(w => w), []);
 
   if (news == undefined)

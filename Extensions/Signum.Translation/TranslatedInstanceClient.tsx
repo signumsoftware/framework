@@ -20,7 +20,7 @@ import { TranslateableRouteType } from '@framework/Signum.Basics';
 
 export namespace TranslatedInstanceClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     OmniboxSpecialAction.registerSpecialAction({
       allowed: () => AppContext.isPermissionAuthorized(TranslationPermission.TranslateInstances),

@@ -41,7 +41,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ChartClient {
   
-  export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
+  export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Chart", () => import("./Changelog"));
   

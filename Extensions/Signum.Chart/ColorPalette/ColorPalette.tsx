@@ -14,7 +14,7 @@ import { EntityLink } from '@framework/Search';
 import { ColorPaletteClient, ColorScheme } from './ColorPaletteClient';
 import { ColorPaletteEntity, ColorPaletteMessage, SpecificColorEmbedded } from './Signum.Chart.ColorPalette';
 
-export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }) {
+export default function ColorPalette(p: { ctx: TypeContext<ColorPaletteEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
   const ctx4 = ctx.subCtx({ formGroupStyle: "Basic" });
