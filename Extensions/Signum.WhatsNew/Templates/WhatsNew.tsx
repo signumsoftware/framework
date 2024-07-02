@@ -55,7 +55,7 @@ export interface WhatsNewMessageComponentProps
   invalidate: () => void;
 }
 
-export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps) {
+export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps): React.JSX.Element {
 
   const ec = p.ctx.subCtx({labelColumns: 4});
   return (

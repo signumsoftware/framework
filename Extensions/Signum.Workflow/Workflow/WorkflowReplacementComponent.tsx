@@ -46,7 +46,7 @@ export default function WorkflowReplacementComponent(p: { ctx: TypeContext<Workf
   );
 }
 
-export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: NewTasksEmbedded[] }) {
+export function WorkflowReplacementItemCombo(p: { ctx: TypeContext<WorkflowReplacementItemEmbedded>, previewTasks: NewTasksEmbedded[] }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleChange(e: React.FormEvent<any>) {
     p.ctx.subCtx(a => a.newNode).value = (e.currentTarget as HTMLSelectElement).value;

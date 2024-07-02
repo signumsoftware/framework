@@ -31,7 +31,7 @@ export default function WorkflowPanelPage(): React.JSX.Element {
 }
 
 
-export function WorkflowScriptRunnerTab(p: {}) {
+export function WorkflowScriptRunnerTab(p: {}): React.JSX.Element {
 
   const [state, reloadState] = useAPIWithReload(() => {
     AppContext.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);

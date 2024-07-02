@@ -89,7 +89,7 @@ export default function RemoteEmailMessage(p: { ctx: TypeContext<RemoteEmailMess
   );
 }
 
-export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel }) {
+export function RemoteEmailRenderer(p: { remoteEmail: RemoteEmailMessageModel }): React.JSX.Element {
 
   var oid = (p.remoteEmail.user.model as UserLiteModel).oID!;
 

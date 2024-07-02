@@ -42,7 +42,7 @@ export default function RemoteEmailPopover(p: { subject: string, user: Lite<User
   );
 }
 
-export function RemoteEmailSnippet(p: {  user: Lite<UserEntity>, remoteEmailId: string }) {
+export function RemoteEmailSnippet(p: {  user: Lite<UserEntity>, remoteEmailId: string }): React.JSX.Element {
 
   const model = p.user.model as UserLiteModel;
 

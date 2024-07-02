@@ -72,7 +72,7 @@ interface CaseActivityStatsComponentProps {
   stats: WorkflowClient.CaseActivityStats;
 }
 
-export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
+export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps): React.JSX.Element {
 
   function renderTaskExtra() {
     return (

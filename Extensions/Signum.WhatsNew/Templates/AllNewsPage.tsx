@@ -30,7 +30,7 @@ export default function AllNews(): React.JSX.Element {
   );
 }
 
-export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}) {
+export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}): React.JSX.Element {
 
   const whatsnew = p.news;
 
@@ -78,7 +78,7 @@ export function WhatsNewPreviewPicture(p: { news: WhatsNewClient.WhatsNewFull}) 
   );
 }
 
-export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }) {
+export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }): React.JSX.Element {
   if (!p.news.read)
     return (
       <span className="sf-news-notify-badge" style={{ right: "0", top: "0" }}>NEW</span>
@@ -88,7 +88,7 @@ export function NewsBadge(p: { news: WhatsNewClient.WhatsNewFull }) {
   }
 }
 
-export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }) {
+export function Attachments(p: { news: WhatsNewClient.WhatsNewFull }): React.JSX.Element {
   return (
     <div>
       <hr />

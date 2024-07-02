@@ -24,7 +24,7 @@ interface PredictModalProps extends IModalProps<undefined> {
   entity?: Lite<Entity>;
 }
 
-export function PredictModal(p: PredictModalProps) {
+export function PredictModal(p: PredictModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
   const [hasChanged, setHasChanged] = React.useState<boolean>(false);
@@ -172,7 +172,7 @@ interface PredictTableProps {
   onChange: () => void;
 }
 
-export function PredictTable(p : PredictTableProps){
+export function PredictTable(p : PredictTableProps): React.JSX.Element {
   var p = p;
   var { subQuery, columnHeaders, rows } = p.table;
   var sctx = new StyleContext(p.sctx, { formGroupStyle: "SrOnly" });
@@ -230,7 +230,7 @@ interface PredictValueProps {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
 }
 
-export function PredictValue(p : PredictValueProps){
+export function PredictValue(p : PredictValueProps): React.JSX.Element {
   function handleValueChange() {
     if (p.onChange)
       p.onChange();

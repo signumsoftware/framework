@@ -11,15 +11,13 @@ class Upgrade_20240702_IsolatedDeclarations : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        var props = @"(?<props>(?:[^()]*|\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\))*)";
-
-        var regexDefault = new Regex(@"export default function *(?<name>[A-Z]\w+) *\(" + props + @"\) *{");
-        var regexStart = new Regex(@"export function start *\(" + props + @"\) *{");
+        var regexDefault = new Regex(@"export (?<def>default )?function *(?<name>\w+) *\((?<props>[^)]*)\) *{");
+        var regexStart = new Regex(@"export function start *\((?<props>[^)]*)\) *{");
         uctx.ForeachCodeFile(@"*.tsx", file =>
         {
             file.Replace(regexDefault, a =>
             {
-                return $"export default function {a.Groups["name"].Value}({a.Groups["props"].Value}): React.JSX.Element {{";
+                return $"export {a.Groups["def"]}function {a.Groups["name"].Value}({a.Groups["props"].Value}): React.JSX.Element {{";
             });
 
             file.Replace(regexStart, a =>

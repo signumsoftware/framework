@@ -8,7 +8,7 @@ import { QueryString } from '@framework/QueryString';
 
 export namespace RestApiKeyClient {
   
-  export function registerAuthenticator() {
+  export function registerAuthenticator(): React.JSX.Element {
     AuthClient.authenticators.insertAt(0, loginFromApiKey);
   }
   

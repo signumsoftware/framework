@@ -173,7 +173,7 @@ interface PropertyIsHelpComponentProps {
   route: PropertyRoute;
 }
 
-export function PropertyIsHelpComponent(p: PropertyIsHelpComponentProps) {
+export function PropertyIsHelpComponent(p: PropertyIsHelpComponentProps): React.JSX.Element {
 
   return (
     <DropdownButton id="property_dropdown" variant="info" title={DynamicValidationMessage.PropertyIs.niceToString()}>

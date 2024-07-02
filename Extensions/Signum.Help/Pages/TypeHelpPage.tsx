@@ -236,7 +236,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
   return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
-export function Shortcut(p: { text: string; }) {
+export function Shortcut(p: { text: string; }): React.JSX.Element {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (!supportsClipboard)

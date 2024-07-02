@@ -44,7 +44,7 @@ interface UserHelpProps {
   activity: WorkflowActivityEntity;
 }
 
-export function UserHelpComponent(p : UserHelpProps){
+export function UserHelpComponent(p : UserHelpProps): React.JSX.Element {
 
   var [open, setOpen] = React.useState(false);
 

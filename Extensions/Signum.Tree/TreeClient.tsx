@@ -189,7 +189,7 @@ export namespace TreeClient {
     return to;
   }
 
-  export function hideSiblingsAndIsDisabled(ti: TypeInfo) {
+  export function hideSiblingsAndIsDisabled(ti: TypeInfo): React.JSX.Element {
     const type = new Type<TreeEntity>(ti.name);
 
     if (type.memberInfo(a => a.isSibling).notVisible == undefined)
@@ -223,14 +223,14 @@ export namespace TreeClient {
     return es;
   }
 
-  export function overrideOnFind(ti: TypeInfo) {
+  export function overrideOnFind(ti: TypeInfo): React.JSX.Element {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.onFind)
       qs.onFind = (fo, mo) => openTree({ typeName: ti.name, filterOptions: fo.filterOptions, columnOptions: fo.columnOptions, columnOptionsMode: fo.columnOptionsMode }, { title: mo?.title });
   }
 
-  export function overrideAutocomplete(ti: TypeInfo) {
+  export function overrideAutocomplete(ti: TypeInfo): React.JSX.Element {
     var es = getEntitySetting(ti.name);
 
     if (!es.autocomplete)
@@ -240,7 +240,7 @@ export namespace TreeClient {
       es.autocompleteDelay = 750;
   }
 
-  export function overrideDefaultOrder(ti: TypeInfo) {
+  export function overrideDefaultOrder(ti: TypeInfo): React.JSX.Element {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.defaultOrders) {
@@ -248,11 +248,11 @@ export namespace TreeClient {
     }
   }
 
-  export function isTree(t: TypeInfo) {
+  export function isTree(t: TypeInfo): React.JSX.Element {
     return (t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key] != null) || false;
   }
 
-  export function getAllTreeTypes() {
+  export function getAllTreeTypes(): React.JSX.Element {
     return getAllTypes().filter(t => isTree(t));
   }
 
@@ -284,7 +284,7 @@ export namespace TreeClient {
 
 
 
-  export function fixState(node: TreeNode) {
+  export function fixState(node: TreeNode): React.JSX.Element {
 
     node.nodeState = node.childrenCount == 0 ? "Leaf" :
       node.loadedChildren.length == 0 ? "Collapsed" :

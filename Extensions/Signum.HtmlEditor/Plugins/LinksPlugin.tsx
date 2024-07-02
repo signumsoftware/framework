@@ -123,7 +123,7 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
 
 
-export function DraftLink({ contentState, entityKey, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactNode }) {
+export function DraftLink({ contentState, entityKey, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactNode }): React.JSX.Element {
   const { url } = contentState.getEntity(entityKey)?.getData();
 
   return (
@@ -152,7 +152,7 @@ export function DraftLink({ contentState, entityKey, children }: { contentState:
   );
 }
 
-export function AutoDraftLink({ decoratedText, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactNode }) {
+export function AutoDraftLink({ decoratedText, children }: { contentState: draftjs.ContentState, decoratedText: string, entityKey: string, children: React.ReactNode }): React.JSX.Element {
 
   return (
     <a

@@ -31,7 +31,7 @@ export default function WhatsNewHtmlEditor(p: {
   );
 }
 
-export function HtmlViewer(p: { text: string; }) {
+export function HtmlViewer(p: { text: string; }): React.JSX.Element {
 
   var binding = new ReadonlyBinding(p.text, "");
 

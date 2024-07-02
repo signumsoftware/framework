@@ -300,7 +300,7 @@ interface RenderWithReplacementsProps {
   viewOverride?: (vr: ViewReplacer<Entity>) => void;
 }
 
-export function RenderWithReplacements(p: RenderWithReplacementsProps) {
+export function RenderWithReplacements(p: RenderWithReplacementsProps): React.JSX.Element {
 
   const originalRenderRef = React.useRef<Function | undefined>(undefined);
 

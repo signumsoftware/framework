@@ -37,7 +37,7 @@ export namespace HelpClient {
   
   }
   
-  export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+  export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): React.JSX.Element {
     if (state.labelIcon === undefined &&
       state.ctx.propertyRoute &&
       state.ctx.frame?.pack.typeHelp
@@ -49,7 +49,7 @@ export namespace HelpClient {
   var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|/]*)\]/gi;
   var helpAppRelativeUrl = /href="\//gi;
   
-  export function replaceHtmlLinks(txt: string | null) {
+  export function replaceHtmlLinks(txt: string | null): React.JSX.Element {
     if (txt == null)
       return "";
   
@@ -160,49 +160,49 @@ export namespace HelpClient {
   
   
   export module Urls {
-    export function indexUrl() {
+    export function indexUrl(): React.JSX.Element {
       return "/help";
     }
   
-    export function searchUrl(query: PseudoType) {
+    export function searchUrl(query: PseudoType): React.JSX.Element {
       return "/help/search?" + QueryString.stringify({ q: getQueryKey(query) });
     }
   
-    export function typeUrl(typeName: PseudoType) {
+    export function typeUrl(typeName: PseudoType): React.JSX.Element {
       return "/help/type/" + getTypeName(typeName);
     }
   
-    export function namespaceUrl(namespace: string) {
+    export function namespaceUrl(namespace: string): React.JSX.Element {
       return "/help/namespace/" + namespace.replaceAll(".", "_");
     }
   
-    export function appendixUrl(uniqueName: string | null) {
+    export function appendixUrl(uniqueName: string | null): React.JSX.Element {
       return "/help/appendix/" + (uniqueName ?? "");
     }
   
-    export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {
+    export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string): React.JSX.Element {
       return typeUrl(typeName) + "#" + idOperation(operation);
     }
   
-    export function idOperation(operation: OperationSymbol | string) {
+    export function idOperation(operation: OperationSymbol | string): React.JSX.Element {
       return "o-" + ((operation as OperationSymbol).key ?? operation as string).replaceAll('.', '_');
     }
   
   
-    export function propertyUrl(typeName: PseudoType, route: PropertyRoute | string) {
+    export function propertyUrl(typeName: PseudoType, route: PropertyRoute | string): React.JSX.Element {
       return typeUrl(typeName) + "#" + idProperty(route);
     }
   
-    export function idProperty(route: PropertyRoute | string) {
+    export function idProperty(route: PropertyRoute | string): React.JSX.Element {
       return "p-" + ((route instanceof PropertyRoute) ? route.propertyPath() : route).replaceAll('.', '_').replaceAll('/', '_').replaceAll('[', '_').replaceAll(']', '_');
     }
   
   
-    export function queryUrl(typeName: PseudoType, query: PseudoType | QueryKey) {
+    export function queryUrl(typeName: PseudoType, query: PseudoType | QueryKey): React.JSX.Element {
       return typeUrl(typeName) + "#" + idQuery(query);
     }
   
-    export function idQuery(query: PseudoType | QueryKey) {
+    export function idQuery(query: PseudoType | QueryKey): React.JSX.Element {
       return "q-" + getQueryKey(query).replaceAll(".", "_");
     }
   

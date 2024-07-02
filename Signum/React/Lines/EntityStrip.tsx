@@ -328,7 +328,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
 }
 
 //tasks.push(taskSetAvoidDuplicates);
-//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps) {
+//export function taskSetAvoidDuplicates(lineBase: LineBaseController<any>, state: LineBaseProps): React.JSX.Element {
 //  if (lineBase instanceof EntityStripController &&
 //    (state as EntityStripProps).avoidDuplicates == undefined &&
 //    state.ctx.propertyRoute &&

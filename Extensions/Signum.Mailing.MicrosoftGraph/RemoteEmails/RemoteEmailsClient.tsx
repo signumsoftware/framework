@@ -161,7 +161,7 @@ export namespace RemoteEmailsClient {
       return ajaxGetRaw({ url: `/api/remoteEmail/${userOID}/${messageId}/attachment/${attachmentId}`});
     }
   
-    export function getRemoteAttachmentUrl(userOID: string, messageId: string, attachmentId: string) {
+    export function getRemoteAttachmentUrl(userOID: string, messageId: string, attachmentId: string): React.JSX.Element {
       return `/api/remoteEmail/${userOID}/${messageId}/attachment/${attachmentId}`
     }
   }

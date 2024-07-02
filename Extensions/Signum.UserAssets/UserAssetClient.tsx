@@ -244,7 +244,7 @@ export namespace UserAssetClient {
     }
   
   
-    export function exportAsset(entity: Lite<IUserAssetEntity>[]) {
+    export function exportAsset(entity: Lite<IUserAssetEntity>[]): React.JSX.Element {
       ajaxPostRaw({ url: "/api/userAssets/export" }, entity)
         .then(resp => saveFile(resp));
     }

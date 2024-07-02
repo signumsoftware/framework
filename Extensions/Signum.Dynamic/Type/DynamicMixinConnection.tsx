@@ -39,7 +39,7 @@ export interface MixinComboProps {
   onChange?: () => void;
 }
 
-export function MixinCombo(p : MixinComboProps){
+export function MixinCombo(p : MixinComboProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleGetItems(query: string) {
     return Finder.fetchLites({

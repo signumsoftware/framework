@@ -193,11 +193,11 @@ export namespace AzureADClient {
   }
 
 
-  export function getAzureB2C_AuthorityDomain() {
+  export function getAzureB2C_AuthorityDomain(): React.JSX.Element {
     return `${window.__azureB2CTenantName}.b2clogin.com`;
   }
 
-  export function getAzureB2C_Authority(userFlow: string) {
+  export function getAzureB2C_Authority(userFlow: string): React.JSX.Element {
     return `https://${window.__azureB2CTenantName}.b2clogin.com/${window.__azureB2CTenantName}.onmicrosoft.com/${window.__azureB2CSignInSignUp_UserFlow}`;
   }
 

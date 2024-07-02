@@ -124,7 +124,7 @@ interface LabelWithHelpProps {
   text: React.ReactNode;
 }
 
-export function LabelWithHelp(p: LabelWithHelpProps) {
+export function LabelWithHelp(p: LabelWithHelpProps): React.JSX.Element {
 
     return (
       <OverlayTrigger overlay={

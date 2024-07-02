@@ -29,7 +29,7 @@ import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal"
 export namespace Operations {
 
   export namespace Options {
-    export function maybeReadonly(ti: TypeInfo) {
+    export function maybeReadonly(ti: TypeInfo): React.JSX.Element {
       return false;
     }
   }

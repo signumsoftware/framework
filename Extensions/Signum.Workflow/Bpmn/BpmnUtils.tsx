@@ -24,7 +24,7 @@ export function isConnection(elementType: BPMN.ElementType): boolean {
 }
 
 
-export function findDecisionStyle(con: BPMN.Connection, entities: WorkflowEntitiesDictionary) {
+export function findDecisionStyle(con: BPMN.Connection, entities: WorkflowEntitiesDictionary): React.JSX.Element {
   var mod = entities[con.id] as (WorkflowConnectionModel | undefined);
   if (mod && mod.type == "Decision") {
 

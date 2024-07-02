@@ -55,7 +55,7 @@ export interface SMSTemplateMessageComponentProps {
   invalidate: () => void;
 }
 
-export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps) {
+export function SMSTemplateMessageComponent(p: SMSTemplateMessageComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   var throttleText = useThrottle(p.ctx.value.message ?? "", 1000);

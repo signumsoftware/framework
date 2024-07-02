@@ -28,7 +28,7 @@ export namespace DynamicClientClient {
   }
   
   //Run before reload
-  export function getIsSafeMode() {
+  export function getIsSafeMode(): React.JSX.Element {
     return window.location.search.contains("safeMode");
   }
   

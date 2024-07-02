@@ -97,7 +97,7 @@ interface WorkflowActivityMonitorConfigComponentState {
   queryDescription?: QueryDescription;
 }
 
-export function WorkflowActivityMonitorConfigComponent(p: WorkflowActivityMonitorConfigComponentProps) {
+export function WorkflowActivityMonitorConfigComponent(p: WorkflowActivityMonitorConfigComponentProps): React.JSX.Element {
 
   const qd = useAPI(() => Finder.getQueryDescription(CaseActivityEntity), []);
 
