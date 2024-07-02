@@ -274,7 +274,7 @@ export namespace ErrorModalOptions {
     return undefined;
   }
 
-  export function isExceptionViewable(): React.JSX.Element {
+  export function isExceptionViewable(): boolean {
     return false;
   }
 

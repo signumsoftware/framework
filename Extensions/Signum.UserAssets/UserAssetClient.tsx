@@ -238,17 +238,14 @@ export namespace UserAssetClient {
       return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
     }
   
-  
     export function stringifyDate(dateValue: string): Promise<string> {
       return ajaxPost({ url: "/api/userAssets/stringifyDate/" }, dateValue);
     }
   
-  
-    export function exportAsset(entity: Lite<IUserAssetEntity>[]): React.JSX.Element {
+    export function exportAsset(entity: Lite<IUserAssetEntity>[]): void {
       ajaxPostRaw({ url: "/api/userAssets/export" }, entity)
         .then(resp => saveFile(resp));
     }
-  
   
     export function importPreview(request: FileUpload): Promise<UserAssetPreviewModel> {
       return ajaxPost({ url: "/api/userAssets/importPreview/" }, request);

@@ -23,7 +23,7 @@ export default function HtmlCodeMirror(p: {
   onChange?: (newValue: string) => void;
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
   options?: Partial<CodeMirror.EditorConfiguration>;
-}) {
+}): React.JSX.Element {
 
   const { ctx, onChange, innerRef } = p;
 

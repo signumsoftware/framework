@@ -315,7 +315,7 @@ export function TimeMachineCompareModal(p: TimeMachineModalCompareProps): React.
     </Modal>
   );
 }
-export declare namespace TimeMachineCompareModal {
+export namespace TimeMachineCompareModal {
   export function show(lite: Lite<Entity>, versionDatesUTC: string[]): Promise<boolean | undefined> {
     return openModal<boolean | undefined>(<TimeMachineCompareModal lite={lite} versionDatesUTC={versionDatesUTC} />);
   }

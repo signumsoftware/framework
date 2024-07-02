@@ -29,12 +29,10 @@ import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal"
 export namespace Operations {
 
   export namespace Options {
-    export function maybeReadonly(ti: TypeInfo): React.JSX.Element {
+    export function maybeReadonly(ti: TypeInfo): boolean {
       return false;
     }
   }
-
-  
 
   export function start(): void {
     ButtonBarManager.onButtonBarRender.push(EntityOperations.getEntityOperationButtons);

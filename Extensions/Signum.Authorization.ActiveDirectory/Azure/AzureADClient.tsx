@@ -8,12 +8,12 @@ import { ExternalServiceError, ajaxPost } from "@framework/Services";
 import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
 
 export namespace AzureADClient {
-  
+
   export function registerAzureADAuthenticator(): void {
-  
+
     if (Reflection.isStarted())
       throw new Error("call AzureADClient.registerWindowsAuthenticator in MainPublic.tsx before AuthClient.autoLogin");
-  
+
     LoginPage.customLoginButtons = ctx =>
       <>
         <MicrosoftSignIn ctx={ctx} />
@@ -39,27 +39,27 @@ export namespace AzureADClient {
 
     msalClient = new msal.PublicClientApplication(msalConfig);
   }
-  
+
   /*     Add this to Index.cshtml
         var __azureApplicationId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_ApplicationID);
         var __azureTenantId = @Json.Serialize(Starter.Configuration.Value.ActiveDirectory.Azure_DirectoryID);
   */
-  
-  
+
+
   let msalClient: msal.PublicClientApplication;
-  
+
   export namespace Config {
     export let scopes: string[] = ["user.read"];
   }
-  
-  
+
+
   export function signIn(ctx: LoginContext): void {
     ctx.setLoading("azureAD");
-  
+
     var userRequest: msal.PopupRequest = {
       scopes: Config.scopes,
     };
-  
+
     (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
     msalClient.loginPopup(userRequest)
       .then(a => {
@@ -67,7 +67,7 @@ export namespace AzureADClient {
           .then(r => {
             if (r == null)
               throw new Error("User " + a.account?.username + " not found in the database");
-  
+
             AuthClient.setAuthToken(r!.token, r!.authenticationType);
             AuthClient.setCurrentUser(r!.userEntity);
             AuthClient.Options.onLogin();
@@ -79,86 +79,86 @@ export namespace AzureADClient {
         ctx.setLoading(undefined);
         if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return;
-  
+
         //if (e instanceof msal.AuthError)
         //  throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
-  
+
         throw e;
       });
   }
-  
+
   export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
-  
+
     if (location.search.contains("avoidAD"))
       return Promise.resolve(undefined);
-  
+
     var ai = getMsalAccount();
-  
+
     if (!ai)
       return Promise.resolve(undefined);
-  
+
     var userRequest: msal.SilentRequest = {
       scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
       account: ai,
     };
-  
+
     return msalClient.acquireTokenSilent(userRequest)
       .then(res => {
         return API.loginWithAzureAD(res.idToken, res.accessToken, false);
       }, e => {
         if (e instanceof msal.InteractionRequiredAuthError ||
-          e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode =="user_cancelled"))
+          e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return Promise.resolve(undefined);
-  
+
         console.log(e);
         return Promise.resolve(undefined);
       });
   }
-  
+
   export function setMsalAccount(accountName: string | null): void {
     if (accountName == null)
       localStorage.removeItem("msalAccount");
     else
       localStorage.setItem("msalAccount", accountName);
   }
-  
+
   export function getMsalAccount(): msal.AccountInfo | null | undefined {
     let account = localStorage.getItem('msalAccount');
     if (!account)
       return null;
-  
+
     return msalClient.getAccountByUsername(account) ?? undefined;
   }
-  
-  export function getAccessToken(): Promise<string>{
-  
+
+  export function getAccessToken(): Promise<string> {
+
     var ai = getMsalAccount();
-  
+
     if (!ai)
       throw new Error('User account missing from session. Please sign out and sign in again.');
-  
+
     var userRequest: msal.SilentRequest = {
       scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
       account: ai,
     };
-  
+
     return adquireTokenSilentOrPopup(userRequest)
       .then(res => res.accessToken);
   }
-  
+
   function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
-      return msalClient.acquireTokenSilent(userRequest)
-          .catch(e => {
-              if (e.errorCode === "consent_required"
-                  || e.errorCode === "interaction_required"
-                  || e.errorCode === "login_required")
-                  return msalClient.acquireTokenPopup(userRequest);
-  
-              else
-                  throw e;
-          });
+    return msalClient.acquireTokenSilent(userRequest)
+      .catch(e => {
+        if (e.errorCode === "consent_required"
+          || e.errorCode === "interaction_required"
+          || e.errorCode === "login_required")
+          return msalClient.acquireTokenPopup(userRequest);
+
+        else
+          throw e;
+      });
   }
-  
+
   export function signOut(): void {
     var account = getMsalAccount();
     if (account) {
@@ -167,7 +167,7 @@ export namespace AzureADClient {
       });
     }
   }
-  
+
   export function MicrosoftSignIn({ ctx }: { ctx: LoginContext }): React.JSX.Element {
     return (
       <div className="row mt-2">
@@ -179,12 +179,13 @@ export namespace AzureADClient {
       </div>
     );
   }
-    export declare namespace MicrosoftSignIn {
-        export var iconUrl: string;
-    }
-  
+
+  export declare namespace MicrosoftSignIn {
+    export var iconUrl: string;
+  }
+
   MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
-  
+
   export module API {
 
     export function loginWithAzureAD(jwt: string, accessToken: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
@@ -193,11 +194,11 @@ export namespace AzureADClient {
   }
 
 
-  export function getAzureB2C_AuthorityDomain(): React.JSX.Element {
+  export function getAzureB2C_AuthorityDomain(): string {
     return `${window.__azureB2CTenantName}.b2clogin.com`;
   }
 
-  export function getAzureB2C_Authority(userFlow: string): React.JSX.Element {
+  export function getAzureB2C_Authority(userFlow: string): string {
     return `https://${window.__azureB2CTenantName}.b2clogin.com/${window.__azureB2CTenantName}.onmicrosoft.com/${window.__azureB2CSignInSignUp_UserFlow}`;
   }
 

@@ -11,7 +11,7 @@ export function Separator(): React.JSX.Element {
   return <div className="sf-html-separator" />
 }
 
-export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactChild, isActive?: boolean, title?: string, onClick: (e: React.MouseEvent) => void }) {
+export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactNode, isActive?: boolean, title?: string, onClick: (e: React.MouseEvent) => void }): React.JSX.Element {
   return (
     <div className="sf-draft-button-wrapper" onMouseDown={e => e.preventDefault()} >
       <button className={classes("sf-draft-button", p.isActive && "sf-draft-active ")} onClick={p.onClick} title={p.title}>
@@ -21,7 +21,9 @@ export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactChil
   );
 }
 
-HtmlEditorButton.defaultProps = { icon: "question" };
+export namespace HtmlEditorButton {
+  export const defaultProps = { icon: "question" };
+}
 
 
 export function InlineStyleButton(p: { controller: HtmlEditorController, style: string, icon?: IconProp, content?: React.ReactChild, title?: string }): React.JSX.Element {
