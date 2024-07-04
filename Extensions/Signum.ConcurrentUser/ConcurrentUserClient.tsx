@@ -12,7 +12,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace ConcurrentUserClient {
   
-  export function start(options: { routes: RouteObject[], activatedFor?: (e: Entity) => boolean }) {
+  export function start(options: { routes: RouteObject[], activatedFor?: (e: Entity) => boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ConcurrentUser", () => import("./Changelog"));
   
