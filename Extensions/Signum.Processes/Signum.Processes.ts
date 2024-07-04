@@ -17,6 +17,7 @@ export interface PackageEntity extends Entities.Entity, IProcessDataEntity {
   Type: "Package";
   name: string | null;
   operationArguments: string /*Byte[]*/ | null;
+  configString: string | null;
 }
 
 export const PackageLineEntity: Type<PackageLineEntity> = new Type<PackageLineEntity>("PackageLine");

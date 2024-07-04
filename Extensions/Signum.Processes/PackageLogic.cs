@@ -249,6 +249,21 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
 
         var args = package.GetOperationArgs();
 
+        if (package.ConfigString.HasText())
+        {
+            var lo = new List<object>();
+
+            if (!args.IsNullOrEmpty())
+                lo.AddRange(args!);
+
+            lo.Add(package);
+
+            args=lo.ToArray();  
+        }
+
+
+
+
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
             OperationType operationType = OperationLogic.GetOperationInfo(line.Target.GetType(), operationSymbol).OperationType;

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityDetail } from '@framework/Lines'
 import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
@@ -36,7 +36,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }): Re
           <EntityLine ctx={ctx4.subCtx(f => f.user)} />
           <AutoLine ctx={ctx4.subCtx(f => f.machineName)} />
           <AutoLine ctx={ctx4.subCtx(f => f.applicationName)} />
-          <EntityLine ctx={ctx4.subCtx(f => f.data)} readOnly={true} />
+          <EntityDetail ctx={ctx4.subCtx(f => f.data)} readOnly={false} />
         </div>
         <div className="col-sm-6">
           <AutoLine ctx={ctx5.subCtx(f => f.creationDate)} />
