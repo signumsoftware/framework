@@ -7,7 +7,7 @@ using System.Linq;
 namespace Signum.Upgrade.Upgrades;
 
 
-class Upgrade_20240405_Fix_Southwind_Server : CodeUpgradeBase
+class Upgrade_20240405_Fix_Server : CodeUpgradeBase
 {
     public override string Description => "fix Southwind.Server";
 

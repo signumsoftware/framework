@@ -7,7 +7,7 @@ using System.Linq;
 namespace Signum.Upgrade.Upgrades;
 
 
-class Upgrade_20240328_Extract_Southwind_Server : CodeUpgradeBase
+class Upgrade_20240328_Extract_Server : CodeUpgradeBase
 {
     public override string Description => "Extract Program.cs and webpack to Southwind.Server";
 
