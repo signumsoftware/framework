@@ -3,7 +3,7 @@ import { AutoLine, EntityLine, TextBoxLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { EmailRecipientEmbedded } from '../Signum.Mailing'
 
-export default function EmailRecipient(p : { ctx: TypeContext<EmailRecipientEmbedded> }){
+export default function EmailRecipient(p : { ctx: TypeContext<EmailRecipientEmbedded> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ placeholderLabels: true, formGroupStyle: "SrOnly" });
 
   return (

@@ -7,11 +7,11 @@ import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { classes } from '@framework/Globals';
 import { HtmlEditorController } from './HtmlEditor';
 
-export function Separator() {
+export function Separator(): React.JSX.Element {
   return <div className="sf-html-separator" />
 }
 
-export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactChild, isActive?: boolean, title?: string, onClick: (e: React.MouseEvent) => void }) {
+export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactNode, isActive?: boolean, title?: string, onClick: (e: React.MouseEvent) => void }): React.JSX.Element {
   return (
     <div className="sf-draft-button-wrapper" onMouseDown={e => e.preventDefault()} >
       <button className={classes("sf-draft-button", p.isActive && "sf-draft-active ")} onClick={p.onClick} title={p.title}>
@@ -21,10 +21,12 @@ export function HtmlEditorButton(p: { icon?: IconProp, content?: React.ReactChil
   );
 }
 
-HtmlEditorButton.defaultProps = { icon: "question" };
+export namespace HtmlEditorButton {
+  export const defaultProps = { icon: "question" };
+}
 
 
-export function InlineStyleButton(p: { controller: HtmlEditorController, style: string, icon?: IconProp, content?: React.ReactChild, title?: string }) {
+export function InlineStyleButton(p: { controller: HtmlEditorController, style: string, icon?: IconProp, content?: React.ReactChild, title?: string }): React.JSX.Element {
 
   const isActive = p.controller.editorState.getCurrentInlineStyle().has(p.style);
 
@@ -36,7 +38,7 @@ export function InlineStyleButton(p: { controller: HtmlEditorController, style: 
   return <HtmlEditorButton isActive={isActive} onClick={toggleStyle} icon={p.icon} content={p.content} title={p.title} />
 }
 
-export function BlockStyleButton(p: { controller: HtmlEditorController, blockType: string, icon?: IconProp, content?: React.ReactChild, title?: string }) {
+export function BlockStyleButton(p: { controller: HtmlEditorController, blockType: string, icon?: IconProp, content?: React.ReactChild, title?: string }): React.JSX.Element {
 
   const isActive = p.controller.editorState.getCurrentContent()
     .getBlockForKey(p.controller.editorState.getSelection().getStartKey()).getType() == p.blockType;
@@ -50,7 +52,7 @@ export function BlockStyleButton(p: { controller: HtmlEditorController, blockTyp
 }
 
 
-export function SubMenuButton(p: { controller: HtmlEditorController, icon?: IconProp, content?: React.ReactChild, title?: string, children: React.ReactNode }) {
+export function SubMenuButton(p: { controller: HtmlEditorController, icon?: IconProp, content?: React.ReactChild, title?: string, children: React.ReactNode }): React.JSX.Element {
 
   function handleOnClick() {
     p.controller.setOverrideToolbar(<SubMenu controller={p.controller}>{p.children}</SubMenu>);
@@ -59,7 +61,7 @@ export function SubMenuButton(p: { controller: HtmlEditorController, icon?: Icon
   return <HtmlEditorButton onClick={handleOnClick} icon={p.icon} content={p.content} title={p.title} />; 
 }
 
-export function SubMenu(p: { controller: HtmlEditorController, children: React.ReactNode }) {
+export function SubMenu(p: { controller: HtmlEditorController, children: React.ReactNode }): React.JSX.Element {
   React.useEffect(() => {
     function onWindowClick() {
       p.controller.setOverrideToolbar(undefined);

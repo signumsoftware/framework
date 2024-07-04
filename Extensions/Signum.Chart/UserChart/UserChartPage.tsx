@@ -11,7 +11,7 @@ import { UserChartEntity } from './Signum.Chart.UserChart'
 
 
 
-export default function UserChartPage() {
+export default function UserChartPage(): React.JSX.Element {
   const params = useParams() as { userChartId: string; entity?: string };
 
   React.useEffect(() => {

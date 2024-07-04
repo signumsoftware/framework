@@ -12,7 +12,7 @@ interface FileImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   ajaxOptions?: Omit<Services.AjaxOptions, "url">;
 }
 
-export function FileImage(p: FileImageProps) {
+export function FileImage(p: FileImageProps): React.JSX.Element {
 
   var [objectUrl, setObjectUrl] = React.useState<string | undefined>(undefined);
   var { file, ajaxOptions, placeholderSrc, ...rest } = p;

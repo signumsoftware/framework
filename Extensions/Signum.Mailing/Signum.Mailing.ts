@@ -15,12 +15,12 @@ export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Basics.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
 
-export const CertFileType = new EnumType<CertFileType>("CertFileType");
+export const CertFileType: EnumType<CertFileType> = new EnumType<CertFileType>("CertFileType");
 export type CertFileType =
   "CertFile" |
   "SignedFile";
 
-export const ClientCertificationFileEmbedded = new Type<ClientCertificationFileEmbedded>("ClientCertificationFileEmbedded");
+export const ClientCertificationFileEmbedded: Type<ClientCertificationFileEmbedded> = new Type<ClientCertificationFileEmbedded>("ClientCertificationFileEmbedded");
 export interface ClientCertificationFileEmbedded extends Entities.EmbeddedEntity {
   Type: "ClientCertificationFileEmbedded";
   fullFilePath: string;
@@ -34,7 +34,7 @@ export interface EmailAddressEmbedded extends Entities.EmbeddedEntity {
   displayName: string | null;
 }
 
-export const EmailAttachmentEmbedded = new Type<EmailAttachmentEmbedded>("EmailAttachmentEmbedded");
+export const EmailAttachmentEmbedded: Type<EmailAttachmentEmbedded> = new Type<EmailAttachmentEmbedded>("EmailAttachmentEmbedded");
 export interface EmailAttachmentEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailAttachmentEmbedded";
   type: EmailAttachmentType;
@@ -42,12 +42,12 @@ export interface EmailAttachmentEmbedded extends Entities.EmbeddedEntity {
   contentId: string;
 }
 
-export const EmailAttachmentType = new EnumType<EmailAttachmentType>("EmailAttachmentType");
+export const EmailAttachmentType: EnumType<EmailAttachmentType> = new EnumType<EmailAttachmentType>("EmailAttachmentType");
 export type EmailAttachmentType =
   "Attachment" |
   "LinkedResource";
 
-export const EmailConfigurationEmbedded = new Type<EmailConfigurationEmbedded>("EmailConfigurationEmbedded");
+export const EmailConfigurationEmbedded: Type<EmailConfigurationEmbedded> = new Type<EmailConfigurationEmbedded>("EmailConfigurationEmbedded");
 export interface EmailConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "EmailConfigurationEmbedded";
   defaultCulture: Basics.CultureInfoEntity;
@@ -65,13 +65,13 @@ export module EmailFileType {
   export const Attachment : Files.FileTypeSymbol = registerSymbol("FileType", "EmailFileType.Attachment");
 }
 
-export const EmailFromEmbedded = new Type<EmailFromEmbedded>("EmailFromEmbedded");
+export const EmailFromEmbedded: Type<EmailFromEmbedded> = new Type<EmailFromEmbedded>("EmailFromEmbedded");
 export interface EmailFromEmbedded extends EmailAddressEmbedded {
   Type: "EmailFromEmbedded";
   azureUserId: string /*Guid*/ | null;
 }
 
-export const EmailMessageEntity = new Type<EmailMessageEntity>("EmailMessage");
+export const EmailMessageEntity: Type<EmailMessageEntity> = new Type<EmailMessageEntity>("EmailMessage");
 export interface EmailMessageEntity extends Entities.Entity {
   Type: "EmailMessage";
   recipients: Entities.MList<EmailRecipientEmbedded>;
@@ -96,12 +96,12 @@ export interface EmailMessageEntity extends Entities.Entity {
 }
 
 export module EmailMessageMessage {
-  export const TheEmailMessageCannotBeSentFromState0 = new MessageKey("EmailMessageMessage", "TheEmailMessageCannotBeSentFromState0");
-  export const Message = new MessageKey("EmailMessageMessage", "Message");
-  export const Messages = new MessageKey("EmailMessageMessage", "Messages");
-  export const RemainingMessages = new MessageKey("EmailMessageMessage", "RemainingMessages");
-  export const ExceptionMessages = new MessageKey("EmailMessageMessage", "ExceptionMessages");
-  export const _01requiresExtraParameters = new MessageKey("EmailMessageMessage", "_01requiresExtraParameters");
+  export const TheEmailMessageCannotBeSentFromState0: MessageKey = new MessageKey("EmailMessageMessage", "TheEmailMessageCannotBeSentFromState0");
+  export const Message: MessageKey = new MessageKey("EmailMessageMessage", "Message");
+  export const Messages: MessageKey = new MessageKey("EmailMessageMessage", "Messages");
+  export const RemainingMessages: MessageKey = new MessageKey("EmailMessageMessage", "RemainingMessages");
+  export const ExceptionMessages: MessageKey = new MessageKey("EmailMessageMessage", "ExceptionMessages");
+  export const _01requiresExtraParameters: MessageKey = new MessageKey("EmailMessageMessage", "_01requiresExtraParameters");
 }
 
 export module EmailMessageOperation {
@@ -114,7 +114,7 @@ export module EmailMessageOperation {
   export const Delete : Operations.DeleteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Delete");
 }
 
-export const EmailMessageState = new EnumType<EmailMessageState>("EmailMessageState");
+export const EmailMessageState: EnumType<EmailMessageState> = new EnumType<EmailMessageState>("EmailMessageState");
 export type EmailMessageState =
   "Created" |
   "Draft" |
@@ -126,25 +126,25 @@ export type EmailMessageState =
   "Received" |
   "Outdated";
 
-export const EmailModelEntity = new Type<EmailModelEntity>("EmailModel");
+export const EmailModelEntity: Type<EmailModelEntity> = new Type<EmailModelEntity>("EmailModel");
 export interface EmailModelEntity extends Entities.Entity {
   Type: "EmailModel";
   fullClassName: string;
 }
 
-export const EmailRecipientEmbedded = new Type<EmailRecipientEmbedded>("EmailRecipientEmbedded");
+export const EmailRecipientEmbedded: Type<EmailRecipientEmbedded> = new Type<EmailRecipientEmbedded>("EmailRecipientEmbedded");
 export interface EmailRecipientEmbedded extends EmailAddressEmbedded {
   Type: "EmailRecipientEmbedded";
   kind: EmailRecipientKind;
 }
 
-export const EmailRecipientKind = new EnumType<EmailRecipientKind>("EmailRecipientKind");
+export const EmailRecipientKind: EnumType<EmailRecipientKind> = new EnumType<EmailRecipientKind>("EmailRecipientKind");
 export type EmailRecipientKind =
   "To" |
   "Cc" |
   "Bcc";
 
-export const EmailSenderConfigurationEntity = new Type<EmailSenderConfigurationEntity>("EmailSenderConfiguration");
+export const EmailSenderConfigurationEntity: Type<EmailSenderConfigurationEntity> = new Type<EmailSenderConfigurationEntity>("EmailSenderConfiguration");
 export interface EmailSenderConfigurationEntity extends Entities.Entity {
   Type: "EmailSenderConfiguration";
   name: string;
@@ -161,7 +161,7 @@ export module EmailSenderConfigurationOperation {
 export interface EmailServiceEntity extends Entities.Entity {
 }
 
-export const SmtpEmailServiceEntity = new Type<SmtpEmailServiceEntity>("SmtpEmailService");
+export const SmtpEmailServiceEntity: Type<SmtpEmailServiceEntity> = new Type<SmtpEmailServiceEntity>("SmtpEmailService");
 export interface SmtpEmailServiceEntity extends EmailServiceEntity {
   Type: "SmtpEmailService";
   deliveryFormat: External.SmtpDeliveryFormat;
@@ -170,7 +170,7 @@ export interface SmtpEmailServiceEntity extends EmailServiceEntity {
   pickupDirectoryLocation: string | null;
 }
 
-export const SmtpNetworkDeliveryEmbedded = new Type<SmtpNetworkDeliveryEmbedded>("SmtpNetworkDeliveryEmbedded");
+export const SmtpNetworkDeliveryEmbedded: Type<SmtpNetworkDeliveryEmbedded> = new Type<SmtpNetworkDeliveryEmbedded>("SmtpNetworkDeliveryEmbedded");
 export interface SmtpNetworkDeliveryEmbedded extends Entities.EmbeddedEntity {
   Type: "SmtpNetworkDeliveryEmbedded";
   host: string;

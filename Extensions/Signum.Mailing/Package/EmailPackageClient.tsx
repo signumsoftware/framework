@@ -9,7 +9,7 @@ import { EmailMessageEntity } from '../Signum.Mailing'
 
 export namespace EmailPackageClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(EmailPackageEntity, e => import('./EmailPackage')));
     Navigator.getSettings(EmailMessageEntity)!.overrideView((rep) => {
       rep.insertAfterLine(e => e.template, ctx => [

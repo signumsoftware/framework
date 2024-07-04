@@ -17,7 +17,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   }
 
 
-  getIcon(element: ToolbarResponse<T>) {
+  getIcon(element: ToolbarResponse<T>): React.ReactElement<any, string | React.JSXElementConstructor<any>> | null {
     const defaultIcon = this.getDefaultIcon();
     return ToolbarConfig.coloredIcon(parseIcon(element.iconName) ?? defaultIcon.icon, element.iconColor ?? defaultIcon.iconColor);
   }
@@ -34,7 +34,7 @@ export abstract class ToolbarConfig<T extends Entity> {
   abstract navigateTo(element: ToolbarResponse<T>): Promise<string | null>;
   abstract isCompatibleWithUrlPrio(element: ToolbarResponse<T>, location: Location, query: any): number;
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>): void {
     e.preventDefault();
     this.navigateTo(res).then(url => {
       if (url)
@@ -46,7 +46,7 @@ export abstract class ToolbarConfig<T extends Entity> {
     return true;
   }
 
-  getMenuItem(res: ToolbarResponse<T>, active: ToolbarResponse<any> | null, key: number | string, onAutoClose?: () => void) {
+  getMenuItem(res: ToolbarResponse<T>, active: ToolbarResponse<any> | null, key: number | string, onAutoClose?: () => void): React.JSX.Element {
     return (
       <ToolbarNavItem key={key}
         title={res.label}

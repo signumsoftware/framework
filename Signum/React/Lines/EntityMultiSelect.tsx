@@ -35,7 +35,7 @@ export interface EntityMultiSelectHandle {
 
 
 export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extends EntityListBaseController<EntityMultiSelectProps<V>, V> {
-  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>) {
+  overrideProps(p: EntityMultiSelectProps<V>, overridenProps: EntityMultiSelectProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     if (p.type) {
@@ -62,7 +62,7 @@ export class EntityMultiSelectController<V extends Lite<Entity> | Entity> extend
   }
 }
 
-export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
+export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V> & React.RefAttributes<EntityMultiSelectController<V>>) => React.ReactNode | null = genericForwardRef(function EntityMultiSelect<V extends Lite<Entity> | Entity>(props: EntityMultiSelectProps<V>, ref: React.Ref<EntityMultiSelectController<V>>) {
   const c = useController(EntityMultiSelectController, props, ref);
   const p = c.props;
 
@@ -148,7 +148,7 @@ export const EntityMultiSelect = genericForwardRef(function EntityMultiSelect<V 
     p.ctx.value.forEach(mle => {
       const entityOrLite = mle.element;
 
-      const lite = isEntity(entityOrLite) ? toLite(entityOrLite) : 
+      const lite: Lite<V & Entity> | (V & Lite<Entity>) | null = isEntity(entityOrLite) ? toLite(entityOrLite) : 
       isLite(entityOrLite) ? entityOrLite : null;
 
       if(lite == null)

@@ -4,7 +4,7 @@ import { AutoLine, EntityRepeater, EntityTable } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { LinkListPartEntity, LinkElementEmbedded } from '../Signum.Dashboard'
 
-export default function SearchValuePart(p : { ctx: TypeContext<LinkListPartEntity> }){
+export default function SearchValuePart(p : { ctx: TypeContext<LinkListPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
 
   return (

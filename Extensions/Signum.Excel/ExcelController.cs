@@ -6,6 +6,7 @@ using Signum.API.Filters;
 using Signum.Excel;
 using Signum.API;
 using Signum.API.Controllers;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Signum.Excel;
 
@@ -62,6 +63,8 @@ public class ExcelController : ControllerBase
     [HttpPost("api/excel/import/{queryKey}"), ProfilerActionSplitter("queryKey")]
     public IAsyncEnumerable<ImportResult> ImportFromExcel(string queryKey, [Required, FromBody] ImportFromExcelRequest request)
     {
+        HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
+
         ExcelPermission.ImportFromExcel.AssertAuthorized();
 
         var qr = request.QueryRequest.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);

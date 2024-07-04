@@ -74,7 +74,7 @@ export function extractGroupFilter(filters: FilterOptionParsed[], fo: FilterGrou
   return f as FilterGroupOptionParsed;
 }
 
-export function similarToken(tokenA: string | undefined, tokenB: string | undefined) {
+export function similarToken(tokenA: string | undefined, tokenB: string | undefined): boolean {
   return (tokenA?.startsWith("Entity.") ? tokenA.after("Entity.") : tokenA) ==
     (tokenB?.startsWith("Entity.") ? tokenB.after("Entity.") : tokenB);
 }

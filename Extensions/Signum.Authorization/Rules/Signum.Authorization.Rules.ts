@@ -20,43 +20,43 @@ export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
 }
 
 export module AuthAdminMessage {
-  export const _0of1 = new MessageKey("AuthAdminMessage", "_0of1");
-  export const TypeRules = new MessageKey("AuthAdminMessage", "TypeRules");
-  export const PermissionRules = new MessageKey("AuthAdminMessage", "PermissionRules");
-  export const Allow = new MessageKey("AuthAdminMessage", "Allow");
-  export const Deny = new MessageKey("AuthAdminMessage", "Deny");
-  export const Overriden = new MessageKey("AuthAdminMessage", "Overriden");
-  export const Filter = new MessageKey("AuthAdminMessage", "Filter");
-  export const PleaseSaveChangesFirst = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
-  export const ResetChanges = new MessageKey("AuthAdminMessage", "ResetChanges");
-  export const SwitchTo = new MessageKey("AuthAdminMessage", "SwitchTo");
-  export const _0InUI = new MessageKey("AuthAdminMessage", "_0InUI");
-  export const _0InDB = new MessageKey("AuthAdminMessage", "_0InDB");
-  export const CanNotBeModified = new MessageKey("AuthAdminMessage", "CanNotBeModified");
-  export const CanNotBeModifiedBecauseIsInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsInCondition0");
-  export const CanNotBeModifiedBecauseIsNotInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotInCondition0");
-  export const CanNotBeReadBecauseIsInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsInCondition0");
-  export const CanNotBeReadBecauseIsNotInCondition0 = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsNotInCondition0");
-  export const _0RulesFor1 = new MessageKey("AuthAdminMessage", "_0RulesFor1");
-  export const TheUserStateMustBeDisabled = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
-  export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
-  export const Save = new MessageKey("AuthAdminMessage", "Save");
-  export const SelectTypeConditions = new MessageKey("AuthAdminMessage", "SelectTypeConditions");
-  export const ThereAre0TypeConditionsDefinedFor1 = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
-  export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
-  export const SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime = new MessageKey("AuthAdminMessage", "SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime");
-  export const RepeatedTypeCondition = new MessageKey("AuthAdminMessage", "RepeatedTypeCondition");
-  export const TheFollowingTypeConditionsHaveAlreadyBeenUsed = new MessageKey("AuthAdminMessage", "TheFollowingTypeConditionsHaveAlreadyBeenUsed");
-  export const Role0InheritsFromTrivialMergeRole1 = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
-  export const Role0IsTrivialMerge = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
-  export const UsedByRoles = new MessageKey("AuthAdminMessage", "UsedByRoles");
-  export const Check = new MessageKey("AuthAdminMessage", "Check");
-  export const Uncheck = new MessageKey("AuthAdminMessage", "Uncheck");
-  export const AddCondition = new MessageKey("AuthAdminMessage", "AddCondition");
-  export const RemoveCondition = new MessageKey("AuthAdminMessage", "RemoveCondition");
+  export const _0of1: MessageKey = new MessageKey("AuthAdminMessage", "_0of1");
+  export const TypeRules: MessageKey = new MessageKey("AuthAdminMessage", "TypeRules");
+  export const PermissionRules: MessageKey = new MessageKey("AuthAdminMessage", "PermissionRules");
+  export const Allow: MessageKey = new MessageKey("AuthAdminMessage", "Allow");
+  export const Deny: MessageKey = new MessageKey("AuthAdminMessage", "Deny");
+  export const Overriden: MessageKey = new MessageKey("AuthAdminMessage", "Overriden");
+  export const Filter: MessageKey = new MessageKey("AuthAdminMessage", "Filter");
+  export const PleaseSaveChangesFirst: MessageKey = new MessageKey("AuthAdminMessage", "PleaseSaveChangesFirst");
+  export const ResetChanges: MessageKey = new MessageKey("AuthAdminMessage", "ResetChanges");
+  export const SwitchTo: MessageKey = new MessageKey("AuthAdminMessage", "SwitchTo");
+  export const _0InUI: MessageKey = new MessageKey("AuthAdminMessage", "_0InUI");
+  export const _0InDB: MessageKey = new MessageKey("AuthAdminMessage", "_0InDB");
+  export const CanNotBeModified: MessageKey = new MessageKey("AuthAdminMessage", "CanNotBeModified");
+  export const CanNotBeModifiedBecauseIsInCondition0: MessageKey = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsInCondition0");
+  export const CanNotBeModifiedBecauseIsNotInCondition0: MessageKey = new MessageKey("AuthAdminMessage", "CanNotBeModifiedBecauseIsNotInCondition0");
+  export const CanNotBeReadBecauseIsInCondition0: MessageKey = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsInCondition0");
+  export const CanNotBeReadBecauseIsNotInCondition0: MessageKey = new MessageKey("AuthAdminMessage", "CanNotBeReadBecauseIsNotInCondition0");
+  export const _0RulesFor1: MessageKey = new MessageKey("AuthAdminMessage", "_0RulesFor1");
+  export const TheUserStateMustBeDisabled: MessageKey = new MessageKey("AuthAdminMessage", "TheUserStateMustBeDisabled");
+  export const _0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships: MessageKey = new MessageKey("AuthAdminMessage", "_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships");
+  export const Save: MessageKey = new MessageKey("AuthAdminMessage", "Save");
+  export const SelectTypeConditions: MessageKey = new MessageKey("AuthAdminMessage", "SelectTypeConditions");
+  export const ThereAre0TypeConditionsDefinedFor1: MessageKey = new MessageKey("AuthAdminMessage", "ThereAre0TypeConditionsDefinedFor1");
+  export const SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition: MessageKey = new MessageKey("AuthAdminMessage", "SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition");
+  export const SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime: MessageKey = new MessageKey("AuthAdminMessage", "SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime");
+  export const RepeatedTypeCondition: MessageKey = new MessageKey("AuthAdminMessage", "RepeatedTypeCondition");
+  export const TheFollowingTypeConditionsHaveAlreadyBeenUsed: MessageKey = new MessageKey("AuthAdminMessage", "TheFollowingTypeConditionsHaveAlreadyBeenUsed");
+  export const Role0InheritsFromTrivialMergeRole1: MessageKey = new MessageKey("AuthAdminMessage", "Role0InheritsFromTrivialMergeRole1");
+  export const Role0IsTrivialMerge: MessageKey = new MessageKey("AuthAdminMessage", "Role0IsTrivialMerge");
+  export const UsedByRoles: MessageKey = new MessageKey("AuthAdminMessage", "UsedByRoles");
+  export const Check: MessageKey = new MessageKey("AuthAdminMessage", "Check");
+  export const Uncheck: MessageKey = new MessageKey("AuthAdminMessage", "Uncheck");
+  export const AddCondition: MessageKey = new MessageKey("AuthAdminMessage", "AddCondition");
+  export const RemoveCondition: MessageKey = new MessageKey("AuthAdminMessage", "RemoveCondition");
 }
 
-export const AuthThumbnail = new EnumType<AuthThumbnail>("AuthThumbnail");
+export const AuthThumbnail: EnumType<AuthThumbnail> = new EnumType<AuthThumbnail>("AuthThumbnail");
 export type AuthThumbnail =
   "All" |
   "Mix" |
@@ -75,69 +75,69 @@ export module BasicPermission {
   export const AutomaticUpgradeOfOperations : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
 }
 
-export const OperationAllowed = new EnumType<OperationAllowed>("OperationAllowed");
+export const OperationAllowed: EnumType<OperationAllowed> = new EnumType<OperationAllowed>("OperationAllowed");
 export type OperationAllowed =
   "None" |
   "DBOnly" |
   "Allow";
 
-export const OperationAllowedRule = new Type<OperationAllowedRule>("OperationAllowedRule");
+export const OperationAllowedRule: Type<OperationAllowedRule> = new Type<OperationAllowedRule>("OperationAllowedRule");
 export interface OperationAllowedRule extends AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> {
   Type: "OperationAllowedRule";
 }
 
-export const OperationRulePack = new Type<OperationRulePack>("OperationRulePack");
+export const OperationRulePack: Type<OperationRulePack> = new Type<OperationRulePack>("OperationRulePack");
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
   Type: "OperationRulePack";
   type: Basics.TypeEntity;
 }
 
-export const OperationTypeEmbedded = new Type<OperationTypeEmbedded>("OperationTypeEmbedded");
+export const OperationTypeEmbedded: Type<OperationTypeEmbedded> = new Type<OperationTypeEmbedded>("OperationTypeEmbedded");
 export interface OperationTypeEmbedded extends Entities.EmbeddedEntity {
   Type: "OperationTypeEmbedded";
   operation: Operations.OperationSymbol;
   type: Basics.TypeEntity;
 }
 
-export const PermissionAllowedRule = new Type<PermissionAllowedRule>("PermissionAllowedRule");
+export const PermissionAllowedRule: Type<PermissionAllowedRule> = new Type<PermissionAllowedRule>("PermissionAllowedRule");
 export interface PermissionAllowedRule extends AllowedRule<Basics.PermissionSymbol, boolean> {
   Type: "PermissionAllowedRule";
 }
 
-export const PermissionRulePack = new Type<PermissionRulePack>("PermissionRulePack");
+export const PermissionRulePack: Type<PermissionRulePack> = new Type<PermissionRulePack>("PermissionRulePack");
 export interface PermissionRulePack extends BaseRulePack<PermissionAllowedRule> {
   Type: "PermissionRulePack";
 }
 
-export const PropertyAllowed = new EnumType<PropertyAllowed>("PropertyAllowed");
+export const PropertyAllowed: EnumType<PropertyAllowed> = new EnumType<PropertyAllowed>("PropertyAllowed");
 export type PropertyAllowed =
   "None" |
   "Read" |
   "Write";
 
-export const PropertyAllowedRule = new Type<PropertyAllowedRule>("PropertyAllowedRule");
+export const PropertyAllowedRule: Type<PropertyAllowedRule> = new Type<PropertyAllowedRule>("PropertyAllowedRule");
 export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
   Type: "PropertyAllowedRule";
 }
 
-export const PropertyRulePack = new Type<PropertyRulePack>("PropertyRulePack");
+export const PropertyRulePack: Type<PropertyRulePack> = new Type<PropertyRulePack>("PropertyRulePack");
 export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
   Type: "PropertyRulePack";
   type: Basics.TypeEntity;
 }
 
-export const QueryAllowed = new EnumType<QueryAllowed>("QueryAllowed");
+export const QueryAllowed: EnumType<QueryAllowed> = new EnumType<QueryAllowed>("QueryAllowed");
 export type QueryAllowed =
   "None" |
   "EmbeddedOnly" |
   "Allow";
 
-export const QueryAllowedRule = new Type<QueryAllowedRule>("QueryAllowedRule");
+export const QueryAllowedRule: Type<QueryAllowedRule> = new Type<QueryAllowedRule>("QueryAllowedRule");
 export interface QueryAllowedRule extends AllowedRuleCoerced<Basics.QueryEntity, QueryAllowed> {
   Type: "QueryAllowedRule";
 }
 
-export const QueryRulePack = new Type<QueryRulePack>("QueryRulePack");
+export const QueryRulePack: Type<QueryRulePack> = new Type<QueryRulePack>("QueryRulePack");
 export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
   Type: "QueryRulePack";
   type: Basics.TypeEntity;
@@ -149,27 +149,27 @@ export interface RuleEntity<R, A> extends Entities.Entity {
   allowed: A;
 }
 
-export const RuleOperationEntity = new Type<RuleOperationEntity>("RuleOperation");
+export const RuleOperationEntity: Type<RuleOperationEntity> = new Type<RuleOperationEntity>("RuleOperation");
 export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded, OperationAllowed> {
   Type: "RuleOperation";
 }
 
-export const RulePermissionEntity = new Type<RulePermissionEntity>("RulePermission");
+export const RulePermissionEntity: Type<RulePermissionEntity> = new Type<RulePermissionEntity>("RulePermission");
 export interface RulePermissionEntity extends RuleEntity<Basics.PermissionSymbol, boolean> {
   Type: "RulePermission";
 }
 
-export const RulePropertyEntity = new Type<RulePropertyEntity>("RuleProperty");
+export const RulePropertyEntity: Type<RulePropertyEntity> = new Type<RulePropertyEntity>("RuleProperty");
 export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
   Type: "RuleProperty";
 }
 
-export const RuleQueryEntity = new Type<RuleQueryEntity>("RuleQuery");
+export const RuleQueryEntity: Type<RuleQueryEntity> = new Type<RuleQueryEntity>("RuleQuery");
 export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAllowed> {
   Type: "RuleQuery";
 }
 
-export const RuleTypeConditionEntity = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
+export const RuleTypeConditionEntity: Type<RuleTypeConditionEntity> = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
 export interface RuleTypeConditionEntity extends Entities.Entity {
   Type: "RuleTypeCondition";
   ruleType: Entities.Lite<RuleTypeEntity>;
@@ -178,13 +178,13 @@ export interface RuleTypeConditionEntity extends Entities.Entity {
   order: number;
 }
 
-export const RuleTypeEntity = new Type<RuleTypeEntity>("RuleType");
+export const RuleTypeEntity: Type<RuleTypeEntity> = new Type<RuleTypeEntity>("RuleType");
 export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
   Type: "RuleType";
   conditionRules: Entities.MList<RuleTypeConditionEntity>;
 }
 
-export const TypeAllowed = new EnumType<TypeAllowed>("TypeAllowed");
+export const TypeAllowed: EnumType<TypeAllowed> = new EnumType<TypeAllowed>("TypeAllowed");
 export type TypeAllowed =
   "None" |
   "DBReadUINone" |
@@ -193,20 +193,20 @@ export type TypeAllowed =
   "DBWriteUIRead" |
   "Write";
 
-export const TypeAllowedAndConditions = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
+export const TypeAllowedAndConditions: Type<TypeAllowedAndConditions> = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
 export interface TypeAllowedAndConditions extends Entities.ModelEntity {
   Type: "TypeAllowedAndConditions";
   fallback: TypeAllowed;
   conditionRules: Entities.MList<TypeConditionRuleModel>;
 }
 
-export const TypeAllowedBasic = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
+export const TypeAllowedBasic: EnumType<TypeAllowedBasic> = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
 export type TypeAllowedBasic =
   "None" |
   "Read" |
   "Write";
 
-export const TypeAllowedRule = new Type<TypeAllowedRule>("TypeAllowedRule");
+export const TypeAllowedRule: Type<TypeAllowedRule> = new Type<TypeAllowedRule>("TypeAllowedRule");
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
   Type: "TypeAllowedRule";
   properties: AuthThumbnail | null;
@@ -215,19 +215,19 @@ export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllo
   availableConditions: Array<TypeConditionSymbol>;
 }
 
-export const TypeConditionRuleModel = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
+export const TypeConditionRuleModel: Type<TypeConditionRuleModel> = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
 export interface TypeConditionRuleModel extends Entities.ModelEntity {
   Type: "TypeConditionRuleModel";
   typeConditions: Entities.MList<TypeConditionSymbol>;
   allowed: TypeAllowed;
 }
 
-export const TypeConditionSymbol = new Type<TypeConditionSymbol>("TypeCondition");
+export const TypeConditionSymbol: Type<TypeConditionSymbol> = new Type<TypeConditionSymbol>("TypeCondition");
 export interface TypeConditionSymbol extends Basics.Symbol {
   Type: "TypeCondition";
 }
 
-export const TypeRulePack = new Type<TypeRulePack>("TypeRulePack");
+export const TypeRulePack: Type<TypeRulePack> = new Type<TypeRulePack>("TypeRulePack");
 export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
   Type: "TypeRulePack";
 }

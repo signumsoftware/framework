@@ -3,7 +3,7 @@ import { WorkflowConnectionModel, WorkflowConditionEntity, WorkflowActionEntity,
 import { AutoLine, EntityLine, TypeContext, FormGroup, EntityTable } from '@framework/Lines'
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<WorkflowConnectionModel> }) {
+export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<WorkflowConnectionModel> }): React.JSX.Element {
   var ctx = p.ctx.subCtx({ formGroupStyle: "Basic" });
   const forceUpdate = useForceUpdate();
 

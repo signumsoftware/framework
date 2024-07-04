@@ -11,7 +11,7 @@ interface CopyLinkButtonProps {
   className?: string;
 }
 
-export default function CopyLinkButton(p: CopyLinkButtonProps) {
+export default function CopyLinkButton(p: CopyLinkButtonProps): React.JSX.Element | null {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (p.entity.isNew || !supportsClipboard)

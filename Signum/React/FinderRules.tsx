@@ -33,7 +33,7 @@ import { EnumLine } from "./Lines/EnumLine";
 import { KeyNames } from "./Components";
 
 
-export function isMultiline(pr?: PropertyRoute) {
+export function isMultiline(pr?: PropertyRoute): boolean {
   if (pr == null || pr.member == null)
     return false;
 
@@ -398,7 +398,7 @@ export function getKeywords(token: QueryToken, filters?: FilterOptionParsed[]): 
   return filters.notNull().flatMap(f => getFiltersKeywords(f)).distinctBy(a => a);
 }
 
-export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
+export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken): boolean {
   if (similarToken(tokenA.fullKey, tokenB.fullKey))
     return true;
 
@@ -424,7 +424,7 @@ export function similarTokenToStr(tokenA: QueryToken, tokenB: QueryToken) {
 
 const toStringFunctionTokensCache: { [typeName: string]: string[] | null } = {};
 
-export function getToStringDependencies(tr: TypeReference) {
+export function getToStringDependencies(tr: TypeReference): string[] | null {
 
   var ti = tryGetTypeInfo(tr.name);
   if (ti == null)
@@ -706,7 +706,7 @@ export interface MultiValueProps {
   onChange: () => void;
 }
 
-export function MultiValue(p: MultiValueProps) {
+export function MultiValue(p: MultiValueProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -766,7 +766,7 @@ export function MultiValue(p: MultiValueProps) {
 }
 
 
-export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }) {
+export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type: string, onChange: () => void, vertical?: boolean }): React.JSX.Element {
   const mListEntity = React.useRef<MList<Lite<Entity>>>([]);
 
 
@@ -785,7 +785,7 @@ export function MultiEntity(p: { values: Lite<Entity>[], readOnly: boolean, type
 
 
 
-export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }) {
+export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean, onChange: () => void, label?: string }): React.JSX.Element {
   return <TextAreaLine ctx={p.ctx}
     type={{ name: "string" }}
     label={p.label}
@@ -808,7 +808,7 @@ export function FilterTextArea(p: { ctx: TypeContext<string>, isComplex: boolean
   />
 }
 
-export function ComplexConditionSyntax() {
+export function ComplexConditionSyntax(): React.JSX.Element {
   const popover = (
     <Popover id="popover-basic">
       <Popover.Header as="h3">Full-Text Search Syntax</Popover.Header>
@@ -827,6 +827,9 @@ export function ComplexConditionSyntax() {
     </OverlayTrigger>
   );
 
+}
+export declare namespace ComplexConditionSyntax {
+    export var examples: string[];
 }
 
 

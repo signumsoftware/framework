@@ -21,7 +21,7 @@ export interface UserQueryPartHandler {
   refresh: () => void;
 }
 
-export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>) {
+export default function UserQueryPart(p: PanelPartContentProps<UserQueryPartEntity>): React.JSX.Element {
 
   const [fo, setFo] = React.useState<FindOptions>();
   const [refreshKey, setRefreshKey] = React.useState<number>(0);
@@ -151,7 +151,7 @@ interface BigValueBadgeProps {
   userQuery: UserQueryEntity;
 }
 
-export function BigValueSearchCounter(p: BigValueBadgeProps) {
+export function BigValueSearchCounter(p: BigValueBadgeProps): React.JSX.Element {
 
   const vsc = React.useRef<SearchValueController>(null);
 

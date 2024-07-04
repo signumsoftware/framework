@@ -7,14 +7,14 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export const CSharpMigrationEntity = new Type<CSharpMigrationEntity>("CSharpMigration");
+export const CSharpMigrationEntity: Type<CSharpMigrationEntity> = new Type<CSharpMigrationEntity>("CSharpMigration");
 export interface CSharpMigrationEntity extends Entities.Entity {
   Type: "CSharpMigration";
   uniqueName: string;
   executionDate: string /*DateTime*/;
 }
 
-export const LoadMethodLogEntity = new Type<LoadMethodLogEntity>("LoadMethodLog");
+export const LoadMethodLogEntity: Type<LoadMethodLogEntity> = new Type<LoadMethodLogEntity>("LoadMethodLog");
 export interface LoadMethodLogEntity extends Entities.Entity {
   Type: "LoadMethodLog";
   methodName: string | null;
@@ -25,7 +25,7 @@ export interface LoadMethodLogEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export const SqlMigrationEntity = new Type<SqlMigrationEntity>("SqlMigration");
+export const SqlMigrationEntity: Type<SqlMigrationEntity> = new Type<SqlMigrationEntity>("SqlMigration");
 export interface SqlMigrationEntity extends Entities.Entity {
   Type: "SqlMigration";
   versionNumber: string;

@@ -20,15 +20,19 @@ export interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement>
 }
 
 export default class ContextMenu extends React.Component<ContextMenuProps> {
-  handleToggle = () => {
+  handleToggle = (): void => {
 
   }
 
-  getChildContext() {
+  getChildContext(): {
+      toggle: () => void;
+  } {
     return { toggle: this.handleToggle };
   }
 
-  static childContextTypes = { "toggle": PropTypes.func };
+  static childContextTypes: {
+      toggle: PropTypes.Requireable<(...args: any[]) => any>;
+  } = { "toggle": PropTypes.func };
 
   static getPositionEvent(e: React.MouseEvent<any>): ContextMenuPosition {
 
@@ -59,7 +63,7 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
     return result;
   }
 
-  render() {
+  render(): React.JSX.Element {
 
     const { position, onHide, ref, alignRight, ...props } = this.props;
 
@@ -88,18 +92,18 @@ export default class ContextMenu extends React.Component<ContextMenuProps> {
 
 
 
-  componentDidMount() {
+  componentDidMount(): void {
 
     document.addEventListener('click', this.handleDocumentClick, true);
     document.addEventListener('touchstart', this.handleDocumentClick, true);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     document.removeEventListener('click', this.handleDocumentClick, true);
     document.removeEventListener('touchstart', this.handleDocumentClick, true);
   }
 
-  handleDocumentClick = (e: MouseEvent | TouchEvent) => {
+  handleDocumentClick = (e: MouseEvent | TouchEvent): void => {
     if ((e as MouseEvent).which === 3)
       return;
 

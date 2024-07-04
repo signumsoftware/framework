@@ -14,7 +14,7 @@ import { DashboardClient } from "../DashboardClient"
 import { newLite } from '@framework/Reflection'
 import { OverlayTrigger, Popover } from "react-bootstrap";
 
-export default function DashboardPage() {
+export default function DashboardPage(): React.JSX.Element {
   const location = useLocation();
   const params = useParams() as { dashboardId: string };
 
@@ -74,7 +74,7 @@ export default function DashboardPage() {
   );
 }
 
-export function HelpIcon() {
+export function HelpIcon(): React.JSX.Element {
   const popover = (
     <Popover id="popover-basic" style={{ "--bs-popover-max-width": "unset" } as React.CSSProperties}>
       <Popover.Header as="h3">Interactive Dashboard</Popover.Header>

@@ -8,7 +8,7 @@ import { DisableOperation, DisabledMixin } from "../Signum.Basics";
 
 export namespace DisabledClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Operations.addSettings(new EntityOperationSettings(DisableOperation.Disable, {
       contextual: {

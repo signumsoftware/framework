@@ -13,14 +13,15 @@ export interface TimeLineProps extends ValueBaseProps<string | null> {
 }
 
 export class TimeLineController extends ValueBaseController<TimeLineProps, string | null>{
-  init(p: TimeLineProps) {
+  init(p: TimeLineProps): void {
     super.init(p);
     this.assertType("TimeLine", ["TimeOnly", "TimeSpan"]);
   }
 }
 
 
-export const TimeLine = React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
+export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TimeLineProps & React.RefAttributes<TimeLineController>>> =
+  React.memo(React.forwardRef(function TimeLine(props: TimeLineProps, ref: React.Ref<TimeLineController>) {
 
   const c = useController(TimeLineController, props, ref);
 
@@ -89,7 +90,7 @@ export interface TimeTextBoxProps {
   id?: string;
 }
 
-export function TimeTextBox(p: TimeTextBoxProps) {
+export function TimeTextBox(p: TimeTextBoxProps): React.JSX.Element {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
@@ -164,9 +165,11 @@ export function TimeTextBox(p: TimeTextBoxProps) {
 
 }
 
-TimeTextBox.defaultProps = {
-  durationFormat: "hh:mm:ss"
-};
+export namespace TimeTextBox {
+  export const defaultProps = {
+    durationFormat: "hh:mm:ss"
+  };
+}
 
 export function isDurationKey(e: React.KeyboardEvent<any>): boolean {
   return isNumberKey(e) || e.key == ":";

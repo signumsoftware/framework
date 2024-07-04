@@ -4,7 +4,7 @@ import { RouteObject } from "react-router";
 
 export namespace ChangeLogClient {
   
-  export function start(options: { routes: RouteObject[], applicationName: string, mainChangeLog: () => Promise<{ default: ChangeLogDic }> }) {
+  export function start(options: { routes: RouteObject[], applicationName: string, mainChangeLog: () => Promise<{ default: ChangeLogDic }> }): void {
     Options.mainChangeLog = options.mainChangeLog;
     Options.applicationName = options.applicationName;
     registerChangeLogModule("Signum", () => import("../../Changelog"))
@@ -86,7 +86,7 @@ export namespace ChangeLogClient {
     }
   }
 
-  export function registerChangeLogModule(name: string, loader: () => Promise<{ default: ChangeLogDic }>) {
+  export function registerChangeLogModule(name: string, loader: () => Promise<{ default: ChangeLogDic }>): void {
     Options.changeLogs[name] = loader;
   }
 }

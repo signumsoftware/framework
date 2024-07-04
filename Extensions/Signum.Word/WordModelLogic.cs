@@ -376,6 +376,15 @@ public static class WordModelLogic
 
     public static IWordModel CreateDefaultWordModel(WordModelEntity wordModel, ModifiableEntity? entity)
     {
-        return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType())!.Invoke(new[] { entity });
+        try
+        {
+            return (IWordModel)WordModelLogic.GetEntityConstructor(wordModel.ToType())!.Invoke(new[] { entity });
+        }
+        catch (TargetInvocationException e)
+        {
+            e.InnerException!.PreserveStackTrace();
+
+            throw e.InnerException!;
+        }
     }
 }

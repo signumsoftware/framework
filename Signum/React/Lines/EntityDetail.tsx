@@ -21,14 +21,15 @@ export interface EntityDetailProps<V extends ModifiableEntity | Lite<Entity> | n
 
 
 export class EntityDetailController<V extends ModifiableEntity | Lite<Entity> | null> extends EntityBaseController<EntityDetailProps<V>, V> {
-  getDefaultProps(p: EntityDetailProps<V>) {
+  getDefaultProps(p: EntityDetailProps<V>): void {
     super.getDefaultProps(p);
     p.viewOnCreate = false;
     p.view = false;
   }
 }
 
-export const EntityDetail = genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
+export const EntityDetail: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V> & React.RefAttributes<EntityDetailController<V>>) => React.ReactNode | null =
+  genericForwardRef(function EntityDetail<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityDetailProps<V>, ref: React.Ref<EntityDetailController<V>>) {
 
   const c = useController(EntityDetailController, props, ref);
   const p = c.props;

@@ -9,13 +9,13 @@ import { CultureClient } from '@framework/Basics/CultureClient'
 import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
 
-export default function LoginDropdown(p: {
-  renderName?: (u: UserEntity) => React.ReactChild;
+function LoginDropdown(p: {
+  renderName?: (u: UserEntity) => React.ReactElement | string | null;
   changePasswordVisible?: boolean;
   switchUserVisible?: boolean;
   profileVisible?: boolean;
-  extraMenuItems?: (user: UserEntity) => React.ReactNode;
-}) {
+  extraMenuItems?: (user: UserEntity) => React.ReactNode | undefined | null;
+}): React.JSX.Element {
 
   const currentCulture = CultureClient.currentCulture;
   const user = AuthClient.currentUser();
@@ -56,11 +56,11 @@ export default function LoginDropdown(p: {
   );
 }
 
-LoginDropdown.customLoginIcon = (user: UserEntity | null | undefined) =>
-  user ? <SmallProfilePhoto user={toLite(user)} /> :
-    <FontAwesomeIcon icon="user" className="me-1" />;
+namespace LoginDropdown {
+  export function customLoginIcon(user: UserEntity | null | undefined): React.JSX.Element {
+    return user ? <SmallProfilePhoto user={toLite(user)} /> :
+      <FontAwesomeIcon icon="user" className="me-1" />;
+  }
+}
 
-
-
-
-
+export default LoginDropdown;

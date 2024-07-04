@@ -16,7 +16,7 @@ interface AutoLineModalProps extends IModalProps<any> {
   options: AutoLineModalOptions;
 }
 
-export default function AutoLineModal(p: AutoLineModalProps) {
+function AutoLineModal(p: AutoLineModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const forceUpdate = useForceUpdate();
@@ -103,9 +103,13 @@ export default function AutoLineModal(p: AutoLineModalProps) {
   );
 }
 
-AutoLineModal.show = (options: AutoLineModalOptions): Promise<any> => {
-  return openModal<any>(<AutoLineModal options={options} />);
+namespace AutoLineModal {
+  export var show = (options: AutoLineModalOptions): Promise<any> => {
+    return openModal<any>(<AutoLineModal options={options} />);
+  }
 }
+
+export default AutoLineModal;
 
 export interface AutoLineModalOptions {
   propertyRoute?: PropertyRoute;

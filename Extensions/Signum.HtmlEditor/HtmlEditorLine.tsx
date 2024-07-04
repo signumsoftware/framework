@@ -13,7 +13,7 @@ export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draf
   htmlEditorRef?: React.Ref<HtmlEditorController>;
 }
 
-export default function HtmlEditorLine({ ctx, htmlEditorRef, ...p }: HtmlEditorLineProps) {
+export default function HtmlEditorLine({ ctx, htmlEditorRef, ...p }: HtmlEditorLineProps): React.JSX.Element {
   return (
     <ErrorBoundary>
       <div style={p.htmlAttributes?.style} className="html-editor-line">

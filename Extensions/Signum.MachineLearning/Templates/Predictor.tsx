@@ -246,7 +246,7 @@ export default React.forwardRef(function Predictor({ ctx }: { ctx: TypeContext<P
   );
 });
 
-export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded | PredictorSubQueryColumnEmbedded) {
+export function initializeColumn(p: PredictorEntity, pc: PredictorColumnEmbedded | PredictorSubQueryColumnEmbedded): React.JSX.Element {
   var token = pc.token && pc.token.token;
   if (token) {
     pc.encoding =
@@ -268,7 +268,7 @@ interface TrainingProgressComponentState {
   trainingProgress?: PredictorClient.TrainingProgress | null;
 }
 
-export function TrainingProgressComponent(p: TrainingProgressComponentProps) {
+export function TrainingProgressComponent(p: TrainingProgressComponentProps): React.JSX.Element {
 
   const tick = useInterval(500, 0, n => n + 1);
 
@@ -296,7 +296,7 @@ interface EpochProgressComponentProps {
   ctx: TypeContext<PredictorEntity>;
 }
 
-export function EpochProgressComponent(p: EpochProgressComponentProps) {
+export function EpochProgressComponent(p: EpochProgressComponentProps): React.JSX.Element {
 
   const eps = useAPI(() => PredictorClient.API.getEpochLosses(toLite(p.ctx.value)), [p.ctx.value]);
 

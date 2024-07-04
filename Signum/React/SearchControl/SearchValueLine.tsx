@@ -58,7 +58,8 @@ export interface SearchValueLineController {
   refreshValue(): void;
 }
 
-const SearchValueLine = React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
+const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & React.RefAttributes<SearchValueLineController>> =
+  React.forwardRef(function SearchValueLine(p: SearchValueLineProps, ref?: React.Ref<SearchValueLineController>) {
 
   var svRef = React.useRef<SearchValueController | null>();
 

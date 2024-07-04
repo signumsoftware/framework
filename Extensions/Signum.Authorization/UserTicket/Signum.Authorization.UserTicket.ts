@@ -7,7 +7,7 @@ import * as Entities from '../../../Signum/React/Signum.Entities'
 import * as Authorization from '../Signum.Authorization'
 
 
-export const UserTicketEntity = new Type<UserTicketEntity>("UserTicket");
+export const UserTicketEntity: Type<UserTicketEntity> = new Type<UserTicketEntity>("UserTicket");
 export interface UserTicketEntity extends Entities.Entity {
   Type: "UserTicket";
   user: Entities.Lite<Authorization.UserEntity>;

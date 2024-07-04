@@ -13,14 +13,6 @@ import { useExpand } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
 
-interface OperationMapPropsState {
-  operationMapInfo?: OperationMapInfo;
-  width?: number;
-  height?: number;
-  parsedQuery?: ParsedQueryString;
-  color?: string;
-}
-
 interface ParsedQueryString {
   color?: string;
   nodes: Nodes;
@@ -53,7 +45,7 @@ function getParsedQuery(loc: Location): ParsedQueryString {
   return result;
 }
 
-export default function OperationMapPage() {
+export default function OperationMapPage(): React.JSX.Element | null {
   const params = useParams() as { type: string };
   const location = useLocation();
 
@@ -148,7 +140,7 @@ export interface OperationMapRendererProps {
   color: string;
 }
 
-export function OperationMapRenderer(p: OperationMapRendererProps) {
+export function OperationMapRenderer(p: OperationMapRendererProps): React.JSX.Element {
 
   const svgRef = React.useRef<SVGSVGElement>(null);
   const mapD3 = React.useRef<OperationMapD3 | null>(null);

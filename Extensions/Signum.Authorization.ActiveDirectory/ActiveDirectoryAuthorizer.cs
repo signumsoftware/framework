@@ -166,7 +166,6 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                             {
                                 UpdateUser(user, dsacuCtx);
 
-
                                 if (user.State == UserState.Deactivated)
                                     throw new InvalidOperationException(LoginAuthMessage.User0IsDeactivated.NiceToString(user));
 

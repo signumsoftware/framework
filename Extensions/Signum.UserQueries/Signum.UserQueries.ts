@@ -12,13 +12,13 @@ import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
 import * as Dashboard from '../Signum.Dashboard/Signum.Dashboard'
 
 
-export const AutoUpdate = new EnumType<AutoUpdate>("AutoUpdate");
+export const AutoUpdate: EnumType<AutoUpdate> = new EnumType<AutoUpdate>("AutoUpdate");
 export type AutoUpdate =
   "None" |
   "InteractionGroup" |
   "Dashboard";
 
-export const SystemTimeEmbedded = new Type<SystemTimeEmbedded>("SystemTimeEmbedded");
+export const SystemTimeEmbedded: Type<SystemTimeEmbedded> = new Type<SystemTimeEmbedded>("SystemTimeEmbedded");
 export interface SystemTimeEmbedded extends Entities.EmbeddedEntity {
   Type: "SystemTimeEmbedded";
   mode: DynamicQuery.SystemTimeMode;
@@ -27,7 +27,7 @@ export interface SystemTimeEmbedded extends Entities.EmbeddedEntity {
   joinMode: DynamicQuery.SystemTimeJoinMode | null;
 }
 
-export const UserQueryEntity = new Type<UserQueryEntity>("UserQuery");
+export const UserQueryEntity: Type<UserQueryEntity> = new Type<UserQueryEntity>("UserQuery");
 export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserQuery";
   query: Basics.QueryEntity;
@@ -50,7 +50,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
 }
 
-export const UserQueryLiteModel = new Type<UserQueryLiteModel>("UserQueryLiteModel");
+export const UserQueryLiteModel: Type<UserQueryLiteModel> = new Type<UserQueryLiteModel>("UserQueryLiteModel");
 export interface UserQueryLiteModel extends Entities.ModelEntity {
   Type: "UserQueryLiteModel";
   displayName: string;
@@ -59,17 +59,17 @@ export interface UserQueryLiteModel extends Entities.ModelEntity {
 }
 
 export module UserQueryMessage {
-  export const Edit = new MessageKey("UserQueryMessage", "Edit");
-  export const CreateNew = new MessageKey("UserQueryMessage", "CreateNew");
-  export const BackToDefault = new MessageKey("UserQueryMessage", "BackToDefault");
-  export const ApplyChanges = new MessageKey("UserQueryMessage", "ApplyChanges");
-  export const Use0ToFilterCurrentEntity = new MessageKey("UserQueryMessage", "Use0ToFilterCurrentEntity");
-  export const Preview = new MessageKey("UserQueryMessage", "Preview");
-  export const MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0 = new MessageKey("UserQueryMessage", "MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0");
-  export const MakesThe0AvailableAsAQuickLinkOf1 = new MessageKey("UserQueryMessage", "MakesThe0AvailableAsAQuickLinkOf1");
-  export const TheSelected0 = new MessageKey("UserQueryMessage", "TheSelected0");
-  export const Date = new MessageKey("UserQueryMessage", "Date");
-  export const Pagination = new MessageKey("UserQueryMessage", "Pagination");
+  export const Edit: MessageKey = new MessageKey("UserQueryMessage", "Edit");
+  export const CreateNew: MessageKey = new MessageKey("UserQueryMessage", "CreateNew");
+  export const BackToDefault: MessageKey = new MessageKey("UserQueryMessage", "BackToDefault");
+  export const ApplyChanges: MessageKey = new MessageKey("UserQueryMessage", "ApplyChanges");
+  export const Use0ToFilterCurrentEntity: MessageKey = new MessageKey("UserQueryMessage", "Use0ToFilterCurrentEntity");
+  export const Preview: MessageKey = new MessageKey("UserQueryMessage", "Preview");
+  export const MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0: MessageKey = new MessageKey("UserQueryMessage", "MakesThe0AvailableForCustomDrilldownsAndInContextualMenuWhenGrouping0");
+  export const MakesThe0AvailableAsAQuickLinkOf1: MessageKey = new MessageKey("UserQueryMessage", "MakesThe0AvailableAsAQuickLinkOf1");
+  export const TheSelected0: MessageKey = new MessageKey("UserQueryMessage", "TheSelected0");
+  export const Date: MessageKey = new MessageKey("UserQueryMessage", "Date");
+  export const Pagination: MessageKey = new MessageKey("UserQueryMessage", "Pagination");
 }
 
 export module UserQueryOperation {
@@ -77,7 +77,7 @@ export module UserQueryOperation {
   export const Delete : Operations.DeleteSymbol<UserQueryEntity> = registerSymbol("Operation", "UserQueryOperation.Delete");
 }
 
-export const UserQueryPartEntity = new Type<UserQueryPartEntity>("UserQueryPart");
+export const UserQueryPartEntity: Type<UserQueryPartEntity> = new Type<UserQueryPartEntity>("UserQueryPart");
 export interface UserQueryPartEntity extends Entities.Entity, Dashboard.IPartEntity {
   Type: "UserQueryPart";
   userQuery: UserQueryEntity;
@@ -92,7 +92,7 @@ export interface UserQueryPartEntity extends Entities.Entity, Dashboard.IPartEnt
   requiresTitle: boolean;
 }
 
-export const UserQueryPartRenderMode = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
+export const UserQueryPartRenderMode: EnumType<UserQueryPartRenderMode> = new EnumType<UserQueryPartRenderMode>("UserQueryPartRenderMode");
 export type UserQueryPartRenderMode =
   "SearchControl" |
   "BigValue";
@@ -101,7 +101,7 @@ export module UserQueryPermission {
   export const ViewUserQuery : Basics.PermissionSymbol = registerSymbol("Permission", "UserQueryPermission.ViewUserQuery");
 }
 
-export const ValueUserQueryElementEmbedded = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
+export const ValueUserQueryElementEmbedded: Type<ValueUserQueryElementEmbedded> = new Type<ValueUserQueryElementEmbedded>("ValueUserQueryElementEmbedded");
 export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   Type: "ValueUserQueryElementEmbedded";
   label: string | null;
@@ -110,7 +110,7 @@ export interface ValueUserQueryElementEmbedded extends Entities.EmbeddedEntity {
   href: string | null;
 }
 
-export const ValueUserQueryListPartEntity = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
+export const ValueUserQueryListPartEntity: Type<ValueUserQueryListPartEntity> = new Type<ValueUserQueryListPartEntity>("ValueUserQueryListPart");
 export interface ValueUserQueryListPartEntity extends Entities.Entity, Dashboard.IPartEntity {
   Type: "ValueUserQueryListPart";
   userQueries: Entities.MList<ValueUserQueryElementEmbedded>;

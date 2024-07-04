@@ -98,7 +98,7 @@ export function inferActive(r: ToolbarResponse<any>, location: Location, query: 
 }
 
 
-export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse<any> | null, key: string | number, onRefresh: () => void, onAutoClose?: () => void) {
+export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse<any> | null, key: string | number, onRefresh: () => void, onAutoClose?: () => void): React.JSX.Element {
 
   switch (res.type) {
     case "Divider":
@@ -196,7 +196,7 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
   );
 }
 
-export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }) {
+export function ToolbarNavItem(p: { title: string | undefined, active?: boolean, isExternalLink?: boolean, extraIcons?: React.ReactElement, onClick: (e: React.MouseEvent) => void, icon?: React.ReactNode, onAutoCloseExtraIcons?: () => void }): React.JSX.Element {
   return (
     <li className="nav-item d-flex">
       <Nav.Link title={p.title} onClick={p.onClick} onAuxClick={p.onClick} active={p.active} className="d-flex w-100">

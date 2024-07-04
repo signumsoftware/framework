@@ -14,7 +14,7 @@ import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
 
 const CurrentEntityKey = "[CurrentEntity]";
-export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }){
+export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
   const entity = ctx.value;

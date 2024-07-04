@@ -32,6 +32,7 @@ export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entit
   data?: Lite<Entity>[];
   columnCount?: number | null;
   columnWidth?: number | null;
+  elementsHtmlAttributes?: React.HTMLAttributes<any>;
   avoidFieldSet?: boolean | HeaderType;
   deps?: React.DependencyList;
   onRenderCheckbox?: (ric: RenderCheckboxItemContext<V>) => React.ReactElement;
@@ -45,7 +46,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
 
   refresh: number = 0;
 
-  getDefaultProps(state: EntityCheckboxListProps<V>) {
+  getDefaultProps(state: EntityCheckboxListProps<V>): void {
     super.getDefaultProps(state);
 
     if (state.ctx.value == null)
@@ -70,7 +71,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
     return new TypeContext(this.props.ctx, undefined, pr, new ReadonlyBinding(embedded, ""));
   }
 
-  handleOnChange = async (event: React.SyntheticEvent, lite: Lite<Entity>) => {
+  handleOnChange = async (event: React.SyntheticEvent, lite: Lite<Entity>): Promise<void> => {
     const ctx = this.props.ctx!;
     const toRemove = this.getMListItemContext(ctx).filter(ctxe => is(this.getKeyEntity(ctxe.value), lite))
 
@@ -86,7 +87,7 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
     }
   }
 
-  handleCreateClick = async (event: React.SyntheticEvent<any>) => {
+  handleCreateClick = async (event: React.SyntheticEvent<any>): Promise<undefined> => {
 
     event.preventDefault();
     var pr = this.props.ctx.propertyRoute!.addMember("Indexer", "", true);
@@ -110,7 +111,8 @@ export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEnt
   }
 }
 
-export const EntityCheckboxList = genericForwardRef(function EntityCheckboxList<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V>, ref: React.Ref<EntityCheckboxListController<V>>) {
+export const EntityCheckboxList: <V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V> & React.RefAttributes<EntityCheckboxListController<V>>) => React.ReactNode | null =
+  genericForwardRef(function EntityCheckboxList<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListProps<V>, ref: React.Ref<EntityCheckboxListController<V>>) {
   const c = useController(EntityCheckboxListController, props, ref);
   const p = c.props;
 
@@ -152,7 +154,7 @@ interface EntityCheckboxListSelectProps<V extends ModifiableEntity | Lite<Entity
   controller: EntityCheckboxListController<V>;
 }
 
-export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListSelectProps<V>) {
+export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entity>>(props: EntityCheckboxListSelectProps<V>): React.JSX.Element {
 
   const c = props.controller;
   const p = c.props;
@@ -181,8 +183,11 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
     }
   }, [normalizeEmptyArray(p.data), p.type!.name, p.deps, p.findOptions && Finder.findOptionsPath(p.findOptions), c.refresh]);
 
+  
   return (
-    <div className="sf-checkbox-elements" style={getColumnStyle()}>
+    <div {...p.elementsHtmlAttributes}
+      className={classes("sf-checkbox-elements", p.elementsHtmlAttributes?.className)}
+      style={{ ...p.elementsHtmlAttributes?.style, ...getColumnStyle()}} >
       {renderContent()}
     </div>
   );

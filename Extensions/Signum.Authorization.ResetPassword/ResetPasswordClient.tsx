@@ -10,7 +10,7 @@ import { ChangeLogClient } from "@framework/Basics/ChangeLogClient";
 
 export namespace ResetPasswordClient {
   
-  export function startPublic(options: { routes: RouteObject[] }) {
+  export function startPublic(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ResetPassword", () => import("./Changelog"));
   

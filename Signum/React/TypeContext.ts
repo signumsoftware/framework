@@ -194,7 +194,7 @@ export class StyleContext {
   }
 
 
-  static bsColumnsCss(bsColumns: BsColumns) {
+  static bsColumnsCss(bsColumns: BsColumns): string {
     return [
       (bsColumns.xs ? "col-xs-" + bsColumns.xs : ""),
       (bsColumns.sm ? "col-sm-" + bsColumns.sm : ""),
@@ -451,7 +451,7 @@ export class TypeContext<T> extends StyleContext {
     return mlistItemContext(this.subCtx(property, styleOptions));
   }
 
-  get propertyPath() {
+  get propertyPath(): string | undefined {
     return this.propertyRoute && this.propertyRoute.propertyRouteType != "Root" ? this.propertyRoute.propertyPath() : undefined;
   }
 

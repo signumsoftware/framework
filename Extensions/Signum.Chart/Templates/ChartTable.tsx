@@ -17,7 +17,7 @@ interface ChartTableProps {
   onReload?: (e: React.MouseEvent<any>) => void;
 }
 
-export default function ChartTableComponent(p: ChartTableProps) {
+export default function ChartTableComponent(p: ChartTableProps): React.JSX.Element {
   function handleHeaderClick(e: React.MouseEvent<any>, col: ColumnOptionParsed) {
     var chartCol = p.chartRequest.columns.map(mle => mle.element)
       .firstOrNull(a => a.token != null && a.token.token != null && a.token.token.fullKey == col.token!.fullKey);

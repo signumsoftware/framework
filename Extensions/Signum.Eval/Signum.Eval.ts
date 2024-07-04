@@ -12,7 +12,7 @@ export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {
 }
 
 export module EvalPanelMessage {
-  export const OpenErrors = new MessageKey("EvalPanelMessage", "OpenErrors");
+  export const OpenErrors: MessageKey = new MessageKey("EvalPanelMessage", "OpenErrors");
 }
 
 export module EvalPanelPermission {

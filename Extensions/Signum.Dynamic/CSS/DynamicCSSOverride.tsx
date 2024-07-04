@@ -4,7 +4,7 @@ import CSSCodeMirror from '../../Signum.CodeMirror/CSSCodeMirror'
 import { useForceUpdate } from '@framework/Hooks'
 import { DynamicCSSOverrideEntity } from '../Signum.Dynamic.CSS';
 
-export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<DynamicCSSOverrideEntity> }){
+export default function DynamicCSSOverrideComponent(p : { ctx: TypeContext<DynamicCSSOverrideEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleCodeChange(newScript: string) {
     const entity = p.ctx.value;

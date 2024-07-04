@@ -61,7 +61,7 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 
 export namespace WorkflowClient {
   
-  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
+  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }): void {
   
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(WorkflowEntity);
@@ -484,7 +484,7 @@ export namespace WorkflowClient {
     return `/workflow/activityMonitor/${workflow.id}`;
   }
   
-  export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
+  export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy): React.JSX.Element {
     return "/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
   }
   
@@ -495,7 +495,7 @@ export namespace WorkflowClient {
     return activity && TypeContext.root(activity, undefined, ctx);
   }
   
-  export function getDefaultInboxUrl() {
+  export function getDefaultInboxUrl(): React.JSX.Element {
     return Finder.findOptionsPath({
       queryName: CaseActivityQuery.Inbox,
       filterOptions: [{
@@ -506,7 +506,7 @@ export namespace WorkflowClient {
     });
   }
   
-  export function showWorkflowTransitionContextCodeHelp() {
+  export function showWorkflowTransitionContextCodeHelp(): React.JSX.Element {
   
     var value = `public CaseActivityEntity PreviousCaseActivity { get; internal set; }
   public DecisionResult? DecisionResult { get; internal set; }
@@ -733,7 +733,7 @@ export namespace WorkflowClient {
   
   const intFormatter = toNumberFormat("D");
   
-  export function formatDuration(d: Duration) {
+  export function formatDuration(d: Duration): React.JSX.Element {
   
     var a = {
       years: "yr",

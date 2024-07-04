@@ -11,7 +11,7 @@ interface ShowCodeModalProps extends IModalProps<undefined> {
   node: BaseNode;
 }
 
-export default function ShowCodeModal(p: ShowCodeModalProps) {
+export default function ShowCodeModal(p: ShowCodeModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 

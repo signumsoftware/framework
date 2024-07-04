@@ -9,7 +9,7 @@ import { useForceUpdate } from '@framework/Hooks'
 import { EmailTemplateMessage } from '../Signum.Mailing.Templates'
 import IFrameRenderer from './IframeRenderer'
 
-export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }) {
+export default function EmailMessage(p: { ctx: TypeContext<EmailMessageEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   let ctx = p.ctx.subCtx({ formGroupStyle: "Basic", readOnly: p.ctx.value.state == "Created" || p.ctx.value.state == "Draft" ? undefined  : true });
@@ -80,7 +80,7 @@ export interface EmailMessageComponentProps {
   invalidate: () => void;
 }
 
-export function EmailMessageComponent(p: EmailMessageComponentProps) {
+export function EmailMessageComponent(p: EmailMessageComponentProps): React.JSX.Element {
   const [showPreview, setShowPreview] = React.useState(true);
 
   function handlePreviewClick(e: React.FormEvent<any>) {

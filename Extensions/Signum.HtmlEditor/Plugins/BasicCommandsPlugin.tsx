@@ -3,7 +3,7 @@ import { HtmlEditorPlugin, HtmlEditorController } from '../HtmlEditor';
 
 export default class BasicCommandsPlugin implements HtmlEditorPlugin {
 
-  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController) {
+  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): draftjs.EditorProps {
     var prevKeyCommand = props.handleKeyCommand;
     props.handleKeyCommand = (command, state, timeStamp) => {
 

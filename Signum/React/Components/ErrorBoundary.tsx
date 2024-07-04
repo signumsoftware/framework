@@ -16,16 +16,16 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     this.state = {};
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
+  componentDidCatch(error: Error, info: React.ErrorInfo): void {
     this.setState({ error, info });
   }
 
-  UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps) {
+  UNSAFE_componentWillReceiveProps(newProps: ErrorBoundaryProps): void {
     if (!depsEquals(newProps.deps, this.props.deps) && (this.state.error || this.state.info))
       this.setState({ error: undefined, info: undefined });
   }
 
-  render() {
+  render(): React.JSX.Element {
     if (this.state.error || this.state.info) {
       return (
         <div className="alert alert-danger" role="alert">
