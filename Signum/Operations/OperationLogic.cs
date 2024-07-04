@@ -6,6 +6,8 @@ using Signum.DynamicQuery.Tokens;
 using Signum.Security;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
+using System.Collections.Generic;
+using System.Xml.Linq;
 
 namespace Signum.Operations;
 
@@ -64,6 +66,17 @@ public static class OperationLogic
         allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).Push(type);
 
         return new Disposable(() => allowedTypes.Value = allowedTypes.Value.Pop());
+    }
+
+    public static IDisposable AllowSave(List<Type> types)
+    {
+        allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).PushRange(types);
+
+        return new Disposable(() => 
+        {
+            foreach (var type in types)
+                allowedTypes.Value = allowedTypes.Value.Pop();
+        });
     }
 
     public static void AssertStarted(SchemaBuilder sb)

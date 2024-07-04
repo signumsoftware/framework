@@ -14,7 +14,7 @@ import { ColorPaletteEntity } from './Signum.Chart.ColorPalette';
 
 export namespace ColorPaletteClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(ColorPaletteEntity, e => import('./ColorPalette')));
   
     Finder.registerPropertyFormatter(ColorPaletteEntity.tryPropertyRoute(a => a.categoryName),
@@ -109,13 +109,13 @@ export namespace ColorPaletteClient {
 
 }
 
-export function ColorScheme(p: { colorScheme: string }) {
+export function ColorScheme(p: { colorScheme: string }): React.JSX.Element {
   return (<div style={{ height: "20px", width: "150px", display: "inline-flex", verticalAlign: "text-bottom" }} className="me-2">
     {ColorUtils.colorSchemes[p.colorScheme]?.map(c => <div key={c} style={{ flex: "1", backgroundColor: c }} />)}
   </div>);
 }
 
-export function ColorInterpolate(p: { colorInterpolator: string }) {
+export function ColorInterpolate(p: { colorInterpolator: string }): React.JSX.Element {
 
   const inter = getColorInterpolation(p.colorInterpolator);
 

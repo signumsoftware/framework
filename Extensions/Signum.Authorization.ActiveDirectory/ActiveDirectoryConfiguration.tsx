@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { useForceUpdate } from '@framework/Hooks';
 import { ActiveDirectoryConfigurationEmbedded } from './Signum.Authorization.ActiveDirectory';
 
-export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }) {
+export default function ActiveDirectoryConfiguration(p: { ctx: TypeContext<ActiveDirectoryConfigurationEmbedded> }): React.JSX.Element {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
   const ctxb = ctx.subCtx({ formGroupStyle: "Basic" });

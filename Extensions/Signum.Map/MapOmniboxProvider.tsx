@@ -8,13 +8,13 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     return "MapOmniboxResult";
   }
 
-  icon() {
+  icon(): React.ReactElement {
     return this.coloredIcon("map", "green");
   }
 
-  renderItem(result: MapOmniboxResult): React.ReactChild[] {
+  renderItem(result: MapOmniboxResult): React.ReactNode[] {
 
-    const array: React.ReactChild[] = [];
+    const array: React.ReactNode[] = [];
 
     array.push(this.icon());
 
@@ -27,7 +27,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     return array;
   }
 
-  navigateTo(result: MapOmniboxResult) {
+  navigateTo(result: MapOmniboxResult): Promise<string> | undefined {
 
     if (result.keywordMatch == undefined)
       return undefined;
@@ -35,7 +35,7 @@ export default class MapOmniboxProvider extends OmniboxProvider<MapOmniboxResult
     return Promise.resolve("/Map" + (result.typeName ? "/" + result.typeName : ""));
   }
 
-  toString(result: MapOmniboxResult) {
+  toString(result: MapOmniboxResult): string {
     if (result.typeMatch == undefined)
       return result.keywordMatch.text;
 

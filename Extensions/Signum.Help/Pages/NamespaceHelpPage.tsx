@@ -15,7 +15,7 @@ import { classes } from '@framework/Globals';
 import { Shortcut } from './TypeHelpPage'
 
 
-export default function NamespaceHelpPage() {
+export default function NamespaceHelpPage(): React.JSX.Element {
   const params = useParams() as { namespace: string };
 
   var [count, setCount] = React.useState(0);

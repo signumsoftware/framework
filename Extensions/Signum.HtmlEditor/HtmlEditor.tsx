@@ -64,7 +64,7 @@ export class HtmlEditorController {
       this.decorators.length == 0 ? undefined : new draftjs.CompositeDecorator(this.decorators));
   }
 
-  init(p: HtmlEditorControllerProps) {
+  init(p: HtmlEditorControllerProps): void {
 
     this.binding = p.binding;
     this.readOnly = p.readOnly;
@@ -113,7 +113,7 @@ export class HtmlEditorController {
     }, [p.innerRef]);
   }
 
-  saveHtml() {
+  saveHtml(): void {
     if (!this.readOnly) {
       var newContent = this.editorState.getCurrentContent();
       if (newContent != this.initialContentState) {
@@ -138,7 +138,8 @@ export class HtmlEditorController {
 }
 
 
-export default React.forwardRef(function HtmlEditor({
+const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & Partial<draftjs.EditorProps> & React.RefAttributes<HtmlEditorController>>
+  = React.forwardRef(function HtmlEditor({
   readOnly,
   small,
   binding,
@@ -250,6 +251,8 @@ export default React.forwardRef(function HtmlEditor({
     </>
   );
 });
+
+export default HtmlEditor;
 
 const defaultToolbarButtons = (c: HtmlEditorController) => <div className="sf-draft-toolbar">
   <InlineStyleButton controller={c} style="BOLD" icon="bold" title="Bold (Ctrl + B)" />

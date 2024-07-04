@@ -18,7 +18,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     super(type);
   }
 
-  getIcon(element: ToolbarResponse<QueryEntity>) {
+  getIcon(element: ToolbarResponse<QueryEntity>): React.JSX.Element | null {
 
     if (element.showCount != null) {
       return (
@@ -43,7 +43,7 @@ export default class QueryToolbarConfig extends ToolbarConfig<QueryEntity> {
     });
   }
 
-  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>) {
+  handleNavigateClick(e: React.MouseEvent<any>, res: ToolbarResponse<any>): void {
     if (!res.openInPopup)
       super.handleNavigateClick(e, res);
     else {
@@ -68,7 +68,7 @@ interface CountIconProps {
   showCount: ShowCount;
 }
 
-export function SearchToolbarCount(p: CountIconProps) {
+export function SearchToolbarCount(p: CountIconProps): React.JSX.Element {
 
   const deps = useInterval(p.autoRefreshPeriod == null ? null : p.autoRefreshPeriod! * 1000, 0, a => a + 1);
 
@@ -90,7 +90,7 @@ export function SearchToolbarCount(p: CountIconProps) {
 }
 
 
-export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }) {
+export function ToolbarCount(p: { num: number | null | undefined, showCount: ShowCount }): React.JSX.Element | null {
 
   if (!p.num && p.showCount == "MoreThan0")
     return null;

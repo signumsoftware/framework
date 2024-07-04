@@ -17,7 +17,11 @@ interface ErrorModalProps extends Modals.IModalProps<undefined> {
   error: any;
 }
 
-export default function ErrorModal(p: ErrorModalProps) {
+const ErrorModal: {
+  (p: ErrorModalProps): React.JSX.Element;
+  register: () => void;
+  showErrorModal: (error: any) => Promise<void>;
+} = function (p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
 
@@ -47,14 +51,14 @@ export default function ErrorModal(p: ErrorModalProps) {
                   renderTitle(e)
           }
         </h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCloseClicked} />
       </div>
 
       <div className="modal-body">
         {se ? ErrorModalOptions.renderServiceMessage(se) :
           ve ? ErrorModalOptions.renderValidationMessage(ve) :
             ese ? ErrorModalOptions.renderExternalServiceMessage(ese) :
-            ErrorModalOptions.renderMessage(e)}
+              ErrorModalOptions.renderMessage(e)}
       </div>
 
       <div className="modal-footer">
@@ -102,7 +106,7 @@ export default function ErrorModal(p: ErrorModalProps) {
   }
 }
 
-
+export default ErrorModal;
 
 var lastError: { model: ClientErrorModel, date: Date } | undefined;
 
@@ -206,7 +210,7 @@ function textDanger(message: string | null | undefined): React.ReactFragment | n
   return message;
 }
 
-export function RenderServiceMessageDefault(p: { error: ServiceError }) {
+export function RenderServiceMessageDefault(p: { error: ServiceError }): React.JSX.Element {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -227,7 +231,7 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }) {
   );
 }
 
-export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }) {
+export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceError }): React.JSX.Element {
 
   const [showDetails, setShowDetails] = React.useState(false);
 
@@ -248,7 +252,7 @@ export function RenderExternalServiceMessageDefault(p: { error: ExternalServiceE
   );
 }
 
-export function RenderValidationMessageDefault(p: { error: ValidationError }) {
+export function RenderValidationMessageDefault(p: { error: ValidationError }): React.JSX.Element {
   return (
     <div>
       {textDanger(Dic.getValues(p.error.modelState).join("\n"))}
@@ -256,7 +260,7 @@ export function RenderValidationMessageDefault(p: { error: ValidationError }) {
   );
 }
 
-export function RenderMessageDefault(p: { error: any }) {
+export function RenderMessageDefault(p: { error: any }): React.JSX.Element {
   const e = p.error;
   return (
     <div>
@@ -270,7 +274,7 @@ export namespace ErrorModalOptions {
     return undefined;
   }
 
-  export function isExceptionViewable() {
+  export function isExceptionViewable(): boolean {
     return false;
   }
 

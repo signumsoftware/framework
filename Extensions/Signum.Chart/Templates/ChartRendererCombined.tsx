@@ -27,7 +27,7 @@ export interface ChartRendererCombinedInfo {
   memo: MemoRepository;
 } 
 
-export default function ChartRendererCombined(p: ChartRendererCombinedProps) {
+export default function ChartRendererCombined(p: ChartRendererCombinedProps): React.JSX.Element {
 
   return (
     <FullscreenComponent onReload={p.onReload} >

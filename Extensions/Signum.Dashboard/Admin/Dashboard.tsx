@@ -20,7 +20,7 @@ import { EntityOperationContext } from '@framework/Operations';
 import QueryTokenEntityBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder';
 import { SubTokensOptions } from '@framework/FindOptions';
 
-export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
+export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleEntityTypeChange() {
     if (!p.ctx.value.entityType)
@@ -235,7 +235,7 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }) {
   }
 }
 
-export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }) {
+export function IsQueryCachedLine(p: { ctx: TypeContext<boolean> }): React.JSX.Element {
   const forceUpate = useForceUpdate();
   return <CheckboxLine ctx={p.ctx} label={<span className={classes("fw-bold", p.ctx.value ? "text-success" : "text-danger")}> {p.ctx.niceName()}</span>} inlineCheckbox="block" onChange={forceUpate} />
 }

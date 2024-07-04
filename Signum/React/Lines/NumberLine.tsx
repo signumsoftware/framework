@@ -19,7 +19,8 @@ export interface NumberLineProps extends ValueBaseProps<number | null> {
 export class NumberLineController extends ValueBaseController<NumberLineProps, number | null>{
 }
 
-export const NumberLine = React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {
+export const NumberLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<NumberLineProps & React.RefAttributes<NumberLineController>>> =
+  React.memo(React.forwardRef(function NumberLine(props: NumberLineProps, ref: React.Ref<NumberLineController>) {
 
   const c = useController(NumberLineController, props, ref);
 
@@ -120,7 +121,7 @@ function getLocaleSeparators(locale: string) {
 }
 
 
-export function NumberBox(p: NumberBoxProps) {
+export function NumberBox(p: NumberBoxProps): React.JSX.Element {
 
   const [text, setText] = React.useState<string | undefined>(undefined);
 
@@ -208,7 +209,7 @@ export function NumberBox(p: NumberBoxProps) {
   }
 }
 
-export function isNumberKey(e: React.KeyboardEvent<any>) {
+export function isNumberKey(e: React.KeyboardEvent<any>): boolean {
   const c = e.key;
   return ((c >= '0' && c <= '9' && !e.shiftKey) /*0-9*/ ||
     (c == KeyNames.enter) ||

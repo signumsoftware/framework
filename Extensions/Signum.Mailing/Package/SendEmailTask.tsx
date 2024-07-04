@@ -8,7 +8,7 @@ import { useAPI, useForceUpdate } from '@framework/Hooks'
 import { EmaiTemplateTargetFrom, SendEmailTaskEntity } from './Signum.Mailing.Package'
 import { UserQueryEntity } from '../../Signum.UserQueries/Signum.UserQueries'
 
-export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity> }) {
+export default function SendEmailTask(p: { ctx: TypeContext<SendEmailTaskEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

@@ -17,7 +17,7 @@ export interface StyleOptionsExpression {
 export const formSize: FormSize[] = ["xs", "sm", "md", "lg"];
 export const formGroupStyle: FormGroupStyle[] = ["None", "Basic", "BasicDown", "SrOnly", "LabelColumns"];
 
-export function subCtx(dn: any /*DesignerNode<BaseNode>*/, ctx: TypeContext<ModifiableEntity>, field: string | undefined, soe: StyleOptionsExpression | undefined) {
+export function subCtx(dn: any /*DesignerNode<BaseNode>*/, ctx: TypeContext<ModifiableEntity>, field: string | undefined, soe: StyleOptionsExpression | undefined): React.JSX.Element {
   if (field == undefined && soe == undefined)
     return ctx;
 

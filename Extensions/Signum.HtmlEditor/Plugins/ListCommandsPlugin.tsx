@@ -5,7 +5,7 @@ import { ContentBlock, EditorState, genKey, getDefaultKeyBinding, KeyBindingUtil
 
 export default class ListCommandsPlugin implements HtmlEditorPlugin {
 
-  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController) {
+  expandEditorProps?(props: draftjs.EditorProps, controller: HtmlEditorController): draftjs.EditorProps {
     var prevKeyCommand = props.handleKeyCommand;
     props.handleKeyCommand = (command, state, timeStamp) => {
 

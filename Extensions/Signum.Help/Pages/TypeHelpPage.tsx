@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTitle } from '@framework/AppContext'
 import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
-export default function TypeHelpPage() {
+export default function TypeHelpPage(): React.JSX.Element {
   const params = useParams() as { cleanName: string };
 
   var hash = useHash();
@@ -236,7 +236,7 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
   return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
 }
 
-export function Shortcut(p: { text: string; }) {
+export function Shortcut(p: { text: string; }): React.JSX.Element {
 
   const supportsClipboard = (navigator.clipboard && window.isSecureContext);
   if (!supportsClipboard)

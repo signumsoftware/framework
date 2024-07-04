@@ -7,9 +7,9 @@ import { ViewReplacer } from './Frames/ReactVisitor'
 import { EntityLine, EntityCombo, EntityDetail, EntityStrip, TypeContext, EntityCheckboxList, EnumCheckboxList, EntityTable, PropertyRoute } from './Lines'
 import { AutoLine } from './Lines/AutoLine'
 
-export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }) {
+export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<ModifiableEntity>, viewName?: string }): React.ReactNode {
   const subContexts = subContext(ctx);
-  const components = subContexts.filter(ctx => ctx.propertyRoute?.member?.name != "Id").map(ctx => <AutoLine ctx={ ctx}/>).filter(a => !!a).map(a => a!);
+  const components = subContexts.filter(ctx => ctx.propertyRoute?.member?.name != "Id").map(ctx => <AutoLine ctx={ctx} />).filter(a => !!a).map(a => a!);
   const result = React.createElement("div", undefined, ...components);
   const es = Navigator.getSettings(ctx.value.Type);
 
@@ -29,7 +29,6 @@ export default function AutoComponent({ ctx, viewName }: { ctx: TypeContext<Modi
 
     return result;
   }
-}
+};
 
-
-AutoComponent.withViewOverrides = true;
+(AutoComponent as any).withViewOverrides = true;

@@ -15,7 +15,7 @@ import { ToolbarCount } from '../QueryToolbarConfig';
 import { PermissionSymbol } from '@framework/Signum.Basics';
 import { IconColor } from '../ToolbarConfig';
 
-export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }) {
+export default function Toolbar(p: { ctx: TypeContext<ToolbarEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const ctx3 = ctx.subCtx({ labelColumns: 3 });
   return (
@@ -55,7 +55,7 @@ function getDefaultIcon(ti: TypeInfo): IconColor | null {
   return  conf.first().getDefaultIcon();
 }
 
-export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }) {
+export function ToolbarElementTable({ ctx }: { ctx: TypeContext<MList<ToolbarElementEmbedded>> }): React.JSX.Element {
 
   function selectContentType(filter: (ti: TypeInfo) => boolean) {
     const pr = ctx.memberInfo(ml => ml[0].element.content);

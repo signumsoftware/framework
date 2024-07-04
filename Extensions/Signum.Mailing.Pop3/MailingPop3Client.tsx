@@ -10,7 +10,7 @@ import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3'
 
 export namespace MailingPop3Client {
   
-  export function start(options: {  routes: RouteObject[] }) {
+  export function start(options: {  routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(Pop3EmailReceptionServiceEntity, e => import('./Pop3EmailReceptionService')));
   

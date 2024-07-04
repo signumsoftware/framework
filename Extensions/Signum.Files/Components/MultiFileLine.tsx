@@ -32,7 +32,7 @@ interface MultiFileLineProps<V extends ModifiableEntity/* & IFile*/ | Lite</*IFi
 
 export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileLineProps<V>, V> {
 
-  overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>) {
+  overrideProps(p: MultiFileLineProps<V>, overridenProps: MultiFileLineProps<V>): void {
 
     p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
 
@@ -58,13 +58,13 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
 
   }
 
-  handleDeleteValue = (index: number) => {
+  handleDeleteValue = (index: number): void => {
     const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileLoaded = (file: IFile & ModifiableEntity): void => {
 
     if (this.props.createElementFromFile)
       this.props.createElementFromFile(file)
@@ -74,7 +74,7 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
         .then(f => this.addElement(f));
   }
 
-  renderElementViewButton(btn: boolean, entity: V, index: number) {
+  renderElementViewButton(btn: boolean, entity: V, index: number): React.JSX.Element | undefined {
 
     if (!this.canView(entity))
       return undefined;
@@ -90,7 +90,8 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
   }
 }
 
-export const MultiFileLine = genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileLineProps<V>, ref: React.Ref<MultiFileLineController<V>>) {
+export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileLineProps<V> & React.RefAttributes<MultiFileLineController<V>>) => React.ReactNode | null =
+  genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileLineProps<V>, ref: React.Ref<MultiFileLineController<V>>) {
   const c = useController(MultiFileLineController, props, ref);
   const p = c.props;
 

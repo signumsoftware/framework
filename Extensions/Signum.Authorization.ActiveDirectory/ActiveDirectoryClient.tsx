@@ -22,7 +22,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ActiveDirectoryClient {
   
-  export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }) {
+  export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ActiveDirectory", () => import("./Changelog"));
   

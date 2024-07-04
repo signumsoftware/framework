@@ -9,14 +9,14 @@ import * as ColorUtils from "../../ColorPalette/ColorUtils"
 
 
 
-export function translate(x: number, y: number) {
+export function translate(x: number, y: number): string {
   if (y == undefined)
     return 'translate(' + x + ')';
 
   return 'translate(' + x + ',' + y + ')';
 }
 
-export function scale(x: number, y: number) {
+export function scale(x: number, y: number): string {
   if (y == undefined)
     return 'scale(' + x + ')';
 

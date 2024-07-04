@@ -11,7 +11,7 @@ import { classes } from '@framework/Globals'
 import { ProcessProgressBar } from './Templates/Process'
 
 
-export default function ProcessPanelPage() {
+export default function ProcessPanelPage(): React.JSX.Element {
 
   
   const [state, reloadState] = useAPIWithReload(() => ProcessClient.API.view(), [], { avoidReset: true });

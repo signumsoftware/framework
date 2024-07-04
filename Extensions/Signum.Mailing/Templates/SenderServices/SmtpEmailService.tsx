@@ -2,7 +2,7 @@ import * as React from 'react'
 import { AutoLine, EntityRepeater, EntityDetail, PasswordLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SmtpNetworkDeliveryEmbedded, ClientCertificationFileEmbedded, SmtpEmailServiceEntity, } from '../../Signum.Mailing'
-export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }) {
+export default function SmtpEmailService(p: { ctx: TypeContext<SmtpEmailServiceEntity> }): React.JSX.Element {
   const sc = p.ctx;
 
   return (

@@ -9,7 +9,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace ViewLogClient {
   
-  export function start(options: { routes: RouteObject[], showQuickLink?: (typeName: string) => boolean }) {
+  export function start(options: { routes: RouteObject[], showQuickLink?: (typeName: string) => boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ViewLog", () => import("./Changelog"));
   

@@ -13,7 +13,7 @@ export interface FormGroupProps {
   children?: (inputId: string) => React.ReactNode;
 }
 
-export function FormGroup(p: FormGroupProps) {
+export function FormGroup(p: FormGroupProps): React.JSX.Element {
   const ctx = p.ctx;
   const controlId = React.useId();
 

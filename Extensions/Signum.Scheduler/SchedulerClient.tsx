@@ -18,7 +18,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace SchedulerClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Scheduler", () => import("./Changelog"));
   

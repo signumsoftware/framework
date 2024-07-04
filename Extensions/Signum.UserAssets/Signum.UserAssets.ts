@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export const EntityAction = new EnumType<EntityAction>("EntityAction");
+export const EntityAction: EnumType<EntityAction> = new EnumType<EntityAction>("EntityAction");
 export type EntityAction =
   "Identical" |
   "Different" |
@@ -17,7 +17,7 @@ export interface IUserAssetEntity extends Entities.Entity {
   guid: string /*Guid*/;
 }
 
-export const LiteConflictEmbedded = new Type<LiteConflictEmbedded>("LiteConflictEmbedded");
+export const LiteConflictEmbedded: Type<LiteConflictEmbedded> = new Type<LiteConflictEmbedded>("LiteConflictEmbedded");
 export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
   Type: "LiteConflictEmbedded";
   propertyRoute: string;
@@ -26,23 +26,23 @@ export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
 }
 
 export module UserAssetMessage {
-  export const ExportToXml = new MessageKey("UserAssetMessage", "ExportToXml");
-  export const ImportUserAssets = new MessageKey("UserAssetMessage", "ImportUserAssets");
-  export const ImportPreview = new MessageKey("UserAssetMessage", "ImportPreview");
-  export const SelectTheXmlFileWithTheUserAssetsThatYouWantToImport = new MessageKey("UserAssetMessage", "SelectTheXmlFileWithTheUserAssetsThatYouWantToImport");
-  export const SelectTheEntitiesToOverride = new MessageKey("UserAssetMessage", "SelectTheEntitiesToOverride");
-  export const SucessfullyImported = new MessageKey("UserAssetMessage", "SucessfullyImported");
-  export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
-  export const SameSelectionForAllConflictsOf0 = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
-  export const _0IsNotFilterable = new MessageKey("UserAssetMessage", "_0IsNotFilterable");
-  export const TheFilterOperation0isNotCompatibleWith1 = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
+  export const ExportToXml: MessageKey = new MessageKey("UserAssetMessage", "ExportToXml");
+  export const ImportUserAssets: MessageKey = new MessageKey("UserAssetMessage", "ImportUserAssets");
+  export const ImportPreview: MessageKey = new MessageKey("UserAssetMessage", "ImportPreview");
+  export const SelectTheXmlFileWithTheUserAssetsThatYouWantToImport: MessageKey = new MessageKey("UserAssetMessage", "SelectTheXmlFileWithTheUserAssetsThatYouWantToImport");
+  export const SelectTheEntitiesToOverride: MessageKey = new MessageKey("UserAssetMessage", "SelectTheEntitiesToOverride");
+  export const SucessfullyImported: MessageKey = new MessageKey("UserAssetMessage", "SucessfullyImported");
+  export const LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase: MessageKey = new MessageKey("UserAssetMessage", "LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase");
+  export const SameSelectionForAllConflictsOf0: MessageKey = new MessageKey("UserAssetMessage", "SameSelectionForAllConflictsOf0");
+  export const _0IsNotFilterable: MessageKey = new MessageKey("UserAssetMessage", "_0IsNotFilterable");
+  export const TheFilterOperation0isNotCompatibleWith1: MessageKey = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
 }
 
 export module UserAssetPermission {
   export const UserAssetsToXML : Basics.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
 }
 
-export const UserAssetPreviewLineEmbedded = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
+export const UserAssetPreviewLineEmbedded: Type<UserAssetPreviewLineEmbedded> = new Type<UserAssetPreviewLineEmbedded>("UserAssetPreviewLineEmbedded");
 export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   Type: "UserAssetPreviewLineEmbedded";
   type: Basics.TypeEntity | null;
@@ -55,7 +55,7 @@ export interface UserAssetPreviewLineEmbedded extends Entities.EmbeddedEntity {
   liteConflicts: Entities.MList<LiteConflictEmbedded>;
 }
 
-export const UserAssetPreviewModel = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
+export const UserAssetPreviewModel: Type<UserAssetPreviewModel> = new Type<UserAssetPreviewModel>("UserAssetPreviewModel");
 export interface UserAssetPreviewModel extends Entities.ModelEntity {
   Type: "UserAssetPreviewModel";
   lines: Entities.MList<UserAssetPreviewLineEmbedded>;

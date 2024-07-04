@@ -9,7 +9,7 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     return "SpecialOmniboxResult";
   }
 
-  icon() {
+  icon(): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     return this.coloredIcon("cog", "limegreen");
   }
 
@@ -26,11 +26,11 @@ export default class SpecialOmniboxProvider extends OmniboxProvider<SpecialOmnib
     return array;
   }
 
-  navigateTo(result: SpecialOmniboxResult) {
+  navigateTo(result: SpecialOmniboxResult): Promise<string | undefined> {
     return OmniboxSpecialAction.specialActions[result.key].onClick();
   }
 
-  toString(result: SpecialOmniboxResult) {
+  toString(result: SpecialOmniboxResult): string {
     return "!" + result.key;
   }
 }

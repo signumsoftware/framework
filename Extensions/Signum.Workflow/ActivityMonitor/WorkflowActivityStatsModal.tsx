@@ -20,7 +20,7 @@ interface WorkflowActivityStatsModalProps extends IModalProps<undefined> {
   activity: WorkflowActivityModel;
 }
 
-export default function WorkflowActivityStatsModal(p: WorkflowActivityStatsModalProps) {
+export default function WorkflowActivityStatsModal(p: WorkflowActivityStatsModalProps): React.JSX.Element {
 
 const [show, setShow] = React.useState<boolean>(true);
 

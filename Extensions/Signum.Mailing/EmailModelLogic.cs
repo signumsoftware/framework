@@ -387,7 +387,16 @@ public static class EmailModelLogic
 
     public static IEmailModel CreateModel(EmailModelEntity model, ModifiableEntity? entity)
     {
-        return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
+        try
+        {
+            return (IEmailModel)EmailModelLogic.GetEntityConstructor(model.ToType())!.Invoke(new[] { entity });
+        }
+        catch (TargetInvocationException e)
+        {
+            e.InnerException!.PreserveStackTrace();
+
+            throw e.InnerException!;
+        }
     }
 
     public static ConstructorInfo? GetEntityConstructor(Type emailModel)

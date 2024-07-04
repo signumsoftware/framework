@@ -26,7 +26,7 @@ interface CSSCodeMirrorProps {
   innerRef?: React.Ref<CodeMirrorComponentHandler>;
 }
 
-export default function CSSCodeMirror(p : CSSCodeMirrorProps){
+export default function CSSCodeMirror(p : CSSCodeMirrorProps): React.JSX.Element {
 
   const options = {
     lineNumbers: true,

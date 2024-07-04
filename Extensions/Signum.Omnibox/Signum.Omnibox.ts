@@ -8,23 +8,23 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 
 
 export module OmniboxMessage {
-  export const No = new MessageKey("OmniboxMessage", "No");
-  export const NotFound = new MessageKey("OmniboxMessage", "NotFound");
-  export const Omnibox_DatabaseAccess = new MessageKey("OmniboxMessage", "Omnibox_DatabaseAccess");
-  export const Omnibox_Disambiguate = new MessageKey("OmniboxMessage", "Omnibox_Disambiguate");
-  export const Omnibox_Field = new MessageKey("OmniboxMessage", "Omnibox_Field");
-  export const Omnibox_Help = new MessageKey("OmniboxMessage", "Omnibox_Help");
-  export const Omnibox_OmniboxSyntaxGuide = new MessageKey("OmniboxMessage", "Omnibox_OmniboxSyntaxGuide");
-  export const Omnibox_MatchingOptions = new MessageKey("OmniboxMessage", "Omnibox_MatchingOptions");
-  export const Omnibox_Query = new MessageKey("OmniboxMessage", "Omnibox_Query");
-  export const Omnibox_Type = new MessageKey("OmniboxMessage", "Omnibox_Type");
-  export const Omnibox_UserChart = new MessageKey("OmniboxMessage", "Omnibox_UserChart");
-  export const Omnibox_UserQuery = new MessageKey("OmniboxMessage", "Omnibox_UserQuery");
-  export const Omnibox_Dashboard = new MessageKey("OmniboxMessage", "Omnibox_Dashboard");
-  export const Omnibox_Value = new MessageKey("OmniboxMessage", "Omnibox_Value");
-  export const Unknown = new MessageKey("OmniboxMessage", "Unknown");
-  export const Yes = new MessageKey("OmniboxMessage", "Yes");
-  export const Search = new MessageKey("OmniboxMessage", "Search");
+  export const No: MessageKey = new MessageKey("OmniboxMessage", "No");
+  export const NotFound: MessageKey = new MessageKey("OmniboxMessage", "NotFound");
+  export const Omnibox_DatabaseAccess: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_DatabaseAccess");
+  export const Omnibox_Disambiguate: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Disambiguate");
+  export const Omnibox_Field: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Field");
+  export const Omnibox_Help: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Help");
+  export const Omnibox_OmniboxSyntaxGuide: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_OmniboxSyntaxGuide");
+  export const Omnibox_MatchingOptions: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_MatchingOptions");
+  export const Omnibox_Query: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Query");
+  export const Omnibox_Type: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Type");
+  export const Omnibox_UserChart: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_UserChart");
+  export const Omnibox_UserQuery: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_UserQuery");
+  export const Omnibox_Dashboard: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Dashboard");
+  export const Omnibox_Value: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_Value");
+  export const Unknown: MessageKey = new MessageKey("OmniboxMessage", "Unknown");
+  export const Yes: MessageKey = new MessageKey("OmniboxMessage", "Yes");
+  export const Search: MessageKey = new MessageKey("OmniboxMessage", "Search");
 }
 
 export module OmniboxPermission {

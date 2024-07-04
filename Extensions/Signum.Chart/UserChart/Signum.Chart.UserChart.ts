@@ -15,14 +15,14 @@ import { ChartRequestModel } from '../Signum.Chart'
 
 export type IChartBase = ChartRequestModel | UserChartEntity;
 
-export const CombinedUserChartElementEmbedded = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
+export const CombinedUserChartElementEmbedded: Type<CombinedUserChartElementEmbedded> = new Type<CombinedUserChartElementEmbedded>("CombinedUserChartElementEmbedded");
 export interface CombinedUserChartElementEmbedded extends Entities.EmbeddedEntity {
   Type: "CombinedUserChartElementEmbedded";
   userChart: UserChartEntity;
   isQueryCached: boolean;
 }
 
-export const CombinedUserChartPartEntity = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
+export const CombinedUserChartPartEntity: Type<CombinedUserChartPartEntity> = new Type<CombinedUserChartPartEntity>("CombinedUserChartPart");
 export interface CombinedUserChartPartEntity extends Entities.Entity, Dashboard.IPartEntity {
   Type: "CombinedUserChartPart";
   userCharts: Entities.MList<CombinedUserChartElementEmbedded>;
@@ -34,7 +34,7 @@ export interface CombinedUserChartPartEntity extends Entities.Entity, Dashboard.
   requiresTitle: boolean;
 }
 
-export const UserChartEntity = new Type<UserChartEntity>("UserChart");
+export const UserChartEntity: Type<UserChartEntity> = new Type<UserChartEntity>("UserChart");
 export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetEntity {
   Type: "UserChart";
   query: Basics.QueryEntity;
@@ -52,7 +52,7 @@ export interface UserChartEntity extends Entities.Entity, UserAssets.IUserAssetE
   guid: string /*Guid*/;
 }
 
-export const UserChartLiteModel = new Type<UserChartLiteModel>("UserChartLiteModel");
+export const UserChartLiteModel: Type<UserChartLiteModel> = new Type<UserChartLiteModel>("UserChartLiteModel");
 export interface UserChartLiteModel extends Entities.ModelEntity {
   Type: "UserChartLiteModel";
   displayName: string;
@@ -65,7 +65,7 @@ export module UserChartOperation {
   export const Delete : Operations.DeleteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Delete");
 }
 
-export const UserChartPartEntity = new Type<UserChartPartEntity>("UserChartPart");
+export const UserChartPartEntity: Type<UserChartPartEntity> = new Type<UserChartPartEntity>("UserChartPart");
 export interface UserChartPartEntity extends Entities.Entity, Dashboard.IPartEntity {
   Type: "UserChartPart";
   userChart: UserChartEntity;

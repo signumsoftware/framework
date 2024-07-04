@@ -16,7 +16,7 @@ export interface HelpWidgetProps {
   wc: WidgetContext<Entity>
 }
 
-export function HelpWidget(p: HelpWidgetProps) {
+export function HelpWidget(p: HelpWidgetProps): React.JSX.Element {
 
   const entity = p.wc.ctx.value;
 
@@ -38,7 +38,7 @@ export function HelpWidget(p: HelpWidgetProps) {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }) {
+export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }): React.JSX.Element {
 
   //debugger;
 

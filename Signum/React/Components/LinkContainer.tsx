@@ -21,6 +21,7 @@ interface LinkContainerProps extends React.AnchorHTMLAttributes<HTMLAnchorElemen
   isActive?: boolean | ((m: PathMatch | null, l: Location) => boolean);
 }
 
+
 export function LinkContainer({
   children,
   onClick,
@@ -34,7 +35,7 @@ export function LinkContainer({
   state,
   // eslint-disable-next-line comma-dangle
   ...props
-}: LinkContainerProps) {
+}: LinkContainerProps): React.ReactElement {
 
   const path = typeof to === 'object' ? to.pathname || '' : to;
   const navigate = useNavigate();
@@ -87,12 +88,14 @@ export function LinkContainer({
   });
 }
 
-LinkContainer.defaultProps = {
-  replace: false,
-  activeClassName: 'active',
-  onClick: null,
-  className: null,
-  style: null,
-  activeStyle: null,
-  isActive: null,
-};
+export namespace LinkContainer {
+  export const defaultProps = {
+    replace: false,
+    activeClassName: 'active',
+    onClick: null,
+    className: null,
+    style: null,
+    activeStyle: null,
+    isActive: null,
+  };
+}

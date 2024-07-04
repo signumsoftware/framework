@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 import { OperationLogEntity } from '@framework/Signum.Operations'
 
-export default function WorkflowPanelPage(){
+export default function WorkflowPanelPage(): React.JSX.Element {
 
   return (
     <div>
@@ -31,7 +31,7 @@ export default function WorkflowPanelPage(){
 }
 
 
-export function WorkflowScriptRunnerTab(p: {}) {
+export function WorkflowScriptRunnerTab(p: {}): React.JSX.Element {
 
   const [state, reloadState] = useAPIWithReload(() => {
     AppContext.assertPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel);

@@ -35,7 +35,7 @@ interface MultiFileImageLineProps<V extends ModifiableEntity/* & IFile*/ | Lite<
 
 export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileImageLineProps<V>, V> {
 
-  overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>) {
+  overrideProps(p: MultiFileImageLineProps<V>, overridenProps: MultiFileImageLineProps<V>): void {
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
@@ -57,13 +57,13 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
     }
   }
 
-  handleDeleteValue = (index: number) => {
+  handleDeleteValue = (index: number): void => {
     const list = this.props.ctx.value;
     list.removeAt(index);
     this.setValue(list);
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileLoaded = (file: IFile & ModifiableEntity): void => {
     if (this.props.createEmbedded)
       this.props.createEmbedded(file)
         .then(em => em && this.addElement(em));
@@ -73,7 +73,8 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
   }
 }
 
-export const MultiFileImageLine = genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>, ref: React.Ref<MultiFileImageLineController<V>>) {
+export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V> & React.RefAttributes<MultiFileImageLineController<V>>) => React.ReactNode | null =
+  genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>, ref: React.Ref<MultiFileImageLineController<V>>) {
 
   const c = useController(MultiFileImageLineController<V>, props, ref);
   const p = c.props;

@@ -31,7 +31,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace UserQueryClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
   
@@ -219,7 +219,7 @@ export namespace UserQueryClient {
     return drilldownToUserQuery(val.fo, val.uq, options);
   }
   
-  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
+  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -232,7 +232,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]) {
+  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -250,7 +250,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions) {
+  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions): Promise<boolean> {
     const openInNewTab = options?.openInNewTab;
     const showInPlace = options?.showInPlace;
     const onReload = options?.onReload;

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { AutoLine, EntityLine } from '@framework/Lines'
+import { AutoLine, EntityLine, EntityDetail } from '@framework/Lines'
 import { SearchValueLine, SearchValueLineController } from '@framework/Search'
 import { toLite } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
@@ -9,7 +9,7 @@ import { BsColor } from '@framework/Components';
 import ProgressBar from '@framework/Components/ProgressBar';
 import { useInterval } from '@framework/Hooks'
 
-export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
+export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }): React.JSX.Element {
   const isActive = ctx.value.state == "Executing" || ctx.value.state == "Queued";
 
   const tick = useInterval(isActive ? 500 : null, 0, n => n + 1);
@@ -36,7 +36,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
           <EntityLine ctx={ctx4.subCtx(f => f.user)} />
           <AutoLine ctx={ctx4.subCtx(f => f.machineName)} />
           <AutoLine ctx={ctx4.subCtx(f => f.applicationName)} />
-          <EntityLine ctx={ctx4.subCtx(f => f.data)} readOnly={true} />
+          <EntityDetail ctx={ctx4.subCtx(f => f.data)} readOnly={false} />
         </div>
         <div className="col-sm-6">
           <AutoLine ctx={ctx5.subCtx(f => f.creationDate)} />
@@ -67,7 +67,7 @@ export default function Process({ ctx}: { ctx: TypeContext<ProcessEntity> }) {
   );
 }
 
-export function ProcessProgressBar({ state, status, progress }: { state: ProcessState, status?: string |null, progress: number | null }) {
+export function ProcessProgressBar({ state, status, progress }: { state: ProcessState, status?: string |null, progress: number | null }): React.JSX.Element {
 
   const color: BsColor | undefined =
     state == "Queued" ? "info" :

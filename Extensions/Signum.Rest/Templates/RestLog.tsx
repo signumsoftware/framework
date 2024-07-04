@@ -21,7 +21,7 @@ function newUrl(rl: RestLogEntity) {
   return `${location.protocol}//${location.hostname}:${location.port}${prefix}${rl.url}?${queryParams}`;
 }
 
-export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }) {
+export default function RestLog(p: { ctx: TypeContext<RestLogEntity> }): React.JSX.Element {
 
   const [replayResult, setReplayResult] = React.useState<string | undefined>(undefined);
 

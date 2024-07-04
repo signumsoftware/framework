@@ -17,7 +17,7 @@ import { useTitle } from '@framework/AppContext'
 
 
 
-export default function UserQueryPage() {
+export default function UserQueryPage(): React.JSX.Element | null {
   const params = useParams() as { userQueryId: string; entity?: string };
 
   const [currentUserQuery, setCurrentUserQuery] = useState<UserQueryEntity | null>(null);

@@ -30,7 +30,7 @@ export interface FileImageLineProps<V extends ModifiableEntity & IFile | Lite<IF
 
 export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null> extends EntityBaseController<FileImageLineProps<V>, V>{
 
-  getDefaultProps(state: FileImageLineProps<V>) {
+  getDefaultProps(state: FileImageLineProps<V>): void {
 
     super.getDefaultProps(state);
 
@@ -48,13 +48,14 @@ export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<I
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity) => {
+  handleFileLoaded = (file: IFile & ModifiableEntity): void => {
     this.convert(file as Aprox<V>)
       .then(f => this.setValue(f));
   }
 }
 
-export const FileImageLine = genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
+export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile & Entity> | null>(props: FileImageLineProps<V> & React.RefAttributes<FileImageLineController<V>>) => React.ReactNode | null =
+  genericForwardRef(function FileImageLine<V extends ModifiableEntity & IFile | Lite<IFile & Entity> | null>(props: FileImageLineProps<V>, ref: React.Ref<FileImageLineController<V>>) {
   const c = useController(FileImageLineController, props, ref);
   const p = c.props;
 

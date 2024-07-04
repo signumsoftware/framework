@@ -27,7 +27,7 @@ import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicVie
 
 export namespace DynamicViewClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
@@ -262,7 +262,7 @@ export namespace DynamicViewClient {
     component.prototype.render.staticRender = staticRender;
   }
   
-  export function unPatchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>) {
+  export function unPatchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>): React.JSX.Element {
   
     if (!component.prototype.render)
       throw new Error("render function not defined in " + component);
@@ -282,7 +282,7 @@ export namespace DynamicViewClient {
   }
   
   
-  export function cleanCaches() {
+  export function cleanCaches(): React.JSX.Element {
     Dic.clear(viewNamesCache);
     Dic.clear(selectorCache);
   }

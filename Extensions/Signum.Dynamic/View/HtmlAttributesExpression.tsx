@@ -44,7 +44,7 @@ export function toCssProperties(dn: any /*DesignerNode<BaseNode>*/, parentCtx: T
 
 }
 
-export function toPascal(dashedName: string) {
+export function toPascal(dashedName: string): React.JSX.Element {
   if (dashedName == "class")
     return "className";
 

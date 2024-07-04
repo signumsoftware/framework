@@ -8,7 +8,7 @@ import { useAPIWithReload, useInterval, useSize } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { classes } from '@framework/Globals'
 
-export default function HeavyList() {
+export default function HeavyList(): React.JSX.Element {
 
     const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
 

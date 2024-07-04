@@ -9,7 +9,7 @@ import { is } from '@framework/Signum.Entities';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { useForceUpdate, useAPI } from '@framework/Hooks'
 
-export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetworkSettingsEntity> }){
+export default function NeuralNetworkSettings(p : { ctx: TypeContext<NeuralNetworkSettingsEntity> }): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handlePredictionTypeChanged() {
     var nn = p.ctx.value;
@@ -124,7 +124,7 @@ interface LabelWithHelpProps {
   text: React.ReactNode;
 }
 
-export function LabelWithHelp(p: LabelWithHelpProps) {
+export function LabelWithHelp(p: LabelWithHelpProps): React.JSX.Element {
 
     return (
       <OverlayTrigger overlay={

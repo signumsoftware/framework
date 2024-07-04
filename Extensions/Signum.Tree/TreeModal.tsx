@@ -15,7 +15,7 @@ interface TreeModalProps extends  IModalProps<TreeNode | undefined> {
   title?: React.ReactNode;
 }
 
-export default function TreeModal(p : TreeModalProps){
+export default function TreeModal(p : TreeModalProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const [show, setShow] = React.useState(true);

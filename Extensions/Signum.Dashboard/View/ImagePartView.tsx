@@ -4,7 +4,7 @@ import { DashboardClient, PanelPartContentProps } from '../DashboardClient';
 import { ImagePartEntity } from '../Signum.Dashboard';
 
 
-export default function ImagePart(p: PanelPartContentProps<ImagePartEntity>) {
+export default function ImagePart(p: PanelPartContentProps<ImagePartEntity>): React.JSX.Element {
   return (
     <div>
       <a href={p.content.clickActionURL ? AppContext.toAbsoluteUrl(p.content.clickActionURL!) : undefined}

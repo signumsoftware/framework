@@ -36,7 +36,7 @@ export default class ImagePlugin implements HtmlEditorPlugin{
     );
   }
 
-  expandConverter(converter: IContentStateConverter) {
+  expandConverter(converter: IContentStateConverter): void {
     if (converter instanceof HtmlContentStateConverter) {
       const { draftToHtmlOptions, htmlToDraftOptions } = converter;
 
@@ -73,7 +73,7 @@ export default class ImagePlugin implements HtmlEditorPlugin{
     }
   }
 
-  expandEditorProps(props: draftjs.EditorProps, controller: HtmlEditorController) {
+  expandEditorProps(props: draftjs.EditorProps, controller: HtmlEditorController): void {
     var oldRenderer = props.blockRendererFn;
     props.blockRendererFn = (block) => {
 

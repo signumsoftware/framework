@@ -14,7 +14,7 @@ interface StyleOptionsLineProps {
   dn: DesignerNode<BaseNode>;
 }
 
-export function StyleOptionsLine(p : StyleOptionsLineProps){
+export function StyleOptionsLine(p : StyleOptionsLineProps): React.JSX.Element {
   function renderMember(expr: StyleOptionsExpression | undefined): React.ReactNode {
     return (<span
       className={expr === undefined ? "design-default" : "design-changed"}>
@@ -91,7 +91,7 @@ export interface StyleOptionsComponentProps {
   styleOptions: StyleOptionsExpression
 }
 
-export function StyleOptionsComponent(p : StyleOptionsComponentProps){
+export function StyleOptionsComponent(p : StyleOptionsComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const so = p.styleOptions;
   const dn = p.dn;

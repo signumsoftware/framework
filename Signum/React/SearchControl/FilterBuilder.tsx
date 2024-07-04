@@ -42,7 +42,7 @@ interface FilterBuilderProps {
   avoidPreview?: boolean;
 }
 
-export default function FilterBuilder(p: FilterBuilderProps) {
+export default function FilterBuilder(p: FilterBuilderProps): React.JSX.Element {
 
   const [showPinnedFiltersOptionsState, setShowPinnedFiltersOptions] = React.useState<boolean>(p.showPinnedFiltersOptions ?? false)
 
@@ -231,7 +231,7 @@ export interface FilterGroupComponentsProps {
   level: number;
 }
 
-export function FilterGroupComponent(p: FilterGroupComponentsProps) {
+export function FilterGroupComponent(p: FilterGroupComponentsProps): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
   const forceUpdatePromise = useForceUpdatePromise();
@@ -484,7 +484,7 @@ export interface FilterConditionComponentProps {
   level: number;
 }
 
-export function FilterConditionComponent(p: FilterConditionComponentProps) {
+export function FilterConditionComponent(p: FilterConditionComponentProps): React.JSX.Element | null {
 
   const forceUpdate = useForceUpdate();
 
@@ -659,7 +659,7 @@ interface PinnedFilterEditorProps {
 }
 
 
-export function PinnedFilterEditor(p: PinnedFilterEditorProps) {
+export function PinnedFilterEditor(p: PinnedFilterEditorProps): React.JSX.Element {
 
   var pinned = p.fo.pinned!;
 

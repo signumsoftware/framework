@@ -1,7 +1,7 @@
 import googleMapStyles from "./GoogleMapStyles"
 
 
-export function getScript(source: string, onload?: () => void) {
+export function getScript(source: string, onload?: () => void): void {
   var script = document.createElement('script');
   var prior = document.getElementsByTagName('script')[0];
   script.async = true;
@@ -10,7 +10,7 @@ export function getScript(source: string, onload?: () => void) {
   prior.parentNode!.insertBefore(script, prior);
 }
 
-export function getMapStyles() {
+export function getMapStyles(): typeof googleMapStyles {
   return googleMapStyles;
 }
 
@@ -26,7 +26,7 @@ declare global {
 export var urlCdnClusterJs = "https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/src/markerclusterer.js";
 export var urlCdnClusterImages = "https://cdn.rawgit.com/googlemaps/js-marker-clusterer/gh-pages/images/m";
 
-export function loadGoogleMapsScript(onReady: () => void) {
+export function loadGoogleMapsScript(onReady: () => void): void {
 
   if (!(typeof google === 'object' && typeof google.maps === 'object')) {
 
@@ -49,7 +49,7 @@ export function loadGoogleMapsScript(onReady: () => void) {
 }
 
 
-export function loadGoogleMapsMarkerCluster(onReady: () => void) {
+export function loadGoogleMapsMarkerCluster(onReady: () => void): void {
   if (!window.MarkerClusterer) {
     getScript(urlCdnClusterJs, function () {
       onReady();

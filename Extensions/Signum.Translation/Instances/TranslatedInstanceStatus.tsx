@@ -12,7 +12,7 @@ import { Operations } from '@framework/Operations'
 import MessageModal from '@framework/Modals/MessageModal'
 import { CultureClient } from '@framework/Basics/CultureClient'
 
-export default function TranslationCodeStatus() {
+export default function TranslationCodeStatus(): React.JSX.Element {
 
   const [result, reload] = useAPIWithReload(() => TranslatedInstanceClient.API.status(), []);
   const [file, setFile] = React.useState<TranslatedInstanceClient.API.FileUpload | undefined>(undefined);

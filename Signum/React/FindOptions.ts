@@ -106,11 +106,11 @@ export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOption
 
 
 
-export function isActive(fo: FilterOptionParsed) {
+export function isActive(fo: FilterOptionParsed): boolean {
   return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
-export function isCheckBox(active: PinnedFilterActive | undefined) {
+export function isCheckBox(active: PinnedFilterActive | undefined): boolean {
   return active == "Checkbox_Checked" ||
     active == "Checkbox_Unchecked" ||
     active == "NotCheckbox_Checked" ||
@@ -245,7 +245,7 @@ function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string
   return token;
 }
 
-export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string) {
+export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string): boolean {
 
   token = getFullKey(token);
   tokenStart = getFullKey(token);
@@ -373,7 +373,7 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
   };
 }
 
-export function canSplitValue(fo: FilterOptionParsed) {
+export function canSplitValue(fo: FilterOptionParsed): boolean | undefined {
   if (isFilterGroup(fo))
     return fo.pinned != null;
 
@@ -508,19 +508,19 @@ export interface SystemTime {
 }
 
 export module PaginateMath {
-  export function startElementIndex(p: Pagination) {
+  export function startElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
   }
 
-  export function endElementIndex(p: Pagination, rows: number) {
+  export function endElementIndex(p: Pagination, rows: number): number {
     return startElementIndex(p) + rows - 1;
   }
 
-  export function totalPages(p: Pagination, totalElements: number) {
+  export function totalPages(p: Pagination, totalElements: number): number {
     return Math.max(1, Math.ceil(totalElements / p.elementsPerPage!)); //Round up
   }
 
-  export function maxElementIndex(p: Pagination) {
+  export function maxElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
   }
 }
@@ -549,7 +549,7 @@ export interface ColumnDescription {
   propertyRoute?: string;
 }
 
-export function isList(fo: FilterOperation) {
+export function isList(fo: FilterOperation): boolean {
   return fo == "IsIn" ||
     fo == "IsNotIn";
 }

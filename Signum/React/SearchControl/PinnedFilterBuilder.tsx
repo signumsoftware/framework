@@ -10,7 +10,6 @@ import { SearchMessage } from '../Signum.Entities';
 import { classes } from '../Globals';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Finder } from '../Finder'
-import { Col } from 'react-bootstrap'
 
 interface PinnedFilterBuilderProps {
   filterOptions: FilterOptionParsed[];
@@ -22,7 +21,7 @@ interface PinnedFilterBuilderProps {
   extraSmall?: boolean;
   showGrid?: boolean;
 }
-export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps) {
+export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.JSX.Element | null {
 
   const timeoutWriteText = React.useRef<number | null>(null);
 

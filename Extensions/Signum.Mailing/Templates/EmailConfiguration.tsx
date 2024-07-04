@@ -5,7 +5,7 @@ import { EmailConfigurationEmbedded } from '../Signum.Mailing'
 import { CultureInfoEntity } from '@framework/Signum.Basics';
 
 
-export default function EmailConfiguration(p : { ctx: TypeContext<EmailConfigurationEmbedded> }){
+export default function EmailConfiguration(p : { ctx: TypeContext<EmailConfigurationEmbedded> }): React.JSX.Element {
   const sc = p.ctx;
   const ac = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
