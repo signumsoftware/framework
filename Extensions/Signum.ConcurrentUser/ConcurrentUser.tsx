@@ -17,7 +17,7 @@ import { HubConnectionState } from '@microsoft/signalr'
 import { SmallProfilePhoto } from '../Signum.Authorization/Templates/ProfilePhoto'
 import { UserEntity } from '../Signum.Authorization/Signum.Authorization'
 
-export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }) {
+export default function ConcurrentUser(p: { entity: Entity, onReload: ()=> void }): React.JSX.Element | null {
   
   const conn = useSignalRConnection("/api/concurrentUserHub");
 

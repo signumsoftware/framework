@@ -21,7 +21,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace AlertsClient {
   
-  export function start(options: { routes: RouteObject[], showAlerts: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }) {
+  export function start(options: { routes: RouteObject[], showAlerts: (typeName: string, when: "CreateAlert" | "QuickLink") => boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Alerts", () => import("./Changelog"));
   
