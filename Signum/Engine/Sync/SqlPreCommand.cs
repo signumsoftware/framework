@@ -294,7 +294,7 @@ public static class SqlPreCommandExtensions
 
         var list = currentPart.Lines();
 
-        var lineNumer = (pgE?.Line?.ToInt() ?? sqlE!.LineNumber);
+        var lineNumer = (sqlE?.LineNumber ?? currentPart.Substring(0, pgE!.Position).Lines().Count());
 
         SafeConsole.WriteLineColor(ConsoleColor.Red, "ERROR:");
 
