@@ -21,7 +21,7 @@ export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
 }
 
-export default function UserChartMenu(p: UserChartMenuProps) {
+export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
   const [filter, setFilter] = React.useState<string>();
@@ -214,7 +214,7 @@ export default function UserChartMenu(p: UserChartMenuProps) {
 }
 
 export namespace UserChartMerger {
-  export function mergeColumns(oldUqColumns: MList<ChartColumnEmbedded>, newUqColumns: MList<ChartColumnEmbedded>) {
+  export function mergeColumns(oldUqColumns: MList<ChartColumnEmbedded>, newUqColumns: MList<ChartColumnEmbedded>): MList<ChartColumnEmbedded> {
     newUqColumns.forEach((newMle, i) => {
 
       var oldMle = oldUqColumns[i];

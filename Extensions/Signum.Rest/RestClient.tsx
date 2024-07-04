@@ -8,7 +8,7 @@ import { QueryString } from '@framework/QueryString';
 
 export namespace RestClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(RestLogEntity, e => import('./Templates/RestLog')));
   }
   

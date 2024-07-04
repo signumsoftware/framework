@@ -11,7 +11,7 @@ import { useForceUpdate } from '@framework/Hooks';
 import { getToString } from '@framework/Signum.Entities';
 import { QueryEntity } from '@framework/Signum.Basics'
 
-export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: TypeContext<QueryRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function QueryRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<QueryRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -32,7 +32,7 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
     ];
   }
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value]);
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value]);
 
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: QueryAllowed) {
 
@@ -112,4 +112,4 @@ export default React.forwardRef(function QueryRulesPackControl({ ctx }: { ctx: T
 
     return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
   }
-});
+}

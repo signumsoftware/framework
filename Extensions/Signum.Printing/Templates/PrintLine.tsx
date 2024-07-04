@@ -6,7 +6,7 @@ import { PrintLineEntity } from '../Signum.Printing'
 import { ProcessExceptionLineEntity } from '../../Signum.Processes/Signum.Processes'
 import { FileLine } from '../../Signum.Files/Components/FileLine'
 
-export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }){
+export default function PrintLine(p : { ctx: TypeContext<PrintLineEntity> }): React.JSX.Element {
   const e = p.ctx.subCtx({ readOnly: true });
 
   return (

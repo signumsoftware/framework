@@ -19,7 +19,7 @@ interface ColumnEditorProps {
   close: () => void;
 }
 
-export default function ColumnEditor(p: ColumnEditorProps) {
+export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
 
   function handleSummaryTokenChanged(newToken: QueryToken | undefined) {
     p.columnOption.summaryToken = newToken;

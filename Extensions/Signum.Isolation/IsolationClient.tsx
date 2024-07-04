@@ -10,7 +10,7 @@ import { getColorProviders } from '../Signum.Map/Schema/ClientColorProvider';
 
 export namespace IsolationClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     onWidgets.push(getIsolationWidget);
   
@@ -33,7 +33,7 @@ export namespace IsolationClient {
     export let onIsolationChange: ((e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined) => boolean) | null = null;
   }
   
-  export function changeOverridenIsolation(e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined) {
+  export function changeOverridenIsolation(e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined): React.JSX.Element {
   
   
     if (Options.onIsolationChange && Options.onIsolationChange(e, isolation))

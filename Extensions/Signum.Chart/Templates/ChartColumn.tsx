@@ -29,7 +29,7 @@ export interface ChartColumnProps {
 }
 
 
-export function ChartColumn(p: ChartColumnProps) {
+export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -193,7 +193,7 @@ export interface ChartPaletteLinkProps {
   ctx: StyleContext;
 }
 
-export function ChartPaletteLink(p: ChartPaletteLinkProps) {
+export function ChartPaletteLink(p: ChartPaletteLinkProps): React.JSX.Element {
 
   const [palette, reload] = useAPIWithReload(() => ColorPaletteClient.getColorPalette(p.type.name), [p.type.name]);
 

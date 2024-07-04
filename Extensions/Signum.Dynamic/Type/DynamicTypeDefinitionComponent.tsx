@@ -43,7 +43,7 @@ interface DynamicTypeDefinitionComponentProps {
 
 const requiresSaveKinds: EntityKind[] = ["Main", "Shared", "String", "Relational"];
 
-export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponentProps) {
+export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const [expressionNames, setExpressionNames] = React.useState<string[] | undefined>(undefined);
@@ -332,7 +332,7 @@ export function DynamicTypeDefinitionComponent(p: DynamicTypeDefinitionComponent
   }
 
 
-export function CustomCodeTab(p: { definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }) {
+export function CustomCodeTab(p: { definition: DynamicTypeDefinition, dynamicType: DynamicTypeEntity }): React.JSX.Element {
 
   function getDynamicTypeFullName() {
     var suffix = p.dynamicType.baseType == "MixinEntity" ? "Mixin" : "Entity";
@@ -793,7 +793,7 @@ export interface CSharpExpressionCodeMirrorProps {
   signature?: string;
 }
 
-export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps) {
+export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   let val = p.binding.getValue();
 
@@ -880,7 +880,7 @@ export interface PropertyRepeaterComponentProps {
   showDatabaseMapping: boolean;
 }
 
-export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps) {
+export function PropertyRepeaterComponent(p: PropertyRepeaterComponentProps): React.JSX.Element {
 
   const [currentEventKey, setCurrentEventKey] = React.useState<number | undefined>(0);
 
@@ -1039,7 +1039,7 @@ export interface PropertyComponentProps {
   dc: DynamicTypeDesignContext;
 }
 
-export function PropertyComponent(p: PropertyComponentProps) {
+export function PropertyComponent(p: PropertyComponentProps): React.JSX.Element {
   function handleAutoFix() {
     const dp = p.property;
 
@@ -1214,7 +1214,7 @@ export interface ComboBoxRepeaterComponentProps {
   list: string[];
 }
 
-export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps) {
+export function ComboBoxRepeaterComponent(p: ComboBoxRepeaterComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleChange(val: string, index: number) {
     var list = p.list;
@@ -1309,7 +1309,7 @@ export interface ValidatorRepeaterComponentProps {
   dc: DynamicTypeDesignContext;
 }
 
-export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps) {
+export function ValidatorRepeaterComponent(p: ValidatorRepeaterComponentProps): React.JSX.Element {
   function handleOnRemove(event: React.MouseEvent<any>, index: number) {
     event.preventDefault();
     var list = p.property.validators!;

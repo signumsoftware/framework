@@ -16,8 +16,7 @@ interface SystemTimeEditorProps {
   onChanged: () => void;
 }
 
-export default function SystemTimeEditor(p : SystemTimeEditorProps){
-
+export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.Element{
 
   function handlePeriodClicked() {
     var fop = p.findOptions;

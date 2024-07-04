@@ -19,7 +19,7 @@ interface SaveChangesModalProps extends IModalProps<SaveChangesResult | undefine
   eocs: EntityOperationContext<any>[];
 }
 
-export default function SaveChangesModal(p: SaveChangesModalProps) {
+function SaveChangesModal(p: SaveChangesModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
 
@@ -71,7 +71,12 @@ export default function SaveChangesModal(p: SaveChangesModalProps) {
   );
 }
 
-SaveChangesModal.show = (options: SaveChangesModalProps): Promise<SaveChangesResult | undefined> => {
-  return openModal(<SaveChangesModal {...options} />);
+namespace SaveChangesModal {
+  export function show(options: SaveChangesModalProps): Promise<SaveChangesResult | undefined> {
+    return openModal(<SaveChangesModal {...options} />);
+  }
 }
+
+export default SaveChangesModal; 
+
 

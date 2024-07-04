@@ -30,7 +30,7 @@ export interface FileUploaderState {
   errors: string[];
 }
 
-export function FileUploader(p: FileUploaderProps) {
+export function FileUploader(p: FileUploaderProps): React.JSX.Element {
 
   const [isLoading, setIsLodaing] = React.useState<boolean>(false);
   const [isOver, setIsOver] = React.useState<boolean>(false);
@@ -118,9 +118,12 @@ export function FileUploader(p: FileUploaderProps) {
   );
 }
 
-FileUploader.defaultProps = {
-  dragAndDrop: true
-};
+export namespace FileUploader {
+  export const defaultProps = {
+    dragAndDrop: true
+  };
+}
+
 
 export function toFileEntity(file: File, o: { accept?: string, maxSizeInBytes?: number, fileType?: FileTypeSymbol, type: PseudoType }): Promise<ModifiableEntity & IFile> {
 

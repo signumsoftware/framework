@@ -21,13 +21,14 @@ export interface DateTimeLineProps extends ValueBaseProps<string | null> {
 }
 
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
-  init(p: DateTimeLineProps) {
+  init(p: DateTimeLineProps): void {
     super.init(p);
     this.assertType("DateTimeLine", ["DateOnly", "DateTime"]);
   }
 }
 
-export const DateTimeLine = React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
+export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<DateTimeLineProps & React.RefAttributes<DateTimeLineController>>> =
+  React.memo(React.forwardRef(function DateTimeLine(props: DateTimeLineProps, ref: React.Ref<DateTimeLineController>) {
 
     const c = useController(DateTimeLineController, props, ref);
 
@@ -104,7 +105,7 @@ export const DateTimeLine = React.memo(React.forwardRef(function DateTimeLine(pr
     return LineBaseController.propEquals(prev, next);
 });
 
-export function defaultRenderDay({ date, label }: { date: Date; label: string }) {
+export function defaultRenderDay({ date, label }: { date: Date; label: string }): React.JSX.Element {
   var dateStr = DateTime.fromJSDate(date).toISODate();
 
   var today = dateStr == DateTime.local().toISODate();

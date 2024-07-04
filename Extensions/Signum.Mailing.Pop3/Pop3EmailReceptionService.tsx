@@ -3,7 +3,7 @@ import { AutoLine, EntityRepeater, PasswordLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { Pop3EmailReceptionServiceEntity } from './Signum.Mailing.Pop3';
 
-export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3EmailReceptionServiceEntity> }) {
+export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3EmailReceptionServiceEntity> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
   return (

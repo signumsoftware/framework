@@ -30,7 +30,7 @@ interface CaseFramePageState {
   executing?: boolean;
 }
 
-export default function CaseFramePage() {
+export default function CaseFramePage(): React.JSX.Element {
 
   var params = useParams() as { workflowId: string; mainEntityStrategy: string; caseActivityId?: string };
   let [state, setState] = useStateWithPromise<CaseFramePageState | undefined>(undefined);

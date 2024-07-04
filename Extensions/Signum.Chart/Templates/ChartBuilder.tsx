@@ -23,7 +23,7 @@ export interface ChartBuilderProps {
   onOrderChanged: () => void;
 }
 
-export default function ChartBuilder(p: ChartBuilderProps) {
+export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   const chartScripts = useAPI(signal => ChartClient.getChartScripts(), []);
@@ -138,7 +138,7 @@ export function Parameters(props: {
   onRedraw?: () => void,
   parameterDic: { [name: string]: TypeContext<ChartParameterEmbedded> },
   columnIndex: number | null
-}) {
+}): React.JSX.Element | null {
 
 
   var groups = props.chartScript.parameterGroups

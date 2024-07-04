@@ -31,7 +31,7 @@ export interface ChartRendererProps {
   minHeight: number | null;
 }
 
-export default function ChartRenderer(p: ChartRendererProps) {
+export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element {
   const cs = useAPI(async signal => {
     const chartScriptPromise = ChartClient.getChartScript(p.chartRequest.chartScript);
     const chartComponentModulePromise = ChartClient.getRegisteredChartScriptComponent(p.chartRequest.chartScript);
@@ -66,7 +66,7 @@ export default function ChartRenderer(p: ChartRendererProps) {
   );
 }
 
-export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void) {
+export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, cr: ChartRequestModel, uc?: Lite<UserChartEntity>, onReload?: () => void): void {
 
   e.stopPropagation();
   var newWindow = e.ctrlKey || e.button == 1;

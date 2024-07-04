@@ -6,7 +6,7 @@ export interface TextIfFitsProps extends React.SVGProps<SVGTextElement>{
   etcText?: string;
 }
 
-export default function TextIfFits({ maxWidth, padding, children, etcText, ...atts } :  TextIfFitsProps) {
+export default function TextIfFits({ maxWidth, padding, children, etcText, ...atts } :  TextIfFitsProps): React.JSX.Element {
 
   const txt = React.useRef<SVGTextElement>(null);
 

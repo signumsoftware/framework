@@ -14,7 +14,7 @@ import { CultureClient } from '@framework/Basics/CultureClient'
 import { useAPI } from '@framework/Hooks'
 import { Dic } from '@framework/Globals'
 
-export default function User(p: { ctx: TypeContext<UserEntity> }) {
+export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Element {
 
   const ctx = p.ctx.subCtx({ labelColumns: { sm: 3 } });
   const entity = p.ctx.value;
@@ -55,16 +55,16 @@ export default function User(p: { ctx: TypeContext<UserEntity> }) {
 }
 
 export let changePasswordVisible = (user: UserEntity) => true;
-export function setChangePasswordVisibleFunction(newFunction: (user: UserEntity) => boolean) {
+export function setChangePasswordVisibleFunction(newFunction: (user: UserEntity) => boolean): void {
   changePasswordVisible = newFunction;
 }
 
 export let userNameReadonly = (user: UserEntity) => false;
-export function setUserNameReadonlyFunction(newFunction: (user: UserEntity) => boolean) {
+export function setUserNameReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   userNameReadonly = newFunction;
 }
 
 export let emailReadonly = (user: UserEntity) => false;
-export function setEmailReadonlyFunction(newFunction: (user: UserEntity) => boolean) {
+export function setEmailReadonlyFunction(newFunction: (user: UserEntity) => boolean): void {
   emailReadonly = newFunction;
 }

@@ -13,7 +13,7 @@ import { getToString, is, liteKey, liteKeyLong, MList } from '@framework/Signum.
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
-export default function ImportAssetsPage() {
+export default function ImportAssetsPage(): React.JSX.Element {
 
   const [file, setFile] = React.useState<UserAssetClient.API.FileUpload | undefined>(undefined);
   const [model, setModel] = React.useState<UserAssetPreviewModel | undefined>(undefined);

@@ -16,7 +16,7 @@ export interface IconTypeaheadLineProps {
   extraButtons?: () => React.ReactNode;
 }
 
-export function IconTypeaheadLine(p : IconTypeaheadLineProps){
+export function IconTypeaheadLine(p : IconTypeaheadLineProps): React.JSX.Element{
   const forceUpdate = useForceUpdate();
   function handleChange(newIcon: string | undefined | null) {
     p.ctx.value = newIcon;
@@ -106,7 +106,7 @@ function toSortPrefix(family: CssStyleClass | IconStyle | IconPrefix): IconPrefi
   };
 }
 
-export function IconTypeahead(p: IconTypeaheadProps) {
+export function IconTypeahead(p: IconTypeaheadProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
 
   var parsedIcon = parseIcon(p.icon);
@@ -240,7 +240,7 @@ export function fallbackIcon(icon: IconProp) : IconProp {
   return ({ prefix: "fas", iconName: "question" });
 }
 
-export function isIconDefined(icon: IconProp) {
+export function isIconDefined(icon: IconProp): any {
 
   if (Array.isArray(icon))
     return lib.definitions[toSortPrefix(icon[0])]?.[icon[1]]
@@ -258,7 +258,7 @@ export function isIconDefined(icon: IconProp) {
   return false;
 }
 
-export function iconToString(icon: IconProp) {
+export function iconToString(icon: IconProp): string {
   return typeof icon == "string" ? "fas fa-" + icon :
     Array.isArray(icon) ? icon[0] + " fa-" + icon[1] :
       icon.prefix + " fa-" + icon.iconName;

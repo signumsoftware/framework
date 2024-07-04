@@ -13,7 +13,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { CultureClient } from '@framework/Basics/CultureClient'
 
-export default function TranslationCodeSync() {
+export default function TranslationCodeSync(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string; namespace?: string; };
   const cultures = useAPI(() => CultureClient.getCultures(null), []);
   const assembly = decodeDots(params.assembly);

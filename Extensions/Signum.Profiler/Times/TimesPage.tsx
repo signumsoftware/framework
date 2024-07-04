@@ -15,7 +15,7 @@ import { Color } from '@framework/Basics/Color';
 import { getToString } from '@framework/Signum.Entities';
 
 
-export default function TimesPage() {
+export default function TimesPage(): React.JSX.Element {
 
   const [times, reloadTimes] = useAPIWithReload(() => ProfilerClient.API.Times.fetchInfo(), []);
   useTitle("Times state");

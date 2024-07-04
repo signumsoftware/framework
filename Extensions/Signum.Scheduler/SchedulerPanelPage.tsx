@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 
-export default function SchedulerPanelPage() {
+export default function SchedulerPanelPage(): React.JSX.Element {
 
   const [state, reloadState] = useAPIWithReload(() => SchedulerClient.API.view(), [], { avoidReset: true });
 

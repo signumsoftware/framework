@@ -17,7 +17,7 @@ import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, 
 import * as AppContext from "@framework/AppContext"
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
-export default function WhatsNewDropdown() {
+export default function WhatsNewDropdown(): React.JSX.Element {
 
   if (!Navigator.isViewable(WhatsNewEntity))
     return null;

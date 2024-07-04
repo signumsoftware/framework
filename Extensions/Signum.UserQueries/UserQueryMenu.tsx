@@ -34,7 +34,7 @@ function decodeUserQueryFromUrl(location: Location) {
   return userQueryKey ? parseLite(userQueryKey) as Lite<UserQueryEntity> : undefined;
 }
 
-export default function UserQueryMenu(p: UserQueryMenuProps) {
+export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -346,7 +346,7 @@ export interface FilterPair {
 }
 
 export namespace UserQueryMerger {
-  export function mergeColumns(oldUqColumns: MList<QueryColumnEmbedded>, newUqColumns: MList<QueryColumnEmbedded>, sd: StringDistance) {
+  export function mergeColumns(oldUqColumns: MList<QueryColumnEmbedded>, newUqColumns: MList<QueryColumnEmbedded>, sd: StringDistance): MListElement<QueryColumnEmbedded>[] {
     const choices = sd.levenshteinChoices(oldUqColumns, newUqColumns, c => c.added == null ? 5 : c.removed == null ? 5 : distanceColumns(c.added.element, c.removed.element));
 
     return choices.flatMap(ch => {
@@ -430,7 +430,7 @@ export namespace UserQueryMerger {
     return result;
   }
 
-  export function similarValues(val1: any, val2: any) {
+  export function similarValues(val1: any, val2: any): boolean {
     if (val1 == val2)
       return true;
 

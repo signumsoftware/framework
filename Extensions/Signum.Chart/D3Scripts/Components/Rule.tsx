@@ -58,11 +58,11 @@ export class Rule<T extends string> {
     }
   }
 
-  static isStar(val: string) {
+  static isStar(val: string): boolean {
     return typeof val === 'string' && val[val.length - 1] == '*';
   }
 
-  static getStar(val: string) {
+  static getStar(val: string): number {
     if (val === '*')
       return 1;
 
@@ -70,27 +70,27 @@ export class Rule<T extends string> {
   }
 
 
-  size(name: T) {
+  size(name: T): number {
     return this.sizes[name];
   }
 
-  has(name: T) {
+  has(name: T): boolean {
     return this.sizes[name] > 0;
   }
 
-  start(name: T) {
+  start(name: T): number {
     return this.starts[name];
   }
 
-  end(name: T) {
+  end(name: T): number {
     return this.ends[name];
   }
 
-  middle(name: T) {
+  middle(name: T): number {
     return this.starts[name] + this.sizes[name] / 2;
   }
 
-  debugX(width = 10000) {
+  debugX(width = 10000): React.JSX.Element {
 
     const keys = Object.keys(this.sizes);
 
@@ -119,7 +119,7 @@ export class Rule<T extends string> {
     );
   }
 
-  debugY(height = 10000) {
+  debugY(height = 10000): React.JSX.Element {
 
     const keys = Object.keys(this.sizes);
 

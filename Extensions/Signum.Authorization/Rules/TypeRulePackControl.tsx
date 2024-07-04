@@ -29,7 +29,8 @@ import { RoleEntity } from '../Signum.Authorization'
 import { OperationSymbol } from '@framework/Signum.Operations'
 import { QueryEntity } from '@framework/Signum.Basics'
 
-export default React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
+export const TypesRulesPackControl: React.ForwardRefExoticComponent<{ ctx: TypeContext<TypeRulePack> } & React.RefAttributes<IRenderButtons>>
+  = React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
 
   const [filter, setFilter] = React.useState("");
 
@@ -459,3 +460,5 @@ function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: 
 
   return current;
 }
+
+export default TypesRulesPackControl;

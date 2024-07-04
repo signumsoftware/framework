@@ -35,7 +35,7 @@ interface ExpressionOrValueComponentHandle {
   updateValue(value: string | boolean | null | undefined): void;
 }
 
-export function ExpressionOrValueComponent(p : ExpressionOrValueProps){
+export function ExpressionOrValueComponent(p : ExpressionOrValueProps): React.JSX.Element {
   function updateValue(value: string | boolean | null | undefined) {
 
     var parsedValue = p.type != "number" ? value : (parseFloat(value as string) ?? null);
@@ -241,7 +241,7 @@ interface NullableCheckBoxProps {
   onChange: (newValue: boolean | undefined) => void;
 }
 
-export function NullableCheckBox(p : NullableCheckBoxProps){
+export function NullableCheckBox(p : NullableCheckBoxProps): React.JSX.Element {
   function getIcon() {
     switch (p.value) {
       case true: return "check";
@@ -281,7 +281,7 @@ export interface FieldComponentProps {
   binding: Binding<string | undefined>,
 }
 
-export function FieldComponent(p : FieldComponentProps){
+export function FieldComponent(p : FieldComponentProps): React.JSX.Element {
   function handleChange(e: React.ChangeEvent<any>) {
     var sender = (e.currentTarget as HTMLSelectElement);
 
@@ -325,7 +325,7 @@ export function FieldComponent(p : FieldComponentProps){
   );
 }
 
-export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode> }){
+export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode> }): React.JSX.Element {
   const sn = p.selectedNode;
 
     if (!sn)
@@ -344,7 +344,7 @@ export function DynamicViewInspector(p : { selectedNode?: DesignerNode<BaseNode>
   }
 
 
-export function CollapsableTypeHelp(p: { initialTypeName?: string }) {
+export function CollapsableTypeHelp(p: { initialTypeName?: string }): React.JSX.Element {
 
   const [open, setOpen] = React.useState<boolean>(false);
 
@@ -387,7 +387,7 @@ interface DesignerModalProps extends IModalProps<boolean | undefined> {
   mainComponent: () => React.ReactElement<any>;
 }
 
-export function DesignerModal(p: DesignerModalProps) {
+export function DesignerModal(p: DesignerModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
   const okClicked = React.useRef<boolean | undefined>();
@@ -425,7 +425,7 @@ DesignerModal.show = (title: React.ReactNode, mainComponent: () => React.ReactEl
     return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
   }
 
-export function PropsHelp(p: { node: DesignerNode<BaseNode> }) {
+export function PropsHelp(p: { node: DesignerNode<BaseNode> }): React.JSX.Element {
 
   return (
     <DropdownButton id="props_help_dropdown" variant="success" size={"xs" as any} title={DynamicViewMessage.PropsHelp.niceToString()}>

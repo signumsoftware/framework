@@ -9,7 +9,10 @@ import { useForceUpdate } from '../Hooks';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { Placement } from 'popper.js';
 
-export function VersionChangedAlert(p: { blink?: boolean }) {
+export const VersionChangedAlert: {
+  (p: { blink?: boolean }): React.JSX.Element | null;
+  forceUpdateSingletone: (() => void) | undefined;
+} = function VersionChangedAlert(p: { blink?: boolean }): React.JSX.Element | null {
 
   var forceUpdate = useForceUpdate();
 
@@ -36,9 +39,9 @@ export function VersionChangedAlert(p: { blink?: boolean }) {
 }
 
 VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
-VersionChangedAlert.defaultProps = { blink: true };
+(VersionChangedAlert as any).defaultProps = { blink: true };
 
-export function VersionInfo(p: { extraInformation?: string }) {
+export function VersionInfo(p: { extraInformation?: string }): React.JSX.Element {
   return (
     <div className="nav-link">
       <OverlayTrigger
@@ -57,7 +60,7 @@ export function VersionInfo(p: { extraInformation?: string }) {
   );
 }
 
-export function VersionInfoTooltip(p: { extraInformation?: string}) {
+export function VersionInfoTooltip(p: { extraInformation?: string}): React.JSX.Element {
 
   var bt = DateTime.fromISO(VersionFilter.initialBuildTime!);
 

@@ -22,14 +22,14 @@ function toTab(e: EmbeddedWidget) {
   );
 }
 
-export function addAdditionalTabs(frame: EntityFrame | undefined) {
+export function addAdditionalTabs(frame: EntityFrame | undefined): React.JSX.Element[] | undefined {
   if (frame === undefined || frame.tabs === undefined)
     return undefined;
 
   return frame.tabs.map(e => toTab(e)); 
 }
 
-export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
+function WidgetEmbedded(p: WidgetEmbeddedProps): React.JSX.Element {
  
   const widgets = onEmbeddedWidgets.map(a => a(p.widgetContext)).filter(a => a !== undefined).map(a => a!).flatMap(a => a);
 
@@ -63,8 +63,15 @@ export default function WidgetEmbedded(p: WidgetEmbeddedProps) {
   }
 }
 
-WidgetEmbedded.customPanel = (ew: EmbeddedWidget) =>
-  <fieldset>
-    <legend>{ew.title}</legend>
-    {ew.embeddedWidget}
-  </fieldset>;
+namespace WidgetEmbedded {
+  export function customPanel(ew: EmbeddedWidget): React.JSX.Element {
+    return (
+      <fieldset>
+        <legend>{ew.title}</legend >
+        {ew.embeddedWidget}
+      </fieldset >
+    );
+  }
+}
+
+export default WidgetEmbedded;

@@ -21,11 +21,11 @@ export interface MessageModalHandler {
 }
 
 interface MessageModalProps extends IModalProps<MessageModalResult | undefined> {
-  title: React.ReactChild;
-  message: React.ReactChild | ((ctx: MessageModalHandler) => React.ReactChild);
+  title: string | React.ReactElement;
+  message: string | React.ReactElement | ((ctx: MessageModalHandler) => string | React.ReactElement);
   style?: MessageModalStyle;
   buttons: MessageModalButtons;
-  buttonContent?: (button: MessageModalResult) => React.ReactChild | null | undefined;
+  buttonContent?: (button: MessageModalResult) => string | React.ReactElement | null | undefined;
   buttonHtmlAttributes?: (button: MessageModalResult) => React.ButtonHTMLAttributes<any> | null | undefined;
   buttonClass?: (button: MessageModalResult) => string | undefined;
   icon?: MessageModalIcon | null;
@@ -36,7 +36,8 @@ interface MessageModalProps extends IModalProps<MessageModalResult | undefined> 
   modalRef?: React.RefObject<MessageModalHandler>; //For closing the modal imperatively
 }
 
-export default function MessageModal(p: MessageModalProps) {
+
+function MessageModal(p: MessageModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
 
@@ -176,14 +177,18 @@ export default function MessageModal(p: MessageModalProps) {
   );
 }
 
-MessageModal.show = (options: MessageModalProps): Promise<MessageModalResult | undefined> => {
-  return openModal<MessageModalResult>(<MessageModal {...options} />);
+namespace MessageModal {
+  export function show(options: MessageModalProps): Promise<MessageModalResult | undefined> {
+    return openModal<MessageModalResult>(<MessageModal {...options} />);
+  }
+
+  export function showError(message: React.ReactElement | string, title?: string): Promise<undefined> {
+    return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title ?? JavascriptMessage.error.niceToString(), message: message })
+      .then(() => undefined);
+  }
 }
 
-MessageModal.showError = (message: React.ReactChild, title?: string): Promise<undefined> => {
-  return MessageModal.show({ buttons: "ok", icon: "error", style: "error", title: title ?? JavascriptMessage.error.niceToString(), message: message })
-    .then(() => undefined);
-}
+export default MessageModal;
 
 function dialogHeaderClass(style: MessageModalStyle | undefined) {
   switch (style) {

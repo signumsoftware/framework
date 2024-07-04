@@ -14,7 +14,8 @@ export class CheckboxLineController extends ValueBaseController<CheckboxLineProp
 
 }
 
-export const CheckboxLine = React.memo(React.forwardRef(function CheckboxLine(props: CheckboxLineProps, ref: React.Ref<CheckboxLineController>) {
+export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<CheckboxLineProps & React.RefAttributes<CheckboxLineController>>> =
+  React.memo(React.forwardRef(function CheckboxLine(props: CheckboxLineProps, ref: React.Ref<CheckboxLineController>) {
 
   const c = useController(CheckboxLineController, props, ref);
 

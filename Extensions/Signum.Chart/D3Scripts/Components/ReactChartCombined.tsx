@@ -16,7 +16,7 @@ export interface ReactChartCombinedInfo {
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
 }
 
-export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null }) {
+export function ReactChartCombined(p: { infos: ReactChartCombinedInfo[], useSameScale: boolean, minHeigh: number | null }): React.JSX.Element {
 
   const isSimple = p.infos.every(a => a.data == null || a.data.rows.length < ReactChart.maxRowsForAnimation);
   const allData = p.infos.every(a => a.data != null);

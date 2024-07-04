@@ -6,12 +6,12 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 
 
-export const SmtpDeliveryFormat = new EnumType<SmtpDeliveryFormat>("SmtpDeliveryFormat");
+export const SmtpDeliveryFormat: EnumType<SmtpDeliveryFormat> = new EnumType<SmtpDeliveryFormat>("SmtpDeliveryFormat");
 export type SmtpDeliveryFormat =
   "SevenBit" |
   "International";
 
-export const SmtpDeliveryMethod = new EnumType<SmtpDeliveryMethod>("SmtpDeliveryMethod");
+export const SmtpDeliveryMethod: EnumType<SmtpDeliveryMethod> = new EnumType<SmtpDeliveryMethod>("SmtpDeliveryMethod");
 export type SmtpDeliveryMethod =
   "Network" |
   "SpecifiedPickupDirectory" |

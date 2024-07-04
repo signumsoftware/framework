@@ -6,7 +6,7 @@ import { DynamicCSSOverrideEntity } from './Signum.Dynamic.CSS'
 
 export namespace DynamicCSSOverrideClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(DynamicCSSOverrideEntity, w => import('./CSS/DynamicCSSOverride')));
     EvalClient.Options.registerDynamicPanelSearch(DynamicCSSOverrideEntity, t => [
       { token: t.append(p => p.name), type: "Text" },

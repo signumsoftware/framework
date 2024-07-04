@@ -53,7 +53,7 @@ export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEdita
   );
 }
 
-export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }) {
+export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined> }): React.JSX.Element {
 
   return (
     <ErrorBoundary>
@@ -68,7 +68,7 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
 }
 
 
-export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }) {
+export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element {
 
   var htmlText = React.useMemo(() => HelpClient.replaceHtmlLinks(p.text ?? ""), [p.text]);
   if (!htmlText)

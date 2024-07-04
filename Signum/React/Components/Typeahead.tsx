@@ -50,7 +50,7 @@ export class TypeaheadController {
     this.rtl = document.body.classList.contains("rtl");
   }
 
-  init(props: TypeaheadProps) {
+  init(props: TypeaheadProps) : void {
     [this.query, this.setQuery] = React.useState<string | undefined>(undefined);
     [this.shown, this.setShown] = React.useState<boolean>(false);
     [this.items, this.setItem] = React.useState<any[] | undefined>(undefined);
@@ -66,11 +66,11 @@ export class TypeaheadController {
     this.props = props;
   }
 
-  setInput = (input: HTMLInputElement | null | undefined) => {
+  setInput = (input: HTMLInputElement | null | undefined): void => {
     this.input = input
   }
 
-  lookup = () => {
+  lookup = (): void => {
     if (!this.props.itemsDelay) {
       this.populate();
     }
@@ -82,7 +82,7 @@ export class TypeaheadController {
     }
   }
 
-  populate = () => {
+  populate = (): void => {
 
     if (this.props.minLength == null || this.input!.value.length < this.props.minLength) {
       this.setShown(false);
@@ -102,7 +102,7 @@ export class TypeaheadController {
     });
   }
 
-  select = (e: React.KeyboardEvent<any> | React.MouseEvent<any>) => {
+  select = (e: React.KeyboardEvent<any> | React.MouseEvent<any>): boolean => {
     if (this.items!.length == 0)
       return false;
 
@@ -117,13 +117,13 @@ export class TypeaheadController {
   }
 
   //public
-  writeInInput = (query: string) => {
+  writeInInput = (query: string): void => {
     this.input!.value = query;
     this.input!.focus();
     this.lookup();
   }
 
-  handleFocus = () => {
+  handleFocus = (): void => {
     if (!this.focused) {
       this.focused = true;
       if (this.props.minLength == 0 && !this.input!.value)
@@ -131,7 +131,7 @@ export class TypeaheadController {
     }
   }
 
-  handleBlur = () => {
+  handleBlur = (): void => {
     this.focused = false;
 
     if (this.props.onBlur)
@@ -139,11 +139,11 @@ export class TypeaheadController {
   }
 
 
-  blur = () => {
+  blur = (): void => {
     this.input!.blur();
   }
 
-  handleKeyDown = (e: React.KeyboardEvent<any>) => {
+  handleKeyDown = (e: React.KeyboardEvent<any>): void => {
     if (!this.shown)
       return;
 
@@ -173,7 +173,7 @@ export class TypeaheadController {
     e.stopPropagation();
   }
 
-  handleKeyUp = (e: React.KeyboardEvent<any>) => {
+  handleKeyUp = (e: React.KeyboardEvent<any>): void => {
     switch (e.keyCode) {
       case 40: // down arrow
       case 38: // up arrow
@@ -205,7 +205,7 @@ export class TypeaheadController {
   }
 
 
-  handleMenuMouseUp = (e: React.MouseEvent<any>, index: number) => {
+  handleMenuMouseUp = (e: React.MouseEvent<any>, index: number): void => {
     e.preventDefault();
     this.setSelectedIndex(index).then(() => {
       if (this.select(e))
@@ -213,24 +213,24 @@ export class TypeaheadController {
     });
   }
 
-  handleElementMouseEnter = (event: React.MouseEvent<any>, index: number) => {
+  handleElementMouseEnter = (event: React.MouseEvent<any>, index: number): void => {
     this.setSelectedIndex(index);
   }
 
-  handleElementMouseLeave = (event: React.MouseEvent<any>, index: number) => {
+  handleElementMouseLeave = (event: React.MouseEvent<any>, index: number): void => {
     this.setSelectedIndex(undefined);
     if (!this.focused && this.shown)
       this.setShown(false);
   }
 
-  handleOnChange = () => {
+  handleOnChange = (): void => {
     if (this.props.onChange)
       this.props.onChange(this.input!.value);
   }
 }
 
 
-export const Typeahead = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadController>) {
+export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.RefAttributes<TypeaheadController>> = React.forwardRef(function Typeahead(p: TypeaheadProps, ref: React.Ref<TypeaheadController>) {
 
   const controller = React.useMemo(() => new TypeaheadController(), []);
   controller.init(p);
@@ -320,7 +320,7 @@ export class TextHighlighter {
   parts?: string[];
   regex?: RegExp;
 
-  static fromString(query: string | undefined) {
+  static fromString(query: string | undefined): TextHighlighter {
     var hl = new TextHighlighter(query?.split(" "));
     hl.query = query;
     return hl;

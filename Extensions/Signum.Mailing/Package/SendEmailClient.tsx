@@ -9,7 +9,7 @@ import { EmailMessageEntity } from '../Signum.Mailing'
 
 export namespace SendEmailClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(SendEmailTaskEntity, e => import('./SendEmailTask')));
   }

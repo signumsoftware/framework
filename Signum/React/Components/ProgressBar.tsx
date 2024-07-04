@@ -14,7 +14,7 @@ interface ProgressBarProps {
   progressHtmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
 }
 
-export default function ProgressBar(p: ProgressBarProps) {
+export default function ProgressBar(p: ProgressBarProps): React.JSX.Element {
   let { value, showPercentageInMessage, message, color, striped, animated } = p;
 
   if (striped == null)

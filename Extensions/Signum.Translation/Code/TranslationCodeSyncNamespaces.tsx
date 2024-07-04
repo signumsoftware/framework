@@ -7,7 +7,7 @@ import "../Translation.css"
 import { encodeDots, decodeDots } from './TranslationCodeStatus'
 import { useAPI } from '@framework/Hooks'
 
-export default function TranslationCodeSyncNamespaces() {
+export default function TranslationCodeSyncNamespaces(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string; };
   const assembly = decodeDots(params.assembly);
   const culture = params.culture;

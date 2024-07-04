@@ -14,7 +14,7 @@ interface QueryTokenEmbeddedBuilderProps {
   helpText?: React.ReactChild;
 }
 
-export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderProps) {
+export default function QueryTokenEmbeddedBuilder(p: QueryTokenEmbeddedBuilderProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleTokenChanged(newToken: QueryToken | undefined) {
     if (newToken == null)

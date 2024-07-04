@@ -81,7 +81,7 @@ export function ajaxPostRaw(options: AjaxOptions, data: any): Promise<Response> 
 
 export const addContextHeaders: ((options: AjaxOptions) => void)[] = [];
 
-export function clearContextHeaders() {
+export function clearContextHeaders(): void {
   addContextHeaders.clear();
 }
 
@@ -229,7 +229,7 @@ a.href = "#";
 document.body.appendChild(a);
 a.style.display = "none";
 
-export function saveFile(response: Response, overrideFileName?: string) {
+export function saveFile(response: Response, overrideFileName?: string): Promise<void> {
 
   var fileName = overrideFileName || getFileName(response);
 
@@ -238,7 +238,7 @@ export function saveFile(response: Response, overrideFileName?: string) {
   });
 }
 
-export function getFileName(response: Response) {
+export function getFileName(response: Response): string {
   const contentDisposition = response.headers.get("Content-Disposition")!;
   const parts = contentDisposition.split(";");
 
@@ -254,7 +254,7 @@ export function getFileName(response: Response) {
     return "file.dat";
 }
 
-export function saveFileBlob(blob: Blob, fileName: string) {
+export function saveFileBlob(blob: Blob, fileName: string): void {
   if ((window.navigator as any).msSaveBlob)
     (window.navigator as any).msSaveBlob(blob, fileName);
   else {
@@ -269,7 +269,7 @@ export function saveFileBlob(blob: Blob, fileName: string) {
   }
 }
 
-export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512) {
+export function b64toBlob(b64Data: string, contentType: string = "", sliceSize = 512): Blob {
   contentType = contentType || '';
   sliceSize = sliceSize || 512;
 
@@ -298,7 +298,7 @@ export class ServiceError {
     public httpError: WebApiHttpError) {
   }
 
-  get defaultIcon() {
+  get defaultIcon(): "lock" | "trash" | "clone" | "exclamation-triangle" {
     switch (this.httpError.exceptionType) {
       case "UnauthorizedAccessException": return "lock";
       case "EntityNotFoundException": return "trash";
@@ -307,7 +307,7 @@ export class ServiceError {
     }
   }
 
-  toString() {
+  toString(): string | null {
     return this.httpError.exceptionMessage;
   }
 }
@@ -370,11 +370,11 @@ export namespace SessionSharing {
 
   var _appName: string = "";
 
-  export function getAppName() {
+  export function getAppName(): string {
     return _appName;
   }
 
-  export function setAppNameAndRequestSessionStorage(appName: string) {
+  export function setAppNameAndRequestSessionStorage(appName: string): void {
     _appName = appName;
     if (!sessionStorage.length) { //Copied from anote
       requestSessionStorageFromAnyTab();
@@ -437,7 +437,7 @@ export class AbortableRequest<Q, A> {
     }
   }
 
-  isRunning() {
+  isRunning(): boolean {
     return this.abortController != null;
   }
 

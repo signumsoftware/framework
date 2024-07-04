@@ -11,7 +11,7 @@ import { saveFile } from '@framework/Services'
 import { CultureClient } from '@framework/Basics/CultureClient'
 import MessageModal from '@framework/Modals/MessageModal'
 
-export default function TranslationCodeStatus() {
+export default function TranslationCodeStatus(): React.JSX.Element {
 
   const [result, reloadResult] = useAPIWithReload(() => TranslationClient.API.status(), []);
 
@@ -112,11 +112,11 @@ function TranslationTable({ result, onRefreshView }: { result: TranslationClient
   }
 }
 
-export function encodeDots(value: string) {
+export function encodeDots(value: string): string {
   return value.replaceAll(".", "-");
 }
 
-export function decodeDots(value: string) {
+export function decodeDots(value: string): string {
   return value.replaceAll("-", ".");
 }
 

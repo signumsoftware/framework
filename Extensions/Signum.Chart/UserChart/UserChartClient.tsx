@@ -25,7 +25,7 @@ import UserChartToolbarConfig from './UserChartToolbarConfig';
 
 export namespace UserChartClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     
     ToolbarClient.registerConfig(new UserChartToolbarConfig());
     OmniboxClient.registerProvider(new UserChartOmniboxProvider());

@@ -7,7 +7,7 @@ import { useAPI, useAPIWithReload } from '@framework/Hooks'
 import { SearchControl } from '@framework/Search'
 import { ExceptionEntity } from '@framework/Signum.Basics'
 
-export default function CacheStatisticsPage() {
+export default function CacheStatisticsPage(): React.JSX.Element {
 
   var [state, reloadState] = useAPIWithReload(() => CacheClient.API.view(), [], { avoidReset: true });
 

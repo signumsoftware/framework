@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Components/FileLine'
 import { ExcelReportEntity } from '../Signum.Excel'
 
-export default function ExcelReport(p : { ctx: TypeContext<ExcelReportEntity> }){
+export default function ExcelReport(p : { ctx: TypeContext<ExcelReportEntity> }): React.JSX.Element {
   const e = p.ctx;
 
   return (

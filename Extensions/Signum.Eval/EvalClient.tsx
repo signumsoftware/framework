@@ -19,7 +19,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace EvalClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Eval", () => import("./Changelog"));
   
@@ -39,7 +39,7 @@ export namespace EvalClient {
   
     export let onGetDynamicPanelSearch: ((ctx: StyleContext, search: string) => React.ReactNode)[] = [];
   
-    export function registerDynamicPanelSearch<T extends Entity>(type: Type<T>, getColumns: (token: QueryTokenString<T & { entity: T }>) => { token: QueryTokenString<any>, type: FormatColumnType }[]) {
+    export function registerDynamicPanelSearch<T extends Entity>(type: Type<T>, getColumns: (token: QueryTokenString<T & { entity: T }>) => { token: QueryTokenString<any>, type: FormatColumnType }[]): void {
       onGetDynamicPanelSearch.push((ctx, search) => {
         var columns = getColumns(type.token());
   

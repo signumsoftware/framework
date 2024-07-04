@@ -11,7 +11,7 @@ interface SimpleResultButtonProps {
   ctx: TypeContext<PredictorEntity>;
 }
 
-export default function SimpleResultButton(p : SimpleResultButtonProps){
+export default function SimpleResultButton(p : SimpleResultButtonProps): React.JSX.Element {
 
   function handleOnClick(e: React.MouseEvent<any>) {
     e.preventDefault();

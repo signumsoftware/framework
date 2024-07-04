@@ -12,7 +12,7 @@ export interface WordSearchMenuProps {
   searchControl: SearchControlLoaded;
 }
 
-export default function WordSearchMenu(p : WordSearchMenuProps){
+export default function WordSearchMenu(p : WordSearchMenuProps): React.JSX.Element | null {
   function handleOnClick(wt: Lite<WordTemplateEntity>) {
     Navigator.API.fetch(wt)
       .then(wordTemplate => WordClient.API.getConstructorType(wordTemplate.model!))

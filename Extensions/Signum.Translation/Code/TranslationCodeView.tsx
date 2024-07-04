@@ -14,7 +14,7 @@ import { useAPI } from '@framework/Hooks'
 import { useTitle } from '@framework/AppContext'
 import { QueryString } from '@framework/QueryString'
 
-export default function TranslationCodeView() {
+export default function TranslationCodeView(): React.JSX.Element {
   const params = useParams() as { culture: string; assembly: string };
   const location = useLocation();
 
@@ -65,7 +65,7 @@ export default function TranslationCodeView() {
   );
 }
 
-export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }){
+export function TranslateSearchBox(p: { filter: string, setFilter: (newFilter: string) => void }): React.JSX.Element{
 
   const [tmpFilter, setTmpFilter] = React.useState(p.filter);
 

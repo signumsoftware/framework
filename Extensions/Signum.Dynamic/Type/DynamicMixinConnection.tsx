@@ -16,7 +16,7 @@ interface DynamicMixinConnectionComponentProps {
   ctx: TypeContext<DynamicMixinConnectionEntity>;
 }
 
-export default function DynamicMixinConnectionComponent(p : DynamicMixinConnectionComponentProps){
+export default function DynamicMixinConnectionComponent(p : DynamicMixinConnectionComponentProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx;
 
@@ -39,7 +39,7 @@ export interface MixinComboProps {
   onChange?: () => void;
 }
 
-export function MixinCombo(p : MixinComboProps){
+export function MixinCombo(p : MixinComboProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   function handleGetItems(query: string) {
     return Finder.fetchLites({

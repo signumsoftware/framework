@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { FileLine } from '../../Signum.Files/Files'
 import { ImageAttachmentEntity } from '../Signum.Mailing.Templates';
 
-export default function ImageAttachment(p: { ctx: TypeContext<ImageAttachmentEntity> }) {
+export default function ImageAttachment(p: { ctx: TypeContext<ImageAttachmentEntity> }): React.JSX.Element {
   const sc = p.ctx.subCtx({ formGroupStyle: "Basic" });
 
   return (

@@ -19,7 +19,7 @@ import { TypeContext } from '@framework/Lines'
 
 export namespace FilesClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Files", () => import("./Changelog"));
   
@@ -161,14 +161,15 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   file: IFile & ModifiableEntity;
 }
 
-export function FileThumbnail({ file, ...attrs }: FileThumbnailProps) {
+export function FileThumbnail({ file, ...attrs }: FileThumbnailProps): React.JSX.Element {
   return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
 }
 
-FileThumbnail.defaultProps = {
-  style: { maxWidth: "150px" }
-} as Partial<FileThumbnailProps>;
-
+export namespace FileThumbnail {
+  export const defaultProps = {
+    style: { maxWidth: "150px" }
+  } as Partial<FileThumbnailProps>;
+}
 
 declare module '@framework/Reflection' {
 
