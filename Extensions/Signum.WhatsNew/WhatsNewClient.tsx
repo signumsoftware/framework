@@ -135,7 +135,7 @@ export namespace WhatsNewClient {
   
   export const configs: { [type: string]: WhatsNewConfig<any>[] } = {};
   
-  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>) {
+  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
   }
 }
