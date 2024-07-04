@@ -33,7 +33,7 @@ export namespace IsolationClient {
     export let onIsolationChange: ((e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined) => boolean) | null = null;
   }
   
-  export function changeOverridenIsolation(e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined): React.JSX.Element {
+  export function changeOverridenIsolation(e: React.MouseEvent, isolation: Lite<IsolationEntity> | undefined): void {
   
   
     if (Options.onIsolationChange && Options.onIsolationChange(e, isolation))
