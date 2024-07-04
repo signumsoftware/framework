@@ -3,7 +3,6 @@
     "target": "ES2018",
     "isolatedDeclarations": true,
     "sourceMap": false,
-    "isolatedDeclarations": true,
     "module": "esnext",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
