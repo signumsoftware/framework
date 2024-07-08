@@ -7,6 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
+
 export const CSharpMigrationEntity: Type<CSharpMigrationEntity> = new Type<CSharpMigrationEntity>("CSharpMigration");
 export interface CSharpMigrationEntity extends Entities.Entity {
   Type: "CSharpMigration";
