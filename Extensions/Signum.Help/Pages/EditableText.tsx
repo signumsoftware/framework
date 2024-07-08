@@ -16,7 +16,7 @@ import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 
-export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
+export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
 
@@ -36,7 +36,7 @@ export function EditableTextComponent({ ctx, defaultText, onChange, defaultEdita
 }
   
 
-export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }) {
+export function EditableHtmlComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | undefined | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element{
 
   var [editable, setEditable] = React.useState(defaultEditable || false);
   var forceUpdate = useForceUpdate();
@@ -68,7 +68,7 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
 }
 
 
-export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element {
+export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?: React.HTMLAttributes<HTMLDivElement>; }): React.JSX.Element | null {
 
   var htmlText = React.useMemo(() => HelpClient.replaceHtmlLinks(p.text ?? ""), [p.text]);
   if (!htmlText)
@@ -80,7 +80,7 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
     <div className="html-viewer">
       <ErrorBoundary>
         <HtmlEditor readOnly
-          binding={binding}
+          binding={binding as any}
           htmlAttributes={p.htmlAttributes}
           toolbarButtons={c => null} plugins={[
             new LinksPlugin(),
