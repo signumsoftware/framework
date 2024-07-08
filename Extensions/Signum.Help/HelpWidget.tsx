@@ -38,7 +38,7 @@ export function HelpWidget(p: HelpWidgetProps): React.JSX.Element {
   );
 }
 
-export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }): React.JSX.Element {
+export function HelpIcon(p: { ctx: TypeContext<any>, typeHelp?: TypeHelpEntity }): React.JSX.Element | undefined | null | boolean {
 
   //debugger;
 

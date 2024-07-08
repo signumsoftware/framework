@@ -17,7 +17,7 @@ import { WhatsNewEntity, WhatsNewLogEntity, WhatsNewMessage, WhatsNewOperation, 
 import * as AppContext from "@framework/AppContext"
 import { HtmlViewer } from '../Templates/WhatsNewHtmlEditor'
 
-export default function WhatsNewDropdown(): React.JSX.Element {
+export default function WhatsNewDropdown(): React.JSX.Element | null {
 
   if (!Navigator.isViewable(WhatsNewEntity))
     return null;
@@ -142,7 +142,7 @@ function WhatsNewDropdownImp() {
   );
 }
 
-export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClose: (e: WhatsNewClient.WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void })
+export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClose: (e: WhatsNewClient.WhatsNewShort[]) => void, refresh: () => void, className?: string; setIsOpen: (isOpen: boolean) => void }): React.JSX.Element
 {
   //ignoring open tags other than img
   function HTMLSubstring(text: string) {
@@ -185,6 +185,12 @@ export function WhatsNewToast(p: { whatsnew: WhatsNewClient.WhatsNewShort, onClo
       </Toast.Body>
     </Toast>
   );
+}
+
+export declare namespace WhatsNewToast {
+    export var icons: {
+        [alertTypeKey: string]: React.ReactNode
+    }
 }
 
 WhatsNewToast.icons = {} as { [alertTypeKey: string]: React.ReactNode };

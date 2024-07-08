@@ -51,10 +51,18 @@ class Upgrade_20240702_IsolatedDeclarations : CodeUpgradeBase
                 """);
         });
 
-        uctx.ChangeCodeFile(@"SignumUpgrade.txt", file =>
+        uctx.ChangeCodeFile(@"Southwind.Server/package.json", file =>
         {
-            file.Replace("Upgrade_20240328_Extract_ReNew_Server", "Upgrade_20240328_Extract_Server");
-            file.Replace("Upgrade_20240405_Fix_ReNew_Server", "Upgrade_20240405_Fix_Server");
+        file.UpdateNpmPackages("""
+            "css-loader": "7.1.2",
+            "rimraf": "5.0.7",
+            "sass-loader": "14.2.1",
+            "style-loader": "3.3.4",
+            "ts-loader": "9.5.1",
+            "webpack": "5.92.1",
+            "webpack-bundle-analyzer": "4.10.2",
+            "typescript": "5.5.3",
+            """);
         });
     }
 }
