@@ -9,7 +9,7 @@ public abstract class ImmutableEntity : Entity
 
     public bool AllowChange
     {
-        get { return allowTemporaly || IsNew; }
+        get { return tempDisabled.Value || allowTemporaly || IsNew; }
         set { allowTemporaly = value; Notify(() => AllowChange); }
     }
 
@@ -27,7 +27,7 @@ public abstract class ImmutableEntity : Entity
             base.PreSaving(ctx);
         else
             if (Modified == ModifiedState.SelfModified)
-                throw new InvalidOperationException("Attempt to save a not new modified ImmutableEntity");
+                throw new InvalidOperationException($"Attempt to save a not new modified ImmutableEntity ({this.GetType().TypeName()})");
     }
 
     public IDisposable AllowChanges()
@@ -35,6 +35,15 @@ public abstract class ImmutableEntity : Entity
         bool old = this.AllowChange;
         this.AllowChange = true;
         return new Disposable(() => this.AllowChange = old);
+    }
+
+    static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("immutableTempDisabled");
+
+    public static IDisposable? Disable()
+    {
+        if (tempDisabled.Value) return null;
+        tempDisabled.Value = true;
+        return new Disposable(() => tempDisabled.Value = false);
     }
 }
 
