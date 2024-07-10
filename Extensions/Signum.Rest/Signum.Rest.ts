@@ -10,14 +10,14 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
-export const QueryStringValueEmbedded = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");
+export const QueryStringValueEmbedded: Type<QueryStringValueEmbedded> = new Type<QueryStringValueEmbedded>("QueryStringValueEmbedded");
 export interface QueryStringValueEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryStringValueEmbedded";
   key: string;
   value: string;
 }
 
-export const RestApiKeyEntity = new Type<RestApiKeyEntity>("RestApiKey");
+export const RestApiKeyEntity: Type<RestApiKeyEntity> = new Type<RestApiKeyEntity>("RestApiKey");
 export interface RestApiKeyEntity extends Entities.Entity {
   Type: "RestApiKey";
   user: Entities.Lite<Authorization.UserEntity>;
@@ -25,7 +25,7 @@ export interface RestApiKeyEntity extends Entities.Entity {
 }
 
 export module RestApiKeyMessage {
-  export const GenerateApiKey = new MessageKey("RestApiKeyMessage", "GenerateApiKey");
+  export const GenerateApiKey: MessageKey = new MessageKey("RestApiKeyMessage", "GenerateApiKey");
 }
 
 export module RestApiKeyOperation {
@@ -33,7 +33,7 @@ export module RestApiKeyOperation {
   export const Delete : Operations.DeleteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Delete");
 }
 
-export const RestLogEntity = new Type<RestLogEntity>("RestLog");
+export const RestLogEntity: Type<RestLogEntity> = new Type<RestLogEntity>("RestLog");
 export interface RestLogEntity extends Entities.Entity {
   Type: "RestLog";
   httpMethod: string | null;
@@ -59,7 +59,7 @@ export interface RestLogEntity extends Entities.Entity {
   allowReplay: boolean;
 }
 
-export const RestLogReplayState = new EnumType<RestLogReplayState>("RestLogReplayState");
+export const RestLogReplayState: EnumType<RestLogReplayState> = new EnumType<RestLogReplayState>("RestLogReplayState");
 export type RestLogReplayState =
   "NoChanges" |
   "WithChanges";
