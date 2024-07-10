@@ -324,12 +324,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
   }
 
-  doSearch(opts: { dataChanged?: boolean, force?: boolean }): Promise<void> {
+  doSearch(opts: { dataChanged?: boolean, force?: boolean, keepSelected?: boolean }): Promise<void> {
 
     if (this.isUnmounted || (this.isManualRefreshOrAllPagination() && !opts.force))
       return Promise.resolve();
 
     var dataChanged = opts.dataChanged ?? this.state.dataChanged;
+
+
+    const selectedLites = opts.keepSelected ? this.state.selectedRows?.map(a => a.entity!) : null;
 
     return this.getFindOptionsWithSFB().then(fop => {
       if (this.props.onSearch)
@@ -354,7 +357,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           dataChanged: undefined,
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
-          selectedRows: [],
+          selectedRows: selectedLites?.map(l => rt.rows.firstOrNull(a => is(a.entity, l))).notNull() ?? [],
           currentMenuItems: undefined,
           markedRows: undefined,
           searchCount: (this.state.searchCount ?? 0) + 1
