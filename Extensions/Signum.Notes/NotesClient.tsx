@@ -7,7 +7,7 @@ import { getQueryKey } from '@framework/Reflection'
 
 export namespace NotesClient {
   
-  export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }) {
+  export function start(options: { routes: RouteObject[], couldHaveNotes?: (typeName: string) => boolean }): void {
     Navigator.addSettings(new EntitySettings(NoteEntity, e => import('./Templates/Note')));
   
     const couldHaveNotes = options.couldHaveNotes ?? (typeName => true);
