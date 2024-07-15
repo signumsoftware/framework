@@ -250,6 +250,22 @@ public static class ExcelExtensions
         return type == typeof(DateTime) || type == typeof(DateOnly) || type == typeof(DateTimeOffset);
     }
 
+    public static WorksheetPart? TryWorksheetPartById(this SpreadsheetDocument document, string sheetId)
+    {
+        WorkbookPart wbPart = document.WorkbookPart!;
+
+        Sheet? theSheet = wbPart.Workbook.Descendants<Sheet>().
+          Where(s => s.Id == sheetId).FirstOrDefault();
+
+        if (theSheet == null)
+            return null;
+
+        // Retrieve a reference to the worksheet part, and then use its Worksheet property to get 
+        // a reference to the cell whose address matches the address you've supplied:
+        WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(theSheet.Id!));
+        return wsPart;
+    }
+
     public static WorksheetPart GetWorksheetPartById(this SpreadsheetDocument document, string sheetId)
     {
         WorkbookPart wbPart = document.WorkbookPart!;
@@ -282,6 +298,4 @@ public static class ExcelExtensions
         WorksheetPart wsPart = (WorksheetPart)(wbPart.GetPartById(sheet.Id!));
         return wsPart;
     }
-
-    
 }
