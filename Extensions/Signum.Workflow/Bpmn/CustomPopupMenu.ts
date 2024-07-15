@@ -3,16 +3,16 @@ import BpmnReplaceMenuProvider from "bpmn-js/lib/features/popup-menu/ReplaceMenu
 import * as BpmnUtils from './BpmnUtils'
 
 export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
-  static $inject = ['popupMenu', 'modeling', 'moddle', 'bpmnReplace', 'rules', 'translate'];
+  static $inject: string[] = ['popupMenu', 'modeling', 'moddle', 'bpmnReplace', 'rules', 'translate'];
   constructor(popupMenu: any, modeling: any, moddle: BPMN.ModdleElement, bpmnReplace: any, rules: any, translate: any) {
     super(popupMenu, modeling, moddle, bpmnReplace, rules, translate);
   }
 
-  getHeaderEntries(element: BPMN.DiElement) {
+  getHeaderEntries(element: BPMN.DiElement): never[] {
     return [];
   }
 
-  getPopupMenuEntries(element: BPMN.DiElement) {
+  getPopupMenuEntries(element: BPMN.DiElement): (entries: BPMN.EntriesObject) => BPMN.EntriesObject {
 
     if (BpmnUtils.isGatewayAnyKind(element.type))
       return this.entriesOrUpdaterGateways;
@@ -26,7 +26,7 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     return this.entriesOrUpdaterEmpty;
   }
 
-  entriesOrUpdaterGateways(entries: BPMN.EntriesObject) {
+  entriesOrUpdaterGateways(entries: BPMN.EntriesObject): BPMN.EntriesObject {
     
     Object.keys(entries)
       .filter(key => key != "replace-with-parallel-gateway" &&
@@ -37,7 +37,7 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     return entries;
   }
 
-  entriesOrUpdaterIntermediateEvents(entries: BPMN.EntriesObject) {
+  entriesOrUpdaterIntermediateEvents(entries: BPMN.EntriesObject): BPMN.EntriesObject {
 
     Object.keys(entries)
       .filter(key => key != "replace-with-timer-intermediate-catch")
@@ -46,7 +46,7 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     return entries;
   }
 
-  entriesOrUpdaterBoundaryEvents(entries: BPMN.EntriesObject) {
+  entriesOrUpdaterBoundaryEvents(entries: BPMN.EntriesObject): BPMN.EntriesObject {
 
     Object.keys(entries)
       .filter(key => key != "replace-with-timer-boundary" &&
@@ -56,7 +56,7 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
     return entries;
   }
 
-  entriesOrUpdaterEmpty(entries: BPMN.EntriesObject) {
+  entriesOrUpdaterEmpty(entries: BPMN.EntriesObject): BPMN.EntriesObject {
 
     Object.keys(entries).forEach(key => delete entries[key]);
 
@@ -64,5 +64,5 @@ export class CustomReplaceMenuProvider extends BpmnReplaceMenuProvider {
   }
 }
 
-export var __init__ = ['customReplaceMenuProvider'];
-export var customReplaceMenuProvider = ['type', CustomReplaceMenuProvider];
+export var __init__: string[] = ['customReplaceMenuProvider'];
+export var customReplaceMenuProvider: (string | typeof CustomReplaceMenuProvider)[] = ['type', CustomReplaceMenuProvider];
