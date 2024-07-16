@@ -176,8 +176,10 @@ public class SystemTimeTS
 {
     public SystemTimeMode mode;
     public SystemTimeJoinMode? joinMode;
-    public DateTimeOffset? startDate;
-    public DateTimeOffset? endDate;
+    public DateTime? startDate;
+    public DateTime? endDate;
+    public TimeUnit? everyTimeUnit;
+    public TimeUnit? everyStep;
 
     public SystemTimeTS() { }
 

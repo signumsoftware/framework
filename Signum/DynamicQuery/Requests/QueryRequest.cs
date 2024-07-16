@@ -104,7 +104,21 @@ public enum SystemTimeMode
     AsOf,
     Between,
     ContainedIn,
-    All
+    All,
+    Every,
+}
+
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+public enum TimeUnit
+{
+    Year,
+    Quarter,
+    Month,
+    Week,
+    Day, 
+    Hour,
+    Minute,
+    Second,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

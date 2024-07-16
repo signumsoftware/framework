@@ -1060,6 +1060,19 @@ public static class SystemTimeExpressions
              );
     }
 
+    internal static Expression? Contains(this IntervalExpression interval, Expression expression)
+    {
+        if (interval.PostgresRange != null)
+        {
+            return new SqlFunctionExpression(typeof(bool), null, "@>", new Expression[] { interval.PostgresRange!, expression! });
+        }
+
+        return Expression.And(
+             Expression.GreaterThanOrEqual(interval.Min!, expression),
+             Expression.LessThan(interval.Max!, expression)
+             );
+    }
+
     public static Expression And(this Expression expression, Expression? other)
     {
         if (other == null)

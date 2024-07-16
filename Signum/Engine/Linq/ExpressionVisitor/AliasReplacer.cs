@@ -1,3 +1,4 @@
+using Azure.Core;
 using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq;
@@ -39,10 +40,14 @@ internal class AliasReplacer : DbExpressionVisitor
 
     protected internal override Expression VisitTable(TableExpression table)
     {
-        if (aliasMap.ContainsKey(table.Alias))
-            return new TableExpression(aliasMap[table.Alias], table.Table, table.SystemTime, table.WithHint);
+        var systemTime = this.VisitSystemTime(table.SystemTime);
+        var newAlias = aliasMap.TryGetC(table.Alias) ?? table.Alias;
+        if (systemTime != table.SystemTime || table.Alias != newAlias)
+            return new TableExpression(newAlias, table.Table, systemTime, table.WithHint);
         return table;
     }
+
+
 
     protected internal override Expression VisitSelect(SelectExpression select)
     {

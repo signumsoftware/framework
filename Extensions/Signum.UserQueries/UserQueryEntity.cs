@@ -216,9 +216,9 @@ public class SystemTimeEmbedded : EmbeddedEntity
             _ => throw new UnexpectedValueException(JoinMode!.Value)
         };
 
-        DateTimeOffset ParseDate(string date)
+        DateTime ParseDate(string date)
         {
-            return (DateTimeOffset)(DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
+            return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
         }
 
         return Mode switch

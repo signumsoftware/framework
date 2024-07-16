@@ -1,5 +1,8 @@
+using Microsoft.SqlServer.Server;
 using Signum.Authorization;
 using Signum.DiffLog;
+using Signum.Engine.Linq;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System;
@@ -10,9 +13,26 @@ using System.Threading.Tasks;
 
 namespace Signum.TimeMachine;
 
+
+public class DateValue : IView
+{
+    [ViewPrimaryKey]
+    public DateOnly Date;
+}
+
 public static class TimeMachineLogic
 {
-
+    [SqlMethod(Name = "GetDatesInRange"), AvoidEagerEvaluation]
+    public static IQueryable<DateValue> GetDatesInRange(DateOnly startDate, DateOnly endDate, string incrementType, int step)
+    {
+        var mi = (MethodInfo)MethodInfo.GetCurrentMethod()!;
+        return new Query<DateValue>(DbQueryProvider.Single, Expression.Call(mi,
+           Expression.Constant(startDate, typeof(DateOnly)),
+           Expression.Constant(endDate, typeof(DateOnly)),
+           Expression.Constant(incrementType, typeof(string)),
+           Expression.Constant(step, typeof(int))
+       ));
+    }
 
     public static void Start(SchemaBuilder sb)
     {
@@ -22,6 +42,77 @@ public static class TimeMachineLogic
 
             if (sb.WebServerBuilder != null)
                 TimeMachineServer.Start(sb.WebServerBuilder.WebApplication);
+
+            Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """
+                (
+                    @startDate DATE,
+                    @endDate DATE,
+                    @incrementType NVARCHAR(10),
+                    @step INT
+                )
+                RETURNS @DateRange TABLE
+                (
+                    Date DATE PRIMARY KEY
+                )
+                AS
+                BEGIN
+                    DECLARE @currentDate DATE
+                    SET @currentDate = @startDate
+
+                    IF @incrementType = 'day'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(DAY, @step, @currentDate)
+                        END
+                    END
+                    ELSE IF @incrementType = 'week'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(WEEK, @step, @currentDate)
+                        END
+                    END
+                    ELSE IF @incrementType = 'month'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(MONTH, @step, @currentDate)
+                        END
+                    END
+                    ELSE IF @incrementType = 'quarter'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(QUARTER, @step, @currentDate)
+                        END
+                    END
+                    ELSE IF @incrementType = 'year'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(YEAR, @step, @currentDate)
+                        END
+                    END
+                    ELSE
+                    BEGIN
+                    -- Throw exception for invalid incrementType
+                        DECLARE @error INT = CAST('Invalid @incrementType provided.' as int);
+                    END
+
+                    RETURN
+                END
+                """);
         }
     }
 

@@ -101,7 +101,19 @@ export type SystemTimeMode =
   "AsOf" |
   "Between" |
   "ContainedIn" |
-  "All";
+  "All" |
+  "Every";
+
+export const TimeUnit: EnumType<TimeUnit> = new EnumType<TimeUnit>("TimeUnit");
+export type TimeUnit =
+  "Year" |
+  "Quarter" |
+  "Month" |
+  "Week" |
+  "Day" |
+  "Hour" |
+  "Minute" |
+  "Second";
 
 export const UniqueType: EnumType<UniqueType> = new EnumType<UniqueType>("UniqueType");
 export type UniqueType =

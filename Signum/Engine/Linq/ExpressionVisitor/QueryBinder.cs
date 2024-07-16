@@ -228,9 +228,35 @@ internal class QueryBinder : ExpressionVisitor
                 m.Method.Name == nameof(EntityContext.MListRowId) ? entityContext.MListRowId ?? new PrimaryKeyExpression(Expression.Constant(null, typeof(IComparable))) :
                  throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
         }
+        else if (m.Method.DeclaringType == typeof(SystemTime) && m.Method.Name == nameof(SystemTime.OverrideInExpression))
+        {
+            SystemTime? old = this.systemTime;
+            this.systemTime = ToSystemTime(m.Arguments[0]);
+
+            Expression newValue = Visit(m.Arguments[1]);
+
+            this.systemTime = old;
+
+            return newValue;
+        }
 
         MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
         return BindMethodCall(result);
+    }
+
+    private SystemTime ToSystemTime(Expression expression)
+    {
+        if (expression is ConstantExpression ce)
+            return (SystemTime)ce.Value!;
+
+        if(expression is NewExpression ne && ne.Type == typeof(SystemTime.AsOf))
+        {
+            var at = ne.Arguments[0];
+
+            return new SystemTime.AsOfExpression(at);
+        }
+
+        throw new InvalidOperationException("Unable to convert to SystemTime the expression:" + expression.ToString());
     }
 
     private ReadOnlyDictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
@@ -3613,7 +3639,8 @@ class QueryJoinExpander : DbExpressionVisitor
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
                     source = new JoinExpression(JoinType.OuterApply, source,
-                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, new[] { new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!) }, null, 0),
+                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, 
+                        [new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!)], null, 0),
                         null);
                 }
                 else

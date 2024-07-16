@@ -92,10 +92,10 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
         Expression replaced = AliasProjectionReplacer.Replace(completed, ag);
         log.Switch("OrderBy");
         Expression orderRewrited = OrderByRewriter.Rewrite(replaced);
-        log.Switch("OrderBy");
-        Expression lazyCastRemoved = SqlCastLazyRemover.Remove(orderRewrited);
+        log.Switch("AsOfExpression");
+        Expression asOf = AsOfExpressionVisitor.Rewrite(orderRewrited, ag);
         log.Switch("Rebinder");
-        Expression rebinded = QueryRebinder.Rebind(lazyCastRemoved);
+        Expression rebinded = QueryRebinder.Rebind(asOf);
         log.Switch("UnusedColumn");
         Expression columnCleaned = UnusedColumnRemover.Remove(rebinded);
         log.Switch("Redundant");
