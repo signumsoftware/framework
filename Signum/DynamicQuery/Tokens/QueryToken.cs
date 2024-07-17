@@ -137,8 +137,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
         if (this is ManualContainerToken mc)
             return new ManualToken(mc, key, mc.Parent!.Type);
-        
-        var result = CachedSubTokensOverride(options).TryGetC(key) ?? QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
+
+        var result = CachedSubTokensOverride(options).TryGetC(key);
+
+        if (result == null)
+            result = QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
 
         if (result == null)
             return null;
