@@ -481,6 +481,8 @@ public partial class Table
                         long oldTicks = entity.Ticks;
                         entity.Ticks = Clock.Now.Ticks;
 
+                        table.SetToStrField(entity);
+
                         UpdateParameters(entity, oldTicks, new Forbidden(graph, entity), i.ToString(), parameters);
                     }
 
@@ -512,6 +514,7 @@ public partial class Table
                     for (int i = 0; i < num; i++)
                     {
                         var ident = idents[i];
+                        table.SetToStrField(ident);
                         UpdateParameters(ident, -1, new Forbidden(graph, ident), i.ToString(), parameters);
                     }
 

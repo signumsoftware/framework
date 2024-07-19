@@ -138,12 +138,16 @@ public static class PlainExcelGenerator
                 select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
 
                 from r in results.Rows
-                select (from c in results.Columns
-                        let t = indexes.GetOrThrow(c)
-                        let value = c.Column.Token is CollectionToArrayToken cta ?
+                select results.Columns.Select(c =>
+                {
+                    var t = indexes.GetOrThrow(c);
+                    var cta = c.Column.Token.HasCollectionToArray();
+                    var value = cta != null ?
                         ((IEnumerable?)r[c])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
-                        r[c]
-                        select CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport)).ToRow()
+                        r[c];
+
+                    return CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
+                }).ToRow()
             }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();

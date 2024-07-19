@@ -1,3 +1,4 @@
+import { BootstrapStyle } from "../../../Signum/React/Signum.Basics";
 import { WorkflowActivityModel, WorkflowConnectionModel, WorkflowEntitiesDictionary } from "../Signum.Workflow";
 
 export function isEvent(elementType: BPMN.ElementType): boolean {
@@ -24,7 +25,7 @@ export function isConnection(elementType: BPMN.ElementType): boolean {
 }
 
 
-export function findDecisionStyle(con: BPMN.Connection, entities: WorkflowEntitiesDictionary): React.JSX.Element {
+export function findDecisionStyle(con: BPMN.Connection, entities: WorkflowEntitiesDictionary): BootstrapStyle | undefined {
   var mod = entities[con.id] as (WorkflowConnectionModel | undefined);
   if (mod && mod.type == "Decision") {
 

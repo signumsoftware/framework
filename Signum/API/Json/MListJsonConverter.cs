@@ -45,6 +45,16 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
 {
     protected readonly Action<PropertyRoute, ModifiableEntity?> AsserCanWrite;
 
+    protected virtual bool IsAllowedToAddNewValue(T newValue)
+    {
+        return true;
+    }
+
+    protected virtual object? OnGetRowIdValue(ref Utf8JsonReader reader)
+    {
+        return reader.GetLiteralValue();
+    }
+
     protected readonly JsonConverter<T> converter;
     public MListJsonConverter(JsonSerializerOptions options, Action<PropertyRoute, ModifiableEntity?> asserCanWrite)
     {
@@ -106,7 +116,7 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                 throw new JsonException($"member 'rowId' expected in {reader.CurrentState}");
 
             reader.Read();
-            var rowIdValue = reader.GetLiteralValue();
+            var rowIdValue = OnGetRowIdValue(ref reader);
 
             reader.Read();
             reader.Assert(JsonTokenType.PropertyName);
@@ -129,7 +139,8 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                         {
                             T newValue = (T)converter.Read(ref reader, typeof(T), options)!;
 
-                            newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
+                            if (IsAllowedToAddNewValue(newValue))
+                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, null));
                         }
                         else
                         {
@@ -137,10 +148,13 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                                 (T)jcwe.Read(ref reader, typeof(T), options, oldValue.Value.Element!, null)! :
                                 (T)converter.Read(ref reader, typeof(T), options)!;
 
-                            if (oldValue.Value.Element!.Equals(newValue))
-                                newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
-                            else
-                                newList.Add(new MList<T>.RowIdElement(newValue));
+                            if (IsAllowedToAddNewValue(newValue))
+                            {
+                                if (oldValue.Value.Element!.Equals(newValue))
+                                    newList.Add(new MList<T>.RowIdElement(newValue, rowId, oldValue.Value.OldIndex));
+                                else
+                                    newList.Add(new MList<T>.RowIdElement(newValue));
+                            }
                         }
                     }
                 }
@@ -149,7 +163,9 @@ public class MListJsonConverter<T> : JsonConverterWithExisting<MList<T>>
                     using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((elementPr, tup.mod, null)))
                     {
                         var newValue = (T)converter.Read(ref reader, typeof(T), options)!;
-                        newList.Add(new MList<T>.RowIdElement(newValue));
+
+                        if (IsAllowedToAddNewValue(newValue))
+                            newList.Add(new MList<T>.RowIdElement(newValue));
                     }
                 }
             }

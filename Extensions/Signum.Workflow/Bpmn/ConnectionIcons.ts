@@ -2,7 +2,7 @@
 import { WorkflowConditionEntity, WorkflowActionEntity } from '../Signum.Workflow'
 import { getToString, Lite, liteKey } from '@framework/Signum.Entities'
 
-export function getOrientation(rect: BPMN.DiElement, reference: BPMN.DiElement, padding: number) {
+export function getOrientation(rect: BPMN.DiElement, reference: BPMN.DiElement, padding: number): string {
   padding = padding || 0;
 
   var sPadding = { x: padding, y: padding };
@@ -36,7 +36,7 @@ export function getOrientation(rect: BPMN.DiElement, reference: BPMN.DiElement, 
 
 
 export class ConnectionIcons {
-  static $inject = ['elementRegistry', 'overlays', 'eventBus'];
+  static $inject: string[] = ['elementRegistry', 'overlays', 'eventBus'];
 
   _overlays: BPMN.Overlays;
   _elementRegistry: BPMN.ElementRegistry;
@@ -60,7 +60,7 @@ export class ConnectionIcons {
 
 
 
-  _addOverlay(shape: BPMN.DiElement, waypoint: BPMN.DiElement, lite: Lite<WorkflowConditionEntity | WorkflowActionEntity>, color: string) {
+  _addOverlay(shape: BPMN.DiElement, waypoint: BPMN.DiElement, lite: Lite<WorkflowConditionEntity | WorkflowActionEntity>, color: string): void {
 
     var orientation = getOrientation(waypoint, shape, -7);
 
@@ -132,7 +132,7 @@ export class ConnectionIcons {
   hasAction!: (con: BPMN.Connection) => Lite<WorkflowActionEntity> | undefined;
   hasCondition!: (con: BPMN.Connection) => Lite<WorkflowConditionEntity> | undefined;
 
-  show() {
+  show(): void {
 
     this._elementRegistry.forEach(element => {
       if (element.type == "label")
@@ -161,13 +161,13 @@ export class ConnectionIcons {
     this.active = true;
   }
 
-  hide() {
+  hide(): void {
     this._overlays.remove({ type: 'transaction-boundaries' });
 
     this.active = false;
   }
 
-  toggle() {
+  toggle(): void {
     this.active ? this.hide() : this.show();
   }
 }
@@ -181,5 +181,5 @@ function htmlEscape(str: string) {
     .replace(/>/g, '&gt;');
 }
 
-export var __init__ = ['connectionIcons'];
-export var connectionIcons = ['type', ConnectionIcons];
+export var __init__: string[] = ['connectionIcons'];
+export var connectionIcons: (string | typeof ConnectionIcons)[] = ['type', ConnectionIcons];

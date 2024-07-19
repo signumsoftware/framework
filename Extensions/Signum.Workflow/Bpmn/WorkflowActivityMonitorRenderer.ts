@@ -17,13 +17,13 @@ export class WorkflowActivityMonitorRenderer extends CustomRenderer {
 
   viewer!: NavigatedViewer;
 
-  gradient = new Gradient([
+  gradient: Gradient = new Gradient([
     { value: 0, color: Color.parse("rgb(117, 202, 112)") },
     { value: 0.5, color: Color.parse("rgb(251, 214, 95)") },
     { value: 1, color: Color.parse("rgb(251, 114, 95)") },
   ]);
 
-  drawShape(visuals: any, element: BPMN.DiElement) {
+  drawShape(visuals: any, element: BPMN.DiElement): SVGElement {
     const result = super.drawShape(visuals, element);
 
     if (BpmnUtils.isTaskAnyKind(element.type)) {
@@ -78,5 +78,5 @@ function formatMinutes(minutes: number | undefined, token: QueryToken) {
   return WorkflowClient.formatDuration(Duration.fromObject({ minutes }));
 }
 
-export const __init__ = ['workflowActivityMonitorRenderer'];
-export const workflowActivityMonitorRenderer = ['type', WorkflowActivityMonitorRenderer];
+export const __init__: string[] = ['workflowActivityMonitorRenderer'];
+export const workflowActivityMonitorRenderer: (string | typeof WorkflowActivityMonitorRenderer)[] = ['type', WorkflowActivityMonitorRenderer];

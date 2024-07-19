@@ -42,7 +42,8 @@ interface CaseFrameModalState {
 
 var modalCount = 0;
 
-export const CaseFrameModal = React.forwardRef(function CaseFrameModal(p: CaseFrameModalProps, ref: React.Ref<IHandleKeyboard>) {
+export const CaseFrameModal: React.ForwardRefExoticComponent<CaseFrameModalProps & React.RefAttributes<IHandleKeyboard>> =
+  React.forwardRef(function CaseFrameModal(p: CaseFrameModalProps, ref: React.Ref<IHandleKeyboard>) {
 
   const [state, setState] = useStateWithPromise<CaseFrameModalState | undefined>(undefined);
   const [show, setShow] = React.useState(true);
