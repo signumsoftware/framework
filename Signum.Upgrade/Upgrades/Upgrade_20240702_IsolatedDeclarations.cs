@@ -8,7 +8,7 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20240702_IsolatedDeclarations : CodeUpgradeBase
 {
-    public override string Description => "";
+    public override string Description => "Activate TypeScript isolated declarations";
 
     public override void Execute(UpgradeContext uctx)
     {
