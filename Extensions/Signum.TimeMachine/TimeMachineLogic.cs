@@ -17,7 +17,7 @@ namespace Signum.TimeMachine;
 public class DateValue : IView
 {
     [ViewPrimaryKey]
-    public DateOnly Date;
+    public DateTime Date;
 }
 
 public static class TimeMachineLogic

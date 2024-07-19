@@ -1068,8 +1068,8 @@ public static class SystemTimeExpressions
         }
 
         return Expression.And(
-             Expression.GreaterThanOrEqual(interval.Min!, expression),
-             Expression.LessThan(interval.Max!, expression)
+             Expression.LessThanOrEqual(interval.Min!, expression.Nullify()),
+             Expression.LessThan(expression.Nullify(), interval.Max!)
              );
     }
 

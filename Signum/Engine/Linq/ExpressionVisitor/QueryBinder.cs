@@ -251,9 +251,11 @@ internal class QueryBinder : ExpressionVisitor
 
         if(expression is NewExpression ne && ne.Type == typeof(SystemTime.AsOf))
         {
-            var at = ne.Arguments[0];
+            var at = Visit(ne.Arguments[0]);
 
-            return new SystemTime.AsOfExpression(at);
+            var at2 = DbExpressionNominator.FullNominate(at);
+
+            return new SystemTime.AsOfExpression(at2);
         }
 
         throw new InvalidOperationException("Unable to convert to SystemTime the expression:" + expression.ToString());
