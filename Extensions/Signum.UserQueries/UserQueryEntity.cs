@@ -177,6 +177,11 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
     public SystemTimeJoinMode? JoinMode { get; set; }
 
+    public TimeSeriesUnit? TimeSeriesUnit { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesStep { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(StartDate))
@@ -191,11 +196,22 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
         if (pi.Name == nameof(JoinMode))
         {
-            return (pi, JoinMode).IsSetOnlyWhen(Mode is not SystemTimeMode.AsOf);
+            return (pi, JoinMode).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.All);
         }
 
         return base.PropertyValidation(pi);
     }
+
+    public StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
+        (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep)
+    {
+ { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
+ { SystemTimeMode.Between, true,  false,            false,          false,                false   },
+ { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
+ { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
+
+
+    };
 
     internal SystemTimeEmbedded? FromXml(XElement xml)
     {
@@ -203,33 +219,30 @@ public class SystemTimeEmbedded : EmbeddedEntity
         StartDate = xml.Attribute("StartDate")?.Value;
         EndDate = xml.Attribute("EndDate")?.Value;
         JoinMode = xml.Attribute("JoinMode")?.Value.ToEnum<SystemTimeJoinMode>();
+        TimeSeriesUnit = xml.Attribute("TimeSerieUnit")?.Value.ToEnum<TimeSeriesUnit>();
+        TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
         return this;
     }
 
-    internal SystemTime GetSystemTime() {
+    internal SystemTimeRequest ToSystemTimeRequest() => new SystemTimeRequest
+    {
+        mode = this.Mode,
+        joinMode = this.JoinMode,
+        endDate = ParseDate(this.EndDate),
+        startDate = ParseDate(this.StartDate),
+        timeSerieStep = this.TimeSeriesStep,
+        timeSerieUnit = this.TimeSeriesUnit,
+    };
 
-        JoinBehaviour GetJoinMode() => JoinMode!.Value switch
-        {
-            SystemTimeJoinMode.Current => JoinBehaviour.Current,
-            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
-            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
-            _ => throw new UnexpectedValueException(JoinMode!.Value)
-        };
+    DateTime? ParseDate(string? date)
+    {
+        if (date.IsNullOrEmpty())
+            return null;
 
-        DateTime ParseDate(string date)
-        {
-            return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
-        }
 
-        return Mode switch
-        {
-            SystemTimeMode.All => new SystemTime.All(GetJoinMode()),
-            SystemTimeMode.AsOf => new SystemTime.AsOf(ParseDate(StartDate!)),
-            SystemTimeMode.Between => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            SystemTimeMode.ContainedIn => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            _ => throw new UnexpectedValueException(Mode)
-        };
+        return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
+
     internal XElement ToXml()
     {
         return new XElement("SystemTime",

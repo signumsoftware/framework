@@ -140,7 +140,7 @@ public static class TimeMachineLogic
     public static void RestoreDeletedEntity<T>(PrimaryKey id)
         where T : Entity
     {
-        var lastVersion = SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible))
+        var lastVersion = SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible))
             .Using(_ => Database.Query<T>().Where(a => a.Id == id).Max(a => a.SystemPeriod().Max))!.Value;
 
         RestoreDeletedEntity<T>(id, lastVersion.AddMicroseconds(-10));

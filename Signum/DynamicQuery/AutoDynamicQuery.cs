@@ -23,7 +23,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override ResultTable ExecuteQuery(QueryRequest request)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
@@ -42,7 +42,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
@@ -61,7 +61,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override ResultTable ExecuteQueryGroup(QueryRequest request)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
@@ -78,7 +78,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
@@ -116,6 +116,9 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         }
         else
         {
+            var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
+            var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
+
             var query = Query
                 .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications(), request.FullTextTableFilters())

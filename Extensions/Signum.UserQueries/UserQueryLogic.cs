@@ -164,7 +164,7 @@ public static class UserQueryLogic
             Columns = MergeColumns(userQuery, ignoreHidden),
             Orders = userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;
@@ -189,7 +189,7 @@ public static class UserQueryLogic
             Orders = valueToken is AggregateToken ? new List<Order>() : userQuery.Orders.Select(qo => new Order(qo.Token.Token, qo.OrderType)).ToList(),
 
             Pagination = userQuery.GetPagination() ?? new Pagination.All(),
-            SystemTime = userQuery.SystemTime?.GetSystemTime()
+            SystemTime = userQuery.SystemTime?.ToSystemTimeRequest()
         };
 
         return qr;

@@ -32,7 +32,7 @@ public class QueryRequest : BaseQueryRequest
 
     public required Pagination Pagination { get; set; }
 
-    public SystemTime? SystemTime { get; set; }
+    public SystemTimeRequest? SystemTime { get; set; }
 
     public bool CanDoMultiplicationsInSubQueries()
     {
@@ -98,6 +98,75 @@ public enum RefreshMode
     Manual
 }
 
+public class SystemTimeRequest
+{
+    public SystemTimeMode mode;
+    public SystemTimeJoinMode? joinMode;
+    public DateTime? startDate;
+    public DateTime? endDate;
+    public TimeSeriesUnit? timeSerieUnit;
+    public int? timeSerieStep;
+
+    public SystemTimeRequest() { }
+
+    public SystemTimeRequest(SystemTime systemTime)
+    {
+        if (systemTime is SystemTime.AsOf asOf)
+        {
+            mode = SystemTimeMode.AsOf;
+            startDate = asOf.DateTime;
+        }
+        else if (systemTime is SystemTime.Between between)
+        {
+            mode = SystemTimeMode.Between;
+            joinMode = between.JoinMode;
+            startDate = between.StartDateTime;
+            endDate = between.EndtDateTime;
+        }
+        else if (systemTime is SystemTime.ContainedIn containedIn)
+        {
+            mode = SystemTimeMode.ContainedIn;
+            joinMode = containedIn.JoinMode;
+            startDate = containedIn.StartDateTime;
+            endDate = containedIn.EndtDateTime;
+        }
+        else if (systemTime is SystemTime.All all)
+        {
+            mode = SystemTimeMode.All;
+            joinMode = all.JoinMode;
+            startDate = null;
+            endDate = null;
+        }
+        else
+            throw new UnexpectedValueException();
+    }
+
+    public override string ToString() => $"{mode} {startDate} {endDate}";
+
+    public SystemTimeRequest Clone() => new SystemTimeRequest
+    { 
+        mode = mode,
+        joinMode = joinMode,
+        startDate = startDate,
+        endDate = endDate,
+        timeSerieUnit = timeSerieUnit,
+        timeSerieStep = timeSerieStep,
+    };
+
+    public SystemTime? ToSystemTime()
+    {
+        return mode switch
+        {
+            SystemTimeMode.AsOf => new SystemTime.AsOf(startDate!.Value),
+            SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, joinMode!.Value),
+            SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, joinMode!.Value),
+            SystemTimeMode.All => new SystemTime.All(joinMode!.Value),
+            SystemTimeMode.TimeSerie => null,
+            _ => throw new InvalidOperationException($"Unexpected {mode}"),
+        };
+    }
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum SystemTimeMode
 {
@@ -105,11 +174,11 @@ public enum SystemTimeMode
     Between,
     ContainedIn,
     All,
-    Every,
+    TimeSerie,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
-public enum TimeUnit
+public enum TimeSeriesUnit
 {
     Year,
     Quarter,

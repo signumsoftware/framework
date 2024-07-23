@@ -19,7 +19,7 @@ internal class AsOfExpressionVisitor : DbExpressionVisitor
                 distinct: false, 
                 top: null,
                 columns: null, 
-                from: new TableExpression(table.Alias, table.Table, new SystemTime.All(JoinBehaviour.Current), table.WithHint),
+                from: new TableExpression(table.Alias, table.Table, new SystemTime.All(SystemTimeJoinMode.Current), table.WithHint),
                 where: interval?.Contains(a.Expression), 
                 orderBy: null,
                 groupBy: null,

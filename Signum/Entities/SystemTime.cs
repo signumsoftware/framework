@@ -58,11 +58,11 @@ public abstract class SystemTime
 
     public abstract class Interval : SystemTime
     {
-        public JoinBehaviour JoinBehaviour;
+        public SystemTimeJoinMode JoinMode;
         [NewCanBeConstant]
-        public Interval(JoinBehaviour includeJoins)
+        public Interval(SystemTimeJoinMode joinMode)
         {
-            this.JoinBehaviour = includeJoins;
+            this.JoinMode = joinMode;
         }
     }
 
@@ -71,7 +71,7 @@ public abstract class SystemTime
         public DateTime StartDateTime { get; private set; }
         public DateTime EndtDateTime { get; private set; }
         [NewCanBeConstant]
-        public Between(DateTime startDateTime, DateTime endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public Between(DateTime startDateTime, DateTime endDateTime, SystemTimeJoinMode joinMode) : base(joinMode)
         {
             this.StartDateTime = startDateTime;
             this.EndtDateTime = endDateTime;
@@ -85,7 +85,7 @@ public abstract class SystemTime
         public DateTime StartDateTime { get; private set; }
         public DateTime EndtDateTime { get; private set; }
         [NewCanBeConstant]
-        public ContainedIn(DateTime startDateTime, DateTime endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public ContainedIn(DateTime startDateTime, DateTime endDateTime, SystemTimeJoinMode joinMode) : base(joinMode)
         {
             this.StartDateTime = startDateTime;
             this.EndtDateTime = endDateTime;
@@ -97,19 +97,12 @@ public abstract class SystemTime
     public class All : Interval
     {
         [NewCanBeConstant]
-        public All(JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public All(SystemTimeJoinMode joinMode) : base(joinMode)
         {
         }
 
         public override string ToString() => $"ALL";
     }
-}
-
-public enum JoinBehaviour
-{
-    Current,
-    FirstCompatible,
-    AllCompatible,
 }
 
 public static class SystemTimeExtensions

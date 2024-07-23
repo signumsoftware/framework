@@ -759,7 +759,7 @@ public static class DQueryable
 
     #region TryPaginate
 
-    public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime, CancellationToken token)
+    public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, SystemTimeRequest? systemTime, CancellationToken token)
     {
         if (pagination == null)
             throw new ArgumentNullException(nameof(pagination));
@@ -780,7 +780,7 @@ public static class DQueryable
         }
         else if (pagination is Pagination.Paginate pag)
         {
-            if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+            if (systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
                 var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 
@@ -804,7 +804,7 @@ public static class DQueryable
                 q = Untyped.Take(q, pag.ElementsPerPage, elemType);
 
                 var listTask = await Untyped.ToListAsync(q, token, elemType);
-                var countTask = systemTime is SystemTime.Interval ?
+                var countTask = systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn ?
                     (await Untyped.ToListAsync(query.Query, token, elemType)).Count : //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
                     await Untyped.CountAsync(query.Query, token, elemType);
 
@@ -815,7 +815,7 @@ public static class DQueryable
         throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
     }
 
-    public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime)
+    public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination, SystemTimeRequest? systemTime)
     {
         if (pagination == null)
             throw new ArgumentNullException(nameof(pagination));
@@ -836,7 +836,7 @@ public static class DQueryable
         }
         else if (pagination is Pagination.Paginate pag)
         {
-            if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+            if (systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
                 var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 

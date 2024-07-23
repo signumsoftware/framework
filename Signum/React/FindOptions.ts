@@ -505,6 +505,7 @@ export interface SystemTime {
   joinMode?: SystemTimeJoinMode;
   startDate?: string;
   endDate?: string;
+
 }
 
 export module PaginateMath {

@@ -25,6 +25,8 @@ export interface SystemTimeEmbedded extends Entities.EmbeddedEntity {
   startDate: string | null;
   endDate: string | null;
   joinMode: DynamicQuery.SystemTimeJoinMode | null;
+  timeSeriesUnit: DynamicQuery.TimeSeriesUnit | null;
+  timeSeriesStep: number | null;
 }
 
 export const UserQueryEntity: Type<UserQueryEntity> = new Type<UserQueryEntity>("UserQuery");

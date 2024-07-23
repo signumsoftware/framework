@@ -1461,7 +1461,7 @@ internal class QueryBinder : ExpressionVisitor
         TableExpression tableExpression = new TableExpression(tableAlias, table, st.SystemTime ?? (table.SystemVersioned != null ? this.systemTime : null), currentTableHint);
         currentTableHint = null;
 
-        if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.Current)
+        if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.Current)
             this.systemTime = null;
 
         Alias selectAlias = NextSelectAlias();
@@ -3637,7 +3637,7 @@ class QueryJoinExpander : DbExpressionVisitor
 
                 Expression equal = DbExpressionNominator.FullNominate(eq)!;
 
-                if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
+                if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
                     source = new JoinExpression(JoinType.OuterApply, source,

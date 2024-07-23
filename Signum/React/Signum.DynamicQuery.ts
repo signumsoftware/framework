@@ -102,10 +102,10 @@ export type SystemTimeMode =
   "Between" |
   "ContainedIn" |
   "All" |
-  "Every";
+  "TimeSerie";
 
-export const TimeUnit: EnumType<TimeUnit> = new EnumType<TimeUnit>("TimeUnit");
-export type TimeUnit =
+export const TimeSeriesUnit: EnumType<TimeSeriesUnit> = new EnumType<TimeSeriesUnit>("TimeSeriesUnit");
+export type TimeSeriesUnit =
   "Year" |
   "Quarter" |
   "Month" |
