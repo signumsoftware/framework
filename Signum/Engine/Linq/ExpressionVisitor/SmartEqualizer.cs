@@ -574,7 +574,7 @@ internal static class SmartEqualizer
     {
         var nominate = DbExpressionNominator.FullNominate(element)!;
 
-        if (nominate.RemoveUnNullify() is ToDayOfWeekExpression dowe)
+        if (nominate.RemoveAllNullify() is ToDayOfWeekExpression dowe)
         {
             if (isPostgres)
             {
