@@ -184,31 +184,17 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(StartDate))
-        {
-            return (pi, StartDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.AsOf);
-        }
-
-        if (pi.Name == nameof(EndDate))
-        {
-            return (pi, EndDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn);
-        }
-
-        if (pi.Name == nameof(JoinMode))
-        {
-            return (pi, JoinMode).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.All);
-        }
-
-        return base.PropertyValidation(pi);
+        return stateValidator.Validate(this, pi) ??  base.PropertyValidation(pi);
     }
 
-    public StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
+    static StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
         (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep)
     {
- { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
- { SystemTimeMode.Between, true,  false,            false,          false,                false   },
- { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
- { SystemTimeMode.AsOf,    true,  false,            false,          false,                false   },
+ { SystemTimeMode.AsOf,       true,          false,            false,          false,                false   },
+ { SystemTimeMode.Between,    true,          true,             true,           false,                false   },
+ { SystemTimeMode.ContainedIn,true,          true,             true,           false,                false   },
+ { SystemTimeMode.All,        false,         false,            true,           false,                false   },
+ { SystemTimeMode.TimeSerie,  true,          true,             false,          true,                 true   },
 
 
     };
@@ -222,6 +208,18 @@ public class SystemTimeEmbedded : EmbeddedEntity
         TimeSeriesUnit = xml.Attribute("TimeSerieUnit")?.Value.ToEnum<TimeSeriesUnit>();
         TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
         return this;
+    }
+
+    internal XElement ToXml()
+    {
+        return new XElement("SystemTime",
+            new XAttribute("Mode", Mode.ToString()),
+            StartDate == null ? null : new XAttribute("StartDate", StartDate),
+            EndDate == null ? null : new XAttribute("EndDate", EndDate),
+            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!),
+            TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
+            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!)
+        );
     }
 
     internal SystemTimeRequest ToSystemTimeRequest() => new SystemTimeRequest
@@ -241,16 +239,6 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
 
         return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
-    }
-
-    internal XElement ToXml()
-    {
-        return new XElement("SystemTime",
-        new XAttribute("Mode", Mode.ToString()),
-            StartDate == null ? null : new XAttribute("StartDate", StartDate),
-            EndDate == null ? null : new XAttribute("EndDate", EndDate),
-            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!)
-        );
     }
 }
 
