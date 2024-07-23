@@ -2286,7 +2286,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+            return strategy.CombineValues(expressions, returnType);
 
         if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
         {
