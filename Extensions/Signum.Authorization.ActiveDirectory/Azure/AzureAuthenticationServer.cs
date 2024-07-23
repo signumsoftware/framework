@@ -72,7 +72,7 @@ public class AzureADAuthenticationServer
         }
     }
 
-    public static Func<IEnumerable<string>>? ExtraValidIssuers;
+    public static Func<IEnumerable<string>>? ExtraValidAudiences;
 
     //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
     public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
@@ -95,8 +95,8 @@ public class AzureADAuthenticationServer
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
             ValidAudience = ada.GetConfig().Azure_ApplicationID.ToString(),
+            ValidAudiences = ExtraValidAudiences?.Invoke(),
             ValidIssuer = issuer,
-            ValidIssuers = ExtraValidIssuers?.Invoke(),
 
             ValidateAudience = true,
             ValidateIssuer = true,
