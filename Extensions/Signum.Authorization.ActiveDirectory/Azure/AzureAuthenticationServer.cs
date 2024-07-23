@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Graph.Me.ExportDeviceAndAppManagementData;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
@@ -71,6 +72,8 @@ public class AzureADAuthenticationServer
         }
     }
 
+    public static Func<IEnumerable<string>>? ExtraValidIssuers;
+
     //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
     public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
     {
@@ -93,6 +96,7 @@ public class AzureADAuthenticationServer
         {
             ValidAudience = ada.GetConfig().Azure_ApplicationID.ToString(),
             ValidIssuer = issuer,
+            ValidIssuers = ExtraValidIssuers?.Invoke(),
 
             ValidateAudience = true,
             ValidateIssuer = true,
