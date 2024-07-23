@@ -188,16 +188,19 @@ public class EntityPropertyToken : QueryToken
         get { return PropertyInfo.GetCustomAttribute<UnitAttribute>()?.UnitName; }
     }
 
+    public static Func<PropertyRoute, string?>? CustomIsAllowed;
+
     public override string? IsAllowed()
     {
         string? parent = this.parent.IsAllowed();
 
-        string? route = GetPropertyRoute()?.IsAllowed();
+        var pr = GetPropertyRoute();
 
-        if (parent.HasText() && route.HasText())
-            return QueryTokenMessage.And.NiceToString().Combine(parent!, route!);
+        string? route = pr?.IsAllowed();
 
-        return parent ?? route;
+        string? custom = pr == null ? null : CustomIsAllowed?.GetInvocationListTyped().CommaAnd(a => a(pr)).DefaultToNull();
+
+        return QueryTokenMessage.And.NiceToString().Combine(parent!, route!, custom).DefaultToNull();
     }
 
     public override PropertyRoute? GetPropertyRoute()

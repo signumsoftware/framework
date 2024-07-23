@@ -30,7 +30,7 @@ interface CaseFramePageState {
   executing?: boolean;
 }
 
-export default function CaseFramePage(): React.JSX.Element {
+function CaseFramePage(): React.JSX.Element {
 
   var params = useParams() as { workflowId: string; mainEntityStrategy: string; caseActivityId?: string };
   let [state, setState] = useStateWithPromise<CaseFramePageState | undefined>(undefined);
@@ -40,7 +40,7 @@ export default function CaseFramePage(): React.JSX.Element {
   const validationErrorsTop = React.useRef<ValidationErrorsHandle>(null);
   const validationErrorsBottom = React.useRef<ValidationErrorsHandle>(null);
   const forceUpdate = useForceUpdate();
-  
+
   React.useEffect(() => {
 
     function loadEntity(): Promise<WorkflowClient.CaseEntityPack | undefined> {
@@ -269,4 +269,8 @@ export default function CaseFramePage(): React.JSX.Element {
   }
 }
 
-CaseFramePage.showSubTitle = true;
+namespace CaseFramePage {
+  export let showSubTitle = true;
+}
+
+export default CaseFramePage;

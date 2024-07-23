@@ -9,7 +9,7 @@ import { useAPI } from '@framework/Hooks';
 import { LinkContainer } from '@framework/Components'
 import { Navigator } from '@framework/Navigator'
 
-export default function WorkflowDropdown(props: {}): React.JSX.Element {
+export default function WorkflowDropdown(props: {}): React.JSX.Element | null {
   
   if (!Navigator.isViewable(WorkflowEntity))
     return null;

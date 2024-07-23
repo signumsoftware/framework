@@ -48,6 +48,7 @@ class Upgrade_20240702_IsolatedDeclarations : CodeUpgradeBase
                 <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.5.3" />
                 <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
                 <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+                <PackageReference Include="Signum.TSGenerator" Version="8.5.1" />
                 """);
         });
 

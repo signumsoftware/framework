@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 using System.Linq.Expressions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -473,6 +474,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public virtual bool HasElement()
     {
         return Parent != null && Parent.HasElement();
+    }
+
+    public virtual CollectionToArrayToken? HasCollectionToArray()
+    {
+        return Parent == null ? null : Parent.HasCollectionToArray();
     }
 
     IEnumerable<QueryToken> EntityProperties(Type type)

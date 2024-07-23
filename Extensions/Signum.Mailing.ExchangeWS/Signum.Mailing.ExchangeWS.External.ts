@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 
 
-export const ExchangeVersion = new EnumType<ExchangeVersion>("ExchangeVersion");
+export const ExchangeVersion: EnumType<ExchangeVersion> = new EnumType<ExchangeVersion>("ExchangeVersion");
 export type ExchangeVersion =
   "Exchange2007_SP1" |
   "Exchange2010" |
