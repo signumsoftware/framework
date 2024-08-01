@@ -40,7 +40,7 @@ public class ReactCodeGenerator
                     {
                         var index = lines.FindLastIndex(s => s.Contains("Navigator.addSettings(new EntitySettings")).NotFoundToNull() ??
                            lines.FindLastIndex(s => s.Contains("export function start")).NotFoundToNull() ?? 0;
-                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(2));
+                        lines.Insert(index + 1, WritetEntitySettings(mod).Trim().Indent(4));
                     }
 
                     {
@@ -329,7 +329,10 @@ public class ReactCodeGenerator
         }
 
         sb.AppendLine();
+        sb.AppendLine("export namespace " + mod.ModuleName + "Client" + " {");
         sb.AppendLine(WriteClientStartMethod(mod));
+        sb.AppendLine("}");
+
 
         return sb.ToString();
     }
@@ -342,20 +345,20 @@ public class ReactCodeGenerator
     protected virtual string WriteClientStartMethod(Module mod)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("export function start(options: { routes: RouteObject[] }) {");
+        sb.AppendLine("export function start(options: { routes: RouteObject[] }) {".Indent(2));
         sb.AppendLine("");
 
         string entitySettings = WritetEntitySettings(mod);
         if (entitySettings != null)
-            sb.Append(entitySettings.Indent(2));
+            sb.Append(entitySettings.Indent(4));
 
         sb.AppendLine();
 
         string operationSettings = WriteOperationSettings(mod);
         if (operationSettings != null)
-            sb.Append(operationSettings.Indent(2));
+            sb.Append(operationSettings.Indent(4));
 
-        sb.AppendLine("}");
+        sb.AppendLine("}".Indent(2));
 
         return sb.ToString();
     }
@@ -420,42 +423,19 @@ public class ReactCodeGenerator
         sb.AppendLine("import { SearchControl, SearchValue, SearchValueLine} from '@framework/Search'");
 
 
+        sb.AppendLine();
+        sb.AppendLine("export default function {0}(p: {{ ctx: TypeContext<{1}> }}): React.JSX.Element {{".FormatWith(GetComponentName(type), type.Name));
+        sb.AppendLine("");
+        sb.AppendLine("  var ctx = p.ctx;");
+        sb.AppendLine("  return (");
+        sb.AppendLine("    <div>");
+        sb.AppendLine(props.Indent(6));
+        sb.AppendLine("     </div>");
+        sb.AppendLine("  );");
+        sb.AppendLine("}");
 
-        if (this.GenerateFunctionalComponent(type))
-        {
-            sb.AppendLine();
-            sb.AppendLine("export default function {0}(p: {{ ctx: TypeContext<{1}> }}) {{".FormatWith(GetComponentName(type), type.Name));
-            sb.AppendLine("");
-            sb.AppendLine("  var ctx = p.ctx;");
-            sb.AppendLine("  return (");
-            sb.AppendLine("    <div>");
-            sb.AppendLine(props.Indent(6));
-            sb.AppendLine("     </div>");
-            sb.AppendLine("  );");
-            sb.AppendLine("}");
-        }
-        else
-        {
-            sb.AppendLine();
-            sb.AppendLine("export default class {0} extends React.Component<{{ ctx: TypeContext<{1}> }}> {{".FormatWith(GetComponentName(type), type.Name));
-            sb.AppendLine("");
-            sb.AppendLine("  render() {");
-            sb.AppendLine("    var ctx = this.props.ctx;");
-            sb.AppendLine("    return (");
-            sb.AppendLine("      <div>");
-            sb.AppendLine(props.Indent(8));
-            sb.AppendLine("       </div>");
-            sb.AppendLine("    );");
-            sb.AppendLine("  }");
-            sb.AppendLine("}");
-        }
 
         return sb.ToString();
-    }
-
-    protected virtual bool GenerateFunctionalComponent(Type type)
-    {
-        return true;
     }
 
     protected virtual string? WriteProperty(PropertyInfo pi, string v, bool useAutoLine)
@@ -548,7 +528,7 @@ public class ReactCodeGenerator
         if (pi.PropertyType == typeof(string))
         {
             var slv = Validator.GetPropertyValidators(pi.DeclaringType!).TryGetC(pi.Name)?.Validators.OfType<StringLengthValidatorAttribute>().SingleOrDefault();
-            if(slv?.MultiLine == true)
+            if (slv?.MultiLine == true)
                 return "<TextAreaLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
 
@@ -577,9 +557,11 @@ public class ReactCodeGenerator
         if (pi.PropertyType.UnNullify() == typeof(Guid))
             return "<GuidLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
-        if (pi.PropertyType.IsEnum)
+        if (pi.PropertyType.IsEnum || pi.PropertyType == typeof(Nullable<Boolean>))
             return "<EnumLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
+        if (pi.PropertyType == typeof(Boolean))
+            return "<CheckboxLine ctx={{ctx.subCtx({0} => {0}.{1})}} />".FormatWith(v, pi.Name.FirstLower());
 
         return "<AutoLine ctx={{ctx.subCtx({0} => {0}.{1})}} /> /*Unknown type {2}*/".FormatWith(v, pi.Name.FirstLower(), pi.PropertyType.Name);
     }
