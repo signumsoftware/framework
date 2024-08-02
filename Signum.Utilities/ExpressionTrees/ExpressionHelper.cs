@@ -41,7 +41,13 @@ public static class ExpressionHelper
     {
         Type type = expression.Type.Nullify();
         if (expression.Type != type)
+        {
+            var simple = expression.RemoveUnNullify();
+            if (simple != expression && simple.Type == type)
+                return simple;
+
             return Expression.Convert(expression, type);
+        }
         return expression;
     }
 
@@ -50,7 +56,27 @@ public static class ExpressionHelper
     {
         Type type = expression.Type.UnNullify();
         if (expression.Type != type)
+        {
+            var simple = expression.Nullify();
+            if (simple != expression && simple.Type == type)
+                return simple;
+
             return Expression.Convert(expression, type);
+        }
+        return expression;
+    }
+
+    [DebuggerStepThrough]
+    public static Expression RemoveAllNullify(this Expression expression)
+    {
+        var exp = expression.RemoveNullify();
+        if (exp != expression)
+            return exp.RemoveAllNullify();
+
+        var exp2 = expression.RemoveUnNullify();
+        if (exp2 != expression)
+            return exp2.RemoveAllNullify();
+
         return expression;
     }
 

@@ -75,12 +75,13 @@ export function PredictModal(p: PredictModalProps): React.JSX.Element {
   );
 }
 
-
-PredictModal.show = (predict: PredictorClient.PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> => {
-  return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
+export namespace PredictModal {
+  export function show(predict: PredictorClient.PredictRequest, entity: Lite<Entity> | undefined, isClassification: boolean): Promise<void> {
+    return openModal<undefined>(<PredictModal initialPredict={predict} entity={entity} isClassification={isClassification} />);
+  }
 }
 
-export function AlternativesCheckBox(p : { binding: Binding<number | null>, onChange: () => void }){
+export function AlternativesCheckBox(p: { binding: Binding<number | null>, onChange: () => void }): React.ReactElement {
 
   function setValue(val: number | null) {
     p.binding.setValue(val);
@@ -89,8 +90,8 @@ export function AlternativesCheckBox(p : { binding: Binding<number | null>, onCh
   var val = p.binding.getValue();
   return (
     <label>
-      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumberBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions 
-      </label>
+      <input type="checkbox" className="form-check-input" checked={val != null} onChange={() => setValue(val == null ? 5 : null)} /> Show <NumberBox value={val} onChange={n => setValue(n)} validateKey={isNumber} format={toNumberFormat("0")} /> alternative predictions
+    </label>
   );
 }
 

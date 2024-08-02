@@ -265,7 +265,7 @@ export function FindOptionsComponent(p : FindOptionsComponentProps): React.JSX.E
     );
 }
 
-export function QueryKeyLine(p : { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }){
+export function QueryKeyLine(p: { queryKey: string | undefined, label: string; onChange: (queryKey: string | undefined) => void }): React.ReactElement {
   function handleGetItems(query: string) {
     return Finder.API.findLiteLike({ types: QueryEntity.typeName, subString: query, count: 5 })
       .then(lites => lites.map(a => getToString(a)));
