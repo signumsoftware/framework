@@ -8,7 +8,7 @@ import * as Security from '../../Signum/React/Signum.Security'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DynamicRenameEntity = new Type<DynamicRenameEntity>("DynamicRename");
+export const DynamicRenameEntity: Type<DynamicRenameEntity> = new Type<DynamicRenameEntity>("DynamicRename");
 export interface DynamicRenameEntity extends Entities.Entity {
   Type: "DynamicRename";
   creationDate: string /*DateTime*/;
@@ -17,7 +17,7 @@ export interface DynamicRenameEntity extends Entities.Entity {
   newName: string;
 }
 
-export const DynamicSqlMigrationEntity = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
+export const DynamicSqlMigrationEntity: Type<DynamicSqlMigrationEntity> = new Type<DynamicSqlMigrationEntity>("DynamicSqlMigration");
 export interface DynamicSqlMigrationEntity extends Entities.Entity {
   Type: "DynamicSqlMigration";
   creationDate: string /*DateTime*/;
@@ -29,8 +29,8 @@ export interface DynamicSqlMigrationEntity extends Entities.Entity {
 }
 
 export module DynamicSqlMigrationMessage {
-  export const TheMigrationIsAlreadyExecuted = new MessageKey("DynamicSqlMigrationMessage", "TheMigrationIsAlreadyExecuted");
-  export const PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer = new MessageKey("DynamicSqlMigrationMessage", "PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer");
+  export const TheMigrationIsAlreadyExecuted: MessageKey = new MessageKey("DynamicSqlMigrationMessage", "TheMigrationIsAlreadyExecuted");
+  export const PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer: MessageKey = new MessageKey("DynamicSqlMigrationMessage", "PreventingGenerationNewScriptBecauseOfErrorsInDynamicCodeFixErrorsAndRestartServer");
 }
 
 export module DynamicSqlMigrationOperation {

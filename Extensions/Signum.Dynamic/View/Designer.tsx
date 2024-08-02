@@ -421,9 +421,11 @@ export function DesignerModal(p: DesignerModalProps): React.JSX.Element {
     );
   }
 
-DesignerModal.show = (title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> => {
+export namespace DesignerModal {
+  export function show(title: React.ReactNode, mainComponent: () => React.ReactElement<any>): Promise<boolean | undefined> {
     return openModal<boolean>(<DesignerModal title={title} mainComponent={mainComponent} />);
   }
+}
 
 export function PropsHelp(p: { node: DesignerNode<BaseNode> }): React.JSX.Element {
 

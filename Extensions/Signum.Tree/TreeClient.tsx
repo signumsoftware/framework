@@ -189,7 +189,7 @@ export namespace TreeClient {
     return to;
   }
 
-  export function hideSiblingsAndIsDisabled(ti: TypeInfo): React.JSX.Element {
+  export function hideSiblingsAndIsDisabled(ti: TypeInfo): void {
     const type = new Type<TreeEntity>(ti.name);
 
     if (type.memberInfo(a => a.isSibling).notVisible == undefined)
@@ -223,14 +223,14 @@ export namespace TreeClient {
     return es;
   }
 
-  export function overrideOnFind(ti: TypeInfo): React.JSX.Element {
+  export function overrideOnFind(ti: TypeInfo): void {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.onFind)
       qs.onFind = (fo, mo) => openTree({ typeName: ti.name, filterOptions: fo.filterOptions, columnOptions: fo.columnOptions, columnOptionsMode: fo.columnOptionsMode }, { title: mo?.title });
   }
 
-  export function overrideAutocomplete(ti: TypeInfo): React.JSX.Element {
+  export function overrideAutocomplete(ti: TypeInfo): void {
     var es = getEntitySetting(ti.name);
 
     if (!es.autocomplete)
@@ -240,7 +240,7 @@ export namespace TreeClient {
       es.autocompleteDelay = 750;
   }
 
-  export function overrideDefaultOrder(ti: TypeInfo): React.JSX.Element {
+  export function overrideDefaultOrder(ti: TypeInfo): void {
     var qs = getQuerySetting(ti.name);
 
     if (!qs.defaultOrders) {
@@ -248,11 +248,11 @@ export namespace TreeClient {
     }
   }
 
-  export function isTree(t: TypeInfo): React.JSX.Element {
+  export function isTree(t: TypeInfo): boolean {
     return (t.kind == "Entity" && t.operations && t.operations[TreeOperation.CreateNextSibling.key] != null) || false;
   }
 
-  export function getAllTreeTypes(): React.JSX.Element {
+  export function getAllTreeTypes(): TypeInfo[] {
     return getAllTypes().filter(t => isTree(t));
   }
 
@@ -278,13 +278,13 @@ export namespace TreeClient {
     [typeName: string]: TreeSettings<any>;
   } = {};
 
-  export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSettings<T>) {
+  export function register<T extends TreeEntity>(type: Type<T>, setting: TreeSettings<T>) : void {
     settings[type.typeName] = setting;
   }
 
 
 
-  export function fixState(node: TreeNode): React.JSX.Element {
+  export function fixState(node: TreeNode): void {
 
     node.nodeState = node.childrenCount == 0 ? "Leaf" :
       node.loadedChildren.length == 0 ? "Collapsed" :
