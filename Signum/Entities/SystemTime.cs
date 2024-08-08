@@ -1,21 +1,29 @@
 using Signum.Utilities.DataStructures;
+using System.Reflection.Metadata;
 
 namespace Signum.Entities;
 
 
 public abstract class SystemTime
 {
+    [AvoidEagerEvaluation]
+    public static T OverrideInExpression<T>(SystemTime systemTime, T value)
+    {
+        throw new InvalidOperationException("Only for Queries");
+    }
+
     static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
 
     public static SystemTime? Current => currentVariable.Value;
 
-    public static IDisposable Override(DateTimeOffset asOf) => Override(new SystemTime.AsOf(asOf));
+    public static IDisposable Override(DateTime asOf) => Override(new SystemTime.AsOf(asOf));
     public static IDisposable Override(SystemTime? systemTime)
     {
         var old = currentVariable.Value;
         currentVariable.Value = systemTime;
         return new Disposable(() => currentVariable.Value = old);
     }
+
 
     public class HistoryTable : SystemTime
     {
@@ -24,10 +32,10 @@ public abstract class SystemTime
 
     public class AsOf : SystemTime
     {
-        public DateTimeOffset DateTime { get; private set; }
+        public DateTime DateTime { get; private set; }
 
         [NewCanBeConstant]
-        public AsOf(DateTimeOffset dateTime)
+        public AsOf(DateTime dateTime)
         {
             this.DateTime = dateTime;
         }
@@ -35,24 +43,35 @@ public abstract class SystemTime
         public override string ToString() => $"AS OF {DateTime:u}";
     }
 
+    internal class AsOfExpression : SystemTime
+    {
+        public Expression Expression { get; private set; }
 
+        [NewCanBeConstant]
+        public AsOfExpression(Expression dateTime)
+        {
+            this.Expression = dateTime;
+        }
+
+        public override string ToString() => $"EVERY {Expression:u}";
+    }
 
     public abstract class Interval : SystemTime
     {
-        public JoinBehaviour JoinBehaviour;
+        public SystemTimeJoinMode JoinMode;
         [NewCanBeConstant]
-        public Interval(JoinBehaviour includeJoins)
+        public Interval(SystemTimeJoinMode joinMode)
         {
-            this.JoinBehaviour = includeJoins;
+            this.JoinMode = joinMode;
         }
     }
 
     public class Between : Interval
     {
-        public DateTimeOffset StartDateTime { get; private set; }
-        public DateTimeOffset EndtDateTime { get; private set; }
+        public DateTime StartDateTime { get; private set; }
+        public DateTime EndtDateTime { get; private set; }
         [NewCanBeConstant]
-        public Between(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public Between(DateTime startDateTime, DateTime endDateTime, SystemTimeJoinMode joinMode) : base(joinMode)
         {
             this.StartDateTime = startDateTime;
             this.EndtDateTime = endDateTime;
@@ -63,10 +82,10 @@ public abstract class SystemTime
 
     public class ContainedIn : Interval
     {
-        public DateTimeOffset StartDateTime { get; private set; }
-        public DateTimeOffset EndtDateTime { get; private set; }
+        public DateTime StartDateTime { get; private set; }
+        public DateTime EndtDateTime { get; private set; }
         [NewCanBeConstant]
-        public ContainedIn(DateTimeOffset startDateTime, DateTimeOffset endDateTime, JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public ContainedIn(DateTime startDateTime, DateTime endDateTime, SystemTimeJoinMode joinMode) : base(joinMode)
         {
             this.StartDateTime = startDateTime;
             this.EndtDateTime = endDateTime;
@@ -78,19 +97,12 @@ public abstract class SystemTime
     public class All : Interval
     {
         [NewCanBeConstant]
-        public All(JoinBehaviour joinBehaviour) : base(joinBehaviour)
+        public All(SystemTimeJoinMode joinMode) : base(joinMode)
         {
         }
 
         public override string ToString() => $"ALL";
     }
-}
-
-public enum JoinBehaviour
-{
-    Current,
-    FirstCompatible,
-    AllCompatible,
 }
 
 public static class SystemTimeExtensions
@@ -105,4 +117,6 @@ public static class SystemTimeExtensions
     {
         throw new InvalidOperationException("Only for queries");
     }
+
+
 }

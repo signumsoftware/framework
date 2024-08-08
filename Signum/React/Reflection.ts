@@ -276,7 +276,7 @@ export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.
   }
 
   if (format == "EE") //missing
-    return dt.toFormat("EEE", options).substr(0, 2);
+    return dt.toFormat("EEE", options).substring(0, 2);
 
   return dt.toFormat(format, options)
 
@@ -1543,6 +1543,10 @@ export class QueryTokenString<T> {
 
   static count(): QueryTokenString<unknown> {
     return new QueryTokenString("Count");
+  }
+  
+  static timeSeries(): QueryTokenString<unknown> {
+    return new QueryTokenString("TimeSeries");
   }
 
   systemValidFrom(): QueryTokenString<unknown> {

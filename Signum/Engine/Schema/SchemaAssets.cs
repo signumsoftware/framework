@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
@@ -172,7 +173,7 @@ public class SchemaAssets
                 {
                     return (from p in Database.View<SysObjects>()
                             join s in Database.View<SysSchemas>() on p.schema_id equals s.schema_id
-                            where p.type == "P" || p.type == "IF" || p.type == "FN"
+                            where new[] {"P", "IF", "FN", "TF" }.Contains(p.type)
                             join m in Database.View<SysSqlModules>() on p.object_id equals m.object_id
                             select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), p.name, isPostgres), m.definition)).ToList();
                 }

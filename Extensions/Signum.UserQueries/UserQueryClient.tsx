@@ -340,6 +340,9 @@ export namespace UserQueryClient {
         startDate: await parseDate(uq.systemTime.startDate),
         endDate: await parseDate(uq.systemTime.endDate),
         joinMode: uq.systemTime.joinMode ?? undefined,
+        timeSeriesStep: uq.systemTime.timeSeriesStep ?? undefined,
+        timeSeriesUnit: uq.systemTime.timeSeriesUnit ?? undefined,
+        timeSeriesMaxRowsPerStep: uq.systemTime.timeSeriesMaxRowsPerStep ?? undefined,
       };
   
       return fo;

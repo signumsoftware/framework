@@ -10,6 +10,8 @@ using System.Runtime.ConstrainedExecution;
 using Signum.DynamicQuery.Tokens;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
+using System.Linq;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace Signum.DynamicQuery;
 
@@ -756,10 +758,63 @@ public static class DQueryable
     }
     #endregion
 
+    #region TimeSerieSelectMany
+
+    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
+    static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
+
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, IEnumerable<Column> colums)
+    {
+        var st =
+            QueryTimeSeriesLogic.GetDatesInRange(
+                systemTime.startDate!.Value,
+                systemTime.endDate!.Value,
+                systemTime.timeSeriesUnit!.ToString()!,
+                systemTime.timeSeriesStep!.Value);
+
+        var pDate = Expression.Parameter(typeof(DateValue), "d");
+
+        var collectionSelectorType = typeof(Func<,>).MakeGenericType(typeof(DateValue), typeof(IEnumerable<>).MakeGenericType(query.Query.ElementType));
+
+        var collectionSelector = Expression.Lambda(collectionSelectorType,
+            Expression.Call(miOverrideInExpression.MakeGenericMethod(typeof(IQueryable<>).MakeGenericType(query.Query.ElementType)),
+            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date))),
+            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression),
+            pDate);
+
+
+        var tokens = colums.Select(a => a.Token).ToHashSet();
+
+        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+        if (str.HasText())
+            throw new ApplicationException(str);
+
+        List<Expression> expressions = tokens.Select(t => t is TimeSeriesToken ? Expression.Field(pDate, nameof(DateValue.Date)) : t.BuildExpression(query.Context, searchToArray: true)).ToList();
+        Expression ctor = TupleReflection.TupleChainConstructor(expressions);
+
+        var pe = Expression.Parameter(ctor.Type);
+
+        var newContext = new BuildExpressionContext(
+                ctor.Type, pe,
+                tokens.Select((t, i) => new
+                {
+                    Token = t,
+                    Expr = TupleReflection.TupleChainProperty(pe, i)
+                }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)),
+                query.Context.Filters);
+
+        var resultSelector = Expression.Lambda(ctor, pDate, query.Context.Parameter);
+
+        var newQuery = Untyped.SelectMany(st, collectionSelector, resultSelector);
+
+        return new DQueryable<T>(newQuery, newContext);
+    }
+    #endregion
+
 
     #region TryPaginate
 
-    public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime, CancellationToken token)
+    public static async Task<DEnumerableCount<T>> TryPaginateAsync<T>(this DQueryable<T> query, Pagination pagination, SystemTimeRequest? systemTime, CancellationToken token)
     {
         if (pagination == null)
             throw new ArgumentNullException(nameof(pagination));
@@ -780,7 +835,7 @@ public static class DQueryable
         }
         else if (pagination is Pagination.Paginate pag)
         {
-            if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+            if (systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
                 var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 
@@ -804,7 +859,7 @@ public static class DQueryable
                 q = Untyped.Take(q, pag.ElementsPerPage, elemType);
 
                 var listTask = await Untyped.ToListAsync(q, token, elemType);
-                var countTask = systemTime is SystemTime.Interval ?
+                var countTask = systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn ?
                     (await Untyped.ToListAsync(query.Query, token, elemType)).Count : //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
                     await Untyped.CountAsync(query.Query, token, elemType);
 
@@ -815,7 +870,7 @@ public static class DQueryable
         throw new InvalidOperationException("pagination type {0} not expexted".FormatWith(pagination.GetType().Name));
     }
 
-    public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination, SystemTime? systemTime)
+    public static DEnumerableCount<T> TryPaginate<T>(this DQueryable<T> query, Pagination pagination, SystemTimeRequest? systemTime)
     {
         if (pagination == null)
             throw new ArgumentNullException(nameof(pagination));
@@ -836,7 +891,7 @@ public static class DQueryable
         }
         else if (pagination is Pagination.Paginate pag)
         {
-            if (systemTime is SystemTime.Interval)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
+            if (systemTime != null && systemTime.mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn)  //Results multipy due to Joins, not easy to change LINQ provider because joins are delayed
             {
                 var q = Untyped.OrderAlsoByKeys(query.Query, elemType);
 

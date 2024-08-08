@@ -1,6 +1,6 @@
 import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
 import { isDecimalKey } from './Lines/NumberLine';
@@ -201,6 +201,7 @@ export enum SubTokensOptions {
   CanToArray = 16,
   CanSnippet= 32,
   CanManual = 64,
+  CanTimeSeries = 128,
 }
 
 export interface QueryToken {
@@ -506,6 +507,10 @@ export interface SystemTime {
   joinMode?: SystemTimeJoinMode;
   startDate?: string;
   endDate?: string;
+  timeSeriesUnit?: TimeSeriesUnit;
+  timeSeriesStep?: number;
+  timeSeriesMaxRowsPerStep?: number;
+
 }
 
 export module PaginateMath {

@@ -177,25 +177,30 @@ public class SystemTimeEmbedded : EmbeddedEntity
 
     public SystemTimeJoinMode? JoinMode { get; set; }
 
+    public TimeSeriesUnit? TimeSeriesUnit { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesStep { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesMaxRowsPerStep { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if (pi.Name == nameof(StartDate))
-        {
-            return (pi, StartDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn or SystemTimeMode.AsOf);
-        }
-
-        if (pi.Name == nameof(EndDate))
-        {
-            return (pi, EndDate).IsSetOnlyWhen(Mode is SystemTimeMode.Between or SystemTimeMode.ContainedIn);
-        }
-
-        if (pi.Name == nameof(JoinMode))
-        {
-            return (pi, JoinMode).IsSetOnlyWhen(Mode is not SystemTimeMode.AsOf);
-        }
-
-        return base.PropertyValidation(pi);
+        return stateValidator.Validate(this, pi) ??  base.PropertyValidation(pi);
     }
+
+    static StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
+        (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep, a => a.TimeSeriesMaxRowsPerStep)
+    {
+ { SystemTimeMode.AsOf,       true,          false,            false,          false,                false,                false  },
+ { SystemTimeMode.Between,    true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.ContainedIn,true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.All,        false,         false,            true,           false,                false,                false  },
+ { SystemTimeMode.TimeSeries,  true,          true,             false,          true,                 true,                 true  },
+
+
+    };
 
     internal SystemTimeEmbedded? FromXml(XElement xml)
     {
@@ -203,41 +208,43 @@ public class SystemTimeEmbedded : EmbeddedEntity
         StartDate = xml.Attribute("StartDate")?.Value;
         EndDate = xml.Attribute("EndDate")?.Value;
         JoinMode = xml.Attribute("JoinMode")?.Value.ToEnum<SystemTimeJoinMode>();
+        TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
+        TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
+        TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
         return this;
     }
 
-    internal SystemTime GetSystemTime() {
-
-        JoinBehaviour GetJoinMode() => JoinMode!.Value switch
-        {
-            SystemTimeJoinMode.Current => JoinBehaviour.Current,
-            SystemTimeJoinMode.FirstCompatible => JoinBehaviour.FirstCompatible,
-            SystemTimeJoinMode.AllCompatible => JoinBehaviour.AllCompatible,
-            _ => throw new UnexpectedValueException(JoinMode!.Value)
-        };
-
-        DateTimeOffset ParseDate(string date)
-        {
-            return (DateTimeOffset)(DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
-        }
-
-        return Mode switch
-        {
-            SystemTimeMode.All => new SystemTime.All(GetJoinMode()),
-            SystemTimeMode.AsOf => new SystemTime.AsOf(ParseDate(StartDate!)),
-            SystemTimeMode.Between => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            SystemTimeMode.ContainedIn => new SystemTime.Between(ParseDate(StartDate!), ParseDate(EndDate!), GetJoinMode()),
-            _ => throw new UnexpectedValueException(Mode)
-        };
-    }
     internal XElement ToXml()
     {
         return new XElement("SystemTime",
-        new XAttribute("Mode", Mode.ToString()),
+            new XAttribute("Mode", Mode.ToString()),
             StartDate == null ? null : new XAttribute("StartDate", StartDate),
             EndDate == null ? null : new XAttribute("EndDate", EndDate),
-            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!)
+            JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!),
+            TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
+            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!)
         );
+    }
+
+    internal SystemTimeRequest ToSystemTimeRequest() => new SystemTimeRequest
+    {
+        mode = this.Mode,
+        joinMode = this.JoinMode,
+        endDate = ParseDate(this.EndDate),
+        startDate = ParseDate(this.StartDate),
+        timeSeriesStep = this.TimeSeriesStep,
+        timeSeriesUnit = this.TimeSeriesUnit,
+        timeSeriesMaxRowsPerStep = this.TimeSeriesMaxRowsPerStep,
+    };
+
+    DateTime? ParseDate(string? date)
+    {
+        if (date.IsNullOrEmpty())
+            return null;
+
+
+        return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
 }
 

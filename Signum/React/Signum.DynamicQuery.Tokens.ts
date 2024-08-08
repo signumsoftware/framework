@@ -111,6 +111,8 @@ export module QueryTokenDateMessage {
   export const Every0Seconds: MessageKey = new MessageKey("QueryTokenDateMessage", "Every0Seconds");
   export const SecondStart: MessageKey = new MessageKey("QueryTokenDateMessage", "SecondStart");
   export const Every0Milliseconds: MessageKey = new MessageKey("QueryTokenDateMessage", "Every0Milliseconds");
+  export const Every01: MessageKey = new MessageKey("QueryTokenDateMessage", "Every01");
+  export const _0Steps1Rows2TotalRowsAprox: MessageKey = new MessageKey("QueryTokenDateMessage", "_0Steps1Rows2TotalRowsAprox");
 }
 
 export module QueryTokenMessage {

@@ -11,6 +11,8 @@ namespace Signum.Entities.Validation;
 [AttributeUsage(AttributeTargets.Property, Inherited = true, AllowMultiple = true)]
 public abstract class ValidatorAttribute : Attribute
 {
+
+
     public Func<ModifiableEntity, bool>? IsApplicable;
     public Func<string>? ErrorMessage { get; set; }
 
@@ -48,6 +50,10 @@ public abstract class ValidatorAttribute : Attribute
         return error;
     }
 
+    public virtual bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return true;
+    }
 
     /// <summary>
     /// When overriden, validates the value against this validator rule
@@ -74,7 +80,10 @@ public class NotNullValidatorAttribute : ValidatorAttribute
 
     public override string HelpMessage => ValidationMessage.BeNotNull.NiceToString();
 
-
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return !pi.PropertyType.IsValueType || pi.PropertyType.IsNullable();
+    }
 }
 
 public static class NotNullValidatorExtensions
@@ -170,6 +179,11 @@ public class StringLengthValidatorAttribute : ValidatorAttribute
             return result;
         }
     }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType == typeof(string);
+    }
 }
 
 
@@ -209,6 +223,11 @@ public abstract class RegexValidatorAttribute : ValidatorAttribute
     }
 
     public override string HelpMessage => ValidationMessage.HaveValid0Format.NiceToString().FormatWith(FormatName);
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType == typeof(string);
+    }
 }
 
 public class EMailValidatorAttribute : RegexValidatorAttribute
@@ -399,6 +418,11 @@ public class FileNameValidatorAttribute : ValidatorAttribute
     {
         return invalidChartsRegex.Replace(a, "");
     }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType == typeof(string);
+    }
 }
 
 public class DecimalsValidatorAttribute : ValidatorAttribute
@@ -426,6 +450,12 @@ public class DecimalsValidatorAttribute : ValidatorAttribute
         }
 
         return null;
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        var type = pi.PropertyType.UnNullify();
+        return type == typeof(decimal);
     }
 
     public override string HelpMessage => ValidationMessage.Have0Decimals.NiceToString().FormatWith(DecimalPlaces);
@@ -496,6 +526,12 @@ public class NumberIsValidatorAttribute : ValidatorAttribute
         return ValidationMessage._0ShouldBe12.NiceToString().FormatWith("{0}", ComparisonType.NiceToString().ToLower(), number.ToString());
     }
 
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        var type = pi.PropertyType.UnNullify();
+        return ReflectionTools.IsNumber(type);
+    }
+
     public override string HelpMessage => ValidationMessage.Be0.NiceToString(ComparisonType.NiceToString().ToLower() + " " + number.ToString());
 }
 
@@ -561,6 +597,12 @@ public class NumberBetweenValidatorAttribute : ValidatorAttribute
         return ValidationMessage._0HasToBeBetween1And2.NiceToString("{0}", min, max);
     }
 
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        var type = pi.PropertyType.UnNullify();
+        return ReflectionTools.IsNumber(type);
+    }
+
     public override string HelpMessage => ValidationMessage.BeBetween0And1.NiceToString(min, max);
 }
 
@@ -593,6 +635,12 @@ public class NumberPowerOfTwoValidatorAttribute : ValidatorAttribute
         return null;
     }
 
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        var type = pi.PropertyType.UnNullify();
+        return ReflectionTools.IsIntegerNumber(type);
+    }
+
     public override string HelpMessage => ValidationMessage.Be0.NiceToString(ValidationMessage.PowerOf.NiceToString() + " " + 2);
 }
 
@@ -619,6 +667,11 @@ public class NoRepeatValidatorAttribute : ValidatorAttribute
             .ToString(e => "{0} x {1}".FormatWith(e.Key, e.Count), ", ");
 
         return errors.DefaultText(null!);
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType.IsMList();
     }
 }
 
@@ -653,6 +706,11 @@ public class CountIsValidatorAttribute : ValidatorAttribute
     public bool IsGreaterThanZero =>
         ComparisonType == ComparisonType.GreaterThan && Number == 0 ||
         ComparisonType == ComparisonType.GreaterThanOrEqualTo && Number == 1;
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType.IsMList();
+    }
 
     public override string HelpMessage => ValidationMessage.HaveANumberOfElements01.NiceToString().FormatWith(ComparisonType.NiceToString().FirstLower(), Number.ToString());
 }
@@ -718,6 +776,11 @@ public class DateTimePrecisionValidatorAttribute : ValidatorAttribute
             throw new UnexpectedValueException(value);
     }
 
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return ReflectionTools.IsDate(pi.PropertyType.UnNullify());
+    }
+
     public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
 }
 
@@ -736,7 +799,10 @@ public class DateInPastValidatorAttribute : ValidatorAttribute
         return null;
     }
 
-
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return ReflectionTools.IsDate(pi.PropertyType.UnNullify());
+    }
 
     public override string HelpMessage => ValidationMessage.BeInThePast.NiceToString();
 }
@@ -761,6 +827,11 @@ public class YearGreaterThanValidatorAttribute : ValidatorAttribute
         if (dateTime.Year < MinYear)
             return ValidationMessage._0ShouldBe12.NiceToString("{0}", ComparisonType.GreaterThanOrEqualTo.NiceToString(), MinYear);
         return null;
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return ReflectionTools.IsDate(pi.PropertyType.UnNullify());
     }
 
     public override string HelpMessage => ValidationMessage.Be0.NiceToString(ComparisonType.GreaterThanOrEqualTo.NiceToString().ToLower() + " " + MinYear);
@@ -830,6 +901,12 @@ public class TimePrecisionValidatorAttribute : ValidatorAttribute
         }
     }
 
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        var type = pi.PropertyType.UnNullify();
+        return type == typeof(TimeOnly) || type == typeof(TimeSpan);
+    }
+
     public override string HelpMessage => ValidationMessage.HaveAPrecisionOf0.NiceToString(Precision.NiceToString().ToLower());
 }
 
@@ -860,6 +937,11 @@ public class StringCaseValidatorAttribute : ValidatorAttribute
             return ValidationMessage._0HasToBeLowercase.NiceToString();
 
         return null;
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType == typeof(string);
     }
 
     public override string HelpMessage => ValidationMessage.Be0.NiceToString(textCase.NiceToString());
@@ -895,6 +977,11 @@ public class IsAssignableToValidatorAttribute : ValidatorAttribute
         }
 
         return null;
+    }
+
+    public override bool IsCompatibleWith(PropertyInfo pi)
+    {
+        return pi.PropertyType == typeof(TypeEntity);
     }
 
     public override string HelpMessage => ValidationMessage.BeA0_G.NiceToString().ForGenderAndNumber(Type.GetGender()).FormatWith(Type.NiceName());
