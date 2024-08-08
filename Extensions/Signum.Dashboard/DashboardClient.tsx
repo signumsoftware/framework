@@ -14,7 +14,8 @@ import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
-  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel
+  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
+  HealthCheckPartEntity
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -72,6 +73,7 @@ export function start(options: { routes: RouteObject[] }): void {
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
   Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
   Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
+  Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
 
   ToolbarClient.registerConfig(new DashboardToolbarConfig());
   OmniboxClient.registerProvider(new DashboardOmniboxProvider());
@@ -101,9 +103,16 @@ export function start(options: { routes: RouteObject[] }): void {
     defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
+
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
     defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+
+  registerRenderer(HealthCheckPartEntity, {
+    component: () => import('./View/HealthCheckPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
     withPanel: () => false
   });
 
