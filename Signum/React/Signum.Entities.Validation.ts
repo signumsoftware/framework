@@ -100,5 +100,7 @@ export module ValidationMessage {
   export const ThereAre0ThatReferenceThis1: MessageKey = new MessageKey("ValidationMessage", "ThereAre0ThatReferenceThis1");
   export const _0IsNotCompatibleWith1: MessageKey = new MessageKey("ValidationMessage", "_0IsNotCompatibleWith1");
   export const _0IsRepeated: MessageKey = new MessageKey("ValidationMessage", "_0IsRepeated");
+  export const NumberIsTooBig: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooBig");
+  export const NumberIsTooSmall: MessageKey = new MessageKey("ValidationMessage", "NumberIsTooSmall");
 }
 

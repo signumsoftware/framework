@@ -1,8 +1,9 @@
 import * as React from 'react'
-import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
+import { IsByAll, MemberInfo, PropertyRoute, PseudoType, Type, TypeInfo, TypeReference, isNumberType, isTypeEnum, isTypeModel, tryGetTypeInfos } from '../Reflection'
 import { LineBaseController, LineBaseProps, tasks } from '../Lines/LineBase'
 import { CheckboxLine, ColorLine, DateTimeLine, DateTimeLineController, EntityCheckboxList, EntityCombo, EntityDetail, EntityLine, EntityMultiSelect, EntityRepeater, EntityStrip, EntityTable, EnumCheckboxList, EnumLine, GuidLine, MultiValueLine, NumberLine, NumberLineController, PasswordLine, TextAreaLine, TextBoxLine, TimeLine, TypeContext } from '../Lines'
 import { Entity, Lite, ModifiableEntity } from '../Signum.Entities'
+import { isNumber } from '../Globals'
 
 export interface AutoLineProps extends LineBaseProps<any> {
   propertyRoute?: PropertyRoute; //For AutoLineModal
@@ -119,7 +120,7 @@ export namespace AutoLine {
       if (tr.name == "Guid")
         return p => <GuidLine {...p} />;
 
-      if (tr.name == "number" || tr.name == "decimal")
+      if (isNumberType(tr.name))
         return p => <NumberLine {...p} />;
 
       if (tr.name == "TimeSpan" || tr.name == "TimeOnly")

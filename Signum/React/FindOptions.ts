@@ -1,8 +1,9 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
 import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
+import { isDecimalKey } from './Lines/NumberLine';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -561,12 +562,9 @@ export function isList(fo: FilterOperation): boolean {
 
 
 export function getFilterType(tr: TypeReference): FilterType | null {
-  if (tr.name == "number")
-    return "Integer";
-
-  if (tr.name == "decmial")
-    return "Decimal";
-
+  if (isNumberType(tr.name))
+    return isDecimalType(tr.name) ? "Decimal" : "Integer";
+    
   if (tr.name == "boolean")
     return "Boolean";
 
@@ -608,7 +606,7 @@ export function getFilterOperations(qt: QueryToken): FilterOperation[] {
 }
 
 export function getFilterGroupUnifiedFilterType(tr: TypeReference): FilterType | null {
-  if (tr.name == "number" || tr.name == "decmial" || tr.name == "boolean" || tr.name == "string" || tr.name == "Guid")
+  if (isNumberType(tr.name) || tr.name == "boolean" || tr.name == "string" || tr.name == "Guid")
     return "String";
 
   if (tr.name == "DateTime")

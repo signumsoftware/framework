@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Dic, areEqual, classes } from '../Globals'
-import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo } from '../Reflection'
+import { tryGetTypeInfos, TypeReference, TypeInfo, tryGetTypeInfo, getTypeName, Binding, getTypeInfos, IsByAll, getTypeInfo, MemberInfo, OperationInfo, isNumberType } from '../Reflection'
 import { ModifiableEntity, SearchMessage, JavascriptMessage, Lite, Entity, OperationMessage } from '../Signum.Entities'
 import { Navigator } from '../Navigator'
 import { ViewReplacer } from '../Frames/ReactVisitor'
@@ -497,8 +497,10 @@ export function getTypeColor(type: TypeReference): string {
   if (type.isCollection)
     return "#CE6700";
 
+  if (isNumberType(type.name))
+    return "#000000";
+
   switch (type.name) {
-    case "number":
     case "string":
     case "Guid":
     case "boolean": return "#000000";

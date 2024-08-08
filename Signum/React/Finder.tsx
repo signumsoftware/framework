@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, softCast } from './Globals'
+import { Dic, classes, isNumber, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -25,7 +25,10 @@ import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions,
-  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel,
+  isNumberType,
+  isDecimalType,
+  numberLimits
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -308,6 +311,12 @@ export namespace Finder {
 
   export function getSimpleTypeNiceName(name: string): string {
 
+    if (isDecimalType(name))
+      return QueryTokenMessage.DecimalNumber.niceToString();
+
+    if (isNumberType(name))
+      return QueryTokenMessage.Number.niceToString();
+
     switch (name) {
       case "string":
       case "Guid":
@@ -315,8 +324,6 @@ export namespace Finder {
       case "Date": return QueryTokenMessage.Date.niceToString();
       case "DateTime": return QueryTokenMessage.DateTime.niceToString();
       case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
-      case "number": return QueryTokenMessage.Number.niceToString();
-      case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
       case "boolean": return QueryTokenMessage.Check.niceToString();
     }
 
@@ -588,7 +595,7 @@ export namespace Finder {
         return Promise.resolve(value);
     }
 
-    if (type.name == "number") {
+    if (isNumberType(type.name)) {
       if (typeof value === "number")
         return Promise.resolve(value);
     }
@@ -1040,11 +1047,13 @@ export namespace Finder {
       var value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
-        if (fop.token.type.name == "number") {
+        if (isNumberType(fop.token.type.name)) {
 
           var numVal = parseInt(value);
 
-          if (isNaN(numVal)) {
+          var limits = numberLimits[fop.token.type.name]
+
+          if (isNaN(numVal) || numVal < limits.min || limits.max < numVal) {
             if (overridenValue)
               return undefined;
 

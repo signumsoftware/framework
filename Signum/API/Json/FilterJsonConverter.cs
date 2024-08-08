@@ -86,11 +86,20 @@ public class FilterConditionTS : FilterTS
     {
         var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
         var parsedToken = QueryUtils.Parse(token, qd, options);
-        var expectedValueType = operation.IsList() ? typeof(List<>).MakeGenericType(parsedToken.Type.Nullify()) : parsedToken.Type;
+        var expectedValueType = operation.IsList() ? typeof(List<>).MakeGenericType(parsedToken.Type.Nullify()) : 
+            parsedToken.Type;
 
-        var val = value is JsonElement jtok ?
-             jtok.ToObject(expectedValueType, jsonSerializerOptions) :
-             value;
+        object? val;
+        try
+        {
+            val = value is JsonElement jtok ?
+                 jtok.ToObject(expectedValueType, jsonSerializerOptions) :
+                 value;
+        }
+        catch(JsonException)
+        {
+            throw new InvalidOperationException("Invalid value when filtering by " + token.ToString());
+        }
 
         if (val is DateTime dt)
         {
