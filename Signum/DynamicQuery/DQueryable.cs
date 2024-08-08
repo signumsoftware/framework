@@ -10,6 +10,8 @@ using System.Runtime.ConstrainedExecution;
 using Signum.DynamicQuery.Tokens;
 using System.Runtime.CompilerServices;
 using Signum.Utilities.ExpressionTrees;
+using System.Linq;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace Signum.DynamicQuery;
 
@@ -753,6 +755,59 @@ public static class DQueryable
         if (num.HasValue)
             return new DEnumerable<T>(Untyped.Take(collection.Collection, num.Value, collection.Context.ElementType), collection.Context);
         return collection;
+    }
+    #endregion
+
+    #region TimeSerieSelectMany
+
+    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
+    static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
+
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, IEnumerable<Column> colums)
+    {
+        var st =
+            QueryTimeSeriesLogic.GetDatesInRange(
+                systemTime.startDate!.Value,
+                systemTime.endDate!.Value,
+                systemTime.timeSeriesUnit!.ToString()!,
+                systemTime.timeSeriesStep!.Value);
+
+        var pDate = Expression.Parameter(typeof(DateValue), "d");
+
+        var collectionSelectorType = typeof(Func<,>).MakeGenericType(typeof(DateValue), typeof(IEnumerable<>).MakeGenericType(query.Query.ElementType));
+
+        var collectionSelector = Expression.Lambda(collectionSelectorType,
+            Expression.Call(miOverrideInExpression.MakeGenericMethod(typeof(IQueryable<>).MakeGenericType(query.Query.ElementType)),
+            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date))),
+            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression),
+            pDate);
+
+
+        var tokens = colums.Select(a => a.Token).ToHashSet();
+
+        string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
+        if (str.HasText())
+            throw new ApplicationException(str);
+
+        List<Expression> expressions = tokens.Select(t => t is TimeSeriesToken ? Expression.Field(pDate, nameof(DateValue.Date)) : t.BuildExpression(query.Context, searchToArray: true)).ToList();
+        Expression ctor = TupleReflection.TupleChainConstructor(expressions);
+
+        var pe = Expression.Parameter(ctor.Type);
+
+        var newContext = new BuildExpressionContext(
+                ctor.Type, pe,
+                tokens.Select((t, i) => new
+                {
+                    Token = t,
+                    Expr = TupleReflection.TupleChainProperty(pe, i)
+                }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)),
+                query.Context.Filters);
+
+        var resultSelector = Expression.Lambda(ctor, pDate, query.Context.Parameter);
+
+        var newQuery = Untyped.SelectMany(st, collectionSelector, resultSelector);
+
+        return new DQueryable<T>(newQuery, newContext);
     }
     #endregion
 

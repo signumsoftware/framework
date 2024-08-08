@@ -853,6 +853,11 @@ public enum QueryTokenDateMessage
     [Description("Every {0} Milliseconds")]
     Every0Milliseconds,
 
+    [Description("Every {0} {1}")]
+    Every01,
+
+    [Description("{0} steps x {1} rows = {2} total rows (aprox)")]
+    _0Steps1Rows2TotalRowsAprox
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

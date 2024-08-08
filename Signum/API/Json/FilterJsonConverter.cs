@@ -117,7 +117,9 @@ public class FilterGroupTS : FilterTS
 
     public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
     {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | 
+            (canAggregate ? SubTokensOptions.CanAggregate : 0);
+
         var parsedToken = token == null ? null : QueryUtils.Parse(token, qd, options);
 
         var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate, jsonSerializerOptions)).ToList();
@@ -131,9 +133,11 @@ public class ColumnTS
     public required string token;
     public string? displayName;
 
-    public Column ToColumn(QueryDescription qd, bool canAggregate)
+    public Column ToColumn(QueryDescription qd, bool canAggregate, bool canTimeSeries)
     {
-        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet  | (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual));
+        var queryToken = QueryUtils.Parse(token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet |
+            (canAggregate ? SubTokensOptions.CanAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) |
+            (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0));
 
         return new Column(queryToken, displayName ?? queryToken.NiceName());
     }
@@ -236,6 +240,7 @@ public class QueryRequestTS
 
         var qn = QueryLogic.ToQueryName(this.queryKey);
         var qd = QueryLogic.Queries.QueryDescription(qn);
+        var timeSeries = this.systemTime?.mode == SystemTimeMode.TimeSeries;
 
         return new QueryRequest
         {
@@ -243,8 +248,8 @@ public class QueryRequestTS
             QueryName = qn,
             GroupResults = groupResults,
             Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions)).ToList(),
-            Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults)).ToList(),
-            Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults)).ToList(),
+            Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
+            Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
             Pagination = this.pagination.ToPagination(),
             SystemTime = this.systemTime,
         };
@@ -275,7 +280,7 @@ public class QueryEntitiesRequestTS
             QueryName = qn,
             Count = count,
             Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions)).ToList(),
-            Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false)).ToList(),
+            Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false, canTimeSeries: false)).ToList(),
         };
     }
 }
@@ -285,9 +290,12 @@ public class OrderTS
     public required string token;
     public required OrderType orderType;
 
-    public Order ToOrder(QueryDescription qd, bool canAggregate)
+    public Order ToOrder(QueryDescription qd, bool canAggregate, bool canTimeSeries)
     {
-        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | (canAggregate ? SubTokensOptions.CanAggregate : 0)), orderType);
+        return new Order(QueryUtils.Parse(this.token, qd, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | 
+            (canAggregate ? SubTokensOptions.CanAggregate : 0) | 
+            (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0)
+            ), orderType);
     }
 
     public override string ToString() => $"{token} {orderType}";

@@ -112,7 +112,7 @@ public static class WordServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
+                cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true, canTimeSeries: true)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {

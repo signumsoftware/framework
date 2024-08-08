@@ -124,7 +124,16 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
                 .SelectMany(request.Multiplications(), request.FullTextTableFilters())
                 .Where(request.Filters);
 
-            if (request.Pagination is Pagination.All)
+            if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
+            {
+                inMemoryOrders = null;
+
+                return query
+                   .SelectManyTimeSeries(request.SystemTime, request.Columns)
+                   .OrderBy(request.Orders);
+
+            }
+            else if (request.Pagination is Pagination.All)
             {
                 var allColumns = request.Columns.Select(a => a.Token)
                     .Concat(request.Orders.Select(a => a.Token))
@@ -151,7 +160,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
         var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
 
-        var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+        var keys = request.Columns.Select(t => t.Token).Where(t => t is not AggregateToken && t is not TimeSeriesToken).ToHashSet();
 
         var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
 
@@ -162,7 +171,16 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .GroupBy(keys, allAggregates)
             .Where(aggregateFilters);
 
-        if (request.Pagination is Pagination.All)
+        if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
+        {
+            inMemoryOrders = null;
+
+            return query
+                .SelectManyTimeSeries(request.SystemTime, request.Columns)
+                .OrderBy(request.Orders);
+
+        }
+        else if (request.Pagination is Pagination.All)
         {
             inMemoryOrders = request.Orders.ToList();
             return query;

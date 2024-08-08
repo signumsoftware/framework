@@ -36,7 +36,7 @@ public class QueryRequest : BaseQueryRequest
 
     public bool CanDoMultiplicationsInSubQueries()
     {
-        return GroupResults == false && Pagination is Pagination.All &&
+        return GroupResults == false && Pagination is Pagination.All && SystemTime == null &&
             Orders.Select(a => a.Token).Concat(Columns.Select(a => a.Token)).Any(a => a.HasElement()) &&
             !Filters.SelectMany(f => f.GetAllFilters()).SelectMany(f => f.GetTokens()).Any(t => t.HasElement());
     }
@@ -104,8 +104,9 @@ public class SystemTimeRequest
     public SystemTimeJoinMode? joinMode;
     public DateTime? startDate;
     public DateTime? endDate;
-    public TimeSeriesUnit? timeSerieUnit;
-    public int? timeSerieStep;
+    public int? timeSeriesStep;
+    public TimeSeriesUnit? timeSeriesUnit;
+    public int? timeSeriesMaxRowsPerStep; 
 
     public SystemTimeRequest() { }
 
@@ -149,8 +150,9 @@ public class SystemTimeRequest
         joinMode = joinMode,
         startDate = startDate,
         endDate = endDate,
-        timeSerieUnit = timeSerieUnit,
-        timeSerieStep = timeSerieStep,
+        timeSeriesUnit = timeSeriesUnit,
+        timeSeriesStep = timeSeriesStep,
+        timeSeriesMaxRowsPerStep = timeSeriesMaxRowsPerStep,
     };
 
     public SystemTime? ToSystemTime()
@@ -161,7 +163,7 @@ public class SystemTimeRequest
             SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, joinMode!.Value),
             SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, joinMode!.Value),
             SystemTimeMode.All => new SystemTime.All(joinMode!.Value),
-            SystemTimeMode.TimeSerie => null,
+            SystemTimeMode.TimeSeries => null,
             _ => throw new InvalidOperationException($"Unexpected {mode}"),
         };
     }
@@ -174,7 +176,7 @@ public enum SystemTimeMode
     Between,
     ContainedIn,
     All,
-    TimeSerie,
+    TimeSeries,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

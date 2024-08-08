@@ -102,7 +102,7 @@ export type SystemTimeMode =
   "Between" |
   "ContainedIn" |
   "All" |
-  "TimeSerie";
+  "TimeSeries";
 
 export const TimeSeriesUnit: EnumType<TimeSeriesUnit> = new EnumType<TimeSeriesUnit>("TimeSeriesUnit");
 export type TimeSeriesUnit =

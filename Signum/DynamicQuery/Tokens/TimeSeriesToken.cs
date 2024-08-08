@@ -2,37 +2,46 @@ using Signum.Utilities.Reflection;
 
 namespace Signum.DynamicQuery.Tokens;
 
-public class TimeSerieToken : QueryToken
+public class TimeSeriesToken : QueryToken
 {
     public override QueryToken? Parent => null;
 
-    internal TimeSerieToken()
+    internal TimeSeriesToken(object queryName)
     {
+        this.queryName = queryName;
         Priority = 8;
     }
 
     public override Type Type
     {
-        get { return typeof(DateTime?); }
+        get { return typeof(DateTime); }
     }
 
     public override DateTimeKind DateTimeKind => DateTimeKind.Utc;
 
     public override string ToString()
     {
-        return "[" + SystemTimeMode.TimeSerie.NiceToString() + "]";
+        return "[" + SystemTimeMode.TimeSeries.NiceToString() + "]";
     }
+
+    public const string KeyText = "TimeSeries";
 
     public override string Key
     {
-        get { return "TimeSerie"; }
+        get { return KeyText; }
+    }
+
+    object queryName;
+    public override object QueryName
+    {
+        get { return queryName; }
     }
 
     static MethodInfo miSystemPeriod = ReflectionTools.GetMethodInfo((object o) => SystemTimeExtensions.SystemPeriod(null!));
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
-        throw new InvalidOperationException("TimeSerie token nof found in replacements");
+        throw new InvalidOperationException("TimeSeries token nof found in replacements");
     }
 
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
@@ -67,11 +76,11 @@ public class TimeSerieToken : QueryToken
 
     public override string NiceName()
     {
-        return SystemTimeMode.TimeSerie.NiceToString();
+        return SystemTimeMode.TimeSeries.NiceToString();
     }
 
     public override QueryToken Clone()
     {
-        return new TimeSerieToken();
+        return new TimeSeriesToken(this.queryName);
     }
 }

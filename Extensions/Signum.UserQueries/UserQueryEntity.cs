@@ -182,19 +182,22 @@ public class SystemTimeEmbedded : EmbeddedEntity
     [NumberIsValidator(ComparisonType.GreaterThan, 0)]
     public int? TimeSeriesStep { get; set; }
 
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesMaxRowsPerStep { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         return stateValidator.Validate(this, pi) ??  base.PropertyValidation(pi);
     }
 
     static StateValidator<SystemTimeEmbedded, SystemTimeMode> stateValidator = new StateValidator<SystemTimeEmbedded, SystemTimeMode>
-        (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep)
+        (a => a.Mode, a => a.StartDate, a => a.EndDate, a => a.JoinMode, a => a.TimeSeriesUnit, a => a.TimeSeriesStep, a => a.TimeSeriesMaxRowsPerStep)
     {
- { SystemTimeMode.AsOf,       true,          false,            false,          false,                false   },
- { SystemTimeMode.Between,    true,          true,             true,           false,                false   },
- { SystemTimeMode.ContainedIn,true,          true,             true,           false,                false   },
- { SystemTimeMode.All,        false,         false,            true,           false,                false   },
- { SystemTimeMode.TimeSerie,  true,          true,             false,          true,                 true   },
+ { SystemTimeMode.AsOf,       true,          false,            false,          false,                false,                false  },
+ { SystemTimeMode.Between,    true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.ContainedIn,true,          true,             true,           false,                false,                false  },
+ { SystemTimeMode.All,        false,         false,            true,           false,                false,                false  },
+ { SystemTimeMode.TimeSeries,  true,          true,             false,          true,                 true,                 true  },
 
 
     };
@@ -205,8 +208,9 @@ public class SystemTimeEmbedded : EmbeddedEntity
         StartDate = xml.Attribute("StartDate")?.Value;
         EndDate = xml.Attribute("EndDate")?.Value;
         JoinMode = xml.Attribute("JoinMode")?.Value.ToEnum<SystemTimeJoinMode>();
-        TimeSeriesUnit = xml.Attribute("TimeSerieUnit")?.Value.ToEnum<TimeSeriesUnit>();
+        TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
         TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
+        TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
         return this;
     }
 
@@ -218,7 +222,8 @@ public class SystemTimeEmbedded : EmbeddedEntity
             EndDate == null ? null : new XAttribute("EndDate", EndDate),
             JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!),
             TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
-            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!)
+            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!)
         );
     }
 
@@ -228,8 +233,9 @@ public class SystemTimeEmbedded : EmbeddedEntity
         joinMode = this.JoinMode,
         endDate = ParseDate(this.EndDate),
         startDate = ParseDate(this.StartDate),
-        timeSerieStep = this.TimeSeriesStep,
-        timeSerieUnit = this.TimeSeriesUnit,
+        timeSeriesStep = this.TimeSeriesStep,
+        timeSeriesUnit = this.TimeSeriesUnit,
+        timeSeriesMaxRowsPerStep = this.TimeSeriesMaxRowsPerStep,
     };
 
     DateTime? ParseDate(string? date)
