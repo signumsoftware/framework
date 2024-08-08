@@ -10,7 +10,7 @@ import * as Eval from '../Signum.Eval/Signum.Eval'
 
 interface IDynamicValidationEvaluator {}
 
-export const DynamicValidationEntity = new Type<DynamicValidationEntity>("DynamicValidation");
+export const DynamicValidationEntity: Type<DynamicValidationEntity> = new Type<DynamicValidationEntity>("DynamicValidation");
 export interface DynamicValidationEntity extends Entities.Entity {
   Type: "DynamicValidation";
   name: string;
@@ -19,13 +19,13 @@ export interface DynamicValidationEntity extends Entities.Entity {
   eval: DynamicValidationEval;
 }
 
-export const DynamicValidationEval = new Type<DynamicValidationEval>("DynamicValidationEval");
+export const DynamicValidationEval: Type<DynamicValidationEval> = new Type<DynamicValidationEval>("DynamicValidationEval");
 export interface DynamicValidationEval extends Eval.EvalEmbedded<IDynamicValidationEvaluator> {
   Type: "DynamicValidationEval";
 }
 
 export module DynamicValidationMessage {
-  export const PropertyIs = new MessageKey("DynamicValidationMessage", "PropertyIs");
+  export const PropertyIs: MessageKey = new MessageKey("DynamicValidationMessage", "PropertyIs");
 }
 
 export module DynamicValidationOperation {

@@ -102,12 +102,12 @@ export namespace PredictorClient {
   }
   
   export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
-  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
+  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) : void {
     initializers[symbol.key] = initialize;
   }
   
   export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactNode } = {};
-  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode) {
+  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode): void {
     resultRenderers[symbol.key] = renderer;
   }
   

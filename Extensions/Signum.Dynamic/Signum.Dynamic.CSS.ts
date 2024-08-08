@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export const DynamicCSSOverrideEntity = new Type<DynamicCSSOverrideEntity>("DynamicCSSOverride");
+export const DynamicCSSOverrideEntity: Type<DynamicCSSOverrideEntity> = new Type<DynamicCSSOverrideEntity>("DynamicCSSOverride");
 export interface DynamicCSSOverrideEntity extends Entities.Entity {
   Type: "DynamicCSSOverride";
   name: string;

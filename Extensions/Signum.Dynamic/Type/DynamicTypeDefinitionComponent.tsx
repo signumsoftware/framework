@@ -784,8 +784,11 @@ public static class ${entityName}Operation2
   );
 }
 
-CustomCodeTab.suggestWorkflow = true;
-CustomCodeTab.suggestTree = true;
+export namespace CustomCodeTab {
+  export let suggestWorkflow = true;
+  export let suggestTree = true;
+}
+
 
 export interface CSharpExpressionCodeMirrorProps {
   binding: Binding<string | undefined>;
@@ -814,7 +817,7 @@ export function CSharpExpressionCodeMirror(p: CSharpExpressionCodeMirrorProps): 
 
 export interface CustomFieldsetComponentProps<T> {
   binding: Binding<T | undefined>;
-  title?: React.ReactChild;
+  title?: React.ReactElement | string;
   renderContent: (item: T) => React.ReactElement<any>;
   onCreate: () => T;
   onChange?: () => void;
@@ -822,7 +825,7 @@ export interface CustomFieldsetComponentProps<T> {
 
 export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetComponentProps<T>> {
 
-  handleChecked = (e: React.FormEvent<any>) => {
+  handleChecked = (e: React.FormEvent<any>) : void=> {
     let val = this.props.binding.getValue();
     if (val)
       this.props.binding.deleteValue();
@@ -835,7 +838,7 @@ export class CustomFieldsetComponent<T> extends React.Component<CustomFieldsetCo
       this.props.onChange();
   }
 
-  render() {
+  render(): JSX.Element {
     let value = this.props.binding.getValue();
     return (
       <fieldset style={{ marginTop: "-5px" }}>
@@ -1115,7 +1118,7 @@ export function PropertyComponent(p: PropertyComponentProps): React.JSX.Element 
     );
   }
 
-export function TypeCombo(p: { dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }) {
+export function TypeCombo(p: { dc: DynamicTypeDesignContext; binding: Binding<string>; labelColumns: number; onBlur: () => void }): JSX.Element {
 
   function handleGetItems(query: string) {
     return TypeHelpClient.API.autocompleteType({
@@ -1460,7 +1463,7 @@ export interface ValidatorOptions<T extends Validators.DynamicValidator> {
 
 export const registeredValidators: { [name: string]: ValidatorOptions<Validators.DynamicValidator> } = {};
 
-export function registerValidator<T extends Validators.DynamicValidator>(options: ValidatorOptions<T>) {
+export function registerValidator<T extends Validators.DynamicValidator>(options: ValidatorOptions<T>) : void {
   registeredValidators[options.name] = options as ValidatorOptions<Validators.DynamicValidator>;
 }
 
