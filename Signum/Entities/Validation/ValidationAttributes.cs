@@ -1182,6 +1182,9 @@ public enum ValidationMessage
     _0IsNotCompatibleWith1,
     [Description("{0} is repeated")]
     _0IsRepeated,
+
+    NumberIsTooBig,
+    NumberIsTooSmall,
 }
 
 public static class ValidationMessageHelper
