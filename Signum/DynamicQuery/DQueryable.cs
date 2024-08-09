@@ -763,7 +763,21 @@ public static class DQueryable
     static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
     static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
 
-    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, IEnumerable<Column> colums)
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, List<Column> columns, List<Order> orders)
+    {
+        var tokens = columns.Select(a => a.Token).Concat(orders.Select(a => a.Token)).ToHashSet();
+
+        return query
+            .OrderBy(orders.Where(a => a.Token is not TimeSeriesToken).ToList())
+            .Select(tokens.Where(t => t is not TimeSeriesToken).ToHashSet())
+            .SelectManyTimeSeries(systemTime, tokens)
+            .OrderBy(orders.ToList())
+            .Select(columns);
+
+    }
+
+
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, IEnumerable<QueryToken> tokens)
     {
         var st =
             QueryTimeSeriesLogic.GetDatesInRange(
@@ -783,7 +797,7 @@ public static class DQueryable
             pDate);
 
 
-        var tokens = colums.Select(a => a.Token).ToHashSet();
+    
 
         string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
         if (str.HasText())
@@ -1296,7 +1310,7 @@ public static class DQueryable
 
             var rc = new ResultColumn(c, array);
 
-            if ((c.Token.Type.IsLite() || isMultiKeyGrupping && c.Token is not AggregateToken) && c.Token.HasToArray() == null)
+            if (req.SystemTime == null && (c.Token.Type.IsLite() || isMultiKeyGrupping && c.Token is not AggregateToken) && c.Token.HasToArray() == null)
                 rc.CompressUniqueValues = true;
 
             return rc;

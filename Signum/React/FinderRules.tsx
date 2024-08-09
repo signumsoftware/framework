@@ -179,7 +179,6 @@ export function initFormatRules(): Finder.FormatRule[] {
       name: "TimeSeries",
       isApplicable: qt => qt.fullKey == QueryTokenString.timeSeries.token,
       formatter: (qt, scl) => {
-        debugger;
         let luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
         const st = scl?.props.findOptions.systemTime;
         if (st) {
