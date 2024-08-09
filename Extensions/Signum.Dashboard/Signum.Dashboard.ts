@@ -101,6 +101,26 @@ export module DashboardPermission {
   export const ViewDashboard : Basics.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
 }
 
+export const HealthCheckElementEmbedded: Type<HealthCheckElementEmbedded> = new Type<HealthCheckElementEmbedded>("HealthCheckElementEmbedded");
+export interface HealthCheckElementEmbedded extends Entities.EmbeddedEntity {
+  Type: "HealthCheckElementEmbedded";
+  title: string;
+  checkURL: string;
+  navigateURL: string;
+}
+
+export const HealthCheckPartEntity: Type<HealthCheckPartEntity> = new Type<HealthCheckPartEntity>("HealthCheckPart");
+export interface HealthCheckPartEntity extends Entities.Entity, IPartEntity {
+  Type: "HealthCheckPart";
+  items: Entities.MList<HealthCheckElementEmbedded>;
+  requiresTitle: boolean;
+}
+
+export const HealthCheckStatus: EnumType<HealthCheckStatus> = new EnumType<HealthCheckStatus>("HealthCheckStatus");
+export type HealthCheckStatus =
+  "Ok" |
+  "Error";
+
 export const ImagePartEntity: Type<ImagePartEntity> = new Type<ImagePartEntity>("ImagePart");
 export interface ImagePartEntity extends Entities.Entity, IPartEntity {
   Type: "ImagePart";

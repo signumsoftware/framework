@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
+using Signum.Dashboard;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.Processes;
@@ -52,5 +53,11 @@ public class ProcessController : ControllerBase
     public SimpleStatus SimpleStatus()
     {
         return ProcessRunner.GetSimpleStatus();
+    }
+
+    [HttpGet("api/processes/healthCheck"), SignumAllowAnonymous]
+    public HealthCheckStatus HealthCheck()
+    {
+        return ProcessRunner.GetSimpleStatus() == Basics.SimpleStatus.Ok ? HealthCheckStatus.Ok : HealthCheckStatus.Error;
     }
 }
