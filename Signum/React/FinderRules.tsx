@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DateTime, Duration } from 'luxon'
+import { DateTime, DateTimeUnit, Duration } from 'luxon'
 import { Navigator } from "./Navigator"
 import { Dic, classes } from './Globals'
 import {
@@ -14,7 +14,8 @@ import {
   TypeReference,
   tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, 
   PropertyRoute, tryGetTypeInfo, 
-  toLuxonDurationFormat, toFormatWithFixes, IsByAll, getTypeInfos, Binding
+  toLuxonDurationFormat, toFormatWithFixes, IsByAll, getTypeInfos, Binding,
+  QueryTokenString
 } from './Reflection';
 import EntityLink from './SearchControl/EntityLink';
 import SearchControlLoaded from './SearchControl/SearchControlLoaded';
@@ -31,6 +32,7 @@ import { TextBoxLine } from "./Lines/TextBoxLine";
 import { AutoLine } from "./Lines/AutoLine";
 import { EnumLine } from "./Lines/EnumLine";
 import { KeyNames } from "./Components";
+import QueryTokenBuilder from "./SearchControl/QueryTokenBuilder";
 
 
 export function isMultiline(pr?: PropertyRoute): boolean {
@@ -171,6 +173,28 @@ export function initFormatRules(): Finder.FormatRule[] {
         const durationFormat = toLuxonDurationFormat(qt.format) ?? "hh:mm:ss";
 
         return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{Duration.fromISOTime(cell).toFormat(durationFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
+      }
+    },
+    {
+      name: "TimeSeries",
+      isApplicable: qt => qt.fullKey == QueryTokenString.timeSeries.token,
+      formatter: (qt, scl) => {
+        debugger;
+        let luxonFormat = toLuxonFormat(qt.format, qt.type.name as "DateOnly" | "DateTime");
+        const st = scl?.props.findOptions.systemTime;
+        if (st) {
+          var start = DateTime.fromISO(st.startDate!);
+
+          if (start.equals(start.startOf(st.timeSeriesUnit?.firstLower() as DateTimeUnit))) {
+            luxonFormat = toLuxonFormat(st.timeSeriesUnit == "Year" ? "YYYY" :
+              st.timeSeriesUnit == "Month" ? "LLLL YYYY" :
+                st.timeSeriesUnit == "Day" ? "d" :
+                  qt.format, "DateTime");
+          }
+        }
+
+        
+        return new Finder.CellFormatter((cell: string | undefined) => cell == undefined || cell == "" ? "" : <bdi className="date try-no-wrap">{toFormatWithFixes(DateTime.fromISO(cell), luxonFormat)}</bdi>, false, "date-cell") //To avoid flippig hour and date (L LT) in RTL cultures
       }
     },
     {

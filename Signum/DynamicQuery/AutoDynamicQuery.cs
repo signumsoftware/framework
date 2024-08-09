@@ -129,6 +129,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
                 inMemoryOrders = null;
 
                 return query
+                   .OrderBy(request.Orders.Where(o => o.Token is not TimeSeriesToken).ToList())
                    .SelectManyTimeSeries(request.SystemTime, request.Columns)
                    .OrderBy(request.Orders);
 
@@ -176,6 +177,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             inMemoryOrders = null;
 
             return query
+                .OrderBy(request.Orders.Where(o => o.Token is not TimeSeriesToken).ToList())
                 .SelectManyTimeSeries(request.SystemTime, request.Columns)
                 .OrderBy(request.Orders);
 
