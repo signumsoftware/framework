@@ -80,7 +80,7 @@ public class WorkflowImportExport
             a.CustomNextButton?.ToXml("CustomNextButton")!,
             string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
             a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
-                new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
+                new XAttribute("Workflow", a.SubWorkflow.Workflow.Is(workflow) ? a.SubWorkflow.Workflow.Guid : ctx.Include(a.SubWorkflow.Workflow)),
                 new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
             ),
             a.Script == null ? null! : new XElement("Script",
@@ -342,7 +342,7 @@ public class WorkflowImportExport
                     activity.UserHelp = xml.Element("UserHelp")?.Value;
                     activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
                     {
-                        swe.Workflow = (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
+                        swe.Workflow = workflow.Guid == (Guid)elem.Attribute("Workflow")! ? workflow : (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
                         swe.SubEntitiesEval = swe.SubEntitiesEval.CreateOrAssignEmbedded(elem.Element("SubEntitiesEval"), (se, x) =>
                         {
                             se.Script = x.Value;
