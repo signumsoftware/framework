@@ -126,14 +126,14 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.E
       st.timeSeriesMaxRowsPerStep = st.mode == "TimeSeries" ? 10 : undefined;
 
       if (st.mode == "TimeSeries") {
-        var token = await Finder.parseSingleToken(p.findOptions.queryKey, QueryTokenString.timeSeries().token, SubTokensOptions.CanTimeSeries);
+        var token = await Finder.parseSingleToken(p.findOptions.queryKey, QueryTokenString.timeSeries.token, SubTokensOptions.CanTimeSeries);
 
         p.findOptions.columnOptions.insertAt(0, { token: token, displayName: token.niceName });
         p.findOptions.orderOptions.insertAt(0, { token: token, orderType: "Ascending" });
 
       } else {
-        p.findOptions.columnOptions.extract(a => a.token != null && a.token.fullKey == QueryTokenString.timeSeries().token);
-        p.findOptions.orderOptions.extract(a => a.token != null && a.token.fullKey == QueryTokenString.timeSeries().token);
+        p.findOptions.columnOptions.extract(a => a.token != null && a.token.fullKey == QueryTokenString.timeSeries.token);
+        p.findOptions.orderOptions.extract(a => a.token != null && a.token.fullKey == QueryTokenString.timeSeries.token);
       }
 
       p.onChanged();
@@ -232,7 +232,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.E
     <div className={classes("sf-system-time-editor", "alert alert-primary")}>
       <span>{JavascriptMessage.showRecords.niceToString()}</span>
       {renderMode()}
-      {mode == QueryTokenString.timeSeries().token ? <>
+      {mode == QueryTokenString.timeSeries.token ? <>
         <span className="ms-2 d-flex">{QueryTokenDateMessage.Every01.niceToString().formatHtml(renderTimeSerieStep(), renderTimeSeriesUnit())}</span>
         {renderDateTime("startDate")}
         {renderDateTime("endDate")}
@@ -257,7 +257,7 @@ function TotalNumStepsAndRows(p: { findOptions: FindOptionsParsed }) {
 
   const st = p.findOptions.systemTime!;
 
-  const isOneValue = p.findOptions.groupResults && p.findOptions.columnOptions.every(a => a.token == null || a.token.fullKey == QueryTokenString.timeSeries().token || a.token.queryTokenType == "Aggregate");
+  const isOneValue = p.findOptions.groupResults && p.findOptions.columnOptions.every(a => a.token == null || a.token.fullKey == QueryTokenString.timeSeries.token || a.token.queryTokenType == "Aggregate");
 
   const forceUpdate = useForceUpdate();
   React.useEffect(() => {
