@@ -12,6 +12,8 @@ import { Dic } from '@framework/Globals'
 import { IChartBase } from '../UserChart/Signum.Chart.UserChart'
 import { AutoLine, EnumLine, NumberLine, NumberLineProps, TextBoxLine, TextBoxLineProps } from '@framework/Lines'
 import { EnumLineProps, OptionItem } from '@framework/Lines/EnumLine'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import SystemTimeEditor from '../../../Signum/React/SearchControl/SystemTimeEditor'
 
 export interface ChartBuilderProps {
   ctx: TypeContext<IChartBase>; /*IChart*/
@@ -21,6 +23,8 @@ export interface ChartBuilderProps {
   onTokenChange: () => void;
   onRedraw: () => void;
   onOrderChanged: () => void;
+  timeSeriesEnabled?: boolean;
+  onEnableTimeSerisChanged?: (a: boolean) => void;
 }
 
 export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
@@ -112,10 +116,17 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
                   </th>
                   <th className="sf-chart-token-wide">
                     Token
+                    {p.onEnableTimeSerisChanged && < label >
+                      <input className='ms-5 me-1' type={'checkbox'} onClick={e => {
+                        p.onEnableTimeSerisChanged!(!p.timeSeriesEnabled);
+                      }} />
+                      <FontAwesomeIcon icon='clock-rotate-left' />
+                    </label>}
                   </th>
                 </tr>
               </thead>
               <tbody>
+                
                 {chartScript && mlistItemContext(p.ctx.subCtx(c => c.columns, { formSize: "xs" })).map((ctx, i) =>
                   <ChartColumn chartBase={chart} chartScript={chartScript} ctx={ctx} key={"C" + i} scriptColumn={chartScript!.columns[i]}
                     queryKey={p.queryKey} onTokenChange={() => handleTokenChange(ctx.value)}

@@ -337,6 +337,8 @@ public enum DashboardMessage
 
     [Description("[Alt] + Click to open results in a modal window")]
     AltClickToOpenResultsInAModalWindow,
+
+    CopyHealthCheckDashboardData,
 }
 
 public enum DashboardEmbedededInEntity

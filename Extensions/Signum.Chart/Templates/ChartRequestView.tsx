@@ -24,6 +24,8 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
+import SystemTimeEditor from '../../../Signum/React/SearchControl/SystemTimeEditor';
+import ChartTimeSeriesEditor from './ChartTimeSeriesEditor';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -47,6 +49,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
   const lastToken = React.useRef<QueryToken | undefined>(undefined);
 
   const [showChartSettings, setShowChartSettings] = React.useState(p.showChartSettings ?? false);
+  const [timeSeriesEnabled, setTimeSeriesEnabled] = React.useState(false);
 
   const [resultAndLoading, setResult] = React.useState<{
     result: {
@@ -188,12 +191,17 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           </AutoFocus>
         }
       </div>
+
+      {timeSeriesEnabled && <div className='alert alert-info'> Time machine editor </div>}
+
       <div className="sf-control-container">
         {showChartSettings && <>
           <ChartBuilder queryKey={cr.queryKey} ctx={tc}
             maxRowsReached={maxRowsReached}
             onInvalidate={handleInvalidate}
             onRedraw={handleOnRedraw}
+            timeSeriesEnabled={timeSeriesEnabled}
+            onEnableTimeSerisChanged={() => setTimeSeriesEnabled(a => !a)}
             onTokenChange={() => { handleTokenChange(); forceUpdate(); }}
             onOrderChanged={() => {
               if (result)
