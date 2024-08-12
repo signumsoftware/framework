@@ -8,6 +8,7 @@ import { ajaxGet } from '../../../Signum/React/Services';
 import * as AppContext from '@framework/AppContext'
 import { softCast } from '../../../Signum/React/Globals';
 import { Color } from '@framework/Basics/Color'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPartEntity>): React.JSX.Element {
   return (
@@ -21,6 +22,7 @@ export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPart
 
 interface StatusInfo {
   status: HealthCheckStatus;
+  httpError: boolean;
   message?: string;
 }
 
@@ -28,12 +30,13 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
 
 
   var statusInfo = useAPI(() => ajaxGet<HealthCheckStatus>({ url: p.element.checkURL }).then(result => {
-    return softCast<StatusInfo>({ status: result, message: 'Server call was OK.' });
+    return softCast<StatusInfo>({ status: result, httpError: false });
   }).catch((e) => {
-    return softCast<StatusInfo>({ status: 'Error', message: e.message });
+    return softCast<StatusInfo>({ status: 'Error', httpError: true, message: e.message });
   }), [p.element.checkURL]);
-  var bgc = statusInfo === undefined ? '#00000038' : statusInfo.status == HealthCheckStatus.value('Ok') ? '#39b54a' : '#ec4205';
-  return (<div className='d-flex justify-content-center align-items-center mx-2 my-2 rounded'
+  var bgc = statusInfo === undefined ? '#00000038' : statusInfo.status == HealthCheckStatus.value('Ok') ? '#39b54a' : statusInfo.httpError ? '#ec4205' : '#eba70e';
+  return (
+  <div className='d-flex position-relative justify-content-center align-items-center mx-2 my-2 rounded'
     title={statusInfo?.message}
     style={{
       cursor: p.element.navigateURL ? 'pointer' : undefined,
@@ -46,6 +49,8 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
       var path = AppContext.toAbsoluteUrl(p.element.navigateURL);
       window.open(path);
     }}>
-    <strong>{p.element.title}</strong>
-  </div>);
+      <span className='position-absolute top-0 end-0 me-1 mt-1'><FontAwesomeIcon  icon={statusInfo?.httpError ? 'link-slash':'link'} color='lightgray'/></span>
+      <strong>{p.element.title}</strong>
+    </div>
+  );
 }
