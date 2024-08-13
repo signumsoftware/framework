@@ -10,6 +10,9 @@
     <Member Name="JoinMode" Description="Join-Modus" />
     <Member Name="Mode" Description="Modus" />
     <Member Name="StartDate" Description="Startdatum" />
+    <Member Name="TimeSeriesMaxRowsPerStep" Description="Zeitreihe max. Zeilen pro Schritt" />
+    <Member Name="TimeSeriesStep" Description="Zeitreihenschritt" />
+    <Member Name="TimeSeriesUnit" Description="Einheit Zeitreihen" />
   </Type>
   <Type Name="UserQueryEntity" Description="Benutzer-Abfrage">
     <Member Name="AppendFilters" Description="Filters anfügen" />

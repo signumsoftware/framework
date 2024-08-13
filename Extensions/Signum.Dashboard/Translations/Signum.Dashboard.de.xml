@@ -72,6 +72,19 @@
   <Type Name="DashboardPermission">
     <Member Name="ViewDashboard" Description="Dashboard anzeigen" />
   </Type>
+  <Type Name="HealthCheckElementEmbedded" Description="Element der Gesundheitskontrolle">
+    <Member Name="CheckURL" Description="URL prüfen" />
+    <Member Name="NavigateURL" Description="URL navigieren" />
+    <Member Name="Title" Description="Titel" />
+  </Type>
+  <Type Name="HealthCheckPartEntity" Description="Teil Gesundheitskontrolle" PluralDescription="Teile der Gesundheitskontrolle" Gender="m">
+    <Member Name="Items" Description="Artikel" />
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+  </Type>
+  <Type Name="HealthCheckStatus">
+    <Member Name="Error" Description="Fehler" />
+    <Member Name="Ok" Description="Ok" />
+  </Type>
   <Type Name="ImagePartEntity" Description="Bildteil" PluralDescription="Bildteile" Gender="m">
     <Member Name="AltText" Description="Alt-Text" />
     <Member Name="ClickActionURL" Description="Aktions-URL" />
