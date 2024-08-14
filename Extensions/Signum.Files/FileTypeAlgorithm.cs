@@ -142,7 +142,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             return File.ReadAllBytes(fullPhysicalPath);
     }
 
-    public virtual void MoveFile(IFilePath ofp, IFilePath fp)
+    public virtual void MoveFile(IFilePath ofp, IFilePath fp,bool createTargetFolder)
     {
         if (WeakFileReference)
             return;
@@ -153,6 +153,12 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         "SOURCE: " + source + "\n" +
         "TARGET:" + target))
         {
+            string targetDirectory = Path.GetDirectoryName(target)!;
+
+            if (createTargetFolder && !Directory.Exists(targetDirectory))
+                Directory.CreateDirectory(targetDirectory);
+
+
             System.IO.File.Move(source, target);
         }
     }

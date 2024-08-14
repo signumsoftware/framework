@@ -51,7 +51,7 @@ public static class FilePathLogic
                                 var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                 fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                 fp.Save();
-                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
+                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp,true);
                                 tr.Commit();
                             }
                         }
