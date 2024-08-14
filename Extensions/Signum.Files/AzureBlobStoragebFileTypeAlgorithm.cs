@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+
 using System.IO;
 
 namespace Signum.Files.FileTypeAlgorithms;
@@ -76,10 +77,31 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
         {
-            var client = GetClient(fp);
-            return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+      
+            return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
         }
     }
+
+    public BlobClient GetBlobClient(IFilePath fp)
+    {
+        var client = GetClient(fp);
+        return client.GetBlobClient(fp.Suffix);
+    }
+
+    public  string GetAsString(IFilePath fp)
+    {
+        return GetAsString(GetBlobClient(fp));
+
+    }
+
+    public   string GetAsString( BlobClient blobClient)
+    {
+        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
+        string content = downloadResult.Content.ToString();
+
+        return content;
+    }
+
 
     public virtual void SaveFile(IFilePath fp)
     {

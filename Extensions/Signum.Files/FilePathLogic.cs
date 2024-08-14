@@ -127,6 +127,13 @@ public static class FilePathLogic
         return fp.BinaryFile ?? fp.FileType.GetAlgorithm().ReadAllBytes(fp);
     }
 
+
+    public static string? GetAsString(this FilePathEntity fp)
+    {
+        return  fp.FileType.GetAlgorithm().GetAsString(fp);
+    }
+
+
     public static Stream OpenRead(this FilePathEntity fp)
     {
         return fp.FileType.GetAlgorithm().OpenRead(fp);

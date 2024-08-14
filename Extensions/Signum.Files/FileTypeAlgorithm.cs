@@ -198,5 +198,12 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     {
         return this.GetPrefixPair(efp);
     }
+
+    public string? GetAsString(IFilePath fp)
+    {
+        string fullPhysicalPath = fp.FullPhysicalPath();
+        using (HeavyProfiler.Log("ReadAllText", () => fullPhysicalPath))
+            return File.ReadAllText(fullPhysicalPath);
+    }
 }
 
