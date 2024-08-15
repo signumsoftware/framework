@@ -803,7 +803,7 @@ export namespace Finder {
 
     const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
-    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries().token ? SubTokensOptions.CanTimeSeries : 0);
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0);
 
     const completer = new TokenCompleter(qd);
 
@@ -1269,7 +1269,7 @@ export namespace Finder {
     }
 
     isSimple(fullKey: string): boolean {
-      return !fullKey.contains(".") && fullKey != QueryTokenString.count().token && fullKey != QueryTokenString.timeSeries().token;
+      return !fullKey.contains(".") && fullKey != QueryTokenString.count.token && fullKey != QueryTokenString.timeSeries.token;
     }
 
     finished(): Promise<void> {

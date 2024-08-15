@@ -530,7 +530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
-    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries().token ? SubTokensOptions.CanTimeSeries : 0)
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0)
 
     return (
       <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
@@ -1421,7 +1421,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
               {
-                co.token?.fullKey == QueryTokenString.timeSeries().token ? <span>
+                co.token?.fullKey == QueryTokenString.timeSeries.token ? <span>
                   <FontAwesomeIcon icon="clock" className="me-1"
                     color={"gray"}
                     title={SystemTimeMode.niceToString("TimeSeries")} />
@@ -1508,7 +1508,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token) && co.token.fullKey != QueryTokenString.timeSeries().token));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token) && co.token.fullKey != QueryTokenString.timeSeries.token));
 
     var keyFilters = resFo.columnOptions
       .filter(col => col.token != null)
@@ -1527,7 +1527,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var extraColumns = resFo.columnOptions.map(a =>
       a.token == null ? null :
-        a.token.fullKey == QueryTokenString.timeSeries().token ? null :
+        a.token.fullKey == QueryTokenString.timeSeries.token ? null :
           a.token.queryTokenType == "Aggregate" ? (!a.token.parent ? null : ({ token: a.token.parent.fullKey, summaryToken: a.token.fullKey }) as ColumnOption) :
             ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
@@ -1540,7 +1540,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       columnOptions: extraColumns,
       columnOptionsMode: "ReplaceOrAdd",
       systemTime: resFo.systemTime &&
-        (resFo.systemTime.mode == "TimeSeries" ? { mode: "AsOf", startDate: this.getRowValue(row, QueryTokenString.timeSeries()) } : 
+        (resFo.systemTime.mode == "TimeSeries" ? { mode: "AsOf", startDate: this.getRowValue(row, QueryTokenString.timeSeries) } : 
         { ...resFo.systemTime }),
       includeDefaultFilters: false,
     } as FindOptions);

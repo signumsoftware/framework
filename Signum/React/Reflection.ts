@@ -1541,13 +1541,9 @@ export class QueryTokenString<T> {
     return new QueryTokenString<T>("Entity");
   }
 
-  static count(): QueryTokenString<unknown> {
-    return new QueryTokenString("Count");
-  }
+  static readonly count: QueryTokenString<number> = new QueryTokenString("Count");
   
-  static timeSeries(): QueryTokenString<unknown> {
-    return new QueryTokenString("TimeSeries");
-  }
+  static readonly timeSeries: QueryTokenString<string /*DateTime*/> = new QueryTokenString("TimeSeries");
 
   systemValidFrom(): QueryTokenString<unknown> {
     return new QueryTokenString(this.token + ".SystemValidFrom");
