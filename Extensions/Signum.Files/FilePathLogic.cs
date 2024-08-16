@@ -51,7 +51,7 @@ public static class FilePathLogic
                                 var preSufix = ofp.Suffix.Substring(0, ofp.Suffix.Length - ofp.FileName.Length);
                                 fp.Suffix = Path.Combine(preSufix, fp.FileName);
                                 fp.Save();
-                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp);
+                                fp.FileType.GetAlgorithm().MoveFile(ofp, fp,true);
                                 tr.Commit();
                             }
                         }
@@ -126,6 +126,13 @@ public static class FilePathLogic
     {
         return fp.BinaryFile ?? fp.FileType.GetAlgorithm().ReadAllBytes(fp);
     }
+
+
+    public static string? GetAsString(this FilePathEntity fp)
+    {
+        return  fp.FileType.GetAlgorithm().GetAsString(fp);
+    }
+
 
     public static Stream OpenRead(this FilePathEntity fp)
     {
