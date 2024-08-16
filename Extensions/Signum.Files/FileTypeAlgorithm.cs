@@ -179,9 +179,9 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             }
         }
     }
+
     static bool IsDirectoryEmpty(string path)
     {
-   
         return Directory.GetFiles(path).Length == 0 && Directory.GetDirectories(path).Length == 0;
     }
 
