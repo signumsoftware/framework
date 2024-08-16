@@ -1,4 +1,5 @@
 using Signum.Utilities.Reflection;
+using System.Text.Json;
 
 namespace Signum.Entities.Validation;
 
@@ -160,18 +161,30 @@ public class PropertyValidator<T> : IPropertyValidator
 
         Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
 
-        var nullable = pi.IsNullable();
-        if (nullable == false && !Validators.Any(v => v is NotNullValidatorAttribute))
+        if (pi.PropertyType.IsClass && pi.IsNullable() == false && !Validators.Any(v => v is NotNullValidatorAttribute))
             Validators.Add(new NotNullValidatorAttribute());
+
+        foreach (var val in Validators)
+        {
+            AssertCompatible(val);
+        }
 
         GetValue = ReflectionTools.CreateGetter<T, object?>(pi)!;
         SetValue = ReflectionTools.CreateSetter<T, object?>(pi)!;
     }
 
-    public void ReplaceValidators(params ValidatorAttribute[] validators)
+    private void AssertCompatible(ValidatorAttribute val)
+    {
+        if (!val.IsCompatibleWith(this.PropertyInfo))
+            throw new InvalidOperationException("Validator " + val.GetType().Name + " is not compatible with property " + this.PropertyInfo.DeclaringType!.TypeName() + "." + this.PropertyInfo.Name);
+    }
+
+    public void ReplaceValidators(params ValidatorAttribute[] newValidators)
     {
         Validators.Clear();
-        Validators.AddRange(validators);
+        foreach (var val in newValidators)
+            AssertCompatible(val);
+        Validators.AddRange(newValidators);
     }
 
     public string? PropertyCheck(T entity)

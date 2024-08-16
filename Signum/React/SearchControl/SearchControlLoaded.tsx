@@ -1,13 +1,13 @@
 import * as React from 'react'
 import { DateTime } from 'luxon'
-import { DomUtils, classes, Dic, softCast } from '../Globals'
+import { DomUtils, classes, Dic, softCast, isNumber } from '../Globals'
 import { Finder } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
   toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
-import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
+import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { AbortableRequest } from '../Services'
@@ -23,7 +23,7 @@ import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
-import { FilterOperation, RefreshMode } from '../Signum.DynamicQuery';
+import { FilterOperation, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
 import SystemTimeEditor from './SystemTimeEditor';
 import { Property } from 'csstype';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -530,6 +530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const canAggregate = (fo.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperationOrManual = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0)
 
     return (
       <div className={classes("sf-search-control sf-control-container", this.state.isMobile == true && this.state.viewMode == "Mobile" && "mobile")}
@@ -567,7 +568,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 columnOption={this.state.editingColumn}
                 onChange={this.handleColumnChanged}
                 queryDescription={qd}
-                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual}
+                subTokensOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperationOrManual | canTimeSeries}
                 close={this.handleColumnClose} />
             }
             <div ref={d => this.containerDiv = d}
@@ -1265,7 +1266,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
 
-  getOffset(pageX: number, rect: ClientRect, margin: number): 1 | 0 | undefined {
+  getOffset(pageX: number, rect: DOMRect, margin: number): 1 | 0 | undefined {
 
     if (margin > rect.width / 2)
       margin = rect.width / 2;
@@ -1419,10 +1420,18 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             {getSummary(co.summaryToken)}
             <div className="d-flex" style={{ alignItems: "center" }}>
               {this.orderIcon(co)}
-              {this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" && <span>
-                <FontAwesomeIcon icon="key" className="me-1"
-                  color={rootKeys.contains(co) ? "gray" : "lightgray"}
-                  title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} /></span>}
+              {
+                co.token?.fullKey == QueryTokenString.timeSeries.token ? <span>
+                  <FontAwesomeIcon icon="clock" className="me-1"
+                    color={"gray"}
+                    title={SystemTimeMode.niceToString("TimeSeries")} />
+                </span> :
+                  this.props.findOptions.groupResults && co.token && co.token.queryTokenType != "Aggregate" ? <span>
+                    <FontAwesomeIcon icon="key" className="me-1"
+                      color={rootKeys.contains(co) ? "gray" : "lightgray"}
+                      title={rootKeys.contains(co) ? SearchMessage.GroupKey.niceToString() : SearchMessage.DerivedGroupKey.niceToString()} />
+                  </span> : null
+              }
               {co.displayName}
             </div>
           </th>
@@ -1499,7 +1508,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
 
-    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token)));
+    var rootKeys = getRootKeyColumn(resFo.columnOptions.filter(co => co.token && co.token.queryTokenType != "Aggregate" && !hasOperation(co.token) && !hasManual(co.token) && co.token.fullKey != QueryTokenString.timeSeries.token));
 
     var keyFilters = resFo.columnOptions
       .filter(col => col.token != null)
@@ -1518,8 +1527,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var extraColumns = resFo.columnOptions.map(a =>
       a.token == null ? null :
-        a.token.queryTokenType == "Aggregate" ? (!a.token.parent ? null : ({ token: a.token.parent.fullKey, summaryToken: a.token.fullKey }) as ColumnOption) :
-          ({ token: a.token.fullKey }) as ColumnOption)
+        a.token.fullKey == QueryTokenString.timeSeries.token ? null :
+          a.token.queryTokenType == "Aggregate" ? (!a.token.parent ? null : ({ token: a.token.parent.fullKey, summaryToken: a.token.fullKey }) as ColumnOption) :
+            ({ token: a.token.fullKey }) as ColumnOption)
       .notNull();
 
     var filters = SearchControlLoaded.getGroupFilters(row, this.state.resultTable!, resFo);
@@ -1529,7 +1539,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       filterOptions: filters,
       columnOptions: extraColumns,
       columnOptionsMode: "ReplaceOrAdd",
-      systemTime: resFo.systemTime && { ...resFo.systemTime },
+      systemTime: resFo.systemTime &&
+        (resFo.systemTime.mode == "TimeSeries" ? { mode: "AsOf", startDate: this.getRowValue(row, QueryTokenString.timeSeries) } : 
+        { ...resFo.systemTime }),
       includeDefaultFilters: false,
     } as FindOptions);
 
@@ -2169,7 +2181,7 @@ function withAggregates(array: { token?: QueryToken, displayName?: string }[], t
 }
 
 function canHaveMin(typeName: string): boolean {
-  return typeName == "number" || typeName == "decimal" || typeName == "TimeSpan";
+  return isNumberType(typeName) || typeName == "TimeSpan";
 }
 
 

@@ -171,6 +171,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       joinMode: uqNew.systemTime.joinMode,
       startDate: uqNew.systemTime.startDate && UserQueryMerger.similarValues(foOld.systemTime!.startDate, foNew.systemTime!.startDate) ? uqOld.systemTime!.startDate : uqNew.systemTime.startDate,
       endDate: uqNew.systemTime.endDate && UserQueryMerger.similarValues(foOld.systemTime!.endDate, foNew.systemTime!.endDate) ? uqOld.systemTime!.endDate : uqNew.systemTime.endDate,
+      timeSeriesStep: uqNew.systemTime.timeSeriesStep ?? null,
+      timeSeriesUnit: uqNew.systemTime.timeSeriesUnit ?? null,
+      timeSeriesMaxRowsPerStep: uqNew.systemTime.timeSeriesMaxRowsPerStep ?? null,
     });
     uqOld.elementsPerPage = uqNew.elementsPerPage;
     uqOld.customDrilldowns = uqNew.customDrilldowns;
@@ -240,7 +243,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         mode: fo.systemTime.mode,
         startDate: fo.systemTime.startDate && await UserAssetClient.API.stringifyDate(fo.systemTime.startDate),
         endDate: fo.systemTime.endDate && await UserAssetClient.API.stringifyDate(fo.systemTime.endDate),
-        joinMode: fo.systemTime.joinMode
+        joinMode: fo.systemTime.joinMode,
+        timeSeriesStep: fo.systemTime.timeSeriesStep ?? null,
+        timeSeriesUnit: fo.systemTime.timeSeriesUnit ?? null,
+        timeSeriesMaxRowsPerStep: fo.systemTime.timeSeriesMaxRowsPerStep ?? null,
       }),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,

@@ -43,14 +43,6 @@ export default function ColumnEditor(p: ColumnEditorProps): React.JSX.Element {
     p.onChange(undefined);
   }
 
-  function handleHiddenColumnClick() {
-    co.hiddenColumn = co.hiddenColumn ? undefined : true;
-    co.displayName = co.token?.niceName;
-    co.summaryToken = undefined;
-    co.combineRows = undefined;
-    p.onChange(undefined);
-  }
-
   function handleCombineEqualsVertically(e: React.ChangeEvent<HTMLSelectElement>) {
     co.combineRows = (e.currentTarget.value as CombineRows) || undefined;
     p.onChange(undefined);

@@ -138,8 +138,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
         if (this is ManualContainerToken mc)
             return new ManualToken(mc, key, mc.Parent!.Type);
-        
-        var result = CachedSubTokensOverride(options).TryGetC(key) ?? QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
+
+        var result = CachedSubTokensOverride(options).TryGetC(key);
+
+        if (result == null)
+            result = QueryLogic.Expressions.GetExtensionsWithParameterTokens(this).SingleOrDefaultEx(a => a.Key == key);
 
         if (result == null)
             return null;
@@ -850,6 +853,11 @@ public enum QueryTokenDateMessage
     [Description("Every {0} Milliseconds")]
     Every0Milliseconds,
 
+    [Description("Every {0} {1}")]
+    Every01,
+
+    [Description("{0} steps x {1} rows = {2} total rows (aprox)")]
+    _0Steps1Rows2TotalRowsAprox
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

@@ -31,7 +31,7 @@ export function executeQueryValueCached(request: QueryValueRequest, fop: FindOpt
   if (token == null)
     token = {
       fullKey: "Count",
-      type: { name: "number" },
+      type: { name: "int" },
       queryTokenType: "Aggregate",
       niceName: "Count",
       key: "Count",

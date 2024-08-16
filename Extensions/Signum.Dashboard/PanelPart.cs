@@ -39,7 +39,8 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [ImplementedBy(
         typeof(LinkListPartEntity),
         typeof(ImagePartEntity),
-        typeof(SeparatorPartEntity))]
+        typeof(SeparatorPartEntity),
+        typeof(HealthCheckPartEntity))]
     public IPartEntity Content { get; set; }
 
     public override string ToString()
@@ -284,4 +285,83 @@ public class SeparatorPartEntity : Entity, IPartEntity
     {
         throw new NotImplementedException();
     }
+}
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class HealthCheckPartEntity : Entity, IPartEntity
+{
+    public MList<HealthCheckElementEmbedded> Items { get; set; } = [];
+
+    public override string ToString()
+    {
+        return "{0} {1}".FormatWith(Items.Count, typeof(HealthCheckElementEmbedded).NicePluralName());
+    }
+
+    public bool RequiresTitle
+    {
+        get { return true; }
+    }
+
+    public IPartEntity Clone()
+    {
+        return new HealthCheckPartEntity
+        {
+            Items = this.Items.Select(e => e.Clone()).ToMList(),
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HealthCheckPart",
+            Items.Select(i => i.ToXml(ctx)));
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        Items.Synchronize(element.Elements().ToList(), (le, x) => le.FromXml(x));
+    }
+}
+
+public class HealthCheckElementEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string Title { get; set; }
+
+    [StringLengthValidator(Max = 400)]
+    public string CheckURL { get; set; }
+
+    [StringLengthValidator(Max = 400)]
+    public string NavigateURL { get; set; }
+
+    public HealthCheckElementEmbedded Clone()
+    {
+        return new HealthCheckElementEmbedded
+        {
+            Title = this.Title,
+            CheckURL = this.CheckURL,
+            NavigateURL = this.NavigateURL
+        };
+    }
+
+    internal XElement ToXml(IToXmlContext ctx)
+    {
+        return new XElement("HealthCheckElement",
+            new XAttribute("Title", Title),
+            new XAttribute("CheckURL", CheckURL),
+            new XAttribute("NavigateURL", NavigateURL));
+    }
+
+    internal void FromXml(XElement element)
+    {
+        Title = element.Attribute("Title")!.Value;
+        CheckURL = element.Attribute("CheckURL")!.Value;
+        NavigateURL = element.Attribute("NavigateURL")!.Value;
+    }
+}
+
+[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
+public enum HealthCheckStatus
+{
+    Ok,
+    Error
 }

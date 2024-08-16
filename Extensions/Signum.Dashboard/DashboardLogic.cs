@@ -49,6 +49,7 @@ public static class DashboardLogic
                 {"LinkListPart", typeof(LinkListPartEntity)},
                 {"ImagePart", typeof(ImagePartEntity)},
                 {"SeparatorPart", typeof(SeparatorPartEntity)},
+                {"HealthCheckPart", typeof(HealthCheckPartEntity)},
             });
 
 
@@ -412,6 +413,9 @@ public static class DashboardLogic
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
 
         TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
+            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+
+        TypeConditionLogic.Register<HealthCheckPartEntity>(typeCondition,
             uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
     }
 

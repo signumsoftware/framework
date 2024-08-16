@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, softCast } from './Globals'
+import { Dic, classes, isNumber, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -25,7 +25,10 @@ import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions,
-  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel,
+  isNumberType,
+  isDecimalType,
+  numberLimits
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -283,6 +286,9 @@ export namespace Finder {
       systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
       systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
       systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
+      timeSeriesStep: fo.systemTime && fo.systemTime.timeSeriesStep,
+      timeSeriesUnit: fo.systemTime && fo.systemTime.timeSeriesUnit,
+      timeSeriesMaxRowsPerStep: fo.systemTime && fo.systemTime.timeSeriesMaxRowsPerStep,
       ...extra
     };
 
@@ -305,6 +311,12 @@ export namespace Finder {
 
   export function getSimpleTypeNiceName(name: string): string {
 
+    if (isDecimalType(name))
+      return QueryTokenMessage.DecimalNumber.niceToString();
+
+    if (isNumberType(name))
+      return QueryTokenMessage.Number.niceToString();
+
     switch (name) {
       case "string":
       case "Guid":
@@ -312,8 +324,6 @@ export namespace Finder {
       case "Date": return QueryTokenMessage.Date.niceToString();
       case "DateTime": return QueryTokenMessage.DateTime.niceToString();
       case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
-      case "number": return QueryTokenMessage.Number.niceToString();
-      case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
       case "boolean": return QueryTokenMessage.Check.niceToString();
     }
 
@@ -341,6 +351,9 @@ export namespace Finder {
         joinMode: query.systemTimeJoinMode,
         startDate: query.systemTimeStartDate,
         endDate: query.systemTimeEndDate,
+        timeSeriesUnit: query.timeSeriesUnit,
+        timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+        timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
       }
     };
 
@@ -582,7 +595,7 @@ export namespace Finder {
         return Promise.resolve(value);
     }
 
-    if (type.name == "number") {
+    if (isNumberType(type.name)) {
       if (typeof value === "number")
         return Promise.resolve(value);
     }
@@ -790,6 +803,7 @@ export namespace Finder {
 
     const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0);
 
     const completer = new TokenCompleter(qd);
 
@@ -798,10 +812,10 @@ export namespace Finder {
       fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
 
     if (fo.orderOptions)
-      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate));
+      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation));
+      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries));
       fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
     }
 
@@ -1033,11 +1047,13 @@ export namespace Finder {
       var value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
-        if (fop.token.type.name == "number") {
+        if (isNumberType(fop.token.type.name)) {
 
           var numVal = parseInt(value);
 
-          if (isNaN(numVal)) {
+          var limits = numberLimits[fop.token.type.name]
+
+          if (isNaN(numVal) || numVal < limits.min || limits.max < numVal) {
             if (overridenValue)
               return undefined;
 
@@ -1253,7 +1269,7 @@ export namespace Finder {
     }
 
     isSimple(fullKey: string): boolean {
-      return !fullKey.contains(".") && fullKey != "Count";
+      return !fullKey.contains(".") && fullKey != QueryTokenString.count.token && fullKey != QueryTokenString.timeSeries.token;
     }
 
     finished(): Promise<void> {

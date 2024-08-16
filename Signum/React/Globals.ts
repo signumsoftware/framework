@@ -47,7 +47,7 @@ declare global {
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
 
-    distinctBy(this: Array<T>, keySelector?: (element: T) => string): T[];
+    distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
 
@@ -377,18 +377,23 @@ Array.prototype.toMapDistinct = function (this: any[], keySelector: (element: an
   return map;
 };
 
-Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {
-  const obj: any = {};
+Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => unknown): any[] {
+  const keysFound = new Set<unknown>();
 
   keySelector ??= a => a.toString();
+
+  const result: any[] = [];
 
   this.forEach(item => {
     const key = keySelector(item);
 
-    obj[key] = item;
+    if (!keysFound.has(key)) {
+      result.push(item);
+      keysFound.add(key);
+    }
   });
 
-  return Dic.getValues(obj);
+  return result;
 };
 
 Array.prototype.flatMap = function (this: any[], selector: (element: any, index: number, array: any[]) => any[]): any {

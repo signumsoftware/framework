@@ -1,5 +1,8 @@
+using Microsoft.SqlServer.Server;
 using Signum.Authorization;
 using Signum.DiffLog;
+using Signum.Engine.Linq;
+using Signum.Engine.Maps;
 using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System;
@@ -10,10 +13,9 @@ using System.Threading.Tasks;
 
 namespace Signum.TimeMachine;
 
+
 public static class TimeMachineLogic
 {
-
-
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
@@ -49,7 +51,7 @@ public static class TimeMachineLogic
     public static void RestoreDeletedEntity<T>(PrimaryKey id)
         where T : Entity
     {
-        var lastVersion = SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible))
+        var lastVersion = SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible))
             .Using(_ => Database.Query<T>().Where(a => a.Id == id).Max(a => a.SystemPeriod().Max))!.Value;
 
         RestoreDeletedEntity<T>(id, lastVersion.AddMicroseconds(-10));

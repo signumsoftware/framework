@@ -91,9 +91,16 @@ public static class QueryLogic
                     "caching " + nameof(QueryEntity)).ToFrozenDictionaryEx(),
                 new InvalidateWith(typeof(QueryEntity)),
                 Schema.Current.InvalidateMetadata);
+
+            sb.Schema.SchemaCompleted += () =>
+            {
+                if (Schema.Current.Tables.Any(a => a.Value.SystemVersioned != null))
+                {
+                    QueryTimeSeriesLogic.Start(sb);
+                }
+            };
         }
     }
-
 
     public static object ToQueryName(this QueryEntity query)
     {

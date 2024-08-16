@@ -276,7 +276,7 @@ export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.
   }
 
   if (format == "EE") //missing
-    return dt.toFormat("EEE", options).substr(0, 2);
+    return dt.toFormat("EEE", options).substring(0, 2);
 
   return dt.toFormat(format, options)
 
@@ -532,8 +532,34 @@ export function isLowPopulationSymbol(type: PseudoType): boolean | undefined {
   return ti != null && ti.kind == "Entity" && ti.fullName.endsWith("Symbol") && ti.isLowPopulation;
 }
 
+
+export const numberLimits: {
+  [numType: string]: { min: number, max: number }
+} = {
+  "sbyte": { min: -128, max: 127 },
+  "byte": { min: 0, max: 255 },
+  "short": { min: -32768, max: 32767 },
+  "ushort": { min: 0, max: 65535 },
+  "int": { min: -2147483648, max: 2147483647 },
+  "uint": { min: 0, max: 4294967295 },
+  "long": { min: -9223372036854775808, max: 9223372036854775807 },
+  "ulong": { min: 0, max: 18446744073709551615 },
+  "float": { min: -3.402823E+38, max: 3.402823E+38 },
+  "double": { min: -1.7976931348623157E+308, max: 1.7976931348623157E+308 },
+  "decimal": { min: -79228162514264337593543950335, max: 79228162514264337593543950335 }
+}
+
+export function isNumberType(name: string): boolean {
+  return numberLimits[name] != null;
+}
+
+export function isDecimalType(name: string): boolean {
+  return name == "float" || name == "double" || name == "decimal";
+}
+
 export function parseId(ti: TypeInfo, id: string): string | number {
-  return getMemberInfo(ti, "Id").type.name == "number" ? parseInt(id) : id;
+
+  return isNumberType(getMemberInfo(ti, "Id").type.name) ? parseInt(id) : id;
 }
 
 export const IsByAll = "[ALL]";
@@ -1515,9 +1541,9 @@ export class QueryTokenString<T> {
     return new QueryTokenString<T>("Entity");
   }
 
-  static count(): QueryTokenString<unknown> {
-    return new QueryTokenString("Count");
-  }
+  static readonly count: QueryTokenString<number> = new QueryTokenString("Count");
+  
+  static readonly timeSeries: QueryTokenString<string /*DateTime*/> = new QueryTokenString("TimeSeries");
 
   systemValidFrom(): QueryTokenString<unknown> {
     return new QueryTokenString(this.token + ".SystemValidFrom");

@@ -19,7 +19,7 @@ import { toAbsoluteUrl } from '../AppContext'
 
 export interface SearchValueLineProps {
   ctx: StyleContext;
-  findOptions?: FindOptions;
+  findOptions?: FindOptions | Lite<Entity> | Entity;
   valueToken?: string | QueryTokenString<any>;
   multipleValues?: { vertical?: boolean, showType?: boolean };
   label?: React.ReactChild | (() => React.ReactChild);
@@ -79,8 +79,22 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
   }, []);
 
   function getFindOptions(props: SearchValueLineProps): FindOptions {
-    if (props.findOptions)
-      return props.findOptions;
+    if (props.findOptions) {
+      const fo = props.findOptions;
+      if (isEntity(fo))
+        return {
+          queryName: fo.Type,
+          filterOptions: [{ token: QueryTokenString.entity(), value: fo }]
+        };
+
+      if (isLite(fo))
+        return {
+          queryName: fo.EntityType,
+          filterOptions: [{ token: QueryTokenString.entity(), value: fo }]
+        };
+
+      return fo;
+    }
 
     var ctx = props.ctx as TypeContext<any>;
 
@@ -224,7 +238,7 @@ const SearchValueLine: React.ForwardRefExoticComponent<SearchValueLineProps & Re
       });
     } else {
 
-      var fo = p.findOptions!;
+      var fo = p.findOptions as FindOptions;
       const isWindowsOpen = e.button == 1 || e.ctrlKey;
       Finder.getQueryDescription(fo.queryName).then(qd => {
         chooseType(qd).then(tn => {

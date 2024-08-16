@@ -23,6 +23,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
   const ctxxs = ctx.subCtx({ formSize: "xs" });
 
   const canAggregate = ctx.value.groupResults ? SubTokensOptions.CanAggregate : 0;
+  const canTimeSeries = ctx.value.systemTime?.mode == "TimeSeries" ? SubTokensOptions.CanTimeSeries : 0;
 
   const qd = useAPI(() => Finder.getQueryDescription(query.key), [query.key]);
   if (!qd)
@@ -92,7 +93,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                       ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                       queryKey={p.ctx.value.query!.key}
                       onTokenChanged={() => { ctx.value.summaryToken = null; ctx.value.modified = true; row.forceUpdate(); }}
-                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual)} />
+                      subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | (canAggregate ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries} />
 
                     <div className="d-flex">
                       <label className="col-form-label col-form-label-xs me-2" style={{ minWidth: "140px" }}>
@@ -133,7 +134,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
                 template: ctx => <QueryTokenEmbeddedBuilder
                   ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                   queryKey={p.ctx.value.query!.key}
-                  subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate} />
+                  subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries} />
               },
               { property: a => a.orderType }
             ]} />
@@ -188,24 +189,45 @@ function SystemTime(p: { ctx: TypeContext<SystemTimeEmbedded> }) {
   const forceUpdate = useForceUpdate();
   const ctx = p.ctx.subCtx({ formSize: "xs", formGroupStyle: "Basic" });
   return (
-    <div className="row">
-      <div className="col-sm-3">
-        <AutoLine ctx={ctx.subCtx(e => e.mode)} onChange={() => {
-          ctx.value.startDate = ctx.value.mode == "All" ? null : ctx.value.startDate;
-          ctx.value.endDate = ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : ctx.value.endDate;
-          ctx.value.joinMode = ctx.value.mode == "AsOf" ? null : (ctx.value.joinMode ?? "FirstCompatible");
-          forceUpdate();
-        }} />
+    <div>
+      <div className="row">
+        <div className="col-sm-3">
+          <AutoLine ctx={ctx.subCtx(e => e.mode)} onChange={() => {
+            ctx.value.startDate = ctx.value.mode == "All" ? null : ctx.value.startDate;
+            ctx.value.endDate = ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : ctx.value.endDate;
+            ctx.value.joinMode = ctx.value.mode == "AsOf" ? null : (ctx.value.joinMode ?? "FirstCompatible");
+            ctx.value.timeSeriesStep = ctx.value.mode == "TimeSeries" ? 1 : null;
+            ctx.value.timeSeriesUnit = ctx.value.mode == "TimeSeries" ? "Day" : null;
+            ctx.value.timeSeriesMaxRowsPerStep = ctx.value.mode == "TimeSeries" ? 10 : null;
+            forceUpdate();
+          }} />
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "All" ? null : <AutoLine ctx={ctx.subCtx(e => e.startDate)} label={ctx.value.mode == "AsOf" ? UserQueryMessage.Date.niceToString() : undefined} mandatory />}
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.endDate)} mandatory />}
+        </div>
+        <div className="col-sm-3">
+          {ctx.value.mode == "AsOf" || ctx.value.mode == "TimeSeries" ? null : <AutoLine ctx={ctx.subCtx(e => e.joinMode)} mandatory />}
+        </div>
       </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "All" ? null : <AutoLine ctx={ctx.subCtx(e => e.startDate)} label={ctx.value.mode == "AsOf" ? UserQueryMessage.Date.niceToString() : undefined} mandatory />}
-      </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "All" || ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.endDate)} mandatory />}
-      </div>
-      <div className="col-sm-3">
-        {ctx.value.mode == "AsOf" ? null : <AutoLine ctx={ctx.subCtx(e => e.joinMode)} mandatory />}
-      </div>
+      {
+        ctx.value.mode == "TimeSeries" &&
+
+        <div className="row">
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesStep)} mandatory />
+            </div>
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesUnit)} mandatory />
+            </div>
+            <div className="col-sm-3">
+              <AutoLine ctx={ctx.subCtx(e => e.timeSeriesMaxRowsPerStep)} mandatory />
+            </div>
+        </div>
+
+      }
     </div>
   );
 }
