@@ -441,6 +441,11 @@ public static class ProcessRunner
             p.CancelationSource.Cancel();
         }
     }
+
+    public static bool IsExecutingInThisMachien(Lite<ProcessEntity> process)
+    {
+        return executing.ContainsKey(process);
+    }
 }
 
 
