@@ -297,6 +297,7 @@ export namespace UserQueryClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: query.key,
         canAggregate: uq.groupResults || false,
+        canTimeSeries: fo.systemTime?.mode == 'TimeSeries',
         entity: entity,
         filters: uq.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });

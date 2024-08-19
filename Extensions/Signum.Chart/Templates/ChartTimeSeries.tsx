@@ -1,7 +1,5 @@
 import { DateTime, DurationUnit } from 'luxon'
 import * as React from 'react'
-import { FindOptionsParsed } from '../../../Signum/React/Search';
-import { QueryDescription } from '../../../Signum/React/FindOptions';
 import { QueryTokenString, toLuxonFormat, toNumberFormat } from '@framework/Reflection';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { TimeSeriesUnit } from '../../../Signum/React/Signum.DynamicQuery';
@@ -10,28 +8,26 @@ import { AggregateFunction, QueryTokenDateMessage } from '../../../Signum/React/
 import { DateTimePicker } from 'react-widgets';
 import { classes } from '../../../Signum/React/Globals';
 import { useForceUpdate } from '../../../Signum/React/Hooks';
+import { ChartRequestModel, ChartTimeSeriesEmbedded } from '../Signum.Chart';
+import { ChartClient } from '../ChartClient'
+import { IChartBase } from '../UserChart/Signum.Chart.UserChart';
 
-interface ChartTimeSeriesEditorProps {
-  findOptions: FindOptionsParsed;
-  queryDescription: QueryDescription;
-  onChanged: () => void;
-}
 
-export default function ChartTimeSeriesEditor(p: ChartTimeSeriesEditorProps): React.JSX.Element {
+export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmbedded, chartBase: IChartBase, onChange: () => void }): React.JSX.Element {
+
+  var ts = p.chartTimeSeries;
 
   function renderTimeSeriesUnit() {
 
     function handleTimeSeriesUnit(e: React.ChangeEvent<HTMLSelectElement>) {
-      let st = p.findOptions.systemTime!;
-      st.timeSeriesUnit = e.currentTarget.value as TimeSeriesUnit;
-      st.timeSeriesStep = 1;
-
-      p.onChanged();
+      ts.timeSeriesUnit = e.currentTarget.value as TimeSeriesUnit;
+      ts.timeSeriesStep = 1;
+      p.onChange();
     }
 
 
     return (
-      <select value={p.findOptions.systemTime!.timeSeriesUnit} className="form-select form-select-xs ms-1" style={{ width: "auto" }} onChange={handleTimeSeriesUnit}>
+      <select value={ts.timeSeriesUnit!} className="form-select form-select-xs ms-1" style={{ width: "auto" }} onChange={handleTimeSeriesUnit}>
         {TimeSeriesUnit.values().map((stm, i) => <option key={i} value={stm}>{TimeSeriesUnit.niceToString(stm)}</option>)}
       </select>
     );
@@ -39,17 +35,15 @@ export default function ChartTimeSeriesEditor(p: ChartTimeSeriesEditorProps): Re
 
   function renderTimeSerieStep() {
 
-    const st = p.findOptions.systemTime!;
     function handleTimeSerieStep(e: number | null | undefined) {
-      st.timeSeriesStep = e ?? 1;
-
-      p.onChanged();
+      ts.timeSeriesStep = e ?? 1;
+      p.onChange();
     }
 
     var numberFormat = toNumberFormat("0");
 
     return (
-      <NumberBox value={p.findOptions.systemTime!.timeSeriesStep} validateKey={isNumberKey} format={numberFormat}
+      <NumberBox value={ts.timeSeriesStep} validateKey={isNumberKey} format={numberFormat}
         htmlAttributes={{ className: "form-control form-control-xs ms-1", style: { width: "40px" } }}
         onChange={handleTimeSerieStep} />
     );
@@ -57,15 +51,13 @@ export default function ChartTimeSeriesEditor(p: ChartTimeSeriesEditorProps): Re
 
   function renderDateTime(field: "startDate" | "endDate") {
 
-    var systemTime = p.findOptions.systemTime!;
-
     const handleDatePickerOnChange = (date: Date | null | undefined, str: string) => {
       const m = date && DateTime.fromJSDate(date);
-      systemTime[field] = m ? m.toISO()! : undefined;
-      p.onChanged();
+      ts[field] = m ? m.toISO()! : null;
+      p.onChange();
     };
 
-    var utcDate = systemTime[field]
+    var utcDate = ts[field];
 
     var m = utcDate == null ? null : DateTime.fromISO(utcDate);
     var luxonFormat = toLuxonFormat("G", "DateTime");
@@ -78,38 +70,35 @@ export default function ChartTimeSeriesEditor(p: ChartTimeSeriesEditorProps): Re
             valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString() }} />
         </div>
       </div>
-
     );
   }
 
   return (
-    <div className={classes("sf-system-time-editor", "alert alert-primary")}>
-      <span>{JavascriptMessage.showRecords.niceToString()}</span>
+    <div className={classes("sf-system-time-editor", "alert alert-primary mb-0")}>
+      <span>Time series</span>
       <span className="ms-2 d-flex">{QueryTokenDateMessage.Every01.niceToString().formatHtml(renderTimeSerieStep(), renderTimeSeriesUnit())}</span>
       {renderDateTime("startDate")}
       {renderDateTime("endDate")}
-      <TotalNumStepsAndRows findOptions={p.findOptions} />
+      <TotalNumStepsAndRows chartTimeSeries={ts} chartBase={p.chartBase} onChange={p.onChange}/>
     </div>
   );
 }
 
-function TotalNumStepsAndRows(p: { findOptions: FindOptionsParsed }) {
+function TotalNumStepsAndRows(p: { chartTimeSeries: ChartTimeSeriesEmbedded, chartBase: IChartBase, onChange: () => void }) {
 
-  const st = p.findOptions.systemTime!;
+  const isOneValue = ChartClient.hasAggregates(p.chartBase) && p.chartBase.columns.every(a => a.element.token == null || a.element.token.token?.fullKey == QueryTokenString.timeSeries.token || a.element.token.token?.queryTokenType == "Aggregate");
 
-  const isOneValue = p.findOptions.groupResults && p.findOptions.columnOptions.every(a => a.token == null || a.token.fullKey == QueryTokenString.timeSeries().token || a.token.queryTokenType == "Aggregate");
-
-  const forceUpdate = useForceUpdate();
+  var st = p.chartTimeSeries;
   React.useEffect(() => {
     if (isOneValue) {
       if (st.timeSeriesMaxRowsPerStep != 1) {
         st.timeSeriesMaxRowsPerStep = 1;
-        forceUpdate();
+        p.onChange();
       }
     } else {
       if (st.timeSeriesMaxRowsPerStep == 1) {
         st.timeSeriesMaxRowsPerStep = 10;
-        forceUpdate();
+        p.onChange();
       }
     }
   }, [isOneValue])
@@ -124,13 +113,11 @@ function TotalNumStepsAndRows(p: { findOptions: FindOptionsParsed }) {
 
   const formatter = toNumberFormat("C0");
 
-
-
   return (
     <span className="ms-1">
       {QueryTokenDateMessage._0Steps1Rows2TotalRowsAprox.niceToString().formatHtml(
         <strong className={steps > 1000 ? "text-danger" : undefined}>{formatter.format(steps)}</strong>,
-        <NumberBox validateKey={isNumberKey} value={st.timeSeriesMaxRowsPerStep} format={formatter} onChange={e => { st.timeSeriesMaxRowsPerStep = e ?? 10; forceUpdate(); }}
+        <NumberBox validateKey={isNumberKey} value={st.timeSeriesMaxRowsPerStep} format={formatter} onChange={e => { st.timeSeriesMaxRowsPerStep = e ?? 10; p.onChange(); }}
           htmlAttributes={{ className: "form-control form-control-xs ms-1", style: { width: "40px", display: "inline-block" } }}
         />,
         <strong className={st.timeSeriesMaxRowsPerStep != null && steps * st.timeSeriesMaxRowsPerStep > 1000 ? "text-danger" : undefined}>

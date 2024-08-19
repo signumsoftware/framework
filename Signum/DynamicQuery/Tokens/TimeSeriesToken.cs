@@ -24,6 +24,8 @@ public class TimeSeriesToken : QueryToken
         return "[" + SystemTimeMode.TimeSeries.NiceToString() + "]";
     }
 
+    public override bool IsGroupable => true;
+
     public const string KeyText = "TimeSeries";
 
     public override string Key

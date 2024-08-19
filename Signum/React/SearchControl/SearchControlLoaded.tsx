@@ -544,7 +544,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 queryDescription={qd}
                 filterOptions={fo.filterOptions}
                 lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries}
                 onTokenChanged={this.handleFilterTokenChanged}
                 onFiltersChanged={() => this.handleFiltersChanged()}
                 onHeightChanged={this.handleHeightChanged}

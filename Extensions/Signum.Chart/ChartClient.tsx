@@ -9,7 +9,7 @@ import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned
+  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
 } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import ChartButton from './ChartButton'
@@ -27,7 +27,7 @@ import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
-import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
 import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
 import { UserChartPartHandler } from './Dashboard/View/UserChartPart';
 import SelectorModal from '@framework/SelectorModal';
@@ -516,12 +516,23 @@ export namespace ChartClient {
     return clone;
   }
   
-  
+  export function cloneChartTimeSeries(ts : ChartTimeSeriesEmbedded | null): ChartTimeSeriesEmbedded | null {
+    if(!ts)
+      return null;
+    return ChartTimeSeriesEmbedded.New({
+      timeSeriesStep: ts.timeSeriesStep, 
+      timeSeriesUnit: ts.timeSeriesUnit, 
+      startDate: ts.startDate, 
+      endDate: ts.endDate, 
+      timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep});
+  }
+
   export interface ChartOptions {
     queryName: any,
     chartScript?: string,
     maxRows?: number | null,
     groupResults?: boolean,
+    timeSeries?: ChartTimeSeriesEmbedded | null | undefined;
     filterOptions?: (FilterOption | null | undefined)[];
     orderOptions?: (OrderOption | null | undefined)[];
     columnOptions?: (ChartColumnOption | null | undefined)[];
@@ -575,6 +586,7 @@ export namespace ChartClient {
         queryName: cr.queryKey,
         chartScript: cr.chartScript?.key.after(".") ?? undefined,
         maxRows: cr.maxRows,
+        timeSeries: cloneChartTimeSeries(cr.chartTimeSeries),
         filterOptions: Finder.toFilterOptions(cr.filterOptions),
         columnOptions: cr.columns.map(co => ({
           token: co.element.token && co.element.token.tokenString,
@@ -610,15 +622,17 @@ export namespace ChartClient {
         maxRows:
           co.maxRows === null ? "null" : 
           co.maxRows === undefined || co.maxRows == Decoder.DefaultMaxRows ? undefined : co.maxRows,
-        groupResults: co.groupResults,
+        groupResults: co.groupResults,        
         userChart: userChart && liteKey(userChart)
       };
   
+      encodeTimeSeries(query, co.timeSeries);
       Finder.Encoder.encodeFilters(query, co.filterOptions?.notNull());
       Finder.Encoder.encodeOrders(query, co.orderOptions?.notNull());
       encodeParameters(query, co.parameters?.notNull());
   
       encodeColumn(query, co.columnOptions?.notNull());
+
   
       return `/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query);
   
@@ -639,6 +653,17 @@ export namespace ChartClient {
       if (parameters)
         parameters.map((p, i) => query["param" + i] = scapeTilde(p.name!) + "~" + scapeTilde(p.value!));
     }
+
+    export function encodeTimeSeries(query: any, ts: ChartTimeSeriesEmbedded | null | undefined): void {
+      if (ts)
+      {
+        query['systemTimeStartDate'] = ts.startDate;
+        query['systemTimeEndDate'] = ts.endDate;
+        query['timeSeriesStep'] = ts.timeSeriesStep;
+        query['timeSeriesUnit'] = ts.timeSeriesUnit;
+        query['timeSeriesMaxRowsPerStep'] = ts.timeSeriesMaxRowsPerStep;  
+      }
+    }
   }
   
   export module Decoder {
@@ -658,8 +683,10 @@ export namespace ChartClient {
           const oos = Finder.Decoder.decodeOrders(query);
           oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   
+          const ts = Decoder.decodeTimeSeries(query);
+
           const cols = Decoder.decodeColumns(query);
-          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));
+          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
           return completer.finished().then(() => {
   
@@ -677,6 +704,7 @@ export namespace ChartClient {
               filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
               columns: cols,
               parameters: Decoder.decodeParameters(query),
+              chartTimeSeries: ts,
             });
   
             synchronizeColumns(chartRequest, cr);
@@ -731,16 +759,40 @@ export namespace ChartClient {
         })
       }));
     }
+
+    export function decodeTimeSeries(query: any): ChartTimeSeriesEmbedded | null {
+      if(!query.timeSeriesUnit)
+        return null;
+      return ChartTimeSeriesEmbedded.New({
+          startDate: query.systemTimeStartDate,
+          endDate: query.systemTimeEndDate,
+          timeSeriesUnit: query.timeSeriesUnit,
+          timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+          timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+      });
+    }
   }
   
   
   export module API {
   
     export function getRequest(request: ChartRequestModel): QueryRequest {
+      var ts = request.chartTimeSeries;
+      var systemTime : SystemTime | undefined = ts == null ? undefined : 
+        softCast<SystemTime>({ 
+          joinMode: 'AllCompatible', 
+          mode : 'TimeSeries', 
+          timeSeriesStep: ts.timeSeriesStep!, 
+          timeSeriesUnit: ts.timeSeriesUnit!, 
+          startDate: ts.startDate!, 
+          endDate: ts.endDate!,
+          timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep!,
+        });
   
       return {
         queryKey: request.queryKey,
         groupResults: hasAggregates(request),
+        systemTime: systemTime,
         filters: Finder.toFilterRequests(request.filterOptions),
         columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
         orders: request.columns.filter(mle => mle.element.orderByType != null && mle.element.token != null).orderBy(mle => mle.element.orderByIndex).map(mle => ({ token: mle.element.token!.token!.fullKey, orderType: mle.element.orderByType! }) as OrderRequest),

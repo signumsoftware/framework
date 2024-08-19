@@ -46,6 +46,7 @@ public static class ChartLogic
         {
             QueryName = request.QueryName,
             GroupResults = request.HasAggregates(),
+            SystemTime = request.ChartTimeSeries?.ToSystemTimeRequest(),
             Columns = request.GetQueryColumns(),
             Filters = request.Filters,
             Orders = request.GetQueryOrders(),

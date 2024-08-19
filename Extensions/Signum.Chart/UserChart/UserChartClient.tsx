@@ -77,7 +77,7 @@ export namespace UserChartClient {
     ));
   
   
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never", modalSize: 'xl' }));
     Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('../Dashboard/Admin/UserChartPart')));
     Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('../Dashboard/Admin/CombinedUserChartPart')));
   
@@ -164,6 +164,7 @@ export namespace UserChartClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: uc.query.key,
         canAggregate: true,
+        canTimeSeries: cr.chartTimeSeries != null,
         entity: entity,
         filters: uc.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });
@@ -211,7 +212,7 @@ export namespace UserChartClient {
     }
   
     export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-      const cs = ChartRequestModel.New({ queryKey: uq.query!.key });
+      const cs = ChartRequestModel.New({ queryKey: uq.query!.key, chartTimeSeries: ChartClient.cloneChartTimeSeries(uq.chartTimeSeries)});
       return applyUserChart(cs, uq, entity);
     }
   }

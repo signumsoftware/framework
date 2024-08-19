@@ -90,7 +90,7 @@ public static class WordServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions)).ToList();
+                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions, false)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {
