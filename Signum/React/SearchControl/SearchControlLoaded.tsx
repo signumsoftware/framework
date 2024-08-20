@@ -1019,7 +1019,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const col = fo.columnOptions[cm.columnIndex!];
 
-    var timeSeriesColumn = fo.columnOptions.singleOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
+    var timeSeriesColumn = fo.columnOptions.firstOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
 
     fo.columnOptions.clear();
 
