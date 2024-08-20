@@ -676,14 +676,15 @@ export namespace ChartClient {
         return Finder.getQueryDescription(queryName).then(qd => {
   
           const completer = new Finder.TokenCompleter(qd);
+          
+          const ts = Decoder.decodeTimeSeries(query);
   
           const fos = Finder.Decoder.decodeFilters(query);
-          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
+          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate| (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
           const oos = Finder.Decoder.decodeOrders(query);
           oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   
-          const ts = Decoder.decodeTimeSeries(query);
 
           const cols = Decoder.decodeColumns(query);
           cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));

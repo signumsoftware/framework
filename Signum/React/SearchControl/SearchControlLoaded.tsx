@@ -1019,6 +1019,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const col = fo.columnOptions[cm.columnIndex!];
 
+    var timeSeriesColumn = fo.columnOptions.singleOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
+
     fo.columnOptions.clear();
 
     var defAggregate = this.props.querySettings?.defaultAggregates;
@@ -1047,6 +1049,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
     }
 
+    if(timeSeriesColumn)
+      fo.columnOptions.push(timeSeriesColumn);
     fo.columnOptions.push(col);
     fo.groupResults = true;
     fo.orderOptions.clear();
@@ -1078,8 +1082,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const fo = this.props.findOptions;
 
     const col = fo.columnOptions[cm.columnIndex!];
+    var timeSeriesColumn = fo.columnOptions.firstOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
     fo.columnOptions.clear();
-    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
+    if(timeSeriesColumn)
+      fo.columnOptions.push(timeSeriesColumn);
+    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));   
+
     if (fo.groupResults) {
       fo.orderOptions.clear();
     }
@@ -1341,7 +1349,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       if (colIndex == -1)
         return null;
 
-      const val = rt.rows[0].columns[colIndex];
+      const val = rt.rows[0]?.columns[colIndex];
 
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 

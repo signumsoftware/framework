@@ -153,7 +153,13 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
       query: query,
       chartScript: cr.chartScript,
-      chartTimeSeries: ChartClient.cloneChartTimeSeries(cr.chartTimeSeries),
+      chartTimeSeries: !ts ? null : ChartTimeSeriesEmbedded.New({
+        timeSeriesUnit: ts?.timeSeriesUnit,
+        startDate: ts.startDate && await UserAssetClient.API.stringifyDate(ts.startDate),
+        endDate: ts.endDate && await UserAssetClient.API.stringifyDate(ts.endDate),
+        timeSeriesStep: ts.timeSeriesStep,
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep
+      }),
       maxRows: cr.maxRows,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),

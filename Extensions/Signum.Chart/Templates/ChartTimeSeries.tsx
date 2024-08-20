@@ -7,10 +7,13 @@ import { isNumberKey, NumberBox } from '../../../Signum/React/Lines/NumberLine';
 import { AggregateFunction, QueryTokenDateMessage } from '../../../Signum/React/Signum.DynamicQuery.Tokens';
 import { DateTimePicker } from 'react-widgets';
 import { classes } from '../../../Signum/React/Globals';
-import { useForceUpdate } from '../../../Signum/React/Hooks';
+import { useAPI, useForceUpdate } from '../../../Signum/React/Hooks';
 import { ChartRequestModel, ChartTimeSeriesEmbedded } from '../Signum.Chart';
 import { ChartClient } from '../ChartClient'
-import { IChartBase } from '../UserChart/Signum.Chart.UserChart';
+import { IChartBase, UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
+import UserQuery from '../../Signum.UserQueries/Templates/UserQuery';
+import { UserQueryEntity } from '../../Signum.UserQueries/Signum.UserQueries';
+import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient';
 
 
 export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmbedded, chartBase: IChartBase, onChange: () => void }): React.JSX.Element {
@@ -65,9 +68,15 @@ export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmb
       <div className="d-flex ms-1">
         {AggregateFunction.niceToString(field == "startDate" ? "Min" : "Max")}
         <div className="rw-widget-xs ms-1">
-          <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
+          {UserChartEntity.isInstance(p.chartBase) ? <input type="text" defaultValue={utcDate!} 
+          style={{width: 170}}
+          onChange={e => {
+            ts[field] = e.target.value;
+            p.onChange();
+
+          }} /> : <DateTimePicker value={m?.toJSDate()} onChange={handleDatePickerOnChange}
             inputProps={{ style: { width: "150px" } }}
-            valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString() }} />
+            valueEditFormat={luxonFormat} valueDisplayFormat={luxonFormat} includeTime={true} messages={{ dateButton: JavascriptMessage.Date.niceToString() }} />}
         </div>
       </div>
     );
@@ -89,6 +98,14 @@ function TotalNumStepsAndRows(p: { chartTimeSeries: ChartTimeSeriesEmbedded, cha
   const isOneValue = ChartClient.hasAggregates(p.chartBase) && p.chartBase.columns.every(a => a.element.token == null || a.element.token.token?.fullKey == QueryTokenString.timeSeries.token || a.element.token.token?.queryTokenType == "Aggregate");
 
   var st = p.chartTimeSeries;
+
+  const min = useAPI(() => !p.chartTimeSeries.startDate ? Promise.resolve(null) : 
+    ChartRequestModel.isInstance(p.chartBase) ? Promise.resolve(DateTime.fromISO(p.chartTimeSeries.startDate)) : 
+      UserAssetClient.API.parseDate(p.chartTimeSeries.startDate).then(date => DateTime.fromISO(date)), [p.chartTimeSeries.startDate]);
+  const max = useAPI(() => !p.chartTimeSeries.endDate ? Promise.resolve(null) : 
+      ChartRequestModel.isInstance(p.chartBase) ? Promise.resolve(DateTime.fromISO(p.chartTimeSeries.endDate)) : 
+        UserAssetClient.API.parseDate(p.chartTimeSeries.endDate).then(date => DateTime.fromISO(date)), [p.chartTimeSeries.endDate]);
+  
   React.useEffect(() => {
     if (isOneValue) {
       if (st.timeSeriesMaxRowsPerStep != 1) {
@@ -103,11 +120,9 @@ function TotalNumStepsAndRows(p: { chartTimeSeries: ChartTimeSeriesEmbedded, cha
     }
   }, [isOneValue])
 
-  if (st.startDate == null || st.endDate == null || st.timeSeriesStep == null || st.timeSeriesUnit == null)
+  if (min == null || max == null || st.timeSeriesStep == null || st.timeSeriesUnit == null)
     return null;
 
-  const min = DateTime.fromISO(st.startDate!);
-  const max = DateTime.fromISO(st.endDate!);
   const unit: DurationUnit = st.timeSeriesUnit.firstLower() as DurationUnit;
   const steps = Math.ceil(max.diff(min, unit).as(unit));
 
