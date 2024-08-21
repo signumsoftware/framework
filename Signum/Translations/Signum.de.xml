@@ -715,6 +715,7 @@
   <Type Name="TimeSeriesUnit">
     <Member Name="Day" Description="Tag" />
     <Member Name="Hour" Description="Stunde" />
+    <Member Name="Millisecond" Description="Millisekunde" />
     <Member Name="Minute" Description="Minute" />
     <Member Name="Month" Description="Monat" />
     <Member Name="Quarter" Description="Quartal" />
