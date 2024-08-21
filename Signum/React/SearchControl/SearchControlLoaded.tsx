@@ -4,7 +4,8 @@ import { DomUtils, classes, Dic, softCast, isNumber } from '../Globals'
 import { Finder } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual,
+  withoutPinned
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType } from '../Reflection'
@@ -1516,7 +1517,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
-    var originalFilters = Finder.toFilterOptions(resFo.filterOptions.filter(f => !Finder.isAggregate(f)));
+    var originalFilters = Finder.toFilterOptions(resFo.filterOptions.map(a => withoutPinned(a)).notNull().filter(f => !Finder.isAggregate(f)));
 
     return [...originalFilters, ...keyFilters];
   }
