@@ -33,7 +33,7 @@ public static class MusicStarter
             Schema.Current.Initialize();
 
             MusicLoader.Load();
-
+       
             startedAndLoaded = true;
         }
     }
@@ -83,6 +83,7 @@ public static class MusicStarter
         OperationLogic.Start(sb);
         ExceptionLogic.Start(sb);
 
+        QueryLogic.Start(sb);
         MusicLogic.Start(sb);
 
         sb.Schema.OnSchemaCompleted();

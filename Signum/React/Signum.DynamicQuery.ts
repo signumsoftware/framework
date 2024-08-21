@@ -113,7 +113,8 @@ export type TimeSeriesUnit =
   "Day" |
   "Hour" |
   "Minute" |
-  "Second";
+  "Second" |
+  "Millisecond";
 
 export const UniqueType: EnumType<UniqueType> = new EnumType<UniqueType>("UniqueType");
 export type UniqueType =
