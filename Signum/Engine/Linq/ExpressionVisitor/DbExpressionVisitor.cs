@@ -192,6 +192,15 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return sqlEnum;
     }
 
+    protected internal virtual Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        var cols = Visit<ColumnExpression>(sqlColumnList.Columns, vc => (ColumnExpression)VisitColumn(vc));
+        if (cols != sqlColumnList.Columns)
+            return new SqlColumnListExpression(cols);
+
+        return sqlColumnList;
+    }
+
     protected internal virtual Expression VisitSqlCast(SqlCastExpression castExpr)
     {
         var expression = Visit(castExpr.Expression);
