@@ -90,9 +90,11 @@ export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile &
 
     const val = ctx.value!;
 
+    const display = ctx.formGroupStyle == "Basic" ? "block" : undefined;
+
     var content = ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
+      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} style={{ maxWidth: "100px", display  }} onClick={e => ImageModal.show(file as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} />}</FetchAndRemember> :
+      <FileImage file={val as IFile & ModifiableEntity} style={{ maxWidth: "100px", display }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} {...p.imageHtmlAttributes} ajaxOptions={p.ajaxOptions} />;
 
     const removeButton = c.renderRemoveButton(true);
 
