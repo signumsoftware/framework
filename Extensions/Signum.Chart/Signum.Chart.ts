@@ -307,11 +307,22 @@ export interface ChartRequestModel extends Entities.ModelEntity {
   columns: Entities.MList<ChartColumnEmbedded>;
   parameters: Entities.MList<ChartParameterEmbedded>;
   maxRows: number | null;
+  chartTimeSeries: ChartTimeSeriesEmbedded | null;
 }
 
 export const ChartScriptSymbol: Type<ChartScriptSymbol> = new Type<ChartScriptSymbol>("ChartScript");
 export interface ChartScriptSymbol extends Basics.Symbol {
   Type: "ChartScript";
+}
+
+export const ChartTimeSeriesEmbedded: Type<ChartTimeSeriesEmbedded> = new Type<ChartTimeSeriesEmbedded>("ChartTimeSeriesEmbedded");
+export interface ChartTimeSeriesEmbedded extends Entities.EmbeddedEntity {
+  Type: "ChartTimeSeriesEmbedded";
+  startDate: string | null;
+  endDate: string | null;
+  timeSeriesUnit: DynamicQuery.TimeSeriesUnit | null;
+  timeSeriesStep: number | null;
+  timeSeriesMaxRowsPerStep: number | null;
 }
 
 export module D3ChartScript {

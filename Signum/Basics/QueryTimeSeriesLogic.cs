@@ -34,7 +34,7 @@ public class QueryTimeSeriesLogic
                 (
                     @startDate DATETIME2,
                     @endDate DATETIME2,
-                    @incrementType NVARCHAR(10),
+                    @incrementType NVARCHAR(20),
                     @step INT
                 )
                 RETURNS @DateRange TABLE
@@ -46,7 +46,16 @@ public class QueryTimeSeriesLogic
                     DECLARE @currentDate DATETIME2
                     SET @currentDate = @startDate
 
-                    IF @incrementType = 'second'
+                     IF @incrementType = 'millisecond'
+                    BEGIN
+                        WHILE @currentDate <= @endDate
+                        BEGIN
+                            INSERT INTO @DateRange (Date)
+                            VALUES (@currentDate)
+                            SET @currentDate = DATEADD(MILLISECOND, @step, @currentDate)
+                        END
+                    END
+                    ELSE IF @incrementType = 'second'
                     BEGIN
                         WHILE @currentDate <= @endDate
                         BEGIN

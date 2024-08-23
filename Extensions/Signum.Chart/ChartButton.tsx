@@ -4,7 +4,7 @@ import { FilterOptionParsed, FilterGroupOptionParsed, isFilterGroup } from '@fra
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { default as SearchControlLoaded } from '@framework/SearchControl/SearchControlLoaded'
-import { ChartMessage, ChartRequestModel } from './Signum.Chart'
+import { ChartMessage, ChartRequestModel, ChartTimeSeriesEmbedded } from './Signum.Chart'
 import { ChartClient } from './ChartClient'
 import { Button } from 'react-bootstrap'
 import { Finder } from '@framework/Finder';
@@ -31,7 +31,8 @@ export default class ChartButton extends React.Component<ChartButtonProps> {
       const path = ChartClient.Encoder.chartPath({
         queryName: fo.queryName,
         orderOptions: [],
-        filterOptions: fo.filterOptions
+        filterOptions: fo.filterOptions,
+        timeSeries: ChartClient.cloneChartTimeSeries(fo.systemTime as any),
       })
 
       if (sc.props.avoidChangeUrl)

@@ -9,7 +9,7 @@ import { Entity, getToString, Lite, liteKey, SelectorMessage, toLite, translated
 import * as QuickLinks from '@framework/QuickLinks'
 import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { DashboardClient, CreateNewButton } from '../../Signum.Dashboard/DashboardClient';
-import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded } from '../Signum.Chart'
+import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded, ChartTimeSeriesEmbedded } from '../Signum.Chart'
 import UserChartMenu from './UserChartMenu'
 import { ChartClient } from '../ChartClient'
 import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient'
@@ -77,7 +77,7 @@ export namespace UserChartClient {
     ));
   
   
-    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never" }));
+    Navigator.addSettings(new EntitySettings(UserChartEntity, e => import('./UserChart'), { isCreable: "Never", modalSize: 'xl' }));
     Navigator.addSettings(new EntitySettings(UserChartPartEntity, e => import('../Dashboard/Admin/UserChartPart')));
     Navigator.addSettings(new EntitySettings(CombinedUserChartPartEntity, e => import('../Dashboard/Admin/CombinedUserChartPart')));
   
@@ -164,6 +164,7 @@ export namespace UserChartClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: uc.query.key,
         canAggregate: true,
+        canTimeSeries: cr.chartTimeSeries != null,
         entity: entity,
         filters: uc.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });
@@ -210,8 +211,24 @@ export namespace UserChartClient {
         });
     }
   
-    export function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
-      const cs = ChartRequestModel.New({ queryKey: uq.query!.key });
+    async function parseDate(dateExpression: string | null): Promise<string | undefined> {
+      if (dateExpression == null)
+        return undefined;
+
+      var date = await UserAssetClient.API.parseDate(dateExpression);
+
+      return date;
+    }
+    
+    export async function toChartRequest(uq: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
+      var ts = uq.chartTimeSeries;
+      const cs = ChartRequestModel.New({ queryKey: uq.query!.key, chartTimeSeries: !ts ? null : ChartTimeSeriesEmbedded.New({
+        timeSeriesUnit: ts.timeSeriesUnit,
+        startDate: await parseDate(ts.startDate),
+        endDate: await parseDate(ts.endDate),
+        timeSeriesStep: ts.timeSeriesStep,
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep
+      })});
       return applyUserChart(cs, uq, entity);
     }
   }

@@ -88,6 +88,7 @@ export module DashboardMessage {
   export const CLickInOneChartToFilterInTheOthers: MessageKey = new MessageKey("DashboardMessage", "CLickInOneChartToFilterInTheOthers");
   export const CtrlClickToFilterByMultipleElements: MessageKey = new MessageKey("DashboardMessage", "CtrlClickToFilterByMultipleElements");
   export const AltClickToOpenResultsInAModalWindow: MessageKey = new MessageKey("DashboardMessage", "AltClickToOpenResultsInAModalWindow");
+  export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
 }
 
 export module DashboardOperation {

@@ -52,7 +52,7 @@ public class FilterJsonConverter : JsonConverter<FilterTS>
 [JsonConverter(typeof(FilterJsonConverter))]
 public abstract class FilterTS
 {
-    public abstract Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions);
+    public abstract Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries);
 
     public static FilterTS FromFilter(Filter filter)
     {
@@ -82,9 +82,9 @@ public class FilterConditionTS : FilterTS
     public FilterOperation operation;
     public object? value;
 
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
+    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries)
     {
-        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0);
+        var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0) | (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
         var parsedToken = QueryUtils.Parse(token, qd, options);
         var expectedValueType = operation.IsList() ? typeof(List<>).MakeGenericType(parsedToken.Type.Nullify()) : 
             parsedToken.Type;
@@ -124,14 +124,14 @@ public class FilterGroupTS : FilterTS
     public string? token;
     public required List<FilterTS> filters;
 
-    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions)
+    public override Filter ToFilter(QueryDescription qd, bool canAggregate, JsonSerializerOptions jsonSerializerOptions, bool canTimeSeries)
     {
         var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | 
-            (canAggregate ? SubTokensOptions.CanAggregate : 0);
+            (canAggregate ? SubTokensOptions.CanAggregate : 0) | (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
 
         var parsedToken = token == null ? null : QueryUtils.Parse(token, qd, options);
 
-        var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate, jsonSerializerOptions)).ToList();
+        var parsedFilters = filters.Select(f => f.ToFilter(qd, canAggregate, jsonSerializerOptions, canTimeSeries)).ToList();
 
         return new FilterGroup(groupOperation, parsedToken, parsedFilters);
     }
@@ -209,7 +209,7 @@ public class QueryValueRequestTS
         {
             QueryName = qn,
             MultipleValues = multipleValues ?? false,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions)).ToList(),
+            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions, this.systemTime?.mode == SystemTimeMode.TimeSeries)).ToList(),
             ValueToken = value,
             SystemTime = this.systemTime?.ToSystemTime(),
         };
@@ -256,7 +256,7 @@ public class QueryRequestTS
             QueryUrl = referrerUrl,
             QueryName = qn,
             GroupResults = groupResults,
-            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions)).ToList(),
+            Filters = this.filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: groupResults, jsonSerializerOptions, timeSeries)).ToList(),
             Orders = this.orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
             Columns = this.columns.EmptyIfNull().Select(f => f.ToColumn(qd, canAggregate: groupResults, canTimeSeries: timeSeries)).ToList(),
             Pagination = this.pagination.ToPagination(),
@@ -288,7 +288,7 @@ public class QueryEntitiesRequestTS
         {
             QueryName = qn,
             Count = count,
-            Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions)).ToList(),
+            Filters = filters.EmptyIfNull().Select(f => f.ToFilter(qd, canAggregate: false, jsonSerializerOptions, canTimeSeries: false)).ToList(),
             Orders = orders.EmptyIfNull().Select(f => f.ToOrder(qd, canAggregate: false, canTimeSeries: false)).ToList(),
         };
     }
