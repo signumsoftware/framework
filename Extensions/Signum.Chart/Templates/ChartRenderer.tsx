@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { ChartRequestModel} from '../Signum.Chart'
+import { ChartRequestModel } from '../Signum.Chart'
 
 import "../Chart.css"
 import { ChartClient, ChartRow, ChartScriptProps, ChartTable } from '../ChartClient';
@@ -49,17 +49,17 @@ export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element 
       <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
-          chartRequest={p.chartRequest}
-          data={p.data}
-          dashboardFilter={p.dashboardFilter}
-          loading={p.loading}
-          onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
-          onBackgroundClick={p.onBackgroundClick}
-          parameters={parameters}
-          onReload={p.onReload}
-          onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)}
-          minHeight={p.minHeight}
-        />
+            chartRequest={p.chartRequest}
+            data={p.data}
+            dashboardFilter={p.dashboardFilter}
+            loading={p.loading}
+            onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
+            onBackgroundClick={p.onBackgroundClick}
+            parameters={parameters}
+            onReload={p.onReload}
+            onRenderChart={cs.chartComponent as ((p: ChartScriptProps) => React.ReactNode)}
+            minHeight={p.minHeight}
+          />
         }
       </ErrorBoundary>
     </FullscreenComponent>
@@ -90,5 +90,4 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
         }
       }
     });
-}
 }
