@@ -18,6 +18,12 @@ public class SelectorModalProxy : ModalProxy
         this.WaitNotVisible();
     }
 
+    public void Select(Lite<Entity> lite)
+    {
+        SelectPrivate(lite.Key());
+        this.WaitNotVisible();
+    }
+
     public void Select<T>()
     {
         SelectPrivate(TypeLogic.GetCleanName(typeof(T)));
@@ -34,9 +40,19 @@ public class SelectorModalProxy : ModalProxy
         return this.Element.GetDriver().CapturePopup(() => SelectPrivate(enumValue.ToString()));
     }
 
+    public IWebElement SelectAndCapture(Lite<Entity> lite)
+    {
+        return this.Element.GetDriver().CapturePopup(() => SelectPrivate(lite.Key()));
+    }
+
     public IWebElement SelectAndCapture<T>()
     {
         return this.Element.GetDriver().CapturePopup(() => SelectPrivate(TypeLogic.GetCleanName(typeof(T))));
+    }
+
+    public string[] ButtonNames()
+    {
+        return this.Element.FindElements(By.CssSelector("button[name]")).Select(e => e.GetAttribute("name")).ToArray();
     }
 
     public static bool IsSelector(IWebElement element)
@@ -46,7 +62,7 @@ public class SelectorModalProxy : ModalProxy
 
     void SelectPrivate(string name)
     {
-        var button = this.Element.WaitElementVisible(By.CssSelector("button[name={0}]".FormatWith(name)));
+        var button = this.Element.WaitElementVisible(By.CssSelector("button[name='{0}']".FormatWith(name)));
         button.Click();
     }
 }
