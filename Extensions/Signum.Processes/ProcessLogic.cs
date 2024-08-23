@@ -227,11 +227,15 @@ public static class ProcessLogic
                 {
                     p.State = ProcessState.Suspending;
                     p.SuspendDate = Clock.Now;
+
+                    Transaction.PostRealCommit -= ProcessRunner.WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit += ProcessRunner.WakeupExecuteInThisMachine;
                 }
             }.Register();
 
             new Execute(ProcessOperation.Cancel)
             {
+                CanExecute = a => ProcessRunner.IsExecutingInThisMachien(a.ToLite()) ? "Process executing, suspend first" : null,
                 FromStates = { ProcessState.Planned, ProcessState.Created, ProcessState.Suspended, ProcessState.Queued, ProcessState.Executing, ProcessState.Suspending },
                 ToStates = { ProcessState.Canceled },
                 Execute = (p, _) =>

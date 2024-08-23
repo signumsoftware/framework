@@ -258,15 +258,7 @@ export namespace UserQueryClient {
     const qd = await Finder.getQueryDescription(fo.queryName);
     const fop = await Finder.parseFilterOptions(fo.filterOptions ?? [], fo.groupResults ?? false, qd);
   
-    const filters = fop.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-  
-      return f2;
-    }).notNull();
-  
-    fo.filterOptions = Finder.toFilterOptions(filters);
+    fo.filterOptions = Finder.toFilterOptions(fop);
   
     if (openInNewTab || showInPlace) {
       const url = Finder.findOptionsPath(fo, { userQuery: liteKey(toLite(uq)) });

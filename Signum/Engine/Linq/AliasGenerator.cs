@@ -90,7 +90,7 @@ public class Alias: IEquatable<Alias>
 
     public override bool Equals(object? obj)
     {
-        return obj is Alias && base.Equals((Alias)obj);
+        return obj is Alias && Equals((Alias)obj);
     }
 
     public override int GetHashCode()

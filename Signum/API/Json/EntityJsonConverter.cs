@@ -615,7 +615,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 {
                     if (identityInfo.Ticks != null)
                     {
-                        if (identityInfo.Modified == true && existingEntity.Ticks != identityInfo.Ticks.Value)
+                        if (ConcurrencyLogic.IsEnabled && identityInfo.Modified == true && existingEntity.Ticks != identityInfo.Ticks.Value)
                             throw new ConcurrencyException(type, id);
 
                         existingEntity.Ticks = identityInfo.Ticks.Value;
@@ -633,7 +633,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 var retrievedEntity = Database.Retrieve(type, id, identityInfo.PartitionId);
                 if (identityInfo.Ticks != null)
                 {
-                    if (identityInfo.Modified == true && retrievedEntity.Ticks != identityInfo.Ticks.Value)
+                    if (ConcurrencyLogic.IsEnabled && identityInfo.Modified == true && retrievedEntity.Ticks != identityInfo.Ticks.Value)
                         throw new ConcurrencyException(type, id);
 
                     retrievedEntity.Ticks = identityInfo.Ticks.Value;

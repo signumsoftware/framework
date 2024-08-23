@@ -331,7 +331,7 @@ bdi.date {
     }
 /* sf-entity-ctxmenu-success */
 tr.sf-entity-ctxmenu-success {
-    font-weight: bold;
+    border-left: 3px solid #22BA00;
 }
 
 .sf-th-entity {
