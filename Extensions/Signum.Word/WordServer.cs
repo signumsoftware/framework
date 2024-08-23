@@ -90,7 +90,7 @@ public static class WordServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions)).ToList();
+                cr.Filters = list.Select(l => l.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions, false)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {
@@ -112,7 +112,7 @@ public static class WordServer
 
                 var qd = QueryLogic.Queries.QueryDescription(cr.QueryName);
 
-                cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true)).ToList();
+                cr.Orders = list.Select(l => l.ToOrder(qd, canAggregate: true, canTimeSeries: true)).ToList();
             },
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) =>
             {

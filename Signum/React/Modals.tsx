@@ -25,7 +25,7 @@ let current: GlobalModalContainerHandles;
   
 const modalInstances: (React.Component & IHandleKeyboard)[] = [];
 
-export function isStarted() {
+export function isStarted(): boolean {
   return current != null;
 }
 
@@ -36,7 +36,9 @@ interface GlobalModalContainerHandles {
   getCount(): number;
 }
 
-export function GlobalModalContainer() {
+export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
+    className: string;
+}, HTMLElement> {
   React.useEffect(() => {
     window.addEventListener("keydown", hanldleKeyDown);
     return () => window.removeEventListener("keydown", hanldleKeyDown);
@@ -114,7 +116,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     return React.cloneElement(only, { innerRef: (a: any) => { this.innerRef = a; } } as any); //TODO: To avoid having to use forward Ref until is removed
   }
 
-  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>) {
+  static withRef(element: React.ReactElement, ref: React.Ref<React.Component>): React.JSX.Element {
     var type = element.type as React.ComponentClass | React.FunctionComponent | string;
     if (typeof type == "string" || type.prototype?.render) {
       return React.cloneElement(element, { ref: ref });
@@ -123,7 +125,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     }
   }
 
-  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType) {
+  static isInstanceOf(component: React.Component | null | undefined, type: React.ComponentType): boolean {
 
     if (component instanceof type)
       return true;
@@ -136,7 +138,7 @@ export class FunctionalAdapter extends React.Component<FunctionalAdapterProps> {
     return false
   }
 
-  static innerRef(component: React.Component | null | undefined) {
+  static innerRef(component: React.Component | null | undefined): any {
 
     if (component instanceof FunctionalAdapter) {
       return component.innerRef;

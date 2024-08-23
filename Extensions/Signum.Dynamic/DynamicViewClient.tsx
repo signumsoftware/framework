@@ -27,7 +27,7 @@ import { DynamicViewEntity, DynamicViewMessage, DynamicViewOperation, DynamicVie
 
 export namespace DynamicViewClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     Navigator.addSettings(new EntitySettings(DynamicViewEntity, w => import('./View/DynamicView')));
     Navigator.addSettings(new EntitySettings(DynamicViewSelectorEntity, w => import('./View/DynamicViewSelector')));
@@ -167,8 +167,8 @@ export namespace DynamicViewClient {
         }
       }));
     }
-  
-    getViewPromiseWithName(entity: ModifiableEntity, viewName: string) {
+
+    getViewPromiseWithName(entity: ModifiableEntity, viewName: string): ViewPromise<ModifiableEntity> {
       const es = Navigator.getSettings(entity.Type);
       var namedView = es?.namedViews && es.namedViews[viewName];
   
@@ -232,8 +232,8 @@ export namespace DynamicViewClient {
     }
   
   }
-  
-  export function patchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>) => void) {
+
+  export function patchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>, viewOverride: (e: ViewReplacer<Entity>) => void): React.ReactElement | undefined {
   
     if (!component.prototype.render)
       throw new Error("render function not defined in " + component);
@@ -249,7 +249,7 @@ export namespace DynamicViewClient {
   
       const view = staticRender.call(this);
   
-      const replacer = new ViewReplacer<Entity>(view, ctx);
+      const replacer = new ViewReplacer<Entity>(view, ctx, component);
       try {
         viewOverride(replacer);
         return replacer.result;
@@ -261,8 +261,8 @@ export namespace DynamicViewClient {
     component.prototype.render.isDynamic = true;
     component.prototype.render.staticRender = staticRender;
   }
-  
-  export function unPatchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>) {
+
+  export function unPatchComponent(component: React.ComponentClass<{ ctx: TypeContext<Entity> }>): React.JSX.Element | undefined {
   
     if (!component.prototype.render)
       throw new Error("render function not defined in " + component);
@@ -281,8 +281,8 @@ export namespace DynamicViewClient {
     return onCreate(key).then(v => cache[key] = v);
   }
   
-  
-  export function cleanCaches() {
+
+  export function cleanCaches(): undefined {
     Dic.clear(viewNamesCache);
     Dic.clear(selectorCache);
   }

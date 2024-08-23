@@ -12,23 +12,23 @@ export interface EntityListProps<V extends Lite<Entity> | ModifiableEntity> exte
 
 export class EntityListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityListProps<V>, V>
 {
-  moveUp(index: number) {
+  moveUp(index: number): void {
     super.moveUp(index);
     this.forceUpdate();
   }
 
-  moveDown(index: number) {
+  moveDown(index: number): void {
     super.moveDown(index);
     this.forceUpdate();
   }
 
-  handleOnSelect = (e: React.FormEvent<HTMLSelectElement>) => {
+  handleOnSelect = (e: React.FormEvent<HTMLSelectElement>): void => {
     this.forceUpdate();
   }
 
 
   selectElement?: HTMLSelectElement | null;
-  handleSelectLoad = (sel: HTMLSelectElement | null) => {
+  handleSelectLoad = (sel: HTMLSelectElement | null): void => {
     let refresh = this.selectElement == undefined && sel;
 
     this.selectElement = sel;
@@ -49,7 +49,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
     return this.selectElement.selectedIndex;
   }
 
-  handleRemoveClick = (event: React.SyntheticEvent<any>) => {
+  handleRemoveClick = (event: React.SyntheticEvent<any>): void => {
 
     event.preventDefault();
 
@@ -68,7 +68,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
       });
   };
 
-  renderViewButton(btn: boolean, item: V) {
+  renderViewButton(btn: boolean, item: V): React.JSX.Element | undefined {
 
     if (!this.canView(item))
       return undefined;
@@ -82,7 +82,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
     );
   }
 
-  renderRemoveButton(btn: boolean, item: V) {
+  renderRemoveButton(btn: boolean, item: V): React.JSX.Element | undefined {
     if (!this.canRemove(item))
       return undefined;
 
@@ -95,7 +95,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
     );
   }
 
-  handleViewClick = (event: React.MouseEvent<any>) => {
+  handleViewClick = (event: React.MouseEvent<any>): void => {
 
     event.preventDefault();
 
@@ -133,7 +133,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
     });
   }
 
-  getTitle(e: Lite<Entity> | ModifiableEntity) {
+  getTitle(e: Lite<Entity> | ModifiableEntity): string {
 
     const pr = this.props.ctx.propertyRoute;
 
@@ -146,7 +146,7 @@ export class EntityListController<V extends Lite<Entity> | ModifiableEntity> ext
 }
 
 
-export const EntityList = genericForwardRef(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>, ref: React.Ref<EntityListController<V>>) {
+export const EntityList: <V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V> & React.RefAttributes<EntityListController<V>>) => React.ReactNode | null = genericForwardRef(function EntityList<V extends Lite<Entity> | ModifiableEntity>(props: EntityListProps<V>, ref: React.Ref<EntityListController<V>>) {
   const c = useController(EntityListController, props, ref);
   const p = c.props;
   const list = p.ctx.value!;

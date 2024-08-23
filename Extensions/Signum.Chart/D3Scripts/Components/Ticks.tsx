@@ -6,7 +6,8 @@ import { translate, rotate } from './ChartUtils';
 import TextEllipsis from './TextEllipsis';
 import { Rule } from './Rule';
 
-export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"title" | "labels" | "ticks" | "content">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
+export function YScaleTicks({ xRule, yRule, valueColumn, y, format }:
+  { xRule: Rule<"title" | "labels" | "ticks" | "content">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
 
   var availableHeight = yRule.size("content");
 
@@ -53,7 +54,7 @@ export function YScaleTicks({ xRule, yRule, valueColumn, y, format }: { xRule: R
   );
 }
 
-export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"content" | "ticks2" | "labels2" | "title2">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
+export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule: Rule<"content" | "ticks2" | "labels2" | "title2">, yRule: Rule<"content">, valueColumn: ChartColumn<number>, y: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
 
   var availableHeight = yRule.size("content");
 
@@ -93,7 +94,7 @@ export function YScaleTicksEnd({ xRule, yRule, valueColumn, y, format }: { xRule
 }
 
 
-export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: Rule<"content" | "title">, yRule: Rule<"labels" | "ticks" | "content" | "title">, valueColumn: ChartColumn<number>, x: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }) {
+export function XScaleTicks({ xRule, yRule, valueColumn, x, format }: { xRule: Rule<"content" | "title">, yRule: Rule<"labels" | "ticks" | "content" | "title">, valueColumn: ChartColumn<number>, x: d3.ScaleContinuousNumeric<number, number>, format?: (d: number) => string }): React.JSX.Element {
 
   var availableWidth = yRule.size("content");
 
@@ -142,7 +143,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
   xRule: Rule<"content">, yRule: Rule<"content" | "ticks" | "labels" | "title">, keyValues: unknown[], keyColumn: ChartColumn<unknown>, x: d3.ScaleBand<string>, showLines?: boolean,
   isActive?: (value: unknown) => boolean;
   onDrillDown?: (value: unknown, e: React.MouseEvent<any> | MouseEvent) => void;
-}) {
+}): React.JSX.Element {
 
   const bandwith = x.bandwidth();
   var stableKeys = keyValues.orderBy(keyColumn.getKey);
@@ -186,7 +187,7 @@ export function XKeyTicks({ xRule, yRule, keyValues, keyColumn, x, showLines, on
   );
 }
 
-export function XTitle({ xRule, yRule, keyColumn }: { xRule: Rule<"content">, yRule: Rule<"title">, keyColumn: ChartColumn<unknown> }) {
+export function XTitle({ xRule, yRule, keyColumn }: { xRule: Rule<"content">, yRule: Rule<"title">, keyColumn: ChartColumn<unknown> }): React.JSX.Element {
   return (
     <g className="x-title-group" transform={translate(xRule.middle('content'), yRule.middle('title'))}>
       <text className="x-title"
@@ -203,7 +204,7 @@ export function YKeyTicks({ xRule, yRule, keyValues, keyColumn, y, showLabels, s
   keyValues: unknown[], keyColumn: ChartColumn<unknown>, y: d3.ScaleBand<string>, showLabels: boolean, showLines?: boolean,
   isActive?: (value: unknown) => boolean;
   onDrillDown?: (value: unknown, e: React.MouseEvent<any> | MouseEvent) => void;
-}) {
+}): React.JSX.Element {
   var orderedKeys = keyValues.orderBy(keyColumn.getKey);
 
   return (

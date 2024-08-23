@@ -11,7 +11,7 @@ import { UserEntity } from '../Signum.Authorization/Signum.Authorization';
 
 export namespace ProfilerClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     options.routes.push(
       { path: "/profiler/times", element: <ImportComponent onImport={() => import("./Times/TimesPage")} /> },
       { path: "/profiler/heavy", element: <ImportComponent onImport={() => import("./Heavy/HeavyListPage")} /> },

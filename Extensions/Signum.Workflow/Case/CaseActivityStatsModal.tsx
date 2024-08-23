@@ -18,7 +18,7 @@ interface CaseActivityStatsModalProps extends IModalProps<undefined> {
   caseActivityStats: WorkflowClient.CaseActivityStats[];
 }
 
-export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
+function CaseActivityStatsModal(p: CaseActivityStatsModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState<boolean>(true);
 
@@ -63,16 +63,20 @@ export default function CaseActivityStatsModal(p: CaseActivityStatsModalProps) {
   );
 }
 
-CaseActivityStatsModal.show = (caseEntity: CaseEntity, caseActivityStats: WorkflowClient.CaseActivityStats[]): Promise<any> => {
-  return openModal<any>(<CaseActivityStatsModal case={caseEntity} caseActivityStats={caseActivityStats} />);
-};
+namespace CaseActivityStatsModal{
+  export function show(caseEntity: CaseEntity, caseActivityStats: WorkflowClient.CaseActivityStats[]): Promise<any> {
+    return openModal<any>(<CaseActivityStatsModal case={caseEntity} caseActivityStats={caseActivityStats} />);
+  };
+}
+
+export default CaseActivityStatsModal;
 
 interface CaseActivityStatsComponentProps {
   caseEntity: CaseEntity;
   stats: WorkflowClient.CaseActivityStats;
 }
 
-export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps){
+export function CaseActivityStatsComponent(p : CaseActivityStatsComponentProps): React.JSX.Element {
 
   function renderTaskExtra() {
     return (

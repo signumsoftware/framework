@@ -20,7 +20,7 @@ export interface ExcelMenuProps {
   excelReport: boolean;
 }
 
-export default function ExcelMenu(p: ExcelMenuProps) {
+export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
 

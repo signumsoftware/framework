@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { DateTime, Duration } from 'luxon'
 import * as AppContext from "./AppContext"
 import { Navigator, ViewPromise } from "./Navigator"
-import { Dic, classes, softCast } from './Globals'
+import { Dic, classes, isNumber, softCast } from './Globals'
 import { ajaxGet, ajaxPost } from './Services';
 
 import {
@@ -25,7 +25,10 @@ import {
   Type, QueryKey, getQueryKey, isQueryDefined, TypeReference,
   getTypeInfo, tryGetTypeInfos, getEnumInfo, toLuxonFormat, toNumberFormat, PseudoType,
   TypeInfo, PropertyRoute, QueryTokenString, getTypeInfos, tryGetTypeInfo, onReloadTypesActions,
-  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel
+  Anonymous, toLuxonDurationFormat, toFormatWithFixes, isTypeModel,
+  isNumberType,
+  isDecimalType,
+  numberLimits
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
@@ -52,11 +55,11 @@ export namespace Finder {
 
   export const querySettings: { [queryKey: string]: QuerySettings } = {};
 
-  export function clearQuerySettings() {
+  export function clearQuerySettings(): void {
     Dic.clear(querySettings);
   }
 
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     options.routes.push({ path: "/find/:queryName", element: <ImportComponent onImport={() => Options.getSearchPage()} /> });
     AppContext.clearSettingsActions.push(clearContextualItems);
     AppContext.clearSettingsActions.push(clearQuerySettings);
@@ -67,7 +70,7 @@ export namespace Finder {
     onReloadTypesActions.push(clearQueryDescriptionCache);
   }
 
-  export function addSettings(...settings: QuerySettings[]) {
+  export function addSettings(...settings: QuerySettings[]): void {
     settings.forEach(s => Dic.addOrThrow(querySettings, getQueryKey(s.queryName), s));
   }
 
@@ -157,21 +160,21 @@ export namespace Finder {
   }
 
   export namespace Options {
-    export function getSearchPage() {
+    export function getSearchPage(): Promise<typeof import("./SearchControl/SearchPage")> {
       return import("./SearchControl/SearchPage");
     }
-    export function getSearchModal() {
+    export function getSearchModal(): Promise<typeof import("./SearchControl/SearchModal")> {
       return import("./SearchControl/SearchModal");
     }
 
     export let entityColumnHeader: () => React.ReactElement | string | null | undefined = () => "";
 
-    export let tokenCanSetPropery = (qt: QueryToken) =>
+    export let tokenCanSetPropery = (qt: QueryToken): boolean =>
       qt.filterType == "Lite" && qt.key != "Entity" ||
       qt.filterType == "Enum" && !isState(qt.type) ||
       qt.filterType == "DateTime" && qt.propertyRoute != null && PropertyRoute.tryParseFull(qt.propertyRoute)?.member?.type.name == "DateOnly";
 
-    export let isState = (ti: TypeReference) => ti.name.endsWith("State");
+    export let isState = (ti: TypeReference): boolean => ti.name.endsWith("State");
 
     export let defaultPagination: Pagination = {
       mode: "Paginate",
@@ -243,7 +246,7 @@ export namespace Finder {
       .then(a => a.default.openMany(fo, modalOptions));
   }
 
-  export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>) {
+  export function exploreWindowsOpen(findOptions: FindOptions, e: React.MouseEvent<any>): void {
     e.preventDefault();
     if (e.ctrlKey || e.button == 1)
       window.open(AppContext.toAbsoluteUrl(findOptionsPath(findOptions)));
@@ -283,6 +286,9 @@ export namespace Finder {
       systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
       systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
       systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
+      timeSeriesStep: fo.systemTime && fo.systemTime.timeSeriesStep,
+      timeSeriesUnit: fo.systemTime && fo.systemTime.timeSeriesUnit,
+      timeSeriesMaxRowsPerStep: fo.systemTime && fo.systemTime.timeSeriesMaxRowsPerStep,
       ...extra
     };
 
@@ -293,7 +299,7 @@ export namespace Finder {
     return query;
   }
 
-  export function getTypeNiceName(tr: TypeReference) {
+  export function getTypeNiceName(tr: TypeReference): string {
 
     const niceName = tr.typeNiceName ??
       tryGetTypeInfos(tr)
@@ -303,7 +309,13 @@ export namespace Finder {
     return tr.isCollection ? QueryTokenMessage.ListOf0.niceToString(niceName) : niceName;
   }
 
-  export function getSimpleTypeNiceName(name: string) {
+  export function getSimpleTypeNiceName(name: string): string {
+
+    if (isDecimalType(name))
+      return QueryTokenMessage.DecimalNumber.niceToString();
+
+    if (isNumberType(name))
+      return QueryTokenMessage.Number.niceToString();
 
     switch (name) {
       case "string":
@@ -312,8 +324,6 @@ export namespace Finder {
       case "Date": return QueryTokenMessage.Date.niceToString();
       case "DateTime": return QueryTokenMessage.DateTime.niceToString();
       case "DateTimeOffset": return QueryTokenMessage.DateTimeOffset.niceToString();
-      case "number": return QueryTokenMessage.Number.niceToString();
-      case "decimal": return QueryTokenMessage.DecimalNumber.niceToString();
       case "boolean": return QueryTokenMessage.Check.niceToString();
     }
 
@@ -341,6 +351,9 @@ export namespace Finder {
         joinMode: query.systemTimeJoinMode,
         startDate: query.systemTimeStartDate,
         endDate: query.systemTimeEndDate,
+        timeSeriesUnit: query.timeSeriesUnit,
+        timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+        timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
       }
     };
 
@@ -582,7 +595,7 @@ export namespace Finder {
         return Promise.resolve(value);
     }
 
-    if (type.name == "number") {
+    if (isNumberType(type.name)) {
       if (typeof value === "number")
         return Promise.resolve(value);
     }
@@ -790,18 +803,19 @@ export namespace Finder {
 
     const canAggregate = (findOptions.groupResults ? SubTokensOptions.CanAggregate : 0);
     const canAggregateXorOperation = (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual);
+    const canTimeSeries = (fo.systemTime?.mode == QueryTokenString.timeSeries.token ? SubTokensOptions.CanTimeSeries : 0);
 
     const completer = new TokenCompleter(qd);
 
 
     if (fo.filterOptions)
-      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate));
+      fo.filterOptions.notNull().forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | canAggregate | canTimeSeries));
 
     if (fo.orderOptions)
-      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate));
+      fo.orderOptions.notNull().forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate | canTimeSeries));
 
     if (fo.columnOptions) {
-      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation));
+      fo.columnOptions.notNull().forEach(co => completer.request(co.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanToArray | SubTokensOptions.CanSnippet | canAggregateXorOperation | canTimeSeries));
       fo.columnOptions.notNull().filter(a => a.summaryToken).forEach(co => completer.request(co.summaryToken!.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
     }
 
@@ -1033,11 +1047,13 @@ export namespace Finder {
       var value = overridenValue ? overridenValue.value : fop.value;
 
       if (fop.token && typeof value == "string") {
-        if (fop.token.type.name == "number") {
+        if (isNumberType(fop.token.type.name)) {
 
           var numVal = parseInt(value);
 
-          if (isNaN(numVal)) {
+          var limits = numberLimits[fop.token.type.name]
+
+          if (isNaN(numVal) || numVal < limits.min || limits.max < numVal) {
             if (overridenValue)
               return undefined;
 
@@ -1166,7 +1182,7 @@ export namespace Finder {
     return newFO;
   }
 
-  export function getTrivialColumns(fos: FilterOption[]) {
+  export function getTrivialColumns(fos: FilterOption[]): ColumnOption[] {
     return fos
       .filter(fo => !isFilterGroup(fo) && (fo.operation == null || fo.operation == "EqualTo") && !fo.token.toString().contains(".") && fo.pinned == null && fo.value != null)
       .map(fo => ({ token: fo.token }) as ColumnOption);
@@ -1204,7 +1220,7 @@ export namespace Finder {
       this.queryCache = (TokenCompleter.globalCache[queryDescription.queryKey] ??= {});
     }
 
-    requestFilter(fo: FilterOption, options: SubTokensOptions) {
+    requestFilter(fo: FilterOption, options: SubTokensOptions): void {
 
       if (isFilterGroup(fo)) {
         fo.token && this.request(fo.token.toString(), options);
@@ -1252,8 +1268,8 @@ export namespace Finder {
       };
     }
 
-    isSimple(fullKey: string) {
-      return !fullKey.contains(".") && fullKey != "Count";
+    isSimple(fullKey: string): boolean {
+      return !fullKey.contains(".") && fullKey != QueryTokenString.count.token && fullKey != QueryTokenString.timeSeries.token;
     }
 
     finished(): Promise<void> {
@@ -1771,7 +1787,7 @@ export namespace Finder {
 
 
 
-    export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string) {
+    export function encodeFilters(query: any, filterOptions?: FilterOption[], prefix?: string): void {
 
       var i: number = 0;
 
@@ -1804,12 +1820,12 @@ export namespace Finder {
         filterOptions.forEach(fo => encodeFilter(fo, 0, false));
     }
 
-    export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string) {
+    export function encodeOrders(query: any, orderOptions?: OrderOption[], prefix?: string): void {
       if (orderOptions)
         orderOptions.forEach((oo, i) => query[(prefix ?? "") + "order" + i] = (oo.orderType == "Descending" ? "-" : "") + oo.token);
     }
 
-    export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string) {
+    export function encodeColumns(query: any, columnOptions?: ColumnOption[], prefix?: string): void {
       if (columnOptions) {
         columnOptions.forEach((co, i) => {
 
@@ -1849,7 +1865,7 @@ export namespace Finder {
       return scapeTilde(value.toString());
     }
 
-    export function scapeTilde(str: string) {
+    export function scapeTilde(str: string): string {
       if (str == undefined)
         return "";
 
@@ -1995,7 +2011,7 @@ export namespace Finder {
       return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a as ButtonBarElement);
     }
 
-    export function clearButtonBarElements() {
+    export function clearButtonBarElements(): void {
       ButtonBarQuery.onButtonBarElements.clear();
     }
 
@@ -2042,7 +2058,7 @@ export namespace Finder {
 
 
 
-  export function isSystemVersioned(tr?: TypeReference) {
+  export function isSystemVersioned(tr?: TypeReference): boolean {
     return tr != null && getTypeInfos(tr).some(ti => ti.isSystemVersioned == true)
   }
 
@@ -2062,7 +2078,7 @@ export namespace Finder {
     return rule.formatter(qt, sc);
   }
 
-  export function resetFormatRules() {
+  export function resetFormatRules(): void {
     Dic.clear(registeredPropertyFormatters);
 
     formatRules.clear();
@@ -2103,7 +2119,7 @@ export namespace Finder {
 
   export const registeredPropertyFormatters: { [typeAndProperty: string]: CellFormatter } = {};
 
-  export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ | undefined, formater: CellFormatter) {
+  export function registerPropertyFormatter(pr: PropertyRoute | string/*For expressions*/ | undefined, formater: CellFormatter): void {
     if (pr == null)
       return;
     registeredPropertyFormatters[pr.toString()] = formater;
@@ -2152,7 +2168,7 @@ export namespace Finder {
 
   export const filterValueFormatRules: FilterValueFormatter[] = FinderRules.initFilterValueFormatRules();
 
-  export function renderFilterValue(f: FilterOptionParsed, ffc: FilterFormatterContext) {
+  export function renderFilterValue(f: FilterOptionParsed, ffc: FilterFormatterContext): React.ReactElement<any, string | React.JSXElementConstructor<any>> {
     var rule = filterValueFormatRules.filter(r => r.applicable(f, ffc)).last();
     return rule.renderValue(f, ffc);
   }

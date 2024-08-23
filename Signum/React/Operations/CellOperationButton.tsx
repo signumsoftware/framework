@@ -29,7 +29,7 @@ export interface CellOperationProps extends ButtonProps {
   outline?: boolean;
 }
 
-export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps) {
+export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline, color, icon, iconColor, iconAlign, ...props }: CellOperationProps): React.JSX.Element | null {
 
   if (cocOrNull == null)
     return null;
@@ -99,7 +99,12 @@ export function CellOperationButton({ coc: cocOrNull, onOperationClick, outline,
   }
 }
 
-CellOperationButton.getText = (icoc: CellOperationContext<Entity>): React.ReactNode => {
+export declare namespace CellOperationButton {
+    export var getText: (icoc: CellOperationContext<Entity>) => React.ReactNode;
+    export var simplifyName: (niceName: string) => string;
+}
+
+(CellOperationButton as any).getText = (icoc: CellOperationContext<Entity>): React.ReactNode => {
 
   if (icoc.settings && icoc.settings.text)
     return icoc.settings.text(icoc);
@@ -108,7 +113,7 @@ CellOperationButton.getText = (icoc: CellOperationContext<Entity>): React.ReactN
 
 };
 
-CellOperationButton.simplifyName = (niceName: string) => {
+(CellOperationButton as any).simplifyName = (niceName: string) => {
   const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(niceName);
   return array ? OperationMessage.Create0.niceToString(array[1].firstUpper()) : niceName;
 }

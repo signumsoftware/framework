@@ -23,7 +23,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override ResultTable ExecuteQuery(QueryRequest request)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
@@ -42,7 +42,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryable(request, out var inMemoryOrders);
 
@@ -61,7 +61,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override ResultTable ExecuteQueryGroup(QueryRequest request)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
@@ -78,7 +78,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     public override async Task<ResultTable> ExecuteQueryGroupAsync(QueryRequest request, CancellationToken token)
     {
-        using (SystemTime.Override(request.SystemTime))
+        using (SystemTime.Override(request.SystemTime?.ToSystemTime()))
         {
             DQueryable<T> query = GetDQueryableGroup(request, out var inMemoryOrders);
 
@@ -98,6 +98,8 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         if (!request.Columns.Where(c => c is _EntityColumn).Any())
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
+
+
         if (request.CanDoMultiplicationsInSubQueries())
         {
             var columnAndOrderTokens = request.Columns.Select(a => a.Token)
@@ -116,12 +118,23 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         }
         else
         {
+            var filters = request.Filters.ToList();
+            var timeSeriesFilters = filters.Extract(f => f.IsTimeSeries());
+
             var query = Query
                 .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications(), request.FullTextTableFilters())
-                .Where(request.Filters);
+                .Where(filters);
 
-            if (request.Pagination is Pagination.All)
+            if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
+            {
+                inMemoryOrders = null;
+
+                return query
+                   .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders, timeSeriesFilters);
+
+            }
+            else if (request.Pagination is Pagination.All)
             {
                 var allColumns = request.Columns.Select(a => a.Token)
                     .Concat(request.Orders.Select(a => a.Token))
@@ -145,10 +158,11 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     private DQueryable<T> GetDQueryableGroup(QueryRequest request, out List<Order>? inMemoryOrders)
     {
-        var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
-        var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
+        var simpleFilters = request.Filters.ToList();
+        var timeSeriesFilter = simpleFilters.Extract(f => f.IsTimeSeries());
+        var aggregateFilters = simpleFilters.Extract(f => f.IsAggregate());
 
-        var keys = request.Columns.Select(t => t.Token).Where(t => !(t is AggregateToken)).ToHashSet();
+        var keys = request.Columns.Select(t => t.Token).Where(t => t is not AggregateToken && t is not TimeSeriesToken).ToHashSet();
 
         var allAggregates = request.AllTokens().OfType<AggregateToken>().ToHashSet();
 
@@ -159,7 +173,15 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .GroupBy(keys, allAggregates)
             .Where(aggregateFilters);
 
-        if (request.Pagination is Pagination.All)
+        if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
+        {
+            inMemoryOrders = null;
+
+            return query
+                .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders, timeSeriesFilter);
+
+        }
+        else if (request.Pagination is Pagination.All)
         {
             inMemoryOrders = request.Orders.ToList();
             return query;

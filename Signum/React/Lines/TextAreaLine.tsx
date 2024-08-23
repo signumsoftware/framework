@@ -15,13 +15,14 @@ export interface TextAreaLineProps extends TextBaseProps<string | null> {
 }
 
 export class TextAreaLineController extends TextBaseController<TextAreaLineProps, string | null>{
-  init(p: TextAreaLineProps) {
+  init(p: TextAreaLineProps): void {
     super.init(p);
     this.assertType("TextAreaLine", ["string"]);
   }
 }
 
-export const TextAreaLine = React.memo(React.forwardRef(function TextAreaLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {
+export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TextAreaLineProps & React.RefAttributes<TextAreaLineController>>>
+  = React.memo(React.forwardRef(function TextAreaLine(props: TextAreaLineProps, ref: React.Ref<TextAreaLineController>) {
 
   const c = useController(TextAreaLineController, props, ref);
   const ccRef = React.useRef<ChartCounterHandler>(null);
@@ -151,7 +152,7 @@ function ChartCounter(p: { children: (length: number) => React.ReactElement | st
 export let maxValueLineSize = 100;
 
 tasks.push(taskSetHtmlProperties);
-export function taskSetHtmlProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetHtmlProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   const vl = lineBase instanceof TextBoxLineController || lineBase instanceof TextAreaLineController ? lineBase : undefined;
   const pr = state.ctx.propertyRoute;
   const s = state as TextAreaLineProps;

@@ -411,6 +411,29 @@ internal class QueryFormatter : DbExpressionVisitor
         return column;
     }
 
+    protected internal override Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        if (sqlColumnList.Columns.Count == 0)
+            sb.Append("*");
+        else
+        {
+            if (sqlColumnList.Columns.Count > 1)
+                sb.Append("(");
+
+            foreach (var col in sqlColumnList.Columns)
+            {
+                sb.Append(col.Alias.ToString());
+                sb.Append('.');
+                sb.Append(col.Name == "*" ? "*" : col.Name!.SqlEscape(isPostgres));
+            }
+
+            if (sqlColumnList.Columns.Count > 1)
+                sb.Append(")");
+        }
+
+        return sqlColumnList;
+    }
+
     protected internal override Expression VisitSelect(SelectExpression select)
     {
         bool isFirst = sb.Length == 0;

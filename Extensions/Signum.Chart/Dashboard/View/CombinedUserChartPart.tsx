@@ -24,7 +24,7 @@ export interface CombinedUserChartInfoTemp {
   error?: any;
 }
 
-export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedUserChartPartEntity>) {
+export default function CombinedUserChartPart(p: PanelPartContentProps<CombinedUserChartPartEntity>): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

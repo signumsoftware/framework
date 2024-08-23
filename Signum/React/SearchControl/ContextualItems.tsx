@@ -27,7 +27,7 @@ export interface MarkedRow {
   message?: string;
 }
 
-export function clearContextualItems() {
+export function clearContextualItems(): void {
   onContextualItems.clear();
 }
 

@@ -122,7 +122,7 @@ export interface TextValueRectangleProps extends React.SVGProps<SVGTextElement> 
   value?: string;
 }
 
-export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidth, isRight, ...atts }: TextValueRectangleProps) {
+export function TextValueRectangle({ rectangleAtts, children, value, rectMaxWidth, isRight, ...atts }: TextValueRectangleProps): React.JSX.Element {
 
   const txt = React.useRef<SVGTextElement>(null);
   const val = React.useRef<SVGTextElement>(null);

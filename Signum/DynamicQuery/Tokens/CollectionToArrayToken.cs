@@ -38,6 +38,9 @@ public class CollectionToArrayToken : QueryToken
         get { return ToArrayType.ToString(); }
     }
 
+
+    public override CollectionToArrayToken? HasCollectionToArray() => this;
+
     protected override List<QueryToken> SubTokensOverride(SubTokensOptions options)
     {
         var st = SubTokensBase(Type, options, GetImplementations());

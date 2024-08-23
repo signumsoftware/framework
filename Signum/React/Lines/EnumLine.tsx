@@ -29,7 +29,8 @@ export interface OptionItem {
   label: string;
 }
 
-export const EnumLine = genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
+export const EnumLine: <V extends string | number | boolean | null>(props: EnumLineProps<V> & React.RefAttributes<EnumLineController<V>>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function EnumLine<V extends string | number | boolean | null>(props: EnumLineProps<V>, ref: React.Ref<EnumLineController<V>>) {
 
   const c = useController(EnumLineController<V>, props, ref);
 

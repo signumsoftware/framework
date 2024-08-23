@@ -8,14 +8,14 @@ import * as Basics from '../../../Signum/React/Signum.Basics'
 import * as Authorization from '../../Signum.Authorization/Signum.Authorization'
 
 
-export const RecipientEmbedded = new Type<RecipientEmbedded>("RecipientEmbedded");
+export const RecipientEmbedded: Type<RecipientEmbedded> = new Type<RecipientEmbedded>("RecipientEmbedded");
 export interface RecipientEmbedded extends Entities.EmbeddedEntity {
   Type: "RecipientEmbedded";
   emailAddress: string | null;
   name: string | null;
 }
 
-export const RemoteAttachmentEmbedded = new Type<RemoteAttachmentEmbedded>("RemoteAttachmentEmbedded");
+export const RemoteAttachmentEmbedded: Type<RemoteAttachmentEmbedded> = new Type<RemoteAttachmentEmbedded>("RemoteAttachmentEmbedded");
 export interface RemoteAttachmentEmbedded extends Entities.EmbeddedEntity {
   Type: "RemoteAttachmentEmbedded";
   id: string;
@@ -26,7 +26,7 @@ export interface RemoteAttachmentEmbedded extends Entities.EmbeddedEntity {
   contentId: string | null;
 }
 
-export const RemoteEmailFolderModel = new Type<RemoteEmailFolderModel>("RemoteEmailFolderModel");
+export const RemoteEmailFolderModel: Type<RemoteEmailFolderModel> = new Type<RemoteEmailFolderModel>("RemoteEmailFolderModel");
 export interface RemoteEmailFolderModel extends Entities.ModelEntity {
   Type: "RemoteEmailFolderModel";
   folderId: string;
@@ -34,10 +34,10 @@ export interface RemoteEmailFolderModel extends Entities.ModelEntity {
 }
 
 export module RemoteEmailMessage {
-  export const NotAuthorizedToViewEmailsFromOtherUsers = new MessageKey("RemoteEmailMessage", "NotAuthorizedToViewEmailsFromOtherUsers");
+  export const NotAuthorizedToViewEmailsFromOtherUsers: MessageKey = new MessageKey("RemoteEmailMessage", "NotAuthorizedToViewEmailsFromOtherUsers");
 }
 
-export const RemoteEmailMessageModel = new Type<RemoteEmailMessageModel>("RemoteEmailMessageModel");
+export const RemoteEmailMessageModel: Type<RemoteEmailMessageModel> = new Type<RemoteEmailMessageModel>("RemoteEmailMessageModel");
 export interface RemoteEmailMessageModel extends Entities.ModelEntity {
   Type: "RemoteEmailMessageModel";
   id: string;
@@ -69,6 +69,6 @@ export module RemoteEmailMessagePermission {
 }
 
 export module RemoteEmailMessageQuery {
-  export const RemoteEmailMessages = new QueryKey("RemoteEmailMessageQuery", "RemoteEmailMessages");
+  export const RemoteEmailMessages: QueryKey = new QueryKey("RemoteEmailMessageQuery", "RemoteEmailMessages");
 }
 

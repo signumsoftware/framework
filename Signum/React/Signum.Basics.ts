@@ -8,7 +8,7 @@ import * as Security from './Signum.Security'
 import * as Operations from './Signum.Operations'
 
 
-export const BootstrapStyle = new EnumType<BootstrapStyle>("BootstrapStyle");
+export const BootstrapStyle: EnumType<BootstrapStyle> = new EnumType<BootstrapStyle>("BootstrapStyle");
 export type BootstrapStyle =
   "Light" |
   "Dark" |
@@ -20,11 +20,11 @@ export type BootstrapStyle =
   "Danger";
 
 export module ChangeLogMessage {
-  export const ThereIsNotAnyNewChangesFrom0 = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
-  export const SeeMore = new MessageKey("ChangeLogMessage", "SeeMore");
+  export const ThereIsNotAnyNewChangesFrom0: MessageKey = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
+  export const SeeMore: MessageKey = new MessageKey("ChangeLogMessage", "SeeMore");
 }
 
-export const ChangeLogViewLogEntity = new Type<ChangeLogViewLogEntity>("ChangeLogViewLog");
+export const ChangeLogViewLogEntity: Type<ChangeLogViewLogEntity> = new Type<ChangeLogViewLogEntity>("ChangeLogViewLog");
 export interface ChangeLogViewLogEntity extends Entities.Entity {
   Type: "ChangeLogViewLog";
   user: Entities.Lite<Security.IUserEntity>;
@@ -35,7 +35,7 @@ export module ChangeLogViewLogOperation {
   export const Delete : Operations.DeleteSymbol<ChangeLogViewLogEntity> = registerSymbol("Operation", "ChangeLogViewLogOperation.Delete");
 }
 
-export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
+export const ClientErrorModel: Type<ClientErrorModel> = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
   Type: "ClientErrorModel";
   errorType: string;
@@ -45,11 +45,11 @@ export interface ClientErrorModel extends Entities.ModelEntity {
 }
 
 export module CollapsableCardMessage {
-  export const Collapse = new MessageKey("CollapsableCardMessage", "Collapse");
-  export const Expand = new MessageKey("CollapsableCardMessage", "Expand");
+  export const Collapse: MessageKey = new MessageKey("CollapsableCardMessage", "Collapse");
+  export const Expand: MessageKey = new MessageKey("CollapsableCardMessage", "Expand");
 }
 
-export const CultureInfoEntity = new Type<CultureInfoEntity>("CultureInfo");
+export const CultureInfoEntity: Type<CultureInfoEntity> = new Type<CultureInfoEntity>("CultureInfo");
 export interface CultureInfoEntity extends Entities.Entity {
   Type: "CultureInfo";
   name: string;
@@ -62,7 +62,7 @@ export module CultureInfoOperation {
   export const Delete : Operations.DeleteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Delete");
 }
 
-export const DeleteLogParametersEmbedded = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
+export const DeleteLogParametersEmbedded: Type<DeleteLogParametersEmbedded> = new Type<DeleteLogParametersEmbedded>("DeleteLogParametersEmbedded");
 export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogParametersEmbedded";
   deleteLogs: Entities.MList<DeleteLogsTypeOverridesEmbedded>;
@@ -71,7 +71,7 @@ export interface DeleteLogParametersEmbedded extends Entities.EmbeddedEntity {
   pauseTime: number | null;
 }
 
-export const DeleteLogsTypeOverridesEmbedded = new Type<DeleteLogsTypeOverridesEmbedded>("DeleteLogsTypeOverridesEmbedded");
+export const DeleteLogsTypeOverridesEmbedded: Type<DeleteLogsTypeOverridesEmbedded> = new Type<DeleteLogsTypeOverridesEmbedded>("DeleteLogsTypeOverridesEmbedded");
 export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity {
   Type: "DeleteLogsTypeOverridesEmbedded";
   type: Entities.Lite<TypeEntity>;
@@ -80,10 +80,10 @@ export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity
 }
 
 export module DisabledMessage {
-  export const ParentIsDisabled = new MessageKey("DisabledMessage", "ParentIsDisabled");
+  export const ParentIsDisabled: MessageKey = new MessageKey("DisabledMessage", "ParentIsDisabled");
 }
 
-export const DisabledMixin = new Type<DisabledMixin>("DisabledMixin");
+export const DisabledMixin: Type<DisabledMixin> = new Type<DisabledMixin>("DisabledMixin");
 export interface DisabledMixin extends Entities.MixinEntity {
   Type: "DisabledMixin";
   isDisabled: boolean;
@@ -94,7 +94,7 @@ export module DisableOperation {
   export const Enabled : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Enabled");
 }
 
-export const ExceptionEntity = new Type<ExceptionEntity>("Exception");
+export const ExceptionEntity: Type<ExceptionEntity> = new Type<ExceptionEntity>("Exception");
 export interface ExceptionEntity extends Entities.Entity {
   Type: "Exception";
   creationDate: string /*DateTime*/;
@@ -125,7 +125,7 @@ export interface ExceptionEntity extends Entities.Entity {
   origin: ExceptionOrigin;
 }
 
-export const ExceptionOrigin = new EnumType<ExceptionOrigin>("ExceptionOrigin");
+export const ExceptionOrigin: EnumType<ExceptionOrigin> = new EnumType<ExceptionOrigin>("ExceptionOrigin");
 export type ExceptionOrigin =
   "Backend_DotNet" |
   "Frontend_React";
@@ -133,12 +133,12 @@ export type ExceptionOrigin =
 export interface IEmailOwnerEntity extends Entities.Entity {
 }
 
-export const PermissionSymbol = new Type<PermissionSymbol>("Permission");
+export const PermissionSymbol: Type<PermissionSymbol> = new Type<PermissionSymbol>("Permission");
 export interface PermissionSymbol extends Symbol {
   Type: "Permission";
 }
 
-export const PropertyRouteEntity = new Type<PropertyRouteEntity>("PropertyRoute");
+export const PropertyRouteEntity: Type<PropertyRouteEntity> = new Type<PropertyRouteEntity>("PropertyRoute");
 export interface PropertyRouteEntity extends Entities.Entity {
   Type: "PropertyRoute";
   path: string;
@@ -146,10 +146,10 @@ export interface PropertyRouteEntity extends Entities.Entity {
 }
 
 export module PropertyRouteMessage {
-  export const Translated = new MessageKey("PropertyRouteMessage", "Translated");
+  export const Translated: MessageKey = new MessageKey("PropertyRouteMessage", "Translated");
 }
 
-export const QueryEntity = new Type<QueryEntity>("Query");
+export const QueryEntity: Type<QueryEntity> = new Type<QueryEntity>("Query");
 export interface QueryEntity extends Entities.Entity {
   Type: "Query";
   key: string;
@@ -171,7 +171,7 @@ export interface Symbol extends Entities.Entity {
   key: string;
 }
 
-export const SystemEventLogEntity = new Type<SystemEventLogEntity>("SystemEventLog");
+export const SystemEventLogEntity: Type<SystemEventLogEntity> = new Type<SystemEventLogEntity>("SystemEventLog");
 export interface SystemEventLogEntity extends Entities.Entity {
   Type: "SystemEventLog";
   machineName: string;
@@ -181,12 +181,12 @@ export interface SystemEventLogEntity extends Entities.Entity {
   exception: Entities.Lite<ExceptionEntity> | null;
 }
 
-export const TranslateableRouteType = new EnumType<TranslateableRouteType>("TranslateableRouteType");
+export const TranslateableRouteType: EnumType<TranslateableRouteType> = new EnumType<TranslateableRouteType>("TranslateableRouteType");
 export type TranslateableRouteType =
   "Text" |
   "Html";
 
-export const TypeEntity = new Type<TypeEntity>("Type");
+export const TypeEntity: Type<TypeEntity> = new Type<TypeEntity>("Type");
 export interface TypeEntity extends Entities.Entity {
   Type: "Type";
   tableName: string;
@@ -195,7 +195,7 @@ export interface TypeEntity extends Entities.Entity {
   className: string;
 }
 
-export const VisualTipConsumedEntity = new Type<VisualTipConsumedEntity>("VisualTipConsumed");
+export const VisualTipConsumedEntity: Type<VisualTipConsumedEntity> = new Type<VisualTipConsumedEntity>("VisualTipConsumed");
 export interface VisualTipConsumedEntity extends Entities.Entity {
   Type: "VisualTipConsumed";
   visualTip: VisualTipSymbol;
@@ -207,7 +207,7 @@ export module VisualTipConsumedOperation {
   export const Delete : Operations.DeleteSymbol<VisualTipConsumedEntity> = registerSymbol("Operation", "VisualTipConsumedOperation.Delete");
 }
 
-export const VisualTipSymbol = new Type<VisualTipSymbol>("VisualTip");
+export const VisualTipSymbol: Type<VisualTipSymbol> = new Type<VisualTipSymbol>("VisualTip");
 export interface VisualTipSymbol extends Symbol {
   Type: "VisualTip";
 }

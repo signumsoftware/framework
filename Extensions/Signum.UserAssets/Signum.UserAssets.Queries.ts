@@ -13,7 +13,7 @@ export interface QueryTokenEmbedded {
     parseException?: string;
 }
 
-export const PinnedQueryFilterEmbedded = new Type<PinnedQueryFilterEmbedded>("PinnedQueryFilterEmbedded");
+export const PinnedQueryFilterEmbedded: Type<PinnedQueryFilterEmbedded> = new Type<PinnedQueryFilterEmbedded>("PinnedQueryFilterEmbedded");
 export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "PinnedQueryFilterEmbedded";
   label: string | null;
@@ -24,7 +24,7 @@ export interface PinnedQueryFilterEmbedded extends Entities.EmbeddedEntity {
   splitValue: boolean;
 }
 
-export const QueryColumnEmbedded = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
+export const QueryColumnEmbedded: Type<QueryColumnEmbedded> = new Type<QueryColumnEmbedded>("QueryColumnEmbedded");
 export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryColumnEmbedded";
   token: QueryTokenEmbedded;
@@ -34,7 +34,7 @@ export interface QueryColumnEmbedded extends Entities.EmbeddedEntity {
   combineRows: DynamicQuery.CombineRows | null;
 }
 
-export const QueryFilterEmbedded = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
+export const QueryFilterEmbedded: Type<QueryFilterEmbedded> = new Type<QueryFilterEmbedded>("QueryFilterEmbedded");
 export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryFilterEmbedded";
   token: QueryTokenEmbedded | null;
@@ -47,21 +47,21 @@ export interface QueryFilterEmbedded extends Entities.EmbeddedEntity {
   indentation: number;
 }
 
-export const QueryOrderEmbedded = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");
+export const QueryOrderEmbedded: Type<QueryOrderEmbedded> = new Type<QueryOrderEmbedded>("QueryOrderEmbedded");
 export interface QueryOrderEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryOrderEmbedded";
   token: QueryTokenEmbedded;
   orderType: DynamicQuery.OrderType;
 }
 
-export const QueryTokenEmbedded = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
+export const QueryTokenEmbedded: Type<QueryTokenEmbedded> = new Type<QueryTokenEmbedded>("QueryTokenEmbedded");
 export interface QueryTokenEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryTokenEmbedded";
   tokenString: string;
 }
 
 export module UserAssetQueryMessage {
-  export const SwitchToValue = new MessageKey("UserAssetQueryMessage", "SwitchToValue");
-  export const SwitchToExpression = new MessageKey("UserAssetQueryMessage", "SwitchToExpression");
+  export const SwitchToValue: MessageKey = new MessageKey("UserAssetQueryMessage", "SwitchToValue");
+  export const SwitchToExpression: MessageKey = new MessageKey("UserAssetQueryMessage", "SwitchToExpression");
 }
 

@@ -25,14 +25,14 @@ export interface FileDownloaderProps {
 
 const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
 
-export function getFileName(toStr: string) {
+export function getFileName(toStr: string): string {
   if (units.some(u => toStr.endsWith(" " + u)))
     return toStr.beforeLast(" - ");
 
   return toStr;
 }
 
-export function FileDownloader(p: FileDownloaderProps) {
+export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
 
   function handleOnClick(e: React.MouseEvent, save: boolean) {
     const entityOrLite = p.entityOrLite;
@@ -107,6 +107,12 @@ export function FileDownloader(p: FileDownloaderProps) {
     </div>
   );
 }
+export declare namespace FileDownloader {
+    export var defaultProps: {
+        download: string
+        showFileIcon: boolean
+    }
+}
 
 FileDownloader.defaultProps = {
   download: "ViewOrSave",
@@ -115,7 +121,7 @@ FileDownloader.defaultProps = {
 
 export const configurations: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
 
-export function registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>) {
+export function registerConfiguration<T extends IFile & ModifiableEntity>(type: Type<T>, configuration: FileDownloaderConfiguration<T>): void {
   configurations[type.typeName] = configuration as FileDownloaderConfiguration<IFile>;
 }
 
@@ -155,14 +161,14 @@ export function downloadFile(file: IFilePath & ModifiableEntity): Promise<Respon
   return Services.ajaxGetRaw({ url: fileUrl });
 }
 
-export function downloadUrl(e: React.MouseEvent<any>, url: string) {
+export function downloadUrl(e: React.MouseEvent<any>, url: string): void {
 
   e.preventDefault();
   Services.ajaxGetRaw({ url: url })
     .then(resp => Services.saveFile(resp));
 };
 
-export function viewUrl(e: React.MouseEvent<any>, url: string) {
+export function viewUrl(e: React.MouseEvent<any>, url: string): void {
 
   e.preventDefault();
   const win = window.open();

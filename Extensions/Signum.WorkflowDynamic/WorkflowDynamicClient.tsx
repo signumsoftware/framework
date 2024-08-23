@@ -11,7 +11,7 @@ import { WorkflowActivityModelOptions } from '../Signum.Workflow/Workflow/Workfl
 
 export namespace WorkflowDynamicClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     registerCustomContexts();
   
     WorkflowActivityModelOptions.getViewProps = (typeName, viewName) => DynamicViewClient.API.getDynamicViewProps(typeName, viewName);

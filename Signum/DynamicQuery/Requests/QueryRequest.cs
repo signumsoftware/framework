@@ -32,11 +32,11 @@ public class QueryRequest : BaseQueryRequest
 
     public required Pagination Pagination { get; set; }
 
-    public SystemTime? SystemTime { get; set; }
+    public SystemTimeRequest? SystemTime { get; set; }
 
     public bool CanDoMultiplicationsInSubQueries()
     {
-        return GroupResults == false && Pagination is Pagination.All &&
+        return GroupResults == false && Pagination is Pagination.All && SystemTime == null &&
             Orders.Select(a => a.Token).Concat(Columns.Select(a => a.Token)).Any(a => a.HasElement()) &&
             !Filters.SelectMany(f => f.GetAllFilters()).SelectMany(f => f.GetTokens()).Any(t => t.HasElement());
     }
@@ -98,13 +98,99 @@ public enum RefreshMode
     Manual
 }
 
+public class SystemTimeRequest
+{
+    public SystemTimeMode mode;
+    public SystemTimeJoinMode? joinMode;
+    public DateTime? startDate;
+    public DateTime? endDate;
+    public int? timeSeriesStep;
+    public TimeSeriesUnit? timeSeriesUnit;
+    public int? timeSeriesMaxRowsPerStep; 
+
+    public SystemTimeRequest() { }
+
+    public SystemTimeRequest(SystemTime systemTime)
+    {
+        if (systemTime is SystemTime.AsOf asOf)
+        {
+            mode = SystemTimeMode.AsOf;
+            startDate = asOf.DateTime;
+        }
+        else if (systemTime is SystemTime.Between between)
+        {
+            mode = SystemTimeMode.Between;
+            joinMode = between.JoinMode;
+            startDate = between.StartDateTime;
+            endDate = between.EndtDateTime;
+        }
+        else if (systemTime is SystemTime.ContainedIn containedIn)
+        {
+            mode = SystemTimeMode.ContainedIn;
+            joinMode = containedIn.JoinMode;
+            startDate = containedIn.StartDateTime;
+            endDate = containedIn.EndtDateTime;
+        }
+        else if (systemTime is SystemTime.All all)
+        {
+            mode = SystemTimeMode.All;
+            joinMode = all.JoinMode;
+            startDate = null;
+            endDate = null;
+        }
+        else
+            throw new UnexpectedValueException();
+    }
+
+    public override string ToString() => $"{mode} {startDate} {endDate}";
+
+    public SystemTimeRequest Clone() => new SystemTimeRequest
+    { 
+        mode = mode,
+        joinMode = joinMode,
+        startDate = startDate,
+        endDate = endDate,
+        timeSeriesUnit = timeSeriesUnit,
+        timeSeriesStep = timeSeriesStep,
+        timeSeriesMaxRowsPerStep = timeSeriesMaxRowsPerStep,
+    };
+
+    public SystemTime? ToSystemTime()
+    {
+        return mode switch
+        {
+            SystemTimeMode.AsOf => new SystemTime.AsOf(startDate!.Value),
+            SystemTimeMode.Between => new SystemTime.Between(startDate!.Value, endDate!.Value, joinMode!.Value),
+            SystemTimeMode.ContainedIn => new SystemTime.ContainedIn(startDate!.Value, endDate!.Value, joinMode!.Value),
+            SystemTimeMode.All => new SystemTime.All(joinMode!.Value),
+            SystemTimeMode.TimeSeries => null,
+            _ => throw new InvalidOperationException($"Unexpected {mode}"),
+        };
+    }
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum SystemTimeMode
 {
     AsOf,
     Between,
     ContainedIn,
-    All
+    All,
+    TimeSeries,
+}
+
+[DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
+public enum TimeSeriesUnit
+{
+    Year,
+    Quarter,
+    Month,
+    Week,
+    Day, 
+    Hour,
+    Minute,
+    Second,
+    Millisecond,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]

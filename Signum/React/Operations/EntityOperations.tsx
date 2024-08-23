@@ -111,7 +111,7 @@ export namespace EntityOperations {
 
 
 
-  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end") {
+  export function withIcon(text: string, icon?: IconProp, iconColor?: string, iconAlign?: "start" | "end"): string | React.JSX.Element {
     if (icon) {
       switch (iconAlign) {
         case "end": return (<span>{text}<FontAwesomeIcon icon={icon} color={iconColor} fixedWidth className="ms-2" /></span>);
@@ -141,7 +141,7 @@ export namespace EntityOperations {
     throw new Error("Unexpected OperationType");
   }
 
-  export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultConstructFromEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -166,7 +166,7 @@ export namespace EntityOperations {
   }
 
 
-  export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultExecuteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -178,7 +178,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultExecuteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -194,7 +194,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultDeleteEntity<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)
@@ -206,7 +206,7 @@ export namespace EntityOperations {
     });
   }
 
-  export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]) {
+  export function defaultDeleteLite<T extends Entity>(eoc: EntityOperationContext<T>, ...args: any[]): Promise<void | undefined> {
 
     return confirmInNecessary(eoc).then(conf => {
       if (!conf)

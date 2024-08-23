@@ -13,7 +13,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient'
 
 export namespace WhatsNewClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.WhatsNew", () => import("./Changelog"));
   
@@ -135,7 +135,7 @@ export namespace WhatsNewClient {
   
   export const configs: { [type: string]: WhatsNewConfig<any>[] } = {};
   
-  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>) {
+  export function registerConfig<T extends Entity>(config: WhatsNewConfig<T>): void {
     (configs[config.type.typeName] ??= []).push(config);
   }
 }

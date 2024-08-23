@@ -47,7 +47,7 @@ declare global {
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
 
-    distinctBy(this: Array<T>, keySelector?: (element: T) => string): T[];
+    distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
     flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
 
@@ -377,18 +377,23 @@ Array.prototype.toMapDistinct = function (this: any[], keySelector: (element: an
   return map;
 };
 
-Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => any): any[] {
-  const obj: any = {};
+Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) => unknown): any[] {
+  const keysFound = new Set<unknown>();
 
   keySelector ??= a => a.toString();
+
+  const result: any[] = [];
 
   this.forEach(item => {
     const key = keySelector(item);
 
-    obj[key] = item;
+    if (!keysFound.has(key)) {
+      result.push(item);
+      keysFound.add(key);
+    }
   });
 
-  return Dic.getValues(obj);
+  return result;
 };
 
 Array.prototype.flatMap = function (this: any[], selector: (element: any, index: number, array: any[]) => any[]): any {
@@ -1020,7 +1025,7 @@ export module Dic {
     return akeys.every(k => equals((objA as any)[k], (objB as any)[k], deep, depth + 1, visited));
   }
 
-  export function assign<O extends P, P extends {}>(obj: O, other: P | undefined) {
+  export function assign<O extends P, P extends {}>(obj: O, other: P | undefined): void {
     if (!other)
       return;
 
@@ -1096,7 +1101,7 @@ export module Dic {
     return result;
   }
 
-  export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void) {
+  export function foreach<V>(obj: { [key: string]: V }, action: (key: string, value: V) => void): void {
 
     for (const name in obj) {
       if (obj.hasOwnProperty == null || obj.hasOwnProperty(name)) {
@@ -1106,7 +1111,7 @@ export module Dic {
   }
 
 
-  export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string) {
+  export function addOrThrow<V>(dic: { [key: string]: V }, key: string, value: V, errorContext?: string): void {
     if (dic[key])
       throw new Error(`Key ${key} already added` + (errorContext ? "in " + errorContext : ""));
 
@@ -1148,7 +1153,7 @@ export function coalesce<T>(value: T | undefined | null, defaultValue: T): T {
   return value != null ? value : defaultValue;
 }
 
-export function classes(...classNames: (string | null | undefined | boolean /*false*/)[]) {
+export function classes(...classNames: (string | null | undefined | boolean /*false*/)[]): string {
   return classNames.filter(a => a && a != "").join(" ");
 }
 export function combineFunction<F extends Function>(func1?: F | null, func2?: F | null): F | null | undefined {
@@ -1258,9 +1263,9 @@ export module DomUtils {
 }
 
 export class KeyGenerator {
-  map = new Map<object, number>();
+  map: Map<object, number> = new Map<object, number>();
   maxIndex = 0;
-  getKey(o: object) {
+  getKey(o: object): number {
     var result = this.map.get(o);
     if (result == undefined) {
       result = this.maxIndex++;
@@ -1270,7 +1275,7 @@ export class KeyGenerator {
   }
 }
 
-export function roundTwoDecimals(num: number) {
+export function roundTwoDecimals(num: number): number {
 
   var round3 = Math.round(num * 1000000) / 1000000; //convert 0.0049999999999 -> 0.005
 
@@ -1284,7 +1289,7 @@ export function roundTwoDecimals(num: number) {
 }
 
 
-export function getColorContrasColorBWByHex (hexcolor: string) {
+export function getColorContrasColorBWByHex (hexcolor: string): "black" | "white" {
   hexcolor = hexcolor.replace("#", "");
   var r = parseInt(hexcolor.substr(0, 2), 16);
   var g = parseInt(hexcolor.substr(2, 2), 16);

@@ -32,30 +32,30 @@ export class DashboardController {
     this.isLoading = true;
   }
 
-  setIsLoading() {
+  setIsLoading(): void {
     this.isLoading = !this.dashboard.parts
       .filter(p => DashboardClient.hasWaitForInvalidation(p.element.content.Type))
       .every(p => this.invalidationMap.has(p.element));
   }
 
-  registerInvalidations(embedded: PanelPartEmbedded, invalidation: () => void) {
+  registerInvalidations(embedded: PanelPartEmbedded, invalidation: () => void): void {
     this.invalidationMap.set(embedded, invalidation);
   }
 
-  invalidate(source: PanelPartEmbedded, interactionGroup: InteractionGroup | null | undefined) {
+  invalidate(source: PanelPartEmbedded, interactionGroup: InteractionGroup | null | undefined): void {
     Array.from(this.invalidationMap.keys())
       .filter(p => p != source && (interactionGroup == null || p.interactionGroup == interactionGroup))
       .forEach(p => this.invalidationMap.get(p)!());
 
   }
 
-  setFilter(filter: DashboardFilter) {
+  setFilter(filter: DashboardFilter): void {
     this.lastChange.set(filter.queryKey, new Date().getTime());
     this.filters.set(filter.partEmbedded, filter);
     this.forceUpdate();
   }
 
-  clearFilters(partEmbedded: PanelPartEmbedded) {
+  clearFilters(partEmbedded: PanelPartEmbedded): void {
     var current = this.filters.get(partEmbedded);
     if (current)
       this.lastChange.set(current.queryKey, new Date().getTime());
@@ -63,13 +63,13 @@ export class DashboardController {
     this.forceUpdate();
   }
 
-  setPinnedFilter(filter: DashboardPinnedFilters) {
+  setPinnedFilter(filter: DashboardPinnedFilters): void {
     this.lastChange.set(filter.queryKey, new Date().getTime());
     this.pinnedFilters.set(filter.partEmbedded, filter);
     this.forceUpdate();
   }       
 
-  clearPinnesFilter(partEmbedded: PanelPartEmbedded) {
+  clearPinnesFilter(partEmbedded: PanelPartEmbedded): void {
     var current = this.pinnedFilters.get(partEmbedded);
     if (current)
       this.lastChange.set(current.queryKey, new Date().getTime());
@@ -78,7 +78,7 @@ export class DashboardController {
     this.forceUpdate();
   }
 
-  getLastChange(queryKey: string) {
+  getLastChange(queryKey: string): number | null | undefined {
     if (this.queriesWithEquivalences.contains(queryKey))
       return this.queriesWithEquivalences.max(qk => this.lastChange.get(qk));
 

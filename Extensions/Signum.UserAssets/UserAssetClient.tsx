@@ -26,7 +26,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 export namespace UserAssetClient {
   
   let started = false;
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     if (started)
       return;
   
@@ -43,7 +43,7 @@ export namespace UserAssetClient {
     started = true;
   }
   
-  export function registerExportAssertLink(type: Type<IUserAssetEntity>) {
+  export function registerExportAssertLink(type: Type<IUserAssetEntity>): void {
     if (AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
       QuickLinks.registerQuickLink(type,
         new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
@@ -198,6 +198,7 @@ export namespace UserAssetClient {
       filters: QueryFilterItem[];
       entity: Lite<Entity> | undefined;
       canAggregate: boolean
+      canTimeSeries: boolean;
     }
   
   
@@ -208,7 +209,8 @@ export namespace UserAssetClient {
     export interface StringifyFiltersRequest {
       queryKey: string;
       filters: FilterNode[];
-      canAggregate: boolean
+      canAggregate: boolean;
+      canTimeSeries: boolean;
     }
     
     export interface FilterNode {
@@ -238,17 +240,14 @@ export namespace UserAssetClient {
       return ajaxPost({ url: "/api/userAssets/parseDate/" }, dateExpression);
     }
   
-  
     export function stringifyDate(dateValue: string): Promise<string> {
       return ajaxPost({ url: "/api/userAssets/stringifyDate/" }, dateValue);
     }
   
-  
-    export function exportAsset(entity: Lite<IUserAssetEntity>[]) {
+    export function exportAsset(entity: Lite<IUserAssetEntity>[]): void {
       ajaxPostRaw({ url: "/api/userAssets/export" }, entity)
         .then(resp => saveFile(resp));
     }
-  
   
     export function importPreview(request: FileUpload): Promise<UserAssetPreviewModel> {
       return ajaxPost({ url: "/api/userAssets/importPreview/" }, request);

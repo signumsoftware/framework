@@ -24,7 +24,7 @@ interface WorkflowActivityMonitorPageState {
   workflowActivityMonitor: WorkflowClient.WorkflowActivityMonitor;
 }
 
-export default function WorkflowActivityMonitorPage() {
+export default function WorkflowActivityMonitorPage(): React.JSX.Element {
   const params = useParams() as { workflowId: string };
 
   var workflow = useAPI(() => {
@@ -97,7 +97,7 @@ interface WorkflowActivityMonitorConfigComponentState {
   queryDescription?: QueryDescription;
 }
 
-export function WorkflowActivityMonitorConfigComponent(p: WorkflowActivityMonitorConfigComponentProps) {
+export function WorkflowActivityMonitorConfigComponent(p: WorkflowActivityMonitorConfigComponentProps): React.JSX.Element | null {
 
   const qd = useAPI(() => Finder.getQueryDescription(CaseActivityEntity), []);
 

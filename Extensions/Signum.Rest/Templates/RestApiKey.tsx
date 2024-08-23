@@ -6,7 +6,7 @@ import { classes } from "@framework/Globals";
 import { RestApiKeyClient } from "../RestApiKeyClient";
 import { useForceUpdate } from '@framework/Hooks';
 
-export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }){
+export default function RestApiKeyComponent(p : { ctx: TypeContext<RestApiKeyEntity> }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 

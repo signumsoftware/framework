@@ -75,7 +75,7 @@ function getRatio(vOut: Point, vIn: Point) {
 
 
 
-export function wrap(textElement: SVGTextElement, width: number) {
+export function wrap(textElement: SVGTextElement, width: number): void {
   const text = d3.select(textElement);
   const words: string[] = text.text().split(/\s+/).reverse();
   let word: string;
@@ -99,7 +99,7 @@ export function wrap(textElement: SVGTextElement, width: number) {
   }
 }
 
-export function forceBoundingBox<T extends d3.SimulationNodeDatum>(width: number = 0, height: number = 0) {
+export function forceBoundingBox<T extends d3.SimulationNodeDatum>(width: number = 0, height: number = 0): (alpha: number) => void {
   var nodes: T[];
 
   function gravityDim(v: number, min: number, max: number, alpha: number): number {

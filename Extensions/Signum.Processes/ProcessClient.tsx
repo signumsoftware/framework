@@ -21,7 +21,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ProcessClient {
   
-  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }) {
+  export function start(options: { routes: RouteObject[], packages: boolean, packageOperations: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Processes", () => import("./Changelog"));
   
@@ -77,7 +77,7 @@ export namespace ProcessClient {
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
-  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]) {
+  export function register<T extends Entity>(...settings: ContextualOperationSettings<T>[]): void {
     settings.forEach(s => Dic.addOrThrow(processOperationSettings, s.operationSymbol, s));
   }
   

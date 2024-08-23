@@ -31,7 +31,7 @@ interface FilterBuilderEmbeddedProps {
   showDashboardBehaviour?: boolean;
 }
 
-export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
+export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.Element {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
   const filterOptions = useAPI(() => qd == null ? Promise.resolve(null) : FilterBuilderEmbedded.toFilterOptionParsed(qd, p.ctx.value, p.subTokenOptions), [qd, p.ctx.value, p.subTokenOptions]);
@@ -170,67 +170,71 @@ export default function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps) {
   );
 }
 
-FilterBuilderEmbedded.toFilterOptionParsed = async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
-  const completer = new Finder.TokenCompleter(qd);
+export namespace FilterBuilderEmbedded {
+  export async function toFilterOptionParsed(qd: QueryDescription, allFilters: MList<QueryFilterEmbedded>, subTokenOptions: SubTokensOptions): Promise<FilterOptionParsed[]> {
+    const completer = new Finder.TokenCompleter(qd);
 
-  allFilters.forEach(mle => {
-    if (mle.element.token && mle.element.token.tokenString)
-      completer.request(mle.element.token.tokenString, subTokenOptions);
-  });
-
-  await completer.finished();
-
-  function toFilterList(filters: QueryFilterEmbedded[], indent: number): FilterOptionParsed[] {
-    return filters.groupWhen(f => f.indentation == indent).map(gr => {
-      if (!gr.key.isGroup) {
-        if (gr.elements.length != 0)
-          throw new Error("Unexpected childrens of condition");
-
-        const pinned = gr.key.pinned;
-
-        const filterCondition: FilterConditionOptionParsed = {
-          token: completer.get(gr.key.token!.tokenString),
-          operation: gr.key.operation ?? "EqualTo",
-          value: gr.key.valueString,
-          frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
-          dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
-        };
-
-        return filterCondition;
-      }
-      else {
-
-        const pinned = gr.key.pinned;
-
-        const filterGroup: FilterGroupOptionParsed = {
-          token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
-          groupOperation: gr.key.groupOperation!,
-          filters: toFilterList(gr.elements, indent + 1),
-          value: gr.key.valueString ?? undefined,
-          frozen: false,
-          pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
-          dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
-        };
-
-        return filterGroup;
-      }
+    allFilters.forEach(mle => {
+      if (mle.element.token && mle.element.token.tokenString)
+        completer.request(mle.element.token.tokenString, subTokenOptions);
     });
 
-    function toPinnedFilterParsed(pinned: PinnedQueryFilterEmbedded): PinnedFilterParsed {
-      return {
-        label: pinned.label ||  undefined,
-        column: pinned.column ?? undefined,
-        colSpan: pinned.colSpan ?? undefined,
-        row: pinned.row ?? undefined,
-        active: pinned.active || undefined,
-        splitValue: pinned.splitValue || undefined,
-      };
-    }
-  }
+    await completer.finished();
 
-  return toFilterList(allFilters.map(a => a.element), 0);
+    function toFilterList(filters: QueryFilterEmbedded[], indent: number): FilterOptionParsed[] {
+      return filters.groupWhen(f => f.indentation == indent).map(gr => {
+        if (!gr.key.isGroup) {
+          if (gr.elements.length != 0)
+            throw new Error("Unexpected childrens of condition");
+
+          const pinned = gr.key.pinned;
+
+          const filterCondition: FilterConditionOptionParsed = {
+            token: completer.get(gr.key.token!.tokenString),
+            operation: gr.key.operation ?? "EqualTo",
+            value: gr.key.valueString,
+            frozen: false,
+            pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+            dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
+          };
+
+          return filterCondition;
+        }
+        else {
+
+          const pinned = gr.key.pinned;
+
+          const filterGroup: FilterGroupOptionParsed = {
+            token: gr.key.token ? completer.get(gr.key.token.tokenString) : undefined,
+            groupOperation: gr.key.groupOperation!,
+            filters: toFilterList(gr.elements, indent + 1),
+            value: gr.key.valueString ?? undefined,
+            frozen: false,
+            pinned: !pinned ? undefined : toPinnedFilterParsed(pinned),
+            dashboardBehaviour: gr.key.dashboardBehaviour ?? undefined,
+          };
+
+          return filterGroup;
+        }
+      });
+
+      function toPinnedFilterParsed(pinned: PinnedQueryFilterEmbedded): PinnedFilterParsed {
+        return {
+          label: pinned.label || undefined,
+          column: pinned.column ?? undefined,
+          colSpan: pinned.colSpan ?? undefined,
+          row: pinned.row ?? undefined,
+          active: pinned.active || undefined,
+          splitValue: pinned.splitValue || undefined,
+        };
+      }
+    }
+
+    return toFilterList(allFilters.map(a => a.element), 0);
+  }
 }
+
+export default FilterBuilderEmbedded;
 
 interface MultiLineOrExpressionProps {
   ctx: TypeContext<string | null | undefined>;
@@ -238,7 +242,7 @@ interface MultiLineOrExpressionProps {
   onRenderItem: (ctx: TypeContext<any>, onChange: () => void) => React.ReactElement<any>;
 }
 
-export function MultiLineOrExpression(p: MultiLineOrExpressionProps) {
+export function MultiLineOrExpression(p: MultiLineOrExpressionProps): React.JSX.Element {
 
   const [values, setValues] = React.useState<string[]>([]);
 
@@ -263,7 +267,7 @@ interface EntityLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function EntityLineOrExpression(p: EntityLineOrExpressionProps) {
+export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
 
@@ -327,7 +331,7 @@ interface ValueLineOrExpressionProps {
   mandatory?: boolean;
 }
 
-export function AutoLineOrExpression(p: ValueLineOrExpressionProps) {
+export function AutoLineOrExpression(p: ValueLineOrExpressionProps): React.JSX.Element {
 
   const foceUpdate = useForceUpdate();
   const valueRef = React.useRef<string | number | boolean | null | undefined>(undefined);

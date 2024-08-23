@@ -3,7 +3,7 @@ import { AutoLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { MultipleSMSModel } from '../Signum.SMS'
 
-export default function MultipleSMS(p: { ctx: TypeContext<MultipleSMSModel> }){
+export default function MultipleSMS(p: { ctx: TypeContext<MultipleSMSModel> }): React.JSX.Element {
 
   return (
     <div>

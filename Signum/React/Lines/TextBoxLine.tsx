@@ -10,13 +10,13 @@ export interface TextBoxLineProps extends TextBaseProps<string | null> {
 }
 
 export class TextBoxLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["string"]);
   }
 }
 
-export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const TextBoxLine: React.MemoExoticComponent<React.ForwardRefExoticComponent<TextBoxLineProps & React.RefAttributes<TextBoxLineController>>> = React.memo(React.forwardRef(function TextBoxLine(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 
@@ -32,13 +32,14 @@ export const TextBoxLine = React.memo(React.forwardRef(function TextBoxLine(prop
 });
 
 export class PasswordLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("PasswordLine", ["string"]);
   }
 }
 
-export const PasswordLine = genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
+export const PasswordLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<PasswordLineController>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function PasswordLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<PasswordLineController>) {
 
   const c = useController(PasswordLineController, props, ref);
 
@@ -54,13 +55,14 @@ export const PasswordLine = genericForwardRefWithMemo(function PasswordLine<V ex
 });
 
 export class GuidLineController extends TextBaseController<TextBoxLineProps, string | null> {
-  init(p: TextBoxLineProps) {
+  init(p: TextBoxLineProps): void {
     super.init(p);
     this.assertType("TextBoxLine", ["Guid"]);
   }
 }
 
-export const GuidLine = genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
+export const GuidLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<GuidLineController>) => React.ReactNode | null =
+  genericForwardRefWithMemo(function GuidLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<GuidLineController>) {
 
   const c = useController(GuidLineController, props, ref);
 
@@ -75,7 +77,7 @@ export const GuidLine = genericForwardRefWithMemo(function GuidLine<V extends st
   return LineBaseController.propEquals(prev, next);
 });
 
-export const ColorLine = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
+export const ColorLine: <V extends string | null>(props: TextBoxLineProps & React.RefAttributes<TextBoxLineController>) => React.ReactNode | null = genericForwardRefWithMemo(function ColorLine<V extends string | null>(props: TextBoxLineProps, ref: React.Ref<TextBoxLineController>) {
 
   const c = useController(TextBoxLineController, props, ref);
 

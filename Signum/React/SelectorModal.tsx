@@ -19,7 +19,7 @@ interface SelectorModalProps extends IModalProps<any> {
   renderGroup?: (groupKey: string) => React.ReactNode;
 }
 
-export default function SelectorModal(p: SelectorModalProps) {
+function SelectorModal(p: SelectorModalProps): React.JSX.Element {
 
   const [show, setShow] = React.useState(true);
   const [selectedItems, setSelectedItems] = React.useState<unknown[]>([]);
@@ -120,100 +120,104 @@ export default function SelectorModal(p: SelectorModalProps) {
   );
 }
 
-SelectorModal.chooseElement = <T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> => {
-  const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
+namespace SelectorModal {
 
-  if (!config || !config.forceShow) {
-    if (options.length == 1)
-      return Promise.resolve(options.single());
+  export function chooseElement<T extends Object>(options: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
+    const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
 
-    if (options.length == 0)
-      return Promise.resolve(undefined);
-  }
+    if (!config || !config.forceShow) {
+      if (options.length == 1)
+        return Promise.resolve(options.single());
 
-  return openModal<T>(<SelectorModal
-    options={options.map(a => ({
-      value: a,
-      displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
-      name: buttonName ? buttonName(a) : a.toString(),
-      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
-      groupKey: buttonGroupKey?.(a) ?? undefined,
-    }))}
-    title={title || SelectorMessage.ChooseAValue.niceToString()}
-    message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
-    size={size}
-    dialogClassName={dialogClassName} />);
-};
+      if (options.length == 0)
+        return Promise.resolve(undefined);
+    }
 
-SelectorModal.chooseManyElement = <T extends Object>(options: T[], config?: MultiSelectorConfig<T>): Promise<T[] | undefined> => {
-  const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
+    return openModal<T>(<SelectorModal
+      options={options.map(a => ({
+        value: a,
+        displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
+        name: buttonName ? buttonName(a) : a.toString(),
+        htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
+        groupKey: buttonGroupKey?.(a) ?? undefined,
+      }))}
+      title={title || SelectorMessage.ChooseAValue.niceToString()}
+      message={message ?? SelectorMessage.PleaseChooseAValueToContinue.niceToString()}
+      size={size}
+      dialogClassName={dialogClassName} />);
+  };
 
-  var minElements = config?.minElements === undefined ? 1 : config.minElements;
+  export function chooseManyElement<T extends Object>(options: T[], config?: MultiSelectorConfig<T>): Promise<T[] | undefined> {
+    const { buttonDisplay, buttonName, title, message, size, dialogClassName, buttonGroupKey } = config || {} as SelectorConfig<T>;
 
-  if (!config || !config.forceShow) {
-    if (options.length == 0)
-      return Promise.resolve([]);
+    var minElements = config?.minElements === undefined ? 1 : config.minElements;
 
-    if (options.length == minElements)
-      return Promise.resolve(options)
-  }
+    if (!config || !config.forceShow) {
+      if (options.length == 0)
+        return Promise.resolve([]);
 
-  return openModal<T[]>(<SelectorModal
-    options={options.map(a => ({
-      value: a,
-      displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
-      name: buttonName ? buttonName(a) : a.toString(),
-      htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
-      groupKey: buttonGroupKey?.(a) ?? undefined,
-    }))}
-    title={title || SelectorMessage.ChooseValues.niceToString()}
-    message={message ?? SelectorMessage.PleaseSelectAtLeastOneValueToContinue.niceToString()}
-    size={size}
-    dialogClassName={dialogClassName}
-    multiSelect={{
-      minElements: minElements,
-      maxElements: config?.maxElements,
-    }}
-  />);
-};
+      if (options.length == minElements)
+        return Promise.resolve(options)
+    }
 
-SelectorModal.chooseType = (options: TypeInfo[], config?: SelectorConfig<TypeInfo>): Promise<TypeInfo | undefined> => {
-  return SelectorModal.chooseElement(options,
-    {
-      buttonDisplay: a => a.niceName ?? "",
-      buttonName: a => a.name,
-      title: SelectorMessage.TypeSelector.niceToString(),
-      message: SelectorMessage.PleaseSelectAType.niceToString(),
-      ...config
-    });
-};
+    return openModal<T[]>(<SelectorModal
+      options={options.map(a => ({
+        value: a,
+        displayName: buttonDisplay ? buttonDisplay(a) : a.toString(),
+        name: buttonName ? buttonName(a) : a.toString(),
+        htmlAttributes: config?.buttonHtmlAttributes && config.buttonHtmlAttributes(a),
+        groupKey: buttonGroupKey?.(a) ?? undefined,
+      }))}
+      title={title || SelectorMessage.ChooseValues.niceToString()}
+      message={message ?? SelectorMessage.PleaseSelectAtLeastOneValueToContinue.niceToString()}
+      size={size}
+      dialogClassName={dialogClassName}
+      multiSelect={{
+        minElements: minElements,
+        maxElements: config?.maxElements,
+      }}
+    />);
+  };
 
-SelectorModal.chooseEnum = <T extends string>(enumType: EnumType<T>, values?: T[], config?: SelectorConfig<T>): Promise<T | undefined> => {
-  return SelectorModal.chooseElement(values ?? enumType.values(),
-    {
-      buttonDisplay: a => enumType.niceToString(a),
-      buttonName: a => a,
-      title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
-      message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
-      size: "md",
-      ...config
-    });
-};
-
-SelectorModal.chooseLite = <T extends Entity>(type: Type<T> | TypeInfo | string, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> => {
-  const ti = getTypeInfo(type);
-  return (values ? Promise.resolve(values) : Finder.API.fetchAllLites({ types: ti.name }))
-    .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
+  export function chooseType(options: TypeInfo[], config?: SelectorConfig<TypeInfo>): Promise<TypeInfo | undefined> {
+    return SelectorModal.chooseElement(options,
       {
-        buttonDisplay: a => getToString(a),
-        buttonName: a => liteKey(a),
-        title: SelectorMessage._0Selector.niceToString(ti.niceName),
-        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(ti.niceName),
+        buttonDisplay: a => a.niceName ?? "",
+        buttonName: a => a.name,
+        title: SelectorMessage.TypeSelector.niceToString(),
+        message: SelectorMessage.PleaseSelectAType.niceToString(),
+        ...config
+      });
+  };
+
+  export function chooseEnum<T extends string>(enumType: EnumType<T>, values?: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
+    return SelectorModal.chooseElement(values ?? enumType.values(),
+      {
+        buttonDisplay: a => enumType.niceToString(a),
+        buttonName: a => a,
+        title: SelectorMessage._0Selector.niceToString(enumType.niceTypeName()),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(enumType.niceTypeName()),
         size: "md",
         ...config
-      }));
-};
+      });
+  };
 
+  export function chooseLite<T extends Entity>(type: Type<T> | TypeInfo | string, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> {
+    const ti = getTypeInfo(type);
+    return (values ? Promise.resolve(values) : Finder.API.fetchAllLites({ types: ti.name }))
+      .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
+        {
+          buttonDisplay: a => getToString(a),
+          buttonName: a => liteKey(a),
+          title: SelectorMessage._0Selector.niceToString(ti.niceName),
+          message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(ti.niceName),
+          size: "md",
+          ...config
+        }));
+  };
+}
+
+export default SelectorModal;
 
 export interface SelectorConfig<T> {
   buttonName?: (val: T) => string; //For testing

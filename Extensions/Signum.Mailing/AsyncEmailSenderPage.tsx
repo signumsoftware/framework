@@ -10,7 +10,7 @@ import { toAbsoluteUrl, useTitle } from '@framework/AppContext'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { classes } from '@framework/Globals'
 
-export default function AsyncEmailSenderPage() {
+export default function AsyncEmailSenderPage(): React.JSX.Element {
 
   useTitle("AsyncEmailSender state");
 

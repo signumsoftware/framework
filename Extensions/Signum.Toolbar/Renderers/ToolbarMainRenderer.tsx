@@ -20,7 +20,7 @@ import { parseIcon } from '@framework/Components/IconTypeahead'
 export interface ToolbarMainRendererProps {
 }
 
-export default function ToolbarMainRenderer(p: ToolbarMainRendererProps) {
+export default function ToolbarMainRenderer(p: ToolbarMainRendererProps): React.JSX.Element {
   var response = useAPI(signal => ToolbarClient.API.getCurrentToolbar("Main").then(t => t ?? null), []);
 
   if (response === undefined)

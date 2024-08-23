@@ -228,9 +228,37 @@ internal class QueryBinder : ExpressionVisitor
                 m.Method.Name == nameof(EntityContext.MListRowId) ? entityContext.MListRowId ?? new PrimaryKeyExpression(Expression.Constant(null, typeof(IComparable))) :
                  throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
         }
+        else if (m.Method.DeclaringType == typeof(SystemTime) && m.Method.Name == nameof(SystemTime.OverrideInExpression))
+        {
+            SystemTime? old = this.systemTime;
+            this.systemTime = ToSystemTime(m.Arguments[0]);
+
+            Expression newValue = Visit(m.Arguments[1]);
+
+            this.systemTime = old;
+
+            return newValue;
+        }
 
         MethodCallExpression result = (MethodCallExpression)base.VisitMethodCall(m);
         return BindMethodCall(result);
+    }
+
+    private SystemTime ToSystemTime(Expression expression)
+    {
+        if (expression is ConstantExpression ce)
+            return (SystemTime)ce.Value!;
+
+        if(expression is NewExpression ne && ne.Type == typeof(SystemTime.AsOf))
+        {
+            var at = Visit(ne.Arguments[0]);
+
+            var at2 = DbExpressionNominator.FullNominate(at);
+
+            return new SystemTime.AsOfExpression(at2);
+        }
+
+        throw new InvalidOperationException("Unable to convert to SystemTime the expression:" + expression.ToString());
     }
 
     private ReadOnlyDictionary<Type, Type>? ToTypeDictionary(Expression? modelType, Type entityType)
@@ -1433,7 +1461,7 @@ internal class QueryBinder : ExpressionVisitor
         TableExpression tableExpression = new TableExpression(tableAlias, table, st.SystemTime ?? (table.SystemVersioned != null ? this.systemTime : null), currentTableHint);
         currentTableHint = null;
 
-        if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.Current)
+        if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.Current)
             this.systemTime = null;
 
         Alias selectAlias = NextSelectAlias();
@@ -2286,7 +2314,7 @@ internal class QueryBinder : ExpressionVisitor
             throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
 
         if (expressions.Any(e => e.Value is AdditionalFieldExpression))
-            throw new InvalidOperationException("MList on ImplementedBy are not supported yet");
+            return strategy.CombineValues(expressions, returnType);
 
         if (expressions.Any(e => e.Value is TypeImplementedByAllExpression || e.Value is TypeImplementedByExpression || e.Value is TypeEntityExpression))
         {
@@ -3609,11 +3637,12 @@ class QueryJoinExpander : DbExpressionVisitor
 
                 Expression equal = DbExpressionNominator.FullNominate(eq)!;
 
-                if (this.systemTime is SystemTime.Interval inter && inter.JoinBehaviour == JoinBehaviour.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
+                if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
                     source = new JoinExpression(JoinType.OuterApply, source,
-                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, new[] { new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!) }, null, 0),
+                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, 
+                        [new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!)], null, 0),
                         null);
                 }
                 else

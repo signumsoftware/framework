@@ -28,6 +28,7 @@ internal enum DbExpressionType
     SqlConstant,
     SqlVariable,
     SqlLiteral,
+    SqlColumnList,
     SqlCast,
     Case,
     RowNumber,
@@ -713,6 +714,30 @@ internal class SqlLiteralExpression : DbExpression
     }
 }
 
+internal class SqlColumnListExpression : DbExpression
+{
+    public readonly ReadOnlyCollection<ColumnExpression> Columns;
+    public SqlColumnListExpression(IEnumerable<ColumnExpression> column)
+        : base(DbExpressionType.SqlLiteral, typeof(void))
+    {
+        this.Columns = column.ToReadOnly();
+    }
+
+    public override string ToString()
+    {
+        var only = Columns.Only();
+        if (only != null)
+            return only.ToString();
+
+        return "(" + Columns.ToString(", ") + ")";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitSqlColumnList(this);
+    }
+}
+
 internal class ToDayOfWeekExpression : DbExpression
 {
     public readonly Expression Expression;
@@ -1057,6 +1082,19 @@ public static class SystemTimeExpressions
         return Expression.And(
              Expression.GreaterThan(max1, min2),
              Expression.GreaterThan(max2, min1)
+             );
+    }
+
+    internal static Expression? Contains(this IntervalExpression interval, Expression expression)
+    {
+        if (interval.PostgresRange != null)
+        {
+            return new SqlFunctionExpression(typeof(bool), null, "@>", new Expression[] { interval.PostgresRange!, expression! });
+        }
+
+        return Expression.And(
+             Expression.LessThanOrEqual(interval.Min!, expression.Nullify()),
+             Expression.LessThan(expression.Nullify(), interval.Max!)
              );
     }
 

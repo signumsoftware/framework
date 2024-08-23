@@ -283,6 +283,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
         return sqlFunction;
     }
 
+    protected internal override Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        return Add(base.VisitSqlColumnList(sqlColumnList));
+    }
+
     protected internal override Expression VisitSqlTableValuedFunction(SqlTableValuedFunctionExpression sqlFunction)
     {
         ReadOnlyCollection<Expression> args = Visit(sqlFunction.Arguments, a => Visit(a));
@@ -1778,13 +1783,13 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
 
 
-    private SqlLiteralExpression ToLiteralColumns(MethodCallExpression mce)
+    private SqlColumnListExpression ToLiteralColumns(MethodCallExpression mce)
     {
         var cols = mce.TryGetArgument("columns");
         if (cols != null)
         {
             if (cols is ConstantExpression c && c.IsNull())
-                return new SqlLiteralExpression(typeof(object), "*");
+                return new SqlColumnListExpression([]);
 
             if (cols is NewArrayExpression arr)
             {
@@ -1801,9 +1806,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 if (columns.Select(a => a.Alias).Distinct().Count() != 1)
                     throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: Unable to use Columns of different table aliases {columns.Select(a => a.Alias).Distinct().ToString(", ")}");
 
-                var bla = columns.Distinct().ToString(", ");
-
-                return new SqlLiteralExpression(typeof(object), "(" + bla + ")");
+                return new SqlColumnListExpression(columns);
             }
         }
 
@@ -1814,7 +1817,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                 table is MListElementExpression mle ? mle.Alias :
                 throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: {table.GetType().Name} can not be used as 'table'");
 
-            return new SqlLiteralExpression(typeof(object), alias.ToString() + ".*");
+            return new SqlColumnListExpression([new ColumnExpression(typeof(void), alias, "*")]);
         }
 
         throw new InvalidOperationException($"In {mce.Method.MethodSignature()}: No 'columns' or 'table' argument found");

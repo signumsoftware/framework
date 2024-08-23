@@ -8,7 +8,7 @@ export namespace DynamicClient {
   
   
   
-  export function start(options: { routes: RouteObject[], withCodeGen: boolean }) {
+  export function start(options: { routes: RouteObject[], withCodeGen: boolean }): void {
   
     var route = options.routes.singleOrNull(a => a.path == "/dynamic/panel");
     if (route == null)

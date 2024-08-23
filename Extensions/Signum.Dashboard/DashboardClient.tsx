@@ -14,7 +14,8 @@ import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
-  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel
+  CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
+  HealthCheckPartEntity
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -57,7 +58,7 @@ export interface PartRenderer<T extends IPartEntity> {
 
 export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
 
-export function start(options: { routes: RouteObject[] }) {
+export function start(options: { routes: RouteObject[] }): void {
 
     ChangeLogClient.registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
 
@@ -72,6 +73,7 @@ export function start(options: { routes: RouteObject[] }) {
   Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
   Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
   Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
+  Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
 
   ToolbarClient.registerConfig(new DashboardToolbarConfig());
   OmniboxClient.registerProvider(new DashboardOmniboxProvider());
@@ -101,9 +103,16 @@ export function start(options: { routes: RouteObject[] }) {
     defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
     withPanel: () => false
   });
+
   registerRenderer(SeparatorPartEntity, {
     component: () => import('./View/SeparatorPartView').then(a => a.default),
     defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+    withPanel: () => false
+  });
+
+  registerRenderer(HealthCheckPartEntity, {
+    component: () => import('./View/HealthCheckPart').then(a => a.default),
+    defaultIcon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
     withPanel: () => false
   });
 
@@ -167,23 +176,23 @@ export function home(): Promise<Lite<DashboardEntity> | null> {
   return API.home();
 }
 
-export function hasWaitForInvalidation(type: PseudoType) {
+export function hasWaitForInvalidation(type: PseudoType): boolean | undefined {
   return partRenderers[getTypeName(type)].waitForInvalidation;
 }
 
-export function defaultIcon(type: PseudoType) {
+export function defaultIcon(type: PseudoType): IconColor {
   return partRenderers[getTypeName(type)].defaultIcon();
 }
 
-export function getQueryNames(part: IPartEntity) {
+export function getQueryNames(part: IPartEntity): QueryEntity[] {
   return partRenderers[getTypeName(part)].getQueryNames?.(part) ?? [];
 }
 
-export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>) {
+export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>): string {
   return "/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity));
 }
 
-export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>) {
+export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>): void {
   partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
 }
 
@@ -212,7 +221,16 @@ export interface DashboardWidgetProps {
   frame: EntityFrame;
 }
 
-export function DashboardWidget(p: DashboardWidgetProps) {
+export function DashboardWidget(p: DashboardWidgetProps): React.FunctionComponentElement<{
+    dashboard: DashboardEntity;
+    cachedQueries: {
+        [userAssetKey: string]: Promise<CachedQueryJS>;
+    };
+    entity?: Entity;
+    deps?: React.DependencyList;
+    reload: () => void;
+    hideEditButton?: boolean;
+}> | null {
 
   const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
 
@@ -227,7 +245,9 @@ export function DashboardWidget(p: DashboardWidgetProps) {
   });
 }
 
-export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null) {
+export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null): {
+    [key: string]: Promise<CachedQueryJS>;
+} | undefined {
 
   if (!dashboardWithQueries)
     return undefined;
@@ -256,7 +276,7 @@ declare module '@framework/Signum.Entities' {
 }
 
 
-export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }) {
+export function CreateNewButton(p: { queryKey: string, onClick: (types: TypeInfo[], qd: QueryDescription) => void }): React.JSX.Element | null {
 
   const qd = useAPI(() => Finder.getQueryDescription(p.queryKey), [p.queryKey]);
 
@@ -292,7 +312,7 @@ export interface PanelPartContentProps<T extends IPartEntity> {
   }
 }
 
-export function DashboardTitle(p: { dashboard: DashboardEntity }) {
+export function DashboardTitle(p: { dashboard: DashboardEntity }): React.JSX.Element | undefined {
 
   const icon = parseIcon(p.dashboard.iconName);
   const title = p.dashboard.hideDisplayName ? undefined :

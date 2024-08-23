@@ -8,7 +8,7 @@ import * as Basics from '../../../Signum/React/Signum.Basics'
 import * as Authorization from '../Signum.Authorization'
 
 
-export const SessionLogEntity = new Type<SessionLogEntity>("SessionLog");
+export const SessionLogEntity: Type<SessionLogEntity> = new Type<SessionLogEntity>("SessionLog");
 export interface SessionLogEntity extends Entities.Entity {
   Type: "SessionLog";
   user: Entities.Lite<Authorization.UserEntity>;

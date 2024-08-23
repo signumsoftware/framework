@@ -11,7 +11,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace TranslationClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Translation", () => import("./Changelog"));
   

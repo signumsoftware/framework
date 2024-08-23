@@ -13,7 +13,7 @@ import "./AuthAdmin.css"
 import { GraphExplorer } from '@framework/Reflection'
 import { RoleEntity } from '../Signum.Authorization'
 
-export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function PermissionRulesPackControl(p: { ctx: TypeContext<PermissionRulePack>, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
   function renderButtons(bc: ButtonsContext) {
 
@@ -59,7 +59,7 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
 
   const [filter, setFilter] = React.useState("");
 
-  React.useImperativeHandle(ref, () => ({ renderButtons }), [p.ctx.value])
+  React.useImperativeHandle(p.innerRef, () => ({ renderButtons }), [p.ctx.value])
 
   function updateFrame() {
     ctx.frame!.frameComponent.forceUpdate();
@@ -150,4 +150,4 @@ export default React.forwardRef(function PermissionRulesPackControl(p: { ctx: Ty
   function renderRadio(c: PermissionAllowedRule, allowed: boolean, color: string) {
     return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; updateFrame() }} />;
   }
-});
+}

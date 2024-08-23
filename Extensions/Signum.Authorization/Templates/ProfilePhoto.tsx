@@ -10,12 +10,12 @@ import { useAPI } from "@framework/Hooks";
 
 export var urlProviders: ((u: UserEntity | Lite<UserEntity>, size: number) => string | Promise<string | null> | null)[] = [];
 
-export function clearCache() {
+export function clearCache(): void {
   Dic.clear(urlCache);
   urlCache = {};
 }
 
-export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
+export default function ProfilePhoto(p: { user: UserEntity, size: number }): React.JSX.Element {
   const [imageError, setImageError] = useState(false);
   let url = useCachedUrl(p.user, p.size!);
 
@@ -37,7 +37,7 @@ export default function ProfilePhoto(p: { user: UserEntity, size: number }) {
   );
 }
 
-export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string, fallback?: React.ReactNode }) {
+export function SmallProfilePhoto(p: { user: Lite<UserEntity>, size?: number, className?: string, fallback?: React.ReactNode }): React.JSX.Element {
   const [imageError, setImageError] = useState(false);
   const size = p.size ?? 22;
 

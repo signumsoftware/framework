@@ -61,7 +61,7 @@ import { isPermissionAuthorized } from '@framework/AppContext';
 
 export namespace WorkflowClient {
   
-  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }) {
+  export function start(options: { routes: RouteObject[], overrideCaseActivityMixin?: boolean }): void {
   
     UserAssetClient.start({ routes: options.routes });
     UserAssetClient.registerExportAssertLink(WorkflowEntity);
@@ -484,7 +484,7 @@ export namespace WorkflowClient {
     return `/workflow/activityMonitor/${workflow.id}`;
   }
   
-  export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy) {
+  export function workflowStartUrl(lite: Lite<WorkflowEntity>, strategy?: WorkflowMainEntityStrategy): string {
     return "/workflow/new/" + lite.id + (strategy == null ? "" : ("/" + strategy));
   }
   
@@ -495,7 +495,7 @@ export namespace WorkflowClient {
     return activity && TypeContext.root(activity, undefined, ctx);
   }
   
-  export function getDefaultInboxUrl() {
+  export function getDefaultInboxUrl(): string {
     return Finder.findOptionsPath({
       queryName: CaseActivityQuery.Inbox,
       filterOptions: [{
@@ -506,7 +506,7 @@ export namespace WorkflowClient {
     });
   }
   
-  export function showWorkflowTransitionContextCodeHelp() {
+  export function showWorkflowTransitionContextCodeHelp(): void {
   
     var value = `public CaseActivityEntity PreviousCaseActivity { get; internal set; }
   public DecisionResult? DecisionResult { get; internal set; }
@@ -642,7 +642,7 @@ export namespace WorkflowClient {
   }
   
   export const customSelectByUser: { [typeName: string]: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<Entity> | undefined> } = {};
-  export function registerCustomSelectByUser<T extends Entity>(type: Type<T>, selectEntity: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<T> | undefined>) {
+  export function registerCustomSelectByUser<T extends Entity>(type: Type<T>, selectEntity: (workflow: Lite<WorkflowEntity>, strategy: WorkflowMainEntityStrategy) => Promise<Lite<T> | undefined>): void {
     customSelectByUser[type.typeName] = selectEntity; 
   }
   
@@ -694,7 +694,7 @@ export namespace WorkflowClient {
   
   export const customOnClicks: { [operationKey: string]: { [typeName: string]: (ctx: EntityOperationContext<CaseActivityEntity>) => Promise<void> } } = {};
   
-  export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => Promise<void>) {
+  export function registerOnClick<T extends ICaseMainEntity>(type: Type<T>, operationKey: ExecuteSymbol<CaseActivityEntity>, action: (ctx: EntityOperationContext<CaseActivityEntity>) => Promise<void>): void {
     var op = customOnClicks[operationKey.key] || (customOnClicks[operationKey.key] = {});
     op[type.typeName] = action;
   }
@@ -732,8 +732,8 @@ export namespace WorkflowClient {
   }
   
   const intFormatter = toNumberFormat("D");
-  
-  export function formatDuration(d: Duration) {
+
+  export function formatDuration(d: Duration): string {
   
     var a = {
       years: "yr",
@@ -861,7 +861,7 @@ export namespace WorkflowClient {
     validationResult?: boolean;
   }
   
-  export const DecisionResultValues = ["Approve", "Decline"];
+  export const DecisionResultValues: string[] = ["Approve", "Decline"];
   
   export interface PreviewTask {
     bpmnId: string;

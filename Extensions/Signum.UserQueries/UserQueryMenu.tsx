@@ -34,7 +34,7 @@ function decodeUserQueryFromUrl(location: Location) {
   return userQueryKey ? parseLite(userQueryKey) as Lite<UserQueryEntity> : undefined;
 }
 
-export default function UserQueryMenu(p: UserQueryMenuProps) {
+export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element | null {
 
   const [filter, setFilter] = React.useState<string>();
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -117,15 +117,14 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
 
-  function applyChangesToSearchControl(uq: Lite<UserQueryEntity>) {
+  function applyUserQueryToSearchControl(uq: Lite<UserQueryEntity>) {
     Navigator.API.fetch(uq).then(userQuery => {
       const sc = p.searchControl;
       const oldFindOptions = sc.props.findOptions;
       UserQueryClient.Converter.applyUserQuery(oldFindOptions, userQuery, sc.props.extraOptions?.entity, sc.props.defaultIncudeDefaultFilters)
         .then(nfo => {
           sc.setState({ refreshMode: userQuery.refreshMode });
-          if (nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions))
-            sc.handleChangeFiltermode('Simple');
+          sc.handleChangeFiltermode(nfo.filterOptions.length == 0 || anyPinned(nfo.filterOptions) ? 'Simple' : "Advanced", false, true);
           setCurrentUserQuery(uq, translated(userQuery, a=>a.displayName));
           if (sc.props.findOptions.pagination.mode != "All") {
             sc.doSearchPage1();
@@ -135,7 +134,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
   }
 
   function handleSelectUserQuery(uq: Lite<UserQueryEntity>) {
-    applyChangesToSearchControl(uq);
+    applyUserQueryToSearchControl(uq);
   }
 
   async function handleEdit() {
@@ -144,7 +143,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     await reloadList();
     if (currentUserQuery  && await Navigator.API.exists(currentUserQuery))
-      applyChangesToSearchControl(currentUserQuery!);
+      applyUserQueryToSearchControl(currentUserQuery!);
      else
       setCurrentUserQuery(undefined, undefined);
   }
@@ -172,6 +171,9 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       joinMode: uqNew.systemTime.joinMode,
       startDate: uqNew.systemTime.startDate && UserQueryMerger.similarValues(foOld.systemTime!.startDate, foNew.systemTime!.startDate) ? uqOld.systemTime!.startDate : uqNew.systemTime.startDate,
       endDate: uqNew.systemTime.endDate && UserQueryMerger.similarValues(foOld.systemTime!.endDate, foNew.systemTime!.endDate) ? uqOld.systemTime!.endDate : uqNew.systemTime.endDate,
+      timeSeriesStep: uqNew.systemTime.timeSeriesStep ?? null,
+      timeSeriesUnit: uqNew.systemTime.timeSeriesUnit ?? null,
+      timeSeriesMaxRowsPerStep: uqNew.systemTime.timeSeriesMaxRowsPerStep ?? null,
     });
     uqOld.elementsPerPage = uqNew.elementsPerPage;
     uqOld.customDrilldowns = uqNew.customDrilldowns;
@@ -186,7 +188,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
     const list = await reloadList();
 
     if (currentUserQuery && await Navigator.API.exists(currentUserQuery))
-      applyChangesToSearchControl(currentUserQuery!);
+      applyUserQueryToSearchControl(currentUserQuery!);
     else
       setCurrentUserQuery(undefined, undefined);
   }
@@ -199,6 +201,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
 
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
+      canTimeSeries: fo.systemTime?.mode == 'TimeSeries',
       queryKey: getQueryKey(fo.queryName),
       filters: (fo.filterOptions ?? []).notNull().map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
@@ -241,7 +244,10 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
         mode: fo.systemTime.mode,
         startDate: fo.systemTime.startDate && await UserAssetClient.API.stringifyDate(fo.systemTime.startDate),
         endDate: fo.systemTime.endDate && await UserAssetClient.API.stringifyDate(fo.systemTime.endDate),
-        joinMode: fo.systemTime.joinMode
+        joinMode: fo.systemTime.joinMode,
+        timeSeriesStep: fo.systemTime.timeSeriesStep ?? null,
+        timeSeriesUnit: fo.systemTime.timeSeriesUnit ?? null,
+        timeSeriesMaxRowsPerStep: fo.systemTime.timeSeriesMaxRowsPerStep ?? null,
       }),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
@@ -256,7 +262,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps) {
       .then(uq => {
         if (uq?.id) {
           reloadList().then(() => {
-            applyChangesToSearchControl(toLite(uq));
+            applyUserQueryToSearchControl(toLite(uq));
           });
         }
       });
@@ -347,7 +353,7 @@ export interface FilterPair {
 }
 
 export namespace UserQueryMerger {
-  export function mergeColumns(oldUqColumns: MList<QueryColumnEmbedded>, newUqColumns: MList<QueryColumnEmbedded>, sd: StringDistance) {
+  export function mergeColumns(oldUqColumns: MList<QueryColumnEmbedded>, newUqColumns: MList<QueryColumnEmbedded>, sd: StringDistance): MListElement<QueryColumnEmbedded>[] {
     const choices = sd.levenshteinChoices(oldUqColumns, newUqColumns, c => c.added == null ? 5 : c.removed == null ? 5 : distanceColumns(c.added.element, c.removed.element));
 
     return choices.flatMap(ch => {
@@ -431,7 +437,7 @@ export namespace UserQueryMerger {
     return result;
   }
 
-  export function similarValues(val1: any, val2: any) {
+  export function similarValues(val1: any, val2: any): boolean {
     if (val1 == val2)
       return true;
 

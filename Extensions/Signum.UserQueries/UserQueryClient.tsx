@@ -31,7 +31,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace UserQueryClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.UserQueries", () => import("./Changelog"));
   
@@ -219,7 +219,7 @@ export namespace UserQueryClient {
     return drilldownToUserQuery(val.fo, val.uq, options);
   }
   
-  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>) {
+  export function onDrilldownEntity(items: MList<Lite<Entity>>, entity: Lite<Entity>): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -232,7 +232,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]) {
+  export function onDrilldownGroup(items: MList<Lite<Entity>>, filters?: FilterOption[]): Promise<{ fo: FindOptions; uq: UserQueryEntity & Entity; } | undefined> {
     const elements = items.map(a => a.element);
     return SelectorModal.chooseElement(elements, { buttonDisplay: i => getToString(i), buttonName: i => liteKey(i) })
       .then(lite => {
@@ -250,7 +250,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions) {
+  export async function drilldownToUserQuery(fo: FindOptions, uq: UserQueryEntity, options?: OnDrilldownOptions): Promise<boolean> {
     const openInNewTab = options?.openInNewTab;
     const showInPlace = options?.showInPlace;
     const onReload = options?.onReload;
@@ -258,15 +258,7 @@ export namespace UserQueryClient {
     const qd = await Finder.getQueryDescription(fo.queryName);
     const fop = await Finder.parseFilterOptions(fo.filterOptions ?? [], fo.groupResults ?? false, qd);
   
-    const filters = fop.map(f => {
-      let f2 = withoutPinned(f);
-      if (f2 == null)
-        return null;
-  
-      return f2;
-    }).notNull();
-  
-    fo.filterOptions = Finder.toFilterOptions(filters);
+    fo.filterOptions = Finder.toFilterOptions(fop);
   
     if (openInNewTab || showInPlace) {
       const url = Finder.findOptionsPath(fo, { userQuery: liteKey(toLite(uq)) });
@@ -297,6 +289,7 @@ export namespace UserQueryClient {
       const filters = await UserAssetClient.API.parseFilters({
         queryKey: query.key,
         canAggregate: uq.groupResults || false,
+        canTimeSeries: fo.systemTime?.mode == 'TimeSeries',
         entity: entity,
         filters: uq.filters!.map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
       });
@@ -340,6 +333,9 @@ export namespace UserQueryClient {
         startDate: await parseDate(uq.systemTime.startDate),
         endDate: await parseDate(uq.systemTime.endDate),
         joinMode: uq.systemTime.joinMode ?? undefined,
+        timeSeriesStep: uq.systemTime.timeSeriesStep ?? undefined,
+        timeSeriesUnit: uq.systemTime.timeSeriesUnit ?? undefined,
+        timeSeriesMaxRowsPerStep: uq.systemTime.timeSeriesMaxRowsPerStep ?? undefined,
       };
   
       return fo;

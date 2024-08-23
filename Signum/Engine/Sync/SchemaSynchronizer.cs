@@ -733,32 +733,6 @@ JOIN {tabCol.ReferenceTable.Name} {fkAlias} ON {tabAlias}.{difCol.Name} = {fkAli
     {
         var isPostgres = sqlBuilder.IsPostgres;
 
-        if (table.Name.Name == "EmailTemplate" && column.Name == "From_AddressSourceID") // Delete this if after 1.4.2024
-        {
-            return SqlPreCommand.Combine(Spacing.Simple,
-                sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = CASE WHEN From_Token_HasValue = 1 THEN 0 ELSE 1 END
-WHERE From_HasValue = 1"))!;
-        }
-
-        if (table.Name.Name == "EmailTemplateRecipients" && column.Name == "AddressSourceID") // Delete this if after 1.4.2024
-        {
-            var tempDefault = new SqlBuilder.DefaultConstraint(
-                columnName: column.Name,
-                name: "DF_TEMP_" + column.Name,
-                quotedDefinition: sqlBuilder.Quote(column.DbType, "0"));
-
-            return SqlPreCommand.Combine(Spacing.Simple,
-                sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-                sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name).Do(a => a.GoAfter = true),
-                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = CASE WHEN Token_HasValue = 1 THEN 0 ELSE 1 END")
-
-                )!;
-        }
-
-
         if (!NeedsDefaultValue(table, column) || avoidDefault)
             return sqlBuilder.AlterTableAddColumn(table, column);
 
@@ -773,13 +747,13 @@ WHERE From_HasValue = 1"))!;
             if (defaultValue == "force")
                 return sqlBuilder.AlterTableAddColumn(table, column);
 
-            var where = hasValueColumn != null ? $"{hasValueColumn.Name} = 1" : "??";
+            var where = hasValueColumn != null ? $"{hasValueColumn.Name.SqlEscape(isPostgres)} = {(isPostgres ? "TRUE" : 1)}" : "??";
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column).Do(a => a.GoAfter = true),
                 new SqlPreCommandSimple($@"UPDATE {table.Name} SET
     {column.Name.SqlEscape(isPostgres)} = {sqlBuilder.Quote(column.DbType, defaultValue)}
-WHERE {where}"))!;
+WHERE {where};"))!;
         }
         else if (column is FieldPartitionId)
         {
@@ -795,13 +769,9 @@ WHERE {where}"))!;
                new SqlPreCommandSimple($@"UPDATE mle SET
     {column.Name.SqlEscape(isPostgres)} = e.{tm.BackReference.ReferenceTable.PartitionId?.Name.SqlEscape(sqlBuilder.IsPostgres) ?? " -- ??"}
 FROM {table.Name} mle
-JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e.{tm.BackReference.ReferenceTable.PrimaryKey.Name}
-
-") :
+JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e.{tm.BackReference.ReferenceTable.PrimaryKey.Name};") :
                new SqlPreCommandSimple($@"UPDATE {table.Name} SET
-    {column.Name.SqlEscape(isPostgres)} = -- Your code here")
-
-               )!;
+    {column.Name.SqlEscape(isPostgres)} = -- Your code here"))!;
         }
         else
         {

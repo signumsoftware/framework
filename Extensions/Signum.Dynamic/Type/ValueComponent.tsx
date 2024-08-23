@@ -19,7 +19,7 @@ export interface ValueComponentProps {
   onChange?: () => void;
 }
 
-export default function ValueComponent(p : ValueComponentProps){
+export default function ValueComponent(p : ValueComponentProps): React.JSX.Element {
   function updateValue(value: string | boolean | undefined) {
 
     var parsedValue = p.type != "number" ? value : (isNaN(parseFloat(value as string)) ? null : parseFloat(value as string));

@@ -15,7 +15,7 @@ import { PermissionSymbol, QueryEntity, TypeEntity } from '@framework/Signum.Bas
 import { OperationSymbol } from '@framework/Signum.Operations';
 import { Entity } from '../../../Signum/React/Signum.Entities';
 
-export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }) {
+export default function WhatsNew(p: { ctx: TypeContext<WhatsNewEntity> }): React.JSX.Element {
   const ctx = p.ctx;
   const forceUpdate = useForceUpdate();
 
@@ -55,7 +55,7 @@ export interface WhatsNewMessageComponentProps
   invalidate: () => void;
 }
 
-export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps) {
+export function WhatsNewMessageComponent(p: WhatsNewMessageComponentProps): React.JSX.Element {
 
   const ec = p.ctx.subCtx({labelColumns: 4});
   return (

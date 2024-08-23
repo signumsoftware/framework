@@ -39,7 +39,7 @@ export function useController<C extends LineBaseController<P, V>, P extends Line
 
 export class LineBaseController<P extends LineBaseProps<V>, V> {
 
-  static propEquals<V>(prevProps: LineBaseProps<V>, nextProps: LineBaseProps<V>) {
+  static propEquals<V>(prevProps: LineBaseProps<V>, nextProps: LineBaseProps<V>): boolean {
     if (Dic.equals(prevProps, nextProps, true))
       return true; //For Debugging
 
@@ -51,13 +51,13 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   changes!: number;
   setChanges!: (changes: React.SetStateAction<number>) => void;
 
-  init(p: P) {
+  init(p: P): void {
     this.props = this.expandProps(p);
     this.forceUpdate = useForceUpdate();
     [this.changes, this.setChanges] = React.useState(0);
   }
 
-  setValue(val: V, event?: React.SyntheticEvent) {
+  setValue(val: V, event?: React.SyntheticEvent): void {
     var oldValue = this.props.ctx.value;
     this.props.ctx.value = val;
     this.setChanges(c => c + 1);
@@ -67,14 +67,14 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
       this.props.onChange({ oldValue: oldValue, newValue: val, originalEvent: event });
   }
 
-  validate() {
+  validate(): void {
     const error = this.props.onValidate ? this.props.onValidate(this.props.ctx.value) : this.defaultValidate(this.props.ctx.value);
     this.props.ctx.error = error;
     if (this.props.ctx.frame)
       this.props.ctx.frame.revalidate();
   }
 
-  defaultValidate(val: V) {
+  defaultValidate(val: V): string | undefined {
     if (this.props.type!.isNotNullable && val == undefined)
       return ValidationMessage._0IsNotSet.niceToString(this.props.ctx.niceName());
 
@@ -99,13 +99,13 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
     return p;
   }
 
-  overrideProps(p: P, overridenProps: P) {
+  overrideProps(p: P, overridenProps: P): void {
     const labelHtmlAttributes = { ...p.labelHtmlAttributes, ...Dic.simplify(overridenProps.labelHtmlAttributes) };
     Dic.assign(p, Dic.simplify(overridenProps))
     p.labelHtmlAttributes = labelHtmlAttributes;
   }
 
-  getDefaultProps(p: P) {
+  getDefaultProps(p: P): void {
   }
 
 
@@ -117,7 +117,7 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   }
 
 
-  get mandatoryClass() {
+  get mandatoryClass(): "sf-mandatory-warning" | "sf-mandatory" | null {
 
     if (this.props.mandatory && !this.props.readOnly) {
       const val = this.props.ctx.value;
@@ -132,12 +132,12 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
     return null;
   }
 
-  get isHidden() {
+  get isHidden(): boolean | undefined {
     return this.props.type == null || this.props.visible == false || this.props.hideIfNull && (this.props.ctx.value == undefined || this.props.ctx.value == "");
   }
 }
 
-export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HTMLElement | null) {
+export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HTMLElement | null): void {
   if (propRef) {
     if (typeof propRef == "function")
       propRef(node);
@@ -146,7 +146,7 @@ export function setRefProp(propRef: React.Ref<HTMLElement> | undefined, node: HT
   }
 }
 
-export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement>) {
+export function useInitiallyFocused(initiallyFocused: boolean | number | undefined, inputElement: React.RefObject<HTMLElement>): void {
   React.useEffect(() => {
     if (initiallyFocused) {
       window.setTimeout(() => {
@@ -180,12 +180,12 @@ export function genericForwardRefWithMemo<T, P = {}>(render: (props: P, ref: Rea
 
 export const tasks: ((lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps) => void)[] = [];
 
-export function runTasks(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps) {
+export function runTasks(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps, originalProps: LineBaseProps): void {
   tasks.forEach(t => t(lineBase, state, originalProps));
 }
 
 tasks.push(taskSetNiceName);
-export function taskSetNiceName(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetNiceName(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (state.label === undefined &&
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field") {
@@ -194,7 +194,7 @@ export function taskSetNiceName(lineBase: LineBaseController<LineBaseProps, unkn
 }
 
 tasks.push(taskSetReadOnlyProperty);
-export function taskSetReadOnlyProperty(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetReadOnlyProperty(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly && 
     state.ctx.propertyRoute &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
@@ -204,7 +204,7 @@ export function taskSetReadOnlyProperty(lineBase: LineBaseController<LineBasePro
 }
 
 tasks.push(taskSetReadOnly);
-export function taskSetReadOnly(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetReadOnly(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (state.ctx.styleOptions.readOnly === undefined && !state.ctx.readOnly &&
     state.ctx.binding.getIsReadonly()) {
     state.ctx.readOnly = true;
@@ -212,7 +212,7 @@ export function taskSetReadOnly(lineBase: LineBaseController<LineBaseProps, unkn
 }
 
 tasks.push(taskSetMandatory);
-export function taskSetMandatory(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+export function taskSetMandatory(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
   if (state.ctx.propertyRoute && state.mandatory == undefined &&
     state.ctx.propertyRoute.propertyRouteType == "Field" &&
     state.ctx.propertyRoute.member!.required) {

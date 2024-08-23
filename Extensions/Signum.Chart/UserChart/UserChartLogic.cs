@@ -257,6 +257,7 @@ public static class UserChartLogic
             Filters = userChart.Filters.ToFilterList(),
             Parameters = userChart.Parameters.ToMList(),
             MaxRows = userChart.MaxRows,
+            ChartTimeSeries = userChart.ChartTimeSeries,
         };
 
         cr.Columns.ZipForeach(userChart.Columns, (a, b) =>

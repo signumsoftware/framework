@@ -3,7 +3,7 @@ import { AutoLine, EntityLine } from '@framework/Lines'
 import { TypeContext } from '@framework/TypeContext'
 import { SMSMessageEntity } from '../Signum.SMS'
 
-export default function SMSMessage(p: { ctx: TypeContext<SMSMessageEntity> }) {
+export default function SMSMessage(p: { ctx: TypeContext<SMSMessageEntity> }): React.JSX.Element {
 
   var ctx4 = p.ctx.subCtx({ labelColumns: 4, formSize: "xs" });
 

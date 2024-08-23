@@ -9,7 +9,7 @@ import { Constructor } from '@framework/Constructor'
 import { Entity, getToString, is, Lite, liteKey, MList, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
 import { getQueryKey, getEnumInfo, QueryTokenString, tryGetTypeInfos, timeToString, toFormatWithFixes } from '@framework/Reflection'
 import {
-  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned
+  FilterOption, OrderOption, QueryRequest, QueryToken, SubTokensOptions, ResultTable, OrderRequest, OrderType, FilterOptionParsed, hasAggregate, ColumnOption, withoutAggregate, FilterConditionOption, QueryDescription, FindOptions, withoutPinned, SystemTime
 } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import ChartButton from './ChartButton'
@@ -27,7 +27,7 @@ import { Dic, softCast } from '@framework/Globals';
 import { colorInterpolators, colorSchemes } from './ColorPalette/ColorUtils';
 import { getColorInterpolation } from './D3Scripts/Components/ChartUtils';
 import { UserQueryEntity } from '../Signum.UserQueries/Signum.UserQueries';
-import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
+import { ChartColumnEmbedded, ChartColumnType, ChartParameterEmbedded, ChartParameterType, ChartPermission, ChartRequestModel, ChartScriptSymbol, ChartTimeSeriesEmbedded, D3ChartScript, GoogleMapsChartScript, HtmlChartScript, SpecialParameterType, SvgMapsChartScript } from './Signum.Chart';
 import { IChartBase, UserChartEntity } from './UserChart/Signum.Chart.UserChart';
 import { UserChartPartHandler } from './Dashboard/View/UserChartPart';
 import SelectorModal from '@framework/SelectorModal';
@@ -41,7 +41,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ChartClient {
   
-  export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }) {
+  export function start(options: { routes: RouteObject[], googleMapsApiKey?: string, svgMap?: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Chart", () => import("./Changelog"));
   
@@ -157,7 +157,7 @@ export namespace ChartClient {
   }
   const registeredChartScriptComponents: { [key: string]: () => Promise<ChartScriptModule> } = {};
   
-  export function registerChartScriptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>) {
+  export function registerChartScriptComponent(symbol: ChartScriptSymbol, module: () => Promise<ChartScriptModule>): void {
     registeredChartScriptComponents[symbol.key] = module;
   }
   
@@ -170,7 +170,7 @@ export namespace ChartClient {
     return result;
   }
   
-  export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean) {
+  export function getCustomDrilldownsFindOptions(queryKey: string, qd: QueryDescription, groupResults: boolean): FindOptions {
     var fos: FilterConditionOption[] = [];
   
     if (groupResults)
@@ -190,7 +190,7 @@ export namespace ChartClient {
   }
   
   
-  export function extractFindOptions(cr: ChartRequestModel, r: ChartRow) {
+  export function extractFindOptions(cr: ChartRequestModel, r: ChartRow): FindOptions {
   
     const filters = cr.filterOptions.map(f => {
       let f2 = withoutPinned(f);
@@ -255,7 +255,7 @@ export namespace ChartClient {
       return onButtonBarElements.map(f => f(ctx)).filter(a => a != undefined).map(a => a!);
     }
   
-    export function clearOnButtonBarElements() {
+    export function clearOnButtonBarElements(): void {
       ButtonBarChart.onButtonBarElements.clear();
     }
   }
@@ -425,7 +425,7 @@ export namespace ChartClient {
   }
   
   
-  export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript) {
+  export function synchronizeColumns(chart: IChartBase, chartScript: ChartScript): void {
   
     if (chart.columns == null ||
       chart.parameters == null)
@@ -489,7 +489,7 @@ export namespace ChartClient {
   
   }
   
-  export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined) {
+  export function defaultParameterValue(scriptParameter: ChartScriptParameter, relatedColumn: QueryToken | null | undefined): string {
     switch (scriptParameter.type) {
       case "Enum": return (scriptParameter.valueDefinition as EnumValueList).filter(a => a.typeFilter == undefined || relatedColumn == undefined || isChartColumnType(relatedColumn, a.typeFilter)).first().name;
       case "Number": return (scriptParameter.valueDefinition as NumberInterval).defaultValue?.toString();
@@ -516,12 +516,23 @@ export namespace ChartClient {
     return clone;
   }
   
-  
+  export function cloneChartTimeSeries(ts : ChartTimeSeriesEmbedded | null): ChartTimeSeriesEmbedded | null {
+    if(!ts)
+      return null;
+    return ChartTimeSeriesEmbedded.New({
+      timeSeriesStep: ts.timeSeriesStep, 
+      timeSeriesUnit: ts.timeSeriesUnit, 
+      startDate: ts.startDate, 
+      endDate: ts.endDate, 
+      timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep});
+  }
+
   export interface ChartOptions {
     queryName: any,
     chartScript?: string,
     maxRows?: number | null,
     groupResults?: boolean,
+    timeSeries?: ChartTimeSeriesEmbedded | null | undefined;
     filterOptions?: (FilterOption | null | undefined)[];
     orderOptions?: (OrderOption | null | undefined)[];
     columnOptions?: (ChartColumnOption | null | undefined)[];
@@ -542,7 +553,7 @@ export namespace ChartClient {
     value: string;
   }
   
-  export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean) {
+  export function handleOrderColumn(cr: IChartBase, col: ChartColumnEmbedded, isShift: boolean): void {
   
     var newOrder = col.orderByType == "Ascending" ? "Descending" : "Ascending" as OrderType;
   
@@ -575,6 +586,7 @@ export namespace ChartClient {
         queryName: cr.queryKey,
         chartScript: cr.chartScript?.key.after(".") ?? undefined,
         maxRows: cr.maxRows,
+        timeSeries: cloneChartTimeSeries(cr.chartTimeSeries),
         filterOptions: Finder.toFilterOptions(cr.filterOptions),
         columnOptions: cr.columns.map(co => ({
           token: co.element.token && co.element.token.tokenString,
@@ -610,15 +622,17 @@ export namespace ChartClient {
         maxRows:
           co.maxRows === null ? "null" : 
           co.maxRows === undefined || co.maxRows == Decoder.DefaultMaxRows ? undefined : co.maxRows,
-        groupResults: co.groupResults,
+        groupResults: co.groupResults,        
         userChart: userChart && liteKey(userChart)
       };
   
+      encodeTimeSeries(query, co.timeSeries);
       Finder.Encoder.encodeFilters(query, co.filterOptions?.notNull());
       Finder.Encoder.encodeOrders(query, co.orderOptions?.notNull());
       encodeParameters(query, co.parameters?.notNull());
   
       encodeColumn(query, co.columnOptions?.notNull());
+
   
       return `/chart/${getQueryKey(co.queryName)}?` + QueryString.stringify(query);
   
@@ -626,7 +640,7 @@ export namespace ChartClient {
   
     const scapeTilde = Finder.Encoder.scapeTilde;
   
-    export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined) {
+    export function encodeColumn(query: any, columns: ChartColumnOption[] | undefined): void {
       if (columns)
         columns.forEach((co, i) => query["column" + i] =
           (co.orderByIndex != null ? (co.orderByIndex! + (co.orderByType == "Ascending" ? "A" : "D") + "~") : "") +
@@ -635,9 +649,20 @@ export namespace ChartClient {
           (co.format ? "~" + scapeTilde(co.format) : ""));
     }
   
-    export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined) {
+    export function encodeParameters(query: any, parameters: ChartParameterOption[] | undefined): void {
       if (parameters)
         parameters.map((p, i) => query["param" + i] = scapeTilde(p.name!) + "~" + scapeTilde(p.value!));
+    }
+
+    export function encodeTimeSeries(query: any, ts: ChartTimeSeriesEmbedded | null | undefined): void {
+      if (ts)
+      {
+        query['systemTimeStartDate'] = ts.startDate;
+        query['systemTimeEndDate'] = ts.endDate;
+        query['timeSeriesStep'] = ts.timeSeriesStep;
+        query['timeSeriesUnit'] = ts.timeSeriesUnit;
+        query['timeSeriesMaxRowsPerStep'] = ts.timeSeriesMaxRowsPerStep;  
+      }
     }
   }
   
@@ -651,15 +676,18 @@ export namespace ChartClient {
         return Finder.getQueryDescription(queryName).then(qd => {
   
           const completer = new Finder.TokenCompleter(qd);
+          
+          const ts = Decoder.decodeTimeSeries(query);
   
           const fos = Finder.Decoder.decodeFilters(query);
-          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate));
+          fos.forEach(fo => completer.requestFilter(fo, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate| (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
           const oos = Finder.Decoder.decodeOrders(query);
           oos.forEach(oo => completer.request(oo.token.toString(), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate));
   
+
           const cols = Decoder.decodeColumns(query);
-          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement));
+          cols.map(a => a.element.token).filter(te => te != undefined).forEach(te => completer.request(te!.tokenString!, SubTokensOptions.CanAggregate | SubTokensOptions.CanElement | (ts ? SubTokensOptions.CanTimeSeries : 0)));
   
           return completer.finished().then(() => {
   
@@ -677,6 +705,7 @@ export namespace ChartClient {
               filterOptions: fos.map(fo => completer.toFilterOptionParsed(fo)),
               columns: cols,
               parameters: Decoder.decodeParameters(query),
+              chartTimeSeries: ts,
             });
   
             synchronizeColumns(chartRequest, cr);
@@ -731,16 +760,40 @@ export namespace ChartClient {
         })
       }));
     }
+
+    export function decodeTimeSeries(query: any): ChartTimeSeriesEmbedded | null {
+      if(!query.timeSeriesUnit)
+        return null;
+      return ChartTimeSeriesEmbedded.New({
+          startDate: query.systemTimeStartDate,
+          endDate: query.systemTimeEndDate,
+          timeSeriesUnit: query.timeSeriesUnit,
+          timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+          timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+      });
+    }
   }
   
   
   export module API {
   
     export function getRequest(request: ChartRequestModel): QueryRequest {
+      var ts = request.chartTimeSeries;
+      var systemTime : SystemTime | undefined = ts == null ? undefined : 
+        softCast<SystemTime>({ 
+          joinMode: 'AllCompatible', 
+          mode : 'TimeSeries', 
+          timeSeriesStep: ts.timeSeriesStep!, 
+          timeSeriesUnit: ts.timeSeriesUnit!, 
+          startDate: ts.startDate!, 
+          endDate: ts.endDate!,
+          timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep!,
+        });
   
       return {
         queryKey: request.queryKey,
         groupResults: hasAggregates(request),
+        systemTime: systemTime,
         filters: Finder.toFilterRequests(request.filterOptions),
         columns: request.columns.map(mle => mle.element).filter(cce => cce.token != null).map(co => ({ token: co.token!.token!.fullKey }) as ColumnRequest),
         orders: request.columns.filter(mle => mle.element.orderByType != null && mle.element.token != null).orderBy(mle => mle.element.orderByIndex).map(mle => ({ token: mle.element.token!.token!.fullKey, orderType: mle.element.orderByType! }) as OrderRequest),

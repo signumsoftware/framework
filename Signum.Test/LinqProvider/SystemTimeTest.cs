@@ -1,3 +1,5 @@
+using Signum.DynamicQuery;
+using Signum.Entities;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Test.LinqProvider;
@@ -23,7 +25,7 @@ public class SystemTimeTest
 
         Assert.Equal(DateTimeKind.Local, list.Select(a => a.Kind).Distinct().SingleEx());
 
-        using (SystemTime.Override(new SystemTime.All(JoinBehaviour.FirstCompatible)))
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.FirstCompatible)))
         {
             var listSP = (from f in Database.Query<FolderEntity>()
                           select f.SystemPeriod()).ToList();
@@ -79,7 +81,7 @@ public class SystemTimeTest
         if (!Connector.Current.SupportsTemporalTables)
             return;
 
-        using (SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible)))
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
         {
             var list = (from f in Database.Query<FolderEntity>()
                         where f.Parent != null
@@ -103,7 +105,7 @@ public class SystemTimeTest
             return;
 
         NullableInterval<DateTime> period;
-        using (SystemTime.Override(new SystemTime.All(JoinBehaviour.AllCompatible)))
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
         {
             period = Database.Query<FolderEntity>().Where(a => a.Name == "X2").Select(a => a.SystemPeriod()).Single();
         }
@@ -114,14 +116,66 @@ public class SystemTimeTest
             var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
         }
 
-        using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1), JoinBehaviour.AllCompatible)))
+        using (SystemTime.Override(new SystemTime.Between(period.Max!.Value, period.Max.Value.AddSeconds(1), SystemTimeJoinMode.AllCompatible)))
         {
             var list = Database.Query<FolderEntity>().Where(f1 => f1.Name == "X2").Select(a => a.SystemPeriod()).ToList();
         }
 
-        using (SystemTime.Override(new SystemTime.ContainedIn(period.Max.Value, period.Max.Value.AddSeconds(1), JoinBehaviour.AllCompatible)))
+        using (SystemTime.Override(new SystemTime.ContainedIn(period.Max.Value, period.Max.Value.AddSeconds(1), SystemTimeJoinMode.AllCompatible)))
         {
             var list = Database.Query<FolderEntity>().Where(f2 => f2.Name == "X2").Select(a => a.SystemPeriod()).ToList();
         }
+    }
+
+    [Fact]
+    public void TimeSeriesOneValue()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        DateTime min;
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
+        {
+            min = Database.Query<FolderEntity>().Min(a => a.SystemPeriod().Min!.Value);
+        }
+
+        var series = QueryTimeSeriesLogic.GetDatesInRange(
+              min,
+              min.AddSeconds(2),
+              TimeSeriesUnit.Millisecond.ToString(),
+              50)
+            .Select(dv =>
+             new
+             {
+                 dv.Date,
+                 Count = SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Count())
+             }).ToList();
+
+    }
+
+    [Fact]
+    public void TimeSeriesManyValue()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        DateTime min;
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
+        {
+            min = Database.Query<FolderEntity>().Min(a => a.SystemPeriod().Min!.Value);
+        }
+
+        var series = QueryTimeSeriesLogic.GetDatesInRange(
+              min,
+              min.AddSeconds(2),
+              TimeSeriesUnit.Millisecond.ToString(),
+              50)
+            .SelectMany(dv =>
+             SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Select(f => new
+             {
+                 dv.Date,
+                 Folder = f
+             }))).ToList();
+
     }
 }

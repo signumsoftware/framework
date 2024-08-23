@@ -98,16 +98,16 @@ export interface SearchControlHandler {
 }
 
 export namespace SearchControlOptions {
-  export let showSelectedButton = (sc: SearchControlHandler, p: SearchControlProps) => (p.showSelectedButton ?? true) && is_touch_device();
-  export let showSystemTimeButton = (sc: SearchControlHandler, p: SearchControlProps) => (p.showSystemTimeButton ?? false);
-  export let showGroupButton = (sc: SearchControlHandler, p: SearchControlProps) => (p.showGroupButton ?? false);
-  export let showFilterButton = (sc: SearchControlHandler, p: SearchControlProps) => (p.showFilterButton ?? true);
-  export let allowChangeColumns = (sc: SearchControlHandler, p: SearchControlProps) => (p.allowChangeColumns ?? true);
-  export let allowOrderColumns = (sc: SearchControlHandler, p: SearchControlProps) => (p.allowChangeOrder ?? true);
-  export let showFooter = (sc: SearchControlHandler, p: SearchControlProps) => p.showFooter;
+  export let showSelectedButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSelectedButton ?? true) && is_touch_device();
+  export let showSystemTimeButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showSystemTimeButton ?? false);
+  export let showGroupButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showGroupButton ?? false);
+  export let showFilterButton = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.showFilterButton ?? true);
+  export let allowChangeColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeColumns ?? true);
+  export let allowOrderColumns = (sc: SearchControlHandler, p: SearchControlProps): boolean => (p.allowChangeOrder ?? true);
+  export let showFooter = (sc: SearchControlHandler, p: SearchControlProps): boolean | undefined => p.showFooter;
 }
 
-const SearchControl = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
+const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.RefAttributes<SearchControlHandler>> = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
 
   const [state, setState] = useStateWithPromise<SearchControlState | undefined>(undefined);
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);

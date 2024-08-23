@@ -13,7 +13,7 @@ interface CaseButtonBarProps {
   pack: EntityPack<CaseActivityEntity>;
 }
 
-export default function CaseButtonBar(p : CaseButtonBarProps){
+export default function CaseButtonBar(p : CaseButtonBarProps): React.JSX.Element {
   var ca = p.pack.entity;
 
   if (ca.doneDate != null) {
@@ -44,7 +44,7 @@ interface UserHelpProps {
   activity: WorkflowActivityEntity;
 }
 
-export function UserHelpComponent(p : UserHelpProps){
+export function UserHelpComponent(p : UserHelpProps): React.JSX.Element {
 
   var [open, setOpen] = React.useState(false);
 

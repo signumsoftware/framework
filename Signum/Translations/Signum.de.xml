@@ -446,12 +446,14 @@
     <Member Name="Key" Description="Schlüssel" />
   </Type>
   <Type Name="QueryTokenDateMessage">
+    <Member Name="_0Steps1Rows2TotalRowsAprox" Description="{0} Schritte x {1} Zeilen = {2} Zeilen insgesamt (ca.)" />
     <Member Name="Date" Description="Datum" />
     <Member Name="DateTimePart" Description="Datum und Uhrzeit Teile " />
     <Member Name="Day" Description="Tag" />
     <Member Name="DayOfWeek" Description="Tag der Woche" />
     <Member Name="DayOfYear" Description="Tag des Jahres" />
     <Member Name="Days" Description="Tage" />
+    <Member Name="Every01" Description="Jedes {0} {1}" />
     <Member Name="Every0Hours" Description="Alle {0} Stunden" />
     <Member Name="Every0Milliseconds" Description="Alle {0} Millisekunden" />
     <Member Name="Every0Minutes" Description="Alle {0} Minuten" />
@@ -704,10 +706,22 @@
     <Member Name="AsOf" Description="Zum" />
     <Member Name="Between" Description="Zwischen" />
     <Member Name="ContainedIn" Description="Enthalten in" />
+    <Member Name="TimeSeries" Description="Zeitreihe" />
   </Type>
   <Type Name="SystemTimeProperty">
     <Member Name="SystemValidFrom" Description="System gültig von" />
     <Member Name="SystemValidTo" Description="System gültig bis" />
+  </Type>
+  <Type Name="TimeSeriesUnit">
+    <Member Name="Day" Description="Tag" />
+    <Member Name="Hour" Description="Stunde" />
+    <Member Name="Millisecond" Description="Millisekunde" />
+    <Member Name="Minute" Description="Minute" />
+    <Member Name="Month" Description="Monat" />
+    <Member Name="Quarter" Description="Quartal" />
+    <Member Name="Second" Description="Sekunde" />
+    <Member Name="Week" Description="Woche" />
+    <Member Name="Year" Description="Jahr" />
   </Type>
   <Type Name="TypeEntity" Description="Typ" PluralDescription="Typen" Gender="m">
     <Member Name="ClassName" Description="Klassen Name" />
@@ -788,6 +802,8 @@
     <Member Name="InvalidFormat" Description="Ungültiges Format" />
     <Member Name="IsATimeOfTheDay" Description="Ist eine Tageszeit" />
     <Member Name="NotPossibleToaAssign0" Description="Es ist nicht möglich {0} zuzuweisen" />
+    <Member Name="NumberIsTooBig" Description="Nummer ist zu groß" />
+    <Member Name="NumberIsTooSmall" Description="Anzahl ist zu klein" />
     <Member Name="Numeric" Description="Numerisch" />
     <Member Name="OrBeNull" Description="oder null sein" />
     <Member Name="PowerOf" Description="Potenz von " />

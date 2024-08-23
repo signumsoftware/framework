@@ -97,7 +97,7 @@ export class CodeContext {
     return result;
   }
 
-  elementCode(type: string, props: any, ...children: (string | undefined)[]) {
+  elementCode(type: string, props: any, ...children: (string | undefined)[]) : string {
 
     var propsStr = props && Dic.map(props, (k, v) => v == undefined ? null :
       (k + "=" + (typeof (v) == "string" ? `"${v}"` : `{${this.stringifyObject(v)}}`)))
@@ -262,7 +262,7 @@ export class DesignerNode<N extends BaseNode> {
     this.route = route;
   }
 
-  static zero<N extends BaseNode>(context: DesignerContext, typeName: string) {
+  static zero<N extends BaseNode>(context: DesignerContext, typeName: string): DesignerNode<N> {
     var res = new DesignerNode(undefined, context, null as any as N, PropertyRoute.root(typeName));
     return res;
   }
@@ -323,24 +323,24 @@ export class DesignerNode<N extends BaseNode> {
 
 export const registeredNodes: { [nodeType: string]: NodeOptions<BaseNode> } = {};
 
-export function register<T extends BaseNode>(options: NodeOptions<T>) {
+export function register<T extends BaseNode>(options: NodeOptions<T>) : void {
   registeredNodes[options.kind] = options as NodeOptions<BaseNode>;
 }
 
-export function treeNodeKind(dn: DesignerNode<BaseNode>) {
+export function treeNodeKind(dn: DesignerNode<BaseNode>): React.JSX.Element {
   return <small>{dn.node.kind}</small>;
 }
 
-export function treeNodeKindField(dn: DesignerNode<LineBaseNode>) {
+export function treeNodeKindField(dn: DesignerNode<LineBaseNode>): React.JSX.Element {
   return <span><small>{dn.node.kind}:</small> <strong>{dn.node.field}</strong></span>;
 }
 
-export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>) {
+export function treeNodeTableColumnProperty(dn: DesignerNode<EntityTableColumnNode>): React.JSX.Element {
   return <span><small>ETColumn:</small> <strong>{dn.node.property}</strong></span>;
 }
 
 
-export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: ViewOverride<ModifiableEntity>[] }) {
+export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, vos: ViewOverride<ModifiableEntity>[] }): React.JSX.Element | React.ReactNode | null {
 
   var resultWithErrors: JSX.Element | null | undefined;
 
@@ -396,7 +396,7 @@ export function RenderWithViewOverrides({ dn, parentCtx, vos }: { dn: DesignerNo
 
   const es = Navigator.getSettings(parentCtx.propertyRoute!.typeReference().name);
   if (vos.length) {
-    const replacer = new ViewReplacer(result, parentCtx);
+    const replacer = new ViewReplacer(result, parentCtx, null);
     vos.forEach(vo => vo.override(replacer));
     return replacer.result;
   } else {
@@ -439,7 +439,7 @@ function validatePropType(propName: string, value: any, typeScriptType: string |
   return null;
 }
 
-export function renderCode(node: BaseNode, cc: CodeContext) {
+export function renderCode(node: BaseNode, cc: CodeContext): string {
 
   try {
     var no = registeredNodes[node.kind];
@@ -456,7 +456,7 @@ export function renderCode(node: BaseNode, cc: CodeContext) {
   }
 }
 
-export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>) {
+export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>): React.JSX.Element | undefined | null {
   try {
     if (evaluateAndValidate(dn, parentCtx, dn.node, n => n.visible, isBooleanOrNull) == false)
       return null;
@@ -480,7 +480,7 @@ export function render(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<Modifi
   }
 }
 
-export function getErrorTitle(dn: DesignerNode<BaseNode>) {
+export function getErrorTitle(dn: DesignerNode<BaseNode>): React.JSX.Element {
   const lbn = dn.node as LineBaseNode;
   if (lbn.field)
     return <strong>{dn.node.kind} ({lbn.field})</strong>;
@@ -488,7 +488,7 @@ export function getErrorTitle(dn: DesignerNode<BaseNode>) {
     return <strong>{dn.node.kind}</strong>;
 }
 
-export function renderDesigner(dn: DesignerNode<BaseNode>) {
+export function renderDesigner(dn: DesignerNode<BaseNode>): React.JSX.Element {
   return (
     <div>
       <ExpressionOrValueComponent dn={dn} binding={Binding.create(dn.node, a => a.visible)} type="boolean" defaultValue={true} />
@@ -508,7 +508,7 @@ export function asFunction(thisObject: React.Component<any, any>, expression: Ex
   }
 }
 
-export function evalWithScope(code: string, modules: any, props: any, locals: any) {
+export function evalWithScope(code: string, modules: any, props: any, locals: any): (e: TypeContext<ModifiableEntity>) => any {
 
   // Lines
   var AutoLine = Lines.AutoLine;
@@ -552,7 +552,7 @@ export function evaluateUntyped(dn: DesignerNode<BaseNode>, parentCtx: TypeConte
   }
 }
 
-export function evaluateAndValidate<F, T>(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null) {
+export function evaluateAndValidate<F, T>(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity>, object: F, fieldAccessor: (from: F) => ExpressionOrValue<T>, validate: (val: any) => string | null): T | undefined {
   var result = evaluate(dn, parentCtx, object, fieldAccessor);
 
   var error = validate(result);
@@ -565,7 +565,7 @@ export function evaluateAndValidate<F, T>(dn: DesignerNode<BaseNode>, parentCtx:
   return result;
 }
 
-export function validate(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined) {
+export function validate(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<ModifiableEntity> | undefined): string | null | undefined {
   const options = registeredNodes[dn.node.kind];
   if (options.isContainer && options.validChild && (dn.node as ContainerNode).children && (dn.node as ContainerNode).children.some(c => c.kind != options.validChild))
     return DynamicViewValidationMessage.OnlyChildNodesOfType0Allowed.niceToString(options.validChild);
@@ -576,105 +576,105 @@ export function validate(dn: DesignerNode<BaseNode>, parentCtx: TypeContext<Modi
   return undefined;
 }
 
-export function isString(val: any) {
+export function isString(val: any): string | null{
   return typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a string`;
 }
 
-export function isNumber(val: any) {
+export function isNumber(val: any): string | null{
   return typeof val == "number" ? null : `The returned value (${JSON.stringify(val)}) should be a number`;
 }
 
-export function isBoolean(val: any) {
+export function isBoolean(val: any): string | null{
   return typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean`;
 }
 
-export function isBooleanOrFunction(val: any) {
+export function isBooleanOrFunction(val: any): string | null{
   return (typeof val == "boolean" || typeof val == "function") ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or function`;
 }
 
-export function isFindOptions(val: any) {
+export function isFindOptions(val: any): string | null{
   return typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be a valid findOptions`;
 }
 
-export function isStringOrNull(val: any) {
+export function isStringOrNull(val: any): string | null{
   return val == null || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a string or null`;
 }
 
-export function isEnum(val: any, enumType: EnumType<any>) {
+export function isEnum(val: any, enumType: EnumType<any>): string | null{
   return val != null && typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")})`;
 }
 
-export function isEnumOrNull(val: any, enumType: EnumType<any>) {
+export function isEnumOrNull(val: any, enumType: EnumType<any>): string | null{
   return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
-export function isObject(val: any) {
+export function isObject(val: any): string | null{
   return val != null && typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object`;
 }
 
-export function isObjectOrNull(val: any) {
+export function isObjectOrNull(val: any): string | null{
   return val == null || typeof val == "object" ? null : `The returned value (${JSON.stringify(val)}) should be an object or null`;
 }
 
-export function isObjectOrFunctionOrNull(val: any) {
+export function isObjectOrFunctionOrNull(val: any): string | null{
   return val == null || typeof val == "object" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be an object or function or null`;
 }
 
-export function isInList(val: any, values: string[]) {
+export function isInList(val: any, values: string[]): string | null{
   return val != null && typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")}`;
 }
 
-export function isInListOrNull(val: any, values: string[]) {
+export function isInListOrNull(val: any, values: string[]): string | null{
   return val == null || typeof val == "string" && values.contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a value like ${values.joinComma(" or ")} or null`;
 }
 
-export function isNumberOrNull(val: any) {
+export function isNumberOrNull(val: any): string | null{
   return val == null || typeof val == "number" ? null : `The returned value (${JSON.stringify(val)}) should be a number or null`;
 }
 
-export function isNumberOrStringOrNull(val: any) {
+export function isNumberOrStringOrNull(val: any): string | null{
   return val == null || typeof val == "number" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a number or string or null`;
 }
 
-export function isBooleanOrNull(val: any) {
+export function isBooleanOrNull(val: any): string | null{
   return val == null || typeof val == "boolean" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or null`;
 }
 
-export function isBooleanOrStringOrNull(val: any) {
+export function isBooleanOrStringOrNull(val: any): string | null{
   return val == null || typeof val == "boolean" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or string or null`;
 }
 
-export function isBooleanOrFunctionOrNull(val: any) {
+export function isBooleanOrFunctionOrNull(val: any): string | null{
   return val == null || typeof val == "boolean" || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a boolean or function or null`;
 }
 
-export function isFunctionOrNull(val: any) {
+export function isFunctionOrNull(val: any): string | null{
   return val == null || typeof val == "function" ? null : `The returned value (${JSON.stringify(val)}) should be a function or null`;
 }
 
-export function isFunctionOrStringOrNull(val: any) {
+export function isFunctionOrStringOrNull(val: any): string | null{
   return val == null || typeof val == "function" || typeof val == "string" ? null : `The returned value (${JSON.stringify(val)}) should be a function or string or null`;
 }
 
-export function isArrayOrNull(val: any) {
+export function isArrayOrNull(val: any): string | null{
   return val == null || Array.isArray(val) ? null : `The returned value (${JSON.stringify(val)}) should be an array or null`;
 }
 
-export function isFindOptionsOrNull(val: any) {
+export function isFindOptionsOrNull(val: any): string | null{
   return val == null || isFindOptions(val) == null ? null : `The returned value (${JSON.stringify(val)}) should be a findOptions or null`;
 }
 
-export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
+export function withChildrensSubCtx(dn: DesignerNode<ContainerNode>, parentCtx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>): React.JSX.Element {
   var ctx = subCtx(dn, parentCtx, (dn.node as any).field, (dn.node as any).styleOptions);
   return withChildrens(dn, ctx, element);
 }
 
-export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>) {
+export function withChildrens(dn: DesignerNode<ContainerNode>, ctx: TypeContext<ModifiableEntity>, element: React.ReactElement<any>): React.JSX.Element {
   var nodes = dn.node.children && dn.node.children.map(n => render(dn.createChild(n), ctx)).filter(a => a != null).map(a => a!);
   return React.cloneElement(element, undefined, ...nodes);
 }
 
-export function mandatory<T extends BaseNode>(dn: DesignerNode<T>, fieldAccessor: (from: T) => any) {
+export function mandatory<T extends BaseNode>(dn: DesignerNode<T>, fieldAccessor: (from: T) => any): string | undefined {
   if (!fieldAccessor(dn.node))
     return DynamicViewValidationMessage.Member0IsMandatoryFor1.niceToString(Binding.getSingleMember(fieldAccessor), dn.node.kind);
 
@@ -793,14 +793,14 @@ export function getEntityListBaseProps(dn: DesignerNode<EntityBaseNode>, parentC
 
 
 
-export function getGetComponent(dn: DesignerNode<ContainerNode>) {
+export function getGetComponent(dn: DesignerNode<ContainerNode>): undefined | ((ctxe: TypeContext<ModifiableEntity>) => React.JSX.Element) {
   if (!dn.node.children || !dn.node.children.length)
     return undefined;
 
   return (ctxe: TypeContext<ModifiableEntity>) => withChildrens(dn, ctxe, <div />);
 }
 
-export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, isEntityLine?: boolean, filterRows?: boolean }) {
+export function designEntityBase(dn: DesignerNode<EntityBaseNode>, options: { showAutoComplete?: boolean, findMany?: boolean, showMove?: boolean, isEntityLine?: boolean, filterRows?: boolean }): React.JSX.Element {
 
   const m = dn.route && dn.route.member;
 
@@ -850,7 +850,7 @@ export function withClassNameEx(attrs: HtmlAttributesExpression | undefined, cla
 }
 
 
-export function toCodeEx(expr: ExpressionOrValue<string>) {
+export function toCodeEx(expr: ExpressionOrValue<string>): string {
   return isExpression(expr) ? "(" + expr.__code__ + ")" :
     expr == null ? "null" :
       ("\"" + expr + "\"");

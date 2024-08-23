@@ -22,7 +22,7 @@ import SelectorModal from '@framework/SelectorModal';
 
 export namespace PredictorClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(PredictorEntity, e => import('./Templates/Predictor')));
     Navigator.addSettings(new EntitySettings(PredictorSubQueryEntity, e => import('./Templates/PredictorSubQuery')));
     Navigator.addSettings(new EntitySettings(NeuralNetworkSettingsEntity, e => import('./Templates/NeuralNetworkSettings')));
@@ -102,12 +102,12 @@ export namespace PredictorClient {
   }
   
   export const initializers: { [key: string]: (pred: PredictorEntity) => void } = {};
-  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) {
+  export function registerInitializer(symbol: PredictorAlgorithmSymbol, initialize: (predictor: PredictorEntity) => void) : void {
     initializers[symbol.key] = initialize;
   }
   
   export const resultRenderers: { [key: string]: (ctx: TypeContext<PredictorEntity>) => React.ReactNode } = {};
-  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode) {
+  export function registerResultRenderer(symbol: PredictorResultSaverSymbol, renderer: (ctx: TypeContext<PredictorEntity>) => React.ReactNode): void {
     resultRenderers[symbol.key] = renderer;
   }
   

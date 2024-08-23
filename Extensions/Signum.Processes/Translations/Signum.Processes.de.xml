@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="PackageEntity" Description="Paket" PluralDescription="Pakete" Gender="n">
+    <Member Name="ConfigString" Description="Konfig-String" />
     <Member Name="Name" Description="Name" />
     <Member Name="OperationArguments" Description="Operationsargumente" />
   </Type>

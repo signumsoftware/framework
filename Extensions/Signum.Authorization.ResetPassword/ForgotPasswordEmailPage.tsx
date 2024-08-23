@@ -6,7 +6,7 @@ import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
 import { ResetPasswordClient } from './ResetPasswordClient'
 import { useStateWithPromise } from '@framework/Hooks'
 
-export default function ForgotPasswordEmailPage() {
+export default function ForgotPasswordEmailPage(): React.JSX.Element {
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
   const [success, setSuccess] = React.useState(false);

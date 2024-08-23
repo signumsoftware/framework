@@ -54,7 +54,7 @@ export class ReactVisitor {
 
 export class ReplaceVisitor extends ReactVisitor {
 
-  validator = new ReactValidator();
+  validator: ReactValidator = new ReactValidator();
 
   constructor(
     public predicate: (e: React.ReactElement) => boolean,
@@ -92,7 +92,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
   constructor(
     public result: React.ReactNode,
     public ctx: TypeContext<T>,
-    public originalFunction: Function,
+    public originalFunction: Function | null,
   ) {
   }
 
@@ -148,7 +148,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return this;
   }
 
-  replaceFindOptions(filter: (findOptions: FindOptions, e: React.ReactElement) => boolean, modifier: (clone: FindOptions) => void) {
+  replaceFindOptions(filter: (findOptions: FindOptions, e: React.ReactElement) => boolean, modifier: (clone: FindOptions) => void): this {
     this.result = new ReplaceVisitor(
       e => e.props.findOptions && filter(e.props.findOptions, e),
       e => {
@@ -205,7 +205,7 @@ export class ViewReplacer<T extends ModifiableEntity> {
     return parentCtx as TypeContext<T>;
   }
 
-  replaceLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]) {
+  replaceLine(propertyRoute: ((entity: T) => any) | PropertyRoute, newElements: (e: React.ReactElement) => (React.ReactElement | undefined)[]): this {
     var pr = propertyRoute instanceof PropertyRoute ? propertyRoute : this.ctx.propertyRoute!.addLambda(propertyRoute);
 
     this.result = new ReplaceVisitor(

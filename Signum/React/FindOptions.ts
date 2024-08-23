@@ -1,8 +1,9 @@
-import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type } from './Reflection';
+import { TypeReference, PseudoType, QueryKey, getLambdaMembers, QueryTokenString, tryGetTypeInfos, PropertyRoute, isTypeEnum, TypeInfo, Type, isNumberType, isDecimalType } from './Reflection';
 import { Lite, Entity } from './Signum.Entities';
-import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows } from './Signum.DynamicQuery';
+import { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType, SystemTimeMode, FilterGroupOperation, PinnedFilterActive, SystemTimeJoinMode, DashboardBehaviour, CombineRows, TimeSeriesUnit } from './Signum.DynamicQuery';
 import { SearchControlProps, SearchControlLoaded } from "./Search";
 import { BsSize } from './Components';
+import { isDecimalKey } from './Lines/NumberLine';
 
 export { PaginationMode, OrderType, FilterOperation, FilterType, ColumnOptionsMode, UniqueType };
 
@@ -106,11 +107,11 @@ export type FilterOptionParsed = FilterConditionOptionParsed | FilterGroupOption
 
 
 
-export function isActive(fo: FilterOptionParsed) {
+export function isActive(fo: FilterOptionParsed): boolean {
   return !(fo.dashboardBehaviour == "UseAsInitialSelection" || fo.pinned && (fo.pinned.active == "Checkbox_Unchecked" || fo.pinned.active == "NotCheckbox_Unchecked" || fo.pinned.active == "WhenHasValue" && fo.value == null));
 }
 
-export function isCheckBox(active: PinnedFilterActive | undefined) {
+export function isCheckBox(active: PinnedFilterActive | undefined): boolean {
   return active == "Checkbox_Checked" ||
     active == "Checkbox_Unchecked" ||
     active == "NotCheckbox_Checked" ||
@@ -200,6 +201,7 @@ export enum SubTokensOptions {
   CanToArray = 16,
   CanSnippet= 32,
   CanManual = 64,
+  CanTimeSeries = 128,
 }
 
 export interface QueryToken {
@@ -245,7 +247,7 @@ function getFullKey(token: QueryToken | QueryTokenString<any> | string) : string
   return token;
 }
 
-export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string) {
+export function tokenStartsWith(token: QueryToken | QueryTokenString<any> | string, tokenStart: QueryToken | QueryTokenString<any> | string): boolean {
 
   token = getFullKey(token);
   tokenStart = getFullKey(token);
@@ -373,7 +375,7 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
   };
 }
 
-export function canSplitValue(fo: FilterOptionParsed) {
+export function canSplitValue(fo: FilterOptionParsed): boolean | undefined {
   if (isFilterGroup(fo))
     return fo.pinned != null;
 
@@ -505,22 +507,26 @@ export interface SystemTime {
   joinMode?: SystemTimeJoinMode;
   startDate?: string;
   endDate?: string;
+  timeSeriesUnit?: TimeSeriesUnit;
+  timeSeriesStep?: number;
+  timeSeriesMaxRowsPerStep?: number;
+
 }
 
 export module PaginateMath {
-  export function startElementIndex(p: Pagination) {
+  export function startElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! - 1)) + 1;
   }
 
-  export function endElementIndex(p: Pagination, rows: number) {
+  export function endElementIndex(p: Pagination, rows: number): number {
     return startElementIndex(p) + rows - 1;
   }
 
-  export function totalPages(p: Pagination, totalElements: number) {
+  export function totalPages(p: Pagination, totalElements: number): number {
     return Math.max(1, Math.ceil(totalElements / p.elementsPerPage!)); //Round up
   }
 
-  export function maxElementIndex(p: Pagination) {
+  export function maxElementIndex(p: Pagination): number {
     return (p.elementsPerPage! * (p.currentPage! + 1)) - 1;
   }
 }
@@ -549,19 +555,16 @@ export interface ColumnDescription {
   propertyRoute?: string;
 }
 
-export function isList(fo: FilterOperation) {
+export function isList(fo: FilterOperation): boolean {
   return fo == "IsIn" ||
     fo == "IsNotIn";
 }
 
 
 export function getFilterType(tr: TypeReference): FilterType | null {
-  if (tr.name == "number")
-    return "Integer";
-
-  if (tr.name == "decmial")
-    return "Decimal";
-
+  if (isNumberType(tr.name))
+    return isDecimalType(tr.name) ? "Decimal" : "Integer";
+    
   if (tr.name == "boolean")
     return "Boolean";
 
@@ -603,7 +606,7 @@ export function getFilterOperations(qt: QueryToken): FilterOperation[] {
 }
 
 export function getFilterGroupUnifiedFilterType(tr: TypeReference): FilterType | null {
-  if (tr.name == "number" || tr.name == "decmial" || tr.name == "boolean" || tr.name == "string" || tr.name == "Guid")
+  if (isNumberType(tr.name) || tr.name == "boolean" || tr.name == "string" || tr.name == "Guid")
     return "String";
 
   if (tr.name == "DateTime")

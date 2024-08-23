@@ -12,7 +12,7 @@ export interface OmniboxAutocompleteProps {
   inputAttrs?: React.HTMLAttributes<HTMLInputElement>;
 }
 
-export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps) {
+export default function OmniboxAutocomplete(p: OmniboxAutocompleteProps): React.JSX.Element {
 
   const typeahead = React.useRef<TypeaheadController>(null);
   const abortRequest = React.useMemo(() => new AbortableRequest((ac, query: string) => OmniboxClient.API.getResults(query, ac)), []);

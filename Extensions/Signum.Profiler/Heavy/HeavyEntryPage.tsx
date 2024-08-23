@@ -11,7 +11,7 @@ import { useTitle } from '@framework/AppContext'
 
 
 
-export default function HeavyEntry() {
+export default function HeavyEntry(): React.JSX.Element {
   const params = useParams() as { selectedIndex: string };
 
   const selectedIndex = params.selectedIndex;
@@ -73,7 +73,7 @@ export default function HeavyEntry() {
 }
 
 
-export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }) {
+export function StackFrameTable(p: { stackTrace: ProfilerClient.StackTraceTS[] }): React.JSX.Element {
   if (p.stackTrace == undefined)
     return <span>No StackTrace</span>;
 
@@ -124,7 +124,7 @@ interface MinMax {
   max: number;
 }
 
-export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props) {
+export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props): React.JSX.Element {
 
   const [minMax, setMinMax] = React.useState<MinMax>(() => resetZoom(p.selected));
 

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Immutable;
+using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq;
 
@@ -10,7 +11,6 @@ internal class QueryRebinder : DbExpressionVisitor
     public Dictionary<ColumnExpression, ColumnExpression?> CurrentScope { get { return scopes.Peek(); } }
 
     private QueryRebinder() { }
-
 
     internal class ColumnCollector : DbExpressionVisitor
     {

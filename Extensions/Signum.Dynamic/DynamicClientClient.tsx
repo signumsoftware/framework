@@ -12,7 +12,7 @@ import { DynamicClientEntity } from './Signum.Dynamic.Client';
 
 export namespace DynamicClientClient {
   
-  export function start(options: { routes: RouteObject[] }) {
+  export function start(options: { routes: RouteObject[] }): void {
     Navigator.addSettings(new EntitySettings(DynamicClientEntity, w => import('./Client/DynamicClientComponent')));
   
   
@@ -28,7 +28,7 @@ export namespace DynamicClientClient {
   }
   
   //Run before reload
-  export function getIsSafeMode() {
+  export function getIsSafeMode(): boolean {
     return window.location.search.contains("safeMode");
   }
   

@@ -19,25 +19,25 @@ import { LineBaseController, LineBaseProps } from '@framework/Lines/LineBase';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace HelpClient {
-  
-  export function start(options: { routes: RouteObject[] }) {
-  
+
+  export function start(options: { routes: RouteObject[] }): void {
+
     ChangeLogClient.registerChangeLogModule("Signum.Help", () => import("./Changelog"));
-  
+
     OmniboxClient.registerProvider(new HelpOmniboxProvider());
-  
+
     options.routes.push({ path: "/help", element: <ImportComponent onImport={() => import("./Pages/HelpIndexPage")} /> });
     options.routes.push({ path: "/help/namespace/:namespace", element: <ImportComponent onImport={() => import("./Pages/NamespaceHelpPage")} /> });
     options.routes.push({ path: "/help/type/:cleanName", element: <ImportComponent onImport={() => import("./Pages/TypeHelpPage")} /> });
     options.routes.push({ path: "/help/appendix/:uniqueName?", element: <ImportComponent onImport={() => import("./Pages/AppendixHelpPage")} /> });
-  
+
     onWidgets.push(wc => AppContext.isPermissionAuthorized(HelpPermissions.ViewHelp) && isEntity(wc.ctx.value) ? <HelpWidget wc={wc as WidgetContext<Entity>} /> : undefined);
-  
+
     tasks.push(taskHelpIcon);
-  
+
   }
-  
-  export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) {
+
+  export function taskHelpIcon(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps) : void {
     if (state.labelIcon === undefined &&
       state.ctx.propertyRoute &&
       state.ctx.frame?.pack.typeHelp
@@ -45,22 +45,22 @@ export namespace HelpClient {
       state.labelIcon = <HelpIcon ctx={state.ctx} />;
     }
   }
-  
+
   var helpLinkRegex = /\[(?<letter>[tpqona]+):(?<link>[.a-z0-9_|/]*)\]/gi;
   var helpAppRelativeUrl = /href="\//gi;
-  
-  export function replaceHtmlLinks(txt: string | null) {
+
+  export function replaceHtmlLinks(txt: string | null): React.JSX.Element | string {
     if (txt == null)
       return "";
-  
+
     function htmlLink(url: string | null | undefined, title: string) {
-  
+
       if (url == null)
         return `<span class="text-danger">${title}</span>`;
-  
+
       return `<a href="${url}">${title}</a>`;
     }
-  
+
     var txt2 = txt.replace(helpLinkRegex, (match: any, letter: string, link: string) => {
       switch (letter) {
         case 't': {
@@ -85,52 +85,52 @@ export namespace HelpClient {
         default: throw new Error("Not expected " + letter);
       }
     });
-  
+
     var txt3 = txt2.replace(helpAppRelativeUrl, "href=\"" + AppContext.toAbsoluteUrl("~/"));
-  
+
     return txt3;
   }
-  
-  
-  const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {}; 
-  
+
+
+  const cache: { [cleanName: string]: Promise<TypeHelpEntity> } = {};
+
   export module API {
-  
+
     export function index(): Promise<HelpIndexTS> {
       return ajaxGet({ url: "/api/help/index" });
     }
-  
+
     export function namespace(namespace: string): Promise<NamespaceHelp> {
       return ajaxGet({ url: "/api/help/namespace/" + namespace });
     }
-  
+
     export function saveNamespace(typeHelp: NamespaceHelpEntity): Promise<void> {
       return ajaxPost({ url: "/api/help/saveNamespace" }, typeHelp);
     }
-  
+
     export function type(cleanName: string): Promise<TypeHelpEntity> {
       return cache[cleanName] ??= ajaxGet({ url: "/api/help/type/" + cleanName });
     }
-  
+
     export function saveType(typeHelp: TypeHelpEntity): Promise<void> {
       return ajaxPost({ url: "/api/help/saveType" }, typeHelp);
     }
-  
+
     export function appendix(uniqueName: string | undefined): Promise<AppendixHelpEntity> {
       return ajaxGet({ url: "/api/help/appendix/" + (uniqueName ?? "") });
     }
-  
+
     export function saveAppendix(appendix: AppendixHelpEntity): Promise<void> {
       return ajaxPost({ url: "/api/help/saveAppendix" }, appendix);
     }
   }
-  
+
   export interface HelpIndexTS {
     culture: CultureInfoEntity;
     namespaces: Array<NamespaceItemTS>;
     appendices: Array<AppendiceItemTS>;
   }
-  
+
   export interface NamespaceItemTS {
     namespace: string;
     module?: string;
@@ -138,17 +138,17 @@ export namespace HelpClient {
     hasEntity?: boolean;
     allowedTypes: EntityItem[];
   }
-  
+
   export interface EntityItem {
     cleanName: string;
     hasEntity?: boolean;
   }
-  
+
   export interface AppendiceItemTS {
     title: string;
     uniqueName: string;
   }
-  
+
   export interface NamespaceHelp {
     namespace: string;
     before?: string;
@@ -157,55 +157,55 @@ export namespace HelpClient {
     entity: NamespaceHelpEntity;
     allowedTypes: EntityItem[];
   }
-  
-  
+
+
   export module Urls {
     export function indexUrl() {
       return "/help";
     }
-  
-    export function searchUrl(query: PseudoType) {
+
+    export function searchUrl(query: PseudoType): string {
       return "/help/search?" + QueryString.stringify({ q: getQueryKey(query) });
     }
-  
-    export function typeUrl(typeName: PseudoType) {
+
+    export function typeUrl(typeName: PseudoType): string {
       return "/help/type/" + getTypeName(typeName);
     }
-  
-    export function namespaceUrl(namespace: string) {
+
+    export function namespaceUrl(namespace: string): string {
       return "/help/namespace/" + namespace.replaceAll(".", "_");
     }
-  
-    export function appendixUrl(uniqueName: string | null) {
+
+    export function appendixUrl(uniqueName: string | null): string {
       return "/help/appendix/" + (uniqueName ?? "");
     }
-  
-    export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string) {
+
+    export function operationUrl(typeName: PseudoType, operation: OperationSymbol | string): string {
       return typeUrl(typeName) + "#" + idOperation(operation);
     }
-  
-    export function idOperation(operation: OperationSymbol | string) {
+
+    export function idOperation(operation: OperationSymbol | string): string {
       return "o-" + ((operation as OperationSymbol).key ?? operation as string).replaceAll('.', '_');
     }
-  
-  
-    export function propertyUrl(typeName: PseudoType, route: PropertyRoute | string) {
+
+
+    export function propertyUrl(typeName: PseudoType, route: PropertyRoute | string): string {
       return typeUrl(typeName) + "#" + idProperty(route);
     }
-  
-    export function idProperty(route: PropertyRoute | string) {
+
+    export function idProperty(route: PropertyRoute | string): string {
       return "p-" + ((route instanceof PropertyRoute) ? route.propertyPath() : route).replaceAll('.', '_').replaceAll('/', '_').replaceAll('[', '_').replaceAll(']', '_');
     }
-  
-  
-    export function queryUrl(typeName: PseudoType, query: PseudoType | QueryKey) {
+
+
+    export function queryUrl(typeName: PseudoType, query: PseudoType | QueryKey): string {
       return typeUrl(typeName) + "#" + idQuery(query);
     }
-  
-    export function idQuery(query: PseudoType | QueryKey) {
+
+    export function idQuery(query: PseudoType | QueryKey): string {
       return "q-" + getQueryKey(query).replaceAll(".", "_");
     }
-  
+
   }
 }
 

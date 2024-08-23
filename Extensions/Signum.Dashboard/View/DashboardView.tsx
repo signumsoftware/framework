@@ -15,7 +15,7 @@ import { CachedQueryJS } from '../CachedQueryExecutor'
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder'
 import { Navigator } from '@framework/Navigator'
 
-export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }) {
+export default function DashboardView(p: { dashboard: DashboardEntity, cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS> }, entity?: Entity, deps?: React.DependencyList; reload: () => void; hideEditButton?: boolean }): React.JSX.Element {
 
   const forceUpdate = useForceUpdate();
   const dashboardController = React.useMemo(() => new DashboardController(forceUpdate, p.dashboard), [p.dashboard]);
@@ -196,7 +196,7 @@ export interface PanelPartProps {
   cachedQueries: { [userAssetKey: string]: Promise<CachedQueryJS>, }
 }
 
-export function PanelPart(p: PanelPartProps) {
+export function PanelPart(p: PanelPartProps): React.JSX.Element | null {
   const content = p.ctx.value.content;
 
   const customDataRef = React.useRef();

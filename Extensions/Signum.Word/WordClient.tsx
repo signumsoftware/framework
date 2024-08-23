@@ -25,7 +25,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace WordClient {
   
-  export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }) {
+  export function start(options: { routes: RouteObject[], contextual: boolean, queryButton: boolean, entityButton: boolean }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.Word", () => import("./Changelog"));
   
@@ -122,7 +122,7 @@ export namespace WordClient {
   
   export const settings: { [typeName: string]: WordModelSettings<ModifiableEntity> } = {};
   
-  export function register<T extends ModifiableEntity>(type: Type<T>, setting: WordModelSettings<T>) {
+  export function register<T extends ModifiableEntity>(type: Type<T>, setting: WordModelSettings<T>): void {
     settings[type.typeName] = setting;
   }
   
@@ -151,7 +151,7 @@ export namespace WordClient {
       });
   }
   
-  export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>) {
+  export function handleMenuClick(wt: Lite<WordTemplateEntity>, ctx: ContextualItemsContext<Entity>): void {
   
     Navigator.API.fetch(wt)
       .then(wordTemplate => wordTemplate.model ? API.getConstructorType(wordTemplate.model) : Promise.resolve(undefined))

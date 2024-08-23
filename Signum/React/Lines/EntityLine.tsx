@@ -35,7 +35,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
   focusNext!: React.MutableRefObject<boolean>;
   typeahead!: React.RefObject<TypeaheadController>;
 
-  init(pro: EntityLineProps<V>) {
+  init(pro: EntityLineProps<V>): void {
     super.init(pro);
 
     [this.currentItem, this.setCurrentItem] = React.useState<ItemPair | undefined>();
@@ -81,14 +81,14 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 
   }
 
-  overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>) {
+  overrideProps(p: EntityLineProps<V>, overridenProps: EntityLineProps<V>): void {
     super.overrideProps(p, overridenProps);
     if (p.autocomplete === undefined && p.type) {
       p.autocomplete = Navigator.getAutoComplete(p.type, p.findOptions, p.findOptionsDictionary,  p.ctx, p.create!, p.showType);
     }
   }
 
-  setValue(val: any, event?: React.SyntheticEvent) {
+  setValue(val: any, event?: React.SyntheticEvent): void {
     if (val != null)
       this.focusNext.current = true;
 
@@ -101,7 +101,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
     }
   }
 
-  writeInTypeahead(query: string) {
+  writeInTypeahead(query: string): void {
     this.typeahead.current && this.typeahead.current.writeInInput(query);
   }
 
@@ -122,7 +122,7 @@ export class EntityLineController<V extends ModifiableEntity | Lite<Entity> | nu
 }
 
 
-export const EntityLine = genericForwardRefWithMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
+export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V> & React.RefAttributes<EntityLineController<V>>) => React.ReactNode | null = genericForwardRefWithMemo(function EntityLine<V extends ModifiableEntity | Lite<Entity> | null>(props: EntityLineProps<V>, ref: React.Ref<EntityLineController<V>>) {
   const c = useController(EntityLineController, props, ref);
   const p = c.props;
 

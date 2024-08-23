@@ -6,7 +6,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { classes } from '@framework/Globals'
 import { useForceUpdate } from '@framework/Hooks'
 
-export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }) {
+export function DoublePassword(p: { ctx: TypeContext<string>, initialOpen: boolean, mandatory: boolean }): React.JSX.Element {
 
   const [isOpen, setIsOpen] = React.useState(p.initialOpen);
   var newPass = React.useRef<HTMLInputElement>(null);

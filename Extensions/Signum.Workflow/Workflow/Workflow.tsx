@@ -26,7 +26,8 @@ export interface WorkflowHandle {
   getSvg(): Promise<string>;
 }
 
-export const Workflow = React.forwardRef(function Workflow(p: WorkflowProps, ref: React.Ref<WorkflowHandle>) {
+export const Workflow: React.ForwardRefExoticComponent<WorkflowProps & React.RefAttributes<WorkflowHandle>> =
+  React.forwardRef(function Workflow(p: WorkflowProps, ref: React.Ref<WorkflowHandle>) {
 
   const bpmnModelerComponentRef = React.useRef<BpmnModelerComponent>(null);
 

@@ -11,7 +11,7 @@ export interface LineOrWordsChange {
   wordChanges?: Array<Change>;
 }
 
-export function DiffDocument(p: { first: string, second: string }) {
+export function DiffDocument(p: { first: string, second: string }): React.JSX.Element {
   
   const [margin, setMargin] = React.useState<number | null>(4);
   const [force, setForce] = React.useState<boolean>(false);
@@ -38,15 +38,14 @@ export function DiffDocument(p: { first: string, second: string }) {
   );
 }
 
-DiffDocument.defaultMarginLines = 4 as (number | null);
-DiffDocument.maxSize = 300000;
+export namespace DiffDocument {
+  export let defaultMarginLines = 4 as (number | null);
+  export let maxSize = 300000;
+}
 
 
 
-export function DiffDocumentSimple(p: { first: string, second: string, margin?: number | null }) {
-
-  
-
+export function DiffDocumentSimple(p: { first: string, second: string, margin?: number | null }): React.JSX.Element {
 
   const linesDiff = React.useMemo<Array<LineOrWordsChange>>(() => {
  

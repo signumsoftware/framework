@@ -192,6 +192,15 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return sqlEnum;
     }
 
+    protected internal virtual Expression VisitSqlColumnList(SqlColumnListExpression sqlColumnList)
+    {
+        var cols = Visit<ColumnExpression>(sqlColumnList.Columns, vc => (ColumnExpression)VisitColumn(vc));
+        if (cols != sqlColumnList.Columns)
+            return new SqlColumnListExpression(cols);
+
+        return sqlColumnList;
+    }
+
     protected internal virtual Expression VisitSqlCast(SqlCastExpression castExpr)
     {
         var expression = Visit(castExpr.Expression);
@@ -202,7 +211,24 @@ internal class DbExpressionVisitor : ExpressionVisitor
 
     protected internal virtual Expression VisitTable(TableExpression table)
     {
+        var st = VisitSystemTime(table.SystemTime);
+
+        if(st != table.SystemTime)
+            return new TableExpression(table.Alias, table.Table, st, table.WithHint);
+
         return table;
+    }
+
+    protected SystemTime? VisitSystemTime(SystemTime? st)
+    {
+        if (st is SystemTime.AsOfExpression aoe)
+        {
+            var exp = Visit(aoe.Expression);
+            if (exp != aoe.Expression)
+                return new SystemTime.AsOfExpression(exp);
+        }
+
+        return st;
     }
 
     protected internal virtual Expression VisitColumn(ColumnExpression column)

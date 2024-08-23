@@ -19,7 +19,7 @@ export interface ReactChartProps {
 }
 
 
-export default function ReactChart(p: ReactChartProps) {
+function ReactChart(p: ReactChartProps): React.JSX.Element {
 
   const isSimple = p.data == null || p.data.rows.length < ReactChart.maxRowsForAnimation;
   const oldData = useThrottle(p.data, 200, { enabled: isSimple });
@@ -50,8 +50,11 @@ export default function ReactChart(p: ReactChartProps) {
   );
 }
 
-ReactChart.maxRowsForAnimation = 500;
+namespace ReactChart {
+   export let maxRowsForAnimation = 500;
+}
 
+export default ReactChart;
 
 export class MemoRepository {
   cache: Map<string, { val: unknown, deps: unknown[] }> = new Map();

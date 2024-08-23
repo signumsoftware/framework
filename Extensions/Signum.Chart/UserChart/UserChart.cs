@@ -44,6 +44,8 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     public bool? IncludeDefaultFilters { get; set; }
 
     public int? MaxRows { get; set; }
+    
+    public ChartTimeSeriesEmbedded? ChartTimeSeries { get; set; }
 
     ChartScriptSymbol chartScript;
     public ChartScriptSymbol ChartScript
@@ -85,10 +87,12 @@ public class UserChartEntity : Entity, IChartBase, IHasEntityType, IUserAssetEnt
     internal void ParseData(QueryDescription description)
     {
         foreach (var f in Filters)
-            f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate);
+            f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | SubTokensOptions.CanAggregate | (ChartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0));
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate);
+        {            
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (ChartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0));
+        }
     }
 
     static Func<QueryEntity, object> ToQueryName;

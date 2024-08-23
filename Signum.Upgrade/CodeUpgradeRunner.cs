@@ -62,6 +62,12 @@ public class CodeUpgradeRunner: IEnumerable<CodeUpgradeBase>
         }
 
         var list = File.ReadAllLines(upgradeFile);
+
+        if (list.Any(a => a.Contains("Southwind_")) && SafeConsole.Ask("Fix incorrect file " + upgradeFile + "?"))
+        {
+            list = list.Select(a => a.Replace("Southwind_", "")).ToArray();
+            File.WriteAllLines(upgradeFile, list);
+        }
       
         foreach (var v in this.Upgrades)
         {
