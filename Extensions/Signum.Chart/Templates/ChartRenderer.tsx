@@ -74,20 +74,21 @@ export function handleDrillDown(r: ChartRow, e: React.MouseEvent | MouseEvent, c
   ChartClient.onDrilldownUserChart(cr, r, uc, { openInNewTab: newWindow, onReload })
     .then(done => {
       if (done == false) {
-  if (r.entity) {
-    if (newWindow)
-      window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
-    else
-      Navigator.view(r.entity)
+        if (r.entity) {
+          if (newWindow)
+            window.open(toAbsoluteUrl(Navigator.navigateRoute(r.entity)));
+          else
+            Navigator.view(r.entity)
               .then(() => onReload?.());
-  } else {
+        } else {
           const fo = ChartClient.extractFindOptions(cr, r);
-    if (newWindow)
-      window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
-    else
-      Finder.explore(fo)
+          if (newWindow)
+            window.open(toAbsoluteUrl(Finder.findOptionsPath(fo)));
+          else
+            Finder.explore(fo)
               .then(() => onReload?.());
         }
-  }
+      }
     });
+}
 }

@@ -89,19 +89,18 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
   const qs = Finder.getSettings(p.queryKey);
   
   const tis = getTypeInfos(p.queryDescription.columns["Entity"].type);
-  var ts = p.ctx.value.chartTimeSeries;
 
   return (<>
       {(qs?.allowSystemTime ?? tis.some(a => a.isSystemVersioned == true)) && <div className='d-flex align-items-center mb-1' style={{minHeight: 34}}>
         <label>
-          <input className='me-1' type={'checkbox'} defaultChecked={ts != null}
+          <input className='me-1' type={'checkbox'} defaultChecked={chart.chartTimeSeries != null}
             onChange={e => {
               
               if(e.target.checked) {
-                if(!ts)
-                  ts = ChartTimeSeriesEmbedded.New({timeSeriesStep: 1, timeSeriesUnit: 'Month', startDate: DateTime.now().startOf('year').toISODate(), endDate: DateTime.now().endOf('year').toISODate()});
+                if(!chart.chartTimeSeries)
+                  chart.chartTimeSeries = ChartTimeSeriesEmbedded.New({timeSeriesStep: 1, timeSeriesUnit: 'Month', startDate: DateTime.now().startOf('year').toISODate(), endDate: DateTime.now().endOf('year').toISODate()});
               } else {
-                ts = null;
+                chart.chartTimeSeries = null;
               }
               forceUpdate();
             }} 
@@ -109,7 +108,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
           Time machine
           <FontAwesomeIcon className='mx-1' icon='clock-rotate-left' />
         </label>
-        {ts && <ChartTimeSeries chartTimeSeries={ts} chartBase={p.ctx.value} onChange={handleOnRedraw}/>}
+        {chart.chartTimeSeries && <ChartTimeSeries chartTimeSeries={chart.chartTimeSeries} chartBase={p.ctx.value} onChange={handleOnRedraw}/>}
       </div>}
     <div className="row sf-chart-builder gx-2">
       <div className="col-lg-2">
