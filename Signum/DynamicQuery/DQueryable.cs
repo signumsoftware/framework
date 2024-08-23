@@ -784,8 +784,8 @@ public static class DQueryable
     {
         var st =
             QueryTimeSeriesLogic.GetDatesInRange(
-                systemTime.startDate!.Value,
-                systemTime.endDate!.Value,
+                systemTime.startDate!.Value.ToUniversalTime(),
+                systemTime.endDate!.Value.ToUniversalTime(),
                 systemTime.timeSeriesUnit!.ToString()!,
                 systemTime.timeSeriesStep!.Value);
 
