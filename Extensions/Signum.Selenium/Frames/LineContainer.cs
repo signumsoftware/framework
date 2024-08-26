@@ -208,6 +208,25 @@ where T : IModifiableEntity
             valueLine.InputLocator.Find().LoseFocus();
     }
 
+    public static HtmlLineProxy HtmlLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
+        where T : IModifiableEntity
+    {
+        var lineLocator = lineContainer.LineLocator(property);
+
+        return new HtmlLineProxy(lineLocator.ElementLocator.WaitVisible(), lineLocator.Route);
+    }
+
+    public static void HtmlLineValue<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property, string? value, bool loseFocus = false)
+        where T : IModifiableEntity
+    {
+        var valueLine = lineContainer.HtmlLine(property);
+
+        valueLine.SetValue((string?)value);
+
+        if (loseFocus)
+            valueLine.InputLocator.Find().LoseFocus();
+    }
+
     public static TextAreaLineProxy TextAreaLine<T>(this ILineContainer<T> lineContainer, Expression<Func<T, string?>> property)
     where T : IModifiableEntity
     {
