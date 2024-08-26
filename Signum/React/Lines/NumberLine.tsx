@@ -145,7 +145,7 @@ export function NumberBox(p: NumberBoxProps): React.JSX.Element {
         undefined;
 
   return <input ref={p.innerRef}
-    autoComplete="off" 
+    autoComplete="off"
     {...p.htmlAttributes}
     id={p.id}
     readOnly={p.readonly}
@@ -167,17 +167,21 @@ export function NumberBox(p: NumberBoxProps): React.JSX.Element {
       p.htmlAttributes.onFocus(e);
   };
 
+  function triggetOnBlur() {
+    if (text != null) {
+      let value = NumberLineController.autoFixString(text, false, false);
+
+      const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
+      setText(undefined);
+      if (result != p.value)
+        p.onChange(result);
+    }
+  }
+
 
   function handleOnBlur(e: React.FocusEvent<any>) {
     if (!p.readonly) {
-      if (text != null) {
-        let value = NumberLineController.autoFixString(text, false, false);
-
-        const result = value == undefined || value.length == 0 ? null : unformat(p.format, value);
-        setText(undefined);
-        if (result != p.value)
-          p.onChange(result);
-      }
+      triggetOnBlur();
     }
 
     if (p.htmlAttributes && p.htmlAttributes.onBlur)
@@ -215,8 +219,12 @@ export function NumberBox(p: NumberBoxProps): React.JSX.Element {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<any>) {
-    if (!p.validateKey(e))
+
+    if (!p.validateKey(e)) {
+      if (e.ctrlKey || e.altKey) //possible shortcut
+        triggetOnBlur();
       e.preventDefault();
+    }
     else {
       var atts = p.htmlAttributes;
       atts?.onKeyDown && atts.onKeyDown(e);
