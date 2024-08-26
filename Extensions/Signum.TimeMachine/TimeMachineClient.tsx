@@ -148,7 +148,7 @@ export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorEle
   inSearch?: "main" | "related";
 }
 
-export default function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
+export function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
 
   function handleClick(event: React.MouseEvent<any>) {
     const lite = p.lite;

@@ -198,6 +198,7 @@ export namespace UserAssetClient {
       filters: QueryFilterItem[];
       entity: Lite<Entity> | undefined;
       canAggregate: boolean
+      canTimeSeries: boolean;
     }
   
   
@@ -208,7 +209,8 @@ export namespace UserAssetClient {
     export interface StringifyFiltersRequest {
       queryKey: string;
       filters: FilterNode[];
-      canAggregate: boolean
+      canAggregate: boolean;
+      canTimeSeries: boolean;
     }
     
     export interface FilterNode {

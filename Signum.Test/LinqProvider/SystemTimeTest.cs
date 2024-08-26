@@ -1,4 +1,5 @@
 using Signum.DynamicQuery;
+using Signum.Entities;
 using Signum.Utilities.DataStructures;
 
 namespace Signum.Test.LinqProvider;
@@ -124,5 +125,57 @@ public class SystemTimeTest
         {
             var list = Database.Query<FolderEntity>().Where(f2 => f2.Name == "X2").Select(a => a.SystemPeriod()).ToList();
         }
+    }
+
+    [Fact]
+    public void TimeSeriesOneValue()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        DateTime min;
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
+        {
+            min = Database.Query<FolderEntity>().Min(a => a.SystemPeriod().Min!.Value);
+        }
+
+        var series = QueryTimeSeriesLogic.GetDatesInRange(
+              min,
+              min.AddSeconds(2),
+              TimeSeriesUnit.Millisecond.ToString(),
+              50)
+            .Select(dv =>
+             new
+             {
+                 dv.Date,
+                 Count = SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Count())
+             }).ToList();
+
+    }
+
+    [Fact]
+    public void TimeSeriesManyValue()
+    {
+        if (!Connector.Current.SupportsTemporalTables)
+            return;
+
+        DateTime min;
+        using (SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible)))
+        {
+            min = Database.Query<FolderEntity>().Min(a => a.SystemPeriod().Min!.Value);
+        }
+
+        var series = QueryTimeSeriesLogic.GetDatesInRange(
+              min,
+              min.AddSeconds(2),
+              TimeSeriesUnit.Millisecond.ToString(),
+              50)
+            .SelectMany(dv =>
+             SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Select(f => new
+             {
+                 dv.Date,
+                 Folder = f
+             }))).ToList();
+
     }
 }

@@ -201,6 +201,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
 
     const qfs = await UserAssetClient.API.stringifyFilters({
       canAggregate: fo.groupResults || false,
+      canTimeSeries: fo.systemTime?.mode == 'TimeSeries',
       queryKey: getQueryKey(fo.queryName),
       filters: (fo.filterOptions ?? []).notNull().map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });

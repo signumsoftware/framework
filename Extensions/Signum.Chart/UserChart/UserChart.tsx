@@ -3,7 +3,7 @@ import ChartBuilder from '../Templates/ChartBuilder'
 import { FormGroup, AutoLine, EntityLine, EntityStrip, CheckboxLine } from '@framework/Lines'
 import { Finder } from '@framework/Finder'
 import { SubTokensOptions } from '@framework/FindOptions'
-import { getQueryNiceName } from '@framework/Reflection'
+import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import "../Chart.css"
 import { useAPI, useForceUpdate } from '@framework/Hooks'
@@ -12,6 +12,11 @@ import { getToString } from '@framework/Signum.Entities'
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
+import { ChartTimeSeriesEmbedded } from '../Signum.Chart'
+import { DateTime } from 'luxon'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import ChartTimeSeries from '../Templates/ChartTimeSeries'
+import { UserChartClient } from './UserChartClient'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {
@@ -60,10 +65,11 @@ export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): Re
         }/>
       <AutoLine ctx={ctx.subCtx(e => e.includeDefaultFilters)} />
       <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} queryKey={p.ctx.value.query.key}
-        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate}
+        subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | (ctx.value.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0)}
         showPinnedFilterOptions={true}
       />
       <ChartBuilder queryKey={queryKey} ctx={p.ctx}
+        queryDescription={qd}
         onInvalidate={() => forceUpdate()}
         onTokenChange={() => forceUpdate()}
         onRedraw={() => forceUpdate()}

@@ -27,7 +27,7 @@ export default function PinnedFilterBuilder(p: PinnedFilterBuilderProps): React.
 
   var allPinned = getAllPinned(p.filterOptions).filter(fop => p.pinnedFilterVisible == null || p.pinnedFilterVisible(fop));
 
-  if (allPinned.length == 0)
+  if (allPinned.length == 0 && !p.showGrid)
     return null;
 
   function getColSpan(fo: FilterOptionParsed) {

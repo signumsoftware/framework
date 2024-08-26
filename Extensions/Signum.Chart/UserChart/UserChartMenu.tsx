@@ -7,7 +7,7 @@ import { is } from '@framework/Signum.Entities'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
 import * as AppContext from '@framework/AppContext'
-import { ChartRequestModel, ChartMessage, ChartColumnEmbedded } from '../Signum.Chart'
+import { ChartRequestModel, ChartMessage, ChartColumnEmbedded, ChartTimeSeriesEmbedded } from '../Signum.Chart'
 import { UserChartClient } from './UserChartClient'
 import { ChartRequestViewHandle } from '../Templates/ChartRequestView'
 import { UserAssetClient } from '../../Signum.UserAssets/UserAssetClient'
@@ -16,6 +16,8 @@ import { AutoFocus } from '@framework/Components/AutoFocus'
 import { KeyNames } from '@framework/Components'
 import { UserQueryMerger } from '../../Signum.UserQueries/UserQueryMenu'
 import { UserChartEntity, UserChartOperation } from '../UserChart/Signum.Chart.UserChart'
+import { clone } from '@framework/Reflection'
+import { ChartClient } from '../ChartClient'
 
 export interface UserChartMenuProps {
   chartRequestView: ChartRequestViewHandle;
@@ -139,15 +141,25 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
     const fos = Finder.toFilterOptions(cr.filterOptions);
 
     const qfs = await UserAssetClient.API.stringifyFilters({
+      canTimeSeries: cr.chartTimeSeries != null,
       canAggregate: true,
       queryKey: cr.queryKey,
       filters: fos.map(fo => UserAssetClient.Converter.toFilterNode(fo))
     });
 
+    var ts = cr.chartTimeSeries;
+    
     const uc = UserChartEntity.New({
       owner: AppContext.currentUser && toLite(AppContext.currentUser),
       query: query,
       chartScript: cr.chartScript,
+      chartTimeSeries: !ts ? null : ChartTimeSeriesEmbedded.New({
+        timeSeriesUnit: ts?.timeSeriesUnit,
+        startDate: ts.startDate && await UserAssetClient.API.stringifyDate(ts.startDate),
+        endDate: ts.endDate && await UserAssetClient.API.stringifyDate(ts.endDate),
+        timeSeriesStep: ts.timeSeriesStep,
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep
+      }),
       maxRows: cr.maxRows,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),
       columns: cr.columns.map(a => newMListElement(JSON.parse(JSON.stringify(a.element)))),

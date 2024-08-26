@@ -763,14 +763,17 @@ public static class DQueryable
     static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
     static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
 
-    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, List<Column> columns, List<Order> orders)
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, List<Column> columns, List<Order> orders, List<Filter> timeSeriesFilter)
     {
-        var tokens = columns.Select(a => a.Token).Concat(orders.Select(a => a.Token)).ToHashSet();
+        var tokens = columns.Select(a => a.Token).Concat(orders.Select(a => a.Token))
+            .Concat(timeSeriesFilter.SelectMany(a => a.GetTokens()))
+            .ToHashSet();
 
         return query
             .OrderBy(orders.Where(a => a.Token is not TimeSeriesToken).ToList())
             .Select(tokens.Where(t => t is not TimeSeriesToken).ToHashSet())
             .SelectManyTimeSeries(systemTime, tokens)
+            .Where(timeSeriesFilter)
             .OrderBy(orders.ToList())
             .Select(columns);
 

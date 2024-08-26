@@ -81,7 +81,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           <div>
             <FilterBuilderEmbedded ctx={ctxxs.subCtx(e => e.filters)}
               avoidFieldSet="h5"
-              subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+              subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries}
               queryKey={ctxxs.value.query!.key}
               showPinnedFilterOptions={true} />
             <EntityTable ctx={ctxxs.subCtx(e => e.columns)} avoidFieldSet="h5" columns={[

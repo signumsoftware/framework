@@ -190,6 +190,7 @@ public enum TimeSeriesUnit
     Hour,
     Minute,
     Second,
+    Millisecond,
 }
 
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
