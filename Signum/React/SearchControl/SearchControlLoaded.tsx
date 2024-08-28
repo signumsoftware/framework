@@ -1530,7 +1530,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     return [...originalFilters, ...keyFilters];
   }
 
-  openRowGroup(row: ResultRow): void {
+  openRowGroup(row: ResultRow, e: React.MouseEvent): void {
 
     var resFo = this.state.resultFindOptions!;
 
@@ -1554,13 +1554,22 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       includeDefaultFilters: false,
     } as FindOptions);
 
+    const isWindowsOpen = e.button == 1 || e.ctrlKey;
+
     const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
-    const promise = onDrilldown ? onDrilldown(this, row, { onReload: () => this.dataChanged() }) : Promise.resolve(false);
+    const promise = onDrilldown ? onDrilldown(this, row, { openInNewTab: isWindowsOpen, onReload: () => this.dataChanged() }) : Promise.resolve(false);
     promise.then(done => {
-      if (done == false)
-        return Finder.explore(fo).then(() => {
-          this.dataChanged();
-        });
+      if (done == false) {
+        if (isWindowsOpen) {
+          window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo)));
+        } else {
+
+          return Finder.explore(fo).then(() => {
+            this.dataChanged();
+          });
+        }
+      }
+        
     });
   }
 
@@ -1585,7 +1594,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var resFo = this.state.resultFindOptions;
     if (resFo?.groupResults) {
 
-      this.openRowGroup(row);
+      this.openRowGroup(row, e);
 
       return;
     }
