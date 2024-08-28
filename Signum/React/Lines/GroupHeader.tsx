@@ -35,7 +35,7 @@ export function GroupHeader(p: {
   }
 
   return (
-    <fieldset >
+    <fieldset>
       {(p.label || p.labelIcon || p.buttons) && < legend >
         <div>
           <span>{p.label}{p.labelIcon}</span>
@@ -43,7 +43,9 @@ export function GroupHeader(p: {
         </div>
       </legend>
       }
+      <div className={p.className} {...p.htmlAttributes}>
       {p.children}
+      </div>
     </fieldset>
   );
 }
