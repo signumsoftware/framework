@@ -392,6 +392,32 @@ public static class QueryUtils
         return result;
     }
 
+    public static QueryToken? TryParse(string tokenString, QueryDescription qd, SubTokensOptions options)
+    {
+        if (string.IsNullOrEmpty(tokenString))
+            return null;
+
+        //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
+        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+
+        string firstPart = parts.FirstEx();
+
+        QueryToken? result = SubToken(null, qd, options, firstPart);
+
+        if (result == null)
+            return null;
+
+        foreach (var part in parts.Skip(1))
+        {
+            var newResult = SubToken(result, qd, options, part);
+            if (newResult == null)
+                return null;
+            result = newResult;
+        }
+
+        return result;
+    }
+
     public static string? CanFilter(QueryToken token)
     {
         if (token == null)
