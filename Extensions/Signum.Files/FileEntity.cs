@@ -1,4 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Signum.Files;
 
@@ -39,4 +41,13 @@ public class FileEntity : ImmutableEntity, IFile
     {
         return null;
     }
+
+    public XElement ToXML(string elementName)
+    {
+        return new XElement(elementName,
+               new XAttribute("FileName", FileName),
+               new XCData(Convert.ToBase64String(BinaryFile))
+        );
+    }
 }
+

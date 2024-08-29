@@ -4,6 +4,7 @@ using Signum.Templating;
 using Signum.UserAssets.Queries;
 using System.ComponentModel;
 using System.Xml.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.Word;
 
@@ -90,10 +91,7 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
             Filters.IsNullOrEmpty() ? null! : new XElement("Filters", Filters.Select(f => f.ToXml(ctx)).ToList()),
             Orders.IsNullOrEmpty() ? null! : new XElement("Orders", Orders.Select(o => o.ToXml(ctx)).ToList()),
             Applicable?.Let(app => new XElement("Applicable", new XCData(app.Script))),
-            ctx.RetrieveLite(Template).Let(t => new XElement("Template",
-                new XAttribute("FileName", t.FileName),
-                new XCData(Convert.ToBase64String(t.BinaryFile))
-            ))
+            ctx.RetrieveLite(Template).Let(t => t.ToXML("Template"))
         );
     }
 
@@ -120,26 +118,48 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         if (Query != null)
             ParseData(ctx.GetQueryDescription(Query));
 
-        Template = SyncFile(Template == null ? null : ctx.RetrieveLite(Template), element.Element("Template")!);
+        Template = Template.SyncFromXml(element.Element("Template")!, ctx)!;
     }
 
-    private Lite<FileEntity> SyncFile(FileEntity? fileEntity, XElement xElement)
+  
+}
+
+public static class FileEntityExtensions
+{
+
+    [return: NotNullIfNotNull("xElement")]
+    public static Lite<FileEntity>? SyncFromXml(this Lite<FileEntity>? file, XElement? xElement, IFromXmlContext ctx)
     {
+        if (xElement == null)
+            return null;
+
+        var result = SyncFromXml(file == null ? null : ctx.RetrieveLite(file), xElement);
+
+        return result.ToLite(result.IsNew);
+
+    }
+
+
+    [return: NotNullIfNotNull("xElement")]
+    public static FileEntity? SyncFromXml(this FileEntity? fileEntity, XElement? xElement)
+    {
+        if (xElement == null)
+            return null;
+
         var fileName = xElement.Attribute("FileName")!.Value!;
         var bytes = Convert.FromBase64String(xElement.Value);
 
         if (fileEntity != null && fileName == fileEntity.FileName &&
             MemoryExtensions.SequenceEqual<byte>(bytes, fileEntity.BinaryFile))
-            return fileEntity.ToLite();
+            return fileEntity;
 
         return new FileEntity
         {
             FileName = fileName,
             BinaryFile = bytes,
-        }.ToLiteFat();
+        };
     }
 }
-
 
 [AutoInit]
 public static class WordTemplateOperation
