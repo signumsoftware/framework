@@ -100,6 +100,9 @@ public abstract class BaseLineProxy
                 return new TextBoxLineProxy(element, route);
             }
 
+            if (type == typeof(int) || type == typeof(decimal))
+                return new NumberLineProxy(element, route);
+
             if (type == typeof(bool))
                 return new CheckboxLineProxy(element, route);
 
