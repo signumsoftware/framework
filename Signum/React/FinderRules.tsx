@@ -495,7 +495,7 @@ export function initEntityFormatRules(): Finder.EntityFormatRule[] {
       formatter: new Finder.EntityFormatter(({ row, columns, searchControl: sc }) =>
         <a href="#"
           className="sf-line-button sf-view"
-          onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+          onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
         >
           <span title={JavascriptMessage.ShowGroup.niceToString()}>
             <FontAwesomeIcon icon="layer-group" />
