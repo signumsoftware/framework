@@ -17,7 +17,7 @@ public class PanelPartEmbedded : EmbeddedEntity, IGridEntity
     [Format(FormatAttribute.Color)]
     public string? IconColor { get; set; }
 
-    [StringLengthValidator(Min = 3, Max = 20)]
+    [StringLengthValidator(Min = 1, Max = 20)]
     [Format(FormatAttribute.Color)]
     public string? TitleColor { get; set; }
 
