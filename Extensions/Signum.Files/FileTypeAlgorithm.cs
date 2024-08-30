@@ -142,7 +142,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             return File.ReadAllBytes(fullPhysicalPath);
     }
 
-    public virtual void MoveFile(IFilePath ofp, IFilePath fp)
+    public virtual void MoveFile(IFilePath ofp, IFilePath fp,bool createTargetFolder)
     {
         if (WeakFileReference)
             return;
@@ -153,6 +153,12 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
         "SOURCE: " + source + "\n" +
         "TARGET:" + target))
         {
+            string targetDirectory = Path.GetDirectoryName(target)!;
+
+            if (createTargetFolder && !Directory.Exists(targetDirectory))
+                Directory.CreateDirectory(targetDirectory);
+
+
             System.IO.File.Move(source, target);
         }
     }
@@ -168,10 +174,15 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             using (HeavyProfiler.Log("DeleteFile", () => fullPhysicalPath))
             {
                 File.Delete(fullPhysicalPath);
-                if (DeleteEmptyFolderOnDelete)
+                if (DeleteEmptyFolderOnDelete && IsDirectoryEmpty(Path.GetDirectoryName(fullPhysicalPath)!))
                     Directory.Delete(Path.GetDirectoryName(fullPhysicalPath)!);
             }
         }
+    }
+    static bool IsDirectoryEmpty(string path)
+    {
+   
+        return Directory.GetFiles(path).Length == 0 && Directory.GetDirectories(path).Length == 0;
     }
 
     public virtual void DeleteFilesIfExist(IEnumerable<IFilePath> files)
@@ -197,6 +208,13 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
     PrefixPair IFileTypeAlgorithm.GetPrefixPair(IFilePath efp)
     {
         return this.GetPrefixPair(efp);
+    }
+
+    public string? ReadAsStringUTF8(IFilePath fp)
+    {
+        string fullPhysicalPath = fp.FullPhysicalPath();
+        using (HeavyProfiler.Log("ReadAllText", () => fullPhysicalPath))
+            return File.ReadAllText(fullPhysicalPath);
     }
 }
 

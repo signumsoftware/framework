@@ -97,7 +97,7 @@ export interface NumberBoxProps {
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   format: Intl.NumberFormat;
   formControlClass?: string;
-  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
   id?: string;
 }
