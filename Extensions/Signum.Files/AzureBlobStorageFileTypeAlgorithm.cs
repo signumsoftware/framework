@@ -64,7 +64,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
         {
-            var client = CalculateSuffixWithRenames(fp);
+            var client = GetBlobContainerClientWithRenames(fp);
             return client.GetBlobClient(fp.Suffix).GetProperties();
         }
     }
@@ -74,7 +74,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
         {
-            var client = CalculateSuffixWithRenames(fp);
+            var client = GetBlobContainerClientWithRenames(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
         }
     }
@@ -95,7 +95,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         //var path = pp.WebPrefix + fp.Suffix;
         //return client.GetBlobClient(path);
 
-        var client = CalculateSuffixWithRenames(fp);
+        var client = GetBlobContainerClientWithRenames(fp);
         return client.GetBlobClient(fp.Suffix);
 
     }
@@ -122,7 +122,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             if (WeakFileReference)
                 return;
 
-            BlobContainerClient client = CalculateSuffixWithRenames(fp);
+            BlobContainerClient client = GetBlobContainerClientWithRenames(fp);
 
             try
             {
@@ -156,7 +156,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             if (WeakFileReference)
                 return Task.CompletedTask;
 
-            BlobContainerClient client = CalculateSuffixWithRenames(fp);
+            BlobContainerClient client = GetBlobContainerClientWithRenames(fp);
 
             try
             {
@@ -195,7 +195,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     string? alreadyCreated;
 
-    private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
+    private BlobContainerClient GetBlobContainerClientWithRenames(IFilePath fp)
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateSuffixWithRenames"))
         {
@@ -263,11 +263,11 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 return;
 
 
-            BlobContainerClient obcc = CalculateSuffixWithRenames(ofp);
+            BlobContainerClient obcc = GetBlobContainerClientWithRenames(ofp);
            var srcBlob = obcc.GetBlobClient(ofp.Suffix);
 
 
-            BlobContainerClient tbcc = CalculateSuffixWithRenames(nfp);
+            BlobContainerClient tbcc = GetBlobContainerClientWithRenames(nfp);
             var destBlob = tbcc.GetBlobClient(nfp.Suffix);
 
 
@@ -281,35 +281,25 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public static async Task<BlobClient> MoveAsync(BlobClient srcBlob, BlobClient destBlob, BlobContainerClient destContainer)
     {
-        // Verificar si el contenedor de destino existe
         if (!await destContainer.ExistsAsync())
-        {
             throw new Exception("Destination container does not exist.");
-        }
 
-        // Iniciar la copia del blob de origen al destino
         var copyOperation = await destBlob.StartCopyFromUriAsync(srcBlob.Uri);
 
-        // Esperar a que la operación de copia se complete
         BlobProperties destBlobProperties = await destBlob.GetPropertiesAsync();
         while (destBlobProperties.CopyStatus == CopyStatus.Pending)
         {
-            await Task.Delay(500); // Esperar medio segundo antes de volver a comprobar el estado
+            await Task.Delay(500);
             destBlobProperties = await destBlob.GetPropertiesAsync();
         }
 
-        // Verificar si la copia fue exitosa
         if (destBlobProperties.CopyStatus != CopyStatus.Success)
-        {
             throw new Exception($"Failed to copy blob. Status: {destBlobProperties.CopyStatus}");
-        }
 
-        // Eliminar el blob de origen después de una copia exitosa
         await srcBlob.DeleteIfExistsAsync();
 
         return destBlob;
     }
-
 
     public void DeleteFiles(IEnumerable<IFilePath> files)
     {
@@ -322,7 +312,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             {
                 //GetClient(f).DeleteBlob(f.Suffix);
 
-                BlobContainerClient client = CalculateSuffixWithRenames(f);
+                BlobContainerClient client = GetBlobContainerClientWithRenames(f);
                 client.DeleteBlob(f.Suffix);
             }
         }
