@@ -130,7 +130,7 @@ public static class FilePathLogic
 
     public static string? GetAsString(this FilePathEntity fp)
     {
-        return  fp.FileType.GetAlgorithm().GetAsString(fp);
+        return  fp.FileType.GetAlgorithm().ReadAsStringUTF8(fp);
     }
 
 

@@ -3,6 +3,7 @@ using Azure.Storage.Blobs.Models;
 
 using System.IO;
 using System.Reflection.Metadata;
+using System.Text;
 
 namespace Signum.Files.FileTypeAlgorithms;
 
@@ -15,7 +16,7 @@ public enum BlobAction
 public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
     public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
-
+    public Func<IFilePath, PrefixPair>? GetPrefixPairFunc;
     public Func<bool> WebDownload { get; set; } = () => false;
 
     public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
@@ -45,6 +46,11 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public PrefixPair GetPrefixPair(IFilePath efp)
     {
+        if(GetPrefixPairFunc!=null)
+            return GetPrefixPairFunc(efp);
+
+
+
         var client = GetClient(efp);
 
         if (!this.WebDownload())
@@ -58,7 +64,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
         {
-            var client = GetClient(fp);
+            var client = CalculateSuffixWithRenames(fp);
             return client.GetBlobClient(fp.Suffix).GetProperties();
         }
     }
@@ -68,7 +74,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
         {
-            var client = GetClient(fp);
+            var client = CalculateSuffixWithRenames(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
         }
     }
@@ -77,30 +83,35 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
         {
-      
+
             return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
         }
     }
 
     public BlobClient GetBlobClient(IFilePath fp)
     {
-        var client = GetClient(fp);
+        //var client = GetClient(fp);
+        //var pp = GetPrefixPair(fp);
+        //var path = pp.WebPrefix + fp.Suffix;
+        //return client.GetBlobClient(path);
+
+        var client = CalculateSuffixWithRenames(fp);
         return client.GetBlobClient(fp.Suffix);
+
     }
 
-    public  string GetAsString(IFilePath fp)
+    public string ReadAsStringUTF8(IFilePath fp)
     {
-        return GetAsString(GetBlobClient(fp));
+        return Encoding.UTF8.GetString(ReadAllBytes(fp));
 
     }
 
-    public   string GetAsString( BlobClient blobClient)
-    {
-        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
-        string content = downloadResult.Content.ToString();
-
-        return content;
-    }
+    //public string ReadAsStringUTF8(BlobClient blobClient)
+    //{
+    //    BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
+    //    string content = downloadResult.Content.ToString();
+    //    return content;
+    //}
 
 
     public virtual void SaveFile(IFilePath fp)
@@ -182,7 +193,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    string? alreadyCreated; 
+    string? alreadyCreated;
 
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
@@ -240,20 +251,65 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         {
             ContentType = contentType,
             ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
-            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "",
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
     {
         using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
         {
             if (WeakFileReference)
                 return;
 
-            throw new NotImplementedException();
+
+            BlobContainerClient obcc = CalculateSuffixWithRenames(ofp);
+           var srcBlob = obcc.GetBlobClient(ofp.Suffix);
+
+
+            BlobContainerClient tbcc = CalculateSuffixWithRenames(nfp);
+            var destBlob = tbcc.GetBlobClient(nfp.Suffix);
+
+
+
+            var cbn = MoveAsync(srcBlob, destBlob, tbcc).Result;
+
+            //return true;
         }
     }
+
+
+    public static async Task<BlobClient> MoveAsync(BlobClient srcBlob, BlobClient destBlob, BlobContainerClient destContainer)
+    {
+        // Verificar si el contenedor de destino existe
+        if (!await destContainer.ExistsAsync())
+        {
+            throw new Exception("Destination container does not exist.");
+        }
+
+        // Iniciar la copia del blob de origen al destino
+        var copyOperation = await destBlob.StartCopyFromUriAsync(srcBlob.Uri);
+
+        // Esperar a que la operación de copia se complete
+        BlobProperties destBlobProperties = await destBlob.GetPropertiesAsync();
+        while (destBlobProperties.CopyStatus == CopyStatus.Pending)
+        {
+            await Task.Delay(500); // Esperar medio segundo antes de volver a comprobar el estado
+            destBlobProperties = await destBlob.GetPropertiesAsync();
+        }
+
+        // Verificar si la copia fue exitosa
+        if (destBlobProperties.CopyStatus != CopyStatus.Success)
+        {
+            throw new Exception($"Failed to copy blob. Status: {destBlobProperties.CopyStatus}");
+        }
+
+        // Eliminar el blob de origen después de una copia exitosa
+        await srcBlob.DeleteIfExistsAsync();
+
+        return destBlob;
+    }
+
 
     public void DeleteFiles(IEnumerable<IFilePath> files)
     {
@@ -264,7 +320,10 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
             foreach (var f in files)
             {
-                GetClient(f).DeleteBlob(f.Suffix);
+                //GetClient(f).DeleteBlob(f.Suffix);
+
+                BlobContainerClient client = CalculateSuffixWithRenames(f);
+                client.DeleteBlob(f.Suffix);
             }
         }
     }
