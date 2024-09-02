@@ -106,14 +106,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     }
 
-    //public string ReadAsStringUTF8(BlobClient blobClient)
-    //{
-    //    BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
-    //    string content = downloadResult.Content.ToString();
-    //    return content;
-    //}
-
-
     public virtual void SaveFile(IFilePath fp)
     {
         using (HeavyProfiler.Log("AzureBlobStorage SaveFile"))
