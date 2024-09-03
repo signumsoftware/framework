@@ -7,18 +7,20 @@ import { getTimeMachineIcon } from '@framework/Lines/TimeMachineIcon';
 import ListCommandsPlugin from './Plugins/ListCommandsPlugin';
 import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 import './HtmlEditorLine.css';
+import { classes } from '@framework/Globals';
 
 export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draftjs.EditorProps>, "binding"> {
   ctx: TypeContext<string | null | undefined>;
   htmlEditorRef?: React.Ref<HtmlEditorController>;
 }
 
-export default function HtmlEditorLine({ ctx, htmlEditorRef, ...p }: HtmlEditorLineProps): React.JSX.Element {
+export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, ...p }: HtmlEditorLineProps): React.JSX.Element {
   return (
     <ErrorBoundary>
-      <div style={p.htmlAttributes?.style} className="html-editor-line">
+      <div className={classes("html-editor-line")} style={{ backgroundColor: readOnly ? "#e9ecef" : undefined, ...p.htmlAttributes?.style}} data-property-path={ctx.propertyPath} >
         {getTimeMachineIcon({ ctx: ctx })}
         <HtmlEditor 
+
           binding={ctx.binding}
           ref={htmlEditorRef}
           plugins={p.plugins ?? [
