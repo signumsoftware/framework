@@ -97,12 +97,13 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     internal void ParseData(QueryDescription description)
     {
         var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
+        var canTimeSeries = this.SystemTime?.Mode == SystemTimeMode.TimeSeries ? SubTokensOptions.CanTimeSeries : 0;
 
         foreach (var f in Filters)
-            f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+            f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries);
 
         foreach (var c in Columns)
-            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual));
+            c.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | SubTokensOptions.CanToArray | (canAggregate != 0 ? canAggregate : SubTokensOptions.CanOperation | SubTokensOptions.CanManual) | canTimeSeries);
 
         foreach (var o in Orders)
             o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanSnippet | canAggregate);

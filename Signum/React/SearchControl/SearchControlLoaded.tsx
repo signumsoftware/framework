@@ -4,7 +4,8 @@ import { DomUtils, classes, Dic, softCast, isNumber } from '../Globals'
 import { Finder } from '../Finder'
 import {
   ResultTable, ResultRow, FindOptionsParsed, FilterOption, FilterOptionParsed, QueryDescription, ColumnOption, ColumnOptionParsed, ColumnDescription,
-  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual
+  toQueryToken, Pagination, OrderOptionParsed, SubTokensOptions, filterOperations, QueryToken, QueryRequest, isActive, hasOperation, hasToArray, hasElement, getTokenParents, FindOptions, isFilterCondition, hasManual,
+  withoutPinned
 } from '../FindOptions'
 import { SearchMessage, JavascriptMessage, Lite, liteKey, Entity, ModifiableEntity, EntityPack, FrameMessage, is } from '../Signum.Entities'
 import { tryGetTypeInfos, TypeInfo, isTypeModel, getTypeInfos, QueryTokenString, getQueryNiceName, isNumberType } from '../Reflection'
@@ -544,7 +545,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
                 queryDescription={qd}
                 filterOptions={fo.filterOptions}
                 lastToken={this.state.lastToken}
-                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                subTokensOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate | canTimeSeries}
                 onTokenChanged={this.handleFilterTokenChanged}
                 onFiltersChanged={() => this.handleFiltersChanged()}
                 onHeightChanged={this.handleHeightChanged}
@@ -1019,6 +1020,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const col = fo.columnOptions[cm.columnIndex!];
 
+    var timeSeriesColumn = fo.columnOptions.firstOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
+
     fo.columnOptions.clear();
 
     var defAggregate = this.props.querySettings?.defaultAggregates;
@@ -1047,6 +1050,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       fo.columnOptions.push({ token: parsedTokens[0], displayName: parsedTokens[0].niceName });
     }
 
+    if(timeSeriesColumn)
+      fo.columnOptions.push(timeSeriesColumn);
     fo.columnOptions.push(col);
     fo.groupResults = true;
     fo.orderOptions.clear();
@@ -1078,8 +1083,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const fo = this.props.findOptions;
 
     const col = fo.columnOptions[cm.columnIndex!];
+    var timeSeriesColumn = fo.columnOptions.firstOrNull(c => c.token?.fullKey == QueryTokenString.timeSeries.token);
     fo.columnOptions.clear();
-    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));
+    if(timeSeriesColumn)
+      fo.columnOptions.push(timeSeriesColumn);
+    fo.columnOptions.push(...Dic.getValues(this.props.queryDescription.columns).filter(a => a.name != "Entity").map(cd => softCast<ColumnOptionParsed>({ displayName: cd.displayName, token: toQueryToken(cd) })));   
+
     if (fo.groupResults) {
       fo.orderOptions.clear();
     }
@@ -1341,7 +1350,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       if (colIndex == -1)
         return null;
 
-      const val = rt.rows[0].columns[colIndex];
+      const val = rt.rows[0]?.columns[colIndex];
 
       var formatter = Finder.getCellFormatter(scl.props.querySettings, summaryToken, scl);
 
@@ -1516,12 +1525,12 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .filter(a => rootKeys.contains(a.col))
       .map(a => ({ token: a.col.token!.fullKey, operation: "EqualTo", value: a.value }) as FilterOption);
 
-    var originalFilters = Finder.toFilterOptions(resFo.filterOptions.filter(f => !Finder.isAggregate(f)));
+    var originalFilters = Finder.toFilterOptions(resFo.filterOptions.map(a => withoutPinned(a)).notNull().filter(f => !Finder.isAggregate(f)));
 
     return [...originalFilters, ...keyFilters];
   }
 
-  openRowGroup(row: ResultRow): void {
+  openRowGroup(row: ResultRow, e: React.MouseEvent): void {
 
     var resFo = this.state.resultFindOptions!;
 
@@ -1545,13 +1554,22 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       includeDefaultFilters: false,
     } as FindOptions);
 
+    const isWindowsOpen = e.button == 1 || e.ctrlKey;
+
     const onDrilldown = this.props.onDrilldown ?? SearchControlLoaded.onDrilldown;
-    const promise = onDrilldown ? onDrilldown(this, row, { onReload: () => this.dataChanged() }) : Promise.resolve(false);
+    const promise = onDrilldown ? onDrilldown(this, row, { openInNewTab: isWindowsOpen, onReload: () => this.dataChanged() }) : Promise.resolve(false);
     promise.then(done => {
-      if (done == false)
-        return Finder.explore(fo).then(() => {
-          this.dataChanged();
-        });
+      if (done == false) {
+        if (isWindowsOpen) {
+          window.open(AppContext.toAbsoluteUrl(Finder.findOptionsPath(fo)));
+        } else {
+
+          return Finder.explore(fo).then(() => {
+            this.dataChanged();
+          });
+        }
+      }
+        
     });
   }
 
@@ -1576,7 +1594,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     var resFo = this.state.resultFindOptions;
     if (resFo?.groupResults) {
 
-      this.openRowGroup(row);
+      this.openRowGroup(row, e);
 
       return;
     }

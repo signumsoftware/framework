@@ -82,7 +82,7 @@ public static class EntityButtonContainerExtensions
 
     public static IWebElement OperationClickCapture(this IEntityButtonContainer container, OperationSymbol symbol, string? groupId = null)
     {
-        return container.OperationButton(symbol, groupId).Find().CaptureOnClick();
+        return container.OperationButton(symbol, groupId).WaitVisible().CaptureOnClick();
     }
 
     public static IWebElement OperationClickCapture<T>(this IEntityButtonContainer<T> container, IEntityOperationSymbolContainer<T> symbol, string? groupId = null)

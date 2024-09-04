@@ -94,6 +94,11 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
       label: s.ctx.value,
     };
 
+    function renderElement({item} : any){
+      var result = vl.props.onRenderDropDownListItem!(item) as React.ReactElement;
+      return React.cloneElement(result, {'data-value': item.value});
+    }
+
     return (
       <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => vl.withItemGroup(
@@ -105,8 +110,8 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
             autoComplete="off"
             dataKey="value"
             textField="label"
-            renderValue={a => vl.props.onRenderDropDownListItem!(a.item)}
-            renderListItem={a => vl.props.onRenderDropDownListItem!(a.item)}
+            renderValue={renderElement}
+            renderListItem={renderElement}
             {...(s.valueHtmlAttributes as any)}
           />)
         }

@@ -27,6 +27,7 @@ public abstract class Filter
     public abstract Filter? ToFullText();
 
     public abstract bool IsAggregate();
+    public abstract bool IsTimeSeries();
 
     public abstract IEnumerable<string> GetKeywords();
 
@@ -176,6 +177,11 @@ public class FilterGroup : Filter
     public override bool IsAggregate()
     {
         return this.Filters.Any(f => f.IsAggregate());
+    }
+
+    public override bool IsTimeSeries()
+    {
+        return this.Filters.Any(f => f.IsTimeSeries());
     }
 
     internal void SetIsTable(IEnumerable<QueryToken> fullTextOrders, bool isOuter)
@@ -343,6 +349,11 @@ public class FilterCondition : Filter
         return this.Token is AggregateToken;
     }
 
+    public override bool IsTimeSeries()
+    {
+        return this.Token is TimeSeriesToken;
+    }
+
     public override string ToString()
     {
         return "{0} {1} {2}".FormatWith(Token.FullKey(), Operation, Value);
@@ -497,6 +508,11 @@ public class FilterFullText : Filter
         return false;
     }
 
+    public override bool IsTimeSeries()
+    {
+        return false;
+    }
+
     public override Filter ToFullText()
     {
         throw new InvalidOperationException("Already FilterFullText!");
@@ -517,6 +533,8 @@ public class FilterFullText : Filter
             .Select(a => a.Trim(' ', '\r', '\n', '\t').Trim('"'))
             .Where(a => a.Length > 0);
     }
+
+    
 }
 
 public static class FullTextFilterOperationExtensions

@@ -82,7 +82,7 @@ export namespace TimeMachineClient {
   
           if (sc?.state.resultFindOptions?.groupResults) {
             return (
-              <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row); }}
+              <a href="#" className="sf-line-button sf-view" onClick={e => { e.preventDefault(); sc!.openRowGroup(row, e); }}
                 style={{ whiteSpace: "nowrap", opacity: deleted ? .5 : undefined }} >
                 <span title={JavascriptMessage.ShowGroup.niceToString()}>
                   <FontAwesomeIcon icon="layer-group" />
@@ -148,7 +148,7 @@ export interface TimeMachineLinkProps extends React.HTMLAttributes<HTMLAnchorEle
   inSearch?: "main" | "related";
 }
 
-export default function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
+export function TimeMachineLink(p: TimeMachineLinkProps): React.JSX.Element {
 
   function handleClick(event: React.MouseEvent<any>) {
     const lite = p.lite;

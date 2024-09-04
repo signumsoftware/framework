@@ -1,4 +1,6 @@
 using Signum.DynamicQuery.Tokens;
+using Signum.UserAssets;
+using System.Xml.Linq;
 
 namespace Signum.Chart;
 
@@ -10,6 +12,8 @@ public interface IChartBase
     
     MList<ChartColumnEmbedded> Columns { get; }
     MList<ChartParameterEmbedded> Parameters { get; }
+
+    ChartTimeSeriesEmbedded? ChartTimeSeries { get; }
 
     void FixParameters(ChartColumnEmbedded chartColumnEntity);
 }
@@ -61,6 +65,8 @@ public class ChartRequestModel : ModelEntity, IChartBase
 
     public int? MaxRows { get; set; }
 
+    public ChartTimeSeriesEmbedded? ChartTimeSeries { get; set; }
+
     public List<Column> GetQueryColumns()
     {
         return Columns.Where(c => c.Token != null).Select(t => t.CreateColumn()).ToList();
@@ -94,7 +100,7 @@ public class ChartRequestModel : ModelEntity, IChartBase
     {
         get { return  CollectionElementToken.GetElements(new HashSet<QueryToken>(AllTokens())); }
     }
-    
+
     public void FixParameters(ChartColumnEmbedded chartColumn)
     {
         ChartUtils.FixParameters(this, chartColumn);
@@ -103,5 +109,63 @@ public class ChartRequestModel : ModelEntity, IChartBase
     public bool HasAggregates()
     {
         return Filters.Any(a=>a.IsAggregate()) || Columns.Any(a=>a.Token?.Token is AggregateToken);
+    }
+}
+
+public class ChartTimeSeriesEmbedded : EmbeddedEntity
+{
+    [StringLengthValidator(Max = 100)]
+    public string? StartDate { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string? EndDate { get; set; }
+
+    public TimeSeriesUnit? TimeSeriesUnit { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesStep { get; set; }
+
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    public int? TimeSeriesMaxRowsPerStep { get; set; }
+
+    internal ChartTimeSeriesEmbedded? FromXml(XElement xml)
+    {
+        StartDate = xml.Attribute("StartDate")?.Value;
+        EndDate = xml.Attribute("EndDate")?.Value;
+        TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
+        TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
+        TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
+        return this;
+    }
+
+    internal XElement ToXml()
+    {
+        return new XElement("SystemTime",
+            StartDate == null ? null : new XAttribute("StartDate", StartDate),
+            EndDate == null ? null : new XAttribute("EndDate", EndDate),
+            TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
+            TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!)
+        );
+    }
+
+    internal SystemTimeRequest ToSystemTimeRequest() => new SystemTimeRequest
+    {
+        mode = SystemTimeMode.TimeSeries,
+        joinMode = SystemTimeJoinMode.AllCompatible,
+        endDate = ParseDate(this.EndDate),
+        startDate = ParseDate(this.StartDate),
+        timeSeriesStep = this.TimeSeriesStep,
+        timeSeriesUnit = this.TimeSeriesUnit,
+        timeSeriesMaxRowsPerStep = this.TimeSeriesMaxRowsPerStep,
+    };
+
+    DateTime? ParseDate(string? date)
+    {
+        if (date.IsNullOrEmpty())
+            return null;
+
+
+        return (DateTime)FilterValueConverter.Parse(date, typeof(DateTime), false)!;
     }
 }

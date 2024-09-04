@@ -350,6 +350,11 @@ public static class SeleniumExtensions
         return button.GetDriver().CapturePopup(() => button.SafeClick());
     }
 
+    public static List<IWebElement> CaptureManyOnClick(this IWebElement button)
+    {
+        return button.GetDriver().CaptureManyPopup(() => button.SafeClick());
+    }
+
     public static IWebElement CaptureOnDoubleClick(this IWebElement button)
     {
         return button.GetDriver().CapturePopup(() => button.DoubleClick());
@@ -375,6 +380,26 @@ public static class SeleniumExtensions
         return result;
     }
 
+    public static List<IWebElement> CaptureManyPopup(this WebDriver selenium, Action clickToOpen)
+    {
+        var body = selenium.FindElement(By.TagName("body"));
+        var oldDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+        clickToOpen();
+        var result = selenium.Wait(() =>
+        {
+            Thread.Sleep(300);
+            var newDialogs = body.FindElements(By.CssSelector("div.modal.fade.show"));
+
+            var newTop = newDialogs.Where(a => !oldDialogs.Contains(a)).ToList();
+
+            if (newTop == null)
+                return null;
+
+            return newTop;
+        })!;
+
+        return result;
+    }
     public static void ContextClick(this IWebElement element)
     {
         Actions builder = new Actions(element.GetDriver());

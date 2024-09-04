@@ -98,6 +98,8 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         if (!request.Columns.Where(c => c is _EntityColumn).Any())
             request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
+
+
         if (request.CanDoMultiplicationsInSubQueries())
         {
             var columnAndOrderTokens = request.Columns.Select(a => a.Token)
@@ -116,20 +118,20 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         }
         else
         {
-            var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
-            var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
+            var filters = request.Filters.ToList();
+            var timeSeriesFilters = filters.Extract(f => f.IsTimeSeries());
 
             var query = Query
                 .ToDQueryable(GetQueryDescription())
                 .SelectMany(request.Multiplications(), request.FullTextTableFilters())
-                .Where(request.Filters);
+                .Where(filters);
 
             if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
             {
                 inMemoryOrders = null;
 
                 return query
-                   .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders);
+                   .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders, timeSeriesFilters);
 
             }
             else if (request.Pagination is Pagination.All)
@@ -156,8 +158,9 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
 
     private DQueryable<T> GetDQueryableGroup(QueryRequest request, out List<Order>? inMemoryOrders)
     {
-        var simpleFilters = request.Filters.Where(f => !f.IsAggregate()).ToList();
-        var aggregateFilters = request.Filters.Where(f => f.IsAggregate()).ToList();
+        var simpleFilters = request.Filters.ToList();
+        var timeSeriesFilter = simpleFilters.Extract(f => f.IsTimeSeries());
+        var aggregateFilters = simpleFilters.Extract(f => f.IsAggregate());
 
         var keys = request.Columns.Select(t => t.Token).Where(t => t is not AggregateToken && t is not TimeSeriesToken).ToHashSet();
 
@@ -175,7 +178,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             inMemoryOrders = null;
 
             return query
-                .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders);
+                .SelectManyTimeSeries(request.SystemTime, request.Columns, request.Orders, timeSeriesFilter);
 
         }
         else if (request.Pagination is Pagination.All)

@@ -28,6 +28,7 @@ internal enum DbExpressionType
     SqlConstant,
     SqlVariable,
     SqlLiteral,
+    SqlColumnList,
     SqlCast,
     Case,
     RowNumber,
@@ -710,6 +711,30 @@ internal class SqlLiteralExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitSqlLiteral(this);
+    }
+}
+
+internal class SqlColumnListExpression : DbExpression
+{
+    public readonly ReadOnlyCollection<ColumnExpression> Columns;
+    public SqlColumnListExpression(IEnumerable<ColumnExpression> column)
+        : base(DbExpressionType.SqlLiteral, typeof(void))
+    {
+        this.Columns = column.ToReadOnly();
+    }
+
+    public override string ToString()
+    {
+        var only = Columns.Only();
+        if (only != null)
+            return only.ToString();
+
+        return "(" + Columns.ToString(", ") + ")";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitSqlColumnList(this);
     }
 }
 

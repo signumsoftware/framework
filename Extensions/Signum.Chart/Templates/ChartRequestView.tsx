@@ -8,12 +8,11 @@ import { ValidationError, AbortableRequest } from '@framework/Services'
 import { FrameMessage, Lite } from '@framework/Signum.Entities'
 import { SubTokensOptions, QueryToken, FilterOptionParsed } from '@framework/FindOptions'
 import { StyleContext, TypeContext } from '@framework/TypeContext'
-import { SearchMessage } from '@framework/Signum.Entities'
-import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer } from '@framework/Reflection'
+import { PropertyRoute, getQueryNiceName, getTypeInfo, ReadonlyBinding, GraphExplorer, getTypeInfos } from '@framework/Reflection'
 import { Navigator } from '@framework/Navigator'
 import FilterBuilder from '@framework/SearchControl/FilterBuilder'
 import { ValidationErrors } from '@framework/Frames/ValidationErrors'
-import { ChartRequestModel, ChartMessage } from '../Signum.Chart'
+import { ChartRequestModel, ChartMessage, ChartTimeSeriesEmbedded } from '../Signum.Chart'
 import ChartBuilder from './ChartBuilder'
 import ChartTableComponent from './ChartTable'
 import ChartRenderer from './ChartRenderer'
@@ -24,6 +23,8 @@ import { useForceUpdate, useAPI } from '@framework/Hooks'
 import { AutoFocus } from '@framework/Components/AutoFocus';
 import PinnedFilterBuilder from '@framework/SearchControl/PinnedFilterBuilder';
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart';
+import ChartTimeSeries from './ChartTimeSeries';
+import { DateTime } from 'luxon';
 
 interface ChartRequestViewProps {
   chartRequest: ChartRequestModel;
@@ -166,6 +167,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
 
   const titleLabels = StyleContext.default.titleLabels;
   const maxRowsReached = result && result.chartRequest.maxRows == result.chartResult.resultTable.rows.length;
+  const canTimeSeries = cr.chartTimeSeries != null ? SubTokensOptions.CanTimeSeries : 0;
   return (
     <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       <h2>
@@ -178,7 +180,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
       <div>
         {showChartSettings ?
           <FilterBuilder filterOptions={cr.filterOptions} queryDescription={queryDescription!}
-            subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement}
+            subTokensOptions={SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canTimeSeries}
             onFiltersChanged={handleFiltersChanged}
             lastToken={lastToken.current} onTokenChanged={t => lastToken.current = t} showPinnedFiltersOptionsButton={true} /> :
           <AutoFocus>
@@ -193,6 +195,7 @@ export default function ChartRequestView(p: ChartRequestViewProps): React.JSX.El
           <ChartBuilder queryKey={cr.queryKey} ctx={tc}
             maxRowsReached={maxRowsReached}
             onInvalidate={handleInvalidate}
+            queryDescription={qd}
             onRedraw={handleOnRedraw}
             onTokenChange={() => { handleTokenChange(); forceUpdate(); }}
             onOrderChanged={() => {

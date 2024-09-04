@@ -425,8 +425,11 @@ public partial class Table
                     var forbidden = new Forbidden(graph, entity);
 
                     int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(entity, oldTicks, forbidden, "", ps))).ExecuteNonQuery();
-                    if (num != 1)
-                        throw new ConcurrencyException(entity.GetType(), entity.Id);
+                    if (ConcurrencyLogic.IsEnabled)
+                    {
+                        if (num != 1)
+                            throw new ConcurrencyException(entity.GetType(), entity.Id);
+                    }
 
                     if (table.saveCollections.Value != null)
                         table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(entity, forbidden) });
@@ -448,6 +451,9 @@ public partial class Table
                     int num = (int)new SqlPreCommandSimple(sqlUpdate, new List<DbParameter>().Do(ps => UpdateParameters(entity, -1, forbidden, "", ps))).ExecuteNonQuery();
                     if (num != 1)
                         throw new EntityNotFoundException(entity.GetType(), entity.Id);
+
+                    if (table.saveCollections.Value != null)
+                        table.saveCollections.Value.UpdateCollections(new List<EntityForbidden> { new EntityForbidden(entity, forbidden) });
 
                     if (table.PartitionId != null)
                         entity.OldPartitionId = entity.PartitionId;
@@ -488,13 +494,16 @@ public partial class Table
 
                     DataTable dt = new SqlPreCommandSimple(sqlMulti, parameters).ExecuteDataTable();
 
-                    if (dt.Rows.Count != idents.Count)
+                    if (ConcurrencyLogic.IsEnabled)
                     {
-                        var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
+                        if (dt.Rows.Count != idents.Count)
+                        {
+                            var updated = dt.Rows.Cast<DataRow>().Select(r => new PrimaryKey((IComparable)r[0])).ToList();
 
-                        var missing = idents.Select(a => a.Id).Except(updated).ToArray();
+                            var missing = idents.Select(a => a.Id).Except(updated).ToArray();
 
-                        throw new ConcurrencyException(table.Type, missing);
+                            throw new ConcurrencyException(table.Type, missing);
+                        }
                     }
 
                     if (isPostgres && num > 1)
@@ -1773,3 +1782,20 @@ public partial class FieldMixin
     }
 }
 
+
+public static class ConcurrencyLogic
+{
+    static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("concurrencyTempDisabled");
+
+    public static IDisposable? Disable()
+    {
+        if (tempDisabled.Value) return null;
+        tempDisabled.Value = true;
+        return new Disposable(() => tempDisabled.Value = false);
+    }
+
+    public static bool IsEnabled
+    {
+        get { return !tempDisabled.Value; }
+    }
+}
