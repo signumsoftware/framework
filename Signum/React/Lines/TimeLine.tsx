@@ -71,9 +71,6 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
     </FormGroup>
   );
 }), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 

@@ -75,7 +75,6 @@ export namespace AzureADClient {
           })
       })
       .catch(e => {
-        debugger;
         ctx.setLoading(undefined);
         if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return;

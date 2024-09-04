@@ -39,9 +39,6 @@ export const EnumLine: <V extends string | number | boolean | null>(props: EnumL
 
   return props.lineType == 'ComboBoxText' ? internalComboBoxText(c) : props.lineType == 'RadioGroup' ? internalRadioGroup(c) : internalDropDownList(c);
 }, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 

@@ -27,8 +27,8 @@ declare global {
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
-    groupToMap<K>(this: Array<T>, keySelector: (element: T) => string): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
-    groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): Map<K, E[]>;
+    groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
+    groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): Map<K, E[]>;
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
@@ -878,7 +878,7 @@ String.prototype.tryBetween = function (this: string, firstSeparator: string, se
   if (index2 == -1)
     return undefined;
 
-  return this.substring(from, index2 - from);
+  return this.substring(from, index2);
 };
 
 String.prototype.after = function (this: string, separator: string) {

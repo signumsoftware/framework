@@ -414,7 +414,6 @@ export namespace UserQueryMerger {
       oldF.isGroup = newF.isGroup;
       oldF.groupOperation = newF.groupOperation;
       oldF.operation = newF.operation;
-      debugger;
       oldF.valueString = similarValues(ch.added.filter.value, ch.removed.filter.value) || oldF.valueString?.startsWith("[") && oldF.valueString.endsWith("]") ? oldF.valueString : newF.valueString;
       if (newF.pinned == null)
         oldF.pinned = null;

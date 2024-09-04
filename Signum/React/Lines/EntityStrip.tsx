@@ -100,19 +100,25 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
       helpText={p.helpText}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className="sf-entity-strip sf-control-container">
-        <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
-          {
-            p.groupElementsBy == undefined ?
-              c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i)) :
+        {p.groupElementsBy == undefined ?
+          <ul id={inputId} className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
+            {c.getMListItemContext(p.ctx).map((mlec, i) => renderElement(mlec, i))}
+            {renderLastElement()}
+          </ul>
+          :
 
-              c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion.value) : p.groupElementsBy!(a.value)).map((gr, i) =>
-                <div className={classes("mb-2")} key={i} >
-                  <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+          <>
+            {c.getMListItemContext(p.ctx).groupBy(a => (a.binding == null && a.previousVersion) ? p.groupElementsBy!(a.previousVersion.value) : p.groupElementsBy!(a.value)).map((gr, i) =>
+              <div className={classes("mb-2")} key={i} >
+                <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+                <ul className={classes("sf-strip", p.vertical ? "sf-strip-vertical" : "sf-strip-horizontal", p.ctx.labelClass)}>
                   {gr.elements.map((mlec, i) => renderElement(mlec, i))}
-                </div>)
-          }
-          {renderLastElement()}
-        </ul>
+                </ul>
+              </div>)}
+            {renderLastElement()}
+          </>
+        }
+    
       </div>}
     </FormGroup>
   );
@@ -135,7 +141,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
   }
 
   function renderLastElement() {
-    
+
     const buttons = (
       <>
         {p.extraButtonsBefore && p.extraButtonsBefore(c)}
@@ -145,18 +151,24 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
         {p.extraButtons && p.extraButtons(c)}
       </>
     );
+    var autocomplete = !EntityBaseController.hasChildrens(buttons) ?
+      renderAutoComplete() :
+      renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
+        {input}
+        {buttons}
+      </div>);
+
+    if (p.groupElementsBy == null)
+      return (
+        <li className={"sf-strip-input"}>
+          {autocomplete}
+        </li>
+      );
 
     return (
-      <li className={"sf-strip-input"}>
-        {
-          !EntityBaseController.hasChildrens(buttons) ?
-            renderAutoComplete() :
-            renderAutoComplete(input => <div className={p.ctx.inputGroupClass}>
-              {input}
-              {buttons}
-            </div>)
-        }
-      </li>
+      <div className={"sf-strip-input"}>
+        {autocomplete}
+      </div>
     );
   }
 

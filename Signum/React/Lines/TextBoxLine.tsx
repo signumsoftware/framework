@@ -25,9 +25,6 @@ export const TextBoxLine: React.MemoExoticComponent<React.ForwardRefExoticCompon
 
   return internalTextBox(c, "text");
 }), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
@@ -71,9 +68,6 @@ export const GuidLine: <V extends string | null>(props: TextBoxLineProps & React
 
   return internalTextBox(c, "guid");
 }, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
@@ -86,9 +80,6 @@ export const ColorLine: <V extends string | null>(props: TextBoxLineProps & Reac
 
   return internalTextBox(c, "color");
 }, (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
   return LineBaseController.propEquals(prev, next);
 });
 
