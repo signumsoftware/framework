@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using System.Globalization;
+using System.Drawing;
 
 namespace Signum.Excel;
 
@@ -222,6 +223,66 @@ public static class ExcelExtensions
 
             cell.CellValue = new CellValue(excelValue);
         }
+    }
+
+    public static System.Drawing.Color? GetCellFillColor(this SpreadsheetDocument document, Row row, string columnName)
+    {
+        var address = columnName + row.RowIndex;
+
+        Cell? cell = row.Descendants<Cell>()
+            .FirstOrDefault(c => c.CellReference == columnName || c.CellReference == address);
+
+        // If the cell doesn't exist, return an empty string:
+        if (cell == null)
+            return null;
+
+        if (cell.StyleIndex == null)
+            return null;
+
+        var stylesPart = document.WorkbookPart!.WorkbookStylesPart;
+
+        if (stylesPart == null)
+            return null;
+
+        var cellFormat = stylesPart.Stylesheet.CellFormats?.ElementAt((int)cell.StyleIndex.Value) as CellFormat;
+
+        if (cellFormat?.FillId != null)
+        {
+            var fill = stylesPart.Stylesheet.Fills?.ElementAt((int)cellFormat.FillId.Value) as Fill;
+            if (fill == null)
+                return null;
+
+            var patternFill = fill.PatternFill;
+
+            if (patternFill?.ForegroundColor != null)
+            {
+                return GetColorFromOpenXml(patternFill.ForegroundColor, stylesPart);
+            }
+            else if (patternFill?.BackgroundColor != null)
+            {
+                return GetColorFromOpenXml(patternFill.BackgroundColor, stylesPart);
+            }
+        }
+
+        return null;
+    }
+
+    static System.Drawing.Color? GetColorFromOpenXml(ColorType color, WorkbookStylesPart stylesPart)
+    {
+        if (color.Rgb != null)
+        {
+            // Color is in Rgb format
+            return ColorTranslator.FromHtml("#" + color.Rgb);
+        }
+        else if (color.Indexed != null)
+        {
+            // Color is an indexed color
+            var indexedColors = stylesPart.Stylesheet.Colors!.IndexedColors!;
+            var rgbColor = indexedColors.ElementAt((int)color.Indexed.Value) as RgbColor;
+            return ColorTranslator.FromHtml("#" + rgbColor!.Rgb);
+        }
+
+        return null;
     }
 
     public static bool IsNumber(Type type)
