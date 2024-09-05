@@ -64,6 +64,8 @@ declare global {
     sum(this: Array<number>): number;
     sum(this: Array<T>, selector: (element: T, index: number, array: T[]) => number): number;
 
+    count(this: Array<T>, predicate: (element: T, index: number, array: T[]) => boolean): number;
+
     first(this: Array<T>, errorContext?: string): T;
     first(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T;
 
@@ -497,6 +499,20 @@ Array.prototype.sum = function (this: any[], selector?: (element: any, index: nu
     for (var i = 0; i < this.length; i++) {
       result +=  this[i];
     }
+  }
+
+  return result;
+};
+
+Array.prototype.count = function (this: any[], predicate: (element: any, index: number, array: any[]) => any) {
+
+  if (this.length == 0)
+    return 0;
+
+  var result = 0;
+  for (var i = 0; i < this.length; i++) {
+    if (predicate(this[i], i, this))
+      result++;
   }
 
   return result;
