@@ -43,7 +43,7 @@ declare global {
 
 
     toMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
-    toMap<K, V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V):  Map<K, V>;
+    toMap<K, V>(this: Array<T>, keySelector: (element: T) => K, valueSelector: (element: T) => V):  Map<K, V>;
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
 
