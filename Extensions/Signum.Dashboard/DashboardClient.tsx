@@ -35,235 +35,235 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 import { parseIcon } from '@framework/Components/IconTypeahead';
 
 export namespace DashboardClient {
-  
 
 
-interface IconColor {
-  icon: IconProp;
-  iconColor: string;
-}
 
-export interface PartRenderer<T extends IPartEntity> {
-  component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
-  waitForInvalidation?: boolean;
-  defaultIcon: () => IconColor;
-  defaultTitle?: (elenent: T) => string;
-  withPanel?: (element: T) => boolean;
-  getQueryNames?: (element: T) => QueryEntity[];
-  handleTitleClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => void;
-  handleEditClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => Promise<boolean>;
-  customTitleButtons?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>) => React.ReactNode;
-}
+  interface IconColor {
+    icon: IconProp;
+    iconColor: string;
+  }
+
+  export interface PartRenderer<T extends IPartEntity> {
+    component: () => Promise<React.ComponentType<PanelPartContentProps<T>>>;
+    waitForInvalidation?: boolean;
+    defaultIcon: () => IconColor;
+    defaultTitle?: (elenent: T) => string;
+    withPanel?: (element: T) => boolean;
+    getQueryNames?: (element: T) => QueryEntity[];
+    handleTitleClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => void;
+    handleEditClick?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>, e: React.MouseEvent<any>) => Promise<boolean>;
+    customTitleButtons?: (content: T, entity: Lite<Entity> | undefined, customDataRef: React.MutableRefObject<any>) => React.ReactNode;
+  }
 
 
-export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
+  export const partRenderers: { [typeName: string]: PartRenderer<IPartEntity> } = {};
 
-export function start(options: { routes: RouteObject[] }): void {
+  export function start(options: { routes: RouteObject[] }): void {
 
     ChangeLogClient.registerChangeLogModule("Signum.Dashboard", () => import("./Changelog"));
 
-  UserAssetClient.start({ routes: options.routes });
-  UserAssetClient.registerExportAssertLink(DashboardEntity);
+    UserAssetClient.start({ routes: options.routes });
+    UserAssetClient.registerExportAssertLink(DashboardEntity);
 
-  Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
+    Constructor.registerConstructor(DashboardEntity, () => DashboardEntity.New({ owner: AppContext.currentUser && toLite(AppContext.currentUser) }));
 
-  Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
-  Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
+    Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
+    Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
-  Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
-  Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
-  Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
-  Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
+    Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
+    Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
+    Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
+    Navigator.addSettings(new EntitySettings(HealthCheckPartEntity, e => import('./Admin/HealthCheckPart')));
 
-  ToolbarClient.registerConfig(new DashboardToolbarConfig());
-  OmniboxClient.registerProvider(new DashboardOmniboxProvider());
+    ToolbarClient.registerConfig(new DashboardToolbarConfig());
+    OmniboxClient.registerProvider(new DashboardOmniboxProvider());
 
-  Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
-    isVisible: () => false,
-    color: "warning",
-    icon: "gears",
-    contextual: { isVisible: () => true },
-    contextualFromMany: { isVisible: () => true },
-  }));
+    Operations.addSettings(new EntityOperationSettings(DashboardOperation.RegenerateCachedQueries, {
+      isVisible: () => false,
+      color: "warning",
+      icon: "gears",
+      contextual: { isVisible: () => true },
+      contextualFromMany: { isVisible: () => true },
+    }));
 
-  Finder.addSettings({
-    queryName: DashboardEntity,
-    defaultOrders: [{ token: DashboardEntity.token(d => d.dashboardPriority), orderType: "Descending" }]
-  });
-
-  options.routes.push({ path: "/dashboard/:dashboardId", element: <ImportComponent onImport={() => import("./View/DashboardPage")} /> });
-
-  registerRenderer(LinkListPartEntity, {
-    component: () => import('./View/LinkListPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "list", iconColor: "#B9770E" })
-  });
-
-  registerRenderer(ImagePartEntity, {
-    component: () => import('./View/ImagePartView').then(a => a.default),
-    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
-    withPanel: () => false
-  });
-
-  registerRenderer(SeparatorPartEntity, {
-    component: () => import('./View/SeparatorPartView').then(a => a.default),
-    defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
-    withPanel: () => false
-  });
-
-  registerRenderer(HealthCheckPartEntity, {
-    component: () => import('./View/HealthCheckPart').then(a => a.default),
-    defaultIcon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
-    withPanel: () => false
-  });
-
-  onEmbeddedWidgets.push(wc => {
-    if (!wc.frame.pack.embeddedDashboards)
-      return undefined;
-
-    return wc.frame.pack.embeddedDashboards.map(d => {
-      return {
-        position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
-        embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
-        eventKey: liteKey(toLite(d)),
-        title: Options.customTitle(d),
-      } as EmbeddedWidget;
+    Finder.addSettings({
+      queryName: DashboardEntity,
+      defaultOrders: [{ token: DashboardEntity.token(d => d.dashboardPriority), orderType: "Descending" }]
     });
-  });
 
-  if (AppContext.isPermissionAuthorized(DashboardPermission.ViewDashboard))
-    QuickLinks.registerGlobalQuickLink(entityType =>
-      API.forEntityType(entityType)
-        .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
-        {
-          order: 0,
-          icon: "gauge",
-          iconColor: "darkslateblue",
-          color: "success",
-          onlyForToken: (d.model as DashboardLiteModel).hideQuickLink
-        }
-      )))
-    );
+    options.routes.push({ path: "/dashboard/:dashboardId", element: <ImportComponent onImport={() => import("./View/DashboardPage")} /> });
 
-  QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
-    (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
-      .then(db => {
-        if (db.entityType == undefined)
-          AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
-        else
-          Navigator.API.fetchAndRemember(db.entityType)
-            .then(t => Finder.find({ queryName: t.cleanName }))
-            .then(entity => {
-              if (!entity)
-                return;
+    registerRenderer(LinkListPartEntity, {
+      component: () => import('./View/LinkListPart').then(a => a.default),
+      defaultIcon: () => ({ icon: "list", iconColor: "#B9770E" })
+    });
 
-              AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
-            });
-      }),
-    {
-      group: null,
-      icon: "eye",
-      iconColor: "blue",
-      color: "info"
-    }
-  ));
-};
+    registerRenderer(ImagePartEntity, {
+      component: () => import('./View/ImagePartView').then(a => a.default),
+      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+      withPanel: () => false
+    });
 
+    registerRenderer(SeparatorPartEntity, {
+      component: () => import('./View/SeparatorPartView').then(a => a.default),
+      defaultIcon: () => ({ icon: "rectangle-list", iconColor: "forestgreen" }),
+      withPanel: () => false
+    });
 
-export function home(): Promise<Lite<DashboardEntity> | null> {
-  if (!Navigator.isViewable(DashboardEntity))
-    return Promise.resolve(null);
+    registerRenderer(HealthCheckPartEntity, {
+      component: () => import('./View/HealthCheckPart').then(a => a.default),
+      defaultIcon: () => ({ icon: "heart-pulse", iconColor: "forestgreen" }),
+      withPanel: () => false
+    });
 
-  return API.home();
-}
+    onEmbeddedWidgets.push(wc => {
+      if (!wc.frame.pack.embeddedDashboards)
+        return undefined;
 
-export function hasWaitForInvalidation(type: PseudoType): boolean | undefined {
-  return partRenderers[getTypeName(type)].waitForInvalidation;
-}
+      return wc.frame.pack.embeddedDashboards.map(d => {
+        return {
+          position: d.embeddedInEntity as "Top" | "Tab" | "Bottom",
+          embeddedWidget: <DashboardWidget dashboard={d} pack={wc.frame.pack as EntityPack<Entity>} frame={wc.frame} />,
+          eventKey: liteKey(toLite(d)),
+          title: Options.customTitle(d),
+        } as EmbeddedWidget;
+      });
+    });
 
-export function defaultIcon(type: PseudoType): IconColor {
-  return partRenderers[getTypeName(type)].defaultIcon();
-}
+    if (AppContext.isPermissionAuthorized(DashboardPermission.ViewDashboard))
+      QuickLinks.registerGlobalQuickLink(entityType =>
+        API.forEntityType(entityType)
+          .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
+            {
+              order: 0,
+              icon: "gauge",
+              iconColor: "darkslateblue",
+              color: "success",
+              onlyForToken: (d.model as DashboardLiteModel).hideQuickLink
+            }
+          )))
+      );
 
-export function getQueryNames(part: IPartEntity): QueryEntity[] {
-  return partRenderers[getTypeName(part)].getQueryNames?.(part) ?? [];
-}
+    QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
+      (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
+        .then(db => {
+          if (db.entityType == undefined)
+            AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite), e);
+          else
+            Navigator.API.fetchAndRemember(db.entityType)
+              .then(t => Finder.find({ queryName: t.cleanName }))
+              .then(entity => {
+                if (!entity)
+                  return;
 
-export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>): string {
-  return "/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity));
-}
+                AppContext.pushOrOpenInTab(dashboardUrl(ctx.lite, entity), e);
+              });
+        }),
+      {
+        group: null,
+        icon: "eye",
+        iconColor: "blue",
+        color: "info"
+      }
+    ));
+  };
 
-export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>): void {
-  partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
-}
-
-export module API {
-  export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
-    return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
-  }
 
   export function home(): Promise<Lite<DashboardEntity> | null> {
-    return ajaxGet({ url: "/api/dashboard/home" });
+    if (!Navigator.isViewable(DashboardEntity))
+      return Promise.resolve(null);
+
+    return API.home();
   }
 
-  export function get(dashboard: Lite<DashboardEntity>): Promise<DashboardWithCachedQueries | null> {
-    return ajaxPost({ url: "/api/dashboard/get" }, dashboard);
+  export function hasWaitForInvalidation(type: PseudoType): boolean | undefined {
+    return partRenderers[getTypeName(type)].waitForInvalidation;
   }
-}
 
-export interface DashboardWithCachedQueries {
-  dashboard: DashboardEntity
-  cachedQueries: Array<CachedQueryEntity>;
-}
+  export function defaultIcon(type: PseudoType): IconColor {
+    return partRenderers[getTypeName(type)].defaultIcon();
+  }
 
-export interface DashboardWidgetProps {
-  pack: EntityPack<Entity>;
-  dashboard: DashboardEntity;
-  frame: EntityFrame;
-}
+  export function getQueryNames(part: IPartEntity): QueryEntity[] {
+    return partRenderers[getTypeName(part)].getQueryNames?.(part) ?? [];
+  }
 
-export function DashboardWidget(p: DashboardWidgetProps): React.FunctionComponentElement<{
+  export function dashboardUrl(lite: Lite<DashboardEntity>, entity?: Lite<Entity>): string {
+    return "/dashboard/" + lite.id + (!entity ? "" : "?entity=" + liteKey(entity));
+  }
+
+  export function registerRenderer<T extends IPartEntity>(type: Type<T>, renderer: PartRenderer<T>): void {
+    partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
+  }
+
+  export module API {
+    export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
+      return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
+    }
+
+    export function home(): Promise<Lite<DashboardEntity> | null> {
+      return ajaxGet({ url: "/api/dashboard/home" });
+    }
+
+    export function get(dashboard: Lite<DashboardEntity>): Promise<DashboardWithCachedQueries | null> {
+      return ajaxPost({ url: "/api/dashboard/get" }, dashboard);
+    }
+  }
+
+  export interface DashboardWithCachedQueries {
+    dashboard: DashboardEntity
+    cachedQueries: Array<CachedQueryEntity>;
+  }
+
+  export interface DashboardWidgetProps {
+    pack: EntityPack<Entity>;
+    dashboard: DashboardEntity;
+    frame: EntityFrame;
+  }
+
+  export function DashboardWidget(p: DashboardWidgetProps): React.FunctionComponentElement<{
     dashboard: DashboardEntity;
     cachedQueries: {
-        [userAssetKey: string]: Promise<CachedQueryJS>;
+      [userAssetKey: string]: Promise<CachedQueryJS>;
     };
     entity?: Entity;
     deps?: React.DependencyList;
     reload: () => void;
     hideEditButton?: boolean;
-}> | null {
+  }> | null {
 
-  const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
+    const component = useAPI(() => import("./View/DashboardView").then(mod => mod.default), []);
 
-  if (!component)
-    return null;
+    if (!component)
+      return null;
 
-  return React.createElement(component, {
-    dashboard: p.dashboard,
-    entity: p.pack.entity,
-    reload: () => p.frame.onReload(),
-    cachedQueries: {} /*for now*/
-  });
-}
+    return React.createElement(component, {
+      dashboard: p.dashboard,
+      entity: p.pack.entity,
+      reload: () => p.frame.onReload(),
+      cachedQueries: {} /*for now*/
+    });
+  }
 
-export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null): {
+  export function toCachedQueries(dashboardWithQueries?: DashboardWithCachedQueries | null): {
     [key: string]: Promise<CachedQueryJS>;
-} | undefined {
+  } | undefined {
 
-  if (!dashboardWithQueries)
-    return undefined;
+    if (!dashboardWithQueries)
+      return undefined;
 
-  const result = dashboardWithQueries.cachedQueries
-    .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; }) })) //share promise
-    .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
-    .toObject(a => liteKey(a.ua), a => a.promise);
+    const result = dashboardWithQueries.cachedQueries
+      .map(a => ({ userAssets: a.userAssets, promise: downloadFile(a.file).then(r => r.json() as Promise<CachedQueryJS>).then(cq => { Finder.decompress(cq.resultTable); return cq; }) })) //share promise
+      .flatMap(a => a.userAssets.map(mle => ({ ua: mle.element, promise: a.promise })))
+      .toObject(a => liteKey(a.ua), a => a.promise);
 
-  return result;
-}
+    return result;
+  }
 
-export namespace Options {
+  export namespace Options {
 
-  export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
-}
+    export let customTitle: (dashboard: DashboardEntity) => React.ReactNode = d => <DashboardTitle dashboard={d} />;
+  }
 
 }
 

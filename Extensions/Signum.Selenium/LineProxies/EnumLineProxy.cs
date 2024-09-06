@@ -20,6 +20,7 @@ public class EnumLineProxy : BaseLineProxy
     public override void SetValueUntyped(object? value) => this.SetValue(value);
 
     public  WebElementLocator SelectLocator => this.Element.WithLocator(By.CssSelector("select, input, div"));
+    public  WebElementLocator WidgetLocator => this.Element.WithLocator(By.CssSelector("div.rw-dropdown-list"));
 
     public void SetValue(object? value)
     {
@@ -31,22 +32,46 @@ public class EnumLineProxy : BaseLineProxy
             value is Enum e ? e.ToString() : 
             throw new UnexpectedValueException(value);
 
-        SelectLocator.Find().SelectElement().SelectByValue(strValue);
+        var rw = WidgetLocator.TryFind();
+        if (rw != null)
+        {
+            var popup = rw.TryFindElement(By.CssSelector(".rw-popup-container"));
+            if (popup == null || !popup.Displayed)
+            {
+                rw.FindElement(By.CssSelector(".rw-dropdown-list-value")).Click();
+                popup = rw.WaitElementVisible(By.CssSelector(".rw-popup-container"));
+            }
+
+            popup.FindElement(By.CssSelector($"[data-value='{strValue}']")).Click();
+        }
+        else
+            SelectLocator.Find().SelectElement().SelectByValue(strValue);
     }
 
     public object? GetValue()
     {
-        var elem = this.SelectLocator.Find();
+        var rw = WidgetLocator.TryFind();
+        string? strValue = null;
+        if (rw != null)
+        {
+            strValue = rw.FindElement(By.CssSelector("[data-value]")).GetAttribute("data-value");
+        }
+        else
+        {
+            var elem = this.SelectLocator.Find();
 
-        var strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetAttribute("value").ToString() :
-            elem.GetAttribute("data-value");
+            strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetAttribute("value").ToString() :
+                elem.GetAttribute("data-value");
 
-        if (strValue.IsNullOrEmpty())
+        }
+
+        if(strValue.IsNullOrEmpty())
             return null;
 
         if (Route.Type.UnNullify() == typeof(bool))
             return ReflectionTools.Parse<BooleanEnum>(strValue) == BooleanEnum.True;
 
         return ReflectionTools.Parse(strValue, Route.Type);
+
     }
 }

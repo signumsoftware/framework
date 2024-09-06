@@ -23,7 +23,7 @@ export interface DateTimeLineProps extends ValueBaseProps<string | null> {
 export class DateTimeLineController extends ValueBaseController<DateTimeLineProps, string | null>{
   init(p: DateTimeLineProps): void {
     super.init(p);
-    this.assertType("DateTimeLine", ["DateOnly", "DateTime"]);
+    this.assertType("DateTimeLine", ["DateOnly", "DateTime","DateTimeOffset"]);
   }
 }
 
@@ -99,9 +99,6 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
         </FormGroup>
     );
 }), (prev, next) => {
-    if (next.extraButtons || prev.extraButtons)
-        return false;
-
     return LineBaseController.propEquals(prev, next);
 });
 

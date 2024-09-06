@@ -261,7 +261,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
       const entity = entityOrLite as Entity;
       const ti = getTypeInfo(entity.Type);
       const toStr = this.props.liteToString && this.props.liteToString(entity as AsEntity<V>);
-      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart");
+      const fatLite = this.props.fatLite || this.props.fatLite == null && (ti.entityKind == "Part" || ti.entityKind == "SharedPart" || entityOrLite.isNew);
       return toLite(entity, fatLite, toStr) as V;
     }
   }

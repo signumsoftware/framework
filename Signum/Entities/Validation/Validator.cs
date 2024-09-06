@@ -161,7 +161,7 @@ public class PropertyValidator<T> : IPropertyValidator
 
         Validators = pi.GetCustomAttributes(typeof(ValidatorAttribute), false).OfType<ValidatorAttribute>().OrderBy(va => va.Order).ThenBy(va => va.GetType().Name).ToList();
 
-        if (pi.PropertyType.IsClass && pi.IsNullable() == false && !Validators.Any(v => v is NotNullValidatorAttribute))
+        if (!pi.PropertyType.IsValueType && pi.IsNullable() == false && !Validators.Any(v => v is NotNullValidatorAttribute))
             Validators.Add(new NotNullValidatorAttribute());
 
         foreach (var val in Validators)

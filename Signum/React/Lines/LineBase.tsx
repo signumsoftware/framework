@@ -39,8 +39,17 @@ export function useController<C extends LineBaseController<P, V>, P extends Line
 
 export class LineBaseController<P extends LineBaseProps<V>, V> {
 
-  static propEquals<V>(prevProps: LineBaseProps<V>, nextProps: LineBaseProps<V>): boolean {
-    if (Dic.equals(prevProps, nextProps, true))
+  static propEquals<V>(prev: LineBaseProps<V>, next: LineBaseProps<V>): boolean {
+    if (next.extraButtons || prev.extraButtons)
+      return false;
+
+    if (next.extraButtonsBefore || prev.extraButtonsBefore)
+      return false;
+
+    if (next.labelIcon || prev.labelIcon)
+      return false;
+
+    if (Dic.equals(prev, next, true))
       return true; //For Debugging
 
     return false;

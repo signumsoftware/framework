@@ -200,18 +200,26 @@ export namespace ChartClient {
     }).notNull();
   
     const columns: ColumnOption[] = [];
-  
+
+    let timeSerieAsOf: string | undefined;
+
     cr.columns.map((a, i) => {
   
       const qte = a.element.token;
   
       if (qte?.token && !hasAggregate(qte!.token!) && r.hasOwnProperty("c" + i)) {
-        filters.push({
-          token: qte!.token!,
-          operation: "EqualTo",
-          value: (r as any)["c" + i],
-          frozen: false
-        } as FilterOptionParsed);
+
+        if (qte.token.fullKey == QueryTokenString.timeSeries.token) {
+          timeSerieAsOf = (r as any)["c" + i];
+        } else {
+
+          filters.push({
+            token: qte!.token!,
+            operation: "EqualTo",
+            value: (r as any)["c" + i],
+            frozen: false
+          } as FilterOptionParsed);
+        }
       }
   
       if (qte?.token && qte.token.parent != undefined) //Avoid Count and simple Columns that are already added
@@ -236,6 +244,7 @@ export namespace ChartClient {
       includeDefaultFilters: false,
       columnOptions: columns,
       columnOptionsMode: "ReplaceOrAdd",
+      systemTime: cr.chartTimeSeries && timeSerieAsOf ? { mode: "AsOf", startDate: timeSerieAsOf } : undefined,
     };
   
     return fo;

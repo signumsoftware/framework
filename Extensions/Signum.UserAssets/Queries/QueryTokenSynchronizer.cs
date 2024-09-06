@@ -28,15 +28,12 @@ public static class DelayedConsole
 
 public static class QueryTokenSynchronizer
 {
-
-
-
-    static void Remember(Replacements replacements, string tokenString, QueryToken token)
+    static void Remember(Replacements replacements, string oldTokenString, QueryToken newToken, QueryDescription qd, SubTokensOptions options)
     {
-        List<QueryToken> tokenList = token.Follow(a => a.Parent).Reverse().ToList();
+        List<QueryToken> tokenList = newToken.Follow(a => a.Parent).Reverse().ToList();
 
-        string[] oldParts = tokenString.Split('.');
-        string[] newParts = token.FullKey().Split('.');
+        string[] oldParts = oldTokenString.Split('.');
+        string[] newParts = newToken.FullKey().Split('.');
 
         List<string> oldPartsList = oldParts.ToList();
         List<string> newPartsList = newParts.ToList();
@@ -57,20 +54,24 @@ public static class QueryTokenSynchronizer
         int pos = -1;
         while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
             (oldPartsList[0] == newPartsList[0] ||
-             rep(oldPartsList[0]) == newPartsList[0]))
+             rep(oldPartsList[0]) == newPartsList[0]) 
+             )
         {
             oldPartsList.RemoveAt(0);
             newPartsList.RemoveAt(0);
             pos++;
         }
 
+
         while (oldPartsList.Count > 0 && newPartsList.Count > 0 &&
-            (oldPartsList[oldPartsList.Count - 1] == newPartsList[newPartsList.Count - 1] ||
-             rep(oldPartsList[oldPartsList.Count - 1]) == newPartsList[newPartsList.Count - 1]))
+         (oldPartsList[oldPartsList.Count - 1] == newPartsList[newPartsList.Count - 1] ||
+          rep(oldPartsList[oldPartsList.Count - 1]) == newPartsList[newPartsList.Count - 1]))
         {
             oldPartsList.RemoveAt(oldPartsList.Count - 1);
             newPartsList.RemoveAt(newPartsList.Count - 1);
         }
+
+
 
         string key = pos == -1 ? QueryKey(tokenList[0].QueryName) : TypeKey(tokenList[pos].Type);
 
@@ -380,7 +381,7 @@ public static class QueryTokenSynchronizer
                     token = null;
                     return FixTokenResult.SkipEntity;
                 case UserAssetTokenAction.Confirm:
-                    Remember(replacements, original, current);
+                    Remember(replacements, original, current, qd, options);
                     Console.SetCursorPosition(0, Console.CursorTop - 1);
                     SafeConsole.WriteColor(ConsoleColor.DarkRed, "  " + original);
                     Console.Write(" -> ");
@@ -439,15 +440,16 @@ public static class QueryTokenSynchronizer
 
 
             SafeConsole.WriteLineColor(ConsoleColor.Red, "- d: Delete entity");
+            SafeConsole.WriteLineColor(ConsoleColor.White, "- freeText: New Full Token");
 
             while (true)
             {
-                string answer = Console.ReadLine()!;
+                string rawAnswer = Console.ReadLine()!;
 
-                if (answer == null)
+                if (rawAnswer == null)
                     throw new InvalidOperationException("Impossible to synchronize interactively without Console");
 
-                answer = answer.ToLower();
+                string answer = rawAnswer.ToLower();
 
                 if (answer == "+" && remaining > 0)
                 {
@@ -485,7 +487,15 @@ public static class QueryTokenSynchronizer
                     return null;
                 }
 
-                Console.WriteLine("Error");
+                var tryToken = QueryUtils.TryParse(rawAnswer, qd, options);
+
+                if (tryToken != null)
+                {
+                    token = tryToken;
+                    return UserAssetTokenAction.Confirm;
+                }
+
+                Console.WriteLine("Input Error");
             }
         }
         finally

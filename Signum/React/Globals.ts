@@ -27,8 +27,8 @@ declare global {
     groupBy<K, E>(this: Array<T>, keySelector: (element: T) => K, keyStringifier: ((key: K) => string) | undefined, elementSelector: (element: T) => E): { key: K; elements: E[] }[];
     groupToObject(this: Array<T>, keySelector: (element: T) => string): { [key: string]: T[] }; // Remove by Object.groupBy when safary supports it https://caniuse.com/?search=Object.groupby
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
-    groupToMap<K>(this: Array<T>, keySelector: (element: T) => string): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
-    groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): Map<K, E[]>;
+    groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
+    groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): Map<K, E[]>;
     groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
@@ -43,7 +43,7 @@ declare global {
 
 
     toMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
-    toMap<K, V>(this: Array<T>, keySelector: (element: T) => string, valueSelector: (element: T) => V):  Map<K, V>;
+    toMap<K, V>(this: Array<T>, keySelector: (element: T) => K, valueSelector: (element: T) => V):  Map<K, V>;
     toMapDistinct<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T>;
     toMapDistinct<K, V>(this: Array<T>, keySelector: (element: T) => V, valueSelector: (element: T) => V): Map<K, V>;
 
@@ -63,6 +63,8 @@ declare global {
     
     sum(this: Array<number>): number;
     sum(this: Array<T>, selector: (element: T, index: number, array: T[]) => number): number;
+
+    count(this: Array<T>, predicate: (element: T, index: number, array: T[]) => boolean): number;
 
     first(this: Array<T>, errorContext?: string): T;
     first(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T;
@@ -502,6 +504,20 @@ Array.prototype.sum = function (this: any[], selector?: (element: any, index: nu
   return result;
 };
 
+Array.prototype.count = function (this: any[], predicate: (element: any, index: number, array: any[]) => any) {
+
+  if (this.length == 0)
+    return 0;
+
+  var result = 0;
+  for (var i = 0; i < this.length; i++) {
+    if (predicate(this[i], i, this))
+      result++;
+  }
+
+  return result;
+};
+
 
 Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
 
@@ -878,7 +894,7 @@ String.prototype.tryBetween = function (this: string, firstSeparator: string, se
   if (index2 == -1)
     return undefined;
 
-  return this.substring(from, index2 - from);
+  return this.substring(from, index2);
 };
 
 String.prototype.after = function (this: string, separator: string) {
