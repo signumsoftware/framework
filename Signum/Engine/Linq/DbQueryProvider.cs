@@ -32,10 +32,10 @@ public class DbQueryProvider : QueryProvider, IQueryProviderAsync
             return this.Translate(expression, tr => tr.Execute()!);
     }
 
-    public async Task<object?> ExecuteAsync(Expression expression, CancellationToken token)
+    public Task<object?> ExecuteAsync(Expression expression, CancellationToken token)
     {
         using (HeavyProfiler.Log("DBQuery", () => expression.Type.TypeName()))
-            return await this.Translate(expression, tr => tr.ExecuteAsync(token));
+            return this.Translate(expression, async tr => await tr.ExecuteAsync(token));
     }
 
     public ITranslateResult GetRawTranslateResult(Expression expression)
