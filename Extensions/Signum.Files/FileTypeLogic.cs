@@ -49,7 +49,7 @@ public interface IFileTypeAlgorithm
 
     byte[] ReadAllBytes(IFilePath fp);
 
-    string? ReadAsStringUTF8(IFilePath fp);
+    string? ReadAsStringUTF8(IFilePath fp) => Encoding.UTF8.GetString(ReadAllBytes(fp));
 
     Stream OpenRead(IFilePath fp);
     void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder);
