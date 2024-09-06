@@ -99,9 +99,6 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
         </FormGroup>
     );
 }), (prev, next) => {
-    if (next.extraButtons || prev.extraButtons)
-        return false;
-
     return LineBaseController.propEquals(prev, next);
 });
 

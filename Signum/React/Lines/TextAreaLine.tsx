@@ -106,10 +106,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
       )}
     </FormGroup>
   );
-}), (prev, next) => {
-  if (next.extraButtons || prev.extraButtons)
-    return false;
-
+  }), (prev, next) => {
   return LineBaseController.propEquals(prev, next);
 });
 
