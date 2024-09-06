@@ -620,7 +620,11 @@ internal class QueryBinder : ExpressionVisitor
 
         var proj = uniqueFunctionReplacements.GetOrCreate(newProjection, () =>
         {
-            AddRequest(new UniqueRequest(newProjection.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault));
+            var request = new UniqueRequest(newProjection.Select, outerApply: function == UniqueFunction.SingleOrDefault || function == UniqueFunction.FirstOrDefault);
+
+            var source = GetCurrentSource(request);
+
+            AddRequest(source, request);
 
             return newProjection.Projector;
         });
@@ -2968,7 +2972,8 @@ internal class QueryBinder : ExpressionVisitor
                 unionEntity.UnionExternalId = new PrimaryKeyExpression(expression);
             }
 
-            AddRequest(result);
+            var source = GetCurrentSource(result);
+            AddRequest(source, result);
 
             return result;
         });
@@ -2982,31 +2987,29 @@ internal class QueryBinder : ExpressionVisitor
         return new Disposable(() => currentSource = currentSource.Pop());
     }
 
-    void AddRequest(ExpansionRequest req)
+    void AddRequest(SourceExpression source, ExpansionRequest req)
     {
-        if (currentSource.IsEmpty)
-            throw new InvalidOperationException("currentSource not set");
-
-        var source = GetCurrentSource(req);
-
         requests.GetOrCreate(source).Add(req);
     }
 
     private SourceExpression GetCurrentSource(ExpansionRequest req)
     {
+        if (currentSource.IsEmpty)
+            throw new InvalidOperationException("currentSource not set");
+
         var external = req.ExternalAlias(this);
+
+        if (external.IsEmpty())
+            return currentSource.Last();
 
         var result = currentSource.FirstOrDefault(s => //could be more than one on GroupBy aggregates
         {
             if (s == null)
                 return false;
 
-            if (external.IsEmpty())
-                return true;
-
             var knownAliases = KnownAliases(s);
 
-            return external.Intersect(knownAliases).Any();
+            return external.All(a => knownAliases.Contains(a));
         });
 
         if (result == null)
@@ -3077,10 +3080,13 @@ internal class QueryBinder : ExpressionVisitor
 
             var result = new EntityExpression(entity.Type, entity.ExternalId, entity.ExternalPeriod, newAlias, bindings, mixins, period, avoidExpandOnRetrieving: false);
 
-            AddRequest(new TableRequest(
+            var request = new TableRequest(
                 table: new TableExpression(newAlias, table, table.SystemVersioned != null ? this.systemTime : null, null),
                 completeEntity: result
-            ));
+            );
+
+            var source = GetCurrentSource(request);
+            AddRequest(source, request);
 
             return result;
         });

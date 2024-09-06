@@ -103,4 +103,28 @@ public class SingleFirstTest
     {
         var config = Database.Query<ConfigEntity>().SingleEx();
     }
+
+    [Fact]
+    public void FirstInSelectAndWhere()
+    {
+        var firstMembers = Database.Query<BandEntity>()
+            .Where(a => a.Members.FirstEx().Name.StartsWith("a"))
+            .Select(a => a.Members.FirstEx()).ToList();
+    }
+
+    [Fact]
+    public void DoubleUniqueExpansionWithInDB()
+    {
+        var michael = Database.Query<ArtistEntity>().FirstEx().ToLite();
+
+        Database.Query<BandEntity>()
+            .Select(a => new
+            {
+                a.Id,
+                Count = a.Members.Where(m => m.Sex == michael.InDB(a => a.Sex)).Count(),
+                Any = a.Members.Where(m => m.Sex == michael.InDB(a => a.Sex)).Any(a => a.Name.StartsWith("a")),
+            })
+            .ToList();
+
+    }
 }
