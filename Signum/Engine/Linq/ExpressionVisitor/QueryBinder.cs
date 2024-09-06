@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
+using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq;
 
@@ -1070,7 +1071,7 @@ internal class QueryBinder : ExpressionVisitor
 
         SubqueryExpression? se;
         if (schema.Settings.IsDbType(pc.Projector.Type))
-            se = new InExpression(newItem, new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
+            se = new InExpression(DbExpressionNominator.FullNominate(newItem), new SelectExpression(alias, false, null, pc.Columns, projection.Select, null, null, null, 0));
         else
         {
             Expression where = DbExpressionNominator.FullNominate(SmartEqualizer.PolymorphicEqual(projection.Projector, newItem))!;
