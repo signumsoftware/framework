@@ -3010,7 +3010,7 @@ internal class QueryBinder : ExpressionVisitor
 
             var knownAliases = KnownAliases(s);
 
-            return external.All(a => knownAliases.Contains(a));
+            return external.Any(a => knownAliases.Contains(a));
         });
 
         if (result == null)
