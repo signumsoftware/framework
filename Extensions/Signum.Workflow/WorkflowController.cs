@@ -292,8 +292,8 @@ public class WorkflowActivityMonitorRequestTS
         return new WorkflowActivityMonitorRequest
         {
             Workflow = workflow,
-            Filters = filters.Select(f => f.ToFilter(qd, true, SignumServer.JsonSerializerOptions)).ToList(),
-            Columns = columns.Select(c => c.ToColumn(qd, true)).ToList(),
+            Filters = filters.Select(f => f.ToFilter(qd, canAggregate: true, SignumServer.JsonSerializerOptions)).ToList(),
+            Columns = columns.Select(c => c.ToColumn(qd, canAggregate: true, canTimeSeries: false)).ToList(),
         };
     }
 }

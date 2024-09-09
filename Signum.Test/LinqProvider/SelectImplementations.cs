@@ -83,6 +83,27 @@ public class SelectImplementationsTest1
     }
 
     [Fact]
+    public void SelectIdLiteIBA()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Select(a => a.LastAward == null ? null : a.LastAward.Id.ToString()).ToList();
+    }
+
+    [Fact]
+    public void WhereIdLiteIB()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Where(a => a.LastAward!.Id.ToString() == "3").ToList();
+    }
+
+    [Fact]
+    public void ContainsIdLiteIB()
+    {
+        var list = Database.Query<ArtistEntity>()
+            .Where(a => a.Friends.Select(a=>a.ToString()).Contains(a.LastAward!.Id.ToString())).ToList();
+    }
+
+    [Fact]
     public void SelectEntityWithLiteIb()
     {
         var list = Database.Query<AwardNominationEntity>().Where(a => a.Award.Entity is GrammyAwardEntity).ToList();
