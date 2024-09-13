@@ -46,6 +46,7 @@ export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAss
   orders: Entities.MList<Queries.QueryOrderEmbedded>;
   applicable: Templating.TemplateApplicableEval | null;
   disableAuthorization: boolean;
+  disableValidation: boolean;
   template: Entities.Lite<Files.FileEntity>;
   fileName: string;
   wordTransformer: WordTransformerSymbol | null;

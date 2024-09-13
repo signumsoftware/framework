@@ -37,6 +37,9 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public bool DisableAuthorization { get; set; }
 
+    [Ignore]
+    public bool DisableValidation { get; set; }
+
     public Lite<FileEntity> Template { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 250), FileNameValidator]
