@@ -293,7 +293,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
     <li className={classes("sf-strip-element", containerHtmlAttributes?.className, drag?.dropClass)}
       {...EntityBaseController.entityHtmlAttributes(p.ctx.value)}
       {...containerHtmlAttributes}>
-      <div className={classes(drag && "sf-strip-dropable")}
+      <div className="sf-strip-dropable"
         onDragEnter={drag?.onDragOver}
         onDragOver={drag?.onDragOver}
         onDrop={drag?.onDrop}
