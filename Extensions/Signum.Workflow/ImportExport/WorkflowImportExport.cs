@@ -313,8 +313,8 @@ public class WorkflowImportExport
 
                 lane.Actors.Synchronize((xml.Element("Actors")?.Elements("Actor")).EmptyIfNull().Select(a => ctx.ParseLite(a.Value, this.workflow, actorsPr)).NotNull().ToMList());
                 lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
-                lane.UseActorEvalForStart = xml.Attribute("UseActorEvalForStart")?.Value.ToBool() ?? false;
-                lane.CombineActorAndActorEvalWhenContinuing = xml.Attribute("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;
+                lane.UseActorEvalForStart = xml.Element("UseActorEvalForStart")?.Value.ToBool() ?? false;
+                lane.CombineActorAndActorEvalWhenContinuing = xml.Element("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;
                 SetXmlDiagram(lane, xml);
             }))
             {
