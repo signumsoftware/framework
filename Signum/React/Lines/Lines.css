@@ -24,6 +24,7 @@ input[type=checkbox].form-control {
     user-select: none;
 }
 
+
 .input-group {
     flex-wrap: nowrap;
 }
@@ -370,6 +371,7 @@ input[type=checkbox].form-control-xs {
 .form-control-xs .rw-widget-input,
 .rw-widget-xs .rw-widget-input {
     min-height: 24px;
+    font-size: 0.875rem;
 }
 
 
@@ -423,6 +425,7 @@ input[type=checkbox].form-control-xs {
 }
 
 .rw-widget-input {
+    color: var(--bs-body-color);
     width: inherit;
 }
 
@@ -438,6 +441,7 @@ input[type=checkbox].form-control-xs {
 .rw-widget-sm .rw-multiselect-input {
     padding: 3px 6px;
     min-height: 28px;
+    font-size: 0.875rem;
 }
 
 .rw-widget-sm .rw-multiselect-tag-label,
