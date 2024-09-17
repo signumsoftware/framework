@@ -10,6 +10,7 @@ export interface ReactChartProps {
   data?: ChartTable;
   parameters: { [parameter: string]: string }; 
   loading: boolean;
+  sizeDeps?: React.DependencyList;
   onReload: (() => void) | undefined;
   onDrillDown: (row: ChartRow, e: React.MouseEvent | MouseEvent) => void;
   onBackgroundClick?: (e: React.MouseEvent) => void;
@@ -27,7 +28,7 @@ function ReactChart(p: ReactChartProps): React.JSX.Element {
 
   const memo = React.useMemo(() => new MemoRepository(), [p.chartRequest, p.chartRequest.chartScript]);
 
-  const { size, setContainer } = useSize();
+  const { size, setContainer } = useSize({deps: p.sizeDeps});
 
   return (
     <div className={classes("sf-chart-container", isSimple ? "sf-chart-animable" : "")} style={{ minHeight: (p.minHeight ?? 400) + "px" }} ref={setContainer} onClick={p.onBackgroundClick}>
