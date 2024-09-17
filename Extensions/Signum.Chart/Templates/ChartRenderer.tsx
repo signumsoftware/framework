@@ -46,11 +46,12 @@ export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element 
 
   return (
     <FullscreenComponent onReload={p.onReload}>
-      <ErrorBoundary deps={[p.data]}>
+      {fullScreen => <ErrorBoundary deps={[p.data]}>
         {cs && parameters &&
           <ReactChart
             chartRequest={p.chartRequest}
             data={p.data}
+            sizeDeps={[fullScreen]}
             dashboardFilter={p.dashboardFilter}
             loading={p.loading}
             onDrillDown={p.onDrillDown ?? ((r, e) => handleDrillDown(r, e, p.lastChartRequest!, p.userChart, p.autoRefresh ? p.onReload : undefined))}
@@ -62,6 +63,7 @@ export default function ChartRenderer(p: ChartRendererProps): React.JSX.Element 
           />
         }
       </ErrorBoundary>
+      }
     </FullscreenComponent>
   );
 }

@@ -111,7 +111,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
   return (
     <div className="sf-scroll-table-container">
       <FullscreenComponent onReload={p.onReload}>
-        <table className="sf-search-results table table-hover table-sm">
+        {fullScreen => <table className="sf-search-results table table-hover table-sm">
           <thead>
             <tr>
               {hasEntity && <th></th>}
@@ -150,6 +150,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
             }
           </tbody>
         </table>
+        }
       </FullscreenComponent>
     </div>
   );
