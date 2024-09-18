@@ -93,7 +93,7 @@ public class ModalProxy : IDisposable
         {
             try
             {
-                return this.Element == null || this.Element.IsStale() || !this.Element.Displayed;
+                return this.Element == null || !this.Element.Displayed;
             }
             catch (NoSuchElementException)
             {

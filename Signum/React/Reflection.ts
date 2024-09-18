@@ -1582,43 +1582,43 @@ export class QueryTokenString<T> {
     return new QueryTokenString<S>(this.token + (this.token ? "." : "") + expressionName);
   }
 
-  any<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".Any");
+  any(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString<ArrayElement<T>>(this.token + ".Any");
   }
 
-  all<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".All");
+  all(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString<ArrayElement<T>>(this.token + ".All");
   }
 
-  notAll<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".NotAll");
+  notAll(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".NotAll");
   }
 
-  notAny<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".NotAny");
+  notAny(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".NotAny");
   }
 
-  separatedByComma<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".SeparatedByComma");
+  separatedByComma(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".SeparatedByComma");
   }
 
-  separatedByCommaDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".SeparatedByCommaDistinct");
+  separatedByCommaDistinct(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".SeparatedByCommaDistinct");
   }
 
-  separatedByNewLine<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".SeparatedByNewLine");
+  separatedByNewLine(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".SeparatedByNewLine");
   }
 
-  separatedByNewLineDistinct<S = ArrayElement<T>>(): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + ".SeparatedByNewLineDistinct");
+  separatedByNewLineDistinct(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString(this.token + ".SeparatedByNewLineDistinct");
   }
   
 
 
 
-  element<S = ArrayElement<T>>(index = 1): QueryTokenString<S> {
-    return new QueryTokenString<S>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
+  element(index = 1): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString<ArrayElement<T>>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
   }
 
   count(option?: "Distinct" | "Null" | "NotNull"): QueryTokenString<number> {

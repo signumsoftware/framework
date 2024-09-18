@@ -72,8 +72,20 @@ export function whenVisible<T extends HTMLElement>(element: T, callback: (visibl
   return observer;
 }
 
-export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout = 0, resizeTimeout = 300, autoResetOnHide = false):
+export function useSize<T extends HTMLElement = HTMLDivElement>(options?: { 
+  initialTimeout?: number ,
+   resizeTimeout ? : number, 
+  autoResetOnHide?: boolean, 
+  deps?: React.DependencyList
+}):
+
   { size: Size | undefined, setContainer: (element: T | null) => void, element: T | null } {
+
+  const initialTimeout = options?.initialTimeout  ?? 0;
+  const resizeTimeout = options?.resizeTimeout  ?? 300;
+  const autoResetOnHide = options?.autoResetOnHide  ?? false;
+  const deps = options?.deps  ?? [];
+
   const [size, setSize] = React.useState<Size | undefined>();
   const sizeRef = useUpdatedRef(size);
   const htmlElement = React.useRef<T | null>(null);
@@ -83,6 +95,16 @@ export function useSize<T extends HTMLElement = HTMLDivElement>(initialTimeout =
     if (size == null || size.width != rect.width || size.height != rect.height)
       setSize({ width: rect.width, height: rect.height });
   }
+
+  React.useEffect(()=> {
+    if(size&& deps.length)
+    { 
+      setSize(undefined);
+      setTimeout(() => {
+        setNewSize();
+      }, resizeTimeout);
+    }
+}, deps);
 
   const initialHandle = React.useRef<number | null>(null);
   const visibleObserver = React.useRef<IntersectionObserver | null>(null);

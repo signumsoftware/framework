@@ -37,6 +37,9 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
 
     public bool DisableAuthorization { get; set; }
 
+    [Ignore]
+    public bool DisableValidation { get; set; }
+
     public Lite<FileEntity> Template { get; set; }
 
     [StringLengthValidator(Min = 3, Max = 250), FileNameValidator]
@@ -111,7 +114,8 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         WordConverter = element.Attribute("WordConverter")?.Let(at => ctx.GetSymbol<WordConverterSymbol>(at.Value));
 
         GroupResults = bool.Parse(element.Attribute("GroupResults")!.Value);
-        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx));
+        var valuePr = PropertyRoute.Construct((WordTemplateEntity wt) => wt.Filters[0].ValueString);
+        Filters.Synchronize(element.Element("Filters")?.Elements().ToList(), (f, x) => f.FromXml(x, ctx, this, valuePr));
         Orders.Synchronize(element.Element("Orders")?.Elements().ToList(), (o, x) => o.FromXml(x, ctx));
 
         Applicable = element.Element("Applicable")?.Let(app => new TemplateApplicableEval { Script = app.Value });

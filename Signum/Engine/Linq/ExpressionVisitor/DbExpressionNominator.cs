@@ -356,7 +356,16 @@ internal class DbExpressionNominator : DbExpressionVisitor
         var expression = m.Object!;
 
         if (expression!.Type.UnNullify() == typeof(PrimaryKey))
+        {
             expression = SmartEqualizer.UnwrapPrimaryKey(expression);
+
+            if(IsFullNominateOrAggresive) //IBA
+            {
+                var result = ConvertIdToString(expression);
+                return Add(result);
+            }
+
+        }
 
         if (IsFullNominateOrAggresive && m.Arguments.Any() && (expression.Type.UnNullify() == typeof(DateTime) || ReflectionTools.IsNumber(expression.Type.UnNullify())) && Connector.Current.SupportsFormat)
             return GetFormatToString(m);
@@ -371,6 +380,24 @@ internal class DbExpressionNominator : DbExpressionVisitor
             return Add(cast);
         }
         return null;
+    }
+
+    private Expression ConvertIdToString(Expression expression)
+    {
+        if (expression is UnaryExpression u && u.NodeType == ExpressionType.Convert && u.Type == typeof(IConvertible))
+        {
+            return ConvertIdToString(u.Operand);
+        }
+        else if (expression is BinaryExpression be && be.NodeType == ExpressionType.Coalesce)
+        {
+            return Expression.Coalesce(ConvertIdToString(be.Left), ConvertIdToString(be.Right));
+        }
+        else if (expression is ConditionalExpression ce && ce.NodeType == ExpressionType.Coalesce)
+        {
+            return Expression.Condition(ce.Test, ConvertIdToString(ce.IfTrue), ConvertIdToString(ce.IfFalse));
+        }
+        else
+            return new SqlCastExpression(typeof(string), expression);
     }
 
     protected Expression GetFormatToString(MethodCallExpression m, string? defaultFormat = null)

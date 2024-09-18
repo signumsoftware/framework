@@ -252,7 +252,7 @@ public static class WordTemplateLogic
 
     static string? ValidateTemplate(WordTemplateEntity template, PropertyInfo pi)
     {
-        if (template.Template == null)
+        if (template.Template == null || template.DisableValidation)
             return null;
 
         using (template.DisableAuthorization ? ExecutionMode.Global() : null)
