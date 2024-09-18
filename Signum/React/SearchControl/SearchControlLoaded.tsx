@@ -1593,9 +1593,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     var resFo = this.state.resultFindOptions;
     if (resFo?.groupResults) {
-
       this.openRowGroup(row, e);
-
       return;
     }
 
