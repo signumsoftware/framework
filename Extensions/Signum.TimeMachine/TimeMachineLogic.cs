@@ -27,7 +27,7 @@ public static class TimeMachineLogic
         }
     }
 
-    public static void RestoreOlderVersion<T>(PrimaryKey id, DateTime lastVersion)
+    public static T RestoreOlderVersion<T>(PrimaryKey id, DateTime lastVersion)
         where T : Entity
     {
         using (var tr = new Transaction())
@@ -44,20 +44,24 @@ public static class TimeMachineLogic
             entity.SetSelfModified();
             entity.Save();
 
-            tr.Commit();
+            return tr.Commit(entity);
         }
     }
 
-    public static void RestoreDeletedEntity<T>(PrimaryKey id)
+    public static T RestoreDeletedEntity<T>(PrimaryKey id, out DateTime date)
         where T : Entity
     {
         var lastVersion = SystemTime.Override(new SystemTime.All(SystemTimeJoinMode.AllCompatible))
             .Using(_ => Database.Query<T>().Where(a => a.Id == id).Max(a => a.SystemPeriod().Max))!.Value;
 
-        RestoreDeletedEntity<T>(id, lastVersion.AddMicroseconds(-10));
+        date = lastVersion.AddMicroseconds(-10);
+
+        var entity = RestoreDeletedEntity<T>(id, date);
+
+        return entity;
     }
 
-    private static void RestoreDeletedEntity<T> (PrimaryKey id, DateTime lastVersion)
+    private static T RestoreDeletedEntity<T> (PrimaryKey id, DateTime lastVersion)
         where T : Entity
     {
         using (var tr = new Transaction())
@@ -68,14 +72,14 @@ public static class TimeMachineLogic
                 entity = Database.Retrieve<T>(id);
             }
 
-            RestoreEntity(entity);
+            var result = RestoreEntity(entity);
 
-            tr.Commit();
+            return tr.Commit((T)result);
         }
 
     }
 
-    private static void RestoreEntity(Entity entity)
+    private static Entity RestoreEntity(Entity entity)
     {
         foreach (var item in GraphExplorer.FromRoot(entity).CompilationOrder().OfType<Entity>())
         {
@@ -113,6 +117,8 @@ public static class TimeMachineLogic
                 }
             }
         }
+
+        return entity;
     }
 
     static GenericInvoker<Action<Entity, PropertyRoute>> giInsertMListElements = 
