@@ -357,6 +357,9 @@ export function withoutPinned(fop: FilterOptionParsed): FilterOptionParsed | und
     return undefined;
   }
 
+  if (fop.value != null && (fop.pinned && fop.pinned.splitValue || isFilterGroup(fop))) 
+    return fop; //otherwise change meaning
+
   if (isFilterGroup(fop)) {
     var newFilters = fop.filters.map(f => withoutPinned(f)).filter(Boolean);
     if (newFilters.length == 0)
