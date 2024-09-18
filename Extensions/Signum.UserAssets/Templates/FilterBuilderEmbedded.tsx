@@ -11,7 +11,7 @@ import {
   isList, FilterType, FilterGroupOptionParsed, PinnedFilter, PinnedFilterParsed,
 	getFilterGroupUnifiedFilterType, getFilterType, isFilterGroup
 } from '@framework/FindOptions'
-import { Lite, Entity, parseLite, liteKey } from "@framework/Signum.Entities";
+import { Lite, Entity, parseLite, liteKey, liteKeyLong } from "@framework/Signum.Entities";
 import { Navigator } from "@framework/Navigator";
 import FilterBuilder, { RenderValueContext } from '@framework/SearchControl/FilterBuilder';
 import { MList, newMListElement } from '@framework/Signum.Entities';
@@ -61,7 +61,7 @@ export function FilterBuilderEmbedded(p: FilterBuilderEmbeddedProps): React.JSX.
 
         if (Array.isArray(fo.value) && fo.token) {
           fo.value = fo.value.map(v => v == null || v == "" ? "" :
-            fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKey(v) :
+            fo.token!.filterType == "Embedded" || fo.token!.filterType == "Lite" ? liteKeyLong(v) :
               toStringValue(v, fo.token!.filterType))
             .join("|");
         }
@@ -300,7 +300,7 @@ export function EntityLineOrExpression(p: EntityLineOrExpressionProps): React.JS
   const ctx = new TypeContext<any>(undefined, { formGroupStyle: "None", readOnly: p.ctx.readOnly, formSize: "xs" }, undefined as any, Binding.create(liteRef, a => a.current));
 
   const handleChangeValue = () => {
-    p.ctx.value = ctx.value ? liteKey(ctx.value) : null;
+    p.ctx.value = ctx.value ? liteKeyLong(ctx.value) : null;
     if (p.onChange)
       p.onChange();
   }
