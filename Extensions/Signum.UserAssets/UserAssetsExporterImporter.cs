@@ -409,4 +409,24 @@ public static class UserAssetsImporter
         UserAssetNames.Add(userAssetName, typeof(T));
         UserAssetsImporter.SaveEntity.Register(saveEntity);
     }
+
+    public static void SolveAllConflicts(UserAssetPreviewModel preview)
+    {
+        foreach (var item in preview.Lines)
+        {
+            foreach (var conf in item.LiteConflicts)
+            {
+                conf.To = giWithSameToString.GetInvoker(conf.From.EntityType)(conf.From);
+            }
+        }
+    }
+
+    static GenericInvoker<Func<Lite<Entity>, Lite<Entity>?>> giWithSameToString = 
+        new GenericInvoker<Func<Lite<Entity>, Lite<Entity>?>>(old => WithSameToString<UserEntity>((Lite<UserEntity>)old));
+
+    public static Lite<T>? WithSameToString<T>(Lite<T> old)
+        where T : Entity
+    {
+        return Database.Query<T>().Where(a => a.ToString() == old.ToString()).Select(a => a.ToLite()).SingleOrDefault();
+    }
 }
