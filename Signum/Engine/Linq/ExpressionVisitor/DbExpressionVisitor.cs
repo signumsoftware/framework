@@ -386,8 +386,9 @@ internal class DbExpressionVisitor : ExpressionVisitor
     protected internal virtual Expression VisitAggregate(AggregateExpression aggregate)
     {
         var expressions = Visit(aggregate.Arguments);
-        if (expressions != aggregate.Arguments)
-            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions);
+        var orderBys = aggregate.OrderBy == null ? null : Visit(aggregate.OrderBy, VisitOrderBy);
+        if (expressions != aggregate.Arguments || orderBys != aggregate.OrderBy)
+            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, expressions, orderBys);
         return aggregate;
     }
 

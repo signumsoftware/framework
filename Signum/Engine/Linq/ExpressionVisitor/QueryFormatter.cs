@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Sync;
+using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq;
 
@@ -505,19 +506,7 @@ internal class QueryFormatter : DbExpressionVisitor
         {
             this.AppendNewLine(Indentation.Same);
             sb.Append("ORDER BY ");
-            for (int i = 0, n = select.OrderBy.Count; i < n; i++)
-            {
-                OrderExpression exp = select.OrderBy[i];
-                if (i > 0)
-                {
-                    sb.Append(", ");
-                }
-                this.Visit(exp.Expression);
-                if (exp.OrderType != OrderType.Ascending)
-                {
-                    sb.Append(" DESC");
-                }
-            }
+            VisitOrderBys(select.OrderBy);
         }
 
         if (select.Top != null && this.isPostgres)
@@ -542,7 +531,23 @@ internal class QueryFormatter : DbExpressionVisitor
         return select;
     }
 
-    
+    private void VisitOrderBys(ReadOnlyCollection<OrderExpression> orderBys)
+    {
+        for (int i = 0, n = orderBys.Count; i < n; i++)
+        {
+            OrderExpression exp = orderBys[i];
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            this.Visit(exp.Expression);
+            if (exp.OrderType != OrderType.Ascending)
+            {
+                sb.Append(" DESC");
+            }
+        }
+    }
+
     string GetAggregateFunction(AggregateSqlFunction agg)
     {
         return agg switch
@@ -580,8 +585,24 @@ internal class QueryFormatter : DbExpressionVisitor
                     sb.Append(", ");
                 this.Visit(exp);
             }
+
+            if(aggregate.OrderBy != null && aggregate.OrderBy.Count > 0 && isPostgres)
+            {
+                sb.Append(" ORDER BY");
+                VisitOrderBys(aggregate.OrderBy!);
+            }
         }
         sb.Append(')');
+
+        if (aggregate.OrderBy != null && aggregate.OrderBy.Count > 0 && !isPostgres)
+        {
+            sb.Append(" WITHIN GROUP (ORDER BY ");
+            VisitOrderBys(aggregate.OrderBy!);
+            sb.Append(")");
+
+        }
+
+
 
         return aggregate;
     }

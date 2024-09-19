@@ -86,6 +86,33 @@ public class ToStringTest
 
 
     [Fact]
+    public void ToStringSubQueryIdIBOrdering()
+    {
+        var result1 = (from b in Database.Query<ArtistEntity>()
+                       orderby b.Name
+                       select new
+                       {
+                           b.Name,
+                           AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).OrderBy(a=>a.Author.Id).ToString(a => a.Author.Id.ToString(), " | "),
+                       }).ToList();
+    }
+
+    [Fact]
+    public void ToStringGroupByOrdering()
+    {
+        //TODO: not using AggregateRequest yet!
+        var result1 = (from b in Database.Query<ArtistEntity>()
+                       group b by b.Sex into g
+                       select new
+                       {
+                           g.Key,
+                           NamesInOrder = g.OrderBy(a => a.Name).ToString(" | "),
+                           NamesInRevereOrder = g.OrderByDescending(a => a.Name).ToString(" | ")
+                       }).ToList();
+    }
+
+
+    [Fact]
     public void ToStringNumbers()
     {
         var result1 = (from b in Database.Query<BandEntity>()

@@ -323,7 +323,8 @@ internal class AggregateExpression : DbExpression
 {
     public readonly AggregateSqlFunction AggregateFunction;
     public readonly ReadOnlyCollection<Expression> Arguments;
-    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments)
+    public readonly ReadOnlyCollection<OrderExpression>? OrderBy;
+    public AggregateExpression(Type type, AggregateSqlFunction aggregateFunction, IEnumerable<Expression> arguments, IEnumerable<OrderExpression>? orderBy)
         : base(DbExpressionType.Aggregate, type)
     {
         if (arguments == null)
@@ -331,11 +332,17 @@ internal class AggregateExpression : DbExpression
         
         this.AggregateFunction = aggregateFunction;
         this.Arguments = arguments.ToReadOnly();
+        this.OrderBy = orderBy?.ToReadOnly();
     }
 
     public override string ToString()
     {
-        return $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+        var result =  $"{AggregateFunction}({(AggregateFunction == AggregateSqlFunction.CountDistinct ? "Distinct " : "")}{Arguments.ToString(", ") ?? "*"})";
+
+        if (OrderBy == null)
+            return result;
+
+        return result + "WITHIN GROUP (" + OrderBy.ToString(", ") + ")";
     }
 
     protected override Expression Accept(DbExpressionVisitor visitor)
