@@ -688,7 +688,7 @@ internal class QueryBinder : ExpressionVisitor
         string value = (string)((ConstantExpression)separator).Value!;
 
 
-        if (isPostgres)
+        if (Connector.Current.SupportsStringAggr)
         {
             ColumnDeclaration cd = new ColumnDeclaration(null!, new AggregateExpression(typeof(string), AggregateSqlFunction.string_agg,
                 new[] { nominated, new SqlConstantExpression(value, typeof(string)) }));

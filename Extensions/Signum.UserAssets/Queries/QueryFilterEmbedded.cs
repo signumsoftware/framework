@@ -131,7 +131,7 @@ public class QueryFilterEmbedded : EmbeddedEntity
         Operation = element.Attribute("Operation")?.Value.ToEnum<FilterOperation>();
         Token = element.Attribute("Token")?.Let(t => new QueryTokenEmbedded(t.Value));
         ValueString = element.Attribute("Value")?.Value;
-        if(ValueString != null && Lite.TryParseLite(ValueString, out var result) == null)
+        if(ValueString.HasText() && Lite.TryParseLite(ValueString, out var result) == null)
         {
             var lite = ctx.ParseLite(ValueString, parentEntity, valuePr);
             if (lite != null && lite.KeyLong() != ValueString)

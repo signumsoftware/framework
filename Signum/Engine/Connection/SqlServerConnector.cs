@@ -490,10 +490,7 @@ public class SqlServerConnector : Connector
 
     public override bool AllowsSetSnapshotIsolation => this.Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool AllowsIndexWithWhere(string Where)
-    {
-        return Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(Where.Contains);
-    }
+    public override bool AllowsIndexWithWhere(string where) => Version > SqlServerVersion.SqlServer2005 && !ComplexWhereKeywords.Any(where.Contains);
 
     public override bool RequiresRetry => this.Version == SqlServerVersion.AzureSQL;
 
@@ -521,35 +518,19 @@ public class SqlServerConnector : Connector
             }.Combine(Spacing.Simple)!;
     }
 
-    public override bool AllowsConvertToDate
-    {
-        get { return Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool AllowsConvertToDate => Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool AllowsConvertToTime
-    {
-        get { return Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool AllowsConvertToTime => Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool SupportsSqlDependency
-    {
-        get { return Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008; }
-    }
+    public override bool SupportsStringAggr => Version >= SqlServerVersion.SqlServer2017;
 
-    public override bool SupportsFormat
-    {
-        get { return Version >= SqlServerVersion.SqlServer2012; }
-    }
+    public override bool SupportsSqlDependency => Version != SqlServerVersion.AzureSQL && Version >= SqlServerVersion.SqlServer2008;
 
-    public override bool SupportsTemporalTables
-    {
-        get { return Version >= SqlServerVersion.SqlServer2016; }
-    }
+    public override bool SupportsFormat => Version >= SqlServerVersion.SqlServer2012;
 
-    public bool SupportsDateTrunc
-    {
-        get { return Version >= SqlServerVersion.SqlServer2022; }
-    }
+    public override bool SupportsTemporalTables => Version >= SqlServerVersion.SqlServer2016;
+
+    public bool SupportsDateTrunc => Version >= SqlServerVersion.SqlServer2022;
 
     public override bool SupportsPartitioning => true;
 

@@ -26,6 +26,7 @@ public class ToStringTest
     }
 
 
+
     [Fact]
     public void ToStringSubCollection()
     {
@@ -69,6 +70,18 @@ public class ToStringTest
                        }).ToList();
 
         Assert.Equal(result1, result2);
+    }
+
+    [Fact]
+    public void ToStringSubQueryIdIB()
+    {
+        var result1 = (from b in Database.Query<ArtistEntity>()
+                       orderby b.Name
+                       select new
+                       {
+                           b.Name,
+                           AlbumnsToString = Database.Query<AlbumEntity>().Where(a => a.Author == b).ToString(a => a.Author.Id.ToString(), " | "),
+                       }).ToList();
     }
 
 

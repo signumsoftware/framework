@@ -361,7 +361,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             if(IsFullNominateOrAggresive) //IBA
             {
-                var result = ConvertIdToString(expression);
+                var toStri = ConvertIdToString(expression);
+                var result = Visit(toStri);
                 return Add(result);
             }
 

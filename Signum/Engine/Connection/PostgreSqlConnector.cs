@@ -67,6 +67,8 @@ public class PostgreSqlConnector : Connector
 
     public override bool AllowsConvertToDate => true;
 
+    public override bool SupportsStringAggr => true;
+
     public override bool AllowsConvertToTime => true;
 
     public override bool SupportsSqlDependency => false;
