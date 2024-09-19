@@ -159,8 +159,7 @@ public abstract class Connector
     public abstract bool SupportsDateDifBig { get; }
 
     public abstract bool SupportsPartitioning { get; }
-    
-
+    public abstract string LocalTimeZone { get; }
 }
 
 public abstract class ParameterBuilder

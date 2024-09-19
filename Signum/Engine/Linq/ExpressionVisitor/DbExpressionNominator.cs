@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Linq;
@@ -1717,7 +1718,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "DateOnly.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
             case "DateTime.ToLongDateString": return GetDateTimeToStringSqlFunction(m, "D");
             case "DateTime.ToUniversalTime": return TrySqlFunction(m.Object, SqlFunction.AtTimeZone, m.Type, new SqlConstantExpression("UTC"));
-            case "DateTime.ToLocalTime": return TrySqlFunction(m.Object, SqlFunction.AtTimeZone, m.Type, new SqlConstantExpression(TimeZoneInfo.Local.Id));
+            case "DateTime.ToLocalTime": return TrySqlFunction(m.Object, SqlFunction.AtTimeZone, m.Type, new SqlConstantExpression(Connector.Current.LocalTimeZone));
 
             //dateadd(month, datediff(month, 0, SomeDate),0);
             case "DateTimeExtensions.YearStart": return TrySqlStartOf(m.TryGetArgument("dateTime") ?? m.GetArgument("date"), SqlEnums.year);
@@ -1808,6 +1809,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             default: return null;
         }
     }
+
 
 
 
