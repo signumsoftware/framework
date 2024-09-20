@@ -310,8 +310,9 @@ internal class ConditionsRewriter: DbExpressionVisitor
     protected internal override Expression VisitAggregate(AggregateExpression aggregate)
     {
         var arguments = Visit(aggregate.Arguments).Select(a => MakeSqlValue(a)).ToReadOnly();
-        if (arguments != aggregate.Arguments)
-            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments);
+        var orderBy = aggregate.OrderBy == null ? null : Visit(aggregate.OrderBy, VisitOrderBy);
+        if (arguments != aggregate.Arguments || orderBy != aggregate.OrderBy)
+            return new AggregateExpression(aggregate.Type, aggregate.AggregateFunction, arguments, orderBy);
         return aggregate;
     }
 

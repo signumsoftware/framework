@@ -588,6 +588,17 @@ export function initFilterValueFormatRules(): Finder.FilterValueFormatter[]{
       }
     },
     {
+      name: "String",
+      applicable: (f, ffc) => isFilterCondition(f) && (
+        f.token?.filterType == "String"),
+      renderValue: (f, ffc) => {
+        var tokenType = f.token!.type;
+        if (ffc.forceNullable)
+          tokenType = { ...tokenType, isNotNullable: false };
+        return <TextBoxLine ctx={ffc.ctx} type={tokenType} autoTrimString={false} onChange={() => ffc.handleValueChange(f)} label={ffc.label} mandatory={ffc.mandatory} />;
+      }
+    },
+    {
       name: "Enum",
       applicable: (f, ffc) => isFilterCondition(f) && f.token?.filterType == "Enum",
       renderValue: (f, ffc) => {

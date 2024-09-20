@@ -41,6 +41,9 @@ public static class PostgresVersionDetector
 
 public class PostgreSqlConnector : Connector
 {
+    public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT current_setting('TIMEZONE')")!);
+    public override string LocalTimeZone => LocalTimeZoneLazy.Value;
+
     public override ParameterBuilder ParameterBuilder { get; protected set; }
 
     public Version? PostgresVersion { get; set; }
@@ -66,6 +69,8 @@ public class PostgreSqlConnector : Connector
     public override bool AllowsSetSnapshotIsolation => false;
 
     public override bool AllowsConvertToDate => true;
+
+    public override bool SupportsStringAggr => true;
 
     public override bool AllowsConvertToTime => true;
 
