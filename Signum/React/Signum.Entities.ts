@@ -257,10 +257,22 @@ export function liteKey(lite: Lite<Entity>): string {
 }
 
 export function parseLite(lite: string): Lite<Entity> {
-  return {
-    EntityType: lite.before(";"),
-    id: lite.after(";"),
-  };
+
+  const type = lite.before(";");
+  const rest = lite.after(";");
+  if (rest.contains(";")) {
+    return {
+      EntityType: type,
+      id: rest.before(";"),
+      model: rest.after(";")
+    }
+  }
+  else {
+    return {
+      EntityType: type,
+      id: rest,
+    }
+  }
 }
 
 export const liteKeyRegEx: RegExp = /^([a-zA-Z]+)[;]([0-9a-zA-Z-]+)$/;
