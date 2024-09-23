@@ -688,10 +688,10 @@ internal class QueryBinder : ExpressionVisitor
         string value = (string)((ConstantExpression)separator).Value!;
 
 
-        if (isPostgres)
+        if (Connector.Current.SupportsStringAggr)
         {
             ColumnDeclaration cd = new ColumnDeclaration(null!, new AggregateExpression(typeof(string), AggregateSqlFunction.string_agg,
-                new[] { nominated, new SqlConstantExpression(value, typeof(string)) }));
+                new[] { nominated, new SqlConstantExpression(value, typeof(string)) }, null));
 
             Alias alias = NextSelectAlias();
 
@@ -908,7 +908,7 @@ internal class QueryBinder : ExpressionVisitor
                 new AggregateExpression(
                     aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
                     distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
-                   new Expression[] { nominated! }).CopyMetadata(nominated)
+                   new Expression[] { nominated! }, null).CopyMetadata(nominated)
                 ).CopyMetadata(nominated);
 
             return RestoreWrappedType(result, resultType);
@@ -928,7 +928,7 @@ internal class QueryBinder : ExpressionVisitor
                 var nominated = DbExpressionNominator.FullNominate(exp)!.Nullify();
 
                 aggregate = (Expression)Expression.Coalesce(
-                    new AggregateExpression(GetBasicType(nominated), aggregateFunction, new[] { nominated }),
+                    new AggregateExpression(GetBasicType(nominated), aggregateFunction, new[] { nominated }, null),
                     new SqlConstantExpression(Activator.CreateInstance(nominated.Type.UnNullify())!));
             }
             else
@@ -940,7 +940,7 @@ internal class QueryBinder : ExpressionVisitor
                 aggregate = new AggregateExpression(
                     aggregateFunction == AggregateSqlFunction.Count ? typeof(int) : GetBasicType(nominated),
                     distinct ? AggregateSqlFunction.CountDistinct : aggregateFunction,
-                    new[] { nominated! }).CopyMetadata(nominated);
+                    new[] { nominated! }, null).CopyMetadata(nominated);
             }
 
             Alias alias = NextSelectAlias();
