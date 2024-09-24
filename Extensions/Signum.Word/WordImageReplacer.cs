@@ -130,6 +130,12 @@ public static class WordImageReplacer
         return img;
     }
 
+    public static bool HasBlip(this WordprocessingDocument doc, string titleOrDescription)
+    {
+        var query = GetDrawings(doc);
+
+        return query.Any(r => r.GetTitle() == titleOrDescription);
+    }
 
     public static Blip FindBlip(this WordprocessingDocument doc, string titleOrDescription)
     {
