@@ -875,12 +875,12 @@ public static class FluentOperationInclude
         return fi;
     }
 
-    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> delete)
+    public static FluentInclude<T> WithDelete<T>(this FluentInclude<T> fi, DeleteSymbol<T> deleteOperation, Action<T, object?[]?>? delete = null)
            where T : Entity
     {
-        new Graph<T>.Delete(delete)
+        new Graph<T>.Delete(deleteOperation)
         {
-            Delete = (e, _) => e.Delete()
+            Delete = delete ?? ((e, _) => e.Delete())
         }.Register();
         return fi;
     }
