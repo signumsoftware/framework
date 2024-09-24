@@ -16,7 +16,9 @@ class Upgrade_20240924_QuickLinkClient : CodeUpgradeBase
         uctx.ForeachCodeFile("*.tsx", file =>
         {
             HashSet<string> imports = new HashSet<string> { "QuickLinkClient" };
+            file.Replace("QuickLinks.start", "QuickLinkClient.start");
             file.Replace("QuickLinks.registerQuickLink", "QuickLinkClient.registerQuickLink");
+            file.Replace("QuickLinks.registerGlobalQuickLink", "QuickLinkClient.registerGlobalQuickLink");
             file.Replace(regex, m =>
             {
                 var type = m.Groups["linkType"].Value;
@@ -24,6 +26,7 @@ class Upgrade_20240924_QuickLinkClient : CodeUpgradeBase
                 return $"new {type}";
             });
             file.Replace("import * as QuickLinks from '@framework/QuickLinks'", $"import {{ {imports.ToString(", ")} }} from '@framework/QuickLinkClient'");
+            file.Replace(@"import * as QuickLinks from ""@framework/QuickLinks""", @$"import {{ {imports.ToString(", ")} }} from ""@framework/QuickLinkClient""");
         });
     }
 }

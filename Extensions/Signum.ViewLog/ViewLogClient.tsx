@@ -14,7 +14,7 @@ export namespace ViewLogClient {
     ChangeLogClient.registerChangeLogModule("Signum.ViewLog", () => import("./Changelog"));
   
     if (Finder.isFindable(ViewLogEntity, false)) {
-      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([
+      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([
         new QuickLinkExplore(ViewLogEntity, ctx => ({ queryName: ViewLogEntity, filterOptions: [{ token: ViewLogEntity.token(e => e.target), value: ctx.lite }] }),
           {
             text: () => ViewLogEntity.nicePluralName(),

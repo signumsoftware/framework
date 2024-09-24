@@ -126,7 +126,7 @@ export namespace MailingClient {
   
     if (Finder.isFindable(EmailMessageEntity, false)) {
       var cachedAllTypes: Promise<string[]>;
-      QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      QuickLinkClient.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
         .then(types => !types.contains(entityType) ? [] :
           [new QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
             {

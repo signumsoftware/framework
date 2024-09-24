@@ -53,7 +53,7 @@ export namespace UserQueryClient {
     });
   
     if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
           .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",

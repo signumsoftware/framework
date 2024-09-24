@@ -131,7 +131,7 @@ export namespace DashboardClient {
     });
 
     if (AppContext.isPermissionAuthorized(DashboardPermission.ViewDashboard))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
           .then(ds => ds.map(d => new QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
             {

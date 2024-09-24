@@ -44,7 +44,7 @@ export namespace UserChartClient {
     });
   
     if (AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) && Navigator.isViewable(UserChartEntity))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
           .then(ucs => ucs.map(uc =>
             new QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),

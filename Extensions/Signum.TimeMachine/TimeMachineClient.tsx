@@ -32,7 +32,7 @@ export namespace TimeMachineClient {
     ChangeLogClient.registerChangeLogModule("Signum.TimeMachine", () => import("./Changelog"));
   
     if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
-      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
+      QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
         [
           new QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
             isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
