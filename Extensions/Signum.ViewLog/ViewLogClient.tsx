@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
 import { getQueryKey } from '@framework/Reflection'
@@ -15,7 +15,7 @@ export namespace ViewLogClient {
   
     if (Finder.isFindable(ViewLogEntity, false)) {
       QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([
-        new QuickLinks.QuickLinkExplore(ViewLogEntity, ctx => ({ queryName: ViewLogEntity, filterOptions: [{ token: ViewLogEntity.token(e => e.target), value: ctx.lite }] }),
+        new QuickLinkExplore(ViewLogEntity, ctx => ({ queryName: ViewLogEntity, filterOptions: [{ token: ViewLogEntity.token(e => e.target), value: ctx.lite }] }),
           {
             text: () => ViewLogEntity.nicePluralName(),
             isVisible: options.showQuickLink == null || options.showQuickLink(entityType),

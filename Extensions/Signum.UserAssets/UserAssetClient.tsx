@@ -3,7 +3,7 @@ import { RouteObject } from 'react-router'
 import { ajaxPost, ajaxPostRaw, saveFile } from '@framework/Services';
 import { Type } from '@framework/Reflection'
 import { Entity, getToString, Lite, liteKey, MList, ModelEntity, parseLite, toLite, translated } from '@framework/Signum.Entities'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import {
   FilterOption, FilterOperation, FilterOptionParsed, FilterGroupOptionParsed, FilterConditionOptionParsed,
   FilterGroupOption, FilterConditionOption, PinnedFilter, toPinnedFilterParsed, FindOptions, FindOptionsParsed, isFilterGroup
@@ -45,8 +45,8 @@ export namespace UserAssetClient {
   
   export function registerExportAssertLink(type: Type<IUserAssetEntity>): void {
     if (AppContext.isPermissionAuthorized(UserAssetPermission.UserAssetsToXML))
-      QuickLinks.registerQuickLink(type,
-        new QuickLinks.QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
+      QuickLinkClient.registerQuickLink(type,
+        new QuickLinkAction(UserAssetMessage.ExportToXml.name, () => UserAssetMessage.ExportToXml.niceToString(), ctx => API.exportAsset(ctx.lites), {
           allowsMultiple: true,
           iconColor: "#FCAE25",
           icon: "file-code"

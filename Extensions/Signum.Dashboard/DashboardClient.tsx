@@ -8,7 +8,7 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Entity, Lite, liteKey, toLite, EntityPack, getToString, SearchMessage, translated } from '@framework/Signum.Entities'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { getTypeInfos, getTypeName, PseudoType, Type, TypeInfo } from '@framework/Reflection'
 import { onEmbeddedWidgets, EmbeddedWidget } from '@framework/Frames/Widgets'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
@@ -133,7 +133,7 @@ export namespace DashboardClient {
     if (AppContext.isPermissionAuthorized(DashboardPermission.ViewDashboard))
       QuickLinks.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
-          .then(ds => ds.map(d => new QuickLinks.QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
+          .then(ds => ds.map(d => new QuickLinkAction(liteKey(d), () => getToString(d), (ctx, e) => AppContext.pushOrOpenInTab(dashboardUrl(d, ctx.lite), e),
             {
               order: 0,
               icon: "gauge",
@@ -144,7 +144,7 @@ export namespace DashboardClient {
           )))
       );
 
-    QuickLinks.registerQuickLink(DashboardEntity, new QuickLinks.QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
+    QuickLinkClient.registerQuickLink(DashboardEntity, new QuickLinkAction("preview", () => DashboardMessage.Preview.niceToString(),
       (ctx, e) => Navigator.API.fetchAndRemember(ctx.lite)
         .then(db => {
           if (db.entityType == undefined)

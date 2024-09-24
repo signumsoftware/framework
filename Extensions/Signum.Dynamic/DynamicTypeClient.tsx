@@ -9,7 +9,7 @@ import * as AppContext from '@framework/AppContext'
 import MessageModal from '@framework/Modals/MessageModal'
 import { EntityData, EntityKind, symbolNiceName } from '@framework/Reflection'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import DynamicTypeComponent from './Type/DynamicType' //typings only
 import { EvalClient } from '../Signum.Eval/EvalClient'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
@@ -55,7 +55,7 @@ export namespace DynamicTypeClient {
       alternatives: eoc => [],
     }));
   
-    QuickLinks.registerQuickLink(DynamicTypeEntity, new QuickLinks.QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
+    QuickLinkClient.registerQuickLink(DynamicTypeEntity, new QuickLinkLink("ViewDynamicPanel", () => symbolNiceName(EvalPanelPermission.ViewDynamicPanel), () => "/dynamic/panel",
       {
         isVisible: AppContext.isPermissionAuthorized(EvalPanelPermission.ViewDynamicPanel),
         icon: "up-down-left-right",

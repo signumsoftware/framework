@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Lite, Entity, getToString, isEntity, JavascriptMessage } from '@framework/Signum.Entities'
 import { OperationLogEntity } from '@framework/Signum.Operations'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { getTypeInfo, getTypeInfos, QueryTokenString } from '@framework/Reflection';
 import { EntityLink, SearchControl, SearchControlLoaded } from '@framework/Search';
@@ -34,7 +34,7 @@ export namespace TimeMachineClient {
     if (AppContext.isPermissionAuthorized(TimeMachinePermission.ShowTimeMachine))
       QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve(!getTypeInfo(entityType).isSystemVersioned ? [] :
         [
-          new QuickLinks.QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
+          new QuickLinkLink("TimeMachine", () => TimeMachineMessage.TimeMachine.niceToString(), ctx => timeMachineRoute(ctx.lite), {
             isVisible: getTypeInfo(entityType) && getTypeInfo(entityType).operations && Finder.isFindable(OperationLogEntity, false),
             icon: "clock-rotate-left",
             iconColor: "blue",

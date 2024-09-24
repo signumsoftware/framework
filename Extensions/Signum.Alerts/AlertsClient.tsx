@@ -7,7 +7,7 @@ import { Operations, EntityOperationSettings } from '@framework/Operations'
 import SelectorModal from '@framework/SelectorModal'
 import AutoLineModal from '@framework/AutoLineModal'
 import { AlertEntity, AlertTypeSymbol, AlertOperation, DelayOption, AlertMessage, SendNotificationEmailTaskEntity } from './Signum.Alerts'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { EntityOperations } from '@framework/Operations/EntityOperations';
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { ajaxGet } from '@framework/Services'
@@ -40,7 +40,7 @@ export namespace AlertsClient {
       contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
     }));
   
-    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
+    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
       {
         key: getQueryKey(AlertEntity),
         text: () => AlertEntity.nicePluralName(),

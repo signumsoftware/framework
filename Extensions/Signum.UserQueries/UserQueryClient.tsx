@@ -8,7 +8,7 @@ import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, MList, parseLite, toLite, toMList, translated } from '@framework/Signum.Entities'
 import { Constructor } from '@framework/Constructor'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { FindOptionsParsed, FindOptions, OrderOption, ColumnOption, QueryRequest, Pagination, ResultRow, ResultTable, FilterOption, withoutPinned, withoutAggregate, hasAggregate, FilterOptionParsed } from '@framework/FindOptions'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { UserQueryEntity, UserQueryPermission, UserQueryMessage, ValueUserQueryListPartEntity, UserQueryPartEntity, UserQueryLiteModel } from './Signum.UserQueries'
@@ -55,13 +55,13 @@ export namespace UserQueryClient {
     if (AppContext.isPermissionAuthorized(UserQueryPermission.ViewUserQuery))
       QuickLinks.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
-          .then(uqs => uqs.map(uq => new QuickLinks.QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
+          .then(uqs => uqs.map(uq => new QuickLinkAction(liteKey(uq), () => getToString(uq), ctx => window.open(AppContext.toAbsoluteUrl(`/userQuery/${uq.id}/${liteKey(ctx.lite)}`)), {
             icon: "rectangle-list", iconColor: "dodgerblue", color: "info",
             onlyForToken: (uq.model as UserQueryLiteModel).hideQuickLink
           })))
       );
   
-    QuickLinks.registerQuickLink(UserQueryEntity, new QuickLinks.QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
+    QuickLinkClient.registerQuickLink(UserQueryEntity, new QuickLinkAction("preview", () => UserQueryMessage.Preview.niceToString(), ctx => {
       Navigator.API.fetchAndRemember(ctx.lite!)
         .then(uq => {
           if (uq.entityType == undefined)
