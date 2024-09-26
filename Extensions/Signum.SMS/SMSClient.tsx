@@ -4,7 +4,7 @@ import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
 import { Lite, registerToString, JavascriptMessage } from '@framework/Signum.Entities'
 import { SMSTemplateMessageEmbedded, SMSMessageEntity, SMSTemplateEntity, SMSSendPackageEntity, SMSUpdatePackageEntity, MultipleSMSModel, ISMSOwnerEntity } from './Signum.SMS'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 
 export namespace SMSClient {
   
@@ -22,7 +22,7 @@ export namespace SMSClient {
   
     var cachedAllTypes: Promise<string[]>;
     QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
-      .then(allTypes => [new QuickLinks.QuickLinkAction("smsMessages", () => SMSMessageEntity.nicePluralName(), ctx => getSMSMessages(ctx.lite),
+      .then(allTypes => [new QuickLinkAction("smsMessages", () => SMSMessageEntity.nicePluralName(), ctx => getSMSMessages(ctx.lite),
         {
           isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
           icon: "comment-sms",

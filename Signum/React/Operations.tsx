@@ -7,7 +7,6 @@ import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphE
 import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
 import * as AppContext from './AppContext';
 import { Finder } from './Finder';
-import * as QuickLinks from './QuickLinks';
 import { Navigator } from './Navigator';
 import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
@@ -24,6 +23,7 @@ import { isActive } from "./FindOptions";
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperationButton";
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
+import { QuickLinkExplore, QuickLinkClient } from "./QuickLinkClient";
 
 
 export namespace Operations {
@@ -40,7 +40,7 @@ export namespace Operations {
 
     AppContext.clearSettingsActions.push(clearOperationSettings);
 
-    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(entityType, ctx => ({
+    QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => ({
       queryName: OperationLogEntity, filterOptions: [{ token: OperationLogEntity.token(e => e.target), value: ctx.lite }]
     }),
       {

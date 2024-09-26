@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkLink } from '@framework/QuickLinkClient'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { ajaxGet, ajaxPost } from '@framework/Services'
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
@@ -27,7 +27,7 @@ export namespace WhatsNewClient {
     //  hideOnCanExecute: true
     //}));
   
-    QuickLinks.registerQuickLink(WhatsNewEntity, new QuickLinks.QuickLinkLink("Preview",
+    QuickLinkClient.registerQuickLink(WhatsNewEntity, new QuickLinkLink("Preview",
       () => WhatsNewMessage.Preview.niceToString(),
       ctx => "/newspage/" + ctx.lite.id,
       {

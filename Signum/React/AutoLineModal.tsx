@@ -62,6 +62,7 @@ function AutoLineModal(p: AutoLineModalProps): React.JSX.Element {
     propertyRoute: props.propertyRoute,
     formGroupStyle: label ? "Basic" : "SrOnly",
     onChange: forceUpdate,
+    mandatory: p.options.allowEmptyValue == false,
   };
 
   const disabled = p.options.allowEmptyValue == false && (ctx.value == null || ctx.value == "");
