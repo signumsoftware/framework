@@ -664,7 +664,7 @@
     <Member Name="ChooseValues" Description="Werte wählen" />
     <Member Name="ConstructorSelector" Description="Konstruktor Selektor" />
     <Member Name="CreationOf0Cancelled" Description="Erstellung von {0} abgebrochen" />
-    <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen wert '{0}', um fortzufahren:" />
+    <Member Name="PleaseChooseA0ToContinue" Description="Wählen Sie einen Wert '{0}', um fortzufahren:" />
     <Member Name="PleaseChooseAValueToContinue" Description="Bitte wählen Sie einen Wert, um fortzufahren:" />
     <Member Name="PleaseSelectAConstructor" Description="Bitte wählen Sie einen Konstruktor" />
     <Member Name="PleaseSelectAnElement" Description="Bitte wählen Sie ein Element" />
