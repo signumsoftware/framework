@@ -69,14 +69,6 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     };
   }
 
-  const handleOnFocus = (e: React.FocusEvent<any>) => {
-    console.log("onFocus handler called");
-    if (htmlAtts?.onFocus) {
-      console.log("passed onFocus called");
-
-      htmlAtts?.onFocus(e);
-    }
-  }
 
   var cc = c.props.charCounter == null ? null :
     c.props.charCounter == true && c.props.valueHtmlAttributes?.maxLength ? <ChartCounter myRef={ccRef}>{v => {
@@ -100,7 +92,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
           minHeight={c.props.valueHtmlAttributes?.style?.minHeight?.toString()}
           onChange={handleTextOnChange}
           onBlur={handleBlur ?? htmlAtts?.onBlur}
-          onFocus={handleOnFocus}
+ 
           placeholder={c.getPlaceholder()}
           innerRef={c.setRefs} />
       )}
