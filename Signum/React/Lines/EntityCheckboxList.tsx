@@ -40,6 +40,9 @@ export interface EntityCheckboxListProps<V extends ModifiableEntity | Lite<Entit
 
   getLiteFromElement?: (e: V) => Entity | Lite<Entity>;
   createElementFromLite?: (file: Lite<Entity>) => Promise<V>;
+
+  groupElementsBy?: (e: ResultRow) => string;
+  renderGroupTitle?: (key: string, i?: number) => React.ReactElement;
 }
 
 export class EntityCheckboxListController<V extends Lite<Entity> | ModifiableEntity> extends EntityListBaseController<EntityCheckboxListProps<V>, V> {
@@ -241,7 +244,7 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
 
     const resultTable = Array.isArray(data) ? undefined : data;
 
-    return fixedData.map((row, i) => {
+    function renderRow(row: ResultRow, i: number) {
       var ectx = listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.value), row.entity));
       var oldCtx = p.ctx.previousVersion == null || p.ctx.previousVersion.value == null ? null :
         listCtx.firstOrNull(ectx => is(c.getKeyEntity(ectx.previousVersion!.value), row.entity));
@@ -273,6 +276,13 @@ export function EntityCheckboxListSelect<V extends ModifiableEntity | Lite<Entit
         </label>
       );
     }
-    );
+
+    return p.groupElementsBy == undefined ? fixedData.map((row, i) => renderRow(row, i)) :
+      <>
+        {fixedData.groupBy(a => p.groupElementsBy!(a)).map((gr, i) => <div className={classes("mb-2")} key={i} >
+          <small className="text-muted">{p.renderGroupTitle != undefined ? p.renderGroupTitle(gr.key, i) : gr.key}</small>
+          {gr.elements.map((mle, j) => renderRow(mle, j)) }          
+        </div>)}
+      </>;
   }
 }
