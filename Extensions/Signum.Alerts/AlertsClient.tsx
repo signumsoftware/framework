@@ -39,8 +39,8 @@ export namespace AlertsClient {
       color: "warning",
       contextual: { isVisible: ctx => couldHaveAlerts(ctx.context.lites[0].EntityType, "CreateAlert"), }
     }));
-  
-    QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
+
+    QuickLinkClient.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(entityType, ctx => ({ queryName: AlertEntity, filterOptions: [{ token: AlertEntity.token(e => e.target), value: ctx.lite }] }),
       {
         key: getQueryKey(AlertEntity),
         text: () => AlertEntity.nicePluralName(),
