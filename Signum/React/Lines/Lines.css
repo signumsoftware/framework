@@ -89,6 +89,7 @@ span.sf-today {
     display: flex;
     margin: -1px -12px -1px -12px;
     padding: 1px 12px 1px 12px;
+    overflow: hidden;
 }
 
 li.sf-strip-element {
