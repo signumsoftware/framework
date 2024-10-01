@@ -10,13 +10,13 @@ export function useForceUpdate(): () => void {
   return forceUpdate
 }
 
-export function useRefreshKey(): [number, () => void] {
-  const [count, setCount] = React.useState(0);
-  const refreshKey = React.useCallback(() => {
-    setCount(c => c + 1);
+export function useVersion(): [version: number, updateVersion: () => void] {
+  const [version, setVersion] = React.useState(0);
+  const updateVersion = React.useCallback(() => {
+    setVersion(c => c + 1);
   }, []);
 
-  return [count, refreshKey]
+  return [version, updateVersion]
 }
 
 export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
