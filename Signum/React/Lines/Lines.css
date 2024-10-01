@@ -260,6 +260,10 @@ ul.nav-tabs {
 }*/
 
 /*buton colors*/
+.sf-default:not(.disabled):hover {
+    color: #000000;
+}
+
 .sf-create:not(.disabled):hover {
     color: #22BA00;
 }
