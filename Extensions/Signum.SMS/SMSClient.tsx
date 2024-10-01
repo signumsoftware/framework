@@ -21,7 +21,7 @@ export namespace SMSClient {
     Navigator.addSettings(new EntitySettings(MultipleSMSModel, e => import('./Templates/MultipleSMS')));
   
     var cachedAllTypes: Promise<string[]>;
-    QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+    QuickLinkClient.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
       .then(allTypes => [new QuickLinkAction("smsMessages", () => SMSMessageEntity.nicePluralName(), ctx => getSMSMessages(ctx.lite),
         {
           isVisible: allTypes.contains(entityType) && !Navigator.isReadOnly(SMSMessageEntity),
