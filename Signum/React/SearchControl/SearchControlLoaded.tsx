@@ -2015,7 +2015,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     const tokenName = token.toString();
 
     if (tokenName == "Entity")
-      return { value: row.entity as any };
+      return { value: row.entity as Finder.AddToLite<T> | undefined };
 
     const colIndex = this.state.resultTable!.columns.indexOf(tokenName);
     if (colIndex != -1)
