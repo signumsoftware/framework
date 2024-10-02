@@ -113,6 +113,7 @@ export namespace HelpClient {
     }
 
     export function saveType(typeHelp: TypeHelpEntity): Promise<void> {
+      delete cache[typeHelp.type.cleanName];
       return ajaxPost({ url: "/api/help/saveType" }, typeHelp);
     }
 

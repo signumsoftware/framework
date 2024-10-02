@@ -227,10 +227,10 @@ function SaveButton({ ctx, onSuccess }: { ctx: TypeContext<TypeHelpEntity>, onSu
 
   function onClick() {
     HelpClient.API.saveType(ctx.value)
-      .then((() => {
+      .then(() => {
         onSuccess();
         Operations.notifySuccess();
-      }));
+      });
   }
 
   return <button className="btn btn-primary" onClick={onClick}><FontAwesomeIcon icon="save" /> {getOperationInfo(TypeHelpOperation.Save, TypeHelpEntity).niceName}</button>;
