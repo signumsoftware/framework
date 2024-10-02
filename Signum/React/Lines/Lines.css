@@ -89,6 +89,7 @@ span.sf-today {
     display: flex;
     margin: -1px -12px -1px -12px;
     padding: 1px 12px 1px 12px;
+    overflow: hidden;
 }
 
 li.sf-strip-element {
@@ -260,6 +261,10 @@ ul.nav-tabs {
 }*/
 
 /*buton colors*/
+.sf-default:not(.disabled):hover {
+    color: #000000;
+}
+
 .sf-create:not(.disabled):hover {
     color: #22BA00;
 }

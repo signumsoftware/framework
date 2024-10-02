@@ -299,7 +299,7 @@ export function EntityStripElement<V extends ModifiableEntity | Lite<Entity>>(p:
         onDrop={drag?.onDrop}
       >
         {p.vertical ? getTimeMachineIcon({ ctx: p.ctx, translateX: "-90%", translateY: "20%" }) : getTimeMachineIcon({ ctx: p.ctx, translateX: "-75%", translateY: "-50%" })}
-        {hasIcon && p.iconStart && <span style={{ marginRight: "5px" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
+        {hasIcon && p.iconStart && <span style={{ marginRight: "5px", whiteSpace: "nowrap" }}>{removeIcon()}&nbsp;{dragIcon()}{p.move?.renderMoveUp()}{p.move?.renderMoveDown()}</span>}
         {
           p.onView ?
             <a href={url} className={classes("sf-strip-link", htmlAttributes?.className)} onClick={p.onView} {...htmlAttributes}>

@@ -23,7 +23,8 @@ export interface EntityComboProps<V extends Entity | Lite<Entity> | null> extend
   labelTextWithData?: (data: Lite<Entity>[] | undefined | null, resultTable?: ResultTable | null) => React.ReactElement | string;
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
-  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any>;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactElement | string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -135,6 +136,7 @@ export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: Entity
             delayLoadData={p.delayLoadData}
             toStringFromData={p.toStringFromData}
             selectHtmlAttributes={p.selectHtmlAttributes}
+            optionHtmlAttributes={p.optionHtmlAttributes}
             liteToString={p.liteToString as (e : Entity) => string}
             nullPlaceHolder={p.nullPlaceHolder}
             onRenderItem={p.onRenderItem}
@@ -157,7 +159,8 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
   mandatoryClass: string | null;
   onDataLoaded?: (data: AsLite<V>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
-  selectHtmlAttributes?: React.AllHTMLAttributes<any>;
+  selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any>;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;
@@ -265,7 +268,8 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
         id={p.id}
         onClick={() => setLoadData(true)}
         disabled={ctx.readOnly} {...p.selectHtmlAttributes} ref={selectRef} >
-        {getOptionRows().map((r, i) => <option key={i} value={r?.entity ? liteKey(r.entity!) : ""}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
+        {getOptionRows().map((r, i) =>
+          <option key={i} value={r?.entity ? liteKey(r.entity!) : ""} {...p.optionHtmlAttributes?.(r)}>{r?.entity ? getToString(r.entity, p.liteToString) : (p.nullPlaceHolder ?? " - ")}</option>)}
       </select>
     );
   }
