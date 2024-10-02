@@ -512,8 +512,13 @@ internal class OverloadingSimplifier : ExpressionVisitor
         if (expression.Type == typeof(string))
             return expression;
 
-        if (expression is ConstantExpression c && c.Value != null)
+        if (expression is ConstantExpression c)
+        {
+            if (c.Value == null)
+                return Expression.Constant("");
+
             return Expression.Call(expression, miToString);
+        }
 
         if (expression is UnaryExpression ue && ue.NodeType == ExpressionType.Convert && ue.Operand.Type == typeof(object))
             return CallToString(ue.Operand);
