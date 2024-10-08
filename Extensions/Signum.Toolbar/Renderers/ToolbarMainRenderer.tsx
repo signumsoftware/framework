@@ -36,7 +36,7 @@ function ToolbarMainRendererPrivate({ response }: { response: ToolbarResponse<an
   return (
     <div>
       {
-        response.elements!.groupWhen(a => a.type == "Divider" || a.type == "Header", false, true).map((gr, i) => <div key={i}>
+        response.elements!.groupWhen(a => a.type == "Divider" || a.type == "Header", false, "defaultGroup").map((gr, i) => <div key={i}>
           {gr.key && gr.key.type == "Divider" && <hr />}
           {gr.key && gr.key.type == "Header" && ToolbarMenuEntity.isLite(gr.key.content) && <CollapsableBlock r={gr.key} />}
           {gr.key && gr.key.type == "Header" && !ToolbarMenuEntity.isLite(gr.key.content) && <h4>{gr.key.label ?? getToString(gr.key.content!)}</h4>}
