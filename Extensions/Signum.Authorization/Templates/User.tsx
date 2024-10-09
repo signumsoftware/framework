@@ -16,7 +16,10 @@ import { Dic } from '@framework/Globals'
 
 export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Element {
 
-  const ctx = p.ctx.subCtx({ labelColumns: { sm: 3 } });
+  const ctx = p.ctx.subCtx({
+    labelColumns: { sm: 3 },
+    readOnly: p.ctx.value.state == "Deactivated" ? true : undefined
+  });
   const entity = p.ctx.value;
   var cultures = useAPI(signal => CultureClient.getCultures(false), []);
 

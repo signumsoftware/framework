@@ -73,7 +73,8 @@ export namespace ActiveDirectoryClient {
     }) : null;
   
     Finder.ButtonBarQuery.onButtonBarElements.push(ctx => {
-      if (ctx.findOptions.queryKey != UserEntity.typeName || !AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD))
+      if (ctx.findOptions.queryKey != UserEntity.typeName || !AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ||
+        (ctx.searchControl.props.extraOptions?.avoidFindInActiveDirectory ?? (!ctx.searchControl.props.create)))
         return undefined;
   
       var search = getSearch(ctx.findOptions);
