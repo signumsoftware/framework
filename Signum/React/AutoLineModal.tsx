@@ -75,9 +75,9 @@ function AutoLineModal(p: AutoLineModalProps): React.JSX.Element {
     <Modal size={p.options.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked}>
       <div className="modal-header">
         <h5 className="modal-title">{title === undefined ? SelectorMessage.ChooseAValue.niceToString() : title}</h5>
-        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked}/>
+        <button type="button" className="btn-close" data-dismiss="modal" aria-label="Close" onClick={handleCancelClicked} />
       </div>
-      <div className="modal-body" onKeyUp={handleFiltersKeyUp}>
+      <div className="modal-body" onKeyUp={(member && member.isMultiline || p.options.doNotCloseByEnter) ? undefined : handleFiltersKeyUp}>
         <p>
           {message === undefined ? SelectorMessage.PleaseChooseAValueToContinue.niceToString() : message}
         </p>
@@ -126,6 +126,7 @@ export interface AutoLineModalOptions {
   valueHtmlAttributes?: React.HTMLAttributes<any>;
   allowEmptyValue?: boolean;
   modalSize?: BsSize;
+  doNotCloseByEnter?: Boolean;
 }
 
 
