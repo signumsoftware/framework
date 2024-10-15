@@ -26,14 +26,9 @@ public class WorkflowNodeGraph
 
         return act.Any(a =>
         {
-            if (a.Lane.UseActorEvalForStart)
-            {
-                var actors = a.Lane.ActorsEval!.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null));
+            var actors = a.Lane.GetActors(null);
 
-                return actors.Any(a => WorkflowLogic.IsCurrentUserActor(a));
-            }
-
-            return a.Lane.Actors.Any(a => WorkflowLogic.IsCurrentUserActor(a));
+            return actors.Any(a => WorkflowLogic.IsCurrentUserActor(a));
         });
     }
 

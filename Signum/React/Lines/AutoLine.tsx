@@ -7,6 +7,7 @@ import { isNumber } from '../Globals'
 
 export interface AutoLineProps extends LineBaseProps<any> {
   propertyRoute?: PropertyRoute; //For AutoLineModal
+  valueHtmlAttributes?: React.HTMLAttributes<any>;
 }
 
 

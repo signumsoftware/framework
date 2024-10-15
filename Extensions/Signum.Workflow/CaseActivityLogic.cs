@@ -177,7 +177,7 @@ public static class CaseActivityLogic
                             notification.Save();
                         }
                     }
-                     
+
                     c.FinishDate = Clock.Now;
                     CancelEntity(c.MainEntity, c);
                     c.Save();
@@ -214,12 +214,12 @@ public static class CaseActivityLogic
 
             IQueryable<CaseActivityEntity> RejectedCases(CaseEntity c)
             {
-                return c.CaseActivities().Where(a => a.DoneBy != null && ( a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
+                return c.CaseActivities().Where(a => a.DoneBy != null && (a.DoneType == DoneType.Next || a.DoneType == DoneType.Recompose)).OrderByDescending(a => a.DoneDate).Take(1);
             }
 
             new Graph<CaseEntity>.Execute(CaseOperation.Reactivate)
             {
-                CanExecute = c => c.FinishDate != null &&  CancelledCases(c).Any()  ? null : CaseActivityMessage.NotCanceled.NiceToString(),
+                CanExecute = c => c.FinishDate != null && CancelledCases(c).Any() ? null : CaseActivityMessage.NotCanceled.NiceToString(),
                 Execute = (c, _) =>
                 {
                     ReactivateEntity(c.MainEntity, c);
@@ -386,7 +386,7 @@ public static class CaseActivityLogic
                 }.Save(),
             }.SetMaxAutomaticUpgrade(OperationAllowed.None).Register();
 
-            
+
             QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                     from cn in Database.Query<CaseNotificationEntity>()
                     where cn.User.Is(UserEntity.Current)
@@ -418,7 +418,7 @@ public static class CaseActivityLogic
                     .ColumnDisplayName(a => a.SenderNote, () => InboxMessage.SenderNote.NiceToString())
                     );
 
-          
+
             CaseActivityGraph.Register();
             OverrideCaseActivityMixin(sb);
         }
@@ -488,7 +488,7 @@ public static class CaseActivityLogic
 
         Options[typeof(T)] = new WorkflowOptions(constructor,
             saveEntity: e => save((T)e),
-            cancel: cancel  == null ? null : ((e, c) => cancel((T)e, c)),
+            cancel: cancel == null ? null : ((e, c) => cancel((T)e, c)),
             reactivate: reactivate == null ? null : ((e, c) => reactivate((T)e, c)));
 
         return fi;
@@ -622,6 +622,49 @@ public static class CaseActivityLogic
         return ca;
     }
 
+    public static List<Lite<Entity>> GetActors(this WorkflowLaneEntity lane, CaseActivityEntity? caseActivity)
+    {
+        if (caseActivity != null)
+        {
+            if (lane.ActorsEval == null)
+                return lane.Actors.ToList();
+
+            var newActors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
+
+            if (lane.CombineActorAndActorEvalWhenContinuing)
+                newActors.AddRange(lane.Actors);
+            
+
+            return newActors.Distinct().ToList();
+        }
+        else
+        {
+            if (lane.UseActorEvalForStart)
+            {
+                return lane.ActorsEval!.Algorithm.GetActors(null!, new WorkflowTransitionContext(null, null, null)).Distinct().ToList();
+            }
+
+            return lane.Actors.ToList();
+        }
+    }
+
+
+    public static List<UserEntity> GetActorUsers(this WorkflowLaneEntity lane, CaseActivityEntity? caseActivity)
+    {
+        var actors = lane.GetActors(caseActivity);
+
+        var users = actors.OfType<Lite<UserEntity>>().Chunk(100)
+            .SelectMany(gr => Database.Query<UserEntity>().Where(u => gr.Contains(u.ToLite())))
+            .ToList();
+
+        var nonUsers = actors.Where(a => a is not Lite<UserEntity>)
+            .SelectMany(a => Database.Query<UserEntity>().Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a)).ToList())
+            .ToList();
+
+        return users.Concat(nonUsers).Distinct().ToList();
+    }
+
+
     public static void InsertCaseActivityNotifications(CaseActivityEntity caseActivity)
     {
         if (caseActivity.WorkflowActivity is WorkflowActivityEntity wa &&
@@ -631,27 +674,20 @@ public static class CaseActivityLogic
             using (ExecutionMode.Global())
             {
                 var lane = caseActivity.WorkflowActivity.Lane;
-                var actors = lane.Actors.ToList();
-                if (lane.ActorsEval != null)
-                {
-                    var newActors = lane.ActorsEval.Algorithm.GetActors(caseActivity.Case.MainEntity, new WorkflowTransitionContext(caseActivity.Case, caseActivity, null)).EmptyIfNull().ToList();
 
-                    if (lane.CombineActorAndActorEvalWhenContinuing)
-                        actors.AddRange(newActors);
-                    else
-                        actors = newActors;
-                }
+                var actors = lane.GetActors(caseActivity);
 
-                var notifications = actors.Distinct().SelectMany(a =>
-                Database.Query<UserEntity>()
-                .Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a))
-                .Select(u => new CaseNotificationEntity
-                {
-                    CaseActivity = caseActivity.ToLite(),
-                    Actor = a,
-                    State = CaseNotificationState.New,
-                    User = u.ToLite()
-                })).ToList();
+                var notifications = (from a in actors
+                                     from u in (a is Lite<UserEntity> u ? [u] : Database.Query<UserEntity>().Where(u => WorkflowLogic.IsUserActorForNotifications.Evaluate(u, a)).Select(u => u.ToLite()).ToList())
+                                     select (a, u))
+                                     .DistinctBy(p => p.u)
+                                     .Select(p => new CaseNotificationEntity
+                                     {
+                                         CaseActivity = caseActivity.ToLite(),
+                                         Actor = p.a,
+                                         State = CaseNotificationState.New,
+                                         User = p.u
+                                     }).ToList();
 
                 if (!notifications.Any())
                     throw new ApplicationException(CaseActivityMessage.NoActorsFoundToInsertCaseActivityNotifications.NiceToString());
@@ -1246,11 +1282,13 @@ public static class CaseActivityLogic
             }
         }
 
+
         private static bool FindNext(WorkflowConnectionEntity connection, WorkflowExecuteStepContext ctx)
         {
             ctx.ExecuteConnection(connection);
             return FindNext(connection.To, ctx);
         }
+
 
         private static bool FindNext(IWorkflowNodeEntity next, WorkflowExecuteStepContext ctx)
         {

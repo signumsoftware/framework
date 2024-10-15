@@ -2014,12 +2014,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     const tokenName = token.toString();
 
-    const sc = this;
+    if (tokenName == "Entity")
+      return { value: row.entity as Finder.AddToLite<T> | undefined };
+
     const colIndex = this.state.resultTable!.columns.indexOf(tokenName);
     if (colIndex != -1)
       return { value: row.columns[colIndex] };
 
-    var filter = sc.props.findOptions.filterOptions.firstOrNull(a => isFilterCondition(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
+    var filter = this.props.findOptions.filterOptions.firstOrNull(a => isFilterCondition(a) && isActive(a) && a.token?.fullKey == tokenName && a.operation == "EqualTo");
     if (filter != null)
       return { value: filter?.value };
 

@@ -29,7 +29,7 @@ declare global {
     groupToObject<E>(this: Array<T>, keySelector: (element: T) => string, elementSelector: (element: T) => E): { [key: string]: E[] };
     groupToMap<K>(this: Array<T>, keySelector: (element: T) => K): Map<K, T[]>; // Remove by MAp.groupBy when safary supports it https://caniuse.com/?search=Map.groupby
     groupToMap<K, E>(this: Array<T>, keySelector: (element: T) => K, elementSelector: (element: T) => E): Map<K, E[]>;
-    groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, initialGroup?: boolean): { key: T, elements: T[] }[];
+    groupWhen(this: Array<T>, condition: (element: T) => boolean, includeKeyInGroup?: boolean, beforeFirstKey?: "throw" | "skip" | "defaultGroup"): { key: T, elements: T[] }[];
     groupWhenChange<K>(this: Array<T>, keySelector: (element: T) => K, keyStringifier?: (key: K) => string): { key: K, elements: T[] }[];
 
     orderBy<V extends Comparable>(this: Array<T>, keySelector: (element: T) => V | null | undefined): T[];
@@ -208,7 +208,7 @@ Array.prototype.groupToMap = function (this: any[], keySelector: (element: any) 
   return result;
 };
 
-Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, initialGroup = false): { key: any, elements: any[] }[] {
+Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) => boolean, includeKeyInGroup = false, beforeFirstKey : "throw" | "skip" | "defaultGroup" = "throw"): { key: any, elements: any[] }[] {
   const result: { key: any, elements: any[] }[] = [];
 
   let group: { key: any, elements: any[] } | undefined = undefined;
@@ -221,14 +221,19 @@ Array.prototype.groupWhen = function (this: any[], isGroupKey: (element: any) =>
     }
     else {
       if (group == undefined) {
-        if (!initialGroup)
-          throw new Error("Parameter initialGroup is false");
-
-        group = { key: undefined, elements: [] };
-        result.push(group);
+        switch (beforeFirstKey) {
+          case "throw": throw new Error("Parameter initialGroup is false");
+          case "skip": break;
+          case "defaultGroup": {
+            group = { key: undefined, elements: [] };
+            result.push(group);
+            group!.elements.push(item);
+          }
+        }
       }
-
-      group.elements.push(item);
+      else {
+        group!.elements.push(item);
+      }
     }
   }
   return result;
