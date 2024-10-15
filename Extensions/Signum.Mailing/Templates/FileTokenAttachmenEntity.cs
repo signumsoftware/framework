@@ -82,5 +82,16 @@ public class FileTokenAttachmentEntity : Entity, IAttachmentGeneratorEntity
 
         return base.PropertyValidation(pi);
     }
+
+    public IAttachmentGeneratorEntity Clone()
+    {
+        return new FileTokenAttachmentEntity()
+        {
+            FileName = this.FileName,
+            Type = this.Type,
+            ContentId = this.ContentId,
+            FileToken = this.FileToken.Clone(),
+        }.Let(c => c.CopyMixinsFrom(this));
+    }
 }
 

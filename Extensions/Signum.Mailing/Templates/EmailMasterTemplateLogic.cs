@@ -45,6 +45,20 @@ public static class EmailMasterTemplateLogic
     {
         public static void Register()
         {
+            new ConstructFrom<EmailMasterTemplateEntity>(EmailMasterTemplateOperation.Clone)
+            {
+                Construct = (e, _) =>
+                {
+                    return new EmailMasterTemplateEntity()
+                    {
+                        Name = $"{e.Name} (Cloned)",
+                        IsDefault = e.IsDefault,
+                        Messages = e.Messages.Select(m => m.Clone()).ToMList(),
+                        Attachments = e.Attachments.Select(a => a.Clone()).ToMList(),
+                    };
+                },
+            }.Register();
+
             new Construct(EmailMasterTemplateOperation.Create)
             {
                 Construct = _ => CreateDefaultMasterTemplate == null ? new EmailMasterTemplateEntity { } : CreateDefaultMasterTemplate()
@@ -55,6 +69,17 @@ public static class EmailMasterTemplateLogic
                 CanBeNew = true,
                 CanBeModified = true,
                 Execute = (t, _) => { }
+            }.Register();
+
+            new Delete(EmailMasterTemplateOperation.Delete)
+            {
+                Delete = (e, _) =>
+                {
+                    var attachments = e.Attachments.Select(a => a.ToLite()).ToList();
+
+                    e.Delete();
+                    attachments.ForEach(at => at.Delete());
+                },
             }.Register();
         }
     }

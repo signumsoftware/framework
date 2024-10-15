@@ -312,6 +312,31 @@ public static class EmailTemplateLogic
                 }
             }.Register();
 
+            new ConstructFrom<EmailTemplateEntity>(EmailTemplateOperation.Clone)
+            {
+                Construct = (e, _) =>
+                {
+                    return new EmailTemplateEntity()
+                    {
+                        Name = $"{e.Name} (Cloned)",
+                        MasterTemplate = e.MasterTemplate,
+                        Applicable = e.Applicable == null ? null : new TemplateApplicableEval() { Script = e.Applicable.Script },
+                        DisableAuthorization = e.DisableAuthorization,
+                        EditableMessage = e.EditableMessage,
+                        GroupResults = e.GroupResults,
+                        MessageFormat = e.MessageFormat,
+                        From = e.From?.Clone(),
+                        Recipients = e.Recipients.Select(r => r.Clone()).ToMList(),
+                        Query = e.Query,
+                        Model = e.Model,
+                        Filters = e.Filters.Select(f => f.Clone()).ToMList(),
+                        Orders = e.Orders.Select(o => o.Clone()).ToMList(),
+                        Messages = e.Messages.Select(m => m.Clone()).ToMList(),
+                        Attachments = e.Attachments.Select(a => a.Clone()).ToMList(),
+                    };
+                }
+            }.Register();
+
             new Execute(EmailTemplateOperation.Save)
             {
                 CanBeNew = true,

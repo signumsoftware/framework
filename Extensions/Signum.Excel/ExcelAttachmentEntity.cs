@@ -74,4 +74,15 @@ public class ExcelAttachmentEntity : Entity, IAttachmentGeneratorEntity
     public void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description)
     {
     }
+
+    public IAttachmentGeneratorEntity Clone()
+    {
+        return new ExcelAttachmentEntity()
+        {
+            FileName = this.FileName,
+            Title = this.Title,
+            Related = this.Related,
+            UserQuery = this.UserQuery,
+        }.Let(c => c.CopyMixinsFrom(this));
+    }
 }
