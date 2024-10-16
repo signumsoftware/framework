@@ -15,18 +15,16 @@ export function HtmlViewer(p: { text: string; htmlAttributes?: React.HTMLAttribu
 
   return (
     <div className="html-viewer" >
-      <ErrorBoundary>
         <HtmlEditor readOnly
           binding={binding}
           htmlAttributes={p.htmlAttributes}
           toolbarButtons={c => null} plugins={[
           ]} />
-      </ErrorBoundary>
     </div>
   );
 }
 
-export default function SeparatorPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
+export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React.JSX.Element {
   const ctx = p.ctx.subCtx({ formGroupStyle: "SrOnly", placeholderLabels: true });
 
   const [isPreview, setIsPreview] = useIsPreview(p.ctx.value);
@@ -65,13 +63,13 @@ export default function SeparatorPart(p: { ctx: TypeContext<TextPartEntity> }): 
 
 
   function PreviewType(): React.JSX.Element {
-    if (textPartType == "Text")
+    if (ctx.value.textPartType == "Text")
       return (<text>{ctx.value.textContent}</text>)
 
-    if (textPartType == "Markdown")
+    if (ctx.value.textPartType == "Markdown")
       return (<Markdown>{ctx.value.textContent}</Markdown>)
 
-    if (textPartType == "HTML" && ctx.value.textContent != null)
+    if (ctx.value.textPartType == "HTML" && ctx.value.textContent != null)
       return (<HtmlViewer text={ctx.value.textContent} />)
 
     return (<text>{ctx.value.textContent}</text>)
