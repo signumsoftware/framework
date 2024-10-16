@@ -234,7 +234,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
         {type.hasGender && (edit ?
-          <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }}>
+          <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }} className={!td.gender && Boolean(td.description) ? "sf-mandatory" : undefined}>
             {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}
           </select> :
@@ -254,6 +254,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
         {
           type.hasPluralDescription && (edit ?
             <TextArea style={{ height: "24px", width: "90%" }} minHeight="24px" value={td.pluralDescription ?? ""}
+              className={!td.pluralDescription && Boolean(td.description) ? "sf-mandatory" : undefined}
               onChange={e => { td.pluralDescription = e.currentTarget.value; forceUpdate(); }}
               onBlur={e => { td.pluralDescription = TranslationMember.normalizeString(e.currentTarget.value); forceUpdate(); }} /> :
             td.pluralDescription)
