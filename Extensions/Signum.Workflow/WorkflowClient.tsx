@@ -22,7 +22,7 @@ import {
 } from './Signum.Workflow'
 
 import ActivityWithRemarks from './Case/ActivityWithRemarks'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction, QuickLinkExplore, QuickLinkLink } from '@framework/QuickLinkClient'
 import { Constructor } from '@framework/Constructor'
 import SelectorModal from '@framework/SelectorModal'
 import AutoLineModal from '@framework/AutoLineModal'
@@ -121,7 +121,7 @@ export namespace WorkflowClient {
     ]);
   
   
-    QuickLinks.registerQuickLink(CaseActivityEntity, new QuickLinks.QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {
+    QuickLinkClient.registerQuickLink(CaseActivityEntity, new QuickLinkAction("caseFlow", () => WorkflowActivityMessage.CaseFlow.niceToString(), ctx => {
       API.fetchCaseFlowPack(ctx.lite)
         .then(result => Navigator.view(result.pack, { extraProps: { workflowActivity: result.workflowActivity } }))
         .then(() => ctx.contextualContext && ctx.contextualContext.markRows({}))
@@ -143,11 +143,11 @@ export namespace WorkflowClient {
       ]
     })
   
-  /*  QuickLinks.registerQuickLink({
+  /*  QuickLinkClient.registerQuickLink({
       type: WorkflowEntity,
       key: getQueryKey(CaseEntity),
       generator: {
-        factory: ctx => new QuickLinks.QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] }),
+        factory: ctx => new QuickLinkExplore({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] }),
         options: {
           text: () => getQueryNiceName(CaseEntity),
           icon: "list-check", iconColor: "blue"
@@ -155,8 +155,8 @@ export namespace WorkflowClient {
       }
     });*/
   
-  /*  QuickLinks.registerQuickLink_New(WorkflowEntity,
-      new QuickLinks.QuickLinkExplore(CaseEntity, ctx => ({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] })));*/
+  /*  QuickLinkClient.registerQuickLink_New(WorkflowEntity,
+      new QuickLinkExplore(CaseEntity, ctx => ({ queryName: CaseEntity, filterOptions: [{ token: CaseEntity.token(e => e.workflow), value: ctx.lite }] })));*/
   
     OmniboxSpecialAction.registerSpecialAction({
       allowed: () => isPermissionAuthorized(WorkflowPermission.ViewWorkflowPanel),
@@ -388,7 +388,7 @@ export namespace WorkflowClient {
       },
     }));
   
-    QuickLinks.registerQuickLink(WorkflowEntity, new QuickLinks.QuickLinkLink("bam", () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(), ctx => workflowActivityMonitorUrl(ctx.lite), {
+    QuickLinkClient.registerQuickLink(WorkflowEntity, new QuickLinkLink("bam", () => WorkflowActivityMonitorMessage.WorkflowActivityMonitor.niceToString(), ctx => workflowActivityMonitorUrl(ctx.lite), {
       icon: "gauge", 
       iconColor: "green"
     }));

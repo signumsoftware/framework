@@ -14,7 +14,7 @@ import { EmailSenderConfigurationEntity, EmailAddressEmbedded } from './Signum.M
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { AuthClient } from '../Signum.Authorization/AuthClient'
 import { EvalClient } from '../Signum.Eval/EvalClient'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import { ModifiableEntity } from "@framework/Signum.Entities";
@@ -126,9 +126,9 @@ export namespace MailingClient {
   
     if (Finder.isFindable(EmailMessageEntity, false)) {
       var cachedAllTypes: Promise<string[]>;
-      QuickLinks.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
+      QuickLinkClient.registerGlobalQuickLink(entityType => (cachedAllTypes ??= API.getAllTypes())
         .then(types => !types.contains(entityType) ? [] :
-          [new QuickLinks.QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
+          [new QuickLinkExplore(EmailMessageEntity, ctx => ({ queryName: EmailMessageEntity, filterOptions: [{ token: "Entity.Target", value: ctx.lite }] }),
             {
               key: getQueryKey(EmailMessageEntity),
               text: () => EmailMessageEntity.nicePluralName(),

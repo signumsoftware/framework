@@ -18,7 +18,7 @@ import { BsSize } from "./Components/Basic";
 import { ButtonBarManager } from "./Frames/ButtonBar";
 import { clearWidgets } from "./Frames/Widgets";
 import { toAbsoluteUrl, currentUser } from "./AppContext";
-import { useForceUpdate, useAPI, useAPIWithReload } from "./Hooks";
+import { useForceUpdate, useAPI, useAPIWithReload, APIHookOptions } from "./Hooks";
 import { ErrorModalOptions, RenderServiceMessageDefault, RenderValidationMessageDefault, RenderMessageDefault } from "./Modals/ErrorModal";
 import CopyLiteButton from "./Components/CopyLiteButton";
 import { Typeahead } from "./Components";
@@ -769,18 +769,18 @@ export namespace Navigator {
   }
 
 
-  export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined): T | null | undefined {
+  export function useFetchInState<T extends Entity>(lite: Lite<T> | null | undefined, options?: APIHookOptions): T | null | undefined {
     return useAPI(signal =>
       lite == null ? Promise.resolve<T | null | undefined>(lite) :
         API.fetch(lite),
-      [lite && liteKey(lite)]);
+      [lite && liteKey(lite)], options);
   }
 
-  export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined): [T | null | undefined, () => void] {
+  export function useFetchInStateWithReload<T extends Entity>(lite: Lite<T> | null | undefined, options?: APIHookOptions): [T | null | undefined, () => void] {
     return useAPIWithReload(signal =>
       lite == null ? Promise.resolve<T | null | undefined>(lite) :
         API.fetch(lite),
-      [lite && liteKey(lite)]);
+      [lite && liteKey(lite)], options);
   }
 
   export function useFetchAndRemember<T extends Entity>(lite: Lite<T> | null, onLoaded?: () => void): T | null | undefined {

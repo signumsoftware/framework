@@ -14,7 +14,7 @@ import {
   NeuralNetworkSettingsEntity, PredictorSettingsEmbedded, PredictorState,
   PredictorMainQueryEmbedded, PredictorColumnUsage, PredictorOperation, PredictSimpleResultEntity, PredictorPublicationSymbol, PredictorEpochProgressEntity, TensorFlowPredictorAlgorithm
 } from './Signum.MachineLearning'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { QueryToken } from '@framework/FindOptions';
 import { ImportComponent } from '@framework/ImportComponent';
 import { TypeContext } from '@framework/Lines';
@@ -39,10 +39,10 @@ export namespace PredictorClient {
     Finder.registerPropertyFormatter(PredictorEpochProgressEntity.tryPropertyRoute(a => a.accuracyValidation), numbericCellFormatter("#D98880"));
   
   
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadCsv.name, () => PredictorMessage.DownloadCsv.niceToString(), ctx => API.downloadCsvById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadTsv.name, () => PredictorMessage.DownloadTsv.niceToString(), ctx => API.downloadTsvById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.DownloadTsvMetadata.name, () => PredictorMessage.DownloadTsvMetadata.niceToString(), ctx => API.downloadTsvMetadataById(ctx.lite)));
-    QuickLinks.registerQuickLink(PredictorEntity, new QuickLinks.QuickLinkAction(PredictorMessage.OpenTensorflowProjector.name, () => PredictorMessage.OpenTensorflowProjector.niceToString(), ctx => window.open("http://projector.tensorflow.org/", "_blank")));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadCsv.name, () => PredictorMessage.DownloadCsv.niceToString(), ctx => API.downloadCsvById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadTsv.name, () => PredictorMessage.DownloadTsv.niceToString(), ctx => API.downloadTsvById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.DownloadTsvMetadata.name, () => PredictorMessage.DownloadTsvMetadata.niceToString(), ctx => API.downloadTsvMetadataById(ctx.lite)));
+    QuickLinkClient.registerQuickLink(PredictorEntity, new QuickLinkAction(PredictorMessage.OpenTensorflowProjector.name, () => PredictorMessage.OpenTensorflowProjector.niceToString(), ctx => window.open("http://projector.tensorflow.org/", "_blank")));
   
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.StopTraining, { hideOnCanExecute: true }));
     Operations.addSettings(new EntityOperationSettings(PredictorOperation.CancelTraining, { hideOnCanExecute: true }));

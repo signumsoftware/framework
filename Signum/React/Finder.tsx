@@ -1567,6 +1567,21 @@ export namespace Finder {
     );
   }
 
+  export function useFetchEntities<T extends Entity>(fo: FetchEntitiesOptions<T>, additionalDeps?: React.DependencyList, options?: APIHookOptions): T[] | undefined {
+    return useAPI(() => fetchEntities(fo),
+      [
+        findOptionsPath({
+          queryName: fo.queryName,
+          filterOptions: fo.filterOptions,
+          orderOptions: fo.orderOptions,
+          pagination: fo.count == null ? { mode: "All" } : { mode: "Firsts", elementsPerPage: fo.count }
+        }),
+        ...additionalDeps ?? []
+      ],
+      options,
+    );
+  }
+
 
   export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
     var fo2: FindOptions | null = fo && {

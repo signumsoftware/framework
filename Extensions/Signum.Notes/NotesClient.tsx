@@ -2,7 +2,7 @@ import { RouteObject } from 'react-router'
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { NoteEntity, NoteOperation } from './Signum.Notes'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkExplore } from '@framework/QuickLinkClient'
 import { getQueryKey } from '@framework/Reflection'
 
 export namespace NotesClient {
@@ -22,7 +22,7 @@ export namespace NotesClient {
     }));
   
     if (Navigator.isViewable(NoteEntity)) {
-      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinks.QuickLinkExplore(NoteEntity, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
+      QuickLinks.registerGlobalQuickLink(entityType => Promise.resolve([new QuickLinkExplore(NoteEntity, ctx => ({ queryName: NoteEntity, filterOptions: [{ token: NoteEntity.token(e => e.target), value: ctx.lite }] }),
         {
           isVisible: couldHaveNotes(entityType),
           icon: "note-sticky",

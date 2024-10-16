@@ -6,7 +6,7 @@ import * as AppContext from '@framework/AppContext'
 import { Constructor } from '@framework/Constructor'
 import { Finder } from '@framework/Finder'
 import { Entity, getToString, Lite, liteKey, SelectorMessage, toLite, translated } from '@framework/Signum.Entities'
-import * as QuickLinks from '@framework/QuickLinks'
+import { QuickLinkClient, QuickLinkAction } from '@framework/QuickLinkClient'
 import { AuthClient } from '../../Signum.Authorization/AuthClient'
 import { DashboardClient, CreateNewButton } from '../../Signum.Dashboard/DashboardClient';
 import { ChartPermission, ChartMessage, ChartRequestModel, ChartParameterEmbedded, ChartColumnEmbedded, ChartTimeSeriesEmbedded } from '../Signum.Chart'
@@ -44,10 +44,10 @@ export namespace UserChartClient {
     });
   
     if (AppContext.isPermissionAuthorized(ChartPermission.ViewCharting) && Navigator.isViewable(UserChartEntity))
-      QuickLinks.registerGlobalQuickLink(entityType =>
+      QuickLinkClient.registerGlobalQuickLink(entityType =>
         API.forEntityType(entityType)
           .then(ucs => ucs.map(uc =>
-            new QuickLinks.QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),
+            new QuickLinkAction(liteKey(uc), () => getToString(uc), (ctx, e) => window.open(AppContext.toAbsoluteUrl(`/userChart/${uc.id}/${liteKey(ctx.lite)}`)),
               {
                 onlyForToken: (uc.model as UserChartLiteModel).hideQuickLink,
                 icon: "chart-bar", iconColor: "darkviolet"
@@ -55,7 +55,7 @@ export namespace UserChartClient {
             ))
           ));
   
-    QuickLinks.registerQuickLink(UserChartEntity, new QuickLinks.QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
+    QuickLinkClient.registerQuickLink(UserChartEntity, new QuickLinkAction("preview", () => ChartMessage.Preview.niceToString(),
       ctx => {
         Navigator.API.fetchAndRemember(ctx.lite).then(uc => {
           if (uc.entityType == undefined)
