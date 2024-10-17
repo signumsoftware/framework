@@ -310,7 +310,7 @@ public static class EmailModelLogic
         var isAllowed = Schema.Current.GetInMemoryFilter<EmailTemplateEntity>(userInterface: false);
 
         var templates = EmailModelToTemplates.Value.TryGetC(emailModelEntity.ToLite()).EmptyIfNull();
-        templates = templates.Where(isAllowed);
+        templates = templates.Where(isAllowed).Where(EmailTemplateLogic.IsApplicableDefault);
 
         if (templates.IsNullOrEmpty())
             return CreateDefaultEmailTemplate(emailModelEntity);

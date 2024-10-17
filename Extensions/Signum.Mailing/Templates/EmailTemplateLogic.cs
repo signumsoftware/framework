@@ -16,6 +16,7 @@ public static class EmailTemplateLogic
 {
     public static bool AvoidSynchronizeTokens = false;
     public static bool AvoidSynchronizeDefaultTemplates = true;
+    public static Func<EmailTemplateEntity, bool> IsApplicableDefault = m => true;
 
     public static Func<Entity?, CultureInfo>? GetCultureInfo;
 
@@ -277,6 +278,10 @@ public static class EmailTemplateLogic
     private static IEnumerable<EmailMessageEntity> CreateEmailMessage(EmailTemplateEntity template, ModifiableEntity? modifiableEntity, ref IEmailModel? model, CultureInfo? cultureInfo = null)
     {
         Entity? entity = null;
+
+        if (!IsApplicableDefault(template))
+            throw new ArgumentException($"EmailTemplate {template} is not applicable for {model?.ToString() ?? modifiableEntity?.ToString()}");
+
         if (template.Model != null)
         {
             if (model == null)
