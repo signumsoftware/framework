@@ -29,26 +29,34 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
 
   const [isPreview, setIsPreview] = useIsPreview(p.ctx.value);
 
-  const [textPartType, setTextPartType] = React.useState<TextPartType>("Text");
+  const [textPartType, setTextPartType] = React.useState<TextPartType>(ctx.value.textPartType);
 
   function useIsPreview(entity: Entity): [boolean, (val: boolean) => void] {
 
-    const [isPreview, setIsPreview] = React.useState(!entity.isNew);
+    const [isPreview, setIsPreview] = React.useState(false);
     
 
     React.useEffect(() => {
-      if (isPreview != !entity.isNew)
+      if (isPreview != !entity.isNew && ctx.value.textPartType == "Markdown")
         setIsPreview(!entity.isNew);
+      else
+        setIsPreview(false);
     }, [entity]);
 
     return [isPreview, setIsPreview]
   } 
 
   function onChangeTextPartType() {
+
+    if (ctx.value.textPartType == "Text" || ctx.value.textPartType == "HTML")
+      setIsPreview(false);
+
     setTextPartType(ctx.value.textPartType);
+
+
   }
 
-  function EditType(): React.JSX.Element {
+  function getEditType(): React.JSX.Element {
     if (textPartType == "Text")
       return (<AutoLine ctx={ctx.subCtx(s => s.textContent)} />)
 
@@ -62,7 +70,7 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
   }
 
 
-  function PreviewType(): React.JSX.Element {
+  function getPreviewType(): React.JSX.Element {
     if (ctx.value.textPartType == "Text")
       return (<text>{ctx.value.textContent}</text>)
 
@@ -79,19 +87,21 @@ export default function TextPart(p: { ctx: TypeContext<TextPartEntity> }): React
  return (
    <div>
      <div style={{ marginBottom: "20px" }}>
-      <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
-        <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
-      </a>
     </div>
     <div className="row">
       <div className="col-sm-4">
-        <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => onChangeTextPartType() } />
+         <AutoLine ctx={ctx.subCtx(s => s.textPartType)} onChange={() => onChangeTextPartType()} />
+      </div>
+       <div className="col-sm-4">
+         {textPartType  == "Markdown" ? <a href="#" onClick={e => { e.preventDefault(); setIsPreview(!isPreview); }} >
+           <FontAwesomeIcon icon={isPreview ? "edit" : "eye"} className="me-1" />{isPreview ? "Edit" : "Preview"}
+         </a> : null}
       </div>
     </div>
     <div className="form-inline">
       {isPreview ?
-        <PreviewType /> :
-        <EditType />
+         getPreviewType() :
+         getEditType() 
       }
     </div>
   </div>
