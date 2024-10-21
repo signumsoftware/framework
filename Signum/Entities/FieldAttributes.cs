@@ -137,6 +137,9 @@ sb.Schema.Settings.FieldAttributes(({route.RootType.TypeName()} a) => a.{route.P
 
     static string? Error(Type type)
     {
+        if(type.IsLite())
+            return "{0} is a Lite".FormatWith(type.CleanType().TypeName());
+
         if (type.IsInterface)
             return "{0} is an interface".FormatWith(type.Name);
 

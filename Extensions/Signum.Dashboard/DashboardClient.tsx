@@ -15,7 +15,8 @@ import { AuthClient } from '../Signum.Authorization/AuthClient'
 import {
   DashboardPermission, DashboardEntity, LinkListPartEntity, IPartEntity, DashboardMessage, PanelPartEmbedded,
   CachedQueryEntity, DashboardOperation, ImagePartEntity, SeparatorPartEntity, DashboardLiteModel,
-  HealthCheckPartEntity
+  HealthCheckPartEntity,
+  TextPartEntity
 } from './Signum.Dashboard'
 import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { ImportComponent } from '@framework/ImportComponent'
@@ -70,6 +71,7 @@ export namespace DashboardClient {
     Navigator.addSettings(new EntitySettings(DashboardEntity, e => import('./Admin/Dashboard')));
     Navigator.addSettings(new EntitySettings(CachedQueryEntity, e => import('./Admin/CachedQuery')));
 
+    Navigator.addSettings(new EntitySettings(TextPartEntity, e => import('./Admin/TextPart')));
     Navigator.addSettings(new EntitySettings(LinkListPartEntity, e => import('./Admin/LinkListPart')));
     Navigator.addSettings(new EntitySettings(ImagePartEntity, e => import('./Admin/ImagePart')));
     Navigator.addSettings(new EntitySettings(SeparatorPartEntity, e => import('./Admin/SeparatorPart')));
@@ -92,6 +94,11 @@ export namespace DashboardClient {
     });
 
     options.routes.push({ path: "/dashboard/:dashboardId", element: <ImportComponent onImport={() => import("./View/DashboardPage")} /> });
+
+    registerRenderer(TextPartEntity, {
+      component: () => import('./View/TextPart').then(a => a.default),
+      defaultIcon: () => ({ icon: "code", iconColor: "#000000" }),
+    });
 
     registerRenderer(LinkListPartEntity, {
       component: () => import('./View/LinkListPart').then(a => a.default),
