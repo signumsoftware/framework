@@ -29,7 +29,9 @@ export namespace ConcurrentUserClient {
   
       if (isEntity(me) && !me.isNew && activatedFor(me)) {
         const entity = me;
-        return <ConcurrentUser entity={entity} onReload={() =>
+        return <ConcurrentUser entity={entity}
+          isExecuting={ctx.frame.isExecuting()}
+          onReload={() =>
           Navigator.API.fetchEntityPack(toLite(entity))
             .then(pack => ctx.frame.onReload(pack))} />;
       }
