@@ -58,6 +58,7 @@ import { ToolbarClient } from '../Signum.Toolbar/ToolbarClient';
 import WorkflowToolbarConfig from './WorkflowToolbarConfig';
 import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
 import { isPermissionAuthorized } from '@framework/AppContext';
+import "./Case/Inbox.css";
 
 export namespace WorkflowClient {
   
