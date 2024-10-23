@@ -27,7 +27,7 @@ public static class CaseActivityLogic
 
     [AutoExpressionField]
     public static bool CurrentUserHasNotification(this ICaseMainEntity e) =>
-        As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(a => a.User.Is(UserEntity.Current)));
+        As.Expression(() => e.CaseActivities().SelectMany(a => a.Notifications()).Any(cn => IsForMe.Evaluate(cn)));
 
     [AutoExpressionField]
     public static IQueryable<CaseEntity> Cases(this WorkflowEntity w) =>
@@ -35,7 +35,7 @@ public static class CaseActivityLogic
 
     [AutoExpressionField]
     public static bool CurrentUserHasNotification(this CaseActivityEntity ca) =>
-        As.Expression(() => ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) &&
+        As.Expression(() => ca.Notifications().Any(cn => IsForMe.Evaluate(cn) &&
                                              (cn.State == CaseNotificationState.New ||
                                               cn.State == CaseNotificationState.Opened ||
                                               cn.State == CaseNotificationState.InProgress)));
@@ -89,6 +89,7 @@ public static class CaseActivityLogic
     public static CaseActivityExecutedTimerEntity? LastExecutedTimer(this CaseActivityEntity ca, Lite<WorkflowEventEntity> we) =>
         As.Expression(() => ca.ExecutedTimers().Where(a => a.BoundaryEvent.Is(we)).OrderByDescending(a => a.CreationDate).FirstOrDefault());
 
+    public static Expression<Func<CaseNotificationEntity, bool>> IsForMe = n => n.User.Is(UserEntity.Current); // For Deputy scenarios
     public static void Start(SchemaBuilder sb)
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
@@ -389,7 +390,7 @@ public static class CaseActivityLogic
 
             QueryLogic.Queries.Register(CaseActivityQuery.Inbox, () => DynamicQueryCore.Auto(
                     from cn in Database.Query<CaseNotificationEntity>()
-                    where cn.User.Is(UserEntity.Current)
+                    where IsForMe.Evaluate(cn)
                     let ca = cn.CaseActivity.Entity
                     let previous = ca.Previous!.Entity
                     select new
@@ -412,6 +413,7 @@ public static class CaseActivityLogic
                         SenderNote = previous.Note,
                         cn.State,
                         cn.Actor,
+                        cn.User,
                     })
                     .ColumnDisplayName(a => a.Activity, () => InboxMessage.Activity.NiceToString())
                     .ColumnDisplayName(a => a.Sender, () => InboxMessage.Sender.NiceToString())
@@ -508,7 +510,7 @@ public static class CaseActivityLogic
         using (AuthLogic.Disable())
             return Database.Query<CaseNotificationEntity>()
                 .Where(n => n.CaseActivity.Entity.Case.MainEntity == mainEntity && n.CaseActivity.Entity.DoneDate == null)
-                .Where(n => n.User.Is(UserEntity.Current) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
+                .Where(n => IsForMe.Evaluate(n) && (n.State == CaseNotificationState.New || n.State == CaseNotificationState.Opened))
                 .UnsafeUpdate()
                 .Set(n => n.State, n => CaseNotificationState.InProgress)
                 .Execute();
@@ -614,7 +616,7 @@ public static class CaseActivityLogic
 
         if (ca.DoneBy == null)
             ca.Notifications()
-              .Where(n => n.User.Is(UserEntity.Current) && n.State == CaseNotificationState.New)
+              .Where(n => IsForMe.Evaluate(n) && n.State == CaseNotificationState.New)
               .UnsafeUpdate()
               .Set(a => a.State, a => CaseNotificationState.Opened)
               .Execute();
@@ -943,12 +945,12 @@ public static class CaseActivityLogic
             {
                 FromStates = { CaseActivityState.Pending },
                 ToStates = { CaseActivityState.Pending },
-                CanExecute = c => c.Notifications().Any(a => a.User.Is(UserEntity.Current) && (a.State == CaseNotificationState.InProgress || a.State == CaseNotificationState.Opened)) ? null :
+                CanExecute = c => c.Notifications().Any(cn => IsForMe.Evaluate(cn) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened)) ? null :
                     CaseActivityMessage.NoOpenedOrInProgressNotificationsFound.NiceToString(),
                 Execute = (ca, args) =>
                 {
                     ca.Notifications()
-                    .Where(cn => cn.User.Is(UserEntity.Current) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
+                    .Where(cn => IsForMe.Evaluate(cn) && (cn.State == CaseNotificationState.InProgress || cn.State == CaseNotificationState.Opened))
                     .UnsafeUpdate()
                     .Set(cn => cn.State, cn => CaseNotificationState.New)
                     .Execute();
@@ -1063,7 +1065,7 @@ public static class CaseActivityLogic
         {
             if (((WorkflowActivityEntity)ca.WorkflowActivity).RequiresOpen)
             {
-                if (!ca.Notifications().Any(cn => cn.User.Is(UserEntity.Current) && cn.State != CaseNotificationState.New))
+                if (!ca.Notifications().Any(cn => IsForMe.Evaluate(cn) && cn.State != CaseNotificationState.New))
                     throw new ApplicationException(CaseActivityMessage.TheActivity0RequiresToBeOpened.NiceToString(ca.WorkflowActivity));
             }
         }
@@ -1621,7 +1623,7 @@ public static class CaseActivityLogic
 
         ca.Notifications()
            .UnsafeUpdate()
-           .Set(a => a.State, a => a.User.Is(UserEntity.Current) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
+           .Set(a => a.State, cn =>  IsForMe.Evaluate(cn) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
            .Execute();
     }
 
