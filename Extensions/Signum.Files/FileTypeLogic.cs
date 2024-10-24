@@ -46,11 +46,7 @@ public interface IFileTypeAlgorithm
     void ValidateFile(IFilePath fp);
     void DeleteFiles(IEnumerable<IFilePath> files);
     void DeleteFilesIfExist(IEnumerable<IFilePath> files);
-
     byte[] ReadAllBytes(IFilePath fp);
-
-    string? GetAsString(IFilePath fp);
-
     Stream OpenRead(IFilePath fp);
     void MoveFile(IFilePath ofp, IFilePath nfp);
     PrefixPair GetPrefixPair(IFilePath efp);
