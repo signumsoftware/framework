@@ -2,7 +2,6 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 
 using System.IO;
-using System.Text;
 
 namespace Signum.Files.FileTypeAlgorithms;
 
@@ -15,7 +14,7 @@ public enum BlobAction
 public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
     public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
-    public Func<IFilePath, PrefixPair>? GetPrefixPairFunc;
+
     public Func<bool> WebDownload { get; set; } = () => false;
 
     public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
@@ -46,11 +45,6 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
     public PrefixPair GetPrefixPair(IFilePath efp)
     {
-        if(GetPrefixPairFunc!=null)
-            return GetPrefixPairFunc(efp);
-
-
-
         var client = GetClient(efp);
 
         if (!this.WebDownload())
@@ -64,7 +58,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     {
         using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
         {
-            var client = CalculateSuffixWithRenames(fp);
+            var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).GetProperties();
         }
     }
@@ -74,7 +68,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     {
         using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
         {
-            var client = CalculateSuffixWithRenames(fp);
+            var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
         }
     }
@@ -83,35 +77,30 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
         {
-
+      
             return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
         }
     }
 
     public BlobClient GetBlobClient(IFilePath fp)
     {
-        //var client = GetClient(fp);
-        //var pp = GetPrefixPair(fp);
-        //var path = pp.WebPrefix + fp.Suffix;
-        //return client.GetBlobClient(path);
-
-        var client = CalculateSuffixWithRenames(fp);
+        var client = GetClient(fp);
         return client.GetBlobClient(fp.Suffix);
-
     }
 
-    public string ReadAsStringUTF8(IFilePath fp)
+    public  string GetAsString(IFilePath fp)
     {
-        return Encoding.UTF8.GetString(ReadAllBytes(fp));
+        return GetAsString(GetBlobClient(fp));
 
     }
 
-    //public string ReadAsStringUTF8(BlobClient blobClient)
-    //{
-    //    BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
-    //    string content = downloadResult.Content.ToString();
-    //    return content;
-    //}
+    public   string GetAsString( BlobClient blobClient)
+    {
+        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
+        string content = downloadResult.Content.ToString();
+
+        return content;
+    }
 
 
     public virtual void SaveFile(IFilePath fp)
@@ -193,7 +182,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         }
     }
 
-    string? alreadyCreated;
+    string? alreadyCreated; 
 
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
@@ -251,11 +240,11 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         {
             ContentType = contentType,
             ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
-            CacheControl = GetCacheControl?.Invoke(fp) ?? "",
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder)
     {
         using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
         {
@@ -275,10 +264,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
 
             foreach (var f in files)
             {
-                //GetClient(f).DeleteBlob(f.Suffix);
-
-                BlobContainerClient client = CalculateSuffixWithRenames(f);
-                client.DeleteBlob(f.Suffix);
+                GetClient(f).DeleteBlob(f.Suffix);
             }
         }
     }
