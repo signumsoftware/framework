@@ -52,7 +52,7 @@ public interface IFileTypeAlgorithm
     string? GetAsString(IFilePath fp);
 
     Stream OpenRead(IFilePath fp);
-    void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder);
+    void MoveFile(IFilePath ofp, IFilePath nfp);
     PrefixPair GetPrefixPair(IFilePath efp);
 }
 

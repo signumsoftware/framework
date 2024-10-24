@@ -244,7 +244,7 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp)
     {
         using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
         {
