@@ -9,10 +9,10 @@ public static class QueryUtils
 {
     public static string GetKey(object queryName)
     {
-        return queryName is Type t ? Reflector.CleanTypeName(EnumEntity.Extract(t) ?? t) :
+        return queryName is Type t ? Reflector.CleanTypeName(EnumEntity.Extract(t) ?? t) : 
             queryName.ToString()!;
     }
-
+    
     public static string GetNiceName(object queryName)
     {
         return
@@ -25,7 +25,7 @@ public static class QueryUtils
     {
         FilterType? filterType = TryGetFilterType(type);
 
-        if (filterType == null)
+        if(filterType == null)
             throw new NotSupportedException("Type {0} not supported".FormatWith(type));
 
         return filterType.Value;
@@ -195,10 +195,6 @@ public static class QueryUtils
                 FilterOperation.DistinctTo,
                 FilterOperation.IsIn,
                 FilterOperation.IsNotIn,
-                FilterOperation.StartsWith,
-                FilterOperation.EndsWith,
-                FilterOperation.Contains,
-
             }.ToReadOnly()
         },
         {
@@ -282,10 +278,10 @@ public static class QueryUtils
                 yield return new AggregateToken(AggregateFunction.Max, token);
             }
 
-            if (ft != null)
+            if(ft != null)
             {
                 yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.DistinctTo, null);
-                yield return new AggregateToken(AggregateFunction.Count, token, FilterOperation.EqualTo, null);
+                yield return new AggregateToken(AggregateFunction.Count, token,  FilterOperation.EqualTo, null);
             }
 
             if (token.IsGroupable)
@@ -315,7 +311,7 @@ public static class QueryUtils
     {
         if (token == null)
         {
-            var column = qd.Columns.SingleOrDefaultEx(a => a.Name == key);
+            var column = qd.Columns.SingleOrDefaultEx(a=>a.Name == key);
 
             if (column == null)
                 return null;
@@ -342,7 +338,7 @@ public static class QueryUtils
 
             dictonary.Add(entity.Key, entity);
 
-            foreach (var item in entity.SubTokensInternal(options).OrderByDescending(a => a.Priority).ThenBy(a => a.ToString()))
+            foreach (var item in entity.SubTokensInternal(options).OrderByDescending(a=>a.Priority).ThenBy(a => a.ToString()))
             {
                 if (!dictonary.ContainsKey(item.Key))
                 {
@@ -421,7 +417,7 @@ public static class QueryUtils
         return null;
     }
 
-    public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters =
+    public static List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>> OrderAdapters = 
         new List<Func<QueryToken, Func<BuildExpressionContext, Expression>?>>();
 
     public static LambdaExpression CreateOrderLambda(QueryToken token, BuildExpressionContext ctx)
@@ -477,7 +473,7 @@ public static class QueryUtils
                 return mce.Arguments[0];
 
             if (!idAndToStr)
-                return Expression.Property(expression, "Entity");
+            return Expression.Property(expression, "Entity");
         }
         return expression;
     }
@@ -558,8 +554,8 @@ public static class QueryUtils
             case FilterOperation.EqualTo:
                 {
                     if (inMemory)
-                        return Expression.Call(null, miEquals,
-                            Expression.Convert(left, typeof(object)),
+                        return Expression.Call(null, miEquals, 
+                            Expression.Convert(left, typeof(object)), 
                             Expression.Convert(right, typeof(object)));
 
                     return Expression.Equal(left, right);
@@ -600,7 +596,7 @@ public static class QueryUtils
 
         var uType = Enum.GetUnderlyingType(type);
 
-        if (expression.Type.IsNullable())
+        if(expression.Type.IsNullable())
             uType = uType.Nullify();
 
         return Expression.Convert(expression, uType);
@@ -627,6 +623,6 @@ public enum SubTokensOptions
     CanElement = 4,
     CanOperation = 8,
     CanToArray = 16,
-    CanSnippet = 32,
+    CanSnippet= 32,
     CanManual = 64,
 }
