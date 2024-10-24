@@ -168,15 +168,10 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             using (HeavyProfiler.Log("DeleteFile", () => fullPhysicalPath))
             {
                 File.Delete(fullPhysicalPath);
-                if (DeleteEmptyFolderOnDelete && IsDirectoryEmpty(Path.GetDirectoryName(fullPhysicalPath)!))
+                if (DeleteEmptyFolderOnDelete)
                     Directory.Delete(Path.GetDirectoryName(fullPhysicalPath)!);
             }
         }
-    }
-    static bool IsDirectoryEmpty(string path)
-    {
-   
-        return Directory.GetFiles(path).Length == 0 && Directory.GetDirectories(path).Length == 0;
     }
 
     public virtual void DeleteFilesIfExist(IEnumerable<IFilePath> files)
