@@ -86,7 +86,7 @@ export interface TimeTextBoxProps {
   validateKey: (e: React.KeyboardEvent<any>) => boolean;
   formControlClass?: string;
   durationFormat?: string;
-  htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
   innerRef?: React.Ref<HTMLInputElement>;
   id?: string;
 }
