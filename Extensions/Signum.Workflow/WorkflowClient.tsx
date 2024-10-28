@@ -334,19 +334,26 @@ export namespace WorkflowClient {
             order: s?.order ?? 0,
             shortcut: undefined,
             button: <OperationButton eoc={eoc} group={group}
-              onOperationClick={() => mle.element.withConfirmation ?
-                MessageModal.show({
-                  title: WorkflowActivityMessage.Conformation.niceToString(),
-                  message: WorkflowActivityMessage.Conformation0.niceToString(mle.element.name),
-                  buttons: "yes_no",
-                  style: "warning",
-                }).then(result => {
-                  if (result == "yes") {
-                    eoc.defaultClick(mle.element.name)
-                  }
-                })
-                : eoc.defaultClick(mle.element.name)
-                } color = { mle.element.style.toLowerCase() as BsColor } > { mle.element.name }
+              color={mle.element.style.toLowerCase() as BsColor}
+              onOperationClick={async () => {
+                if (mle.element.withConfirmation) {
+                  const answer = await MessageModal.show({
+                    title: WorkflowActivityMessage.Conformation.niceToString(),
+                    message: WorkflowActivityMessage.Conformation0.niceToString(mle.element.name),
+                    buttons: "yes_no",
+                    style: "warning",
+                  });
+
+                  if (answer != "yes")
+                    return;
+                }
+
+                eoc.frame.execute(() =>
+                  eoc.defaultClick(mle.element.name)
+                );
+                  
+              }}>
+              {mle.element.name}
             </OperationButton>,
           }));
         }
