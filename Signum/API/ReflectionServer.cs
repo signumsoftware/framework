@@ -170,16 +170,25 @@ public static class ReflectionServer
 
             var normalTypes = kvp.Key.GetTypes().Where(t => !ExcludeType(t) && kvp.Value.Contains(t.Namespace!)).ToList();
 
-            var usedEnums = (from type in normalTypes
-                             where typeof(ModifiableEntity).IsAssignableFrom(type)
-                             from p in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
-                             let pt = (p.PropertyType.ElementType() ?? p.PropertyType).UnNullify()
-                             where pt.IsEnum && !EntityAssemblies.ContainsKey(pt.Assembly)
-                             select pt).ToList();
 
+            var usedEnums = (from type in normalTypes
+                          where typeof(ModifiableEntity).IsAssignableFrom(type)
+                          from prop in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                          let ptype = (prop.PropertyType.ElementType() ?? prop.PropertyType).UnNullify()
+                          where ptype.IsEnum
+                          select new { ptype, prop, type }).ToList();
+
+            var externalEnums = usedEnums.Where(a => !EntityAssemblies.ContainsKey(a.ptype.Assembly)).Select(a => a.ptype).Distinct();
+
+            var enumErrors = usedEnums.Where(a => EntityAssemblies.TryGetValue(a.ptype.Assembly, out var ns) && !ns.Contains(a.ptype.Namespace!))
+            .ToString(a => $"Property {a.type.TypeName()}.{a.prop.Name} uses type {a.ptype.Name} defined in namespace {a.ptype.Namespace!} that is not included, consider using ReflectionServer.RegisterLike or moving the enum", "\n");
+
+            if (enumErrors.HasText())
+                throw new InvalidOperationException(enumErrors);
 
             var importedTypes = kvp.Key.GetCustomAttributes<ImportInTypeScriptAttribute>().Select(a => a.Type);
-            var allTypes = normalTypes.Concat(importedTypes).Concat(usedEnums).ToList();
+
+            var allTypes = normalTypes.Concat(externalEnums).Concat(importedTypes).ToList();
 
             var entities = allTypes.Where(a => a.IsModifiableEntity() && !a.IsAbstract && (!a.IsEntity() || TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
 
