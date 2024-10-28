@@ -272,6 +272,20 @@ public class EmailTemplateRecipientEmbedded : EmailTemplateAddressEmbedded
     {
         return "{0} {1} <{2}>".FormatWith(Kind.NiceToString(), DisplayName, EmailAddress);
     }
+
+    public EmailTemplateRecipientEmbedded Clone()
+    {
+        return new EmailTemplateRecipientEmbedded()
+        {
+            AddressSource = this.AddressSource,
+            DisplayName = this.DisplayName,
+            EmailAddress = this.EmailAddress,
+            Kind = this.Kind,
+            Token = this.Token?.Clone(),
+            WhenMany = this.WhenMany,
+            WhenNone = this.WhenNone,
+        };
+    }
 }
 
 public enum EmailMessageFormat
@@ -311,6 +325,20 @@ public class EmailTemplateFromEmbedded : EmailTemplateAddressEmbedded
     public WhenManyFromBehaviour WhenMany { get; set; }
 
     public Guid? AzureUserId { get; set; }
+
+    public EmailTemplateFromEmbedded Clone()
+    {
+        return new EmailTemplateFromEmbedded()
+        {
+            AddressSource = this.AddressSource,
+            AzureUserId = this.AzureUserId,
+            DisplayName = this.DisplayName,
+            EmailAddress = this.EmailAddress,
+            Token = this.Token?.Clone(),
+            WhenMany = this.WhenMany,
+            WhenNone = this.WhenNone,
+        };
+    }
 }
 
 public enum EmailAddressSource
@@ -382,6 +410,16 @@ public class EmailTemplateMessageEmbedded : EmbeddedEntity
     {
         return CultureInfo?.ToString() ?? EmailTemplateMessage.NewCulture.NiceToString();
     }
+
+    public EmailTemplateMessageEmbedded Clone()
+    {
+        return new EmailTemplateMessageEmbedded()
+        {
+            Subject = this.Subject,
+            CultureInfo = this.CultureInfo,
+            Text = this.Text,
+        };
+    }
 }
 
 public static class AttachmentFromXmlExtensions
@@ -426,12 +464,15 @@ public interface IAttachmentGeneratorEntity : IEntity
 
     void FromXml(XElement element, IFromXmlContext ctx, IUserAssetEntity userAsset);
     void ParseData(EmailTemplateEntity emailTemplateEntity, QueryDescription description);
+
+    IAttachmentGeneratorEntity Clone();
 }
 
 [AutoInit]
 public static class EmailTemplateOperation
 {
     public static ConstructSymbol<EmailTemplateEntity>.From<EmailModelEntity> CreateEmailTemplateFromModel;
+    public static ConstructSymbol<EmailTemplateEntity>.From<EmailTemplateEntity> Clone;
     public static ConstructSymbol<EmailTemplateEntity>.Simple Create;
     public static ExecuteSymbol<EmailTemplateEntity> Save;
     public static DeleteSymbol<EmailTemplateEntity> Delete;
