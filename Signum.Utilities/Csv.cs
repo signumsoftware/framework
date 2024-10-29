@@ -8,6 +8,7 @@ using System.Collections;
 using System.IO.Pipes;
 using System;
 using System.ComponentModel.Design.Serialization;
+using System.Data;
 
 namespace Signum.Utilities;
 
@@ -180,38 +181,27 @@ public static class Csv
         encoding ??= DefaultEncoding;
         var defCulture = GetDefaultCulture(culture);
         var defOptions = options ?? new CsvReadOptions<T>();
+        var separator = defOptions.ListSeparator ?? GetListSeparator(defCulture);
 
         var members = CsvMemberCache<T>.Members;
         var parsers = members.Select(m => GetParser(defCulture, m, defOptions.ParserFactory)).ToList();
-        Regex valueRegex = GetRegex(isLine: false, defCulture, defOptions.RegexTimeout, defOptions.ListSeparator);
-
-        if (defOptions.AsumeSingleLine)
+        using (StreamReader sr = new StreamReader(stream, encoding))
         {
-            using (StreamReader sr = new StreamReader(stream, encoding))
+            var i = 0;
+            foreach (var csvLine in defOptions.AsumeSingleLine ? CsvLinesSplitter.ReadCsvLinesSimple(sr) : CsvLinesSplitter.ReadCsvLines(sr))
             {
-                for (int i = 0; i < skipLines; i++)
-                    sr.ReadLine();
-
-                var line = skipLines;
-                while (true)
+                if (skipLines <= i)
                 {
-                    string? csvLine = sr.ReadLine();
-
-                    if (csvLine == null)
-                        yield break;
-
-                    if (csvLine.Length > 0)
+                    if(csvLine.Length > 0)
                     {
                         T? t = null;
                         try
                         {
-                            var m = valueRegex.EnumerateMatches(csvLine);
-
-                            t = ReadObject<T>(m, csvLine.AsSpan(), members, parsers);
+                            t = ReadObject<T>(csvLine, members, separator, parsers);
                         }
                         catch (Exception e)
                         {
-                            e.Data["row"] = line;
+                            e.Data["row"] = csvLine;
 
                             if (defOptions.SkipError == null || !defOptions.SkipError(e, csvLine))
                                 throw new ParseCsvException(e);
@@ -219,50 +209,10 @@ public static class Csv
 
                         if (t != null)
                             yield return t;
-
                     }
-                    line++;
                 }
-            }
-        }
-        else
-        {
-            Regex lineRegex = GetRegex(isLine: true, defCulture, defOptions.RegexTimeout, defOptions.ListSeparator);
 
-            using (StreamReader sr = new StreamReader(stream, encoding))
-            {
-                string str = sr.ReadToEnd();
-
-                int i = 0;
-                foreach (Match m in lineRegex.Matches(str))
-                {
-                    if (i < skipLines)
-                        continue;
-
-                    if (m.Length > 0)
-                    {
-                        T? t = null;
-                        try
-                        {
-                            var line = m.Value;
-
-                            if (options?.Constructor != null)
-                                t = options.Constructor(line);
-                            else
-                                t = ReadObject<T>(valueRegex.EnumerateMatches(line), line, members, parsers);
-                        }
-                        catch (Exception e)
-                        {
-                            e.Data["row"] = i;
-
-                            if (defOptions.SkipError == null || !defOptions.SkipError(e, str.Substring(m.Index, m.Length)))
-                                throw new ParseCsvException(e);
-                        }
-                        if (t != null)
-                            yield return t;
-                    }
-                    i++;
-                }
+                i++;
             }
         }
     }
@@ -271,21 +221,12 @@ public static class Csv
         where T : class
     {
         var defOptions = options ?? new CsvReadOptions<T>();
-
         var defCulture = GetDefaultCulture(culture);
-
-        Regex regex = GetRegex(isLine: false, defCulture, defOptions.RegexTimeout);
-
-        var vme = regex.EnumerateMatches(csvLine);
-
         var members = CsvMemberCache<T>.Members;
-
-        return ReadObject<T>(vme,
-            csvLine.AsSpan(),
-            members,
-            members.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList());
+        var separator = defOptions.ListSeparator ?? GetListSeparator(defCulture);
+        var parsers = members.Select(c => GetParser(defCulture, c, defOptions.ParserFactory)).ToList();
+        return ReadObject<T>(csvLine, members, separator, parsers);
     }
-
 
     private static ValueParser GetParser<T>(CultureInfo culture, CsvMemberInfo<T> column, Func<CsvMemberInfo<T>, CultureInfo, ValueParser?>? parserFactory)
     {
@@ -304,56 +245,56 @@ public static class Csv
 
     public delegate object? ValueParser(ReadOnlySpan<char> str);
 
-    static T ReadObject<T>(Regex.ValueMatchEnumerator vme, ReadOnlySpan<char> line, List<CsvMemberInfo<T>> members, List<ValueParser> parsers)
+    static T ReadObject<T>(string line, List<CsvMemberInfo<T>> members, char separator, List<ValueParser> parsers)
     {
         T t = Activator.CreateInstance<T>();
 
-        bool endsInCollection = false; 
+        bool endsInCollection = false;
+        var enumerator = new CsvEnumerator(line, separator);
         int i = 0;
-        foreach (var v in vme)
+        while (enumerator.MoveNext())
         {
+            var span = enumerator.Current;
             if (members.Count <= i)
                 continue;
 
-            var value = line.Slice(v.Index, v.Length);
             var member = members[i];
             var parser = parsers[i];
             try
             {
                 if (!member.IsCollection)
-                {
-                    value = DecodeCsv(value);
-
-                    object? val = parser(value);
+            {
+              
+                    object? val = parser(span);
 
                     member.MemberEntry.Setter!(t, val);
-                }
-                else
+              
+            }
+            else
+            {
+                if (i != members.Count - 1)
+                    throw new InvalidOperationException($"Collection {member.MemberInfo} should be the last member");
+
+                endsInCollection = true;
+                var list = (IList)Activator.CreateInstance(member.MemberInfo.ReturningType())!;
+
+                object? val = parser(span);
+                list.Add(val);
+
+                while (enumerator.MoveNext())
                 {
-                    if (i != members.Count - 1)
-                        throw new InvalidOperationException($"Collection {member.MemberInfo} should be the last member");
-                    endsInCollection = true;
-                    var list = (IList)Activator.CreateInstance(member.MemberInfo.ReturningType())!;
-
-                    value = DecodeCsv(value);
-                    object? val = parser(value);
+                    span = enumerator.Current;
+                    val = parser(span);
                     list.Add(val);
-
-                    foreach (var v2 in vme)
-                    {
-                        value = line.Slice(v2.Index, v2.Length);
-                        value = DecodeCsv(value);
-                        val = parser(value);
-                        list.Add(val);
-                    }
-
-                    member.MemberEntry.Setter!(t, list);
                 }
+
+                member.MemberEntry.Setter!(t, list);
+            }
             }
             catch (Exception e)
             {
-                e.Data["value"] = new String(value);
-                e.Data["member"] = members[i].MemberInfo.Name;
+                e.Data["value"] = new String(span);
+                e.Data["member"] = member.MemberInfo.Name;
                 throw;
             }
 
@@ -367,7 +308,7 @@ public static class Csv
     }
 
 
-    public static List<string[]> ReadUntypedFile(string fileName, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
+    public static List<List<string>> ReadUntypedFile(string fileName, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
     {
         encoding ??= DefaultEncoding;
         culture ??= DefaultCulture ?? CultureInfo.CurrentCulture;
@@ -376,91 +317,62 @@ public static class Csv
             return ReadUntypedStream(fs, encoding, culture, options).ToList();
     }
 
-    public static List<string[]> ReadUntypedBytes(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
+    public static List<List<string>> ReadUntypedBytes(byte[] data, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
     {
         using (MemoryStream ms = new MemoryStream(data))
             return ReadUntypedStream(ms, encoding, culture, options).ToList();
     }
 
-    public static IEnumerable<string[]> ReadUntypedStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null) 
+    public static IEnumerable<List<string>> ReadUntypedStream(Stream stream, Encoding? encoding = null, CultureInfo? culture = null, CsvReadOptions? options = null)
     {
         encoding ??= DefaultEncoding;
         var defCulture = GetDefaultCulture(culture);
         var defOptions = options ?? new CsvReadOptions();
+        var separator = defOptions.ListSeparator ?? GetListSeparator(defCulture);
 
-        Regex valueRegex = GetRegex(false, defCulture, defOptions.RegexTimeout, defOptions.ListSeparator);
-        if (defOptions.AsumeSingleLine)
+        int? capacity = null;
+        using (StreamReader sr = new StreamReader(stream, encoding))
         {
-            using (StreamReader sr = new StreamReader(stream, encoding))
+            foreach (var csvLine in defOptions.AsumeSingleLine ? CsvLinesSplitter.ReadCsvLinesSimple(sr) : CsvLinesSplitter.ReadCsvLines(sr))
             {
-                var line = 0;
-                while (true)
+                if (csvLine.Length > 0)
                 {
-                    string? csvLine = sr.ReadLine();
-
-                    if (csvLine == null)
-                        yield break;
-
-                    Match? m = null;
-                    string[]? t = null;
+                    List<string>? cells = null;
                     try
                     {
-                        m = valueRegex.Match(csvLine);
-                        if (m.Length > 0)
-                        {
-                            t = m.Groups["val"].Captures.Select(c => c.Value).ToArray();
-                        }
+                        cells = ToArray(separator, capacity, csvLine);
+
+                        if (capacity == null)
+                            capacity = cells.Count;
                     }
                     catch (Exception e)
                     {
-                        e.Data["row"] = line;
+                        e.Data["row"] = csvLine;
 
                         if (defOptions.SkipError == null || !defOptions.SkipError(e, csvLine))
                             throw new ParseCsvException(e);
                     }
 
-                    if (t != null)
-                        yield return t;
-
-                    line++;
-                }
-            }
-        }
-        else
-        {
-            using (StreamReader sr = new StreamReader(stream, encoding))
-            {
-                string str = sr.ReadToEnd();
-
-                var matches = valueRegex.Matches(str).Cast<Match>();
-
-                int line = 0;
-                foreach (var m in matches)
-                {
-                    if (m.Length > 0)
-                    {
-                        string[]? t = null;
-                        try
-                        {
-                            t = m.Groups["val"].Captures.Select(c => c.Value).ToArray();
-                        }
-                        catch (Exception e)
-                        {
-                            e.Data["row"] = line;
-
-                            if (defOptions.SkipError == null || !defOptions.SkipError(e, m.Value))
-                                throw new ParseCsvException(e);
-                        }
-                        if (t != null)
-                            yield return t;
-                    }
-                    line++;
+                    if (cells != null)
+                        yield return cells;
                 }
             }
         }
     }
 
-    private static CultureInfo GetDefaultCulture(CultureInfo? culture)
+    static List<string> ToArray(char separator, int? lastCapacity, string csvLine)
+    {
+        List<string> cells = lastCapacity.HasValue ? new List<string>(lastCapacity.Value) : new List<string>();
+        CsvEnumerator enumerator = new CsvEnumerator(csvLine, separator);
+        foreach (var span in enumerator)
+        {
+            cells.Add(span.ToString());
+        }
+
+        return cells;
+    }
+
+    static CultureInfo GetDefaultCulture(CultureInfo? culture)
     {
         return culture ?? DefaultCulture ?? CultureInfo.CurrentCulture;
     }
@@ -486,7 +398,7 @@ public static class Csv
         return classCode;
     }
 
-    private static string InferClass(List<string[]> lines, CultureInfo? culture)
+    private static string InferClass(List<List<string>> lines, CultureInfo? culture)
     {
         var defCulture = GetDefaultCulture(culture);
         var header = lines.FirstEx();
@@ -549,18 +461,9 @@ public static class Csv
             """;
     }
 
-    static ConcurrentDictionary<(bool multiLine, char separator, TimeSpan timeout), Regex> regexCache = new();
-    readonly static string ValueRegex = "'(?:[^']+|'')*'|[^;\r\n]*".Replace('\'', '"');
-    readonly static string LineRegex = $@"^({ValueRegex})?((?!($|\r\n));({ValueRegex}))*($|\r\n)";
-    static Regex GetRegex(bool isLine, CultureInfo culture, TimeSpan timeout, char? listSeparator = null)
-    {
-        char separator = listSeparator ?? GetListSeparator(culture);
-
-        return regexCache.GetOrAdd((isLine, separator, timeout), a =>
-            new Regex((isLine ? LineRegex : ValueRegex).Replace(';', a.separator), RegexOptions.Multiline | RegexOptions.ExplicitCapture, a.timeout));
-    }
-
   
+
+
     private static char GetListSeparator(CultureInfo culture)
     {
         return culture.TextInfo.ListSeparator.SingleEx();
@@ -590,43 +493,42 @@ public static class Csv
         public static List<CsvMemberInfo<T>> Members;
     }
 
-
-
-    static ReadOnlySpan<char> DecodeCsv(ReadOnlySpan<char> s)
-    {
-        if (s.StartsWith("\"") && s.EndsWith("\""))
-        {
-            string str = new string(s[1..^1]).Replace("\"\"", "\"");
-
-            return Regex.Replace(str, "(?<!\r)\n", "\r\n");
-        }
-
-        return s;
-    }
-
     static ValueParser GetBasicParser(Type type, CultureInfo culture, string? format)
     {
+        if(format != null)
+        {
+            return type switch
+            {
+                _ when type == typeof(DateTime) => span => span.Length == 0 ? null : DateTime.ParseExact(span, format, culture),
+                _ when type == typeof(DateTimeOffset) => span => span.Length == 0 ? null : DateTimeOffset.ParseExact(span, format, culture),
+                _ when type == typeof(DateOnly) => span => span.Length == 0 ? null : DateOnly.ParseExact(span, format, culture),
+                _ when type == typeof(TimeOnly) => span => span.Length == 0 ? null : TimeOnly.ParseExact(span, format, culture),
+                _ => throw new InvalidOperationException("Format not expected for " + type.Name)
+            };
+        }
+
+
         return type switch
         {
-            _ when type == typeof(string) => str => str.Length == 0 ? null : str.ToString(),
-            _ when type == typeof(byte) => str => str.Length == 0 ? null : byte.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(sbyte) => str => str.Length == 0 ? null : sbyte.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(short) => str => str.Length == 0 ? null : short.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(ushort) => str => str.Length == 0 ? null : ushort.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(int) => str => str.Length == 0 ? null : int.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(uint) => str => str.Length == 0 ? null : uint.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(long) => str => str.Length == 0 ? null : long.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(ulong) => str => str.Length == 0 ? null : ulong.Parse(str, NumberStyles.Integer, culture),
-            _ when type == typeof(float) => str => str.Length == 0 ? null : float.Parse(str, NumberStyles.Float, culture),
-            _ when type == typeof(double) => str => str.Length == 0 ? null : double.Parse(str, NumberStyles.Float, culture),
-            _ when type == typeof(decimal) => str => str.Length == 0 ? null : decimal.Parse(str, NumberStyles.Number, culture),
-            _ when type == typeof(DateTime) => str => str.Length == 0 ? null : DateTime.ParseExact(str, format, culture),
-            _ when type == typeof(DateTimeOffset) => str => str.Length == 0 ? null : DateTimeOffset.ParseExact(str, format, culture),
-            _ when type == typeof(DateOnly) => str => str.Length == 0 ? null : DateOnly.ParseExact(str, format, culture),
-            _ when type == typeof(TimeOnly) => str => str.Length == 0 ? null : TimeOnly.ParseExact(str, format, culture),
-            _ when type == typeof(Guid) => str => str.Length == 0 ? null : Guid.Parse(str.ToString()),
-            _ when type.IsEnum => str => str.Length == 0 ? null : Enum.Parse(type, str),
-            _ => str => Convert.ChangeType(new string(str), type, culture)
+            _ when type == typeof(string) => span => span.Length == 0 ? null : span.ToString(),
+            _ when type == typeof(byte) => span => span.Length == 0 ? null : byte.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(sbyte) => span => span.Length == 0 ? null : sbyte.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(short) => span => span.Length == 0 ? null : short.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(ushort) => span => span.Length == 0 ? null : ushort.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(int) => span => span.Length == 0 ? null : int.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(uint) => span => span.Length == 0 ? null : uint.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(long) => span => span.Length == 0 ? null : long.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(ulong) => span => span.Length == 0 ? null : ulong.Parse(span, NumberStyles.Integer, culture),
+            _ when type == typeof(float) => span => span.Length == 0 ? null : float.Parse(span, NumberStyles.Float, culture),
+            _ when type == typeof(double) => span => span.Length == 0 ? null : double.Parse(span, NumberStyles.Float, culture),
+            _ when type == typeof(decimal) => span => span.Length == 0 ? null : decimal.Parse(span, NumberStyles.Number, culture),
+            _ when type == typeof(DateTime) => span => span.Length == 0 ? null : DateTime.Parse(span, culture),
+            _ when type == typeof(DateTimeOffset) => span => span.Length == 0 ? null : DateTimeOffset.Parse(span, culture),
+            _ when type == typeof(DateOnly) => span => span.Length == 0 ? null : DateOnly.Parse(span, culture),
+            _ when type == typeof(TimeOnly) => span => span.Length == 0 ? null : TimeOnly.Parse(span, culture),
+            _ when type == typeof(Guid) => span => span.Length == 0 ? null : Guid.Parse(span.ToString()),
+            _ when type.IsEnum => span => span.Length == 0 ? null : Enum.Parse(type, span),
+            _ => span => Convert.ChangeType(new string(span), type, culture)
         };
     }
 }
@@ -655,6 +557,8 @@ public class CsvMemberInfo<T>
     public readonly MemberEntry<T> MemberEntry;
     public readonly string? Format;
     public readonly bool IsCollection;
+
+    public override string ToString() => MemberInfo.Name;
 
     public MemberInfo MemberInfo
     {
@@ -690,5 +594,186 @@ public class ParseCsvException : Exception
         {
             return $"(Row: {this.Row}, Member: {this.Member}, Value: '{this.Value}') {base.Message})";
         }
+    }
+}
+
+public static class CsvLinesSplitter
+{
+    public static IEnumerable<string> ReadCsvLinesSimple(StreamReader reader)
+    {
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            yield return line;
+        }
+    }
+
+    public static IEnumerable<string> ReadCsvLines(StreamReader reader)
+    {
+        var lineBuilder = new StringBuilder();
+        bool insideQuotes = false;
+
+        string? line;
+        while ((line = reader.ReadLine()) != null)
+        {
+            for (int i = 0; i < line.Length; i++)
+            {
+                char currentChar = line[i];
+
+                if (currentChar == '"')
+                {
+                    // Toggle the insideQuotes flag only if it's not an escaped quote (i.e., not a double quote inside quotes).
+                    if (i + 1 < line.Length && line[i + 1] == '"')
+                    {
+                        // Add one quote to the builder and skip the next one.
+                        lineBuilder.Append('"');
+                        i++;
+                    }
+                    else
+                    {
+                        insideQuotes = !insideQuotes;
+                    }
+                }
+                else
+                {
+                    lineBuilder.Append(currentChar);
+                }
+            }
+
+            if (insideQuotes)
+            {
+                // If inside quotes, continue to the next line and append to the current line.
+                lineBuilder.Append(Environment.NewLine);
+            }
+            else
+            {
+                // Yield the complete line when we're not inside quotes and reset the builder for the next line.
+                yield return lineBuilder.ToString();
+                lineBuilder.Clear();
+            }
+        }
+
+        // In case the last line ends while still inside quotes (for edge cases).
+        if (lineBuilder.Length > 0)
+        {
+            yield return lineBuilder.ToString();
+        }
+    }
+}
+
+public ref struct CsvEnumerator
+{
+    private readonly ReadOnlySpan<char> _line;
+    private readonly char _separator;
+    int _currentIndex;
+    ReadOnlySpan<char> _currentField;
+
+    public CsvEnumerator(ReadOnlySpan<char> line, char separator)
+    {
+        _line = line;
+        _separator = separator;
+        _currentIndex = 0;
+        _currentField = default;
+    }
+
+    public CsvEnumerator GetEnumerator() => this;
+
+    public bool MoveNext()
+    {
+        if(_currentIndex == _line.Length)
+        {
+            _currentField = _line.Slice(_currentIndex, 0);
+            _currentIndex++;
+            return true;
+        }
+
+        if (_currentIndex > _line.Length)
+            return false;
+
+        bool inQuotes = false;
+        int start = _currentIndex;
+
+        for (int i = _currentIndex; i < _line.Length; i++)
+        {
+            char c = _line[i];
+
+            if (c == '"')
+            {
+                if (inQuotes && i + 1 < _line.Length && _line[i + 1] == '"')
+                {
+                    // Escaped double quote within a quoted field
+                    i++; // Skip the next quote
+                }
+                else
+                {
+                    // Toggle inQuotes state
+                    inQuotes = !inQuotes;
+                }
+            }
+            else if (c == _separator && !inQuotes)
+            {
+                // Separator outside quotes - end of field
+                _currentField = _line.Slice(start, i - start);
+                _currentIndex = i + 1; // Move past the separator
+                return true;
+            }
+
+            // End of line reached
+            if (i == _line.Length - 1)
+            {
+                _currentField = _line.Slice(start, i - start + 1);
+                _currentIndex = _line.Length + 1;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public ReadOnlySpan<char> Current
+    {
+        get
+        {
+            if (_currentField.Length > 1 && _currentField[0] == '"' && _currentField[^1] == '"')
+            {
+                // Trim surrounding quotes and handle escaped quotes
+                var unquotedField = _currentField.Slice(1, _currentField.Length - 2);
+                return RemoveEscapedQuotes(unquotedField);
+            }
+            return _currentField;
+        }
+    }
+
+    private static ReadOnlySpan<char> RemoveEscapedQuotes(ReadOnlySpan<char> span)
+    {
+        int quoteCount = 0;
+        for (int i = 0; i < span.Length - 1; i++)
+        {
+            if (span[i] == '"' && span[i + 1] == '"')
+            {
+                quoteCount++;
+                i++;
+            }
+        }
+
+        if (quoteCount == 0)
+            return span; // No escaped quotes
+
+        char[] result = new char[span.Length - quoteCount];
+        int index = 0;
+        for (int i = 0; i < span.Length; i++)
+        {
+            if (i < span.Length - 1 && span[i] == '"' && span[i + 1] == '"')
+            {
+                result[index++] = '"';
+                i++; // Skip the next quote
+            }
+            else
+            {
+                result[index++] = span[i];
+            }
+        }
+
+        return result.AsSpan();
     }
 }
