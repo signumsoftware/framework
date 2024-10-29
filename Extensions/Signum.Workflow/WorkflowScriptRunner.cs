@@ -215,7 +215,11 @@ public static class WorkflowScriptRunner
 
     private static void Transaction_PostRealCommit(System.Collections.Generic.Dictionary<string, object> obj)
     {
-        WakeUp("Save Transaction Commit", null);
+        Task.Delay(1000).ContinueWith(t =>
+        {
+            if (t.IsCompleted)
+                WakeUp("Save Transaction Commit", null);
+        });
     }
 
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
