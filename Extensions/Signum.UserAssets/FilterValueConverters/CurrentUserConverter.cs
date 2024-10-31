@@ -112,7 +112,7 @@ public static class SimpleMemberEvaluator
         return new Result<object?>.Success(result);
     }
 
-    internal static Result<Type> CheckExpression(Type type, string[] parts)
+    public static Result<Type> CheckExpression(Type type, string[] parts)
     {
         var currentType = type;
 

@@ -1622,6 +1622,7 @@ public static class CaseActivityLogic
         ca.Save();
 
         ca.Notifications()
+           .DisableQueryFilter()
            .UnsafeUpdate()
            .Set(a => a.State, cn =>  IsForMe.Evaluate(cn) ? CaseNotificationState.Done : CaseNotificationState.DoneByOther)
            .Execute();

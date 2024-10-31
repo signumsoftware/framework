@@ -396,7 +396,7 @@ export namespace Finder {
   export function smartColumns(current: ColumnOptionParsed[], ideal: ColumnDescription[]): { mode: ColumnOptionsMode; columns: ColumnOption[] } {
 
     const similar = (c: ColumnOptionParsed, d: ColumnDescription) =>
-      c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && !c.hiddenColumn;
+      c.token!.fullKey == d.name && (c.displayName == d.displayName) && c.summaryToken == null && c.combineRows == null && !c.hiddenColumn;
 
     const toColumnOption = (c: ColumnOptionParsed) => ({
       token: c.token!.fullKey,

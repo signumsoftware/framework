@@ -203,6 +203,9 @@ public static class FilePathEmbeddedLogic
 
     public static Stream OpenRead(this FilePathEmbedded fpe)
     {
+        if (fpe.BinaryFile != null)
+            return new MemoryStream(fpe.BinaryFile);
+
         return fpe.FileType.GetAlgorithm().OpenRead(fpe);
     }
 
