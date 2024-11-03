@@ -23,7 +23,7 @@ public class NeuralNetworkSettingsEntity : Entity, IPredictorAlgorithmSettings
     public NeuralNetworkEvalFunction LossFunction { get; set; }
     public NeuralNetworkEvalFunction EvalErrorFunction { get; set; }
 
-    [DecimalsValidator(5), NumberIsValidator(ComparisonType.GreaterThan, 0)]
+    [NumberIsValidator(ComparisonType.GreaterThan, 0)]
     public double LearningRate { get; set; } = 0.001f;
     
     public double LearningEpsilon { get; set; } = 1e-8f;
