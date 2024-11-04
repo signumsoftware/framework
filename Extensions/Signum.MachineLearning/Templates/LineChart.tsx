@@ -25,7 +25,7 @@ interface LineChartProps {
 
 export default function LineChart(p: LineChartProps): React.JSX.Element {
 
-  const { size, setContainer } = useSize(undefined, undefined);
+  const { size, setContainer } = useSize(undefined);
 
   const [logMode, setLogMode] = React.useState<boolean>(false);
 
