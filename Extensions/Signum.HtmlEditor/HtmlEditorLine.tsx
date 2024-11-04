@@ -34,7 +34,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
             }} data-property-path={ctx.propertyPath} >
               {getTimeMachineIcon({ ctx: ctx })}
               <HtmlEditor
-
+                readOnly={ctx.readOnly}
                 binding={ctx.binding}
                 ref={htmlEditorRef}
                 plugins={p.plugins ?? [
