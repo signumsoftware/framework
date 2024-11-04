@@ -104,6 +104,16 @@ export class StyleContext {
     }
   }
 
+  inputGroupVerticalClass(mode: "before" | "after"): string | undefined {
+    switch (this.formSize) {
+      case "xs": return "input-group-vertical " + mode + " input-group-xs";
+      case "sm": return "input-group-vertical " + mode + " input-group-sm";
+      case "md": return "input-group-vertical " + mode ;
+      case "lg": return "input-group-vertical " + mode + " input-group-lg";
+      default: throw new Error("Unexpected formSize " + this.formSize);
+    }
+  }
+
   get formControlClass(): string | undefined {
     switch (this.formSize) {
       case "xs": return "form-control form-control-xs";
