@@ -126,6 +126,8 @@ li.sf-strip-element {
 
 /* EntityLine buttons  */
 .input-group-vertical {
+    display: flex;
+    flex-grow: 0;
     flex-direction: column;
     align-items: stretch;
 }
