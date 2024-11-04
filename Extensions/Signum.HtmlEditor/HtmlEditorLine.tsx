@@ -27,7 +27,11 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
             {extraButtonsBefore && <div className={ctx.inputGroupVerticalClass("before")}>
               {extraButtonsBefore()}
             </div>}
-            <div className={classes("html-editor-line")} style={{ backgroundColor: readOnly ? "#e9ecef" : undefined, ...p.htmlAttributes?.style }} data-property-path={ctx.propertyPath} >
+            <div className={classes("html-editor-line")} style={{
+              backgroundColor: readOnly ? "#e9ecef" : undefined,
+              flexGrow: 1,
+              ...p.htmlAttributes?.style
+            }} data-property-path={ctx.propertyPath} >
               {getTimeMachineIcon({ ctx: ctx })}
               <HtmlEditor
 
