@@ -1,30 +1,13 @@
 using System.Collections.Frozen;
+using System.Data;
+using System.Net.Http.Headers;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-public interface IMerger<K, A>
-{
-    A Merge(K key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, A>> baseValues);
-    Func<K, A> MergeDefault(Lite<RoleEntity> role);
-}
 
-public interface IManualAuth<K, A>
-{
-    A GetAllowed(Lite<RoleEntity> role, K key);
-    void SetAllowed(Lite<RoleEntity> role, K key, A allowed);
-}
-
-class Coercer<A, K>
-{
-    public static readonly Coercer<A, K> None = new Coercer<A, K>();
-
-    public virtual Func<Lite<RoleEntity>, A, A> GetCoerceValueManual(K key) { return (role, allowed) => allowed; }
-    public virtual Func<K, A, A> GetCoerceValue(Lite<RoleEntity> role) { return (key, allowed) => allowed; }
-}
-
-class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
-    where RT : RuleEntity<R, A>, new()
+public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
+    where RT : RuleEntity<R>, new()
     where AR : AllowedRule<R, A>, new()
     where A : notnull
     where R : class
@@ -32,32 +15,49 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 {
     readonly ResetLazy<FrozenDictionary<Lite<RoleEntity>, RoleAllowedCache>> runtimeRules;
 
-    Func<R, K> ToKey;
-    Func<K, R> ToEntity;
-    Expression<Func<R, R, bool>> IsEquals;
-    IMerger<K, A> merger;
-    Coercer<A, K> coercer;
-
-    public AuthCache(SchemaBuilder sb, Func<R, K> toKey, Func<K, R> toEntity,
-        Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, bool invalidateWithTypes, Coercer<A, K>? coercer = null)
+   
+    public AuthCache(SchemaBuilder sb, bool invalidateWithTypes)
     {
-        ToKey = toKey;
-        ToEntity = toEntity;
-        this.merger = merger;
-        IsEquals = isEquals;
-        this.coercer = coercer ?? Coercer<A, K>.None;
-
+       
         runtimeRules = sb.GlobalLazy(this.NewCache,
             invalidateWithTypes ?
             new InvalidateWith(typeof(RT), typeof(RoleEntity), typeof(RuleTypeEntity)) :
-            new InvalidateWith(typeof(RT), typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
+            new InvalidateWith(typeof(RT), typeof(RoleEntity)),
+            AuthLogic.NotifyRulesChanged);
+    }
+
+    protected abstract Expression<Func<R, R, bool>> IsEqual { get; }
+
+    protected abstract K ToKey(R resource);
+    protected abstract R ToEntity(K key);
+    protected abstract A Merge(K key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, A>> baseValues);
+    protected abstract Func<K, A> MergeDefault(Lite<RoleEntity> role);
+
+    protected abstract A GetRuleAllowed(RT rule);
+    protected abstract RT SetRuleAllowed(RT rule, A allowed);
+
+    public virtual A CoerceValue(Lite<RoleEntity> role, K key, A allowed)
+    {
+        return allowed;
+    }
+
+    protected virtual AR ToAllowedRule(R resource, RoleAllowedCache ruleCache)
+    {
+        var k = ToKey(resource);
+
+        return new AR()
+        {
+            Resource = resource,
+            AllowedBase = ruleCache.GetAllowedBase(k),
+            Allowed = ruleCache.GetAllowed(k)
+        };
     }
 
     A IManualAuth<K, A>.GetAllowed(Lite<RoleEntity> role, K key)
     {
         R resource = ToEntity(key);
 
-        ManualResourceCache miniCache = new ManualResourceCache(key, resource, IsEquals, merger, coercer.GetCoerceValueManual(key));
+        ManualResourceCache miniCache = new ManualResourceCache(this, key, resource);
 
         return miniCache.GetAllowed(role);
     }
@@ -66,16 +66,14 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     {
         R resource = ToEntity(key);
 
-        var keyCoercer = coercer.GetCoerceValueManual(key);
+        ManualResourceCache miniCache = new ManualResourceCache(this, key, resource);
 
-        ManualResourceCache miniCache = new ManualResourceCache(key, resource, IsEquals, merger, keyCoercer);
-
-        allowed = keyCoercer(role, allowed);
+        allowed = CoerceValue(role, key, allowed);
 
         if (miniCache.GetAllowed(role).Equals(allowed))
             return;
 
-        IQueryable<RT> query = Database.Query<RT>().Where(a => IsEquals.Evaluate(a.Resource, resource) && a.Role.Is(role));
+        IQueryable<RT> query = Database.Query<RT>().Where(a =>this.IsEqual.Evaluate(a.Resource, resource) && a.Role.Is(role));
         if (miniCache.GetAllowedBase(role).Equals(allowed))
         {
             if (query.UnsafeDelete() == 0)
@@ -83,53 +81,45 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         }
         else
         {
-            if (query.UnsafeUpdate().Set(a => a.Allowed, a => allowed).Execute() == 0)
-                new RT
-                {
-                    Role = role,
-                    Resource = resource,
-                    Allowed = allowed,
-                }.Save();
+            query.UnsafeDelete();
+            SetRuleAllowed(new RT
+            {
+                Role = role,
+                Resource = resource,
+            }, allowed).Save();
         }
     }
 
     public class ManualResourceCache
     {
+        readonly AuthCache<RT, AR, R, K, A> cache; 
+
         readonly Dictionary<Lite<RoleEntity>, A> specificRules;
-
-        readonly IMerger<K, A> merger;
-
-        readonly Func<Lite<RoleEntity>, A, A> coercer;
 
         readonly K key;
 
-        public ManualResourceCache(K key, R resource, Expression<Func<R, R, bool>> isEquals, IMerger<K, A> merger, Func<Lite<RoleEntity>, A, A> coercer)
+        public ManualResourceCache(AuthCache<RT, AR, R, K, A> cache, K key, R resource)
         {
             this.key = key;
 
-            var list = (from r in Database.Query<RT>()
-                        where isEquals.Evaluate(r.Resource, resource)
-                        select new { r.Role, r.Allowed }).ToList();
+            var list = Database.Query<RT>().Where(r => cache.IsEqual.Evaluate(r.Resource, resource)).ToList();
 
-            specificRules = list.ToDictionary(a => a.Role, a => a.Allowed);
-
-            this.coercer = coercer;
-            this.merger = merger;
+            specificRules = list.ToDictionary(a => a.Role, a => cache.GetRuleAllowed(a));
         }
 
         public A GetAllowed(Lite<RoleEntity> role)
         {
             if (specificRules.TryGetValue(role, out A? result))
-                return coercer(role, result);
+                return cache.CoerceValue(role, key, result);
 
             return GetAllowedBase(role);
         }
 
         public A GetAllowedBase(Lite<RoleEntity> role)
         {
-            var result = merger.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KeyValuePair.Create(r, GetAllowed(r))));
+            var result = cache.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KeyValuePair.Create(r, GetAllowed(r))));
 
-            return coercer(role, result);
+            return cache.CoerceValue(role, key, result);
         }
     }
 
@@ -142,11 +132,15 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     {
         List<Lite<RoleEntity>> roles = AuthLogic.RolesInOrder(includeTrivialMerge: true).ToList();
 
-        Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules =
-           Database.Query<RT>()
-           .Select(a => new { a.Role, a.Allowed, a.Resource })
+        var rules = Database.Query<RT>().ToList();
+
+        var errors = GraphExplorer.FullIntegrityCheck(GraphExplorer.FromRoots(rules));
+        if (errors != null)
+            throw new IntegrityCheckException(errors);
+
+        Dictionary<Lite<RoleEntity>, Dictionary<K, A>> realRules = rules
               .AgGroupToDictionary(ru => ru.Role!, gr => gr
-                .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), ru.Allowed))
+                .SelectCatch(ru => KeyValuePair.Create(ToKey(ru.Resource!), GetRuleAllowed(ru)))
                 .ToDictionaryEx());
 
         Dictionary<Lite<RoleEntity>, RoleAllowedCache> newRules = new Dictionary<Lite<RoleEntity>, RoleAllowedCache>();
@@ -154,31 +148,23 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         {
             var related = AuthLogic.RelatedTo(role);
 
-            newRules.Add(role, new RoleAllowedCache(
-                role,
-                merger,
+            newRules.Add(role, new RoleAllowedCache(this, role,
                 related.Select(r => newRules.GetOrThrow(r)).ToList(),
-                realRules.TryGetC(role),
-                coercer.GetCoerceValue(role)));
+                realRules.TryGetC(role)));
         }
 
         return newRules.ToFrozenDictionary();
     }
 
+
+
     internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
     {
-        RoleAllowedCache cache = runtimeRules.Value.GetOrThrow(rules.Role);
+        RoleAllowedCache ruleCache = runtimeRules.Value.GetOrThrow(rules.Role);
 
         rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
         rules.InheritFrom = AuthLogic.RelatedTo(rules.Role).ToMList();
-        rules.Rules = (from r in resources
-                       let k = ToKey(r)
-                       select new AR()
-                       {
-                           Resource = r,
-                           AllowedBase = cache.GetAllowedBase(k),
-                           Allowed = cache.GetAllowed(k)
-                       }).ToMList();
+        rules.Rules = resources.Select(r => ToAllowedRule(r, ruleCache)).ToMList();
     }
 
     internal void SetRules(BaseRulePack<AR> rules, Expression<Func<R, bool>> filterResources)
@@ -189,13 +175,17 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
             var should = rules.Rules.Where(a => a.Overriden).ToDictionary(r => r.Resource);
 
             Synchronizer.Synchronize(should, current,
-                (p, ar) => new RT { Resource = p, Role = rules.Role, Allowed = ar.Allowed }.Save(),
-                (p, pr) => pr.Delete(),
-                (p, ar, pr) =>
+                (p, ar) => {
+                    var rule = SetRuleAllowed(new RT { Resource = p, Role = rules.Role }, ar.Allowed);
+                    rule.Save();
+
+                    },
+                (p, rule) => rule.Delete(),
+                (p, ar, rule) =>
                 {
-                    pr.Allowed = ar.Allowed;
-                    if (pr.IsGraphModified)
-                        pr.Save();
+                    SetRuleAllowed(rule, ar.Allowed);
+                    if (rule.IsGraphModified)
+                        rule.Save();
                 });
         }
     }
@@ -203,6 +193,11 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     internal A GetAllowed(Lite<RoleEntity> role, K key)
     {
         return runtimeRules.Value.GetOrThrow(role).GetAllowed(key);
+    }
+
+    internal A GetAllowedBase(Lite<RoleEntity> role, K key)
+    {
+        return runtimeRules.Value.GetOrThrow(role).GetAllowedBase(key);
     }
 
     internal DefaultDictionary<K, A> GetDefaultDictionary()
@@ -217,26 +212,23 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
     public class RoleAllowedCache
     {
+        readonly AuthCache<RT, AR, R, K, A> cache;
         readonly Lite<RoleEntity> role;
-        readonly IMerger<K, A> merger;
-        readonly Func<K, A, A> coercer;
 
         readonly DefaultDictionary<K, A> rules;
         readonly List<RoleAllowedCache> baseCaches;
 
 
-        public RoleAllowedCache(Lite<RoleEntity> role, IMerger<K, A> merger, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues, Func<K, A, A> coercer)
+        public RoleAllowedCache(AuthCache<RT, AR, R, K, A>  cache, Lite<RoleEntity> role, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues)
         {
             this.role = role;
 
-            this.merger = merger;
-            this.coercer = coercer;
-
+            
             this.baseCaches = baseCaches;
 
-            Func<K, A> defaultAllowed = merger.MergeDefault(role);
+            Func<K, A> defaultAllowed = cache.MergeDefault(role);
 
-            Func<K, A> baseAllowed = k => merger.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
+            Func<K, A> baseAllowed = k => cache.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
 
             var keys = baseCaches
                 .Where(b => b.rules.OverrideDictionary != null)
@@ -252,7 +244,7 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
             rules = new DefaultDictionary<K, A>(defaultAllowed, tmpRules);
         }
 
-        internal Dictionary<K, A>? Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
+        Dictionary<K, A>? Simplify(Dictionary<K, A> dictionary, Func<K, A> defaultAllowed, Func<K, A> baseAllowed)
         {
             if (dictionary == null || dictionary.Count == 0)
                 return null;
@@ -271,14 +263,14 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         {
             var raw = rules.GetAllowed(key);
 
-            return coercer(key, raw);
+            return cache.CoerceValue(role, key, raw);
         }
 
         public A GetAllowedBase(K key)
         {
-            var raw = merger.Merge(key, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(key))));
+            var raw = this.cache.Merge(key, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(key))));
 
-            return coercer(key, raw);
+            return cache.CoerceValue(role, key, raw);
         }
 
         internal DefaultDictionary<K, A> DefaultDictionary()
@@ -287,34 +279,39 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         }
     }
 
-    internal XElement ExportXml(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, string> allowedToString, List<K>? allKeys)
+    public abstract XElement ExportXml(bool exportAll);
+
+    protected XElement ExportXmlInternal(XName rootName, XName elementName, Func<K, string> resourceToString, Func<A, object[]> allowedToXml, List<K>? allKeys)
     {
         var rules = runtimeRules.Value;
 
         return new XElement(rootName,
             from r in AuthLogic.RolesInOrder(includeTrivialMerge: false)
-             let rac = rules.GetOrThrow(r)
+            let rac = rules.GetOrThrow(r)
 
-             select new XElement("Role",
-                 new XAttribute("Name", r.ToString()!),
-                     from k in allKeys ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
-                     let allowedBase = rac.GetAllowedBase(k)
-                     let allowed = rac.GetAllowed(k)
-                     where allKeys != null || !allowed.Equals(allowedBase)
-                     let resource = resourceToString(k)
-                     orderby resource
-                     select new XElement(elementName,
-                        new XAttribute("Resource", resource),
-                        new XAttribute("Allowed", allowedToString(allowed)))
-            ));
+            select new XElement("Role",
+                new XAttribute("Name", r.ToString()!),
+                    from k in allKeys ?? (rac.DefaultDictionary().OverrideDictionary?.Keys).EmptyIfNull()
+                    let allowedBase = rac.GetAllowedBase(k)
+                    let allowed = rac.GetAllowed(k)
+                    where allKeys != null || !allowed.Equals(allowedBase)
+                    let resource = resourceToString(k)
+                    orderby resource
+                    select new XElement(elementName,
+                       new XAttribute("Resource", resource),
+                       allowedToXml(allowed))
+                       )
+            );
     }
 
 
-    internal SqlPreCommand? ImportXml(XElement element, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
-        Func<string, R?> toResource, Func<string, A> parseAllowed)
+    public abstract SqlPreCommand? ImportXml(XElement root, Dictionary<string, Lite<RoleEntity>> roles, Replacements replacements);
+
+    protected SqlPreCommand? ImportXmlInternal(XElement root, XName rootName, XName elementName, Dictionary<string, Lite<RoleEntity>> roles,
+        Func<string, R?> toResource, Func<XElement, A> parseAllowed)
     {
         var current = Database.RetrieveAll<RT>().GroupToDictionary(a => a.Role);
-        var xRoles = (element.Element(rootName)?.Elements("Role")).EmptyIfNull();
+        var xRoles = (root.Element(rootName)?.Elements("Role")).EmptyIfNull();
         var should = xRoles.ToDictionary(x => roles.GetOrThrow(x.Attribute("Name")!.Value));
 
         Table table = Schema.Current.Table(typeof(RT));
@@ -325,15 +322,14 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                 var dic = (from xr in x.Elements(elementName)
                            let r = toResource(xr.Attribute("Resource")!.Value)
                            where r != null
-                           select KeyValuePair.Create(r, parseAllowed(xr.Attribute("Allowed")!.Value)))
+                           select KeyValuePair.Create(r, parseAllowed(xr)))
                            .ToDictionaryEx("{0} rules for {1}".FormatWith(typeof(R).NiceName(), role));
 
-                SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(new RT
+                SqlPreCommand? restSql = dic.Select(kvp => table.InsertSqlSync(SetRuleAllowed(new RT
                 {
                     Resource = kvp.Key,
                     Role = role,
-                    Allowed = kvp.Value
-                }, comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
+                }, kvp.Value), comment: Comment(role, kvp.Key, kvp.Value))).Combine(Spacing.Simple)?.Do(p => p.GoBefore = true);
 
                 return restSql;
             },
@@ -353,16 +349,16 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
                 SqlPreCommand? restSql = Synchronizer.SynchronizeScript(Spacing.Simple, shouldResources, currentResources,
                     (r, xr) =>
                     {
-                        var a = parseAllowed(xr.Attribute("Allowed")!.Value);
-                        return table.InsertSqlSync(new RT { Resource = ToEntity(r), Role = role, Allowed = a }, comment: Comment(role, ToEntity(r), a));
+                        var a = parseAllowed(xr);
+                        return table.InsertSqlSync(SetRuleAllowed(new RT { Resource = ToEntity(r), Role = role }, a), comment: Comment(role, ToEntity(r), a));
                     },
-                    (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), rt.Allowed)),
+                    (r, rt) => table.DeleteSqlSync(rt, null, Comment(role, ToEntity(r), GetRuleAllowed(rt))),
                     (r, xr, rt) =>
                     {
-                        var oldA = rt.Allowed;
-                        rt.Allowed = parseAllowed(xr.Attribute("Allowed")!.Value);
+                        var oldA = GetRuleAllowed(rt);
+                        SetRuleAllowed(rt, parseAllowed(xr));
                         if (rt.IsGraphModified)
-                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, rt.Allowed));
+                            return table.UpdateSqlSync(rt, null, comment: Comment(role, ToEntity(r), oldA, GetRuleAllowed(rt)));
                         return null;
                     })?.Do(p => p.GoBefore = true);
 
@@ -371,13 +367,24 @@ class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     }
 
 
-    internal static string Comment(Lite<RoleEntity> role, R resource, A allowed)
+    internal string Comment(Lite<RoleEntity> role, R resource, A allowed)
     {
-        return "{0} {1} for {2} ({3})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, allowed);
+        return "{0} {1} for {2} ({3})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, AllowedComment(allowed));
     }
 
-    internal static string Comment(Lite<RoleEntity> role, R resource, A from, A to)
+    protected virtual string AllowedComment(A allowed) 
     {
-        return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, from, to);
+        return allowed.ToString()!;
     }
+
+    internal string Comment(Lite<RoleEntity> role, R resource, A from, A to)
+    {
+        return "{0} {1} for {2} ({3} -> {4})".FormatWith(typeof(R).NiceName(), resource.ToString(), role, AllowedComment(from), AllowedComment(to));
+    }
+}
+
+public interface IManualAuth<K, A>
+{
+    A GetAllowed(Lite<RoleEntity> role, K key);
+    void SetAllowed(Lite<RoleEntity> role, K key, A allowed);
 }

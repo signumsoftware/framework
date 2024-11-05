@@ -1,21 +1,19 @@
 using System.Collections.Immutable;
 using Signum.Authorization;
+using Signum.Operations;
 
 namespace Signum.Authorization.Rules;
 
 
 public static class OperationAuthLogic
 {
-    static AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed> cache = null!;
-
+    static OperationCache cache = null!;
 
     public static IManualAuth<(OperationSymbol operation, Type type), OperationAllowed> Manual { get { return cache; } }
 
     public static bool IsStarted { get { return cache != null; } }
 
     public static readonly Dictionary<OperationSymbol, OperationAllowed> MaxAutomaticUpgrade = new Dictionary<OperationSymbol, OperationAllowed>();
-
-    internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
 
     public static void Start(SchemaBuilder sb)
     {
@@ -29,13 +27,7 @@ public static class OperationAuthLogic
             sb.Include<RuleOperationEntity>()
                  .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role });
 
-            cache = new AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed>(sb,
-                 toKey: s => (operation: s.Operation, type: s.Type.ToType()),
-                 toEntity: s => new OperationTypeEmbedded { Operation = s.operation, Type = s.type.ToTypeEntity() },
-                 isEquals: (o1, o2) => o1.Operation.Is(o2.Operation) && o1.Type.Is(o2.Type),
-                 merger: new OperationMerger(),
-                 invalidateWithTypes: true,
-                 coercer: OperationCoercer.Instance);
+            cache = new OperationCache(sb);
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
             {
@@ -43,35 +35,8 @@ public static class OperationAuthLogic
                 return null;
             };
 
-            AuthLogic.ExportToXml += exportAll => cache.ExportXml("Operations", "Operation", s => s.operation.Key + "/" + s.type?.ToTypeEntity().CleanName, b => b.ToString(),
-                exportAll ? AllOperationTypes() : null);
-
-            AuthLogic.ImportFromXml += (x, roles, replacements) =>
-            {
-                var allResources = x.Element("Operations")!.Elements("Role").SelectMany(r => r.Elements("Operation")).Select(p => p.Attribute("Resource")!.Value).ToHashSet();
-
-                replacements.AskForReplacements(
-                  allResources.Select(a => a.TryBefore("/") ?? a).ToHashSet(),
-                  SymbolLogic<OperationSymbol>.AllUniqueKeys(),
-                  operationReplacementKey);
-
-                string typeReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
-                replacements.AskForReplacements(
-                   allResources.Select(a => a.After("/")).ToHashSet(),
-                   TypeLogic.NameToType.Keys.ToHashSet(),
-                   TypeAuthCache.typeReplacementKey);
-
-                return cache.ImportXml(x, "Operations", "Operation", roles,
-                    s => {
-                        var operation = SymbolLogic<OperationSymbol>.TryToSymbol(replacements.Apply(operationReplacementKey, s.Before("/")));
-                        var type = TypeLogic.TryGetType(replacements.Apply(TypeAuthCache.typeReplacementKey, s.After("/")));
-
-                        if (operation == null || type == null || !OperationLogic.IsDefined(type, operation))
-                            return null;
-
-                        return new OperationTypeEmbedded { Operation = operation, Type = type.ToTypeEntity() };
-                    }, EnumExtensions.ToEnum<OperationAllowed>);
-            };
+            AuthLogic.ExportToXml += cache.ExportXml;
+            AuthLogic.ImportFromXml += cache.ImportXml;
 
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
@@ -111,11 +76,10 @@ public static class OperationAuthLogic
 
         cache.GetRules(result, resources);
 
-        var coercer = OperationCoercer.Instance.GetCoerceValue(role);
         result.Rules.ForEach(r =>
         {
             var operationType = (operation: r.Resource.Operation, type: r.Resource.Type.ToType());
-            r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !coercer(operationType, a).Equals(a)).ToArray();
+            r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !cache.CoerceValue(role, operationType, a).Equals(a)).ToArray();
         });
 
         return result;
@@ -161,7 +125,7 @@ public static class OperationAuthLogic
         return AllOperationTypes().ToDictionary(a => a, a => cache.GetAllowed(RoleEntity.Current, a));
     }
 
-    static List<(OperationSymbol operation, Type type)> AllOperationTypes()
+    internal static List<(OperationSymbol operation, Type type)> AllOperationTypes()
     {
         return (from type in Schema.Current.Tables.Keys
                 from o in OperationLogic.TypeOperations(type)
@@ -187,7 +151,7 @@ public static class OperationAuthLogic
         return ta.Contains(operationKey);
     }
 
-    public static OperationAllowed InferredOperationAllowed((OperationSymbol operation, Type type) operationType, Func<Type, TypeAllowedAndConditions> allowed)
+    public static OperationAllowed InferredOperationAllowed((OperationSymbol operation, Type type) operationType, Func<Type, WithConditions<TypeAllowed>> allowed)
     {
         Func<Type, TypeAllowedBasic, OperationAllowed> operationAllowed = (t, checkFor) =>
         {
@@ -227,123 +191,5 @@ public static class OperationAuthLogic
             default:
                 throw new UnexpectedValueException(operation.OperationType);
         }
-    }
-}
-
-class OperationMerger : IMerger<(OperationSymbol operation, Type type), OperationAllowed>
-{
-    public OperationAllowed Merge((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
-    {
-        OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
-            Max(baseValues.Select(a => a.Value)) :
-            Min(baseValues.Select(a => a.Value));
-
-        if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
-            return best;
-
-        var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(operationType.Item1);
-
-        if (maxUp.HasValue && maxUp <= best)
-            return best;
-
-        if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(operationType, a.Key).Equals(a.Value)))
-        {
-            var def = GetDefault(operationType, role);
-
-            return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
-        }
-
-        return best;
-    }
-
-    static OperationAllowed GetDefault((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role)
-    {
-        return OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.GetAllowed(role, t));
-    }
-
-    static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
-    {
-        OperationAllowed result = OperationAllowed.None;
-
-        foreach (var item in baseValues)
-        {
-            if (item > result)
-                result = item;
-
-            if (result == OperationAllowed.Allow)
-                return result;
-
-        }
-        return result;
-    }
-
-    static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
-    {
-        OperationAllowed result = OperationAllowed.Allow;
-
-        foreach (var item in baseValues)
-        {
-            if (item < result)
-                result = item;
-
-            if (result == OperationAllowed.None)
-                return result;
-
-        }
-        return result;
-    }
-
-    public Func<(OperationSymbol operation, Type type), OperationAllowed> MergeDefault(Lite<RoleEntity> role)
-    {
-        return key =>
-        {
-            if (AuthLogic.GetDefaultAllowed(role))
-                return OperationAllowed.Allow;
-
-            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
-                return OperationAllowed.None;
-
-            var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
-
-            var def = GetDefault(key, role);
-
-            return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
-        };
-    }
-
-}
-
-public class MinimumTypeAllowed
-{
-    public TypeAllowedBasic? OverridenType;
-    public TypeAllowedBasic? ReturnType;
-}
-
-class OperationCoercer : Coercer<OperationAllowed, (OperationSymbol symbol, Type type)>
-{
-    public static readonly OperationCoercer Instance = new OperationCoercer();
-
-    private OperationCoercer()
-    {
-    }
-
-    public override Func<(OperationSymbol symbol, Type type), OperationAllowed, OperationAllowed> GetCoerceValue(Lite<RoleEntity> role)
-    {
-        return (operationType, allowed) =>
-        {
-            var required = OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.GetAllowed(role, t));
-
-            return allowed < required ? allowed : required;
-        };
-    }
-
-    public override Func<Lite<RoleEntity>, OperationAllowed, OperationAllowed> GetCoerceValueManual((OperationSymbol symbol, Type type) operationType)
-    {
-        return (role, allowed) =>
-        {
-            var required = OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.Manual.GetAllowed(role, t));
-
-            return allowed < required ? allowed : required;
-        };
     }
 }

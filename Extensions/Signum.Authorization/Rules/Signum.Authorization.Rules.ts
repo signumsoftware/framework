@@ -159,9 +159,19 @@ export interface RulePermissionEntity extends RuleEntity<Basics.PermissionSymbol
   Type: "RulePermission";
 }
 
+export const RulePropertyConditionEntity: Type<RulePropertyConditionEntity> = new Type<RulePropertyConditionEntity>("RulePropertyCondition");
+export interface RulePropertyConditionEntity extends Entities.Entity {
+  Type: "RulePropertyCondition";
+  ruleProperty: Entities.Lite<RulePropertyEntity>;
+  conditions: Entities.MList<TypeConditionSymbol>;
+  allowed: PropertyAllowed;
+  order: number;
+}
+
 export const RulePropertyEntity: Type<RulePropertyEntity> = new Type<RulePropertyEntity>("RuleProperty");
 export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
   Type: "RuleProperty";
+  conditionRules: Entities.MList<RulePropertyConditionEntity>;
 }
 
 export const RuleQueryEntity: Type<RuleQueryEntity> = new Type<RuleQueryEntity>("RuleQuery");

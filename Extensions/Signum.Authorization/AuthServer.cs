@@ -170,7 +170,7 @@ public static class AuthServer
         {
             ReflectionServer.PropertyRouteExtension += (mi, pr) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed().Max();
                 if (allowed == PropertyAllowed.None)
                     return null;
 
@@ -180,14 +180,14 @@ public static class AuthServer
 
             SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed().Max();
 
                 return allowed == PropertyAllowed.None ? "Not allowed" : null;
             };
 
             SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed().Max();
 
                 return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
             };

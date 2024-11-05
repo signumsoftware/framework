@@ -211,7 +211,7 @@ public static partial class TypeAuthLogic
             return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
     }
 
-    private static Func<T, bool>? IsAllowedInMemory<T>(TypeAllowedAndConditions tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
+    private static Func<T, bool>? IsAllowedInMemory<T>(WithConditions<TypeAllowed> tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
     {
         if (tac.ConditionRules.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
             return null;
@@ -394,7 +394,7 @@ public static partial class TypeAuthLogic
     {
         Type type = entity.Type;
 
-        TypeAllowedAndConditions tac = GetAllowed(type);
+        WithConditions<TypeAllowed> tac = GetAllowed(type);
 
         var node = tac.ToTypeConditionNode(requested, inUserInterface);
 
@@ -415,7 +415,7 @@ public static partial class TypeAuthLogic
     {
         Type type = entity.Type;
 
-        TypeAllowedAndConditions tac = GetAllowed(type);
+        WithConditions<TypeAllowed> tac = GetAllowed(type);
 
         Expression baseValue = Expression.Constant(tac.Fallback.Get(inUserInterface) >= requested);
 
@@ -565,27 +565,6 @@ public static partial class TypeAuthLogic
                 return await base.ExecuteQueryValueAsync(request, token);
             }
         }
-    }
-
-    public static RuleTypeEntity ToRuleType(this TypeAllowedAndConditions allowed, Lite<RoleEntity> role, TypeEntity resource)
-    {
-        return new RuleTypeEntity
-        {
-            Role = role,
-            Resource = resource,
-            Allowed = allowed.Fallback,
-            ConditionRules = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
-            {
-                Allowed = a.Allowed,
-                Conditions = a.TypeConditions.ToMList()
-            }).ToMList()
-        };
-    }
-
-    public static TypeAllowedAndConditions ToTypeAllowedAndConditions(this RuleTypeEntity rule)
-    {
-        return new TypeAllowedAndConditions(rule.Allowed,
-            rule.ConditionRules.Select(c => new TypeConditionRuleModel(c.Conditions, c.Allowed)));
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements rep)

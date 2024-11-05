@@ -1,3 +1,5 @@
+using System.Runtime.CompilerServices;
+
 namespace Signum.Authorization.Rules;
 
 public class DefaultDictionary<K, A>
@@ -32,28 +34,6 @@ public class ConstantFunction<K, A>
     public A GetValue(K key)
     {
         return this.Allowed;
-    }
-
-    public override string ToString()
-    {
-        return "Constant {0}".FormatWith(Allowed);
-    }
-}
-
-public class ConstantFunctionButEnums
-{
-    internal TypeAllowedAndConditions Allowed;
-    public ConstantFunctionButEnums(TypeAllowedAndConditions allowed)
-    {
-        this.Allowed = allowed;
-    }
-
-    public TypeAllowedAndConditions GetValue(Type type)
-    {
-        if (EnumEntity.Extract(type) != null)
-            return new TypeAllowedAndConditions(TypeAllowed.Read);
-
-        return Allowed;
     }
 
     public override string ToString()
@@ -141,7 +121,7 @@ public class TypeRulePack : BaseRulePack<TypeAllowedRule>
     }
 }
 
-public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions>
+public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditions<TypeAllowed>>
 {
     public AuthThumbnail? Properties { get; set; }
 
@@ -152,37 +132,36 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, TypeAllowedAndConditions>
     public List<TypeConditionSymbol> AvailableConditions { get; set; }
 }
 
-
-
-public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndConditions>
+public class WithConditions<A> : ModelEntity, IEquatable<WithConditions<A>>
+    where A : struct, Enum
 {
-    private TypeAllowedAndConditions()
+    private WithConditions()
     {
     }
 
-    public TypeAllowedAndConditions(TypeAllowed fallback, IEnumerable<TypeConditionRuleModel> conditions)
-    {
-        this.fallback = fallback;
-        this.ConditionRules.AddRange(conditions);
-    }
-
-    public TypeAllowedAndConditions(TypeAllowed fallback, params TypeConditionRuleModel[] conditions)
+    public WithConditions(A fallback, IEnumerable<ConditionRule<A>> conditions)
     {
         this.fallback = fallback;
         this.ConditionRules.AddRange(conditions);
     }
 
-    TypeAllowed fallback;
-    public TypeAllowed Fallback
+    public WithConditions(A fallback, params ConditionRule<A>[] conditions)
+    {
+        this.fallback = fallback;
+        this.ConditionRules.AddRange(conditions);
+    }
+
+    A fallback;
+    public A Fallback
     {
         get { return fallback; }
         private set { fallback = value; }
     }
 
-    public MList<TypeConditionRuleModel> ConditionRules { get; set; } = new MList<TypeConditionRuleModel>();
+    public MList<ConditionRule<A>> ConditionRules { get; set; } = new MList<ConditionRule<A>>();
 
-    public override bool Equals(object? obj) => obj is TypeAllowedAndConditions tac && Equals(tac);
-    public bool Equals(TypeAllowedAndConditions? other)
+    public override bool Equals(object? obj) => obj is WithConditions<A> tac && Equals(tac);
+    public bool Equals(WithConditions<A>? other)
     {
         if (other == null)
             return false;
@@ -209,57 +188,6 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         return base.PropertyValidation(pi);
     }
 
-    public TypeAllowedBasic Min(bool inUserInterface)
-    {
-        return inUserInterface ? MinUI() : MinDB();
-    }
-
-    public TypeAllowedBasic Max(bool inUserInterface)
-    {
-        return inUserInterface ? MaxUI() : MaxDB();
-    }
-
-    public TypeAllowed MinCombined()
-    {
-        return TypeAllowedExtensions.Create(MinDB(), MinUI());
-    }
-
-    public TypeAllowed MaxCombined()
-    {
-        return TypeAllowedExtensions.Create(MaxDB(), MaxUI());
-    }
-
-    public TypeAllowedBasic MinUI()
-    {
-        if (!ConditionRules.Any())
-            return Fallback.GetUI();
-
-        return (TypeAllowedBasic)Math.Min((int)Fallback.GetUI(), ConditionRules.Select(a => (int)a.Allowed.GetUI()).Min());
-    }
-
-    public TypeAllowedBasic MaxUI()
-    {
-        if (!ConditionRules.Any())
-            return Fallback.GetUI();
-
-        return (TypeAllowedBasic)Math.Max((int)Fallback.GetUI(), ConditionRules.Select(a => (int)a.Allowed.GetUI()).Max());
-    }
-
-    public TypeAllowedBasic MinDB()
-    {
-        if (!ConditionRules.Any())
-            return Fallback.GetDB();
-
-        return (TypeAllowedBasic)Math.Min((int)Fallback.GetDB(), ConditionRules.Select(a => (int)a.Allowed.GetDB()).Min());
-    }
-
-    public TypeAllowedBasic MaxDB()
-    {
-        if (!ConditionRules.Any())
-            return Fallback.GetDB();
-
-        return (TypeAllowedBasic)Math.Max((int)Fallback.GetDB(), ConditionRules.Select(a => (int)a.Allowed.GetDB()).Max());
-    }
 
     public override string ToString()
     {
@@ -269,22 +197,98 @@ public class TypeAllowedAndConditions : ModelEntity, IEquatable<TypeAllowedAndCo
         return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
     }
 
-    internal bool Exactly(TypeAllowed current)
+    internal bool Exactly(A current)
     {
-        return Fallback == current && ConditionRules.IsNullOrEmpty();
+        return Fallback.Equals(current) && ConditionRules.IsNullOrEmpty();
     }
 
-    public TypeAllowedAndConditions WithoutCondition(TypeConditionSymbol typeCondition)
+    public WithConditions<A> WithoutCondition(TypeConditionSymbol typeCondition)
     {
-        return new TypeAllowedAndConditions(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
+        return new WithConditions<A>(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
     }
 }
 
-public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleModel>
+static class TypeAllowAndConditionsExtensions
 {
-    private TypeConditionRuleModel() { }
 
-    public TypeConditionRuleModel(IEnumerable<TypeConditionSymbol> typeConditions, TypeAllowed allowed)
+    public static TypeAllowedBasic Min(this WithConditions<TypeAllowed> taac, bool inUserInterface)
+    {
+        return inUserInterface ? taac.MinUI() : taac.MinDB();
+    }
+
+    public static TypeAllowedBasic Max(this WithConditions<TypeAllowed> taac, bool inUserInterface)
+    {
+        return inUserInterface ? taac.MaxUI() : taac.MaxDB();
+    }
+
+    public static TypeAllowed MinCombined(this WithConditions<TypeAllowed> taac)
+    {
+        return TypeAllowedExtensions.Create(taac.MinDB(), taac.MinUI());
+    }
+
+    public static TypeAllowed MaxCombined(this WithConditions<TypeAllowed> taac)
+    {
+        return TypeAllowedExtensions.Create(taac.MaxDB(), taac.MaxUI());
+    }
+
+    public static TypeAllowedBasic MinUI(this WithConditions<TypeAllowed> taac)
+    {
+        if (!taac.ConditionRules.Any())
+            return taac.Fallback.GetUI();
+
+        return (TypeAllowedBasic)Math.Min((int)taac.Fallback.GetUI(), taac.ConditionRules.Select(a => (int)a.Allowed.GetUI()).Min());
+    }
+
+    public static TypeAllowedBasic MaxUI(this WithConditions<TypeAllowed> taac)
+    {
+        if (!taac.ConditionRules.Any())
+            return taac.Fallback.GetUI();
+
+        return (TypeAllowedBasic)Math.Max((int)taac.Fallback.GetUI(), taac.ConditionRules.Select(a => (int)a.Allowed.GetUI()).Max());
+    }
+
+    public static TypeAllowedBasic MinDB(this WithConditions<TypeAllowed> taac)
+    {
+        if (!taac.ConditionRules.Any())
+            return taac.Fallback.GetDB();
+
+        return (TypeAllowedBasic)Math.Min((int)taac.Fallback.GetDB(), taac.ConditionRules.Select(a => (int)a.Allowed.GetDB()).Min());
+    }
+
+    public static TypeAllowedBasic MaxDB(this WithConditions<TypeAllowed> taac)
+    {
+        if (!taac.ConditionRules.Any())
+            return taac.Fallback.GetDB();
+
+        return (TypeAllowedBasic)Math.Max((int)taac.Fallback.GetDB(), taac.ConditionRules.Select(a => (int)a.Allowed.GetDB()).Max());
+    }
+}
+
+public static class ProperyAllowedAndConditionsExtensions
+{
+    public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac)
+    {
+        if (!paac.ConditionRules.Any())
+            return paac.Fallback;
+
+        return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+    }
+
+    public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac)
+    {
+        if (!paac.ConditionRules.Any())
+            return paac.Fallback;
+
+        return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+    }
+}
+
+public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
+    where A: struct, Enum
+{
+    private ConditionRule() { }
+
+    public ConditionRule(IEnumerable<TypeConditionSymbol> typeConditions, A allowed)
     {
         this.TypeConditions = typeConditions.ToMList();
         this.Allowed = allowed;
@@ -293,23 +297,23 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
     [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
     public MList<TypeConditionSymbol> TypeConditions { get; set; } = new MList<TypeConditionSymbol>();
 
-    public TypeAllowed Allowed { get; set; }
+    public A Allowed { get; set; }
 
     public override int GetHashCode() => TypeConditions.Count ^ Allowed.GetHashCode();
-    public override bool Equals(object? obj) => obj is TypeConditionRuleModel rm && Equals(rm);
+    public override bool Equals(object? obj) => obj is ConditionRule<A> rm && Equals(rm);
 
-    public bool Equals(TypeConditionRuleModel? other)
+    public bool Equals(ConditionRule<A>? other)
     {
         if (other == null)
             return false;
 
-        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed == other.Allowed;
+        return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
     }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => TypeConditions.ToString(" & ") + " => " + Allowed);
 
-    internal TypeConditionRuleModel? WithoutCondition(TypeConditionSymbol typeCondition)
+    internal ConditionRule<A>? WithoutCondition(TypeConditionSymbol typeCondition)
     {
         if (!TypeConditions.Contains(typeCondition))
             return this;
@@ -317,7 +321,7 @@ public class TypeConditionRuleModel : ModelEntity, IEquatable<TypeConditionRuleM
         if (TypeConditions.Count == 1)
             return null;
 
-        return new TypeConditionRuleModel { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
+        return new ConditionRule<A> { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
     }
 }
 
@@ -337,7 +341,6 @@ public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
 
 public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
 {
-
     public TypeEntity Type { get; internal set; }
 
     public override string ToString()
@@ -345,7 +348,8 @@ public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
         return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
     }
 }
-public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, PropertyAllowed>
+
+public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, WithConditions<PropertyAllowed>>
 {
 }
 

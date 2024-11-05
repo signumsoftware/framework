@@ -5,7 +5,7 @@ namespace Signum.Authorization.Rules;
 
 public static class PermissionAuthLogic
 {
-    static AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool> cache = null!;
+    static PermissionCache cache = null!;
 
     public static IManualAuth<PermissionSymbol, bool> Manual { get { return cache; } }
 
@@ -26,12 +26,7 @@ public static class PermissionAuthLogic
             sb.Include<RulePermissionEntity>()
                .WithUniqueIndex(rt => new { rt.Resource, rt.Role });
 
-            cache = new AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>(sb,
-                toKey: p => p,
-                toEntity: p => p,
-                isEquals: (p1, p2) => p1.Is(p2),
-                merger: new PermissionMerger(),
-                invalidateWithTypes: false);
+            cache = new PermissionCache(sb);
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
             {
@@ -41,20 +36,8 @@ public static class PermissionAuthLogic
 
             PermissionLogic.RegisterTypes(typeof(BasicPermission));
 
-            AuthLogic.ExportToXml += exportAll => cache.ExportXml("Permissions", "Permission", a => a.Key, b => b.ToString(),
-                exportAll ? PermissionLogic.RegisteredPermission.ToList() : null);
-            AuthLogic.ImportFromXml += (x, roles, replacements) =>
-            {
-                string replacementKey = "AuthRules:" + typeof(PermissionSymbol).Name;
-
-                replacements.AskForReplacements(
-                    x.Element("Permissions")!.Elements("Role").SelectMany(r => r.Elements("Permission")).Select(p => p.Attribute("Resource")!.Value).ToHashSet(),
-                    SymbolLogic<PermissionSymbol>.Symbols.Select(s => s.Key).ToHashSet(),
-                    replacementKey);
-
-                return cache.ImportXml(x, "Permissions", "Permission", roles,
-                    s => SymbolLogic<PermissionSymbol>.TryToSymbol(replacements.Apply(replacementKey, s)), bool.Parse);
-            };
+            AuthLogic.ExportToXml += cache.ExportXml;
+            AuthLogic.ImportFromXml += cache.ImportXml;
 
             PermissionLogic.IsAuthorizedImplementation = permissionSymbol =>
             {
@@ -114,21 +97,5 @@ public static class PermissionAuthLogic
     public static void SetPermissionRules(PermissionRulePack rules)
     {
         cache.SetRules(rules, r => true);
-    }
-}
-
-class PermissionMerger : IMerger<PermissionSymbol, bool>
-{
-    public bool Merge(PermissionSymbol key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, bool>> baseValues)
-    {
-        if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-            return baseValues.Any(a => a.Value);
-        else
-            return baseValues.All(a => a.Value);
-    }
-
-    public Func<PermissionSymbol, bool> MergeDefault(Lite<RoleEntity> role)
-    {
-        return new ConstantFunction<PermissionSymbol, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
     }
 }

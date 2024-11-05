@@ -120,7 +120,7 @@ public class SymbolNode : TypeConditionNode
 
 public static class TypeConditionNodeExtensions
 {
-    public static TypeConditionNode ToTypeConditionNode(this TypeAllowedAndConditions tac, TypeAllowedBasic requested, bool inUserInterface)
+    public static TypeConditionNode ToTypeConditionNode(this WithConditions<TypeAllowed> tac, TypeAllowedBasic requested, bool inUserInterface)
     {
         var baseValue = tac.Fallback.Get(inUserInterface) >= requested ? TypeConditionNode.True : TypeConditionNode.False;
 
