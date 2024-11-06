@@ -95,7 +95,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
  
           placeholder={c.getPlaceholder()}
           innerRef={c.setRefs} />
-      )}
+      , undefined, true)}
     </FormGroup>
   );
   }), (prev, next) => {

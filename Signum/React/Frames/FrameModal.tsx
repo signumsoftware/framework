@@ -198,9 +198,9 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
           if (result instanceof EntityOperationContext) {
 
             result.onExecuteSuccess = pack => {
-                Operations.notifySuccess();
-                frameRef.current!.onClose(pack);
-                return Promise.resolve();
+              Operations.notifySuccess();
+              frameRef.current!.onClose(pack);
+              return Promise.resolve();
             };
 
             result.defaultClick();
@@ -268,7 +268,7 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
       allowExchangeEntity: p.buttons == "close" && (p.allowExchangeEntity ?? true),
       prefix: prefix,
       isExecuting: () => state.executing == true,
-      execute: async action  => {
+      execute: async action => {
         if (state.executing)
           return;
 
@@ -294,7 +294,16 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
   }
 
   return (
-    <Modal size={p.modalSize ?? settings?.modalSize ?? "lg" as any} show={show} onExited={handleOnExited} onHide={handleCancelClicked} className="sf-frame-modal" enforceFocus={settings?.enforceFocusInModal ?? true}>
+    <Modal
+      size={p.modalSize ?? settings?.modalSize ?? "lg" as any}
+      show={show}
+      onExited={handleOnExited}
+      onHide={handleCancelClicked}
+      className="sf-frame-modal"
+      dialogClassName={settings?.modalDialogClass}
+      enforceFocus={settings?.enforceFocusInModal ?? true}
+      fullscreen={settings?.modalFullScreen ? true : undefined}
+    >
       <ModalHeaderButtons onClose={p.buttons == "close" ? handleCancelClicked : undefined} stickyHeader={settings?.stickyHeader}>
         <FrameModalTitle pack={state?.pack} pr={p.propertyRoute} title={p.title} subTitle={p.subTitle} getViewPromise={p.getViewPromise as any} widgets={wc && renderWidgets(wc, settings?.stickyHeader)} />
       </ModalHeaderButtons>

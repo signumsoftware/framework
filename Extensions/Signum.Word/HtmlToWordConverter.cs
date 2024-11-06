@@ -42,6 +42,9 @@ public static class HtmlToWordConverter
             case "#document":
                 return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties, addParagraphProperties, document)).ToArray();
 
+            case "br":
+                return new[] { new Break() };
+
             case "li":
             case "p":
                 {

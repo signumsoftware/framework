@@ -365,3 +365,44 @@ public enum HealthCheckStatus
     Ok,
     Error
 }
+
+
+
+[EntityKind(EntityKind.Part, EntityData.Master)]
+public class TextPartEntity : Entity, IPartEntity
+{
+    [StringLengthValidator(Min = 1, MultiLine = true)]
+    public string? TextContent { get; set; }
+
+    public TextPartType TextPartType { get; set; }
+
+    public bool RequiresTitle
+    {
+        get { return false; }
+    }
+
+    public IPartEntity Clone()
+    {
+        return new TextPartEntity
+        {
+            TextContent = this.TextContent
+        };
+    }
+
+    public XElement ToXml(IToXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void FromXml(XElement element, IFromXmlContext ctx)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public enum TextPartType
+{
+    Text,
+    Markdown,
+    HTML,
+}

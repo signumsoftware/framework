@@ -183,6 +183,20 @@ export interface SeparatorPartEntity extends Entities.Entity, IPartEntity {
   requiresTitle: boolean;
 }
 
+export const TextPartEntity: Type<TextPartEntity> = new Type<TextPartEntity>("TextPart");
+export interface TextPartEntity extends Entities.Entity, IPartEntity {
+  Type: "TextPart";
+  textContent: string | null;
+  textPartType: TextPartType;
+  requiresTitle: boolean;
+}
+
+export const TextPartType: EnumType<TextPartType> = new EnumType<TextPartType>("TextPartType");
+export type TextPartType =
+  "Text" |
+  "Markdown" |
+  "HTML";
+
 export const TokenEquivalenceEmbedded: Type<TokenEquivalenceEmbedded> = new Type<TokenEquivalenceEmbedded>("TokenEquivalenceEmbedded");
 export interface TokenEquivalenceEmbedded extends Entities.EmbeddedEntity {
   Type: "TokenEquivalenceEmbedded";

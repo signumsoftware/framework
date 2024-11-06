@@ -7,7 +7,7 @@ namespace Signum.UserAssets;
 
 public static class UserAssetsExporter
 {
-    static void ToXmlMixin(IUserAssetEntity entity, XElement element, IToXmlContext ctx)
+    public static void ToXmlMixin(IUserAssetEntity entity, XElement element, IToXmlContext ctx)
     {
         foreach (var m in ((Entity)entity).Mixins.OfType<IUserAssetMixin>())
         {

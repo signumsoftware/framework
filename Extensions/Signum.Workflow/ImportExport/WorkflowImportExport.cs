@@ -39,6 +39,16 @@ public class WorkflowImportExport
         }
     }
 
+    static XElement WithXmlMixin(IWorkflowObjectEntity entity, IToXmlContext ctx, XElement element)
+    {
+        foreach (var m in ((Entity)(IEntity)entity).Mixins.OfType<IUserAssetMixin>())
+        {
+            m.ToXml(element, ctx);
+        }
+
+        return element;
+    }
+
     public XElement ToXml(IToXmlContext ctx)
     {
         return new XElement("Workflow",
@@ -48,12 +58,12 @@ public class WorkflowImportExport
           new XAttribute("MainEntityStrategies", workflow.MainEntityStrategies.ToString(",")),
           workflow.ExpirationDate == null ? null! : new XAttribute("ExpirationDate", workflow.ExpirationDate.Value.ToString("o", CultureInfo.InvariantCulture)),
 
-           this.pools.Values.Select(p => new XElement("Pool",
+           this.pools.Values.Select(p => WithXmlMixin(p, ctx, new XElement("Pool",
             new XAttribute("BpmnElementId", p.BpmnElementId),
             new XAttribute("Name", p.Name),
-            p.Xml.ToXml())),
+            p.Xml.ToXml()))),
 
-           this.lanes.Values.Select(la => new XElement("Lane",
+           this.lanes.Values.Select(la => WithXmlMixin(la, ctx, new XElement("Lane",
             new XAttribute("BpmnElementId", la.BpmnElementId),
             new XAttribute("Name", la.Name),
             new XAttribute("Pool", la.Pool.BpmnElementId),
@@ -61,46 +71,47 @@ public class WorkflowImportExport
             la.ActorsEval == null ? null! : new XElement("ActorsEval", new XCData(la.ActorsEval.Script)),
             la.UseActorEvalForStart == false ? null! : new XElement("UseActorEvalForStart", la.UseActorEvalForStart),
             la.CombineActorAndActorEvalWhenContinuing == false ? null! : new XElement("CombineActorAndActorEvalWhenContinuing", la.CombineActorAndActorEvalWhenContinuing),
-            la.Xml.ToXml())),
+            la.Xml.ToXml()))),
 
-           this.activities.Values.Select(a => new XElement("Activity",
-            new XAttribute("BpmnElementId", a.BpmnElementId),
-            new XAttribute("Lane", a.Lane.BpmnElementId),
-            new XAttribute("Name", a.Name),
-            new XAttribute("Type", a.Type.ToString()),
-            a.RequiresOpen == false ? null! : new XAttribute("RequiresOpen", a.RequiresOpen),
-            a.EstimatedDuration == null ? null! : new XAttribute("EstimatedDuration", a.EstimatedDuration),
-            string.IsNullOrEmpty(a.ViewName) ? null! : new XAttribute("ViewName", a.ViewName),
-            string.IsNullOrEmpty(a.Comments) ? null! : new XElement("Comments", a.Comments),
-            !a.ViewNameProps.Any() ? null! : new XElement("ViewNameProps",
-                a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))
-            ),
-            !a.DecisionOptions.Any() ? null! : new XElement("DecisionOptions",
-                a.DecisionOptions.Select(cdo => cdo.ToXml("DecisionOption"))),
-            a.CustomNextButton?.ToXml("CustomNextButton")!,
-            string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
-            a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
-                new XAttribute("Workflow", ctx.Include(a.SubWorkflow.Workflow)),
-                new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
-            ),
-            a.Script == null ? null! : new XElement("Script",
-                new XAttribute("Script", ctx.Include(a.Script.Script)),
-                a.Script.RetryStrategy == null ? null! : new XAttribute("RetryStrategy", ctx.Include(a.Script.RetryStrategy))
-            ),
-            a.Xml.ToXml()
-           )),
+           this.activities.Values.Select(a => WithXmlMixin(a, ctx,
+               new XElement("Activity",
+                new XAttribute("BpmnElementId", a.BpmnElementId),
+                new XAttribute("Lane", a.Lane.BpmnElementId),
+                new XAttribute("Name", a.Name),
+                new XAttribute("Type", a.Type.ToString()),
+                a.RequiresOpen == false ? null! : new XAttribute("RequiresOpen", a.RequiresOpen),
+                a.EstimatedDuration == null ? null! : new XAttribute("EstimatedDuration", a.EstimatedDuration),
+                string.IsNullOrEmpty(a.ViewName) ? null! : new XAttribute("ViewName", a.ViewName),
+                string.IsNullOrEmpty(a.Comments) ? null! : new XElement("Comments", a.Comments),
+                !a.ViewNameProps.Any() ? null! : new XElement("ViewNameProps",
+                    a.ViewNameProps.Select(vnp => new XElement("ViewNameProp", new XAttribute("Name", vnp.Name), new XCData(vnp.Expression!)))
+                ),
+                !a.DecisionOptions.Any() ? null! : new XElement("DecisionOptions",
+                    a.DecisionOptions.Select(cdo => cdo.ToXml("DecisionOption"))),
+                a.CustomNextButton?.ToXml("CustomNextButton")!,
+                string.IsNullOrEmpty(a.UserHelp) ? null! : new XElement("UserHelp", new XCData(a.UserHelp)),
+                a.SubWorkflow == null ? null! : new XElement("SubWorkflow",
+                    new XAttribute("Workflow", a.SubWorkflow.Workflow.Is(workflow) ? a.SubWorkflow.Workflow.Guid : ctx.Include(a.SubWorkflow.Workflow)),
+                    new XElement("SubEntitiesEval", new XCData(a.SubWorkflow.SubEntitiesEval.Script))
+                ),
+                a.Script == null ? null! : new XElement("Script",
+                    new XAttribute("Script", ctx.Include(a.Script.Script)),
+                    a.Script.RetryStrategy == null ? null! : new XAttribute("RetryStrategy", ctx.Include(a.Script.RetryStrategy))
+                ),
+                a.Xml.ToXml()
+               ))),
 
-           this.gateways.Values.Select(g => new XElement("Gateway",
+           this.gateways.Values.Select(g => WithXmlMixin(g, ctx, new XElement("Gateway",
                new XAttribute("BpmnElementId", g.BpmnElementId),
                g.Name.HasText() ? new XAttribute("Name", g.Name) : null!,
                new XAttribute("Lane", g.Lane.BpmnElementId),
                new XAttribute("Type", g.Type.ToString()),
                new XAttribute("Direction", g.Direction.ToString()),
-               g.Xml.ToXml())),
+               g.Xml.ToXml()))),
 
 
            this.events.Values.Select(e => new { Event = e, WorkflowEventTaskModel = WorkflowEventTaskModel.GetModel(e) })
-               .Select(e => new XElement("Event",
+               .Select(e => WithXmlMixin(e.Event, ctx, new XElement("Event",
                 new XAttribute("BpmnElementId", e.Event.BpmnElementId),
                 e.Event.Name.HasText() ? new XAttribute("Name", e.Event.Name) : null!,
                 new XAttribute("Lane", e.Event.Lane.BpmnElementId),
@@ -118,9 +129,9 @@ public class WorkflowImportExport
                     e.WorkflowEventTaskModel.Rule == null ? null! : new XAttribute("Rule", ctx.Include(e.WorkflowEventTaskModel.Rule)),
                     e.WorkflowEventTaskModel.Condition == null ? null! : new XElement("Condition", new XCData(e.WorkflowEventTaskModel.Condition.Script)),
                     e.WorkflowEventTaskModel.Action == null ? null! : new XElement("Action", new XCData(e.WorkflowEventTaskModel.Action.Script)))
-            )),
+            ))),
 
-           this.connections.Values.Select(c => new XElement("Connection",
+           this.connections.Values.Select(c => WithXmlMixin(c, ctx, new XElement("Connection",
                 new XAttribute("BpmnElementId", c.BpmnElementId),
                 c.Name.HasText() ? new XAttribute("Name", c.Name) : null!,
                 new XAttribute("Type", c.Type.ToString()),
@@ -130,7 +141,7 @@ public class WorkflowImportExport
                 c.Condition == null ? null! : new XAttribute("Condition", ctx.Include(c.Condition)),
                 c.Action == null ? null! : new XAttribute("Action", ctx.Include(c.Action)),
                 c.Order == null ? null! : new XAttribute("Order", c.Order),
-                c.Xml.ToXml()))
+                c.Xml.ToXml())))
            );
 
 
@@ -303,7 +314,7 @@ public class WorkflowImportExport
         {
             pool.Name = xml.Attribute("Name")!.Value;
             pool.Workflow = this.workflow;
-            SetXmlDiagram(pool, xml);
+            SetXmlDiagramAndMixins(pool, xml, ctx);
         }))
         {
             using (Sync(this.lanes, element.Elements("Lane"), ctx, WorkflowLaneOperation.Save, WorkflowLaneOperation.Delete, (lane, xml) =>
@@ -315,7 +326,7 @@ public class WorkflowImportExport
                 lane.ActorsEval = lane.ActorsEval.CreateOrAssignEmbedded(xml.Element("ActorsEval"), (ae, aex) => { ae.Script = aex.Value; });
                 lane.UseActorEvalForStart = xml.Element("UseActorEvalForStart")?.Value.ToBool() ?? false;
                 lane.CombineActorAndActorEvalWhenContinuing = xml.Element("CombineActorAndActorEvalWhenContinuing")?.Value.ToBool() ?? false;
-                SetXmlDiagram(lane, xml);
+                SetXmlDiagramAndMixins(lane, xml, ctx);
             }))
             {
                 using (Sync(this.activities, element.Elements("Activity"), ctx, WorkflowActivityOperation.Save, WorkflowActivityOperation.Delete, (activity, xml) =>
@@ -342,7 +353,7 @@ public class WorkflowImportExport
                     activity.UserHelp = xml.Element("UserHelp")?.Value;
                     activity.SubWorkflow = activity.SubWorkflow.CreateOrAssignEmbedded(xml.Element("SubWorkflow"), (swe, elem) =>
                     {
-                        swe.Workflow = (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
+                        swe.Workflow = workflow.Guid == (Guid)elem.Attribute("Workflow")! ? workflow : (WorkflowEntity)ctx.GetEntity((Guid)elem.Attribute("Workflow")!);
                         swe.SubEntitiesEval = swe.SubEntitiesEval.CreateOrAssignEmbedded(elem.Element("SubEntitiesEval"), (se, x) =>
                         {
                             se.Script = x.Value;
@@ -353,7 +364,7 @@ public class WorkflowImportExport
                         swe.Script = ((WorkflowScriptEntity)ctx.GetEntity((Guid)elem.Attribute("Script")!)).ToLiteFat();
                         swe.RetryStrategy = elem.Attribute("RetryStrategy")?.Let(a => (WorkflowScriptRetryStrategyEntity)ctx.GetEntity((Guid)a));
                     });
-                    SetXmlDiagram(activity, xml);
+                    SetXmlDiagramAndMixins(activity, xml, ctx);
                 }))
                 {
                     using (Sync(this.events, element.Elements("Event"), ctx, WorkflowEventOperation.Save, WorkflowEventOperation.Delete, (ev, xml) =>
@@ -370,7 +381,7 @@ public class WorkflowImportExport
                         });
                         ev.BoundaryOf = xml.Attribute("BoundaryOf")?.Let(a => activities.GetOrThrow(a.Value).ToLiteFat());
 
-                        SetXmlDiagram(ev, xml);
+                        SetXmlDiagramAndMixins(ev, xml, ctx);
                     }, afterSaveOperation: (ev, xml, ctx) =>
                     {
                         var wet = xml.Element("WorkflowEventTaskModel");
@@ -400,7 +411,7 @@ public class WorkflowImportExport
                             gw.Type = xml.Attribute("Type")!.Value.ToEnum<WorkflowGatewayType>();
                             gw.Direction = xml.Attribute("Direction")!.Value.ToEnum<WorkflowGatewayDirection>();
 
-                            SetXmlDiagram(gw, xml);
+                            SetXmlDiagramAndMixins(gw, xml, ctx);
                         }))
                         {
                             using (Sync(this.connections, element.Elements("Connection"), ctx, WorkflowConnectionOperation.Save, WorkflowConnectionOperation.Delete, (conn, xml) =>
@@ -413,7 +424,7 @@ public class WorkflowImportExport
                                 conn.Condition = xml.Attribute("Condition")?.Let(a => ((WorkflowConditionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
                                 conn.Action = xml.Attribute("Action")?.Let(a => ((WorkflowActionEntity)ctx.GetEntity((Guid)a)).ToLiteFat());
                                 conn.Order = (int?)xml.Attribute("Order");
-                                SetXmlDiagram(conn, xml);
+                                SetXmlDiagramAndMixins(conn, xml, ctx);
                             }))
                             {
                                 //Identation vertigo :)
@@ -436,7 +447,7 @@ public class WorkflowImportExport
             ?? throw new InvalidOperationException("No Workflow node wound with BpmnElementId: " + bpmnElementId);
     }
 
-    void SetXmlDiagram(IWorkflowObjectEntity entity, XElement xml)
+    void SetXmlDiagramAndMixins(IWorkflowObjectEntity entity, XElement xml, IFromXmlContext ctx)
     {
         if (entity.Xml == null)
             entity.Xml = new WorkflowXmlEmbedded();
@@ -445,5 +456,11 @@ public class WorkflowImportExport
 
         if (!Enumerable.SequenceEqual((entity.Xml.DiagramXml ?? "").Lines(), newValue.Lines()))
             entity.Xml.DiagramXml = newValue;
+
+
+        foreach (var m in ((Entity)entity).Mixins.OfType<IUserAssetMixin>())
+        {
+            m.FromXml(xml, ctx);
+        }
     }
 }
