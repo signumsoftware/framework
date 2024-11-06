@@ -16,6 +16,7 @@ export interface EnumLineProps<V extends string | number | boolean | null> exten
   "RadioGroup";
   optionItems?: (OptionItem | MemberInfo | V)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
+  optionHtmlAttributes?: (oi: OptionItem) => React.OptionHTMLAttributes<HTMLOptionElement>;
   columnCount?: number;
   columnWidth?: number;
 }
@@ -127,7 +128,7 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
         {inputId => vl.withItemGroup(
           <select id={inputId} {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formSelectClass, vl.mandatoryClass)} onChange={handleEnumOnChange} >
             {!optionItems.some(a => toStr(a.value) == toStr(s.ctx.value)) && <option key={-1} value={toStr(s.ctx.value)}>{toStr(s.ctx.value)}</option>}
-            {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)}>{oi.label}</option>)}
+            {optionItems.map((oi, i) => <option key={i} value={toStr(oi.value)} {...s.optionHtmlAttributes?.(oi)}>{oi.label}</option>)}
           </select>)
         }
       </FormGroup>
