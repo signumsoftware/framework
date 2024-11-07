@@ -54,6 +54,11 @@ export module AuthAdminMessage {
   export const Uncheck: MessageKey = new MessageKey("AuthAdminMessage", "Uncheck");
   export const AddCondition: MessageKey = new MessageKey("AuthAdminMessage", "AddCondition");
   export const RemoveCondition: MessageKey = new MessageKey("AuthAdminMessage", "RemoveCondition");
+  export const Fallback: MessageKey = new MessageKey("AuthAdminMessage", "Fallback");
+  export const FirstRule: MessageKey = new MessageKey("AuthAdminMessage", "FirstRule");
+  export const SecondRule: MessageKey = new MessageKey("AuthAdminMessage", "SecondRule");
+  export const ThirdRule: MessageKey = new MessageKey("AuthAdminMessage", "ThirdRule");
+  export const NthRule: MessageKey = new MessageKey("AuthAdminMessage", "NthRule");
 }
 
 export const AuthThumbnail: EnumType<AuthThumbnail> = new EnumType<AuthThumbnail>("AuthThumbnail");
@@ -73,6 +78,14 @@ export module BasicPermission {
   export const AutomaticUpgradeOfProperties : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
   export const AutomaticUpgradeOfQueries : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
   export const AutomaticUpgradeOfOperations : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
+}
+
+export function ConditionRule<A extends string>(a : EnumType<A>): Type<ConditionRule<A>> {
+    return new Type<ConditionRule<A>>("ConditionRule_" + a.typeName);
+}
+export interface ConditionRule<A> extends Entities.ModelEntity {
+  typeConditions: Entities.MList<TypeConditionSymbol>;
+  allowed: A;
 }
 
 export const OperationAllowed: EnumType<OperationAllowed> = new EnumType<OperationAllowed>("OperationAllowed");
@@ -116,8 +129,9 @@ export type PropertyAllowed =
   "Write";
 
 export const PropertyAllowedRule: Type<PropertyAllowedRule> = new Type<PropertyAllowedRule>("PropertyAllowedRule");
-export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, PropertyAllowed> {
+export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, WithConditions<PropertyAllowed>> {
   Type: "PropertyAllowedRule";
+  availableConditions: Array<TypeConditionSymbol>;
 }
 
 export const PropertyRulePack: Type<PropertyRulePack> = new Type<PropertyRulePack>("PropertyRulePack");
@@ -143,20 +157,21 @@ export interface QueryRulePack extends BaseRulePack<QueryAllowedRule> {
   type: Basics.TypeEntity;
 }
 
-export interface RuleEntity<R, A> extends Entities.Entity {
+export interface RuleEntity<R> extends Entities.Entity {
   role: Entities.Lite<Authorization.RoleEntity>;
   resource: R;
-  allowed: A;
 }
 
 export const RuleOperationEntity: Type<RuleOperationEntity> = new Type<RuleOperationEntity>("RuleOperation");
-export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded, OperationAllowed> {
+export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded> {
   Type: "RuleOperation";
+  allowed: OperationAllowed;
 }
 
 export const RulePermissionEntity: Type<RulePermissionEntity> = new Type<RulePermissionEntity>("RulePermission");
-export interface RulePermissionEntity extends RuleEntity<Basics.PermissionSymbol, boolean> {
+export interface RulePermissionEntity extends RuleEntity<Basics.PermissionSymbol> {
   Type: "RulePermission";
+  allowed: boolean;
 }
 
 export const RulePropertyConditionEntity: Type<RulePropertyConditionEntity> = new Type<RulePropertyConditionEntity>("RulePropertyCondition");
@@ -169,14 +184,16 @@ export interface RulePropertyConditionEntity extends Entities.Entity {
 }
 
 export const RulePropertyEntity: Type<RulePropertyEntity> = new Type<RulePropertyEntity>("RuleProperty");
-export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity, PropertyAllowed> {
+export interface RulePropertyEntity extends RuleEntity<Basics.PropertyRouteEntity> {
   Type: "RuleProperty";
+  fallback: PropertyAllowed;
   conditionRules: Entities.MList<RulePropertyConditionEntity>;
 }
 
 export const RuleQueryEntity: Type<RuleQueryEntity> = new Type<RuleQueryEntity>("RuleQuery");
-export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity, QueryAllowed> {
+export interface RuleQueryEntity extends RuleEntity<Basics.QueryEntity> {
   Type: "RuleQuery";
+  allowed: QueryAllowed;
 }
 
 export const RuleTypeConditionEntity: Type<RuleTypeConditionEntity> = new Type<RuleTypeConditionEntity>("RuleTypeCondition");
@@ -189,8 +206,9 @@ export interface RuleTypeConditionEntity extends Entities.Entity {
 }
 
 export const RuleTypeEntity: Type<RuleTypeEntity> = new Type<RuleTypeEntity>("RuleType");
-export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity, TypeAllowed> {
+export interface RuleTypeEntity extends RuleEntity<Basics.TypeEntity> {
   Type: "RuleType";
+  fallback: TypeAllowed;
   conditionRules: Entities.MList<RuleTypeConditionEntity>;
 }
 
@@ -203,13 +221,6 @@ export type TypeAllowed =
   "DBWriteUIRead" |
   "Write";
 
-export const TypeAllowedAndConditions: Type<TypeAllowedAndConditions> = new Type<TypeAllowedAndConditions>("TypeAllowedAndConditions");
-export interface TypeAllowedAndConditions extends Entities.ModelEntity {
-  Type: "TypeAllowedAndConditions";
-  fallback: TypeAllowed;
-  conditionRules: Entities.MList<TypeConditionRuleModel>;
-}
-
 export const TypeAllowedBasic: EnumType<TypeAllowedBasic> = new EnumType<TypeAllowedBasic>("TypeAllowedBasic");
 export type TypeAllowedBasic =
   "None" |
@@ -217,19 +228,12 @@ export type TypeAllowedBasic =
   "Write";
 
 export const TypeAllowedRule: Type<TypeAllowedRule> = new Type<TypeAllowedRule>("TypeAllowedRule");
-export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, TypeAllowedAndConditions> {
+export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, WithConditions<TypeAllowed>> {
   Type: "TypeAllowedRule";
   properties: AuthThumbnail | null;
   operations: AuthThumbnail | null;
   queries: AuthThumbnail | null;
   availableConditions: Array<TypeConditionSymbol>;
-}
-
-export const TypeConditionRuleModel: Type<TypeConditionRuleModel> = new Type<TypeConditionRuleModel>("TypeConditionRuleModel");
-export interface TypeConditionRuleModel extends Entities.ModelEntity {
-  Type: "TypeConditionRuleModel";
-  typeConditions: Entities.MList<TypeConditionSymbol>;
-  allowed: TypeAllowed;
 }
 
 export const TypeConditionSymbol: Type<TypeConditionSymbol> = new Type<TypeConditionSymbol>("TypeCondition");
@@ -240,5 +244,13 @@ export interface TypeConditionSymbol extends Basics.Symbol {
 export const TypeRulePack: Type<TypeRulePack> = new Type<TypeRulePack>("TypeRulePack");
 export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
   Type: "TypeRulePack";
+}
+
+export function WithConditions<A extends string>(a : EnumType<A>): Type<WithConditions<A>> {
+    return new Type<WithConditions<A>>("WithConditions_" + a.typeName);
+}
+export interface WithConditions<A> extends Entities.ModelEntity {
+  fallback: A;
+  conditionRules: Entities.MList<ConditionRule<A>>;
 }
 

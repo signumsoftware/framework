@@ -102,7 +102,7 @@ public static class PropertyAuthLogic
 
         result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<PropertyAllowed>()
             .Select(pa => new WithConditions<PropertyAllowed>(pa))
-            .Where(paac => !cache.CoerceValue(role, r.Resource.ToPropertyRoute(), paac).Equals(paac))
+            .Where(paac => !cache.CoerceValue(role, r.Resource.ToPropertyRoute(), paac, manual: false).Equals(paac))
             .ToArray());
 
         return result;

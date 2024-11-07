@@ -31,6 +31,25 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
         return rule;
     }
 
+    protected override TypeAllowedRule ToAllowedRule(TypeEntity resource, RoleAllowedCache ruleCache)
+    {
+        var r =  base.ToAllowedRule(resource, ruleCache);
+
+        Type type = r.Resource.ToType();
+
+        if (OperationAuthLogic.IsStarted)
+            r.Operations = OperationAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
+
+        if (PropertyAuthLogic.IsStarted)
+            r.Properties = PropertyAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
+
+        if (QueryAuthLogic.IsStarted)
+            r.Queries = QueryAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
+
+        r.AvailableConditions = TypeConditionLogic.ConditionsFor(type).ToList();
+
+        return r;
+    }
     protected override WithConditions<TypeAllowed> Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<TypeAllowed>>> baseValues)
     {
         if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)

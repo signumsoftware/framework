@@ -31,12 +31,22 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         return rule;
     }
 
-    public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed)
+    protected override PropertyAllowedRule ToAllowedRule(PropertyRouteEntity resource, RoleAllowedCache ruleCache)
+    {
+        var r = base.ToAllowedRule(resource, ruleCache);
+        Type type = resource.RootType.ToType();
+        r.AvailableConditions = TypeConditionLogic.ConditionsFor(type).ToList();
+        return r;
+    }
+
+    public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual)
     {
         if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
             return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
 
-        var aac = TypeAuthLogic.Manual.GetAllowed(role, key.RootType);
+        var aac = manual ? 
+            TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
+            TypeAuthLogic.GetAllowed(role, key.RootType);
 
         TypeAllowedBasic ta = aac.MaxUI();
 

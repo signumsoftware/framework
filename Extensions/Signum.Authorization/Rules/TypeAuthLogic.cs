@@ -39,11 +39,11 @@ public static partial class TypeAuthLogic
                 return OnIsWriting(query.ElementType);
             };
 
-            cache = new TypeCache(sb);
-
             sb.Include<RuleTypeEntity>()
                 .WithUniqueIndex(rt => new { rt.Resource, rt.Role })
                 .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleType);
+
+            cache = new TypeCache(sb);
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Type);
@@ -172,19 +172,6 @@ public static partial class TypeAuthLogic
         Schema s = Schema.Current;
         cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
 
-        foreach (TypeAllowedRule r in result.Rules)
-        {
-            Type type = TypeLogic.EntityToType[r.Resource];
-
-            if (OperationAuthLogic.IsStarted)
-                r.Operations = OperationAuthLogic.GetAllowedThumbnail(roleLite, type);
-
-            if (PropertyAuthLogic.IsStarted)
-                r.Properties = PropertyAuthLogic.GetAllowedThumbnail(roleLite, type);
-
-            if (QueryAuthLogic.IsStarted)
-                r.Queries = QueryAuthLogic.GetAllowedThumbnail(roleLite, type);
-        }
 
         return result;
 

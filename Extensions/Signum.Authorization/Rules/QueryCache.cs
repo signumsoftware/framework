@@ -98,7 +98,7 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
         };
     }
 
-    public override QueryAllowed CoerceValue(Lite<RoleEntity> role, object key, QueryAllowed allowed)
+    public override QueryAllowed CoerceValue(Lite<RoleEntity> role, object key, QueryAllowed allowed, bool manual = false)
     {
         if (QueryAuthLogic.AvoidCoerce.Contains(key))
             return allowed;
@@ -108,7 +108,9 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
 
         var implementations = QueryLogic.Queries.GetEntityImplementations(key);
 
-        return implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? allowed : QueryAllowed.None;
+        return manual ?
+            implementations.AllCanRead(t => TypeAuthLogic.Manual.GetAllowed(role, t)) ? allowed : QueryAllowed.None :
+            implementations.AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? allowed : QueryAllowed.None;
     }
 
     public override XElement ExportXml(bool exportAll)

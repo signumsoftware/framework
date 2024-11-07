@@ -79,4 +79,14 @@ public enum AuthAdminMessage
 
     AddCondition,
     RemoveCondition,
+
+    Fallback,
+    [Description("1st Rule")]
+    FirstRule,
+    [Description("2nd Rule")]
+    SecondRule,
+    [Description("3rd Rule")]
+    ThirdRule,
+    [Description("{0}th Rule")]
+    NthRule
 }

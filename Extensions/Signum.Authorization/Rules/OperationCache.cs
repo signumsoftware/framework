@@ -102,9 +102,11 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
         };
     }
 
-    public override OperationAllowed CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, OperationAllowed allowed)
+    public override OperationAllowed CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, OperationAllowed allowed, bool manual)
     {
-        var required = OperationAuthLogic.InferredOperationAllowed(key, t => TypeAuthLogic.Manual.GetAllowed(role, t));
+        var required = manual ? 
+            OperationAuthLogic.InferredOperationAllowed(key, t => TypeAuthLogic.Manual.GetAllowed(role, t)): 
+            OperationAuthLogic.InferredOperationAllowed(key, t => TypeAuthLogic.GetAllowed(role, t));
 
         return allowed < required ? allowed : required;
     }

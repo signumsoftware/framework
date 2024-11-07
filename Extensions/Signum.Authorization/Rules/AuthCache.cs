@@ -36,7 +36,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     protected abstract A GetRuleAllowed(RT rule);
     protected abstract RT SetRuleAllowed(RT rule, A allowed);
 
-    public virtual A CoerceValue(Lite<RoleEntity> role, K key, A allowed)
+    public virtual A CoerceValue(Lite<RoleEntity> role, K key, A allowed, bool manual = false)
     {
         return allowed;
     }
@@ -68,7 +68,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
         ManualResourceCache miniCache = new ManualResourceCache(this, key, resource);
 
-        allowed = CoerceValue(role, key, allowed);
+        allowed = CoerceValue(role, key, allowed, manual: true);
 
         if (miniCache.GetAllowed(role).Equals(allowed))
             return;
@@ -101,7 +101,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         public ManualResourceCache(AuthCache<RT, AR, R, K, A> cache, K key, R resource)
         {
             this.key = key;
-
+            this.cache = cache;
             var list = Database.Query<RT>().Where(r => cache.IsEqual.Evaluate(r.Resource, resource)).ToList();
 
             specificRules = list.ToDictionary(a => a.Role, a => cache.GetRuleAllowed(a));
@@ -110,7 +110,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         public A GetAllowed(Lite<RoleEntity> role)
         {
             if (specificRules.TryGetValue(role, out A? result))
-                return cache.CoerceValue(role, key, result);
+                return cache.CoerceValue(role, key, result, manual: true);
 
             return GetAllowedBase(role);
         }
@@ -119,7 +119,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         {
             var result = cache.Merge(key, role, AuthLogic.RelatedTo(role).Select(r => KeyValuePair.Create(r, GetAllowed(r))));
 
-            return cache.CoerceValue(role, key, result);
+            return cache.CoerceValue(role, key, result, manual: true);
         }
     }
 
@@ -158,13 +158,13 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
 
 
-    internal void GetRules(BaseRulePack<AR> rules, IEnumerable<R> resources)
+    internal void GetRules(BaseRulePack<AR> pack, IEnumerable<R> resources)
     {
-        RoleAllowedCache ruleCache = runtimeRules.Value.GetOrThrow(rules.Role);
+        RoleAllowedCache ruleCache = runtimeRules.Value.GetOrThrow(pack.Role);
 
-        rules.MergeStrategy = AuthLogic.GetMergeStrategy(rules.Role);
-        rules.InheritFrom = AuthLogic.RelatedTo(rules.Role).ToMList();
-        rules.Rules = resources.Select(r => ToAllowedRule(r, ruleCache)).ToMList();
+        pack.MergeStrategy = AuthLogic.GetMergeStrategy(pack.Role);
+        pack.InheritFrom = AuthLogic.RelatedTo(pack.Role).ToMList();
+        pack.Rules = resources.Select(r => ToAllowedRule(r, ruleCache)).ToMList();
     }
 
     internal void SetRules(BaseRulePack<AR> rules, Expression<Func<R, bool>> filterResources)
@@ -213,22 +213,22 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
     public class RoleAllowedCache
     {
         readonly AuthCache<RT, AR, R, K, A> cache;
-        readonly Lite<RoleEntity> role;
+        internal readonly Lite<RoleEntity> Role;
 
         readonly DefaultDictionary<K, A> rules;
         readonly List<RoleAllowedCache> baseCaches;
+        readonly Func<K, A, A> coercer;
 
 
         public RoleAllowedCache(AuthCache<RT, AR, R, K, A>  cache, Lite<RoleEntity> role, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues)
         {
-            this.role = role;
-
-            
+            this.Role = role;
+            this.cache = cache;
             this.baseCaches = baseCaches;
 
             Func<K, A> defaultAllowed = cache.MergeDefault(role);
 
-            Func<K, A> baseAllowed = k => cache.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(k))));
+            Func<K, A> baseAllowed = k => cache.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.Role, b.GetAllowed(k))));
 
             var keys = baseCaches
                 .Where(b => b.rules.OverrideDictionary != null)
@@ -263,14 +263,14 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         {
             var raw = rules.GetAllowed(key);
 
-            return cache.CoerceValue(role, key, raw);
+            return cache.CoerceValue(Role, key, raw);
         }
 
         public A GetAllowedBase(K key)
         {
-            var raw = this.cache.Merge(key, role, baseCaches.Select(b => KeyValuePair.Create(b.role, b.GetAllowed(key))));
+            var raw = this.cache.Merge(key, Role, baseCaches.Select(b => KeyValuePair.Create(b.Role, b.GetAllowed(key))));
 
-            return cache.CoerceValue(role, key, raw);
+            return cache.CoerceValue(Role, key, raw);
         }
 
         internal DefaultDictionary<K, A> DefaultDictionary()

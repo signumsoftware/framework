@@ -1670,10 +1670,10 @@ function tokenSequence(lambdaToProperty: Function, isFirst: boolean) {
 }
 
 export class EnumType<T extends string> {
-  constructor(public type: string) { }
+  constructor(public typeName: string) { }
 
   typeInfo(): TypeInfo {
-    return getTypeInfo(this.type);
+    return getTypeInfo(this.typeName);
   }
 
   values(): T[] {
@@ -1688,7 +1688,7 @@ export class EnumType<T extends string> {
     if (this.isDefined(val))
       return val;
 
-    throw new Error(`'${val}' is not a valid ${this.type}`)
+    throw new Error(`'${val}' is not a valid ${this.typeName}`)
   }
 
   value(val: T): T {

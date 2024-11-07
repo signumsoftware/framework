@@ -5,7 +5,7 @@ import { Operations } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
 import { EntityLine, AutoLine } from '@framework/Lines'
 import { AuthAdminClient } from '../AuthAdminClient'
-import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage } from './Signum.Authorization.Rules'
+import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, WithConditions } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
@@ -35,16 +35,14 @@ export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeC
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
 
     ctx.value.rules.forEach(mle => {
-      if (!mle.element.coercedValues!.contains(hc)) {
-        mle.element.allowed = hc;
+      if (!mle.element.coercedValues!.some(c => c.fallback == hc)) {
+        mle.element.allowed = WithConditions(PropertyAllowed).New({ fallback: hc });
         mle.element.modified = true;
       }
     });
 
     forceUpdate();
   }
-
-
 
   return (
     <div>
@@ -106,14 +104,14 @@ export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeC
 
   function renderRadio(c: PropertyAllowedRule, allowed: PropertyAllowed, color: string) {
 
-    if (c.coercedValues!.contains(allowed))
+    if (c.coercedValues!.some(a => a.fallback == allowed))
       return;
 
     return <ColorRadio
       readOnly={ctx.readOnly}
-      checked={c.allowed == allowed}
+      checked={c.allowed.fallback == allowed}
       color={color}
-      onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }}
+      onClicked={a => { c.allowed = WithConditions(PropertyAllowed).New({ fallback: allowed }); c.modified = true; forceUpdate() }}
     />;
   }
 }

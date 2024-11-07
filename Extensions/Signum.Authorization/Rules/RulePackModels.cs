@@ -208,7 +208,7 @@ public class WithConditions<A> : ModelEntity, IEquatable<WithConditions<A>>
     }
 }
 
-static class TypeAllowAndConditionsExtensions
+public static class TypeAllowAndConditionsExtensions
 {
 
     public static TypeAllowedBasic Min(this WithConditions<TypeAllowed> taac, bool inUserInterface)
@@ -310,9 +310,6 @@ public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
         return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
     }
 
-    [AutoExpressionField]
-    public override string ToString() => As.Expression(() => TypeConditions.ToString(" & ") + " => " + Allowed);
-
     internal ConditionRule<A>? WithoutCondition(TypeConditionSymbol typeCondition)
     {
         if (!TypeConditions.Contains(typeCondition))
@@ -351,6 +348,7 @@ public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
 
 public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, WithConditions<PropertyAllowed>>
 {
+    public List<TypeConditionSymbol> AvailableConditions { get; set; }
 }
 
 

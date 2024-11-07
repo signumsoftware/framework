@@ -28,6 +28,11 @@ public static class AuthServer
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
+        ReflectionServer.RegisterGenericModel(typeof(WithConditions<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRule<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(WithConditions<PropertyAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRule<PropertyAllowed>));
+
         ReflectionServer.GetContext = () => new
         {
             Culture = ReflectionServer.GetCurrentValidCulture(),
