@@ -52,7 +52,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
 {
   dragIndex!: number | undefined;
   setDragIndex!: React.Dispatch<number | undefined>;
-  dropBorderIndex!: IndexWithOffset | undefined
+  dropBorderIndex!: IndexWithOffset | undefined;
   setDropBorderIndex!: React.Dispatch<IndexWithOffset | undefined>;
 
   init(p: P): void {
@@ -455,7 +455,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     this.forceUpdate();
   }
 
-  getOffsetHorizontal(dragEvent: DragEvent, rect: ClientRect): 0 | 1 | undefined {
+  getOffsetHorizontal(dragEvent: DragEvent, rect: DOMRect): 0 | 1 | undefined {
 
     const margin = Math.min(50, rect.width / 2);
 
@@ -471,7 +471,7 @@ export abstract class EntityListBaseController<P extends EntityListBaseProps<V>,
     return undefined;
   }
 
-  getOffsetVertical(dragEvent: DragEvent, rect: ClientRect): 0 | 1 | undefined {
+  getOffsetVertical(dragEvent: DragEvent, rect: DOMRect): 0 | 1 | undefined {
 
     var margin = Math.min(50, rect.height / 2);
 

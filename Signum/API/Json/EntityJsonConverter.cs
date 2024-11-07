@@ -263,7 +263,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             }
             else
             {
-                writer.WriteString("Type", mod.GetType().Name);
+                writer.WriteString("Type", ReflectionServer.GetTypeName(mod.GetType()));
             }
 
             writer.WriteString("temporalId", mod.temporalId);

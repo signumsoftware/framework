@@ -83,7 +83,7 @@ export default function renderPunchcard({ data, width, height, parameters, loadi
     if ((elements as any).__sum__ !== undefined)
       return (elements as any).__sum__;
 
-    return (elements as any).__sum__ = elements.reduce<number>((acum, r) => acum + orderColumn!.getValue(r) ?? 0, 0);
+    return (elements as any).__sum__ = elements.sum(r => orderColumn!.getValue(r) ?? 0);
   }
 
   var horizontalKeys = groupAndSort(data.rows, parameters["XSort"]!, horizontalColumn, parameters['CompleteHorizontalValues']);
