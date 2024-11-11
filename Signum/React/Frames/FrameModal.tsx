@@ -6,7 +6,7 @@ import { Navigator, ViewPromise } from '../Navigator'
 import * as AppContext from '../AppContext';
 import { ButtonBar, ButtonBarHandle } from './ButtonBar'
 import { ValidationError } from '../Services'
-import { ifError } from '../Globals'
+import { classes, ifError } from '../Globals'
 import { TypeContext, StyleOptions, EntityFrame, IHasChanges, ButtonsContext } from '../TypeContext'
 import { Entity, Lite, ModifiableEntity, JavascriptMessage, FrameMessage, getToString, EntityPack, entityInfo, isEntityPack, isLite, is, isEntity, SaveChangesMessage, ModelEntity } from '../Signum.Entities'
 import { getTypeInfo, PropertyRoute, ReadonlyBinding, GraphExplorer, isTypeModel, tryGetTypeInfo } from '../Reflection'
@@ -300,7 +300,7 @@ export const FrameModal: <T extends ModifiableEntity>(props: FrameModalProps<T> 
       onExited={handleOnExited}
       onHide={handleCancelClicked}
       className="sf-frame-modal"
-      dialogClassName={settings?.modalDialogClass}
+      dialogClassName={classes(settings?.modalDialogClass, settings?.modalMaxWidth ? "modal-max-width" : undefined)}
       enforceFocus={settings?.enforceFocusInModal ?? true}
       fullscreen={settings?.modalFullScreen ? true : undefined}
     >
