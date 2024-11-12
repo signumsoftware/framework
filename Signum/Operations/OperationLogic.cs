@@ -72,7 +72,7 @@ public static class OperationLogic
     {
         allowedTypes.Value = (allowedTypes.Value ?? ImmutableStack<Type>.Empty).PushRange(types);
 
-        return new Disposable(() => 
+        return new Disposable(() =>
         {
             foreach (var type in types)
                 allowedTypes.Value = allowedTypes.Value.Pop();
@@ -420,16 +420,36 @@ Consider the following options:
         };
     }
 
+    static readonly Variable<Dictionary<string, object>> multiCanExecuteState = Statics.ThreadVariable<Dictionary<string, object>>("multicanExecuteState");
+
+    public static IDisposable? CreateMultiCanExecuteState()
+    {
+        var oldState = multiCanExecuteState.Value;
+        multiCanExecuteState.Value = new Dictionary<string, object>();
+        return new Disposable(() => multiCanExecuteState.Value = oldState);
+    }
+
+    public static Dictionary<string, object>? MultiCanExecuteState => multiCanExecuteState.Value;
+    public static bool IsMultiCanExecute => multiCanExecuteState.Value != null;
+
     public static Dictionary<OperationSymbol, string> ServiceCanExecute(Entity entity)
     {
         try
         {
-            var entityType = entity.GetType();
 
-            return (from o in TypeOperations(entityType)
-                    let eo = o as IEntityOperation
-                    where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
-                    select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+            using (CreateMultiCanExecuteState())
+            {
+                var entityType = entity.GetType();
+
+                var result = (from o in TypeOperations(entityType)
+                              let eo = o as IEntityOperation
+                              where eo != null && (eo.CanBeNew || !entity.IsNew) && OperationAllowed(o.OperationSymbol, entityType, true)
+                              select KeyValuePair.Create(eo.OperationSymbol, eo.CanExecute(entity))).ToDictionary();
+
+                return result;
+            }
+
+
         }
         catch (Exception e)
         {

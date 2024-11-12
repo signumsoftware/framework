@@ -1052,7 +1052,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         return list.Cast<Lite<Entity>>().ToList();
     }
 
-    public static List<T> RetrieveFromListOfLite<T>(this IEnumerable<Lite<T>> lites, string? message = null)
+    public static List<T> RetrieveLites<T>(this IEnumerable<Lite<T>> lites, string? message = null)
         where T : class, IEntity
     {
         if (lites == null)

@@ -24,7 +24,7 @@ export interface EntityComboProps<V extends Entity | Lite<Entity> | null> extend
   deps?: React.DependencyList;
   initiallyFocused?: boolean;
   selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
-  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any> | undefined;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactElement | string;
   nullPlaceHolder?: string;
   delayLoadData?: boolean;
@@ -160,7 +160,7 @@ export interface EntityComboSelectProps<V extends ModifiableEntity | Lite<Entity
   onDataLoaded?: (data: AsLite<V>[] | ResultTable | undefined) => void;
   deps?: React.DependencyList;
   selectHtmlAttributes?: React.SelectHTMLAttributes<any>;
-  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any>;
+  optionHtmlAttributes?: (lite: ResultRow | undefined) => React.OptionHTMLAttributes<any> | undefined;
   onRenderItem?: (lite: ResultRow | undefined, role: "Value" | "ListItem", searchTerm?: string) => React.ReactNode;
   liteToString?: (e: Entity) => string;
   nullPlaceHolder?: string;

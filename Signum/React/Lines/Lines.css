@@ -126,20 +126,37 @@ li.sf-strip-element {
 
 /* EntityLine buttons  */
 .input-group-vertical {
+    display: flex;
+    flex-grow: 0;
     flex-direction: column;
     align-items: stretch;
 }
 
-    .input-group-vertical > .btn {
-        border-top-left-radius: 0px !important;
-        border-bottom-left-radius: 0px !important;
-        margin-left: 0px;
+.input-group-vertical.before {
+    margin-right: -1px;
+}
+
+    .input-group-vertical.after {
+        margin-left: -1px;
     }
 
-        .input-group-vertical > .btn:first-child:not(:last-child) {
+
+        .input-group-vertical.after > .btn:first-child:not(:last-child) {
             border-top-right-radius: 4px;
+        }
+
+        .input-group-vertical.before > .btn:first-child:not(:last-child) {
+            border-top-left-radius: 4px;
+        }
+
+        .input-group-vertical > .btn:not(:last-child) {
             border-bottom-right-radius: 0;
             border-bottom-left-radius: 0;
+        }
+
+        .input-group-vertical > .btn:not(:first-child) {
+            border-top-right-radius: 0;
+            border-top-left-radius: 0;
         }
 
 /*legends*/
