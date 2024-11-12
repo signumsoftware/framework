@@ -1245,20 +1245,23 @@ public static class CaseActivityLogic
 
         internal static void TryToRecompose(CaseEntity childCase)
         {
-            if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
-                if (decompositionCaseActivity.DoneDate != null)
-                    throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
+                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+                {
+                    var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
+                    if (decompositionCaseActivity.DoneDate != null)
+                        throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
 
-                var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
-                    .Where(ca => ca != null)
-                    .Select(ca =>  new { ca!.DoneBy, ca!.Note})
-                    .ToList()
-                    .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                    var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
+                        .Where(ca => ca != null)
+                        .Select(ca => new { ca!.DoneBy, ca!.Note })
+                        .ToList()
+                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
 
-                decompositionCaseActivity.Note = lastActivitiesNotes;
-                ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                    decompositionCaseActivity.Note = lastActivitiesNotes;
+                    ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                }
             }
         }
 
