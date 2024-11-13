@@ -1270,19 +1270,21 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
     public static IQueryable<MListElement<E, V>> MListElements<E, V>(this E entity, Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
     {
-        return MListQuery(mListProperty).Where(mle => mle.Parent == entity);
+        return MListQuery(mListProperty).DisableQueryFilter().Where(mle => mle.Parent == entity);
     }
 
     [MethodExpander(typeof(MListElementsExpander))]
     public static IQueryable<MListElement<E, V>> MListElementsLite<E, V>(this Lite<E> entity, Expression<Func<E, MList<V>>> mListProperty)
             where E : Entity
     {
-        return MListQuery(mListProperty).Where(mle => mle.Parent.ToLite().Is(entity));
+        
+        return MListQuery(mListProperty).DisableQueryFilter().Where(mle => mle.Parent.ToLite().Is(entity));
     }
 
     class MListElementsExpander : IMethodExpander
     {
         static readonly MethodInfo miMListQuery = ReflectionTools.GetMethodInfo(() => Database.MListQuery<Entity, int>(null!)).GetGenericMethodDefinition();
+        static readonly MethodInfo miDisableQueryFilger = ReflectionTools.GetMethodInfo(() => LinqHints.DisableQueryFilter<Entity>(null!)).GetGenericMethodDefinition();
         static readonly MethodInfo miWhere = ReflectionTools.GetMethodInfo(() => Queryable.Where<Entity>(null!, a => false)).GetGenericMethodDefinition();
         static readonly MethodInfo miToLite = ReflectionTools.GetMethodInfo((Entity e) => e.ToLite()).GetGenericMethodDefinition();
 
@@ -1305,7 +1307,10 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
 
             var lambda = Expression.Lambda(Expression.Equal(prop, entity), p);
 
-            return Expression.Call(miWhere.MakeGenericMethod(mleType), Expression.Constant(query, mi.ReturnType), lambda);
+            return Expression.Call(miWhere.MakeGenericMethod(mleType),
+                Expression.Call(miDisableQueryFilger.MakeGenericMethod(mleType),
+                    Expression.Constant(query, mi.ReturnType)
+                ), lambda);
         }
     }
 
