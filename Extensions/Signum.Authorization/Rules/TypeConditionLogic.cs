@@ -1,5 +1,6 @@
 using Signum.Utilities.Reflection;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata;
 
 namespace Signum.Authorization.Rules;
@@ -26,7 +27,6 @@ public class TypeCondition
 }
 
 public delegate LambdaExpression QueryAuditor(FilterQueryArgs ctx);
-
 
 
 public static class TypeConditionLogic
@@ -362,3 +362,4 @@ public static class TypeConditionLogic
         return infos.TryGetC(type)?.TryGetC(typeCondition) != null;
     }
 }
+

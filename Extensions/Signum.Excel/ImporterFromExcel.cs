@@ -684,7 +684,7 @@ public class ImporterFromExcel
         {
             var pr = a is HasValueToken ? a.Parent!.GetPropertyRoute() : a.GetPropertyRoute();
 
-            return PropertyAuthLogic.GetAllowedFor(pr!, PropertyAllowed.Write);
+            return PropertyAuthLogic.CanBeAllowedFor(pr!, PropertyAllowed.Write);
         }).NotNull().ToList();
 
         if (authErrors.Any())

@@ -279,7 +279,7 @@ public static class ProperyAllowedAndConditionsExtensions
         if (!paac.ConditionRules.Any())
             return paac.Fallback;
 
-        return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+        return (PropertyAllowed)Math.Max((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Max());
     }
 }
 
@@ -320,6 +320,11 @@ public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
 
         return new ConditionRule<A> { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
     }
+
+    public override string ToString()
+    {
+        return TypeConditions.ToString(a => a.ToString().After("."), " & ") + " => " + Allowed;
+    }
 }
 
 public enum AuthThumbnail
@@ -333,7 +338,7 @@ public abstract class AllowedRuleCoerced<R, A> : AllowedRule<R, A>
     where R : notnull
     where A : notnull
 {
-    public A[] CoercedValues { get; internal set; }
+    public A Coerced { get; internal set; }
 }
 
 public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>

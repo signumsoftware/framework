@@ -249,6 +249,12 @@ public static class TypeAllowedExtensions
             ta == TypeAllowedBasic.Read ? PropertyAllowed.Read : PropertyAllowed.Write;
         return pa;
     }
+
+    public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
+    {
+        return new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(),
+            taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())));
+    }
 }
 
 [InTypeScript(true)]

@@ -79,7 +79,8 @@ public static class OperationAuthLogic
         result.Rules.ForEach(r =>
         {
             var operationType = (operation: r.Resource.Operation, type: r.Resource.Type.ToType());
-            r.CoercedValues = EnumExtensions.GetValues<OperationAllowed>().Where(a => !cache.CoerceValue(role, operationType, a, manual: false).Equals(a)).ToArray();
+
+            r.Coerced = cache.CoerceValue(role, operationType, OperationAllowed.Allow);
         });
 
         return result;

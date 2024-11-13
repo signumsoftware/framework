@@ -16,7 +16,7 @@ export interface AllowedRule<R, A> extends Entities.ModelEntity {
 }
 
 export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
-  coercedValues: A[];
+  coerced: A;
 }
 
 export module AuthAdminMessage {

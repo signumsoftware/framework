@@ -11,7 +11,7 @@ import { EntityLine, AutoLine, EntityBaseController } from '@framework/Lines'
 import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
-import { getTypeInfo, Binding, GraphExplorer } from '@framework/Reflection'
+import { getTypeInfo, Binding, GraphExplorer, EnumType } from '@framework/Reflection'
 import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList, Lite, EntityControlMessage, MList } from '@framework/Signum.Entities'
 import { AuthAdminClient } from '../AuthAdminClient'
 import {
@@ -32,171 +32,168 @@ import { QueryEntity } from '@framework/Signum.Basics'
 import { KeyNames } from '@framework/Components'
 import { useForceUpdate } from '@framework/Hooks'
 
-export const TypesRulesPackControl: React.ForwardRefExoticComponent<{ ctx: TypeContext<TypeRulePack> } & React.RefAttributes<IRenderButtons>>
-  = React.forwardRef(function TypesRulesPackControl({ ctx }: { ctx: TypeContext<TypeRulePack> }, ref: React.Ref<IRenderButtons>) {
+export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<TypeRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
-    const [filter, setFilter] = React.useState("");
+  const [filter, setFilter] = React.useState("");
 
-    function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
+  function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
 
-      GraphExplorer.propagateAll(bc.pack.entity);
+    GraphExplorer.propagateAll(bc.pack.entity);
 
-      const hasChanges = bc.pack.entity.modified;
+    const hasChanges = bc.pack.entity.modified;
 
-      return [
-        { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
-        { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
-        { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
-      ];
-    }
+    return [
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
+      { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
+      { button: <Button variant="info" disabled={hasChanges} onClick={() => handleSwitchToClick(bc)}>{AuthAdminMessage.SwitchTo.niceToString()}</Button> }
+    ];
+  }
 
-    React.useImperativeHandle(ref, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
 
-    function handleSaveClick(bc: ButtonsContext) {
-      let pack = ctx.value;
+  function handleSaveClick(bc: ButtonsContext) {
+    let pack = ctx.value;
 
-      AuthAdminClient.API.saveTypeRulePack(pack)
-        .then(() => AuthAdminClient.API.fetchTypeRulePack(pack.role.id!))
-        .then(newPack => {
-          Operations.notifySuccess();
-          bc.frame.onReload({ entity: newPack, canExecute: {} });
-        });
-    }
-
-    function handleResetChangesClick(bc: ButtonsContext) {
-      let pack = ctx.value;
-
-      AuthAdminClient.API.fetchTypeRulePack(pack.role.id!)
-        .then(newPack => {
-          bc.frame.onReload({ entity: newPack, canExecute: {} });
-        });
-    }
-
-    function handleSwitchToClick(bc: ButtonsContext) {
-      let pack = ctx.value;
-
-      Finder.find(RoleEntity).then(r => {
-        if (!r)
-          return;
-
-        AuthAdminClient.API.fetchTypeRulePack(r.id!)
-          .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
+    AuthAdminClient.API.saveTypeRulePack(pack)
+      .then(() => AuthAdminClient.API.fetchTypeRulePack(pack.role.id!))
+      .then(newPack => {
+        Operations.notifySuccess();
+        bc.frame.onReload({ entity: newPack, canExecute: {} });
       });
-    }
+  }
+
+  function handleResetChangesClick(bc: ButtonsContext) {
+    let pack = ctx.value;
+
+    AuthAdminClient.API.fetchTypeRulePack(pack.role.id!)
+      .then(newPack => {
+        bc.frame.onReload({ entity: newPack, canExecute: {} });
+      });
+  }
+
+  function handleSwitchToClick(bc: ButtonsContext) {
+    let pack = ctx.value;
+
+    Finder.find(RoleEntity).then(r => {
+      if (!r)
+        return;
+
+      AuthAdminClient.API.fetchTypeRulePack(r.id!)
+        .then(newPack => bc.frame.onReload({ entity: newPack, canExecute: {} }));
+    });
+  }
+
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
+  }
+
+  function handleSetFilter(e: React.FormEvent<any>) {
+    setFilter((e.currentTarget as HTMLInputElement).value);
+  }
+
+  const parts = filter.match(/[+-]?((!?\w+)|\*)/g);
+
+  function isMatch(rule: TypeAllowedRule): boolean {
+
+    if (!parts || parts.length == 0)
+      return true;
+
+    const array = [
+      rule.resource.namespace,
+      rule.resource.cleanName,
+      getTypeInfo(rule.resource.cleanName).niceName
+    ];
 
 
-    function updateFrame() {
-      ctx.frame!.frameComponent.forceUpdate();
-    }
+    const str = array.join("|");
 
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      const pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
+        p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
+          { isPositive: true, token: p };
 
-    function handleSetFilter(e: React.FormEvent<any>) {
-      setFilter((e.currentTarget as HTMLInputElement).value);
-    }
+      if (pair.token == "*")
+        return pair.isPositive;
 
-    const parts = filter.match(/[+-]?((!?\w+)|\*)/g);
-
-    function isMatch(rule: TypeAllowedRule): boolean {
-
-      if (!parts || parts.length == 0)
-        return true;
-
-      const array = [
-        rule.resource.namespace,
-        rule.resource.cleanName,
-        getTypeInfo(rule.resource.cleanName).niceName
-      ];
-
-
-      const str = array.join("|");
-
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const p = parts[i];
-        const pair = p.startsWith("+") ? { isPositive: true, token: p.after("+") } :
-          p.startsWith("-") ? { isPositive: false, token: p.after("-") } :
-            { isPositive: true, token: p };
-
-        if (pair.token == "*")
+      if (pair.token.startsWith("!")) {
+        if ("overriden".startsWith(pair.token.after("!")) && !withConditionsEquals(rule.allowed, rule.allowedBase))
           return pair.isPositive;
 
-        if (pair.token.startsWith("!")) {
-          if ("overriden".startsWith(pair.token.after("!")) && !typeAllowedEquals(rule.allowed, rule.allowedBase))
-            return pair.isPositive;
+        if ("conditions".startsWith(pair.token.after("!")) && rule.availableConditions.length)
+          return pair.isPositive;
 
-          if ("conditions".startsWith(pair.token.after("!")) && rule.availableConditions.length)
-            return pair.isPositive;
-
-          if ("error".startsWith(pair.token.after("!")) && rule.allowed.fallback == null)
-            return pair.isPositive;
-        }
-
-        if (str.toLowerCase().contains(pair.token.toLowerCase()))
+        if ("error".startsWith(pair.token.after("!")) && rule.allowed.fallback == null)
           return pair.isPositive;
       }
 
-      return false;
-    };
+      if (str.toLowerCase().contains(pair.token.toLowerCase()))
+        return pair.isPositive;
+    }
+
+    return false;
+  };
 
 
-    return (
-      <div>
-        <div className="form-compact">
-          <EntityLine ctx={ctx.subCtx(f => f.role)} />
-          <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
-        </div>
-
-        <table className="table table-sm sf-auth-rules">
-          <thead>
-            <tr>
-              <th>
-                <div style={{ marginBottom: "-2px" }}>
-                  <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions+!error" value={filter} onChange={handleSetFilter} />
-                </div>
-              </th>
-
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Write")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("Read")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {TypeAllowed.niceToString("None")}
-              </th>
-              <th style={{ textAlign: "center" }}>
-                {AuthAdminMessage.Overriden.niceToString()}
-              </th>
-              {AuthAdminClient.properties && <th style={{ textAlign: "center" }}>
-                {PropertyRouteEntity.niceName()}
-              </th>}
-              {AuthAdminClient.operations && <th style={{ textAlign: "center" }}>
-                {OperationSymbol.niceName()}
-              </th>}
-              {AuthAdminClient.queries && <th style={{ textAlign: "center" }}>
-                {QueryEntity.niceName()}
-              </th>}
-            </tr>
-          </thead>
-          <tbody>
-            {ctx.mlistItemCtxs(a => a.rules)
-              .filter((n, i) => isMatch(n.value))
-              .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).map(gr =>
-                <>
-                  <tr key={gr.key} className="sf-auth-namespace">
-                    <td colSpan={10}><b>{gr.key}</b></td>
-                  </tr>
-                  {gr.elements.orderBy(a => a.value.resource.className)
-                    .map(c => <TypeRow tctx={c} role={ctx.value.role} updateFrame={updateFrame} />)}
-                </>)
-            }
-          </tbody>
-        </table>
-
+  return (
+    <div>
+      <div className="form-compact">
+        <EntityLine ctx={ctx.subCtx(f => f.role)} />
+        <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
       </div>
-    );
-  });
 
-function typeAllowedEquals(allowed: WithConditions<TypeAllowed>, allowedBase: WithConditions<TypeAllowed>) {
+      <table className="table table-sm sf-auth-rules">
+        <thead>
+          <tr>
+            <th>
+              <div style={{ marginBottom: "-2px" }}>
+                <input type="text" className="form-control form-control-sm" id="filter" placeholder="Auth-!overriden+!conditions+!error" value={filter} onChange={handleSetFilter} />
+              </div>
+            </th>
+
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("Write")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("Read")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {TypeAllowed.niceToString("None")}
+            </th>
+            <th style={{ textAlign: "center" }}>
+              {AuthAdminMessage.Overriden.niceToString()}
+            </th>
+            {AuthAdminClient.properties && <th style={{ textAlign: "center" }}>
+              {PropertyRouteEntity.niceName()}
+            </th>}
+            {AuthAdminClient.operations && <th style={{ textAlign: "center" }}>
+              {OperationSymbol.niceName()}
+            </th>}
+            {AuthAdminClient.queries && <th style={{ textAlign: "center" }}>
+              {QueryEntity.niceName()}
+            </th>}
+          </tr>
+        </thead>
+        <tbody>
+          {ctx.mlistItemCtxs(a => a.rules)
+            .filter((n, i) => isMatch(n.value))
+            .groupBy(a => a.value.resource.namespace).orderBy(a => a.key).map(gr =>
+              <>
+                <tr key={gr.key} className="sf-auth-namespace">
+                  <td colSpan={10}><b>{gr.key}</b></td>
+                </tr>
+                {gr.elements.orderBy(a => a.value.resource.className)
+                  .map(c => <TypeRow tctx={c} role={ctx.value.role} updateFrame={updateFrame} />)}
+              </>)
+          }
+        </tbody>
+      </table>
+
+    </div>
+  );
+}
+
+function withConditionsEquals<A extends string>(allowed: WithConditions<A>, allowedBase: WithConditions<A>) {
   return allowed.fallback == allowedBase.fallback
     && allowed.conditionRules.length == allowedBase.conditionRules.length
     && allowed.conditionRules.map(mle => mle.element)
@@ -278,7 +275,7 @@ function select(current: TypeAllowed | null, basicAllowed: TypeAllowedBasic, e: 
 
 export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<RoleEntity>, updateFrame: () => void }): React.ReactElement {
 
-  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame());
+  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
 
   let roleId = p.role.id!;
 
@@ -289,46 +286,13 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
 
   const masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
 
-  function handleAddConditionClick(conditions: TypeConditionSymbol[], taac: WithConditions<TypeAllowed>, type: TypeEntity) {
-
-    SelectorModal.chooseManyElement(conditions, {
-      buttonDisplay: a => getToString(a),
-      title: AuthAdminMessage.SelectTypeConditions.niceToString(),
-      message: <div>
-        <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
-        <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
-        <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
-      </div>,
-      size: "md"
-    })
-      .then(tc => {
-        if (!tc)
-          return;
-
-        var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
-
-        if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
-          return MessageModal.showError(<div><p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
-            <p><strong>{combinedKey}</strong></p></div>,
-            AuthAdminMessage.RepeatedTypeCondition.niceToString());
-        }
-
-        taac.conditionRules.push(newMListElement(ConditionRule(TypeAllowed).New({
-          typeConditions: tc.map(t => newMListElement(t)),
-          allowed: "None"
-        })));
-
-        p.updateFrame();
-      });
-  }
-
   function handleRemoveConditionClick(taac: WithConditions<TypeAllowed>, con: ConditionRule<TypeAllowed>) {
     taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
     taac.modified = true;
     p.updateFrame();
   }
 
-  function colorRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
+  function renderRadio(b: Binding<TypeAllowed | null>, basicAllowed: TypeAllowedBasic, color: string) {
     const allowed = b.getValue();
 
     const niceName = TypeAllowedBasic.niceToString(basicAllowed)!;
@@ -402,7 +366,11 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
       <tr key={rule.resource.namespace + "." + rule.resource.className} className={classes("sf-auth-type", rule.allowed.conditionRules.length > 0 && "sf-auth-with-conditions")}>
         <td>
           {conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
-            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={e => { e.preventDefault(); handleAddConditionClick(conditions, rule.allowed, rule.resource); }}>
+            <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
+              e.preventDefault();
+              await addConditionClick(TypeAllowed, conditions, rule.allowed, rule.resource);
+              p.updateFrame();
+            }}>
               <FontAwesomeIcon icon="circle-plus" className="me-2" />
             </a> :
             <FontAwesomeIcon icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
@@ -412,16 +380,16 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
           {rule.allowed.conditionRules.length > 0 && <small className="shy-text ms-1">{AuthAdminMessage.Fallback.niceToString()}</small>}
         </td>
         <td style={{ textAlign: "center" }} className={masterClass}>
-          {colorRadio(fallback, "Write", "green")}
+          {renderRadio(fallback, "Write", "green")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {colorRadio(fallback, "Read", "#FFAD00")}
+          {renderRadio(fallback, "Read", "#FFAD00")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {colorRadio(fallback, "None", "red")}
+          {renderRadio(fallback, "None", "red")}
         </td>
         <td style={{ textAlign: "center" }}>
-          <GrayCheckbox readOnly={p.tctx.readOnly} checked={!typeAllowedEquals(rule.allowed, rule.allowedBase)} onUnchecked={() => {
+          <GrayCheckbox readOnly={p.tctx.readOnly} checked={!withConditionsEquals(rule.allowed, rule.allowedBase)} onUnchecked={() => {
             rule.allowed = JSON.parse(JSON.stringify(rule.allowedBase));
             rule.modified = true;
             p.updateFrame();
@@ -461,7 +429,10 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             onDrop={drag?.onDrop}
           >
             <td>
-              <a className="sf-condition-icon me-1 ms-3" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => { e.preventDefault(); handleRemoveConditionClick(rule.allowed, cr); }}>
+              <a className="sf-condition-icon me-1 ms-3" href="#" title={AuthAdminMessage.RemoveCondition.niceToString()} onClick={e => {
+                e.preventDefault();
+                handleRemoveConditionClick(rule.allowed, cr);
+              }}>
                 <FontAwesomeIcon icon="circle-minus" title={AuthAdminMessage.RemoveCondition.niceToString()} />
               </a>
               {drag && <a className="sf-condition-icon me-1" href="#" title={drag.title}
@@ -473,21 +444,20 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
               >
                 {EntityBaseController.getMoveIcon()}
               </a>}
-              {cr.typeConditions.flatMap((tc, j) => [
-                <small className="mx-1" key={j}>{getToString(tc.element)}</small>,
-                j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null])
-                .notNull()}
-
+              {cr.typeConditions.map((tc, j) => <>
+                <small className="mx-1" key={j}>{getToString(tc.element)}</small>
+                {j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null}
+              </>)}
               <small className="shy-text ms-1">{(getRuleTitle(i, rule.allowed.conditionRules.length))}</small>
             </td>
             <td style={{ textAlign: "center" }} className={masterClass}>
-              {colorRadio(b, "Write", "green")}
+              {renderRadio(b, "Write", "green")}
             </td>
             <td style={{ textAlign: "center" }}>
-              {colorRadio(b, "Read", "#FFAD00")}
+              {renderRadio(b, "Read", "#FFAD00")}
             </td>
             <td style={{ textAlign: "center" }}>
-              {colorRadio(b, "None", "red")}
+              {renderRadio(b, "None", "red")}
             </td>
             <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
             </td>
@@ -498,7 +468,38 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
   );
 }
 
-function getRuleTitle(i: number, total: number) {
+export async function addConditionClick<A extends string>(allowedType: EnumType<A>, conditions: TypeConditionSymbol[], taac: WithConditions<A>, type: TypeEntity): Promise<undefined> {
+
+  const tc = await SelectorModal.chooseManyElement(conditions, {
+    buttonDisplay: a => getToString(a),
+    title: AuthAdminMessage.SelectTypeConditions.niceToString(),
+    message: <div>
+      <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
+      <p>{AuthAdminMessage.SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+      <p>{AuthAdminMessage.SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime.niceToString().formatHtml(<strong>{getTypeInfo(type.cleanName).nicePluralName}</strong>)}</p>
+    </div>,
+    size: "md"
+  });
+  if (!tc)
+    return;
+
+  var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
+
+  if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
+    return MessageModal.showError(<div>
+      <p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
+      <p><strong>{combinedKey}</strong></p>
+    </div>,
+      AuthAdminMessage.RepeatedTypeCondition.niceToString());
+  }
+
+  taac.conditionRules.push(newMListElement(ConditionRule(allowedType).New({
+    typeConditions: tc.map(t => newMListElement(t)),
+    allowed: allowedType.values().first(),
+  })));
+}
+
+export function getRuleTitle(i: number, total: number): string {
 
   const j = total - i;
 
@@ -507,12 +508,12 @@ function getRuleTitle(i: number, total: number) {
       j == 3 ? AuthAdminMessage.ThirdRule.niceToString() : AuthAdminMessage.NthRule.niceToString(j);
 }
 
-interface IndexWithOffset {
+export interface IndexWithOffset {
   index: number;
   offset: 0 | 1;
 }
 
-function useDragAndDrop(list: MList<any>, forceUpdate: () => void): (index: number) => DragConfig {
+export function useDragAndDrop(list: MList<any>, forceUpdate: () => void, onChanged: () => void): (index: number) => DragConfig {
 
   const [dragIndex, setDragIndex] = React.useState<number | undefined>();
   const [dropBorderIndex, setDropBorderIndex] = React.useState<IndexWithOffset | undefined>();
@@ -606,7 +607,7 @@ function useDragAndDrop(list: MList<any>, forceUpdate: () => void): (index: numb
 
     setDropBorderIndex(undefined);
     setDragIndex(undefined);
-    forceUpdate();
+    onChanged();
   }
 
   function handleMoveKeyDown(ke: React.KeyboardEvent<any>, index: number): void {
@@ -645,5 +646,3 @@ export interface DragConfig {
   dropClass?: string;
   title?: string;
 }
-
-export default TypesRulesPackControl;

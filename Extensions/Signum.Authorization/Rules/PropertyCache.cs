@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 
@@ -39,23 +40,30 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         return r;
     }
 
-    public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual)
+    public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual = false)
     {
         if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
             return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
 
-        var aac = manual ? 
+        var taac = manual ? 
             TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
             TypeAuthLogic.GetAllowed(role, key.RootType);
 
-        TypeAllowedBasic ta = aac.MaxUI();
+        var paac = taac.ToPropertyAllowed();
 
-        PropertyAllowed pa = ta.ToPropertyAllowed();
+        PropertyAllowed Min(PropertyAllowed a, PropertyAllowed b) => a < b ? a : b;
 
-        if (allowed.Max() <= pa)
-            return allowed;
+        var result = new WithConditions<PropertyAllowed>(
+            Min(paac.Fallback, allowed.Fallback),
+            paac.ConditionRules.Select(cr =>
+            {
+                var similar = allowed.ConditionRules.SingleOrDefault(a => a.TypeConditions.ToHashSet().SetEquals(cr.TypeConditions));
 
-        return new WithConditions<PropertyAllowed>(pa);
+                return new ConditionRule<PropertyAllowed>(cr.TypeConditions,
+                    similar == null ? cr.Allowed : Min(cr.Allowed, similar.Allowed));
+            }));
+
+        return result;
     }
 
     protected override WithConditions<PropertyAllowed> Merge(PropertyRoute key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<PropertyAllowed>>> baseValues)

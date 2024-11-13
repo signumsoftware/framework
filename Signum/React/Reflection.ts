@@ -6,6 +6,7 @@ import { MList } from "./Signum.Entities";
 import * as AppContext from './AppContext';
 import { QueryString } from './QueryString';
 import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationSymbol } from './Signum.Operations';
+import { index } from 'd3';
 
 export function getEnumInfo(enumTypeName: string, enumId: number): MemberInfo {
 
@@ -1676,8 +1677,9 @@ export class EnumType<T extends string> {
     return getTypeInfo(this.typeName);
   }
 
+  _values: T[] | undefined; 
   values(): T[] {
-    return Dic.getKeys(this.typeInfo().members) as T[];
+    return (this._values ??= Dic.getKeys(this.typeInfo().members) as T[]);
   }
 
   isDefined(val: any): val is T {
@@ -1693,6 +1695,18 @@ export class EnumType<T extends string> {
 
   value(val: T): T {
     return val;
+  }
+
+  index(val: T): number {
+    return this.values().indexOf(val);
+  }
+
+  min(a: T, b: T): T{
+    return index(a) < index(b) ? a : b;
+  }
+
+  max(a: T, b: T): T {
+    return index(a) > index(b) ? a : b;
   }
 
   niceTypeName(): string | undefined {

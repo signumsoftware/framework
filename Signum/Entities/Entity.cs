@@ -70,6 +70,9 @@ public abstract class Entity : ModifiableEntity, IEntity
         set { this.Set(ref partitionId, value); }
     }
 
+    ////User for property type conditions
+    //object? typeConditions;
+
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)
     {
         if (EqualityComparer<T>.Default.Equals(field, value))

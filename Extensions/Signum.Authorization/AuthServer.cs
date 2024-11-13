@@ -185,16 +185,44 @@ public static class AuthServer
 
             SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed().Max();
+                if(UserEntity.Current == null)
+                {
+                    var allowed = pr.GetAllowUnathenticated();
 
-                return allowed == PropertyAllowed.None ? "Not allowed" : null;
+                    if (allowed == PropertyAllowed.None)
+                        return "Not Allowed for Unathenticated";
+
+                    return null;
+
+                }
+                else
+                {
+                    if (!PropertyAuthLogic.IsAllowedFor(mod, pr, PropertyAllowed.Read))
+                        return "Not Allowed";
+
+                    return null;
+
+                }
             };
 
             SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed().Max();
+                if(UserEntity.Current == null)
+                {
+                    var allowed = pr.GetAllowUnathenticated();
 
-                return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
+                    if (allowed == PropertyAllowed.None)
+                        return "Not Allowed for Unathenticated";
+
+                    return null;
+                }
+                else
+                {
+                    if (!PropertyAuthLogic.IsAllowedFor(mod, pr, PropertyAllowed.Write))
+                        return "Not Allowed to write";
+
+                    return null;
+                }
             };
 
             PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);

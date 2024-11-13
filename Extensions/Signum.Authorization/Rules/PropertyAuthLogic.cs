@@ -2,6 +2,7 @@ using Signum.API;
 using Signum.API.Json;
 using Signum.Authorization;
 using Signum.DynamicQuery.Tokens;
+using Signum.Entities;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Authorization.Rules;
@@ -35,7 +36,7 @@ public static class PropertyAuthLogic
                 return null;
             };
 
-            PropertyRoute.SetIsAllowedCallback(pp => pp.GetAllowedFor(PropertyAllowed.Read));
+            PropertyRoute.SetIsAllowedCallback(pp => pp.CanBeAllowedFor(PropertyAllowed.Read));
 
             AuthLogic.ExportToXml += cache.ExportXml;
             AuthLogic.ImportFromXml += cache.ImportXml;
@@ -98,12 +99,9 @@ public static class PropertyAuthLogic
     public static PropertyRulePack GetPropertyRules(Lite<RoleEntity> role, TypeEntity typeEntity)
     {
         var result = new PropertyRulePack { Role = role, Type = typeEntity };
-        cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity));
+        cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id"));
 
-        result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<PropertyAllowed>()
-            .Select(pa => new WithConditions<PropertyAllowed>(pa))
-            .Where(paac => !cache.CoerceValue(role, r.Resource.ToPropertyRoute(), paac, manual: false).Equals(paac))
-            .ToArray());
+        result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), new WithConditions<PropertyAllowed>(PropertyAllowed.Write)));
 
         return result;
     }
@@ -145,7 +143,7 @@ public static class PropertyAuthLogic
         return hasAttr ? PropertyAllowed.Write : PropertyAllowed.None;
     }
 
-    public static string? GetAllowedFor(this PropertyRoute route, PropertyAllowed requested)
+    public static string? CanBeAllowedFor(this PropertyRoute route, PropertyAllowed requested)
     {
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
             return null;
@@ -181,5 +179,62 @@ public static class PropertyAuthLogic
     public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
     {
         return PropertyRoute.GenerateRoutes(entityType).Select(pr => cache.GetAllowed(role, pr).Max()).Collapse();
+    }
+
+    public static bool IsAllowedFor<T, S>(T mod, Expression<Func<T, S>> property, PropertyAllowed allowed)
+        where T : ModifiableEntity, IRootEntity
+    {
+        var taac = PropertyAuthLogic.GetPropertyAllowed(PropertyRoute.Construct(property));
+
+        return IsAllowedFor(mod, taac, allowed);
+    }
+
+    public static bool IsAllowedFor(ModifiableEntity mod, PropertyRoute route, PropertyAllowed allowed)
+    {
+
+        var taac = PropertyAuthLogic.GetPropertyAllowed(route);
+
+        return IsAllowedFor(mod, taac, allowed);
+    }
+
+    public static bool IsAllowedFor(ModifiableEntity mod, WithConditions<PropertyAllowed> paac, PropertyAllowed allowed)
+    {
+        if (AuthLogic.GloballyEnabled || ExecutionMode.InGlobal)
+            return true;
+
+        if (paac.Min() >= allowed)
+            return true;
+
+        if (paac.Max() <= allowed)
+            return false;
+
+        if (mod is Entity e)
+            return giEvaluateAllowedFor.GetInvoker(mod.GetType())(e, paac, allowed);
+        else
+            throw new InvalidOperationException("Unexpected");
+    }
+
+    static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed, bool>> giEvaluateAllowedFor =
+        new GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed, bool>>((e, cond, pa) => EvaluateIsAllowedFor((UserEntity)e, cond, pa));
+    static bool EvaluateIsAllowedFor<T>(T entity, WithConditions<PropertyAllowed> paac, PropertyAllowed allowed)
+        where T : Entity
+    {
+        foreach (var cond in paac.ConditionRules.Reverse())
+        {
+            if (cond.TypeConditions.All(tc =>
+            {
+                var func = TypeConditionLogic.GetInMemoryCondition<T>(tc)!;
+
+                if (func == null)
+                    throw new InvalidOperationException($"TypeCondition {tc} has no in-memory implementation for {typeof(T).Name}");
+
+                return func(entity);
+            }))
+            {
+                return cond.Allowed >= allowed;
+            }
+        }
+
+        return paac.Fallback >= allowed;
     }
 }

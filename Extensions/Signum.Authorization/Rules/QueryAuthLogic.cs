@@ -68,9 +68,7 @@ public static class QueryAuthLogic
         var result = new QueryRulePack { Role = role, Type = typeEntity };
         cache.GetRules(result, QueryLogic.GetTypeQueries(typeEntity));
 
-        result.Rules.ForEach(r => r.CoercedValues = EnumExtensions.GetValues<QueryAllowed>()
-            .Where(a => !cache.CoerceValue(role, QueryLogic.ToQueryName(r.Resource.Key), a).Equals(a))
-            .ToArray());
+        result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, QueryLogic.ToQueryName(r.Resource.Key), QueryAllowed.Allow));
 
         return result;
     }
