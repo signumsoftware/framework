@@ -1528,7 +1528,9 @@ export namespace Finder {
   }
 
   export type AddToLite<T> = T extends Entity ? Lite<T> : T;
-  export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> : any;
+  export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> :
+    T extends TokenObject ? ExtractTokensObject<T>[] :
+    any;
 
   export type ExtractTokensObject<T> = {
     [P in keyof T]: ExtractQueryToken<T[P]>;
@@ -1582,46 +1584,73 @@ export namespace Finder {
     );
   }
 
-
+  
   export function useResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions | null, tokensObject: TO, additionalDeps?: React.DependencyList, options?: APIHookOptions): ExtractTokensObject<TO>[] | null | undefined {
     var fo2: FindOptions | null = fo && {
       pagination: { mode: "All" },
       ...fo,
-      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptions: getAllColumns(tokensObject),
       columnOptionsMode: "ReplaceAll",
     };
 
     var result = useAPI(signal => fo2 && getResultTable(fo2, signal), [fo2 && findOptionsPath(fo2), ...(additionalDeps || [])], options);
 
-    return result && result.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>);
+    return result && result.rows.map(row => toTypedRow(tokensObject, result!.columns, row));
   }
 
+  function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
+    return Dic.getValues(tokensObject).flatMap(a => {
+      if (typeof a == "string" || a instanceof QueryTokenString)
+        return [{ token: a }];
 
+      return getAllColumns(a);
+    });
+  }
 
-  export function getResultTableTyped<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
+  export interface TokenObject {
+    [name: string]: QueryTokenString<any> | string | TokenObject;
+  }
+
+  export function toTypedRow<TO extends TokenObject>(tokensObject: TO, columns: string[], row: ResultRow): ExtractTokensObject<TO> {
+    return Dic.mapObject(tokensObject, (key, value) => {
+
+      var token = value.toString();
+
+      if (token == "Entity" && row.entity)
+        return row.entity;
+
+      const index = columns.indexOf(token);
+
+      return row.columns[index];
+    }) as ExtractTokensObject<TO>;
+  }
+
+  export async function getResultTableTyped<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<ExtractTokensObject<TO>[]> {
     var fo2: FindOptions = {
       pagination: { mode: "All" },
       ...fo,
-      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptions: getAllColumns(tokensObject),
       columnOptionsMode: "ReplaceAll",
     };
 
-    return getResultTable(fo2)
-      .then(fop => fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>));
+    const rt = await getResultTable(fo2);
+
+    return rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row));
   }
 
-  export function getResultTableTypedWithPagination<TO extends { [name: string]: QueryTokenString<any> | string }>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
+  export async function getResultTableTypedWithPagination<TO extends TokenObject>(fo: FindOptions, tokensObject: TO, signal?: AbortSignal): Promise<{ totalElements?: number, rows: ExtractTokensObject<TO>[] }> {
     var fo2: FindOptions = {
       ...fo,
-      columnOptions: Dic.getValues(tokensObject).map(a => ({ token: a })),
+      columnOptions: getAllColumns(tokensObject),
       columnOptionsMode: "ReplaceAll",
     };
 
-    return getResultTable(fo2)
-      .then(fop => ({
-        totalElements: fop.totalElements,
-        rows: fop.rows.map(row => Dic.mapObject(tokensObject, (key, value, index) => row.columns[index]) as ExtractTokensObject<TO>)
-      }));
+    const rt = await getResultTable(fo2);
+
+    return ({
+      totalElements: rt.totalElements,
+      rows: rt.rows.map(row => toTypedRow(tokensObject, rt.columns, row))
+    });
   }
 
   export function getResultTable(fo: FindOptions, signal?: AbortSignal): Promise<ResultTable> {

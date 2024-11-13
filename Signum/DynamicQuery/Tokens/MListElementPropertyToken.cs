@@ -37,7 +37,7 @@ public class MListElementPropertyToken : QueryToken
     internal MListElementPropertyToken(QueryToken parent, PropertyInfo pi, PropertyRoute pr, string key, Func<string> nicePropertyName)
     {
         this.parent = parent ?? throw new ArgumentNullException(nameof(parent));
-        if (parent is not (CollectionAnyAllToken or CollectionElementToken or CollectionToArrayToken))
+        if (parent is not (CollectionAnyAllToken or CollectionElementToken or CollectionNestedToken or CollectionToArrayToken))
             throw new InvalidOperationException("Unexpected parent");
 
         PropertyInfo = pi ?? throw new ArgumentNullException(nameof(pi));
@@ -125,7 +125,9 @@ public class MListElementPropertyToken : QueryToken
         var ctxTemp = new BuildExpressionContext(ctx.ElementType, ctx.Parameter, new Dictionary<QueryToken, ExpressionBox>
         {
             {  entityParent, new ExpressionBox(param)}
-        }, ctx.Filters);
+        }, 
+        ctx.Filters,
+        ctx.Orders);
 
         var lambda = Expression.Lambda(ept.BuildExpression(ctxTemp), param);
 

@@ -10,8 +10,8 @@ namespace Signum.DynamicQuery;
 
 public class ResultColumn
 {
-    Column column;
-    public Column Column => column;
+    QueryToken token;
+    public QueryToken Token => token;
 
     int index;
     public int Index
@@ -25,22 +25,19 @@ public class ResultColumn
 
     public bool CompressUniqueValues { get; set; }
 
-    public ResultColumn(Column column, IList values)
+    public ResultColumn(QueryToken token, IList values)
     {
-        this.column = column;
+        this.token = token;
         this.values = values;
     }
 
-    public override string ToString() => "Col" + this.Index + ": " + this.Column.ToString();
+    public override string ToString() => "Col" + this.Index + ": " + this.token.ToString();
 }
 
 public class ResultTable
 {
     internal ResultColumn? entityColumn;
-    public ColumnDescription? EntityColumn
-    {
-        get { return entityColumn == null ? null : ((ColumnToken)entityColumn.Column.Token).Column; }
-    }
+    public ResultColumn? EntityColumn => entityColumn;
 
     public bool HasEntities
     {
@@ -56,10 +53,10 @@ public class ResultTable
 
     public ResultColumn[] AllColumns() => entityColumn == null ? Columns : Columns.PreAnd(entityColumn).ToArray();
 
-    public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination)
+    public ResultTable(ResultColumn[] columns, int? totalElements, Pagination pagination, bool isGroupResults)
     {
-        this.entityColumn = columns.Where(c => c.Column is _EntityColumn).SingleOrDefaultEx();
-        this.columns = columns.Where(c => !(c.Column is _EntityColumn) && c.Column.Token.IsAllowed() == null).ToArray();
+        this.entityColumn = isGroupResults ? null : columns.SingleOrDefault(c => c.Token.IsEntity());
+        this.columns = columns.Where(c => c.Token.IsAllowed() == null && (isGroupResults || !c.Token.IsEntity())).ToArray();
 
         int rowCount = columns.Select(a => a.Values.Count).Distinct().SingleEx(() => "Count");
         for (int i = 0; i < Columns.Length; i++)
@@ -75,14 +72,24 @@ public class ResultTable
         var defConverter = converter ?? new InvariantDataTableValueConverter();
 
         DataTable dt = new DataTable("Table");
-        dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Column.Name, defConverter.ConvertType(c.Column))).ToArray());
+        dt.Columns.AddRange(Columns.Select(c => new DataColumn(c.Token.NiceName(), defConverter.ConvertType(c.Token))).ToArray());
         foreach (var row in Rows)
         {
-            dt.Rows.Add(Columns.Select((c, i) => defConverter.ConvertValue(row[i], c.Column)).ToArray());
+            dt.Rows.Add(Columns.Select((c, i) => defConverter.ConvertValue(row[i], c.Token)).ToArray());
         }
         return dt;
     }
 
+    Dictionary<QueryToken, ResultColumn>? _columnsDic;
+    public ResultColumn GetResultRow(QueryToken token)
+    {
+        if (token.IsEntity() && EntityColumn != null)
+            return EntityColumn;
+
+        _columnsDic ??= Columns.ToDictionary(a => a.Token);
+
+        return _columnsDic!.GetOrThrow(token);
+    }
 
     int? totalElements;
     public int? TotalElements { get { return totalElements; } }
@@ -108,13 +115,13 @@ public class ResultTable
 
 public abstract class DataTableValueConverter
 {
-    public abstract Type ConvertType(Column column);
-    public abstract object? ConvertValue(object? value, Column column);
+    public abstract Type ConvertType(QueryToken column);
+    public abstract object? ConvertValue(object? value, QueryToken column);
 }
 
 public class NiceDataTableValueConverter : DataTableValueConverter
 {
-    public override Type ConvertType(Column column)
+    public override Type ConvertType(QueryToken column)
     {
         var type = column.Type;
 
@@ -130,7 +137,7 @@ public class NiceDataTableValueConverter : DataTableValueConverter
         return type.UnNullify();
     }
 
-    public override object? ConvertValue(object? value, Column column)
+    public override object? ConvertValue(object? value, QueryToken column)
     {
         if (value is Lite<Entity> lite)
             return lite.ToString();
@@ -138,8 +145,8 @@ public class NiceDataTableValueConverter : DataTableValueConverter
         if (value is Enum @enum)
             return @enum.NiceToString();
 
-        if (value is DateTime time && column.Token.Format != "g")
-            return time.ToString(column.Token.Format);
+        if (value is DateTime time && column.Format != "g")
+            return time.ToString(column.Format);
 
         return value;
     }
@@ -152,12 +159,12 @@ public class UnambiguousNiceDataTableValueConverter : NiceDataTableValueConverte
     public UnambiguousNiceDataTableValueConverter(ResultTable rt)
     {
         this.ambiguousObjects = rt.Columns
-            .Where(a => typeof(Lite<Entity>).IsAssignableFrom(a.Column.Type))
-            .SelectMany(c => c.Values.Cast<Lite<Entity>?>().NotNull().Distinct().GroupBy(v => base.ConvertValue(v, c.Column)).Where(g => g.Count() > 1).SelectMany(a => a))
+            .Where(a => typeof(Lite<Entity>).IsAssignableFrom(a.Token.Type))
+            .SelectMany(c => c.Values.Cast<Lite<Entity>?>().NotNull().Distinct().GroupBy(v => base.ConvertValue(v, c.Token)).Where(g => g.Count() > 1).SelectMany(a => a))
             .ToHashSet();
     }
 
-    public override object? ConvertValue(object? value, Column column)
+    public override object? ConvertValue(object? value, QueryToken column)
     {
         if (value is Lite<Entity> lite && ambiguousObjects.Contains(lite))
             return lite.ToString() + "(" + lite.Key() + ")";
@@ -168,9 +175,9 @@ public class UnambiguousNiceDataTableValueConverter : NiceDataTableValueConverte
 
 public class InvariantDataTableValueConverter : NiceDataTableValueConverter
 {
-    public override Type ConvertType(Column column)
+    public override Type ConvertType(QueryToken column)
     {
-        var type = column.Token.Type;
+        var type = column.Type;
 
         if (type.IsLite())
             return typeof(string);
@@ -181,7 +188,7 @@ public class InvariantDataTableValueConverter : NiceDataTableValueConverter
         return type.UnNullify();
     }
 
-    public override object? ConvertValue(object? value, Column column)
+    public override object? ConvertValue(object? value, QueryToken column)
     {
         if (value is Lite<Entity> lite)
             return lite.KeyLong();
@@ -236,9 +243,9 @@ public class ResultRow : INotifyPropertyChanged
         get { return Table.entityColumn == null ? null : (Lite<Entity>?)Table.entityColumn.Values[Index]; }
     }
 
-    public T GetValue<T>(string columnName)
+    public T GetValue<T>(string fullKey)
     {
-        return (T)this[Table.Columns.Where(c => c.Column.Name == columnName).SingleEx(() => columnName)]!;
+        return (T)this[Table.Columns.Where(c => c.Token.FullKey() == fullKey).SingleEx(() => fullKey)]!;
     }
 
     public T GetValue<T>(int columnIndex)

@@ -154,7 +154,9 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>
             {
                 [cta] = new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute())
-            }, context.Filters);
+            }, 
+             context.Filters,
+             context.Orders);
         }
         else
         {
@@ -165,9 +167,10 @@ public class CollectionToArrayToken : QueryToken
             subCtx = new BuildExpressionContext(elemeType, param, new Dictionary<QueryToken, ExpressionBox>()
             {
                 [cta] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))
-            }, context.Filters);
+            },
+            context.Filters, context.Orders);
         }
-
+        // Ask Olmo CollectionNestedToken
         var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
         foreach (var ce in cets)
         {
@@ -181,7 +184,9 @@ public class CollectionToArrayToken : QueryToken
                 subCtx = new BuildExpressionContext(mleType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
                     [ce] = new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())
-                }, context.Filters);
+                }, 
+                context.Filters,
+                context.Orders);
             }
             else
             {
@@ -193,7 +198,9 @@ public class CollectionToArrayToken : QueryToken
                 subCtx = new BuildExpressionContext(elementType, param, new Dictionary<QueryToken, ExpressionBox>()
                 {
                     [ce] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))
-                }, context.Filters);
+                }, 
+                context.Filters, 
+                context.Orders);
             }
         }
 

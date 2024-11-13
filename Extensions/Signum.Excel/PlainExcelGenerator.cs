@@ -59,22 +59,22 @@ public static class PlainExcelGenerator
         }
     }
     
-    public static byte[] WritePlainExcel(ResultTable results, string title, bool forImport = false)
+    public static byte[] WritePlainExcel(ResultTable results, QueryRequest request, string title, bool forImport = false)
     {
         using (MemoryStream ms = new MemoryStream())
         {
-            WritePlainExcel(results, ms, title, forImport);
+            WritePlainExcel(results, request, ms, title, forImport);
             return ms.ToArray(); 
         }
     }
 
-    public static void WritePlainExcel(ResultTable results, string fileName, string title, bool forImport = false)
+    public static void WritePlainExcel(ResultTable results, QueryRequest request, string fileName, string title, bool forImport = false)
     {
         using (FileStream fs = File.Create(fileName))
-            WritePlainExcel(results, fs,title, forImport);
+            WritePlainExcel(results, request, fs, title, forImport);
     }
 
-    static void WritePlainExcel(ResultTable results, Stream stream, string title, bool forImport)
+    static void WritePlainExcel(ResultTable results, QueryRequest request, Stream stream, string title, bool forImport)
     {
         stream.WriteAllBytes(Template);
 
@@ -92,17 +92,17 @@ public static class PlainExcelGenerator
 
             worksheetPart.Worksheet = new Worksheet();
 
-            worksheetPart.Worksheet.Append(new Columns(results.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
+            worksheetPart.Worksheet.Append(new Columns(request.Columns.Select((c, i) => new DocumentFormat.OpenXml.Spreadsheet.Column()
             {
                 Min = (uint)i + 1,
                 Max = (uint)i + 1,
-                Width = GetColumnWidth(c.Column.Type),
+                Width = GetColumnWidth(c.Token.Type),
                 BestFit = true,
                 CustomWidth = true
             }).ToArray()));
 
-            Dictionary<ResultColumn, (DefaultStyle defaultStyle, UInt32Value styleIndex)> indexes =
-                results.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
+            Dictionary<DynamicQuery.Column, (DefaultStyle defaultStyle, UInt32Value styleIndex)> styleIndexes =
+                request.Columns.ToDictionary(c => c, c => CellBuilder.GetDefaultStyleAndIndex(c));
 
             var ss = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet;
             {
@@ -129,22 +129,23 @@ public static class PlainExcelGenerator
                 }
             }
 
-
             worksheetPart.Worksheet.Append(new Sequence<Row>()
             {
                 new [] { CellBuilder.Cell(title, DefaultStyle.Title, forImport) }.ToRow(),
 
-                (from c in results.Columns
-                select CellBuilder.Cell(c.Column.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
+                (from c in request.Columns
+                select CellBuilder.Cell(c.DisplayName, DefaultStyle.Header, forImport)).ToRow(),
 
                 from r in results.Rows
-                select results.Columns.Select(c =>
+                select request.Columns.Select(c =>
                 {
-                    var t = indexes.GetOrThrow(c);
-                    var cta = c.Column.Token.HasCollectionToArray();
+                    var t = styleIndexes.GetOrThrow(c);
+                    var rt = results.GetResultRow(c.Token);
+
+                    var cta = c.Token.HasCollectionToArray();
                     var value = cta != null ?
-                        ((IEnumerable?)r[c])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
-                        r[c];
+                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
+                        r[rt];
 
                     return CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
                 }).ToRow()
