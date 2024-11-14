@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed>
+class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed, OperationAllowed>
 {
     public OperationCache(SchemaBuilder sb) : base(sb, invalidateWithTypes: true)
     {
@@ -21,6 +21,9 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
         rule.Allowed = allowed;
         return rule;
     }
+
+    protected override OperationAllowed ToAllowed(OperationAllowed allowedModel) => allowedModel;
+    protected override OperationAllowed ToAllowedModel(OperationAllowed allowed) => allowed;
 
     protected override OperationAllowed Merge((OperationSymbol operation, Type type) key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
     {

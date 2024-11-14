@@ -1,4 +1,5 @@
 using Signum.Authorization;
+using Signum.DynamicQuery.Tokens;
 
 namespace Signum.Authorization.Rules;
 
@@ -41,6 +42,8 @@ public static class QueryAuthLogic
             sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
         }
     }
+
+  
 
     static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
     {

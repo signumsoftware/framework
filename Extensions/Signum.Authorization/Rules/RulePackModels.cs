@@ -1,3 +1,7 @@
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Collections.Frozen;
+using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization.Rules;
@@ -121,9 +125,9 @@ public class TypeRulePack : BaseRulePack<TypeAllowedRule>
     }
 }
 
-public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditions<TypeAllowed>>
+public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditionsModel<TypeAllowed>>
 {
-    public AuthThumbnail? Properties { get; set; }
+    public WithConditionsModel<AuthThumbnail>? Properties { get; set; }
 
     public AuthThumbnail? Operations { get; set; }
 
@@ -132,20 +136,124 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditions<TypeAllowe
     public List<TypeConditionSymbol> AvailableConditions { get; set; }
 }
 
-public class WithConditions<A> : ModelEntity, IEquatable<WithConditions<A>>
+public class WithConditions<A> : IEquatable<WithConditions<A>>
     where A : struct, Enum
 {
-    private WithConditions()
+    public Dictionary<WithConditions<A>, WithConditions<A>> Cache = new Dictionary<WithConditions<A>, WithConditions<A>>();
+
+    public A Fallback { get; }
+
+    public ReadOnlyCollection<ConditionRule<A>> ConditionRules { get; }
+
+    public int _hashCode;
+
+    public WithConditions(A fallback, ReadOnlyCollection<ConditionRule<A>> conditionRules)
+    {
+        Fallback = fallback;
+        ConditionRules = conditionRules;
+        _hashCode = CalculateHash();
+    }
+
+    public WithConditions(A fallback): this(fallback, ReadOnlyCollection<ConditionRule<A>>.Empty)
     {
     }
 
-    public WithConditions(A fallback, IEnumerable<ConditionRule<A>> conditions)
+    public WithConditions<A> Intern() => Cache.GetOrCreate(this, () => this);
+
+    private int CalculateHash()
+    {
+        var hash = 17;
+        foreach (var rule in this.ConditionRules)
+            hash = hash * 31 + rule.GetHashCode();
+
+        hash = hash * 31 + Fallback.GetHashCode();
+        return hash;
+    }
+
+    public override bool Equals(object? obj) => obj is WithConditions<A> wc && Equals(wc);
+    public bool Equals(WithConditions<A>? other)
+    {
+        if (other == null)
+            return false;
+
+        return this.Fallback.Equals(other.Fallback) &&
+            this.ConditionRules.SequenceEqual(other.ConditionRules);
+    }
+
+    public override int GetHashCode() => _hashCode;
+
+    internal bool Exactly(A current)
+    {
+        return Fallback.Equals(current) && ConditionRules.IsNullOrEmpty();
+    }
+
+    public override string ToString()
+    {
+        if (ConditionRules.IsEmpty())
+            return Fallback.ToString()!;
+
+        return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
+    }
+
+    internal WithConditionsModel<A> ToModel() => new WithConditionsModel<A>(Fallback,
+            ConditionRules.Select(r => new ConditionRuleModel<A>(r.TypeConditions, r.Allowed)));
+}
+
+public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
+       where A : notnull
+{
+    public FrozenSet<TypeConditionSymbol> TypeConditions { get; }
+    public A Allowed { get; }
+    readonly int _hash;
+
+    public ConditionRule(FrozenSet<TypeConditionSymbol> typeConditions, A allowed)
+    {
+        TypeConditions = typeConditions;
+        Allowed = allowed;
+        this._hash = CalculateHash();
+    }
+
+    public int CalculateHash()
+    {
+        int hash = 17;
+        foreach (var condition in TypeConditions)
+            hash = hash * 31 + condition.GetHashCode();
+
+        hash = hash * 31 + Allowed.GetHashCode();
+
+        return hash;
+    }
+
+    public override bool Equals([NotNullWhen(true)] object? obj) => obj is ConditionRule<A> cr && Equals(cr);
+    public bool Equals(ConditionRule<A> other)
+    {
+        return TypeConditions.SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
+    }
+
+    public override int GetHashCode() => _hash;
+
+    public override string ToString()
+    {
+        return TypeConditions.ToString(a => a.ToString().After("."), " & ") + " => " + Allowed;
+    }
+}
+
+
+
+public class WithConditionsModel<A> : ModelEntity
+    where A : struct, Enum
+{
+    private WithConditionsModel()
+    {
+    }
+
+    public WithConditionsModel(A fallback, IEnumerable<ConditionRuleModel<A>> conditions)
     {
         this.fallback = fallback;
         this.ConditionRules.AddRange(conditions);
     }
 
-    public WithConditions(A fallback, params ConditionRule<A>[] conditions)
+    public WithConditionsModel(A fallback, params ConditionRuleModel<A>[] conditions)
     {
         this.fallback = fallback;
         this.ConditionRules.AddRange(conditions);
@@ -158,10 +266,10 @@ public class WithConditions<A> : ModelEntity, IEquatable<WithConditions<A>>
         private set { fallback = value; }
     }
 
-    public MList<ConditionRule<A>> ConditionRules { get; set; } = new MList<ConditionRule<A>>();
+    public MList<ConditionRuleModel<A>> ConditionRules { get; set; } = new MList<ConditionRuleModel<A>>();
 
-    public override bool Equals(object? obj) => obj is WithConditions<A> tac && Equals(tac);
-    public bool Equals(WithConditions<A>? other)
+    public override bool Equals(object? obj) => obj is WithConditionsModel<A> tac && Equals(tac);
+    public bool Equals(WithConditionsModel<A>? other)
     {
         if (other == null)
             return false;
@@ -197,15 +305,13 @@ public class WithConditions<A> : ModelEntity, IEquatable<WithConditions<A>>
         return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
     }
 
-    internal bool Exactly(A current)
+    public WithConditionsModel<A> WithoutCondition(TypeConditionSymbol typeCondition)
     {
-        return Fallback.Equals(current) && ConditionRules.IsNullOrEmpty();
+        return new WithConditionsModel<A>(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
     }
 
-    public WithConditions<A> WithoutCondition(TypeConditionSymbol typeCondition)
-    {
-        return new WithConditions<A>(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
-    }
+    internal WithConditions<A> ToImmutable() => new WithConditions<A>(Fallback,
+        ConditionRules.Select(r => new ConditionRule<A>(r.TypeConditions.ToFrozenSet(), r.Allowed)).ToReadOnly());
 }
 
 public static class TypeAllowAndConditionsExtensions
@@ -283,12 +389,12 @@ public static class ProperyAllowedAndConditionsExtensions
     }
 }
 
-public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
+public class ConditionRuleModel<A> : ModelEntity, IEquatable<ConditionRuleModel<A>>
     where A: struct, Enum
 {
-    private ConditionRule() { }
+    private ConditionRuleModel() { }
 
-    public ConditionRule(IEnumerable<TypeConditionSymbol> typeConditions, A allowed)
+    public ConditionRuleModel(IEnumerable<TypeConditionSymbol> typeConditions, A allowed)
     {
         this.TypeConditions = typeConditions.ToMList();
         this.Allowed = allowed;
@@ -300,9 +406,9 @@ public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
     public A Allowed { get; set; }
 
     public override int GetHashCode() => TypeConditions.Count ^ Allowed.GetHashCode();
-    public override bool Equals(object? obj) => obj is ConditionRule<A> rm && Equals(rm);
+    public override bool Equals(object? obj) => obj is ConditionRuleModel<A> rm && Equals(rm);
 
-    public bool Equals(ConditionRule<A>? other)
+    public bool Equals(ConditionRuleModel<A>? other)
     {
         if (other == null)
             return false;
@@ -310,7 +416,7 @@ public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
         return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
     }
 
-    internal ConditionRule<A>? WithoutCondition(TypeConditionSymbol typeCondition)
+    internal ConditionRuleModel<A>? WithoutCondition(TypeConditionSymbol typeCondition)
     {
         if (!TypeConditions.Contains(typeCondition))
             return this;
@@ -318,7 +424,7 @@ public class ConditionRule<A> : ModelEntity, IEquatable<ConditionRule<A>>
         if (TypeConditions.Count == 1)
             return null;
 
-        return new ConditionRule<A> { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
+        return new ConditionRuleModel<A> { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
     }
 
     public override string ToString()
@@ -345,15 +451,17 @@ public class PropertyRulePack : BaseRulePack<PropertyAllowedRule>
 {
     public TypeEntity Type { get; internal set; }
 
+    public List<List<TypeConditionSymbol>> AvailableTypeConditions { get; set; }
+
     public override string ToString()
     {
         return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(PropertyRouteEntity).NiceName(), Role);
     }
 }
 
-public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, WithConditions<PropertyAllowed>>
+public class PropertyAllowedRule : AllowedRuleCoerced<PropertyRouteEntity, WithConditionsModel<PropertyAllowed>>
 {
-    public List<TypeConditionSymbol> AvailableConditions { get; set; }
+
 }
 
 

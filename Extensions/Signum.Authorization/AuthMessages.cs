@@ -117,4 +117,9 @@ public enum AuthMessage
     SameAs0,
     Nothing,
     Everything,
+    [Description("Unable to determine if you can read {0}")]
+    UnableToDetermineIfYouCanRead0,
+
+    [Description("The query does not ensure that you can read {0}")]
+    TheQueryDoesNotEnsureThatYouCanRead0,
 }

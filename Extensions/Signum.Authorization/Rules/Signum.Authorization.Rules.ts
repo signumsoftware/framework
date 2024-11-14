@@ -80,10 +80,10 @@ export module BasicPermission {
   export const AutomaticUpgradeOfOperations : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfOperations");
 }
 
-export function ConditionRule<A extends string>(a : EnumType<A>): Type<ConditionRule<A>> {
-    return new Type<ConditionRule<A>>("ConditionRule_" + a.typeName);
+export function ConditionRuleModel<A extends string>(a : EnumType<A>): Type<ConditionRuleModel<A>> {
+    return new Type<ConditionRuleModel<A>>("ConditionRuleModel_" + a.typeName);
 }
-export interface ConditionRule<A> extends Entities.ModelEntity {
+export interface ConditionRuleModel<A> extends Entities.ModelEntity {
   typeConditions: Entities.MList<TypeConditionSymbol>;
   allowed: A;
 }
@@ -129,15 +129,15 @@ export type PropertyAllowed =
   "Write";
 
 export const PropertyAllowedRule: Type<PropertyAllowedRule> = new Type<PropertyAllowedRule>("PropertyAllowedRule");
-export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, WithConditions<PropertyAllowed>> {
+export interface PropertyAllowedRule extends AllowedRuleCoerced<Basics.PropertyRouteEntity, WithConditionsModel<PropertyAllowed>> {
   Type: "PropertyAllowedRule";
-  availableConditions: Array<TypeConditionSymbol>;
 }
 
 export const PropertyRulePack: Type<PropertyRulePack> = new Type<PropertyRulePack>("PropertyRulePack");
 export interface PropertyRulePack extends BaseRulePack<PropertyAllowedRule> {
   Type: "PropertyRulePack";
   type: Basics.TypeEntity;
+  availableTypeConditions: Array<Array<TypeConditionSymbol>>;
 }
 
 export const QueryAllowed: EnumType<QueryAllowed> = new EnumType<QueryAllowed>("QueryAllowed");
@@ -228,9 +228,9 @@ export type TypeAllowedBasic =
   "Write";
 
 export const TypeAllowedRule: Type<TypeAllowedRule> = new Type<TypeAllowedRule>("TypeAllowedRule");
-export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, WithConditions<TypeAllowed>> {
+export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, WithConditionsModel<TypeAllowed>> {
   Type: "TypeAllowedRule";
-  properties: AuthThumbnail | null;
+  properties: WithConditionsModel<AuthThumbnail> | null;
   operations: AuthThumbnail | null;
   queries: AuthThumbnail | null;
   availableConditions: Array<TypeConditionSymbol>;
@@ -246,11 +246,11 @@ export interface TypeRulePack extends BaseRulePack<TypeAllowedRule> {
   Type: "TypeRulePack";
 }
 
-export function WithConditions<A extends string>(a : EnumType<A>): Type<WithConditions<A>> {
-    return new Type<WithConditions<A>>("WithConditions_" + a.typeName);
+export function WithConditionsModel<A extends string>(a : EnumType<A>): Type<WithConditionsModel<A>> {
+    return new Type<WithConditionsModel<A>>("WithConditionsModel_" + a.typeName);
 }
-export interface WithConditions<A> extends Entities.ModelEntity {
+export interface WithConditionsModel<A> extends Entities.ModelEntity {
   fallback: A;
-  conditionRules: Entities.MList<ConditionRule<A>>;
+  conditionRules: Entities.MList<ConditionRuleModel<A>>;
 }
 

@@ -12,13 +12,15 @@ import SelectorModal from '@framework/SelectorModal'
 import MessageModal from '@framework/Modals/MessageModal'
 
 import { getTypeInfo, Binding, GraphExplorer, EnumType } from '@framework/Reflection'
-import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList, Lite, EntityControlMessage, MList } from '@framework/Signum.Entities'
+import { ModelEntity, newMListElement, NormalControlMessage, getToString, toMList, Lite, EntityControlMessage, MList, MListElement } from '@framework/Signum.Entities'
 import { AuthAdminClient } from '../AuthAdminClient'
 import {
   TypeRulePack, TypeAllowed, TypeAllowedRule,
   TypeAllowedBasic, AuthThumbnail,
   PropertyRulePack, OperationRulePack, QueryRulePack, TypeConditionSymbol, AuthAdminMessage,
-  WithConditions, ConditionRule
+  WithConditionsModel,
+  ConditionRuleModel,
+  PropertyAllowed,
 } from './Signum.Authorization.Rules'
 
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -193,7 +195,7 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
   );
 }
 
-function withConditionsEquals<A extends string>(allowed: WithConditions<A>, allowedBase: WithConditions<A>) {
+function withConditionsEquals<A extends string>(allowed: WithConditionsModel<A>, allowedBase: WithConditionsModel<A>) {
   return allowed.fallback == allowedBase.fallback
     && allowed.conditionRules.length == allowedBase.conditionRules.length
     && allowed.conditionRules.map(mle => mle.element)
@@ -286,7 +288,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
 
   const masterClass = typeInfo.entityData == "Master" ? "sf-master" : undefined;
 
-  function handleRemoveConditionClick(taac: WithConditions<TypeAllowed>, con: ConditionRule<TypeAllowed>) {
+  function handleRemoveConditionClick(taac: WithConditionsModel<TypeAllowed>, con: ConditionRuleModel<TypeAllowed>) {
     taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
     taac.modified = true;
     p.updateFrame();
@@ -320,7 +322,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
   }
 
 
-  function link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", fetch: () => Promise<T>, setNewValue: (model: T) => void) {
+  function link<T extends ModelEntity>(icon: IconProp, allowed: AuthThumbnail | null | "Invalidated", fetch: () => Promise<T>, setNewValue: (model: T) => void, extraProps?: {}) {
     if (!allowed)
       return undefined;
 
@@ -338,7 +340,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
       }
       else {
         fetch()
-          .then(m => Navigator.view(m, { buttons: "close", readOnly: p.tctx.readOnly }))
+          .then(m => Navigator.view(m, { buttons: "close", readOnly: p.tctx.readOnly, extraProps: extraProps }))
           .then(() => fetch())
           .then(m => {
             setNewValue(m);
@@ -396,11 +398,9 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
           }} />
         </td>
         {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
-          {link("edit", rule.modified ? "Invalidated" : rule.properties,
+          {link("edit", rule.modified ? "Invalidated" : rule.properties?.fallback ?? null,
             () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
-            m => rule.properties =
-              m.rules.every(a => a.element.allowed.fallback == "None" && a.element.allowed.conditionRules.length == 0) ? "None" :
-                m.rules.every(a => a.element.allowed.fallback == "Write" && a.element.allowed.conditionRules.length == 0) ? "All" : "Mix"
+            m => rule.properties = collapsePropertyRules(m, rule.allowed)
           )}
         </td>}
         {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
@@ -445,7 +445,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
                 {EntityBaseController.getMoveIcon()}
               </a>}
               {cr.typeConditions.map((tc, j) => <>
-                <small className="mx-1" key={j}>{getToString(tc.element)}</small>
+                <small className="mx-1" key={j}>{getToString(tc.element).after(".")}</small>
                 {j < cr.typeConditions.length - 1 ? <small className="and" key={j + "$"}>&</small> : null}
               </>)}
               <small className="shy-text ms-1">{(getRuleTitle(i, rule.allowed.conditionRules.length))}</small>
@@ -459,6 +459,15 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
             <td style={{ textAlign: "center" }}>
               {renderRadio(b, "None", "red")}
             </td>
+            <td>
+            </td>
+            {AuthAdminClient.properties && <td style={{ textAlign: "center" }}>
+              {link("edit", rule.modified ? "Invalidated" : rule.properties?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
+                () => AuthAdminClient.API.fetchPropertyRulePack(rule.resource.cleanName, roleId),
+                m => rule.properties = collapsePropertyRules(m, rule.allowed),
+                { initialTypeConditions: cr.typeConditions.map(a=>a.element) }
+              )}
+            </td>}
             <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
             </td>
           </tr>
@@ -468,10 +477,37 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
   );
 }
 
-export async function addConditionClick<A extends string>(allowedType: EnumType<A>, conditions: TypeConditionSymbol[], taac: WithConditions<A>, type: TypeEntity): Promise<undefined> {
+function collapsePropertyRules(pack: PropertyRulePack, tar: WithConditionsModel<TypeAllowed>): WithConditionsModel<AuthThumbnail> {
+
+  function collapse(properties: PropertyAllowed[]): AuthThumbnail {
+    if (properties.every(a => a == "None"))
+      return "None";
+
+    if (properties.every(a => a == "Write"))
+      return "All";
+
+    return "Mix";
+  }
+
+
+
+  return WithConditionsModel(AuthThumbnail).New({
+    fallback: collapse(pack.rules.map(mle => mle.element.allowed.fallback)),
+    conditionRules: tar.conditionRules.map(cr => newMListElement(ConditionRuleModel(AuthThumbnail).New({
+      typeConditions: cr.element.typeConditions,
+      allowed: collapse(pack.rules.map(mle => mle.element.allowed.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.element.typeConditions))?.element.allowed).notNull())
+    })))
+  });
+}
+
+function matches(a: MList<TypeConditionSymbol>, b: MList<TypeConditionSymbol>) {
+  return a.length == b.length && a.every((tc, i) => is(tc.element, b[i].element));
+}
+
+export async function addConditionClick<A extends string>(allowedType: EnumType<A>, conditions: TypeConditionSymbol[], taac: WithConditionsModel<A>, type: TypeEntity): Promise<undefined> {
 
   const tc = await SelectorModal.chooseManyElement(conditions, {
-    buttonDisplay: a => getToString(a),
+    buttonDisplay: a => getToString(a).after("."),
     title: AuthAdminMessage.SelectTypeConditions.niceToString(),
     message: <div>
       <p>{AuthAdminMessage.ThereAre0TypeConditionsDefinedFor1.niceToString().formatHtml(<strong>{conditions.length}</strong>, <strong>{getTypeInfo(type.cleanName).niceName}</strong>)}</p>
@@ -483,9 +519,9 @@ export async function addConditionClick<A extends string>(allowedType: EnumType<
   if (!tc)
     return;
 
-  var combinedKey = tc.orderBy(a => a.key).map(a => a.key).join(" & ");
+  var combinedKey = tc.orderBy(a => a.key).map(a => a.key.after(".")).join(" & ");
 
-  if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key).join(" & ") == combinedKey)) {
+  if (taac.conditionRules.some(cr => cr.element.typeConditions.orderBy(a => a.element.key).map(a => a.element.key.after(".")).join(" & ") == combinedKey)) {
     return MessageModal.showError(<div>
       <p>{AuthAdminMessage.TheFollowingTypeConditionsHaveAlreadyBeenUsed.niceToString()}</p>
       <p><strong>{combinedKey}</strong></p>
@@ -493,7 +529,7 @@ export async function addConditionClick<A extends string>(allowedType: EnumType<
       AuthAdminMessage.RepeatedTypeCondition.niceToString());
   }
 
-  taac.conditionRules.push(newMListElement(ConditionRule(allowedType).New({
+  taac.conditionRules.push(newMListElement(ConditionRuleModel(allowedType).New({
     typeConditions: tc.map(t => newMListElement(t)),
     allowed: allowedType.values().first(),
   })));

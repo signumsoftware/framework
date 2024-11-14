@@ -5,8 +5,8 @@ public abstract class TypeConditionNode
 {
     public abstract bool? ConstantValue { get; }
 
-    public static readonly TypeConditionNode True = new AndNode(new TypeConditionNode[0]);
-    public static readonly TypeConditionNode False = new OrNode(new TypeConditionNode[0]);
+    public static readonly TypeConditionNode True = new AndNode([]);
+    public static readonly TypeConditionNode False = new OrNode([]);
 
     public abstract bool IsMoreSimpleAndGeneralThan(TypeConditionNode og);
 }

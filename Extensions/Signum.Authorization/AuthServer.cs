@@ -28,10 +28,10 @@ public static class AuthServer
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
-        ReflectionServer.RegisterGenericModel(typeof(WithConditions<TypeAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(ConditionRule<TypeAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(WithConditions<PropertyAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(ConditionRule<PropertyAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<PropertyAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<PropertyAllowed>));
 
         ReflectionServer.GetContext = () => new
         {
@@ -218,7 +218,7 @@ public static class AuthServer
                 }
                 else
                 {
-                    if (!PropertyAuthLogic.IsAllowedFor(mod, pr, PropertyAllowed.Write))
+                    if (!PropertyAuthLogic.IsAllowedFor(mod!, pr, PropertyAllowed.Write))
                         return "Not Allowed to write";
 
                     return null;

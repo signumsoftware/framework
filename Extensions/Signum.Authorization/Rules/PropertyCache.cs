@@ -1,12 +1,13 @@
 
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System.Collections.Frozen;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, WithConditions<PropertyAllowed>>
+class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, PropertyRouteEntity, PropertyRoute, WithConditions<PropertyAllowed>, WithConditionsModel<PropertyAllowed>>
 {
     public PropertyCache(SchemaBuilder sb) : base(sb, invalidateWithTypes: true)
     {
@@ -19,7 +20,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     protected override PropertyRouteEntity ToEntity(PropertyRoute key) => PropertyRouteLogic.ToPropertyRouteEntity(key);
 
     protected override WithConditions<PropertyAllowed> GetRuleAllowed(RulePropertyEntity rule) => new WithConditions<PropertyAllowed>(rule.Fallback,
-            rule.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.Conditions, c.Allowed)));
+            rule.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
 
     protected override RulePropertyEntity SetRuleAllowed(RulePropertyEntity rule, WithConditions<PropertyAllowed> allowed)
     {
@@ -32,13 +33,8 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         return rule;
     }
 
-    protected override PropertyAllowedRule ToAllowedRule(PropertyRouteEntity resource, RoleAllowedCache ruleCache)
-    {
-        var r = base.ToAllowedRule(resource, ruleCache);
-        Type type = resource.RootType.ToType();
-        r.AvailableConditions = TypeConditionLogic.ConditionsFor(type).ToList();
-        return r;
-    }
+    protected override WithConditions<PropertyAllowed> ToAllowed(WithConditionsModel<PropertyAllowed> allowedModel) => allowedModel.ToImmutable();
+    protected override WithConditionsModel<PropertyAllowed> ToAllowedModel(WithConditions<PropertyAllowed> allowed) => allowed.ToModel();
 
     public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual = false)
     {
@@ -51,26 +47,34 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
         var paac = taac.ToPropertyAllowed();
 
-        PropertyAllowed Min(PropertyAllowed a, PropertyAllowed b) => a < b ? a : b;
-
-        var result = new WithConditions<PropertyAllowed>(
-            Min(paac.Fallback, allowed.Fallback),
-            paac.ConditionRules.Select(cr =>
-            {
-                var similar = allowed.ConditionRules.SingleOrDefault(a => a.TypeConditions.ToHashSet().SetEquals(cr.TypeConditions));
-
-                return new ConditionRule<PropertyAllowed>(cr.TypeConditions,
-                    similar == null ? cr.Allowed : Min(cr.Allowed, similar.Allowed));
-            }));
+        var result = Reduce(paac, allowed);
 
         return result;
     }
 
+
+    WithConditions<PropertyAllowed> Reduce(WithConditions<PropertyAllowed> structure, WithConditions<PropertyAllowed> allowed)
+    {
+        PropertyAllowed Min(PropertyAllowed a, PropertyAllowed b) => a < b ? a : b;
+
+        return new WithConditions<PropertyAllowed>(
+            Min(structure.Fallback, allowed.Fallback),
+            structure.ConditionRules.Select(cr =>
+            {
+                var similar = allowed.ConditionRules.SingleOrDefault(a => a.TypeConditions.SetEquals(cr.TypeConditions));
+
+                return new ConditionRule<PropertyAllowed>(cr.TypeConditions,
+                    similar.TypeConditions == null ? cr.Allowed : Min(cr.Allowed, similar.Allowed));
+            }).ToReadOnly());
+    }
+
     protected override WithConditions<PropertyAllowed> Merge(PropertyRoute key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<PropertyAllowed>>> baseValues)
     {
-        var best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
-            ConditionMerger<PropertyAllowed>.MergeBase(baseValues.Select(a => a.Value), MaxPropertyAllowed, PropertyAllowed.Write, PropertyAllowed.None) :
-            ConditionMerger<PropertyAllowed>.MergeBase(baseValues.Select(a => a.Value), MinPropertyAllowed, PropertyAllowed.None, PropertyAllowed.Write);
+        var merge = AuthLogic.GetMergeStrategy(role);
+
+        var best = merge == MergeStrategy.Union ?
+            ConditionMerger<PropertyAllowed>.MergeBase(merge, baseValues.Select(a => a.Value).ToList(), MaxPropertyAllowed, PropertyAllowed.Write, PropertyAllowed.None) :
+            ConditionMerger<PropertyAllowed>.MergeBase(merge, baseValues.Select(a => a.Value).ToList(), MinPropertyAllowed, PropertyAllowed.None, PropertyAllowed.Write);
 
         if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
             return best;
@@ -236,9 +240,10 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             {
                 return new WithConditions<PropertyAllowed>(
                     fallback: e.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>(),
-                    conditions: e.Elements("Condition").Select(xc => new ConditionRule<PropertyAllowed>(
-                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull(),
-                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>())));
+                    conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<PropertyAllowed>(
+                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
+                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>()))
+                    .ToReadOnly());
             });
     }
 

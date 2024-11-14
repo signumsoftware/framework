@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool>
+class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, PermissionSymbol, PermissionSymbol, bool, bool>
 {
     public PermissionCache(SchemaBuilder sb) : base(sb, invalidateWithTypes: false)
     {
@@ -19,6 +19,9 @@ class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, P
         rule.Allowed = allowed;
         return rule;
     }
+
+    protected override bool ToAllowedModel(bool allowed) => allowed;
+    protected override bool ToAllowed(bool allowedModel) => allowedModel;
 
     protected override bool Merge(PermissionSymbol key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, bool>> baseValues)
     {

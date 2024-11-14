@@ -6,10 +6,11 @@ using System.Xml.Linq;
 namespace Signum.Authorization.Rules;
 
 
-public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
+public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
     where RT : RuleEntity<R>, new()
-    where AR : AllowedRule<R, A>, new()
+    where AR : AllowedRule<R, AM>, new()
     where A : notnull
+    where AM : notnull
     where R : class
     where K : notnull
 {
@@ -35,6 +36,8 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
     protected abstract A GetRuleAllowed(RT rule);
     protected abstract RT SetRuleAllowed(RT rule, A allowed);
+    protected abstract AM ToAllowedModel(A allowed);
+    protected abstract A ToAllowed(AM allowedModel);
 
     public virtual A CoerceValue(Lite<RoleEntity> role, K key, A allowed, bool manual = false)
     {
@@ -48,10 +51,12 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         return new AR()
         {
             Resource = resource,
-            AllowedBase = ruleCache.GetAllowedBase(k),
-            Allowed = ruleCache.GetAllowed(k)
+            AllowedBase = ToAllowedModel(ruleCache.GetAllowedBase(k)),
+            Allowed = ToAllowedModel(ruleCache.GetAllowed(k))
         };
     }
+
+    
 
     A IManualAuth<K, A>.GetAllowed(Lite<RoleEntity> role, K key)
     {
@@ -92,13 +97,13 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
     public class ManualResourceCache
     {
-        readonly AuthCache<RT, AR, R, K, A> cache; 
+        readonly AuthCache<RT, AR, R, K, A, AM> cache; 
 
         readonly Dictionary<Lite<RoleEntity>, A> specificRules;
 
         readonly K key;
 
-        public ManualResourceCache(AuthCache<RT, AR, R, K, A> cache, K key, R resource)
+        public ManualResourceCache(AuthCache<RT, AR, R, K, A, AM> cache, K key, R resource)
         {
             this.key = key;
             this.cache = cache;
@@ -176,14 +181,14 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
             Synchronizer.Synchronize(should, current,
                 (p, ar) => {
-                    var rule = SetRuleAllowed(new RT { Resource = p, Role = rules.Role }, ar.Allowed);
+                    var rule = SetRuleAllowed(new RT { Resource = p, Role = rules.Role },  ToAllowed(ar.Allowed));
                     rule.Save();
 
                     },
                 (p, rule) => rule.Delete(),
                 (p, ar, rule) =>
                 {
-                    SetRuleAllowed(rule, ar.Allowed);
+                    SetRuleAllowed(rule, ToAllowed(ar.Allowed));
                     if (rule.IsGraphModified)
                         rule.Save();
                 });
@@ -212,7 +217,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
 
     public class RoleAllowedCache
     {
-        readonly AuthCache<RT, AR, R, K, A> cache;
+        readonly AuthCache<RT, AR, R, K, A, AM> cache;
         internal readonly Lite<RoleEntity> Role;
 
         readonly DefaultDictionary<K, A> rules;
@@ -220,7 +225,7 @@ public abstract class AuthCache<RT, AR, R, K, A> : IManualAuth<K, A>
         readonly Func<K, A, A> coercer;
 
 
-        public RoleAllowedCache(AuthCache<RT, AR, R, K, A>  cache, Lite<RoleEntity> role, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues)
+        public RoleAllowedCache(AuthCache<RT, AR, R, K, A, AM>  cache, Lite<RoleEntity> role, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues)
         {
             this.Role = role;
             this.cache = cache;

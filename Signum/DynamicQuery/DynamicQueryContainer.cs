@@ -110,7 +110,6 @@ public class DynamicQueryContainer
         ExecuteUniqueEntity,
         QueryDescription,
         GetEntities,
-        GetDQueryable,
     }
 
     public ResultTable ExecuteQuery(QueryRequest request)

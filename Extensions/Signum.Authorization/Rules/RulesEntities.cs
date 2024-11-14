@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Data;
 
 namespace Signum.Authorization.Rules;
@@ -250,10 +251,11 @@ public static class TypeAllowedExtensions
         return pa;
     }
 
+
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
     {
         return new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(),
-            taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())));
+            taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly());
     }
 }
 

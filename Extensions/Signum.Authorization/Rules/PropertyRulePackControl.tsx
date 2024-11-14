@@ -4,21 +4,22 @@ import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { Operations } from '@framework/Operations'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
-import { EntityLine, AutoLine, EntityBaseController, Binding } from '@framework/Lines'
+import { EntityLine, AutoLine, EntityBaseController, Binding, FormGroup } from '@framework/Lines'
 import { AuthAdminClient } from '../AuthAdminClient'
-import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, WithConditions, ConditionRule } from './Signum.Authorization.Rules'
+import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, TypeConditionSymbol, WithConditionsModel, ConditionRuleModel } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks';
 import { RoleEntity } from '../Signum.Authorization';
-import { getToString, Lite, newMListElement } from '@framework/Signum.Entities';
+import { getToString, is, Lite, newMListElement } from '@framework/Signum.Entities';
 import { getRuleTitle, addConditionClick, useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
 
-export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeContext<PropertyRulePack>, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
+export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
 
-  
- 
+
+  const [typeConditions, setTypeConditions] = React.useState<TypeConditionSymbol[] | undefined>(initialTypeConditions);
+
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
 
@@ -50,11 +51,16 @@ export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeC
   function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: PropertyAllowed) {
 
     ctx.value.rules.forEach(mle => {
-      mle.element.allowed = reduceCoerced(mle.element.coerced, hc);
+      const value = PropertyAllowed.min(getBinding(mle.element.coerced, typeConditions).getValue(), hc);
+      getBinding(mle.element.allowed, typeConditions).setValue(value);
       mle.element.modified = true;
     });
 
     updateFrame();
+  }
+
+  function hasOverrides(tcs: TypeConditionSymbol[] | undefined): undefined | "fw-bold" {
+    return ctx.value.rules.some(r => getBinding(r.element.allowed, tcs).getValue() != getBinding(r.element.allowedBase, tcs).getValue()) ? "fw-bold" : undefined;
   }
 
   return (
@@ -63,6 +69,21 @@ export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeC
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
+        <FormGroup ctx={ctx} label="Type Conditions">
+          {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
+            if (e.currentTarget.value == "Fallback")
+              setTypeConditions(undefined);
+            else {
+              var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
+              setTypeConditions(tcs);
+            }
+          }} >
+            <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+            {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
+              {arr.map(a => a.key.after(".")).join(" & ")}
+            </option>)}
+          </select>}
+        </FormGroup>
       </div>
       <table className="table table-sm sf-auth-rules">
         <thead>
@@ -85,92 +106,72 @@ export default function PropertyRulesPackControl({ ctx, innerRef }: { ctx: TypeC
           </tr>
         </thead>
         <tbody>
-          {ctx.mlistItemCtxs(a => a.rules).map((tctx, i) => <PropertyRow key={i} tctx={tctx} updateFrame={updateFrame} />)}
+          {ctx.mlistItemCtxs(a => a.rules).map((tctx, i) => <PropertyRow key={i} tctx={tctx} updateFrame={updateFrame} getBidning={tac => getBinding(tac, typeConditions)} />)}
         </tbody>
       </table>
 
     </div>
   );
-
-
 }
 
-function max(p: WithConditions<PropertyAllowed>) {
-  return [p.fallback, ...p.conditionRules.map(a => a.element.allowed)].maxBy(a => PropertyAllowed.index(a));
-}
-
-function reduceCoerced(coerced: WithConditions<PropertyAllowed>, value: PropertyAllowed) {
-  return WithConditions(PropertyAllowed).New({
-    fallback: PropertyAllowed.min(coerced.fallback, value),
-    conditionRules: coerced.conditionRules.map(cr => newMListElement(ConditionRule(PropertyAllowed).New({
-      allowed: PropertyAllowed.min(cr.element.allowed, value),
-      typeConditions: JSON.parse(JSON.stringify(cr.element.typeConditions))
-    })))
-  });
-}
-
-function PropertyRow(p: { tctx: TypeContext<PropertyAllowedRule>, updateFrame: () => void }): React.JSX.Element {
+function PropertyRow(p: { tctx: TypeContext<PropertyAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<PropertyAllowed>) => Binding<PropertyAllowed> }): React.JSX.Element {
 
   const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
 
-  const rule = p.tctx.value;
+  const allowedBinding = p.getBidning(p.tctx.value.allowed);
+  const allowedBaseBinding = p.getBidning(p.tctx.value.allowedBase);
+  const coercedBinding = p.getBidning(p.tctx.value.coerced);
 
-  function renderRadio(b: Binding<PropertyAllowed | null>, allowed: PropertyAllowed, color: string) {
+  function renderRadio(allowed: PropertyAllowed, color: string) {
 
-    if (rule.coerced.fallback == allowed)
+    if (PropertyAllowed.index(coercedBinding.getValue()) < PropertyAllowed.index(allowed))
       return;
 
     return <ColorRadio
       readOnly={p.tctx.readOnly}
-      checked={b.getValue() == allowed}
+      checked={allowedBinding.getValue() == allowed}
       color={color}
-      onClicked={e => { b.setValue(allowed); p.updateFrame(); }}
+      onClicked={e => {
+        allowedBinding.setValue(allowed);
+        p.updateFrame();
+      }}
     />;
   }
 
-  function handleRemoveConditionClick(taac: WithConditions<PropertyAllowed>, con: ConditionRule<PropertyAllowed>) {
-    taac.conditionRules.remove(taac.conditionRules.single(mle => mle.element == con));
-    taac.modified = true;
-    p.updateFrame();
-  }
-
-  const conditions = rule.availableConditions;
-  let fallback = Binding.create(rule.allowed, a => a.fallback);
   return (
       <tr>
-        <td>
-          {
-            conditions.length > 1 || conditions.length == 1 && rule.allowed.conditionRules.length == 0 ?
-              <a className="sf-condition-icon" href="#" title={AuthAdminMessage.AddCondition.niceToString()} onClick={async e => {
-                e.preventDefault();
-                await addConditionClick(PropertyAllowed, conditions, rule.allowed, rule.resource.rootType);
-                p.updateFrame();
-              }}>
-                <FontAwesomeIcon icon="circle-plus" className="me-2" />
-              </a> :
-              <FontAwesomeIcon icon="circle" className="sf-placeholder-icon me-2"></FontAwesomeIcon>
-          }
-          {rule.resource.path}
-          {rule.allowed.conditionRules.length > 0 && <small className="shy-text ms-1">{AuthAdminMessage.Fallback.niceToString()}</small>}
+      <td>
+        {p.tctx.value.resource.path}
         </td>
         <td style={{ textAlign: "center" }}>
-          {renderRadio(fallback, "Write", "green")}
+          {renderRadio("Write", "green")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {renderRadio(fallback, "Read", "#FFAD00")}
+          {renderRadio("Read", "#FFAD00")}
         </td>
         <td style={{ textAlign: "center" }}>
-          {renderRadio(fallback, "None", "red")}
+          {renderRadio("None", "red")}
         </td>
-        <td style={{ textAlign: "center" }}>
-          <GrayCheckbox readOnly={p.tctx.readOnly} checked={rule.allowed != rule.allowedBase} onUnchecked={() => {
-            rule.allowed = JSON.parse(JSON.stringify(rule.allowedBase));
-            rule.modified = true;
-            p.updateFrame();
-          }} />
+      <td style={{ textAlign: "center" }}>
+        <GrayCheckbox readOnly={p.tctx.readOnly} checked={allowedBinding.getValue() != allowedBaseBinding.getValue()} onUnchecked={() => {
+          allowedBinding.setValue(allowedBaseBinding.getValue());
+          p.updateFrame();
+        }} />
         </td>
       </tr>
   )
 }
 
 
+function matches(r: ConditionRuleModel<PropertyAllowed>, typeConditions: TypeConditionSymbol[]) {
+  return r.typeConditions.length == typeConditions.length && r.typeConditions.every((tc, i) => is(tc.element, typeConditions[i]));
+}
+
+function getBinding(pac: WithConditionsModel<PropertyAllowed>, typeConditions: TypeConditionSymbol[] | undefined): Binding<PropertyAllowed> {
+  if (typeConditions == undefined)
+    return new Binding(pac, "fallback");
+  else {
+    var cr = pac.conditionRules.single(a => matches(a.element, typeConditions)).element;
+    return new Binding(cr, "allowed");
+  }
+}

@@ -1,12 +1,16 @@
 using Microsoft.VisualBasic;
 using Signum.Basics;
+using Signum.Utilities.Reflection;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
+using System.Collections.ObjectModel;
 using System.Data;
+using System.Runtime.CompilerServices;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, WithConditions<TypeAllowed>>
+class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, WithConditions<TypeAllowed>, WithConditionsModel<TypeAllowed>>
 {
     public TypeCache(SchemaBuilder sb) : base(sb, invalidateWithTypes: true)
     {
@@ -18,7 +22,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     protected override TypeEntity ToEntity(Type key) => key.ToTypeEntity();
 
     protected override WithConditions<TypeAllowed> GetRuleAllowed(RuleTypeEntity rule) => new WithConditions<TypeAllowed>(rule.Fallback,
-            rule.ConditionRules.Select(c => new  ConditionRule<TypeAllowed>(c.Conditions, c.Allowed)));
+            rule.ConditionRules.Select(c => new ConditionRule<TypeAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
 
     protected override RuleTypeEntity SetRuleAllowed(RuleTypeEntity rule, WithConditions<TypeAllowed> allowed)
     {
@@ -31,6 +35,9 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
         return rule;
     }
 
+    protected override WithConditions<TypeAllowed> ToAllowed(WithConditionsModel<TypeAllowed> allowedModel) => allowedModel.ToImmutable();
+    protected override WithConditionsModel<TypeAllowed> ToAllowedModel(WithConditions<TypeAllowed> allowed) => allowed.ToModel();
+
     protected override TypeAllowedRule ToAllowedRule(TypeEntity resource, RoleAllowedCache ruleCache)
     {
         var r =  base.ToAllowedRule(resource, ruleCache);
@@ -41,7 +48,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
             r.Operations = OperationAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
 
         if (PropertyAuthLogic.IsStarted)
-            r.Properties = PropertyAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
+            r.Properties = PropertyAuthLogic.GetAllowedThumbnail(ruleCache.Role, type, r.Allowed.ToImmutable());
 
         if (QueryAuthLogic.IsStarted)
             r.Queries = QueryAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
@@ -52,10 +59,11 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     }
     protected override WithConditions<TypeAllowed> Merge(Type key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<TypeAllowed>>> baseValues)
     {
-        if (AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union)
-            return ConditionMerger<TypeAllowed>.MergeBase(baseValues.Select(a => a.Value), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var strategy = AuthLogic.GetMergeStrategy(role);
+        if (strategy == MergeStrategy.Union)
+            return ConditionMerger<TypeAllowed>.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
         else
-            return ConditionMerger<TypeAllowed>.MergeBase(baseValues.Select(a => a.Value), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
+            return ConditionMerger<TypeAllowed>.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
     }
 
     static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
@@ -154,9 +162,9 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
             {
                 return new WithConditions<TypeAllowed>(
                     fallback: e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
-                    conditions: e.Elements("Condition").Select(xc => new ConditionRule<TypeAllowed>(
-                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull(),
-                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>())));
+                    conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<TypeAllowed>(
+                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
+                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>())).ToReadOnly());
             });
     }
 
@@ -173,7 +181,14 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
 static class ConditionMerger<A> where A : struct, Enum
 {
-    public static WithConditions<A> MergeBase(IEnumerable<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
+    static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<A>> tuple), WithConditions<A>> cache = new();
+
+    public static WithConditions<A> MergeBase(MergeStrategy mergeStrage, List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
+    {
+        return cache.GetOrAdd((mergeStrage, new StructureList<WithConditions<A>>(baseRules)), tuple => MergeBaseImplementations(baseRules, maxMerge, max, min));
+    }
+
+    static WithConditions<A> MergeBaseImplementations(List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
     {
         WithConditions<A>? only = baseRules.Only();
         if (only != null)
@@ -240,7 +255,7 @@ static class ConditionMerger<A> where A : struct, Enum
                 var ta = OnlyOneValue(0);
 
                 if (ta != null)
-                    return new WithConditions<A>(ta.Value, conditionRules.AsEnumerable().Reverse().ToArray());
+                    return new WithConditions<A>(ta.Value, conditionRules.AsEnumerable().Reverse().ToReadOnly());
             }
 
             { //1 Condition
@@ -252,7 +267,7 @@ static class ConditionMerger<A> where A : struct, Enum
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<A>(new[] { tc }, ta.Value));
+                        conditionRules.Add(new ConditionRule<A>(new[] { tc }.ToFrozenSet(), ta.Value));
                         availableTypeConditions.Remove(tc);
 
                         ClearArray(mask);
@@ -272,7 +287,7 @@ static class ConditionMerger<A> where A : struct, Enum
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<A>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToArray(), ta.Value));
+                        conditionRules.Add(new ConditionRule<A>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToFrozenSet(), ta.Value));
 
                         ClearArray(mask);
 
@@ -343,6 +358,36 @@ static class ConditionMerger<A> where A : struct, Enum
                     }
                 }
             }
+        }
+    }
+}
+
+
+public class StructureList<T> : ReadOnlyCollection<T>
+{
+    public StructureList(IList<T> list) : base(list) { }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is StructureList<T> otherList)
+        {
+            // Check if both lists have the same count and contents in the same order
+            return this.Count == otherList.Count && this.SequenceEqual(otherList);
+        }
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        // Aggregate the hash codes of all elements in the list
+        unchecked
+        {
+            int hash = 17;
+            foreach (var item in this)
+            {
+                hash = hash * 31 + (item?.GetHashCode() ?? 0);
+            }
+            return hash;
         }
     }
 }

@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed>
+public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEntity, object, QueryAllowed, QueryAllowed>
 {
     public QueryCache(SchemaBuilder sb): base(sb, invalidateWithTypes: true)
     {
@@ -20,6 +20,9 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
         rule.Allowed = allowed;
         return rule;
     }
+
+    protected override QueryAllowed ToAllowed(QueryAllowed allowedModel) => allowedModel;
+    protected override QueryAllowed ToAllowedModel(QueryAllowed allowed) => allowed;
 
     protected override QueryAllowed Merge(object key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, QueryAllowed>> baseValues)
     {

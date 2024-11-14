@@ -38,17 +38,15 @@ public class AuthColorProvider
         return "auth-" + list.ToString("-");
     }
 
-    static List<TypeAllowedBasic> ToStringList(WithConditions<TypeAllowed> tac, bool userInterface)
+    static List<TypeAllowedBasic> ToStringList(WithConditionsModel<TypeAllowed> tac, bool userInterface)
     {
-        List<TypeAllowedBasic> result = new List<TypeAllowedBasic>();
-        result.Add(tac.Fallback.Get(userInterface));
+        List<TypeAllowedBasic> result = [tac.Fallback.Get(userInterface)];
 
         foreach (var c in tac.ConditionRules)
             result.Add(c.Allowed.Get(userInterface));
 
         return result;
     }
-
 
     private static string ToString(TypeAllowed? typeAllowed)
     {
