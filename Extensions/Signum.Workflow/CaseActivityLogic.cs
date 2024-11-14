@@ -1263,26 +1263,29 @@ public static class CaseActivityLogic
                     ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
                 }
             }
-        }
+        } 
 
         private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn, WorkflowExecuteStepContext ctx)
         {
-            var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
-            ctx.NotifyTransitionContext(surrogate);
-            var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
-            if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
-                throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
-
-            if (subEntities.IsEmpty())
-                ExecuteStep(surrogate, DoneType.Recompose, null, null);
-            else
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var subWorkflow = decActivity.SubWorkflow.Workflow;
-                foreach (var se in subEntities)
+                var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
+                ctx.NotifyTransitionContext(surrogate);
+                var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
+                if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
+                    throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
+
+                if (subEntities.IsEmpty())
+                    ExecuteStep(surrogate, DoneType.Recompose, null, null);
+                else
                 {
-                    var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
-                    caseActivity.Previous = surrogate.ToLite();
-                    caseActivity.Execute(CaseActivityOperation.Register);
+                    var subWorkflow = decActivity.SubWorkflow.Workflow;
+                    foreach (var se in subEntities)
+                    {
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
+                        caseActivity.Previous = surrogate.ToLite();
+                        caseActivity.Execute(CaseActivityOperation.Register);
+                    }
                 }
             }
         }
