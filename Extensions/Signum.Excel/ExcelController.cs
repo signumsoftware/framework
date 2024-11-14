@@ -20,8 +20,8 @@ public class ExcelController : ControllerBase
 
         var queryRequest = request.ToQueryRequest(queryKey, SignumServer.JsonSerializerOptions, this.HttpContext.Request.Headers.Referer);
 
-        ResultTable queryResult = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
-        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(queryResult, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
+        ResultTable resultTable = await QueryLogic.Queries.ExecuteQueryAsync(queryRequest, token);
+        byte[] binaryFile = PlainExcelGenerator.WritePlainExcel(resultTable, queryRequest, QueryUtils.GetNiceName(queryRequest.QueryName), forImport: forImport);
 
         var fileName = request.queryKey + Clock.Now.ToString("yyyyMMdd-HHmmss") + ".xlsx";
 

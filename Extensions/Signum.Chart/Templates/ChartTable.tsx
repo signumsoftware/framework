@@ -98,11 +98,21 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
 
   const columns = chartRequest.columns.map(c => c.element).filter(cc => cc.token != undefined)
     .map(cc => ({ token: cc.token!.token, displayName: cc.displayName } as ColumnOptionParsed))
-    .map(co => ({
-      column: co,
-      cellFormatter: (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined),
-      resultIndex: resultTable.columns.indexOf(co.token!.fullKey)
-    }));
+    .map(co => {
+
+      const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined);
+
+      let resultIndex : number | "Entity"= resultTable.columns.indexOf(co.token!.fullKey);
+
+      if (resultIndex == -1 && co.token?.fullKey == "Entity")
+        resultIndex = "Entity";
+
+      return ({
+        column: co,
+        cellFormatter: formatter,
+        resultIndex: resultIndex
+      });
+    });
 
   var hasEntity = !ChartClient.hasAggregates(chartRequest);
 
@@ -141,7 +151,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
                     }
                     {columns.map((c, j) =>
                       <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(row.columns[c.resultIndex], ctx, c.column.token!)}
+                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx, c.column.token!)}
                       </td>)
                     }
                   </tr>
