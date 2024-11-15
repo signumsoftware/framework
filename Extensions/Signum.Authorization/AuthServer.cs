@@ -223,9 +223,7 @@ public static class AuthServer
 
                     return null;
                 }
-            };
-
-            PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);
+            };   
         }
 
         if (OperationAuthLogic.IsStarted)
