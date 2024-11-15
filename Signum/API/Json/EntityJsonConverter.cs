@@ -1,6 +1,7 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Diagnostics.Eventing.Reader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -43,6 +44,7 @@ public class PropertyConverter
 
 public delegate bool AvoidReadJsonPropertyDelegate(ReadJsonPropertyContext ctx);
 public delegate void ReadJsonPropertyDelegate(ref Utf8JsonReader reader, ReadJsonPropertyContext ctx);
+
 public class ReadJsonPropertyContext
 {
     public ReadJsonPropertyContext(JsonSerializerOptions jsonSerializerOptions, PropertyConverter propertyConverter, ModifiableEntity entity, PropertyRoute parentPropertyRoute, EntityJsonConverterFactory factory)
@@ -96,12 +98,19 @@ public enum EntityJsonConverterStrategy
     Full,
 }
 
+public enum PropertyMetadata
+{
+    Hidden, 
+    ReadOnly,
+}
+
 public class EntityJsonConverterFactory : JsonConverterFactory
 {
     public Polymorphic<Action<ModifiableEntity>> AfterDeserilization = new Polymorphic<Action<ModifiableEntity>>();
     public Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>();
     public Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
     public Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
+    public Func<PropertyRoute, ModifiableEntity, PropertyMetadata?>? GetMetadataPropertyRoute;
     public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error in " + pi.Name;
 
     public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
@@ -268,20 +277,38 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
             writer.WriteBoolean("modified", mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
-            foreach (var kvp in Factory.GetPropertyConverters(value!.GetType()))
+            foreach (var kvp in Factory.GetPropertyConverters(mod.GetType()))
             {
+
                 WriteJsonProperty(writer, options, mod, kvp.Key, kvp.Value, tup.pr);
             }
 
-            var readonlyProps = Factory.GetPropertyConverters(value!.GetType())
-                .Where(kvp => kvp.Value.PropertyValidator?.IsPropertyReadonly(mod) == true)
-                .Select(a => a.Key)
-                .ToList();
+            var props = Factory.GetPropertyConverters(mod.GetType())
+                .Where(a => a.Value.PropertyValidator != null)
+                .Select(a =>
+                {
+                    var pi = a.Value.PropertyValidator!.PropertyInfo;
+                    var pr = tup.pr.Add(pi);
+                    var result = Factory.GetMetadataPropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).Min();
 
-            if (readonlyProps.Any())
+                    if (result == null)
+                    {
+                        if (a.Value.PropertyValidator.IsPropertyReadonly(mod))
+                            return a.Key;
+
+                        return null;
+                    }
+
+                    if (result == PropertyMetadata.Hidden)
+                        return "!" + a.Key;
+                    else
+                        return a.Key;
+                }).NotNull().ToArray();
+
+            if (props.Any())
             {
-                writer.WritePropertyName("readonlyProperties");
-                JsonSerializer.Serialize(writer, readonlyProps, readonlyProps.GetType(), options);
+                writer.WritePropertyName("propsMeta");
+                JsonSerializer.Serialize(writer, props, props.GetType(), options);
             }
 
             if (mod.Mixins.Any())
@@ -326,7 +353,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
             if (Factory.Strategy == EntityJsonConverterStrategy.WebAPI)
             {
-                string? error = Factory.CanReadPropertyRoute?.Invoke(pr, mod);
+                string? error = Factory.CanReadPropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).NotNull().FirstOrDefault();
                 if (error != null)
                     return;
             }

@@ -120,6 +120,21 @@ public class SymbolNode : TypeConditionNode
 
 public static class TypeConditionNodeExtensions
 {
+    public static TypeConditionNode ToTypeConditionNode(this WithConditions<PropertyAllowed> tac, PropertyAllowed requested)
+    {
+        var baseValue = tac.Fallback >= requested ? TypeConditionNode.True : TypeConditionNode.False;
+
+        return tac.ConditionRules.Aggregate(baseValue, (acum, tacRule) =>
+        {
+            var iExp = new AndNode(tacRule.TypeConditions.Select(a => (TypeConditionNode)new SymbolNode(a)).ToHashSet());
+
+            if (tacRule.Allowed >= requested)
+                return new OrNode(new TypeConditionNode[] { iExp, acum });
+            else
+                return new AndNode(new TypeConditionNode[] { new NotNode(iExp), acum });
+        });
+    }
+
     public static TypeConditionNode ToTypeConditionNode(this WithConditions<TypeAllowed> tac, TypeAllowedBasic requested, bool inUserInterface)
     {
         var baseValue = tac.Fallback.Get(inUserInterface) >= requested ? TypeConditionNode.True : TypeConditionNode.False;

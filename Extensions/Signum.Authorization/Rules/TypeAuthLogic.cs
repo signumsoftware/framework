@@ -1,5 +1,7 @@
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
+using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Signum.Authorization;
@@ -49,6 +51,9 @@ public static partial class TypeAuthLogic
             sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Type);
             sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Condition);
             Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
+            
+   
+
 
             AuthLogic.ExportToXml += cache.ExportXml;
             AuthLogic.ImportFromXml += cache.ImportXml;
@@ -116,11 +121,59 @@ public static partial class TypeAuthLogic
 
     static GenericInvoker<Action<Schema>> miRegister =
         new(s => RegisterSchemaEvent<TypeEntity>(s));
-    static void RegisterSchemaEvent<T>(Schema sender)
+    static void RegisterSchemaEvent<T>(Schema schema)
          where T : Entity
     {
-        sender.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
+        schema.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
+
+        schema.EntityEvents<T>().RegisterBinding(a => a.TypeConditions,
+            () => TypeConditionsForBinding(typeof(T)) != null,
+            () =>
+            {
+                var conditions = TypeConditionsForBinding(typeof(T))!;
+                if (conditions == null || conditions.IsEmpty())
+                    return (e, rowId) => (IDictionary?)null;
+
+                var entity = Expression.Parameter(typeof(T));
+                var rowId = Expression.Parameter(typeof(PrimaryKey?));
+                var type = typeof(Dictionary<TypeConditionSymbol, bool>);
+                var miAdd = type.GetMethod("Add")!;
+                var newDic = Expression.ListInit(Expression.New(type),
+                    conditions.Select(c => Expression.ElementInit(miAdd, Expression.Constant(c),
+                        Expression.Invoke(TypeConditionLogic.GetCondition(type, c, null), entity))));
+
+                return Expression.Lambda<Func<T, PrimaryKey?, object?>>(newDic, [entity, rowId]);
+            },
+            (e, rowId, ret) => null);
     }
+
+    static List<TypeConditionSymbol>? TypeConditionsForBinding(Type type)
+    {
+        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return null;
+
+        var tac = GetAllowed(type);
+
+        if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(type))
+            return null;
+
+        return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
+            .Where(cond => !TypeConditionLogic.HasInMemoryCondition(type, cond))
+            .ToList();
+    }
+
+
+    public static bool HasWriteAndRead(WithConditions<TypeAllowed> tac)
+    {
+        if (tac.MaxUI() < TypeAllowedBasic.Write)
+            return false;
+
+        return tac.Fallback == TypeAllowed.Read || !tac.ConditionRules.Any(a => a.Allowed == TypeAllowed.Read);
+    }
+
+    public static Func<Type, bool> HasTypeConditionInProperties = t => false;
+
+  
 
     public static void AssertStarted(SchemaBuilder sb)
     {

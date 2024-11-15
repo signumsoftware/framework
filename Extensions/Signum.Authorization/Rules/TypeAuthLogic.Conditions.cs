@@ -203,35 +203,16 @@ public static partial class TypeAuthLogic
         if (max < allowed)
             return false;
 
-        var inMemoryCodition = IsAllowedInMemory<T>(tac, allowed, inUserInterface);
-        if (inMemoryCodition != null)
-            return inMemoryCodition(entity);
 
-        using (DisableQueryFilter())
-            return entity.InDB().WhereIsAllowedFor(allowed, inUserInterface, args).Any();
-    }
-
-    private static Func<T, bool>? IsAllowedInMemory<T>(WithConditions<TypeAllowed> tac, TypeAllowedBasic allowed, bool inUserInterface) where T : Entity
-    {
-        if (tac.ConditionRules.SelectMany(c => c.TypeConditions).Any(tc => TypeConditionLogic.GetInMemoryCondition<T>(tc) == null))
-            return null;
-
-        return entity =>
+        foreach (var cond in tac.ConditionRules.Reverse())
         {
-            foreach (var cond in tac.ConditionRules.Reverse())
+            if (cond.TypeConditions.All(tc => entity.InTypeCondition(tc)))
             {
-                if (cond.TypeConditions.All(tc =>
-                {
-                    var func = TypeConditionLogic.GetInMemoryCondition<T>(tc)!;
-                    return func(entity);
-                }))
-                {
-                    return cond.Allowed.Get(inUserInterface) >= allowed;
-                }
+                return cond.Allowed.Get(inUserInterface) >= allowed;
             }
+        }
 
-            return tac.Fallback.Get(inUserInterface) >= allowed;
-        };
+        return tac.Fallback.Get(inUserInterface) >= allowed;
     }
 
     [MethodExpander(typeof(IsAllowedForExpander))]
@@ -330,13 +311,10 @@ public static partial class TypeAuthLogic
                 return null;
         }
 
-        Func<T, bool>? func = IsAllowedInMemory<T>(GetAllowed(typeof(T)), tab, ui);
-
-        return new FilterQueryResult<T>(Expression.Lambda<Func<T, bool>>(body, e), func);
+        return new FilterQueryResult<T>(
+            Expression.Lambda<Func<T, bool>>(body, e),
+            e => e.IsAllowedFor(tab, ui, args));
     }
-
-
-  
 
     private static void AssertMinimum<T>(bool ui) where T : Entity
     {
