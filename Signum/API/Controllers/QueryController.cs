@@ -235,10 +235,13 @@ public class QueryTokenTS
         if (qt is AggregateToken)
             return QueryTokenType.Aggregate;
 
-        if (qt is CollectionElementToken ce)
+        if (qt is CollectionElementToken)
             return QueryTokenType.Element;
 
-        if (qt is CollectionAnyAllToken caat)
+        if (qt is CollectionNestedToken)
+            return QueryTokenType.Nested;
+
+        if (qt is CollectionAnyAllToken)
             return QueryTokenType.AnyOrAll;
 
         if (qt is CollectionToArrayToken)
@@ -280,5 +283,6 @@ public enum QueryTokenType
     AnyOrAll,
     Operation,
     ToArray,
-    Manual
+    Manual,
+    Nested
 }

@@ -38,27 +38,40 @@ export class ValueBaseController<T extends ValueBaseProps<V>, V> extends LineBas
       state.valueHtmlAttributes = valueHtmlAttributes;
   }
 
-  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element): JSX.Element {
+  withItemGroup(input: JSX.Element, preExtraButton?: JSX.Element, vertical?: boolean): JSX.Element {
 
-      if (!this.props.unit && !this.props.extraButtons && !preExtraButton) {
+    if (!this.props.unit && !this.props.extraButtons && !this.props.extraButtonsBefore && !preExtraButton) {
         return (
           <>
             {getTimeMachineIcon({ ctx: this.props.ctx })}
             {input}
           </>
         );
-      }
+    }
 
+    if (vertical) {
       return (
-          <div className={this.props.ctx.inputGroupClass}>
-              {getTimeMachineIcon({ ctx: this.props.ctx })}
-              {this.props.extraButtonsBefore && this.props.extraButtonsBefore(this)}
-              {input}
-              {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
-              {preExtraButton}
-              {this.props.extraButtons && this.props.extraButtons(this)}
-          </div>
+        <div className="d-flex">
+          {getTimeMachineIcon({ ctx: this.props.ctx })}
+          {this.props.extraButtonsBefore && <div className={this.props.ctx.inputGroupVerticalClass("before")}>{this.props.extraButtonsBefore(this)}</div>}
+          {input}
+          {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
+          {preExtraButton}
+          {this.props.extraButtons && <div className={this.props.ctx.inputGroupVerticalClass("after")}>{this.props.extraButtons(this)}</div>}
+        </div>
       );
+    } else {
+      return (
+        <div className={this.props.ctx.inputGroupClass}>
+          {getTimeMachineIcon({ ctx: this.props.ctx })}
+          {this.props.extraButtonsBefore && this.props.extraButtonsBefore(this)}
+          {input}
+          {this.props.unit && <span className={this.props.ctx.readonlyAsPlainText ? undefined : "input-group-text"}>{this.props.unit}</span>}
+          {preExtraButton}
+          {this.props.extraButtons && this.props.extraButtons(this)}
+        </div>
+      );
+    }
   }
 
   getPlaceholder(): string | undefined {

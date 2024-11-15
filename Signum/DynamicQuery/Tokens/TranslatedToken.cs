@@ -47,7 +47,7 @@ public class TranslatedToken : QueryToken
 
             var lambda = pr.GetLambdaExpression(mlistItemRoute.Type, typeof(string), safeNullAccess: false, skipBefore: mlistItemRoute);
 
-            var itemmToken = ((QueryToken)this).Follow(a => a.Parent).FirstOrDefault(qt => qt is CollectionElementToken or CollectionAnyAllToken or CollectionToArrayToken);
+            var itemmToken = ((QueryToken)this).Follow(a => a.Parent).FirstOrDefault(qt => qt is CollectionElementToken or CollectionNestedToken or CollectionAnyAllToken or CollectionToArrayToken);
 
             if(itemmToken == null)
                 throw new InvalidOperationException("Unable to find the MList element token for " + this.Parent);

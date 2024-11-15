@@ -666,4 +666,5 @@ public enum SubTokensOptions
     CanSnippet = 32,
     CanManual = 64,
     CanTimeSeries = 128,
+    CanNested = 256,
 }

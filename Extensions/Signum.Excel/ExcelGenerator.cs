@@ -8,26 +8,26 @@ namespace Signum.Excel;
 
 public static class ExcelGenerator
 {
-    public static byte[] WriteDataInExcelFile(ResultTable queryResult, byte[] template)
+    public static byte[] WriteDataInExcelFile(ResultTable resultTable, QueryRequest request, byte[] template)
     {
         using (MemoryStream ms = new MemoryStream())
         {
             ms.WriteAllBytes(template);
             ms.Seek(0, SeekOrigin.Begin);
 
-            ExcelGenerator.WriteDataInExcelFile(queryResult, ms);
+            ExcelGenerator.WriteDataInExcelFile(resultTable, request, ms);
 
             return ms.ToArray();
         }
     }
 
-    public static void WriteDataInExcelFile(ResultTable results, string fileName)
+    public static void WriteDataInExcelFile(ResultTable results, QueryRequest request, string fileName)
     {
         using (FileStream fs = File.Open(fileName, FileMode.Open, FileAccess.ReadWrite))
-            WriteDataInExcelFile(results, fs);
+            WriteDataInExcelFile(results, request, fs);
     }
 
-    public static void WriteDataInExcelFile(ResultTable results, Stream stream)
+    public static void WriteDataInExcelFile(ResultTable results, QueryRequest request, Stream stream)
     {
         if (results == null)
             throw new ApplicationException(ExcelMessage.ThereAreNoResultsToWrite.NiceToString());
@@ -51,7 +51,7 @@ public static class ExcelGenerator
             
             SheetData sheetData = worksheetPart.Worksheet.Descendants<SheetData>().SingleEx();
 
-            List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, results);
+            List<ColumnData> columnEquivalences = GetColumnsEquivalences(document, sheetData, request);
 
             UInt32Value headerStyleIndex = worksheetPart.Worksheet.FindCell("A1").StyleIndex!;
 
@@ -61,11 +61,11 @@ public static class ExcelGenerator
             sheetData.Append(new Sequence<Row>()
             {
                 (from columnData in columnEquivalences
-                    select cb.Cell(columnData.Column.Column.DisplayName, headerStyleIndex, forImport: false)).ToRow(),
+                 select cb.Cell(columnData.Column.DisplayName, headerStyleIndex, forImport: false)).ToRow(),
 
                 from r in results.Rows
-                    select (from columnData in columnEquivalences
-                            select cb.Cell(r[columnData.Column], cb.GetDefaultStyle(columnData.Column.Column.Type), columnData.StyleIndex, forImport: false)).ToRow()
+                select (from columnData in columnEquivalences
+                        select cb.Cell(r[results.GetResultRow(columnData.Column.Token)], cb.GetDefaultStyle(columnData.Column.Type), columnData.StyleIndex, forImport: false)).ToRow()
             }.Cast<OpenXmlElement>());
 
             var pivotTableParts = workbookPart.PivotTableCacheDefinitionParts
@@ -87,9 +87,9 @@ public static class ExcelGenerator
         }
     }
 
-    private static List<ColumnData> GetColumnsEquivalences(this SpreadsheetDocument document, SheetData sheetData, ResultTable results)
+    private static List<ColumnData> GetColumnsEquivalences(SpreadsheetDocument document, SheetData sheetData, QueryRequest request)
     {
-        var resultsCols = results.Columns.ToDictionary(c => c.Column.DisplayName!);
+        var resultsCols = request.Columns.ToDictionary(c => c.DisplayName!);
 
         var headerCells = sheetData.Descendants<Row>().FirstEx().Descendants<Cell>().ToList();
         var templateCols = headerCells.ToDictionary(c => document.GetCellValue(c)!);
@@ -153,7 +153,7 @@ public static class ExcelGenerator
 
     public class ColumnData
     {
-        public ColumnData(ResultColumn column, UInt32Value styleIndex, bool isNew) 
+        public ColumnData(DynamicQuery.Column column, UInt32Value styleIndex, bool isNew) 
         {
             Column = column;
             IsNew = isNew;
@@ -163,7 +163,7 @@ public static class ExcelGenerator
         /// <summary>
         /// Column Data
         /// </summary>
-        public ResultColumn Column { get; set; }
+        public DynamicQuery.Column Column { get; set; }
 
         /// <summary>
         /// Indicates the column is not present in the template excel

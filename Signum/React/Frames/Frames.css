@@ -235,3 +235,8 @@ a.expand-window:hover {
     margin-right: -25px;
     overflow: inherit;
 }
+
+.modal-max-width {
+    max-width: none !important;
+    width: calc(100vw - 30px);
+}

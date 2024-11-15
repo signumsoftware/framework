@@ -34,6 +34,8 @@ public class QueryRequest : BaseQueryRequest
 
     public required Pagination Pagination { get; set; }
 
+    public int SubQueryLimit { get; set; } = 10;
+
     public SystemTimeRequest? SystemTime { get; set; }
 
     public bool CanDoMultiplicationsInSubQueries()

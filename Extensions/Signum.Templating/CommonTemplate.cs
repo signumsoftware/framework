@@ -99,8 +99,8 @@ public static class TemplateUtils
     public static object? DistinctSingle(this IEnumerable<ResultRow> rows, ResultColumn column)
     {
         return rows.Select(r => r[column]).Distinct(SemiStructuralEqualityComparer.Comparer).SingleEx(
-            () => "No values for column {0}".FormatWith(column.Column.Token.FullKey()),
-            () => "Multiple values for column {0}".FormatWith(column.Column.Token.FullKey()));
+            () => "No values for column {0}".FormatWith(column.Token.FullKey()),
+            () => "Multiple values for column {0}".FormatWith(column.Token.FullKey()));
     }
 
     public static IEnumerable<IEnumerable<ResultRow>> GroupByColumn(this IEnumerable<ResultRow> rows, ResultColumn keyColumn)

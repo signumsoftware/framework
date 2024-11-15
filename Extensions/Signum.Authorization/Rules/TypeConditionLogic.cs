@@ -70,19 +70,19 @@ public static class TypeConditionLogic
         }
     }
 
-    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, bool replace = false)
           where T : Entity
     {
-        Register<T>(typeCondition, condition, null);
+        Register<T>(typeCondition, condition, null, replace: replace);
     }
 
-    public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+    public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, bool replace = false)
           where T : Entity
     {
-        Register<T>(typeCondition, condition, condition.Compile());
+        Register<T>(typeCondition, condition, condition.Compile(), replace: replace);
     }
 
-    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition)
+    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition, bool replace = false)
         where T : Entity
     {
         if (Schema.Current.IsCompleted)
@@ -94,7 +94,16 @@ public static class TypeConditionLogic
         if (condition == null)
             throw new ArgumentNullException(nameof(condition));
 
-        infos.GetOrCreate(typeof(T))[typeCondition] = new TypeCondition(condition, inMemoryCondition);
+        var dic = infos.GetOrCreate(typeof(T));
+        if (replace)
+            dic[typeCondition] = new TypeCondition(condition, inMemoryCondition);
+        else
+        {
+            if (dic.ContainsKey(typeCondition))
+                throw new InvalidOperationException($"TypeCondition {typeCondition} already registered for {typeof(T).TypeName()}");
+
+            dic.Add(typeCondition, new TypeCondition(condition, inMemoryCondition));
+        }
     }
 
     public static void RegisterWhenAlreadyFilteringBy<T, P>(TypeConditionSymbol typeCondition, Expression<Func<T, P>> property)

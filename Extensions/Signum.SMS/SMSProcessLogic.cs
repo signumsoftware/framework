@@ -20,7 +20,7 @@ public static class SMSProcessLogic
 
             new Graph<ProcessEntity>.ConstructFromMany<SMSMessageEntity>(SMSMessageOperation.CreateUpdateStatusPackage)
             {
-                Construct = (messages, _) => UpdateMessages(messages.RetrieveFromListOfLite())
+                Construct = (messages, _) => UpdateMessages(messages.RetrieveLites())
             }.Register();
 
             QueryLogic.Queries.Register(typeof(SMSSendPackageEntity), () =>

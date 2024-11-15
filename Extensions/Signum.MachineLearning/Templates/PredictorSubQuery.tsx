@@ -35,12 +35,12 @@ export default function PredictorSubQuery(p : { ctx: TypeContext<PredictorSubQue
         canAggregate: true,
         entity: undefined,
         filters: (getMainFilters() ?? []).concat(sq.filters).map(mle => UserAssetClient.Converter.toQueryFilterItem(mle.element))
-      }).then(filters => {
+      } as UserAssetClient.API.ParseFiltersRequest).then(filters => {
         var fo: FindOptions = {
           queryName: sq.query!.key,
           groupResults: true,
           filterOptions: filters.map(f => UserAssetClient.Converter.toFilterOption(f)),
-          columnOptions: [{ token: QueryTokenString.count() } as ColumnOption]
+          columnOptions: [{ token: QueryTokenString.count } as ColumnOption]
             .concat(sq.columns.map(mle => ({ token: mle.element.token && mle.element.token.tokenString, } as ColumnOption))),
           columnOptionsMode: "ReplaceAll",
         };

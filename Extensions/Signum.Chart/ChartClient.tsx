@@ -929,18 +929,18 @@ export namespace ChartClient {
   
       var cols = request.columns.map((mle, i) => {
         const token = mle.element.token && mle.element.token.token;
-  
+
         if (token == null)
           return null;
-  
+
         const scriptCol = chartScript.columns[i];
-  
+
         const value: (r: ChartRow) => undefined = function (r: ChartRow) { return (r as any)["c" + i]; };
         const key = getKey(token);
-  
+
         const niceName = getNiceName(token, mle.element /*capture format by ref*/);
         const color = getColor(token, palettes);
-  
+
         return softCast<ChartColumn<unknown>>({
           name: "c" + i,
           displayName: scriptCol.displayName,
@@ -957,18 +957,6 @@ export namespace ChartClient {
           getValueNiceName: row => niceName(value(row)),
           getValueColor: row => color(value(row)),
         })
-      });
-  
-      var index = 0;
-      var chartColToTableCol = request.columns.map(mle => {
-        var token = mle.element.token && mle.element.token.token;
-  
-        if (token == null)
-          return null;
-  
-        return {
-          index: index++
-        }
       });
   
       if (!hasAggregates(request)) {
@@ -991,21 +979,29 @@ export namespace ChartClient {
           getValueColor: row => color(value(row)),
         } as ChartColumn<Lite<Entity> | undefined>) as ChartColumn<unknown>);
       }
-  
-      var rows = rt.rows.map(row => {
-        var cr = request.columns.map((c, i) => {
-          var tuple = chartColToTableCol[i];
-  
-          if (tuple == null)
-            return null;
-  
-          var val = row.columns[tuple.index];
-  
-          return { colName: "c" + i, cValue: val };
-        }).filter(a => a != null).toObject(a => a!.colName, a => a!.cValue) as ChartRow;
-  
+
+
+      const columnIndexes = request.columns.map((mle, i) => {
+        const fullKey = mle.element.token?.token?.fullKey;
+
+        if (fullKey == null)
+          return null;
+
+        var resultIndex = rt.columns.indexOf(fullKey);
+
+        if (resultIndex != -1)
+          return { colName: "c" + i, resultIndex };
+
+        if (fullKey == "Entity")
+          return { colName: "c" + i, resultIndex: "Entity" as const };
+
+        throw new Error(fullKey + " not found in results");
+      }).notNull();
+
+
+      var rows = rt.rows.map<ChartRow>(row => {
+        var cr = columnIndexes.toObject(c => c.colName, c => c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex]);
         cr.entity = row.entity;
-  
         return cr;
       });
   

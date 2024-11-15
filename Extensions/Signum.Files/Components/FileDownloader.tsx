@@ -21,6 +21,7 @@ export interface FileDownloaderProps {
   htmlAttributes?: React.HTMLAttributes<HTMLSpanElement | HTMLAnchorElement>;
   children?: React.ReactNode | ((info: FilesClient.ExtensionInfo | undefined) => React.ReactNode)
   showFileIcon?: boolean;
+  hideFileName?: boolean;
 }
 
 const units = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
@@ -91,7 +92,7 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
           {p.showFileIcon && <FontAwesomeIcon className="me-1"
             icon={info?.icon ?? "file"}
             color={info?.color ?? "grey"} />}
-            {toStr}
+            {!p.hideFileName && toStr}
           </>}
       </a>
       {p.download == "ViewOrSave" &&

@@ -130,6 +130,16 @@
     <Member Name="RequiresTitle" Description="Erfordert Titel" />
     <Member Name="Title" Description="Titel" />
   </Type>
+  <Type Name="TextPartEntity" Description="Textteil" PluralDescription="Textteile" Gender="m">
+    <Member Name="RequiresTitle" Description="Erfordert Titel" />
+    <Member Name="TextContent" Description="Textinhalt" />
+    <Member Name="TextPartType" Description="Typ des Textteils" />
+  </Type>
+  <Type Name="TextPartType" Description="Typ des Textteils">
+    <Member Name="HTML" Description="HTML" />
+    <Member Name="Markdown" Description="Markdown" />
+    <Member Name="Text" Description="Text" />
+  </Type>
   <Type Name="TokenEquivalenceEmbedded" Description="Token-Äquivalenz">
     <Member Name="Query" Description="Abfrage" />
     <Member Name="Token" Description="Token" />

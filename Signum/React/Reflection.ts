@@ -44,7 +44,7 @@ export interface CustomLiteModel {
   isDefault: boolean;
   constructorFunctionString?: string;
   constructorFunction?: (e: Entity) => ModelEntity;
-} 
+}
 
 export interface MemberInfo {
   name: string,
@@ -93,7 +93,7 @@ export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | 
 
   if (!netFormat)
     return type == "DateOnly" ? "D" : "F";
-  
+
   switch (netFormat) {
     case "d": return "D"; // toFormatWithFixes
     case "D": return "DDDD";
@@ -126,7 +126,7 @@ export function toLuxonFormat(netFormat: string | undefined, type: "DateOnly" | 
   }
 }
 
-export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, durationFormat: string | null] {
+export function splitLuxonFormat(luxonFormat: string): [dateFormat: string, durationFormat: string | null] {
 
   switch (luxonFormat) {
     case "D": return ["D", null];
@@ -154,7 +154,7 @@ export function splitLuxonFormat(luxonFormat: string) : [dateFormat: string, dur
 
 export function dateTimePlaceholder(luxonFormat: string): string {
   var result = DateTime.expandFormat(luxonFormat);
-  
+
   return result
     .replace(/\bd\b/, "dd")
     .replace(/\bMM?\b/, "mm")
@@ -261,7 +261,7 @@ const oneDigitCulture = new Set([
   "zu", "zu-ZA"
 ]);
 
-export function toFormatWithFixes(dt: DateTime, format: string, options ?: Intl.DateTimeFormatOptions): string{
+export function toFormatWithFixes(dt: DateTime, format: string, options?: Intl.DateTimeFormatOptions): string {
 
   if (!oneDigitCulture.has(dt.locale!)) {
 
@@ -299,10 +299,10 @@ export namespace NumberFormatSettings {
 
 //https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings
 export function toNumberFormat(format: string | undefined, locale?: string): Intl.NumberFormat {
-    let loc = locale ?? NumberFormatSettings.defaultNumberFormatLocale;
-    if (loc.startsWith("es-")) {
-        loc = "de-DE"; //fix problem for Intl formatting "es" numbers for 4 digits over decimal point 
-    }
+  let loc = locale ?? NumberFormatSettings.defaultNumberFormatLocale;
+  if (loc.startsWith("es-")) {
+    loc = "de-DE"; //fix problem for Intl formatting "es" numbers for 4 digits over decimal point 
+  }
   return new Intl.NumberFormat(loc, toNumberFormatOptions(format));
 }
 
@@ -383,7 +383,7 @@ export function toNumberFormatOptions(format: string | undefined): Intl.NumberFo
   var afterDot = body.tryAfter(".") ?? "";
   const result: Intl.NumberFormatOptions = {
     style: suffix == "%" ? "percent" : "decimal",
-    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact": undefined,
+    notation: suffix == "K" || suffix == "M" || suffix == "B" ? "compact" : undefined,
     minimumFractionDigits: afterDot.replaceAll("#", "").length,
     maximumFractionDigits: afterDot.length,
     useGrouping: f.contains(","),
@@ -949,7 +949,7 @@ export class ReadonlyBinding<T> implements IBinding<T> {
   }
 }
 
-export class MListElementBinding<T> implements IBinding<T>{
+export class MListElementBinding<T> implements IBinding<T> {
 
   suffix: string;
   constructor(
@@ -1210,7 +1210,7 @@ function initializeCollections(mod: ModifiableEntity, pr: PropertyRoute) {
 
 // https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
 function newGuid() {
-  return (`${[1e7]}-${1e3}-${4e3}-${8e3}-${1e11}`).replace(/[018]/g, (c : any) =>
+  return (`${[1e7]}-${1e3}-${4e3}-${8e3}-${1e11}`).replace(/[018]/g, (c: any) =>
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
 }
@@ -1346,7 +1346,7 @@ export class Type<T extends ModifiableEntity> implements IType {
   tryTypeInfo(): TypeInfo | undefined {
     var result = tryGetTypeInfo(this.typeName);
 
-    if (result == null && this.typeName.endsWith("Embedded")) 
+    if (result == null && this.typeName.endsWith("Embedded"))
       throw new Error(`Type ${this.typeName} has no TypeInfo because is an EmbeddedEntity. 
 Start from the main Entity Type containing the embedded entity, like: MyEntity.propertyRoute(m => m.myEmbedded.someProperty).
 In case of a collection of embedded entities, use something like: MyEntity.propertyRoute(m => m.myCollection[0].element.someProperty)`);
@@ -1552,7 +1552,7 @@ export class QueryTokenString<T> {
   }
 
   static readonly count: QueryTokenString<number> = new QueryTokenString("Count");
-  
+
   static readonly timeSeries: QueryTokenString<string /*DateTime*/> = new QueryTokenString("TimeSeries");
 
   systemValidFrom(): QueryTokenString<unknown> {
@@ -1623,9 +1623,17 @@ export class QueryTokenString<T> {
   separatedByNewLineDistinct(): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString(this.token + ".SeparatedByNewLineDistinct");
   }
-  
 
+  nested(): QueryTokenString<ArrayElement<T>> {
+    return new QueryTokenString<ArrayElement<T>>(this.token + ".Nested");
+  }
 
+  //only for typed results
+  nestedMap<S>(selector: (nestedToken: QueryTokenString<ArrayElement<T>>) => S): S {
+    var nested = new QueryTokenString<ArrayElement<T>>(this.token + ".Nested");
+
+    return selector(nested);
+  }
 
   element(index = 1): QueryTokenString<ArrayElement<T>> {
     return new QueryTokenString<ArrayElement<T>>(this.token + (this.token ? "." : "") + "Element" + (index == 1 ? "" : index));
@@ -1986,7 +1994,7 @@ export class PropertyRoute {
     return PropertyRoute.root(ti).tryAddMembers(propertyString);
   }
 
- 
+
 
   constructor(
     parent: PropertyRoute | undefined,
@@ -2103,7 +2111,7 @@ export class PropertyRoute {
         if (ref.isLite) {
           if (memberType == "Member" && memberName == "Entity")
             return PropertyRoute.liteEntity(this);
-          
+
           throw new Error("Entity expected");
         }
 
@@ -2189,7 +2197,7 @@ export class PropertyRoute {
           if (suffix.contains("/"))
             return false;
 
-          if (suffix.startsWith("[") ? suffix.after("].").contains("."): suffix.contains("."))
+          if (suffix.startsWith("[") ? suffix.after("].").contains(".") : suffix.contains("."))
             return false;
 
           return true;
@@ -2348,7 +2356,7 @@ export class GraphExplorer {
   public static specialProperties: string[] = ["Type", "id", "isNew", "ticks", "toStr", "modified", "temporalId"];
 
   //The redundant return true / return false are there for debugging
-  private isModifiableObject(obj: any, modelStatePrefix: string) : boolean {
+  private isModifiableObject(obj: any, modelStatePrefix: string): boolean {
 
     if (obj instanceof Date)
       return false;
@@ -2425,7 +2433,7 @@ export class GraphExplorer {
 
       mod.error = undefined;
 
-      const prefix = modelStatePrefix  + ".";
+      const prefix = modelStatePrefix + ".";
       for (const key in this.modelState) {
         const propName = key.tryAfter(prefix)
         if (propName && !propName.contains(".")) {
@@ -2487,7 +2495,7 @@ export class GraphExplorer {
     var modified = false;
     for (const p in mixins) {
       const mixinPrefix = prefix + "[" + p + "]";
-      if (this.isModified(mixins[p], mixinPrefix)) { 
+      if (this.isModified(mixins[p], mixinPrefix)) {
         if (window.exploreGraphDebugMode)
           debugger;
         modified = true;

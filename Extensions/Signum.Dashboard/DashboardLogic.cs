@@ -234,7 +234,7 @@ public static class DashboardLogic
                                 throw new ApplicationException($"The query for {c.UserAssets.CommaAnd(a => a.KeyLong())} has returned more than {cq.MaxRows} rows: " +
                                     JsonSerializer.Serialize(QueryRequestTS.FromQueryRequest(c.QueryRequest), EntityJsonContext.FullJsonSerializerOptions));
                             else
-                                rt = new ResultTable(rt.AllColumns(), null, new Pagination.All());
+                                rt = new ResultTable(rt.AllColumns(), null, new Pagination.All(), c.QueryRequest.GroupResults);
                         }
 
 
