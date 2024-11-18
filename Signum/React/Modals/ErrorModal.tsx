@@ -41,7 +41,7 @@ const ErrorModal: {
   const ve = e instanceof ValidationError ? (e as ValidationError) : undefined;
 
   return (
-    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg">
+    <Modal show={show} onExited={handleOnExited} onHide={handleCloseClicked} size="lg" dialogClassName="error-modal">
       <div className="modal-header dialog-header-error">
         <h5 className="modal-title">
           {
