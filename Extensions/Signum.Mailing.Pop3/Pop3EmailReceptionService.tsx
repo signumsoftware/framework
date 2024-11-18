@@ -27,6 +27,9 @@ export default function Pop3EmailReceptionService(p: { ctx: TypeContext<Pop3Emai
         <div className="col-sm-auto">
           <PasswordLine ctx={sc.subCtx(s => s.password)} />
         </div>
+        <div className="col-sm-auto">
+          <PasswordLine ctx={sc.subCtx(s => s.newPassword)} />
+        </div>
       </div>
       
       <div className="row">

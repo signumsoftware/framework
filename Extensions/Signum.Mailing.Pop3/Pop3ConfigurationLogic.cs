@@ -41,24 +41,29 @@ public static class Pop3ConfigurationLogic
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
                 var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
                 pcs.GetOrThrow("password").CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { };
-                pcs.Add("newPassword", new PropertyConverter
-                {
-                    AvoidValidate = true,
-                    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
-                    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
-                    {
-                        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
+                //pcs.Add("newPassword", new PropertyConverter
+                //{
+                //    AvoidValidate = true,
+                //    CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
+                //    CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
+                //    {
+                //        ctx.Factory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPassword), ctx.Entity);
 
-                        var password = reader.GetString()!;
+                //        var password = reader.GetString()!;
 
-                        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
-                    }
-                });
+                //        ((Pop3EmailReceptionServiceEntity)ctx.Entity).Password = Pop3ConfigurationLogic.EncryptPassword(password);
+                //    }
+                //});
             }
         }
     }
 
     public static event Func<EmailReceptionConfigurationEntity, IDisposable>? SurroundReceiveEmail;
+
+
+
+
+
 
     public static EmailReceptionEntity ReceiveEmails(Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config)
     {
