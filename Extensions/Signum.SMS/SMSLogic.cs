@@ -337,7 +337,7 @@ public static class SMSLogic
                 Orders = model?.GetOrders(qd) ?? new List<Order>(),
             });
 
-            var columnTokens = table.Columns.ToDictionary(a => a.Column.Token);
+            var columnTokens = table.Columns.ToDictionary(a => a.Token);
 
             var ownerData = (SMSOwnerData)table.Rows[0][columnTokens.GetOrThrow(t.To!.Token)]!;
 

@@ -195,12 +195,20 @@ class ConvertBinding implements IBinding<string | null> {
     this.parent.setValue(val == null ? null : toLite(this.converter.enumToEntity[val]));
   }
   suffix: string;
+
   getIsReadonly(): boolean {
     return this.parent.getIsReadonly();
   }
+
+  getIsHidden(): boolean {
+    return this.parent.getIsHidden();
+  }
+
   getError(): string | undefined {
     return this.parent.getError()
   }
+
+
   setError(value: string | undefined): void {
     return this.parent.setError(value);
   }
