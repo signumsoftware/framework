@@ -66,7 +66,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
             return ConditionMerger<TypeAllowed>.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
     }
 
-    static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
+    internal static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
     {
         TypeAllowed result = TypeAllowed.Write;
 
@@ -82,7 +82,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
         return result;
     }
 
-    static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
+    internal static TypeAllowed MaxTypeAllowed(IEnumerable<TypeAllowed> collection)
     {
         TypeAllowed result = TypeAllowed.None;
 
@@ -179,7 +179,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
 
 
-static class ConditionMerger<A> where A : struct, Enum
+internal static class ConditionMerger<A> where A : struct, Enum
 {
     static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<A>> tuple), WithConditions<A>> cache = new();
 
@@ -188,7 +188,7 @@ static class ConditionMerger<A> where A : struct, Enum
         return cache.GetOrAdd((mergeStrage, new StructureList<WithConditions<A>>(baseRules)), tuple => MergeBaseImplementations(baseRules, maxMerge, max, min));
     }
 
-    static WithConditions<A> MergeBaseImplementations(List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
+    internal static WithConditions<A> MergeBaseImplementations(List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
     {
         WithConditions<A>? only = baseRules.Only();
         if (only != null)
@@ -197,9 +197,9 @@ static class ConditionMerger<A> where A : struct, Enum
         if (baseRules.Any(a => a.Exactly(max)))
             return new WithConditions<A>(max);
 
-        WithConditions<A>? onlyNotOposite = baseRules.Where(a => !a.Exactly(min)).Only();
-        if (onlyNotOposite != null)
-            return onlyNotOposite;
+        WithConditions<A>? onlyNotMin = baseRules.Where(a => !a.Exactly(min)).Only();
+        if (onlyNotMin != null)
+            return onlyNotMin;
 
         if (baseRules.All(a => a.ConditionRules.Count == 0))
             return new WithConditions<A>(maxMerge(baseRules.Select(a => a.Fallback)));
@@ -313,7 +313,7 @@ static class ConditionMerger<A> where A : struct, Enum
                     {
                         if (currentValue == null)
                             currentValue = v;
-                        else if (currentValue.Equals(v))
+                        else if (!currentValue.Equals(v))
                             return null;
                     }
                 }
