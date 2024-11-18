@@ -343,7 +343,7 @@ public static class PropertyAuthLogic
         return giGetAllowed.GetInvoker(rootEntity.GetType())(rootEntity, paac);
     }
 
-    public static bool IsAllowedFor(ModifiableEntity mod, PropertyRoute route, PropertyAllowed allowed)
+    public static bool IsAllowedFor(IRootEntity mod, PropertyRoute route, PropertyAllowed allowed)
     {
         var paac = PropertyAuthLogic.GetPropertyAllowed(route);
 

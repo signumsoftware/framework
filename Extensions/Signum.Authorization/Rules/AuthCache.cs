@@ -222,7 +222,6 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
 
         readonly DefaultDictionary<K, A> rules;
         readonly List<RoleAllowedCache> baseCaches;
-        readonly Func<K, A, A> coercer;
 
 
         public RoleAllowedCache(AuthCache<RT, AR, R, K, A, AM>  cache, Lite<RoleEntity> role, List<RoleAllowedCache> baseCaches, Dictionary<K, A>? newValues)
