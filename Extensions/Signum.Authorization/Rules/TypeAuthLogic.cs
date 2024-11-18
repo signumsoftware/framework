@@ -140,7 +140,7 @@ public static partial class TypeAuthLogic
                 var miAdd = type.GetMethod("Add")!;
                 var newDic = Expression.ListInit(Expression.New(type),
                     conditions.Select(c => Expression.ElementInit(miAdd, Expression.Constant(c),
-                        Expression.Invoke(TypeConditionLogic.GetCondition(type, c, null), entity))));
+                        Expression.Invoke(TypeConditionLogic.GetCondition(typeof(T), c, null), entity))));
 
                 return Expression.Lambda<Func<T, PrimaryKey?, object?>>(newDic, [entity, rowId]);
             },
@@ -168,7 +168,7 @@ public static partial class TypeAuthLogic
         if (tac.MaxUI() < TypeAllowedBasic.Write)
             return false;
 
-        return tac.Fallback == TypeAllowed.Read || !tac.ConditionRules.Any(a => a.Allowed == TypeAllowed.Read);
+        return tac.Fallback == TypeAllowed.Read || tac.ConditionRules.Any(a => a.Allowed == TypeAllowed.Read);
     }
 
     public static Func<Type, bool> HasTypeConditionInProperties = t => false;
