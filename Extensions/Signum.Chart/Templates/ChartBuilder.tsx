@@ -102,6 +102,7 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
               } else {
                 chart.chartTimeSeries = null;
               }
+              chart.modified = true;
               forceUpdate();
             }} 
           />

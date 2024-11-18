@@ -743,22 +743,18 @@ export function setTypes(types: TypeInfoDictionary): void {
     t.name = k;
     if (t.members) {
       Dic.foreach(t.members, (k2, t2) => t2.name = k2);
-      Object.freeze(t.members);
-
+      
       if (t.kind == "Enum") {
         t.membersById = Dic.getValues(t.members).toObject(a => a.name);
-        Object.freeze(t.membersById);
       }
     }
 
     if (t.requiresSaveOperation == undefined && t.entityKind)
       t.requiresSaveOperation = calculateRequiresSaveOperation(t.entityKind);
 
-    Object.freeze(t);
   });
 
   _types = Dic.getValues(types).toObject(a => a.name.toLowerCase());
-  Object.freeze(_types);
 
   Dic.foreach(types, (k, t) => {
     if (t.operations) {
@@ -819,6 +815,7 @@ export interface IBinding<T> {
   setValue(val: T): void;
   suffix: string;
   getIsReadonly(): boolean;
+  getIsHidden(): boolean;
   getError(): string | undefined;
   setError(value: string | undefined): void;
 }
@@ -895,8 +892,13 @@ export class Binding<T> implements IBinding<T> {
   }
 
   getIsReadonly(): boolean {
-    const readonlyProperties = (this.parentObject as ModifiableEntity).readonlyProperties;
-    return readonlyProperties != null && readonlyProperties.contains(this.member as string);
+    const propsMeta = (this.parentObject as ModifiableEntity).propsMeta;
+    return propsMeta != null && propsMeta.contains(this.member as string);
+  }
+
+  getIsHidden(): boolean {
+    const propsMeta = (this.parentObject as ModifiableEntity).propsMeta;
+    return propsMeta != null && propsMeta.contains("!" + this.member as string);
   }
 
   setError(value: string | undefined): void {
@@ -933,6 +935,10 @@ export class ReadonlyBinding<T> implements IBinding<T> {
 
   getIsReadonly() {
     return true;
+  }
+
+  getIsHidden() {
+    return false;
   }
 
   getError(): string | undefined {
@@ -975,7 +981,11 @@ export class MListElementBinding<T> implements IBinding<T> {
   }
 
   getIsReadonly() {
-    return false; //Not sure
+    return false; 
+  }
+
+  getIsHidden() {
+    return false;
   }
 
   getError(): string | undefined {
@@ -1678,14 +1688,15 @@ function tokenSequence(lambdaToProperty: Function, isFirst: boolean) {
 }
 
 export class EnumType<T extends string> {
-  constructor(public type: string) { }
+  constructor(public typeName: string) { }
 
   typeInfo(): TypeInfo {
-    return getTypeInfo(this.type);
+    return getTypeInfo(this.typeName);
   }
 
+  _values: T[] | undefined; 
   values(): T[] {
-    return Dic.getKeys(this.typeInfo().members) as T[];
+    return (this._values ??= Dic.getKeys(this.typeInfo().members) as T[]);
   }
 
   isDefined(val: any): val is T {
@@ -1696,11 +1707,23 @@ export class EnumType<T extends string> {
     if (this.isDefined(val))
       return val;
 
-    throw new Error(`'${val}' is not a valid ${this.type}`)
+    throw new Error(`'${val}' is not a valid ${this.typeName}`)
   }
 
   value(val: T): T {
     return val;
+  }
+
+  index(val: T): number {
+    return this.values().indexOf(val);
+  }
+
+  min(a: T, b: T): T{
+    return this.index(a) < this.index(b) ? a : b;
+  }
+
+  max(a: T, b: T): T {
+    return this.index(a) > this.index(b) ? a : b;
   }
 
   niceTypeName(): string | undefined {

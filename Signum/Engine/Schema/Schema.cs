@@ -279,7 +279,7 @@ public class Schema : IImplementationsFinder
         if (entityCompleter && !ab.ShouldSet())
             return null;
 
-        return ab.ValueExpression;
+        return ab.GetValueExpression();
     }
 
     internal CacheControllerBase<T>? CacheController<T>() where T : Entity

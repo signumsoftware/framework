@@ -28,6 +28,11 @@ public static class AuthServer
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<TypeAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<PropertyAllowed>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<PropertyAllowed>));
+
         ReflectionServer.GetContext = () => new
         {
             Culture = ReflectionServer.GetCurrentValidCulture(),
@@ -65,13 +70,26 @@ public static class AuthServer
                     if (ta.MaxUI() == TypeAllowedBasic.None)
                         return null;
 
-                    ti.Extension.Add("maxTypeAllowed", ta.MaxUI());
-                    ti.Extension.Add("minTypeAllowed", ta.MinUI());
+                    var max = ta.MaxUI();
+                    var min = ta.MinUI();
+                    if (max == min)
+                    {
+                        ti.Extension.Add("typeAllowed", min); ;
+                    }
+                    else
+                    {
+
+                        ti.Extension.Add("maxTypeAllowed", max);
+                        ti.Extension.Add("minTypeAllowed", min);
+                    }
+
 
                     if(ta.Fallback == TypeAllowed.None)
                     {
                         var conditions = ta.ConditionRules.SelectMany(a => a.TypeConditions)
-                        .Distinct().Where(a => TypeConditionLogic.IsQueryAuditor(t, a)).Select(a => a.Key);
+                            .Distinct()
+                            .Where(a => TypeConditionLogic.IsQueryAuditor(t, a))
+                            .Select(a => a.Key);
 
                         if (conditions.Any())
                             ti.Extension.Add("queryAuditors", conditions.ToList());
@@ -170,29 +188,108 @@ public static class AuthServer
         {
             ReflectionServer.PropertyRouteExtension += (mi, pr) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
-                if (allowed == PropertyAllowed.None)
-                    return null;
+                if (UserEntity.Current == null)
+                {
+                    if (!pr.GetAllowUnathenticated())
+                        return null;
 
-                mi.Extension.Add("propertyAllowed", allowed);
+                    mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);
+                }
+                else
+                {
+                    var pac = pr.GetPropertyAllowed();
+                    if (pac.Max() == PropertyAllowed.None)
+                        return null;
+
+                    var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+                    if(!pac.Equals(tac))
+                    {
+                        var min = pac.Min();
+                        var max = pac.Max();
+                        if (min != max)
+                        {
+                            mi.Extension.Add("minPropertyAllowed", min);
+                            mi.Extension.Add("maxPropertyAllowed", max);
+                        }
+                        else
+                        {
+                            mi.Extension.Add("propertyAllowed", min);
+                        }
+                    }
+
+                }
                 return mi;
             };
 
             SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                if(UserEntity.Current == null)
+                {
+                    if (!pr.GetAllowUnathenticated())
+                        return "Not Allowed for Unathenticated";
 
-                return allowed == PropertyAllowed.None ? "Not allowed" : null;
+                    return null;
+
+                }
+                else
+                {
+                    if (!PropertyAuthLogic.IsAllowedFor(mod, pr, PropertyAllowed.Read))
+                        return "Not Allowed";
+
+                    return null;
+
+                }
             };
 
             SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
             {
-                var allowed = UserEntity.Current == null ? pr.GetAllowUnathenticated() : pr.GetPropertyAllowed();
+                if(UserEntity.Current == null)
+                {
+                    if (!pr.GetAllowUnathenticated())
+                        return "Not Allowed for Unathenticated";
 
-                return allowed == PropertyAllowed.Write ? null : "Not allowed to write property: " + pr.ToString();
+                    return null;
+                }
+                else
+                {
+                    if (!PropertyAuthLogic.IsAllowedFor(mod!, pr, PropertyAllowed.Write))
+                        return "Not Allowed to write";
+
+                    return null;
+                }
             };
 
-            PropertyAuthLogic.GetPropertyConverters = (t) => SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(t);
+            SignumServer.WebEntityJsonConverterFactory.GetMetadataPropertyRoute += (pr, mod) =>
+            {
+                if (UserEntity.Current == null || !pr.RootType.IsEntity())
+                    return null;
+
+                var role = RoleEntity.Current;
+                var pac = PropertyAuthLogic.GetAllowed(role, pr);
+
+                if (!pac.ConditionRules.Any())
+                    return null;
+
+                var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+
+                if (pac.Equals(tac))
+                    return null;
+
+                var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+
+                if (entity == null)
+                    throw new InvalidOperationException("Not IRootEntity found");
+
+                var allowed = PropertyAuthLogic.GetAllowed((Entity)entity, pr);
+
+                if (allowed == PropertyAllowed.None)
+                    return PropertyMetadata.Hidden;
+
+                if (allowed == PropertyAllowed.Read)
+                    return PropertyMetadata.ReadOnly;
+
+                return null;
+            };
         }
 
         if (OperationAuthLogic.IsStarted)
