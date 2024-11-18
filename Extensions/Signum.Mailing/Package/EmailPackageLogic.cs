@@ -141,7 +141,7 @@ public class SendEmailProcessAlgorithm : IProcessAlgorithm
 
             foreach (var group in emails.Chunk(EmailLogic.Configuration.ChunkSizeSendingEmails))
             {
-                var retrieved = group.RetrieveLites();
+                var retrieved = group.RetrieveList();
                 foreach (var m in retrieved)
                 {
                     executingProcess.CancellationToken.ThrowIfCancellationRequested();
