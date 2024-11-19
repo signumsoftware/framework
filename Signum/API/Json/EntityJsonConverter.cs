@@ -417,7 +417,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                 reader.Assert(JsonTokenType.EndObject);
                                 reader.Read();
                             }
-                            else if (propertyName == "readonlyProperties")
+                            else if (propertyName == "propsMeta")
                             {
                                 reader.Read();
                                 JsonSerializer.Deserialize(ref reader, typeof(List<string>), options);
