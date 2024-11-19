@@ -15,10 +15,20 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
 
         uctx.ChangeCodeFile(@"Southwind.Server/Dockerfile", file =>
         {
+            file.Replace("RUN ./nsolid_setup_deb.sh 21", "RUN ./nsolid_setup_deb.sh 22");
+            file.WarningLevel = WarningLevel.None;
             file.Replace("aspnet:8.0-bookworm-slim", "aspnet:9.0");
             file.Replace("aspnet:8.0", "aspnet:9.0");
             file.Replace("sdk:8.0-bookworm-slim", "sdk:9.0");
             file.Replace("sdk:8.0", "sdk:9.0");
+        });
+
+        uctx.ChangeCodeFile(@"package.json", file =>
+        {
+            file.ReplaceLine( a=> a.Contains("@types/react"), """
+                "@types/react": "18.3.2",
+                "@types/node": "22.9.0"
+                """);
         });
 
         uctx.ForeachCodeFile("*.csproj", file =>
@@ -49,6 +59,29 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
                 <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
                 """);
                 //<PackageReference Include="Signum.TSGenerator" Version="9.0.0" />
+        });
+
+        uctx.ChangeCodeFile("Southwind.Server/package.csproj", file =>
+        {
+            file.UpdateNpmPackages("""
+                "assets-webpack-plugin": "7.1.1",
+                "css-loader": "7.1.2",
+                "file-loader": "6.2.0",
+                "sass": "1.81.0",
+                "raw-loader": "4.0.2",
+                "rimraf": "6.0.1",
+                "sass-loader": "16.0.3",
+                "style-loader": "4.0.0",
+                "ts-loader": "9.5.1",
+                "typescript": "5.6.3",
+                "url-loader": "4.1.1",
+                "webpack": "5.96.1",
+                "webpack-bundle-analyzer": "4.10.2",
+                "webpack-cli": "5.1.4",
+                "webpack-notifier": "1.15.0"
+                """);
+
+
         });
     }
 }
