@@ -32,6 +32,7 @@ class Upgrade_20241107_UpdateNugets : CodeUpgradeBase
                 <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.1" />
                 <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
                 <PackageReference Include="Npgsql" Version="8.0.5" />
+                <PackageReference Include="xunit" Version="2.9.2" />
                 """);
         });
     }

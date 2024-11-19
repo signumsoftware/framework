@@ -233,7 +233,10 @@ public static class AuthServer
                 }
                 else
                 {
-                    if (!PropertyAuthLogic.IsAllowedFor(mod, pr, PropertyAllowed.Read))
+
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+
+                    if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Read))
                         return "Not Allowed";
 
                     return null;
@@ -252,7 +255,9 @@ public static class AuthServer
                 }
                 else
                 {
-                    if (!PropertyAuthLogic.IsAllowedFor(mod!, pr, PropertyAllowed.Write))
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+
+                    if (!PropertyAuthLogic.IsAllowedFor(entity!, pr, PropertyAllowed.Write))
                         return "Not Allowed to write";
 
                     return null;
