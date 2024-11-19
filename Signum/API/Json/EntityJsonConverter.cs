@@ -1,6 +1,7 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Diagnostics.Eventing.Reader;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -14,13 +15,6 @@ public class PropertyConverter
 
     public ReadJsonPropertyDelegate? CustomReadJsonProperty { get; set; }
     public WriteJsonPropertyDelegate? CustomWriteJsonProperty { get; set; }
-
-    /// <summary>
-    /// Return <c>true</c> to block writing to entity property silently.
-    /// To block with raise exception use <c>PropertyValidator.IsReadonly</c> or <c>Entity.IsPropertyReadonly</c> or <c>GlobalIsReadonly</c>
-    /// </summary>
-    public AvoidReadJsonPropertyDelegate? AvoidReadJsonProperty { get; set; }
-    public AvoidWriteJsonPropertyDelegate? AvoidWriteJsonProperty { get; set; }
 
     public bool AvoidValidate { get; set; }
 
@@ -50,6 +44,7 @@ public class PropertyConverter
 
 public delegate bool AvoidReadJsonPropertyDelegate(ReadJsonPropertyContext ctx);
 public delegate void ReadJsonPropertyDelegate(ref Utf8JsonReader reader, ReadJsonPropertyContext ctx);
+
 public class ReadJsonPropertyContext
 {
     public ReadJsonPropertyContext(JsonSerializerOptions jsonSerializerOptions, PropertyConverter propertyConverter, ModifiableEntity entity, PropertyRoute parentPropertyRoute, EntityJsonConverterFactory factory)
@@ -103,12 +98,19 @@ public enum EntityJsonConverterStrategy
     Full,
 }
 
+public enum PropertyMetadata
+{
+    Hidden, 
+    ReadOnly,
+}
+
 public class EntityJsonConverterFactory : JsonConverterFactory
 {
     public Polymorphic<Action<ModifiableEntity>> AfterDeserilization = new Polymorphic<Action<ModifiableEntity>>();
     public Dictionary<Type, Func<ModifiableEntity>> CustomConstructor = new Dictionary<Type, Func<ModifiableEntity>>();
     public Func<PropertyRoute, ModifiableEntity?, string?>? CanWritePropertyRoute;
     public Func<PropertyRoute, ModifiableEntity, string?>? CanReadPropertyRoute;
+    public Func<PropertyRoute, ModifiableEntity, PropertyMetadata?>? GetMetadataPropertyRoute;
     public Func<PropertyInfo, Exception, string?> GetErrorMessage = (pi, ex) => "Unexpected error in " + pi.Name;
 
     public void AssertCanWrite(PropertyRoute pr, ModifiableEntity? mod)
@@ -263,7 +265,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
             }
             else
             {
-                writer.WriteString("Type", mod.GetType().Name);
+                writer.WriteString("Type", ReflectionServer.GetTypeName(mod.GetType()));
             }
 
             writer.WriteString("temporalId", mod.temporalId);
@@ -275,20 +277,38 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
             writer.WriteBoolean("modified", mod.Modified == ModifiedState.Modified || mod.Modified == ModifiedState.SelfModified);
 
-            foreach (var kvp in Factory.GetPropertyConverters(value!.GetType()))
+            foreach (var kvp in Factory.GetPropertyConverters(mod.GetType()))
             {
+
                 WriteJsonProperty(writer, options, mod, kvp.Key, kvp.Value, tup.pr);
             }
 
-            var readonlyProps = Factory.GetPropertyConverters(value!.GetType())
-                .Where(kvp => kvp.Value.PropertyValidator?.IsPropertyReadonly(mod) == true)
-                .Select(a => a.Key)
-                .ToList();
+            var props = Factory.GetPropertyConverters(mod.GetType())
+                .Where(a => a.Value.PropertyValidator != null)
+                .Select(a =>
+                {
+                    var pi = a.Value.PropertyValidator!.PropertyInfo;
+                    var pr = tup.pr.Add(pi);
+                    var result = Factory.GetMetadataPropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).Min();
 
-            if (readonlyProps.Any())
+                    if (result == null)
+                    {
+                        if (a.Value.PropertyValidator.IsPropertyReadonly(mod))
+                            return a.Key;
+
+                        return null;
+                    }
+
+                    if (result == PropertyMetadata.Hidden)
+                        return "!" + a.Key;
+                    else
+                        return a.Key;
+                }).NotNull().ToArray();
+
+            if (props.Any())
             {
-                writer.WritePropertyName("readonlyProperties");
-                JsonSerializer.Serialize(writer, readonlyProps, readonlyProps.GetType(), options);
+                writer.WritePropertyName("propsMeta");
+                JsonSerializer.Serialize(writer, props, props.GetType(), options);
             }
 
             if (mod.Mixins.Any())
@@ -329,20 +349,11 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
-            if (pc.AvoidWriteJsonProperty!= null && pc.AvoidWriteJsonProperty(new WriteJsonPropertyContext(
-                    entity: mod,
-                    lowerCaseName: lowerCaseName,
-                    propertyConverter: pc,
-                    parentPropertyRoute: route,
-                    jsonSerializerOptions: options,
-                    factory: this.Factory)))
-                return;
-
             var pr = route.Add(pc.PropertyValidator!.PropertyInfo);
 
             if (Factory.Strategy == EntityJsonConverterStrategy.WebAPI)
             {
-                string? error = Factory.CanReadPropertyRoute?.Invoke(pr, mod);
+                string? error = Factory.CanReadPropertyRoute.GetInvocationListTyped().Select(a => a(pr, mod)).NotNull().FirstOrDefault();
                 if (error != null)
                     return;
             }
@@ -406,7 +417,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                 reader.Assert(JsonTokenType.EndObject);
                                 reader.Read();
                             }
-                            else if (propertyName == "readonlyProperties")
+                            else if (propertyName == "propsMeta")
                             {
                                 reader.Read();
                                 JsonSerializer.Deserialize(ref reader, typeof(List<string>), options);
@@ -460,14 +471,6 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
         }
         else
         {
-            if (pc.AvoidReadJsonProperty != null && pc.AvoidReadJsonProperty(new ReadJsonPropertyContext(
-                    jsonSerializerOptions: options,
-                    entity: entity,
-                    parentPropertyRoute: parentRoute,
-                    propertyConverter: pc,
-                    factory: this.Factory)))
-                return; //silently block writing to property
-
             object? oldValue = pc.GetValue!(entity);
 
             var pi = pc.PropertyValidator!.PropertyInfo;

@@ -918,7 +918,7 @@ public static class AuthLogic
                             if (table is TableMList tm && tm.BackReference.ReferenceTable.Type == typeof(RoleEntity)) //Candidates should be removed in the right order, a non-candidate inheriting from a candidate should produce an exception
                                 return false;
 
-                            if (table is Table t && t.Type.IsInstanceOfType(typeof(RuleEntity<,>))) //Should have no rules
+                            if (table is Table t && t.Type.IsInstanceOfType(typeof(RuleEntity<>))) //Should have no rules
                                 return false;
 
                             return true;

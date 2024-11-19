@@ -84,7 +84,7 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
     {
         try
         {
-            var message = arg.Message.Body.ToObjectFromJson<AzureInvalidationMessage>(EntityJsonContext.FullJsonSerializerOptions);
+            var message = arg.Message.Body.ToObjectFromJson<AzureInvalidationMessage>(EntityJsonContext.FullJsonSerializerOptions)!;
 
             if (message.CreationDate < StartTime)
                 return;

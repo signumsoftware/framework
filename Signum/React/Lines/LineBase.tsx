@@ -142,7 +142,7 @@ export class LineBaseController<P extends LineBaseProps<V>, V> {
   }
 
   get isHidden(): boolean | undefined {
-    return this.props.type == null || this.props.visible == false || this.props.hideIfNull && (this.props.ctx.value == undefined || this.props.ctx.value == "");
+    return this.props.type == null || this.props.visible == false || this.props.ctx.binding.getIsHidden() || this.props.hideIfNull && (this.props.ctx.value == undefined || this.props.ctx.value == "");
   }
 }
 

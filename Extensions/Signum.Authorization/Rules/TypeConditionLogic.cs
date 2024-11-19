@@ -1,5 +1,6 @@
 using Signum.Utilities.Reflection;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata;
 
 namespace Signum.Authorization.Rules;
@@ -26,7 +27,6 @@ public class TypeCondition
 }
 
 public delegate LambdaExpression QueryAuditor(FilterQueryArgs ctx);
-
 
 
 public static class TypeConditionLogic
@@ -358,6 +358,13 @@ public static class TypeConditionLogic
         return pair.QueryAuditor!(args);
     }
 
+    public static bool HasInMemoryCondition(Type type, TypeConditionSymbol typeCondition)
+    {
+        var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").GetOrThrow(typeCondition);
+
+        return pair.InMemoryCondition != null;
+    }
+
     public static Func<T, bool>? GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
         where T : Entity
     {
@@ -366,8 +373,27 @@ public static class TypeConditionLogic
         return (Func<T, bool>?)pair.InMemoryCondition;
     }
 
+    public static bool InTypeCondition<T>(this T entity, TypeConditionSymbol typeCodition)
+        where T : Entity
+    {
+        if (entity.GetType() != typeof(T))
+            throw new InvalidOperationException("InTypeCondition should be called with the exact type");
+
+        var func = GetInMemoryCondition<T>(typeCodition);
+        if (func != null)
+            return func(entity);
+
+        var d = (Dictionary<TypeConditionSymbol, bool>)entity.TypeConditions!;
+
+        if (d == null || !d.TryGetValue(typeCodition, out var result))
+            throw new InvalidOperationException($"TypeCondition {typeCodition} can not be evaluated in-memory for {typeof(T).Name} and has not been included when retrieving the entity. Cached entities should have in-memory type conditions");
+
+        return result;
+    }
+
     public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)
     {
         return infos.TryGetC(type)?.TryGetC(typeCondition) != null;
     }
 }
+

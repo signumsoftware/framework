@@ -305,7 +305,7 @@ public static class AlertLogic
         return CreateAlert(entity.ToLiteFat(), alertType, text, textArguments, alertDate, createdBy, title, recipient, linkTarget, groupTarget, avoidSendMail);
     }
 
-    static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => new TypeAllowedAndConditions(TypeAllowed.Write));
+    static IDisposable AllowSaveAlerts() => TypeAuthLogic.OverrideTypeAllowed<AlertEntity>(tac => new WithConditions<TypeAllowed>(TypeAllowed.Write));
 
     public static AlertEntity? CreateAlert(this Lite<IEntity> entity, AlertTypeSymbol alertType, string? text = null, string?[]? textArguments = null, DateTime? alertDate = null, 
         Lite<IUserEntity>? createdBy = null, string? title = null, Lite<IUserEntity>? recipient = null, Lite<Entity>? linkTarget = null, Lite<Entity>? groupTarget = null, bool avoidSendMail = false)

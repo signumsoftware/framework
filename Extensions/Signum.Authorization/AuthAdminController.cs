@@ -124,7 +124,7 @@ public class AuthAdminController : ControllerBase
     private static void CleanChanges(ModelEntity rules)
     {
         var graph = GraphExplorer.FromRoot(rules);
-        var conditions = graph.OfType<TypeAllowedAndConditions>().SelectMany(a => a.ConditionRules).ToList();
+        var conditions = graph.OfType<WithConditionsModel<TypeAllowed>>().SelectMany(a => a.ConditionRules).ToList();
         conditions.ForEach(con => graph.UnionWith(GraphExplorer.FromRoot(con)));
         GraphExplorer.CleanModifications(graph);
         GraphExplorer.SetDummyRowIds(graph);

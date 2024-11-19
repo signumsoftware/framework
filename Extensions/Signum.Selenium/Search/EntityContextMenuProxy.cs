@@ -102,8 +102,7 @@ public class EntityContextMenuProxy
     {
         Operation(operationSymbol).WaitVisible();
 
-        var popup = this.Element.GetDriver().CapturePopup(() =>
-        ResultTable.Selenium.ConsumeAlert());
+        var popup = this.Element.GetDriver().CapturePopup(() => ResultTable.Selenium.ConsumeAlert());
 
         return new FrameModalProxy<ProcessEntity>(popup).WaitLoaded();
     }
