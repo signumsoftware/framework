@@ -76,20 +76,35 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Expression.Lambda<Func<object, T>>(BuildExpression(context), context.Parameter).Compile();
     }
 
+    public static Func<QueryToken, BuildExpressionContext, Expression?>? IsValueHidden;
+
+    private Expression WithHidden(Expression expression, BuildExpressionContext context)
+    {
+        var isHidden = IsValueHidden?.Invoke(this, context);
+
+        if (isHidden == null)
+            return expression;
+
+        return Expression.Condition(isHidden, Expression.Constant(null, expression.Type.Nullify()), expression.Nullify());
+    }
+
     public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false)
     {
+
         if (context.Replacements.TryGetValue(this, out var result))
-            return result.GetExpression();
+            return WithHidden(result.GetExpression(), context);
 
         if (searchToArray)
         {
             var cta = HasToArray();
             if (cta != null)
-                return CollectionToArrayToken.BuildToArrayExpression(this, cta, context);
+                return WithHidden(CollectionToArrayToken.BuildToArrayExpression(this, cta, context), context);
         }
 
-        return BuildExpressionInternal(context);
+        return WithHidden(BuildExpressionInternal(context), context);
     }
+
+  
 
     protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 

@@ -8,6 +8,7 @@ using Signum.Basics;
 using Signum.DynamicQuery.Tokens;
 using Signum.Entities;
 using Signum.Utilities;
+using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
@@ -55,13 +56,65 @@ public static class PropertyAuthLogic
             AuthLogic.ImportFromXml += cache.ImportXml;
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
-            QueryLogic.Queries.QueryExecuted += Queries_QueryExecuted;
+            //QueryLogic.Queries.QueryExecuted += Queries_QueryExecuted;
+            QueryToken.IsValueHidden = QueryToken_IsValueHidden;
             TypeAuthLogic.HasTypeConditionInProperties = HasTypeConditionInProperties;
         }
     }
 
+    static Expression? QueryToken_IsValueHidden(QueryToken expression, BuildExpressionContext context)
+    {
+        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return null;
+
+        var pr = expression.GetPropertyRoute();
+
+        if (pr == null)
+            return null;
+
+        var role = RoleEntity.Current;
+
+        var pa = cache.GetAllowed(role, pr);
+
+        if (!(pa.Min() == PropertyAllowed.None && pa.Max() > PropertyAllowed.None))
+            return null;
+
+        var ta = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+
+        if (ta.Equals(pa))
+            return null;
 
 
+        var parent = expression.Follow(a => a.Parent).FirstOrDefault(a => a.GetPropertyRoute() is PropertyRoute r && r.PropertyRouteType == PropertyRouteType.Root && r.RootType == pr.RootType);
+
+        if (parent == null)
+        {
+            parent = context.Replacements.Keys.FirstOrDefault(qt => qt is ColumnToken ct && ct.IsEntity() && ct.Type.CleanType() == pr.RootType);
+
+            if (parent == null)
+                return Expression.Constant(true); // Unable to know
+        }
+
+        var node = DiffNodes(pa, ta);
+        node = node.Simplify();
+
+
+        var parentExpr = parent.BuildExpression(context);
+
+        var args = giTrivialFilterQueryArgs.GetInvoker(pr.RootType)(); //TODO finish
+
+        var exp = node.ToExpression(parentExpr.ExtractEntity(false), args);
+
+        return exp;
+    }
+
+    internal static GenericInvoker<Func<FilterQueryArgs>> giTrivialFilterQueryArgs = new(() => GetTrivialFilterQueryArgs<ExceptionEntity>());
+
+    private static FilterQueryArgs GetTrivialFilterQueryArgs<T>()
+        where T : Entity
+    {
+        return FilterQueryArgs.FromQuery(Database.Query<T>());
+    }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
     static bool HasTypeConditionInProperties(Type type)
@@ -78,91 +131,91 @@ public static class PropertyAuthLogic
         });
     }
 
-    static IDisposable? Queries_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
-    {
-        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return null;
+    //static IDisposable? Queries_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)
+    //{
+    //    if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+    //        return null;
 
-        if (request == null)
-            return null;
+    //    if (request == null)
+    //        return null;
 
-        var tokens = request.AllTokens();
+    //    var tokens = request.AllTokens();
 
-        var propertyRoutes = tokens.SelectMany(t => GetAllPropertyRoutes(t)).Distinct().ToList();
+    //    var propertyRoutes = tokens.SelectMany(t => GetAllPropertyRoutes(t)).Distinct().ToList();
 
-        var role = RoleEntity.Current;
-        var list = (from pr in propertyRoutes
-                    let pa = cache.GetAllowed(role, pr)
-                    where pa.Min() == PropertyAllowed.None && pa.Max() > PropertyAllowed.None
-                    let ta = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed()
-                    where !ta.Equals(pa)
-                    select new { pr, ta, pa }).ToList();
+    //    var role = RoleEntity.Current;
+    //    var list = (from pr in propertyRoutes
+    //                let pa = cache.GetAllowed(role, pr)
+    //                where pa.Min() == PropertyAllowed.None && pa.Max() > PropertyAllowed.None
+    //                let ta = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed()
+    //                where !ta.Equals(pa)
+    //                select new { pr, ta, pa }).ToList();
 
-        if (list.Count == 0)
-            return null;
+    //    if (list.Count == 0)
+    //        return null;
 
-        var problematicPropertioes = list.Select(a => a.pr).ToHashSet();
+    //    var problematicPropertioes = list.Select(a => a.pr).ToHashSet();
 
-        var simpleFilters = request.Filters.Where(a => a.GetTokens().SelectMany(a => GetAllPropertyRoutes(a)).All(t => !problematicPropertioes.Contains(t)));
+    //    var simpleFilters = request.Filters.Where(a => a.GetTokens().SelectMany(a => GetAllPropertyRoutes(a)).All(t => !problematicPropertioes.Contains(t)));
 
-        var entityColumn = QueryLogic.Queries.QueryDescription(queryName).Columns.Single(q => q.IsEntity);
+    //    var entityColumn = QueryLogic.Queries.QueryDescription(queryName).Columns.Single(q => q.IsEntity);
 
-        foreach (var gr in list.GroupBy(a => new { a.ta, a.pa, a.pr.RootType }, a => a.pr))
-        {
-            if (entityColumn.Implementations == null ||
-                entityColumn.Implementations.Value.IsByAll ||
-                !entityColumn.Implementations.Value.Types.Contains(gr.Key.RootType))
-                throw new UnauthorizedAccessException(AuthMessage.UnableToDetermineIfYouCanRead0.NiceToString(gr.CommaAnd()));
+    //    foreach (var gr in list.GroupBy(a => new { a.ta, a.pa, a.pr.RootType }, a => a.pr))
+    //    {
+    //        if (entityColumn.Implementations == null ||
+    //            entityColumn.Implementations.Value.IsByAll ||
+    //            !entityColumn.Implementations.Value.Types.Contains(gr.Key.RootType))
+    //            throw new UnauthorizedAccessException(AuthMessage.UnableToDetermineIfYouCanRead0.NiceToString(gr.CommaAnd()));
 
-            var node = DiffNodes(gr.Key.pa, gr.Key.ta);
+    //        var node = DiffNodes(gr.Key.pa, gr.Key.ta);
 
-            node = node.Simplify();
+    //        node = node.Simplify();
 
-            if (node.ConstantValue == true)
-                throw new UnauthorizedAccessException(AuthMessage.TheQueryDoesNotEnsureThatYouCanRead0.NiceToString(gr.CommaAnd()));
+    //        if (node.ConstantValue == true)
+    //            throw new UnauthorizedAccessException(AuthMessage.TheQueryDoesNotEnsureThatYouCanRead0.NiceToString(gr.CommaAnd()));
 
-            if (node.ConstantValue == false)
-                continue; //possible?
+    //        if (node.ConstantValue == false)
+    //            continue; //possible?
 
-            var query = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
-            {
-                QueryName = queryName,
-                Filters = simpleFilters.ToList(),
-                Orders = new List<Order>(),
-                QueryUrl = request.QueryUrl,
-                Count = null,
-            });
+    //        var query = QueryLogic.Queries.GetEntitiesFull(new QueryEntitiesRequest
+    //        {
+    //            QueryName = queryName,
+    //            Filters = simpleFilters.ToList(),
+    //            Orders = new List<Order>(),
+    //            QueryUrl = request.QueryUrl,
+    //            Count = null,
+    //        });
 
-            var pe = Expression.Parameter(typeof(Entity));
+    //        var pe = Expression.Parameter(typeof(Entity));
 
-            var exp = node.ToExpression(Expression.Convert(pe, gr.Key.RootType), FilterQueryArgs.FromQuery(query));
+    //        var exp = node.ToExpression(Expression.Convert(pe, gr.Key.RootType), FilterQueryArgs.FromQuery(query));
 
-            var lambda = Expression.Lambda<Func<Entity, bool>>(exp, pe);
+    //        var lambda = Expression.Lambda<Func<Entity, bool>>(exp, pe);
 
-            if (query.Any(lambda))
-                throw new UnauthorizedAccessException(AuthMessage.TheQueryDoesNotEnsureThatYouCanRead0.NiceToString(gr.CommaAnd()));
-        }
+    //        if (query.Any(lambda))
+    //            throw new UnauthorizedAccessException(AuthMessage.TheQueryDoesNotEnsureThatYouCanRead0.NiceToString(gr.CommaAnd()));
+    //    }
 
-        return null;
-    }
+    //    return null;
+    //}
 
-    static IEnumerable<PropertyRoute> GetAllPropertyRoutes(QueryToken token)
-    {
-        var t = token;
-        PropertyRoute? lastPr = null;
-        while (t != null)
-        {
-            var pr = t.GetPropertyRoute();
+    //static IEnumerable<PropertyRoute> GetAllPropertyRoutes(QueryToken token)
+    //{
+    //    var t = token;
+    //    PropertyRoute? lastPr = null;
+    //    while (t != null)
+    //    {
+    //        var pr = t.GetPropertyRoute();
 
-            if (pr != null && pr != lastPr)
-            {
-                yield return pr;
-                lastPr = pr;
-            }
+    //        if (pr != null && pr != lastPr)
+    //        {
+    //            yield return pr;
+    //            lastPr = pr;
+    //        }
 
-            t = t.Parent;
-        }
-    }
+    //        t = t.Parent;
+    //    }
+    //}
 
     static TypeConditionNode DiffNodes(this WithConditions<PropertyAllowed> propertyAllowed, WithConditions<PropertyAllowed> typeAllowed)
     {
@@ -318,7 +371,7 @@ public static class PropertyAuthLogic
         }
     }
 
-    public static Expression IsAllowedExpression(Expression entity,  PropertyRoute route, PropertyAllowed requested, FilterQueryArgs args)
+    public static Expression IsAllowedExpression(Expression entity, PropertyRoute route, PropertyAllowed requested, FilterQueryArgs args)
     {
         Type type = entity.Type;
 
@@ -363,8 +416,8 @@ public static class PropertyAuthLogic
     }
 
 
-    static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed>> giGetAllowed=
-        new ((e, cond) => GetAllowed((ExceptionEntity)e, cond));
+    static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed>> giGetAllowed =
+        new((e, cond) => GetAllowed((ExceptionEntity)e, cond));
     static PropertyAllowed GetAllowed<T>(T entity, WithConditions<PropertyAllowed> paac)
         where T : Entity
     {

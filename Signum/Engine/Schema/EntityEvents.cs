@@ -334,7 +334,7 @@ public class FilterQueryArgs
     }
 
     static GenericInvoker<Func<LambdaExpression, FilterQueryArgs>> giFromFilter = 
-        new GenericInvoker<Func<LambdaExpression, FilterQueryArgs>>(lambda => FromFilter((Expression<Func<Entity, bool>>)lambda));
+        new (lambda => FromFilter((Expression<Func<Entity, bool>>)lambda));
     public static FilterQueryArgs FromFilter<T>(Expression<Func<T, bool>> filter) where T: Entity
     {
         var query = filter == null ? Database.Query<T>() : Database.Query<T>().Where(filter);
