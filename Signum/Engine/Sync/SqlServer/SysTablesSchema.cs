@@ -1,8 +1,5 @@
 using Signum.Engine.Maps;
-using Signum.Utilities;
 using System.Data;
-using System.Data.Common;
-using static System.Net.WebRequestMethods;
 
 namespace Signum.Engine.Sync.SqlServer;
 

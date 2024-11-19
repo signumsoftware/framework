@@ -5,9 +5,6 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using Signum.Engine.Sync;
-using Signum.Engine.Sync.Postgres;
-using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Engine;
 

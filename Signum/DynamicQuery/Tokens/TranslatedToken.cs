@@ -1,8 +1,3 @@
-using Microsoft.AspNetCore.Routing;
-using Signum.Engine.Linq;
-using Signum.Utilities.Reflection;
-using System.Linq.Expressions;
-
 namespace Signum.DynamicQuery.Tokens;
 
 public class TranslatedToken : QueryToken

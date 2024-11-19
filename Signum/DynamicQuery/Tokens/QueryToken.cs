@@ -2,15 +2,6 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Signum.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics.X86;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
-using System.Linq.Expressions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.DynamicQuery.Tokens;
 

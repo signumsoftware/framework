@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq;
 

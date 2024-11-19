@@ -5,12 +5,7 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
-using System.Linq;
-using Signum.Utilities;
-using System.Collections.Generic;
 using System.Collections.Frozen;
-using Microsoft.Identity.Client;
-using System.Runtime.CompilerServices;
 
 namespace Signum.API;
 

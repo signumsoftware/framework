@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using Signum.DynamicQuery.Tokens;
-using System.Runtime.CompilerServices;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
 namespace Signum.DynamicQuery;

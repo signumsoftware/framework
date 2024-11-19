@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Signum.Security;
 using System.Globalization;
 
 namespace Signum.API.Filters;

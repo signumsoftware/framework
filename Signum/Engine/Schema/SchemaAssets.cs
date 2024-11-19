@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;

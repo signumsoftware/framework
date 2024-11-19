@@ -8,17 +8,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Signum.Engine.Maps;
-using Signum.API.ApiControllers;
 using Signum.API.Filters;
 using Signum.API.JsonModelValidators;
 using Signum.API.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using System.Globalization;
 using Signum.DynamicQuery.Tokens;
-using Signum.Operations;
 
 namespace Signum.API;
 
