@@ -8,12 +8,12 @@ namespace Signum.Upgrade.Upgrades;
 
 class Upgrade_20241119_DotNet9 : CodeUpgradeBase
 {
-    public override string Description => "Update Nugets";
+    public override string Description => "Upgrade to .net 9";
 
     public override void Execute(UpgradeContext uctx)
     {
 
-        uctx.ChangeCodeFile(@"Southwind/Dockerfile", file =>
+        uctx.ChangeCodeFile(@"Southwind.Server/Dockerfile", file =>
         {
             file.Replace("aspnet:8.0-bookworm-slim", "aspnet:9.0");
             file.Replace("aspnet:8.0", "aspnet:9.0");
