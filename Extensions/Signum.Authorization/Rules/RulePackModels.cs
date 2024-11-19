@@ -187,6 +187,11 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
         return Fallback.Equals(current) && ConditionRules.IsNullOrEmpty();
     }
 
+    public WithConditions<A> WithoutCondition(TypeConditionSymbol typeCondition)
+    {
+        return new WithConditions<A>(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToReadOnly());
+    }
+
     public override string ToString()
     {
         if (ConditionRules.IsEmpty())
@@ -228,6 +233,18 @@ public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
     public bool Equals(ConditionRule<A> other)
     {
         return TypeConditions.SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
+    }
+
+
+    internal ConditionRule<A>? WithoutCondition(TypeConditionSymbol typeCondition)
+    {
+        if (!TypeConditions.Contains(typeCondition))
+            return this;
+
+        if (TypeConditions.Count == 1)
+            return null;
+
+        return new ConditionRule<A>(TypeConditions.Where(tc => !tc.Is(typeCondition)).ToFrozenSet(), Allowed);
     }
 
     public override int GetHashCode() => _hash;
@@ -305,10 +322,6 @@ public class WithConditionsModel<A> : ModelEntity
         return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
     }
 
-    public WithConditionsModel<A> WithoutCondition(TypeConditionSymbol typeCondition)
-    {
-        return new WithConditionsModel<A>(this.Fallback, this.ConditionRules.Select(a => a.WithoutCondition(typeCondition)).NotNull().ToMList());
-    }
 
     internal WithConditions<A> ToImmutable() => new WithConditions<A>(Fallback,
         ConditionRules.Select(r => new ConditionRule<A>(r.TypeConditions.ToFrozenSet(), r.Allowed)).ToReadOnly());
@@ -416,16 +429,6 @@ public class ConditionRuleModel<A> : ModelEntity, IEquatable<ConditionRuleModel<
         return TypeConditions.ToHashSet().SetEquals(other.TypeConditions) && Allowed.Equals(other.Allowed);
     }
 
-    internal ConditionRuleModel<A>? WithoutCondition(TypeConditionSymbol typeCondition)
-    {
-        if (!TypeConditions.Contains(typeCondition))
-            return this;
-
-        if (TypeConditions.Count == 1)
-            return null;
-
-        return new ConditionRuleModel<A> { TypeConditions = TypeConditions.Where(tc => !tc.Is(typeCondition)).ToMList() };
-    }
 
     public override string ToString()
     {
