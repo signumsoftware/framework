@@ -46,6 +46,7 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
                 <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="131.0.6778.6900" />
                 <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
                 <PackageReference Include="Npgsql" Version="9.0.0" />
+                <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
                 """);
                 //<PackageReference Include="Signum.TSGenerator" Version="9.0.0" />
         });
