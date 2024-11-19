@@ -13,6 +13,14 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
     public override void Execute(UpgradeContext uctx)
     {
 
+        uctx.ChangeCodeFile(@"Southwind/Dockerfile", file =>
+        {
+            file.Replace("aspnet:8.0-bookworm-slim", "aspnet:9.0");
+            file.Replace("aspnet:8.0", "aspnet:9.0");
+            file.Replace("sdk:8.0-bookworm-slim", "sdk:9.0");
+            file.Replace("sdk:8.0", "sdk:9.0");
+        });
+
         uctx.ForeachCodeFile("*.csproj", file =>
         {
             file.Replace(
@@ -20,6 +28,9 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
                 "<TargetFramework>net9.0</TargetFramework>");
 
             file.UpdateNugetReferences("""
+                <PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
+                <PackageReference Include="Signum.TSGenerator" Version="9.0.0" />
+                <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.6.2">
                 <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.6.2">
                 <PackageReference Include="System.DirectoryServices" Version="9.0.0" />
                 <PackageReference Include="System.DirectoryServices.AccountManagement" Version="9.0.0" />
