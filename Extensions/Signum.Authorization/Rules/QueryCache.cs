@@ -83,7 +83,7 @@ public class QueryCache : AuthCache<RuleQueryEntity, QueryAllowedRule, QueryEnti
         return QueryLogic.Queries.GetEntityImplementations(key).AllCanRead(t => TypeAuthLogic.GetAllowed(role, t)) ? QueryAllowed.Allow : QueryAllowed.None;
     }
 
-    protected override Func<object, QueryAllowed> MergeDefault(Lite<RoleEntity> role)
+    protected override Func<object, QueryAllowed> GetDefaultValue(Lite<RoleEntity> role)
     {
         return key =>
         {

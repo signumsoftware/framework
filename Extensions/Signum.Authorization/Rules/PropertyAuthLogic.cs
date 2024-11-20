@@ -248,7 +248,7 @@ public static class PropertyAuthLogic
         var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id").ToList();
         cache.GetRules(result, properties);
 
-        result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), new WithConditions<PropertyAllowed>(PropertyAllowed.Write)).ToModel());
+        result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write)).ToModel());
 
         Type type = typeEntity.ToType();
         result.AvailableTypeConditions = TypeAuthLogic.GetAllowed(role, type).ConditionRules.Select(a => a.TypeConditions.ToList()).ToList();
@@ -274,12 +274,12 @@ public static class PropertyAuthLogic
     public static WithConditions<PropertyAllowed> GetPropertyAllowed(this PropertyRoute route)
     {
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
+            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
         route = route.SimplifyToPropertyOrRoot();
 
         if (!typeof(Entity).IsAssignableFrom(route.RootType))
-            return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
+            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
         return cache.GetAllowed(RoleEntity.Current, route);
     }

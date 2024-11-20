@@ -238,13 +238,13 @@ public static partial class TypeAuthLogic
     public static WithConditions<TypeAllowed> GetAllowed(Type type)
     {
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return new WithConditions<TypeAllowed>(TypeAllowed.Write);
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
         if (!TypeLogic.TypeToEntity.ContainsKey(type))
-            return new WithConditions<TypeAllowed>(TypeAllowed.Write);
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
         if (EnumEntity.Extract(type) != null)
-            return new WithConditions<TypeAllowed>(TypeAllowed.Read);
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
         var allowed = cache.GetAllowed(RoleEntity.Current, type);
 

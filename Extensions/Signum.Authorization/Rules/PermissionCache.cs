@@ -31,7 +31,7 @@ class PermissionCache : AuthCache<RulePermissionEntity, PermissionAllowedRule, P
             return baseValues.All(a => a.Value);
     }
 
-    protected override Func<PermissionSymbol, bool> MergeDefault(Lite<RoleEntity> role)
+    protected override Func<PermissionSymbol, bool> GetDefaultValue(Lite<RoleEntity> role)
     {
         return new ConstantFunction<PermissionSymbol, bool>(AuthLogic.GetDefaultAllowed(role)).GetValue;
     }

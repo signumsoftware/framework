@@ -32,7 +32,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
     protected abstract K ToKey(R resource);
     protected abstract R ToEntity(K key);
     protected abstract A Merge(K key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, A>> baseValues);
-    protected abstract Func<K, A> MergeDefault(Lite<RoleEntity> role);
+    protected abstract Func<K, A> GetDefaultValue(Lite<RoleEntity> role);
 
     protected abstract A GetRuleAllowed(RT rule);
     protected abstract RT SetRuleAllowed(RT rule, A allowed);
@@ -230,7 +230,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
             this.cache = cache;
             this.baseCaches = baseCaches;
 
-            Func<K, A> defaultAllowed = cache.MergeDefault(role);
+            Func<K, A> defaultAllowed = cache.GetDefaultValue(role);
 
             Func<K, A> baseAllowed = k => cache.Merge(k, role, baseCaches.Select(b => KeyValuePair.Create(b.Role, b.GetAllowed(k))));
 
@@ -241,7 +241,12 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
 
             Dictionary<K, A>? tmpRules = keys.ToDictionary(k => k, baseAllowed);
             if (newValues != null)
-                tmpRules.SetRange(newValues);
+            {
+                foreach (var item in newValues)
+                {
+                    tmpRules[item.Key] = cache.CoerceValue(role, item.Key, item.Value);
+                }
+            }
 
             tmpRules = Simplify(tmpRules, defaultAllowed, baseAllowed);
 
@@ -255,7 +260,8 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
 
             dictionary.RemoveRange(dictionary.Where(p =>
                 p.Value.Equals(defaultAllowed(p.Key)) &&
-                p.Value.Equals(baseAllowed(p.Key))).Select(p => p.Key).ToList());
+                p.Value.Equals(baseAllowed(p.Key)))
+                .Select(p => p.Key).ToList());
 
             if (dictionary.Count == 0)
                 return null;

@@ -87,7 +87,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
     }
 
 
-    protected override Func<(OperationSymbol operation, Type type), OperationAllowed> MergeDefault(Lite<RoleEntity> role)
+    protected override Func<(OperationSymbol operation, Type type), OperationAllowed> GetDefaultValue(Lite<RoleEntity> role)
     {
         return key =>
         {

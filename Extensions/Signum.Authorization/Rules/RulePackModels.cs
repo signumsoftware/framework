@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
@@ -139,7 +140,6 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditionsModel<TypeA
 public class WithConditions<A> : IEquatable<WithConditions<A>>
     where A : struct, Enum
 {
-    public Dictionary<WithConditions<A>, WithConditions<A>> Cache = new Dictionary<WithConditions<A>, WithConditions<A>>();
 
     public A Fallback { get; }
 
@@ -154,10 +154,10 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
         _hashCode = CalculateHash();
     }
 
-    public WithConditions(A fallback): this(fallback, ReadOnlyCollection<ConditionRule<A>>.Empty)
-    {
-    }
+    static FrozenDictionary<A, WithConditions<A>> simpleCache = EnumExtensions.GetValues<A>().ToFrozenDictionary(a => a, a => new WithConditions<A>(a, ReadOnlyCollection<ConditionRule<A>>.Empty));
+    public static WithConditions<A> Simple(A value) => simpleCache.GetOrThrow(value);
 
+    static Dictionary<WithConditions<A>, WithConditions<A>> Cache = new Dictionary<WithConditions<A>, WithConditions<A>>();
     public WithConditions<A> Intern() => Cache.GetOrCreate(this, () => this);
 
     private int CalculateHash()
@@ -170,7 +170,7 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
         return hash;
     }
 
-    public override bool Equals(object? obj) => obj is WithConditions<A> wc && Equals(wc);
+    public override bool Equals(object? obj) => obj == this || obj is WithConditions<A> wc && Equals(wc);
     public bool Equals(WithConditions<A>? other)
     {
         if (other == null)
@@ -323,8 +323,7 @@ public class WithConditionsModel<A> : ModelEntity
     }
 
 
-    internal WithConditions<A> ToImmutable() => new WithConditions<A>(Fallback,
-        ConditionRules.Select(r => new ConditionRule<A>(r.TypeConditions.ToFrozenSet(), r.Allowed)).ToReadOnly());
+    internal WithConditions<A> ToImmutable() => new WithConditions<A>(Fallback, ConditionRules.Select(r => new ConditionRule<A>(r.TypeConditions.ToFrozenSet(), r.Allowed)).ToReadOnly());
 }
 
 public static class TypeAllowAndConditionsExtensions

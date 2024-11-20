@@ -230,10 +230,12 @@ public static class TypeAllowedExtensions
     }
 
 
+    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
     {
-        return new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(),
-            taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly());
+        return cache.GetOrAdd(taac, taac =>
+            new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly()).Intern()
+        );
     }
 }
 

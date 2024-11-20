@@ -21,8 +21,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     protected override Type ToKey(TypeEntity resource) => resource.ToType();
     protected override TypeEntity ToEntity(Type key) => key.ToTypeEntity();
 
-    protected override WithConditions<TypeAllowed> GetRuleAllowed(RuleTypeEntity rule) => new WithConditions<TypeAllowed>(rule.Fallback,
-            rule.ConditionRules.Select(c => new ConditionRule<TypeAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
+    protected override WithConditions<TypeAllowed> GetRuleAllowed(RuleTypeEntity rule) => new WithConditions<TypeAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<TypeAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
 
     protected override RuleTypeEntity SetRuleAllowed(RuleTypeEntity rule, WithConditions<TypeAllowed> allowed)
     {
@@ -65,9 +64,9 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     {
         var strategy = AuthLogic.GetMergeStrategy(role);
         if (strategy == MergeStrategy.Union)
-            return ConditionMerger<TypeAllowed>.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+            return TypeConditionMerger.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
         else
-            return ConditionMerger<TypeAllowed>.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
+            return TypeConditionMerger.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
     }
 
     internal static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
@@ -103,16 +102,16 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     }
 
 
-    protected override Func<Type, WithConditions<TypeAllowed>> MergeDefault(Lite<RoleEntity> role)
+    protected override Func<Type, WithConditions<TypeAllowed>> GetDefaultValue(Lite<RoleEntity> role)
     {
         var allowed = AuthLogic.GetDefaultAllowed(role) ? TypeAllowed.Write : TypeAllowed.None;
 
         return type =>
         {
             if (EnumEntity.Extract(type) != null)
-                return new WithConditions<TypeAllowed>(TypeAllowed.Read);
+                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
-            return new WithConditions<TypeAllowed>(allowed);
+            return WithConditions<TypeAllowed>.Simple(allowed);
         };
     }
 
@@ -164,8 +163,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
             },
             parseAllowed: e =>
             {
-                return new WithConditions<TypeAllowed>(
-                    fallback: e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
+                return new WithConditions<TypeAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>(),
                     conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<TypeAllowed>(
                         typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
                         allowed: xc.Attribute("Allowed")!.Value.ToEnum<TypeAllowed>())).ToReadOnly());
@@ -183,32 +181,32 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
 
 
-internal static class ConditionMerger<A> where A : struct, Enum
+internal static class TypeConditionMerger
 {
-    static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<A>> tuple), WithConditions<A>> cache = new();
+    static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<TypeAllowed>> tuple), WithConditions<TypeAllowed>> cache = new();
 
-    public static WithConditions<A> MergeBase(MergeStrategy mergeStrage, List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
+    public static WithConditions<TypeAllowed> MergeBase(MergeStrategy mergeStrage, List<WithConditions<TypeAllowed>> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
     {
-        return cache.GetOrAdd((mergeStrage, new StructureList<WithConditions<A>>(baseRules)), tuple => MergeBaseImplementations(baseRules, maxMerge, max, min));
+        return cache.GetOrAdd((mergeStrage, new StructureList<WithConditions<TypeAllowed>>(baseRules)), tuple => MergeBaseImplementations(baseRules, maxMerge, max, min));
     }
 
-    internal static WithConditions<A> MergeBaseImplementations(List<WithConditions<A>> baseRules, Func<IEnumerable<A>, A> maxMerge, A max, A min)
+    internal static WithConditions<TypeAllowed> MergeBaseImplementations(List<WithConditions<TypeAllowed>> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
     {
-        WithConditions<A>? only = baseRules.Only();
+        WithConditions<TypeAllowed>? only = baseRules.Only();
         if (only != null)
             return only;
 
-        if (baseRules.Any(a => a.Exactly(max)))
-            return new WithConditions<A>(max);
+        if (baseRules.Any(TypeAllowed => TypeAllowed.Exactly(max)))
+            return WithConditions<TypeAllowed>.Simple(max);
 
-        WithConditions<A>? onlyNotMin = baseRules.Where(a => !a.Exactly(min)).Only();
+        WithConditions<TypeAllowed>? onlyNotMin = baseRules.Where(TypeAllowed => !TypeAllowed.Exactly(min)).Only();
         if (onlyNotMin != null)
             return onlyNotMin;
 
-        if (baseRules.All(a => a.ConditionRules.Count == 0))
-            return new WithConditions<A>(maxMerge(baseRules.Select(a => a.Fallback)));
+        if (baseRules.All(TypeAllowed => TypeAllowed.ConditionRules.Count == 0))
+            return WithConditions<TypeAllowed>.Simple(maxMerge(baseRules.Select(TypeAllowed => TypeAllowed.Fallback)));
 
-        var conditions = baseRules.SelectMany(a => a.ConditionRules).SelectMany(a => a.TypeConditions).Distinct().OrderBy(a => a.ToString()).ToList();
+        var conditions = baseRules.SelectMany(TypeAllowed => TypeAllowed.ConditionRules).SelectMany(TypeAllowed => TypeAllowed.TypeConditions).Distinct().OrderBy(TypeAllowed => TypeAllowed.ToString()).ToList();
 
         if (conditions.Count > 31)
             throw new InvalidOperationException("You can not merge more than 31 type conditions");
@@ -225,13 +223,13 @@ internal static class ConditionMerger<A> where A : struct, Enum
     }
 
 
-    static A[] GetMatrix(WithConditions<A> tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    static TypeAllowed[] GetMatrix(WithConditions<TypeAllowed> tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
     {
-        var matrix = 0.To(numCells).Select(a => tac.Fallback).ToArray();
+        var matrix = 0.To(numCells).Select(TypeAllowed => tac.Fallback).ToArray();
 
         foreach (var rule in tac.ConditionRules)
         {
-            var mask = rule.TypeConditions.Select(tc => conditionDictionary.GetOrThrow(tc)).Aggregate((a, b) => a | b);
+            var mask = rule.TypeConditions.Select(tc => conditionDictionary.GetOrThrow(tc)).Aggregate((TypeAllowed, b) => TypeAllowed | b);
 
             for (int i = 0; i < numCells; i++)
             {
@@ -245,11 +243,11 @@ internal static class ConditionMerger<A> where A : struct, Enum
         return matrix;
     }
 
-    static WithConditions<A> GetRules(A[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    static WithConditions<TypeAllowed> GetRules(TypeAllowed[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
     {
-        var array = matrix.Select(ta => (A?)ta).ToArray();
+        var array = matrix.Select(ta => (TypeAllowed?)ta).ToArray();
 
-        var conditionRules = new List<ConditionRule<A>>();
+        var conditionRules = new List<ConditionRule<TypeAllowed>>();
 
         var availableTypeConditions = conditionDictionary.Keys.ToList();
 
@@ -259,7 +257,7 @@ internal static class ConditionMerger<A> where A : struct, Enum
                 var ta = OnlyOneValue(0);
 
                 if (ta != null)
-                    return new WithConditions<A>(ta.Value, conditionRules.AsEnumerable().Reverse().ToReadOnly());
+                    return new WithConditions<TypeAllowed>(ta.Value, conditionRules.AsEnumerable().Reverse().ToReadOnly());
             }
 
             { //1 Condition
@@ -271,7 +269,7 @@ internal static class ConditionMerger<A> where A : struct, Enum
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<A>(new[] { tc }.ToFrozenSet(), ta.Value));
+                        conditionRules.Add(new ConditionRule<TypeAllowed>(new[] { tc }.ToFrozenSet(), ta.Value));
                         availableTypeConditions.Remove(tc);
 
                         ClearArray(mask);
@@ -291,7 +289,7 @@ internal static class ConditionMerger<A> where A : struct, Enum
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<A>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToFrozenSet(), ta.Value));
+                        conditionRules.Add(new ConditionRule<TypeAllowed>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToFrozenSet(), ta.Value));
 
                         ClearArray(mask);
 
@@ -304,9 +302,9 @@ internal static class ConditionMerger<A> where A : struct, Enum
         }
 
 
-        A? OnlyOneValue(int mask)
+        TypeAllowed? OnlyOneValue(int mask)
         {
-            A? currentValue = null;
+            TypeAllowed? currentValue = null;
 
             for (int i = 0; i < numCells; i++)
             {

@@ -8,7 +8,7 @@ namespace Signum.Test.Authorization;
 public class AuthTest
 {
     [Fact]
-    void MergeMax()
+    public void MergeMax()
     {
 
         var a = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
@@ -17,15 +17,15 @@ public class AuthTest
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
         }.ToReadOnly());
 
-        var max = new WithConditions<TypeAllowed>(TypeAllowed.Write);
+        var max = WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        var result = ConditionMerger<TypeAllowed>.MergeBaseImplementations(new() { a, max }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var result = TypeConditionMerger.MergeBaseImplementations(new() { a, max }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
         Assert.Equal(max, result);
     }
 
     [Fact]
-    void MergeMin()
+    public void MergeMin()
     {
 
         var a = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
@@ -34,15 +34,15 @@ public class AuthTest
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
         }.ToReadOnly());
 
-        var min = new WithConditions<TypeAllowed>(TypeAllowed.None);
+        var min = WithConditions<TypeAllowed>.Simple(TypeAllowed.None);
 
-        var result = ConditionMerger<TypeAllowed>.MergeBaseImplementations(new() { a, min }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var result = TypeConditionMerger.MergeBaseImplementations(new() { a, min }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
         Assert.Equal(a, result);
     }
 
     [Fact]
-    void MergeIdentical()
+    public void MergeIdentical()
     {
 
         var a = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
@@ -51,13 +51,13 @@ public class AuthTest
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
         }.ToReadOnly());
 
-        var result = ConditionMerger<TypeAllowed>.MergeBaseImplementations(new() { a, a }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var result = TypeConditionMerger.MergeBaseImplementations(new() { a, a }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
         Assert.Equal(a, result);
     }
 
     [Fact]
-    void MergeTypes()
+    public void MergeTypes()
     {
 
         var germany = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
@@ -70,7 +70,7 @@ public class AuthTest
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
         }.ToReadOnly());
 
-        var result = ConditionMerger<TypeAllowed>.MergeBaseImplementations(new() { germany, spain }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var result = TypeConditionMerger.MergeBaseImplementations(new() { germany, spain }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
         var mix = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
         {

@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -20,8 +21,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
     protected override PropertyRouteEntity ToEntity(PropertyRoute key) => PropertyRouteLogic.ToPropertyRouteEntity(key);
 
-    protected override WithConditions<PropertyAllowed> GetRuleAllowed(RulePropertyEntity rule) => new WithConditions<PropertyAllowed>(rule.Fallback,
-            rule.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
+    protected override WithConditions<PropertyAllowed> GetRuleAllowed(RulePropertyEntity rule) => new WithConditions<PropertyAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
 
     protected override RulePropertyEntity SetRuleAllowed(RulePropertyEntity rule, WithConditions<PropertyAllowed> allowed)
     {
@@ -42,7 +42,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual = false)
     {
         if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
-            return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
+            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
         var taac = manual ? 
             TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
@@ -50,53 +50,117 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
         var paac = taac.ToPropertyAllowed();
 
-        var result = Reduce(paac, allowed);
+        var adjusted = AdjustShape(paac, allowed);
 
-        return result;
+        var coerced = CoerceSimilar(adjusted, paac);
+
+        return coerced;
     }
 
-
-    WithConditions<PropertyAllowed> Reduce(WithConditions<PropertyAllowed> structure, WithConditions<PropertyAllowed> allowed)
+    public static WithConditions<PropertyAllowed> CoerceSimilar(WithConditions<PropertyAllowed> value, WithConditions<PropertyAllowed> maxValue)
     {
+        if (AlreadyCoerced(value, maxValue))
+            return value;
+
         PropertyAllowed Min(PropertyAllowed a, PropertyAllowed b) => a < b ? a : b;
 
-        return new WithConditions<PropertyAllowed>(
-            Min(structure.Fallback, allowed.Fallback),
-            structure.ConditionRules.Select(cr =>
-            {
-                var similar = allowed.ConditionRules.SingleOrDefault(a => a.TypeConditions.SetEquals(cr.TypeConditions));
+        return new WithConditions<PropertyAllowed>(Min(value.Fallback, maxValue.Fallback),
+            value.ConditionRules.Select((c, i) => new ConditionRule<PropertyAllowed>(c.TypeConditions, Min(c.Allowed, maxValue.ConditionRules[i].Allowed))).ToReadOnly()
+            ).Intern();
+    }
 
+    private static bool AlreadyCoerced(WithConditions<PropertyAllowed> value, WithConditions<PropertyAllowed> maxValue)
+    {
+        if (value.Fallback > maxValue.Fallback)
+            return false;
+
+        for (int i = 0; i < value.ConditionRules.Count; i++)
+        {
+            if (value.ConditionRules[i].Allowed > maxValue.ConditionRules[i].Allowed)
+                return false;
+        }
+
+        return true;
+    }
+
+    static ConcurrentDictionary<(WithConditions<PropertyAllowed> shape, WithConditions<PropertyAllowed> values), WithConditions<PropertyAllowed>> cacheAdjustShape = new ();
+    WithConditions<PropertyAllowed> AdjustShape(WithConditions<PropertyAllowed> shape, WithConditions<PropertyAllowed> values)
+    {
+        if (shape.ConditionRules.Count == values.ConditionRules.Count && 
+            shape.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(values.ConditionRules.Select(a=>a.TypeConditions)))
+            return values;
+
+        return cacheAdjustShape.GetOrAdd((shape, values), p => new WithConditions<PropertyAllowed>(p.values.Fallback,
+            p.shape.ConditionRules.Select(cr =>
+            {
+                var rule = values.ConditionRules.LastOrDefault(cr2 => cr2.TypeConditions.All(c => cr.TypeConditions.Contains(c)));
                 return new ConditionRule<PropertyAllowed>(cr.TypeConditions,
-                    similar.TypeConditions == null ? cr.Allowed : Min(cr.Allowed, similar.Allowed));
-            }).ToReadOnly());
+                    rule.TypeConditions == null ? cr.Allowed : values.Fallback);
+            }).ToReadOnly()).Intern());
+    }
+
+    //static ConcurrentDictionary<(WithConditions<TypeAllowed> shape, WithConditions<TypeAllowed> values), WithConditions<TypeAllowed>> cacheAdjustShapeType = new();
+    //WithConditions<TypeAllowed> AdjustShapeType(WithConditions<TypeAllowed> shape, WithConditions<TypeAllowed> values)
+    //{
+    //    if (shape.ConditionRules.Count == values.ConditionRules.Count &&
+    //        shape.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(values.ConditionRules.Select(a => a.TypeConditions)))
+    //        return values;
+
+    //    return cacheAdjustShapeType.GetOrAdd((shape, values), p => new WithConditions<TypeAllowed>(
+    //        p.values.Fallback,
+    //        p.shape.ConditionRules.Select(cr =>
+    //        {
+    //            var rule = values.ConditionRules.LastOrDefault(cr2 => cr2.TypeConditions.All(c => cr.TypeConditions.Contains(c)));
+    //            return new ConditionRule<TypeAllowed>(cr.TypeConditions,
+    //                rule.TypeConditions == null ? cr.Allowed : values.Fallback);
+    //        }).ToReadOnly()).Intern());
+    //}
+
+    static ConcurrentDictionary<(WithConditions<PropertyAllowed> taac, PropertyAllowed pa), WithConditions<PropertyAllowed>> cacheWithShape = new();
+    WithConditions<PropertyAllowed> WithShape(WithConditions<PropertyAllowed> taac, PropertyAllowed pa)
+    {
+        return cacheWithShape.GetOrAdd((taac, pa), p => new WithConditions<PropertyAllowed>(pa, p.taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, pa)).ToReadOnly()).Intern());
     }
 
     protected override WithConditions<PropertyAllowed> Merge(PropertyRoute key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<PropertyAllowed>>> baseValues)
     {
         var merge = AuthLogic.GetMergeStrategy(role);
 
-        var best = merge == MergeStrategy.Union ?
-            ConditionMerger<PropertyAllowed>.MergeBase(merge, baseValues.Select(a => a.Value).ToList(), MaxPropertyAllowed, PropertyAllowed.Write, PropertyAllowed.None) :
-            ConditionMerger<PropertyAllowed>.MergeBase(merge, baseValues.Select(a => a.Value).ToList(), MinPropertyAllowed, PropertyAllowed.None, PropertyAllowed.Write);
+        var tac = GetDefaultFromType(key, role);
+
+        var baseAdjusted = baseValues.Select(a => AdjustShape(tac, a.Value)).ToList();
+
+        Func<IEnumerable<PropertyAllowed>, PropertyAllowed> collapse = merge == MergeStrategy.Union ? MaxPropertyAllowed : MinPropertyAllowed;
+
+        var best = 
+            baseAdjusted.Count == 0 ? WithShape(tac, merge == MergeStrategy.Union ? PropertyAllowed.None : PropertyAllowed.Write) :
+            baseAdjusted.Count == 1 ? baseAdjusted.SingleEx() :
+            new WithConditions<PropertyAllowed>(collapse(baseAdjusted.Select(a => a.Fallback)),
+                tac.ConditionRules.Select((a, i) => new ConditionRule<PropertyAllowed>(a.TypeConditions, collapse(baseAdjusted.Select(b => b.ConditionRules[i].Allowed)))).ToReadOnly());
 
         if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
             return best;
 
+
         var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
-
-        if (maxUp.HasValue && maxUp <= best.Max())
-            return best;
-
-        if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefaultFromType(key, a.Key).Equals(a.Value)))
+        PropertyAllowed AutomaticUpgrade(PropertyAllowed mergedValue, IEnumerable<(PropertyAllowed baseValue, PropertyAllowed defaultBaseValue)> bases, PropertyAllowed defaultValue)
         {
-            var def = GetDefaultFromType(key, role);
+            if(bases.Where(a=>a.baseValue == mergedValue).All(a=> mergedValue == a.defaultBaseValue))
+            {
+                var upgrade = maxUp.HasValue && maxUp <= defaultValue ? maxUp.Value : defaultValue;
+                return upgrade;
+            }
 
-            var upgrade = maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
-
-            return new WithConditions<PropertyAllowed>(upgrade);
+            return mergedValue;
         }
 
-        return best;
+        var baseDefaults = baseValues.Select(a => AdjustShape(tac, GetDefaultFromType(key, role))).ToList();
+        var result = new WithConditions<PropertyAllowed>(AutomaticUpgrade(best.Fallback, baseAdjusted.Zip(baseDefaults, (b, d) => (b.Fallback, d.Fallback)), tac.Fallback),
+            tac.ConditionRules.Select((cr, i) => new ConditionRule<PropertyAllowed>(cr.TypeConditions,
+             AutomaticUpgrade(best.ConditionRules[i].Allowed, baseAdjusted.Zip(baseDefaults, (b, d) => (b.ConditionRules[i].Allowed, d.ConditionRules[i].Allowed)), cr.Allowed)
+            )).ToReadOnly());
+
+        return result.Intern();
     }
 
     static PropertyAllowed MinPropertyAllowed(IEnumerable<PropertyAllowed> collection)
@@ -132,24 +196,9 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     }
 
 
-    protected override Func<PropertyRoute, WithConditions<PropertyAllowed>> MergeDefault(Lite<RoleEntity> role)
+    protected override Func<PropertyRoute, WithConditions<PropertyAllowed>> GetDefaultValue(Lite<RoleEntity> role)
     {
-        return pr =>
-        {
-            if (AuthLogic.GetDefaultAllowed(role))
-                return new WithConditions<PropertyAllowed>(PropertyAllowed.Write);
-
-            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
-                return new WithConditions<PropertyAllowed>(PropertyAllowed.None);
-
-            var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
-
-            var typeDefault = GetDefaultFromType(pr, role);
-
-            var upgrade = maxUp.HasValue && maxUp <= typeDefault ?  maxUp.Value :  typeDefault;
-
-            return new WithConditions<PropertyAllowed>(upgrade);
-        };
+        return pr => GetDefaultFromType(pr, role);
     }
 
     WithConditions<PropertyAllowed> GetDefaultFromType(PropertyRoute key, Lite<RoleEntity> role)
@@ -241,8 +290,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             },
             parseAllowed: e =>
             {
-                return new WithConditions<PropertyAllowed>(
-                    fallback: e.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>(),
+                return new WithConditions<PropertyAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>(),
                     conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<PropertyAllowed>(
                         typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
                         allowed: xc.Attribute("Allowed")!.Value.ToEnum<PropertyAllowed>()))
@@ -258,4 +306,5 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         return $"{allowed.Fallback} + {allowed.ConditionRules.Count} conditions";
     }
 }
+
 
