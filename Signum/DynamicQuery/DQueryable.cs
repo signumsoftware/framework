@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Collections;
 using Signum.Engine.Maps;
 using Signum.DynamicQuery.Tokens;
+using System.Linq;
 
 namespace Signum.DynamicQuery;
 
@@ -1296,9 +1297,11 @@ public static class DQueryable
     {
         var isMultiKeyGrupping = req.GroupResults && req.Columns.Count(col => col.Token is not AggregateToken) >= 2;
 
-        var resultColumns = collection.Context.Replacements.Keys.Where(a => a.HasNested() == null).Select(token =>
+        var resultColumns = collection.Context.Replacements.Where(a => a.Key.HasNested() == null).Select(kvp =>
         {
-            var expression = Expression.Lambda(token.BuildExpression(collection.Context), collection.Context.Parameter);
+            var token = kvp.Key;
+
+            var expression = Expression.Lambda(kvp.Value.GetExpression(), collection.Context.Parameter);
 
             var lambda = expression.Compile();
 
@@ -1323,7 +1326,7 @@ public static class DQueryable
         return context.Replacements.Where(a => a.Key is CollectionNestedToken).Select(kvp =>
         {
             var body = Expression.Call(miToResultTableSubQuery,
-                kvp.Key.BuildExpression(context),
+                kvp.Value.GetExpression(),
                 Expression.Constant((CollectionNestedToken)kvp.Key),
                 Expression.Constant(kvp.Value.SubQueryContext!),
                 Expression.Constant(subQueryLimit)
@@ -1345,15 +1348,15 @@ public static class DQueryable
     public static ResultTable ToResultTableSubQuery(IEnumerable collection, CollectionNestedToken nested,  BuildExpressionContext ctx, int subQueryLimit)
     {
 
-        var resultColumns = ctx.Replacements.Keys.Where(a => a.HasNested() == nested).Select(token =>
+        var resultColumns = ctx.Replacements.Where(a => a.Key.HasNested() == nested).Select(kvp =>
         {
-            var expression = Expression.Lambda(token.BuildExpression(ctx), ctx.Parameter);
+            var expression = Expression.Lambda(kvp.Value.GetExpression(), ctx.Parameter);
 
             var lambda = expression.Compile();
 
             var array = Untyped.ToArray(Untyped.Select(collection, lambda), expression.Body.Type);
 
-            var rc = new ResultColumn(token, array);
+            var rc = new ResultColumn(kvp.Key, array);
 
             return rc;
         }).ToList();

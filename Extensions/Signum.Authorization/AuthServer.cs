@@ -28,10 +28,9 @@ public static class AuthServer
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
 
-        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<TypeAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<TypeAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<PropertyAllowed>));
-        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<PropertyAllowed>));
+        RrgisterWithCondition<TypeAllowed>();
+        RrgisterWithCondition<PropertyAllowed>();
+        RrgisterWithCondition<AuthThumbnail>();
 
         ReflectionServer.GetContext = () => new
         {
@@ -64,7 +63,7 @@ public static class AuthServer
                 {
                     if (UserEntity.Current == null)
                         return null;
-                    
+
                     var ta = TypeAuthLogic.GetAllowed(t);
 
                     if (ta.MaxUI() == TypeAllowedBasic.None)
@@ -84,7 +83,7 @@ public static class AuthServer
                     }
 
 
-                    if(ta.Fallback == TypeAllowed.None)
+                    if (ta.Fallback == TypeAllowed.None)
                     {
                         var conditions = ta.ConditionRules.SelectMany(a => a.TypeConditions)
                             .Distinct()
@@ -152,10 +151,10 @@ public static class AuthServer
             {
                 if (ti.QueryDefined)
                 {
-                    var allowed = UserEntity.Current == null ? QueryAllowed.None : 
+                    var allowed = UserEntity.Current == null ? QueryAllowed.None :
                     QueryLogic.Queries.QueryAllowed(t, fullScreen: true) ? QueryAllowed.Allow :
                     QueryLogic.Queries.QueryAllowed(t, fullScreen: false) ? QueryAllowed.EmbeddedOnly : QueryAllowed.None;
-                    
+
                     if (allowed == QueryAllowed.None)
                         ti.QueryDefined = false;
 
@@ -202,7 +201,7 @@ public static class AuthServer
                         return null;
 
                     var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
-                    if(!pac.Equals(tac))
+                    if (!pac.Equals(tac))
                     {
                         var min = pac.Min();
                         var max = pac.Max();
@@ -223,7 +222,7 @@ public static class AuthServer
 
             SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
             {
-                if(UserEntity.Current == null)
+                if (UserEntity.Current == null)
                 {
                     if (!pr.GetAllowUnathenticated())
                         return "Not Allowed for Unathenticated";
@@ -246,7 +245,7 @@ public static class AuthServer
 
             SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
             {
-                if(UserEntity.Current == null)
+                if (UserEntity.Current == null)
                 {
                     if (!pr.GetAllowUnathenticated())
                         return "Not Allowed for Unathenticated";
@@ -356,7 +355,7 @@ public static class AuthServer
         });
 
         if (SessionLogLogic.IsStarted)
-            AuthServer.UserLogged +=  (ActionContext ac, UserEntity user) =>
+            AuthServer.UserLogged += (ActionContext ac, UserEntity user) =>
             {
                 Microsoft.AspNetCore.Http.HttpRequest re = ac.HttpContext.Request;
                 SessionLogLogic.SessionStart(
@@ -365,6 +364,13 @@ public static class AuthServer
             };
 
 
+    }
+
+    private static void RrgisterWithCondition<T>()
+        where T : struct, Enum
+    {
+        ReflectionServer.RegisterGenericModel(typeof(WithConditionsModel<T>));
+        ReflectionServer.RegisterGenericModel(typeof(ConditionRuleModel<T>));
     }
 
     public static ResetLazy<FrozenDictionary<string, List<Type>>> entitiesByNamespace =

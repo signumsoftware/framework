@@ -63,8 +63,8 @@ public abstract class BaseRulePack<T> : ModelEntity
         get
         {
             return AuthMessage.DefaultAuthorization.NiceToString() +
-                (InheritFrom.Count == 0 ? (MergeStrategy == MergeStrategy.Union ? AuthMessage.Everything : AuthMessage.Nothing).NiceToString() :
-                InheritFrom.Count == 1 ? AuthMessage  .SameAs0.NiceToString(InheritFrom.Only()) :
+                (InheritFrom.Count == 0 ? (MergeStrategy == MergeStrategy.Union ? AuthMessage.Nothing : AuthMessage.Everything).NiceToString() :
+                InheritFrom.Count == 1 ? AuthMessage.SameAs0.NiceToString(InheritFrom.Only()) :
                 (MergeStrategy == MergeStrategy.Union ? AuthMessage.MaximumOfThe0 : AuthMessage.MinumumOfThe0).NiceToString(typeof(RoleEntity).NiceCount(InheritFrom.Count)));
         }
     }

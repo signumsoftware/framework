@@ -27,11 +27,15 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     protected override RuleTypeEntity SetRuleAllowed(RuleTypeEntity rule, WithConditions<TypeAllowed> allowed)
     {
         rule.Fallback = allowed.Fallback;
-        rule.ConditionRules = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
-        {
-            Allowed = a.Allowed,
-            Conditions = a.TypeConditions.ToMList()
-        }).ToMList();
+        var oldConditions = rule.ConditionRules.Select(a => new ConditionRule<TypeAllowed>(a.Conditions.ToFrozenSet(), a.Allowed)).ToReadOnly();
+
+        if (!oldConditions.SequenceEqual(allowed.ConditionRules))
+            rule.ConditionRules = allowed.ConditionRules.Select(a => new RuleTypeConditionEntity
+            {
+                Allowed = a.Allowed,
+                Conditions = a.TypeConditions.ToMList()
+            }).ToMList();
+
         return rule;
     }
 

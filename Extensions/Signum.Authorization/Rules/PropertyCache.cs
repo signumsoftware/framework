@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using System.Collections.Frozen;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
@@ -25,11 +26,13 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     protected override RulePropertyEntity SetRuleAllowed(RulePropertyEntity rule, WithConditions<PropertyAllowed> allowed)
     {
         rule.Fallback = allowed.Fallback;
-        rule.ConditionRules = allowed.ConditionRules.Select(a => new RulePropertyConditionEntity
-        {
-            Allowed = a.Allowed,
-            Conditions = a.TypeConditions.ToMList()
-        }).ToMList();
+        var oldConditions = rule.ConditionRules.Select(a => new ConditionRule<PropertyAllowed>(a.Conditions.ToFrozenSet(), a.Allowed)).ToReadOnly();
+        if (!oldConditions.SequenceEqual(allowed.ConditionRules))
+            rule.ConditionRules = allowed.ConditionRules.Select(a => new RulePropertyConditionEntity
+            {
+                Allowed = a.Allowed,
+                Conditions = a.TypeConditions.ToMList()
+            }).ToMList();
         return rule;
     }
 
@@ -149,9 +152,9 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         };
     }
 
-    PropertyAllowed GetDefaultFromType(PropertyRoute key, Lite<RoleEntity> role)
+    WithConditions<PropertyAllowed> GetDefaultFromType(PropertyRoute key, Lite<RoleEntity> role)
     {
-        return TypeAuthLogic.GetAllowed(role, key.RootType).MaxUI().ToPropertyAllowed();
+        return TypeAuthLogic.GetAllowed(role, key.RootType).ToPropertyAllowed();
     }
 
 
@@ -214,7 +217,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
         var routes = Database.Query<PropertyRouteEntity>().ToDictionary(a => a.ToPropertyRoute());
 
-        return ImportXmlInternal(root, "Properties", "Role", roles,
+        return ImportXmlInternal(root, "Properties", "Property", roles,
             toResource: s =>
             {
                 var pp = new PropertyPair(s);

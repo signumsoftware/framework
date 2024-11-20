@@ -83,7 +83,7 @@ public class RulePropertyEntity : RuleEntity<PropertyRouteEntity>
 }
 
 [EntityKind(EntityKind.System, EntityData.Master)]
-public class RulePropertyConditionEntity : Entity, IEquatable<RulePropertyConditionEntity>, ICanBeOrdered
+public class RulePropertyConditionEntity : Entity, ICanBeOrdered
 {
     [NotNullValidator(Disabled = true)]
     public Lite<RulePropertyEntity> RuleProperty { get; set; }
@@ -94,17 +94,6 @@ public class RulePropertyConditionEntity : Entity, IEquatable<RulePropertyCondit
     public PropertyAllowed Allowed { get; set; }
 
     public int Order { get; set; }
-
-    public override int GetHashCode() => Conditions.Count ^ Allowed.GetHashCode();
-
-    public override bool Equals(object? obj) => obj is RuleTypeConditionEntity rtc && Equals(rtc);
-    public bool Equals(RulePropertyConditionEntity? other)
-    {
-        if (other == null)
-            return false;
-
-        return this.Conditions.ToHashSet().SetEquals(other.Conditions) && this.Allowed == other.Allowed;
-    }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Allowed.ToString());
@@ -135,7 +124,7 @@ public class RuleTypeEntity : RuleEntity<TypeEntity>
 }
 
 [EntityKind(EntityKind.System, EntityData.Master)]
-public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntity>, ICanBeOrdered
+public class RuleTypeConditionEntity : Entity, ICanBeOrdered
 {
     [NotNullValidator(Disabled = true)]
     public Lite<RuleTypeEntity> RuleType { get; set; }
@@ -146,17 +135,6 @@ public class RuleTypeConditionEntity : Entity, IEquatable<RuleTypeConditionEntit
     public TypeAllowed Allowed { get; set; }
 
     public int Order { get; set; }
-
-    public override int GetHashCode() => Conditions.Count ^ Allowed.GetHashCode();
-
-    public override bool Equals(object? obj) => obj is RuleTypeConditionEntity rtc && Equals(rtc);
-    public bool Equals(RuleTypeConditionEntity? other)
-    {
-        if (other == null)
-            return false;
-
-        return this.Conditions.ToHashSet().SetEquals(other.Conditions) && this.Allowed == other.Allowed;
-    }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => Allowed.ToString());

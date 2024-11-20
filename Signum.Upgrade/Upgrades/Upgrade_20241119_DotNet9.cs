@@ -61,7 +61,7 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
                 //<PackageReference Include="Signum.TSGenerator" Version="9.0.0" />
         });
 
-        uctx.ChangeCodeFile("Southwind.Server/package.csproj", file =>
+        uctx.ChangeCodeFile("Southwind.Server/package.json", file =>
         {
             file.UpdateNpmPackages("""
                 "assets-webpack-plugin": "7.1.1",

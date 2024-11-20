@@ -293,7 +293,7 @@ export namespace AuthAdminClient {
   }
   
   export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions): boolean {
-  
+
     if (options?.isEmbedded)
       return false;
   

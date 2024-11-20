@@ -546,6 +546,10 @@ public static class AuthLogic
             {
                 var r = rolesDic.GetOrThrow(kvp.Key);
 
+                var xmlName = kvp.Value.Attribute("Name")!.Value;
+                if (r.ToString() != xmlName)
+                    throw new InvalidOperationException($"Role {r} has been renamed to {xmlName}");
+
                 {
                     var currentMergeStrategy = GetMergeStrategy(r);
                     var shouldMergeStrategy = kvp.Value.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union;

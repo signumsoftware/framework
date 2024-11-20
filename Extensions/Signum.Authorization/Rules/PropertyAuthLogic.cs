@@ -241,16 +241,12 @@ public static class PropertyAuthLogic
         return Administrator.DeleteWhereScript((RulePropertyEntity rt) => rt.Resource, (PropertyRouteEntity)arg);
     }
 
-    private static string AuthPropertiesReplacementKey(Type type)
-    {
-        return "AuthRules:" + type.Name + " Properties";
-    }
-
 
     public static PropertyRulePack GetPropertyRules(Lite<RoleEntity> role, TypeEntity typeEntity)
     {
         var result = new PropertyRulePack { Role = role, Type = typeEntity };
-        cache.GetRules(result, PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id"));
+        var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id").ToList();
+        cache.GetRules(result, properties);
 
         result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), new WithConditions<PropertyAllowed>(PropertyAllowed.Write)).ToModel());
 
@@ -393,7 +389,7 @@ public static class PropertyAuthLogic
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
             return PropertyAllowed.Write;
 
-        return giGetAllowed.GetInvoker(rootEntity.GetType())(rootEntity, paac);
+        return giEvaluateAllowed.GetInvoker(rootEntity.GetType())(rootEntity, paac);
     }
 
     public static bool IsAllowedFor(IRootEntity mod, PropertyRoute route, PropertyAllowed allowed)
@@ -410,15 +406,15 @@ public static class PropertyAuthLogic
             return false;
 
         if (mod is Entity e)
-            return giGetAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
+            return giEvaluateAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
         else
             throw new InvalidOperationException("Unexpected");
     }
 
 
-    static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed>> giGetAllowed =
-        new((e, cond) => GetAllowed((ExceptionEntity)e, cond));
-    static PropertyAllowed GetAllowed<T>(T entity, WithConditions<PropertyAllowed> paac)
+    static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed>> giEvaluateAllowed =
+        new((e, cond) => EvaluateAllowed((ExceptionEntity)e, cond));
+    static PropertyAllowed EvaluateAllowed<T>(T entity, WithConditions<PropertyAllowed> paac)
         where T : Entity
     {
         foreach (var cond in paac.ConditionRules.Reverse())
