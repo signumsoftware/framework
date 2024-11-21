@@ -175,11 +175,11 @@ export function useInitiallyFocused(initiallyFocused: boolean | number | undefin
 
 
 export function genericForwardRef<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.forwardRef(render) as any;
+  return React.forwardRef(render as any) as any;
 }
 
 export function genericForwardRefWithMemo<T, P = {}>(render: (props: P, ref: React.Ref<T>) => React.ReactNode | null, propsAreEqual?: (prevProps: P, nextProps: P) => boolean): (props: P & React.RefAttributes<T>) => React.ReactNode | null {
-  return React.memo(React.forwardRef(render), propsAreEqual as any) as any;
+  return React.memo(React.forwardRef(render as any), propsAreEqual as any) as any;
 }
 
 

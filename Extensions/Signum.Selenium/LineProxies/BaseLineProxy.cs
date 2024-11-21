@@ -56,6 +56,10 @@ public abstract class BaseLineProxy
         }
         else
         {
+            if (type == typeof(PrimaryKey))
+                type = PrimaryKey.Type(route.RootType);
+
+
             if (imp != null)
             {
                 if (imp.Value.IsByAll)

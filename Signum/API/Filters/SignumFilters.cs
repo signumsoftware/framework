@@ -149,18 +149,6 @@ public class SignumCurrentContextFilter : SignumDisposableResourceFilter
     }
 }
 
-public static class UrlHelperExtensions
-{
-    public static string? Action<T>(this UrlHelper helper, string action, object values) where T : ControllerBase
-    {
-        return helper.Action(new UrlActionContext
-        {
-            Action = action,
-            Controller = typeof(T).Name.TryBefore("Controller") ?? typeof(T).Name,
-            Values = values,
-        });
-    }
-}
 
 public abstract class SignumDisposableResourceFilter : IAsyncResourceFilter
 {
