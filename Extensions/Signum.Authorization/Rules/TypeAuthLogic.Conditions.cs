@@ -99,7 +99,7 @@ public static partial class TypeAuthLogic
                 using (var tr = Transaction.ForceNew())
                 {
                     foreach (var gr in groups)
-                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                        miAssertAllowed.GetInvoker(gr.Key)(gr.ToList(), TypeAllowedBasic.Write);
 
                     tr.Commit();
                 }
@@ -107,7 +107,7 @@ public static partial class TypeAuthLogic
                 //Assert after
                 foreach (var gr in groups)
                 {
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToList(), TypeAllowedBasic.Write);
                 }
             }
 
@@ -115,19 +115,51 @@ public static partial class TypeAuthLogic
 
             if (created.HasItems())
             {
-                var groups = created.GroupBy(e => e.GetType(), e => e.Id);
+                var groups = created.GroupBy(e => e.GetType());
 
                 //Assert after
                 foreach (var gr in groups)
-                    miAssertAllowed.GetInvoker(gr.Key)(gr.ToArray(), TypeAllowedBasic.Write);
+                    miAssertAllowed.GetInvoker(gr.Key)(gr.Select(a=>a.Id).ToList(), TypeAllowedBasic.Write);
+
+                foreach (var gr in groups)
+                {
+                    var tcs = TypeConditionsForBinding(gr.Key);
+
+                    if(tcs != null)
+                    {
+                        miFillTypeConditions.GetInvoker(gr.Key)(gr, tcs);
+                    }
+                }
+            }
+        }
+    }
+
+    static GenericInvoker<Action<IEnumerable<Entity>, List<TypeConditionSymbol>>> miFillTypeConditions =
+        new((entities, conditions) => FillTypeConditions<Entity>(entities, conditions));
+    static void FillTypeConditions<T>(IEnumerable<Entity> entities, List<TypeConditionSymbol> typeConditions)
+    where T : Entity
+    {
+        var dic = GetTypeConditionsDictionary<T>(typeConditions);
+        foreach (var gr in entities.Chunk(100))
+        {
+            var list = Database.Query<T>().Where(e => gr.Contains(e)).Select(a => new
+            {
+                a.Id,
+                dic = dic.Evaluate(a, null)
+            }).ToList().ToDictionary(a => a.Id, a => a.dic);
+
+
+            foreach (var e in gr)
+            {
+                e.TypeConditions = list.GetOrThrow(e.Id);
             }
         }
     }
 
 
-    static GenericInvoker<Action<PrimaryKey[], TypeAllowedBasic>> miAssertAllowed =
+    static GenericInvoker<Action<List<PrimaryKey>, TypeAllowedBasic>> miAssertAllowed =
         new((a, tab) => AssertAllowed<Entity>(a, tab));
-    static void AssertAllowed<T>(PrimaryKey[] requested, TypeAllowedBasic typeAllowed)
+    static void AssertAllowed<T>(List<PrimaryKey> requested, TypeAllowedBasic typeAllowed)
         where T : Entity
     {
         using (DisableQueryFilter())
@@ -136,12 +168,12 @@ public static partial class TypeAuthLogic
             {
                 a.Id,
                 Allowed = a.IsAllowedFor(typeAllowed, ExecutionMode.InUserInterface, null! /*automatically populated*/),
-            })).ToArray();
+            })).ToList();
 
-            if (found.Length != requested.Length)
+            if (found.Count != requested.Count)
                 throw new EntityNotFoundException(typeof(T), requested.Except(found.Select(a => a.Id)).ToArray());
 
-            PrimaryKey[] notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToArray();
+            var notFound = found.Where(a => !a.Allowed).Select(a => a.Id).ToList();
             if (notFound.Any())
             {
                 var args = FilterQueryArgs.FromFilter<T>(t => notFound.Contains(t.Id));
@@ -155,7 +187,7 @@ public static partial class TypeAuthLogic
 
                 throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(
                     typeAllowed.NiceToString(),
-                    notFound.Length == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
+                    notFound.Count == 1 ? typeof(T).NiceName() : typeof(T).NicePluralName(), notFound.CommaAnd()) + "\r\n" + details);
             }
         }
     }

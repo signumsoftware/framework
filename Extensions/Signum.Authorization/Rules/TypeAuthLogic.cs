@@ -134,17 +134,22 @@ public static partial class TypeAuthLogic
                 if (conditions == null || conditions.IsEmpty())
                     return (e, rowId) => (IDictionary?)null;
 
-                var entity = Expression.Parameter(typeof(T));
-                var rowId = Expression.Parameter(typeof(PrimaryKey?));
-                var type = typeof(Dictionary<TypeConditionSymbol, bool>);
-                var miAdd = type.GetMethod("Add")!;
-                var newDic = Expression.ListInit(Expression.New(type),
-                    conditions.Select(c => Expression.ElementInit(miAdd, Expression.Constant(c),
-                        Expression.Invoke(TypeConditionLogic.GetCondition(typeof(T), c, null), entity))));
-
-                return Expression.Lambda<Func<T, PrimaryKey?, object?>>(newDic, [entity, rowId]);
+                return GetTypeConditionsDictionary<T>(conditions);
             },
             (e, rowId, ret) => null);
+    }
+
+    private static Expression<Func<T, PrimaryKey?, IDictionary?>> GetTypeConditionsDictionary<T>(List<TypeConditionSymbol> conditions) where T : Entity
+    {
+        var entity = Expression.Parameter(typeof(T));
+        var rowId = Expression.Parameter(typeof(PrimaryKey?));
+        var type = typeof(Dictionary<TypeConditionSymbol, bool>);
+        var miAdd = type.GetMethod("Add")!;
+        var newDic = Expression.ListInit(Expression.New(type),
+            conditions.Select(c => Expression.ElementInit(miAdd, Expression.Constant(c),
+                Expression.Invoke(TypeConditionLogic.GetCondition(typeof(T), c, null), entity))));
+
+        return Expression.Lambda<Func<T, PrimaryKey?, IDictionary?>>(newDic, [entity, rowId]);
     }
 
     static List<TypeConditionSymbol>? TypeConditionsForBinding(Type type)

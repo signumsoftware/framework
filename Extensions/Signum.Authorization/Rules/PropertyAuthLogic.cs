@@ -302,6 +302,9 @@ public static class PropertyAuthLogic
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
             return PropertyAllowed.Write;
 
+        if (rootEntity.IsNew)
+            return PropertyAllowed.Write;
+
         return giEvaluateAllowed.GetInvoker(rootEntity.GetType())(rootEntity, paac);
     }
 
@@ -319,7 +322,12 @@ public static class PropertyAuthLogic
             return false;
 
         if (mod is Entity e)
+        {
+            if (e.IsNew)
+                return true;
+
             return giEvaluateAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
+        }
         else
             throw new InvalidOperationException("Unexpected");
     }
