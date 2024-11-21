@@ -20,7 +20,7 @@ public class ManualDynamicQueryCore<T> : DynamicQueryCore<T>
     public override ResultTable ExecuteQuery(QueryRequest request) => Task.Run(() => ExecuteQueryAsync(request, CancellationToken.None)).Result;
     public override async Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken cancellationToken)
     {
-        request.Columns.Insert(0, new _EntityColumn(EntityColumnFactory().BuildColumnDescription(), QueryName));
+        request.Columns.Insert(0, new Column(EntityColumnFactory().BuildColumnDescription(), QueryName));
 
         DEnumerableCount<T> manualResult = await Execute(request, GetQueryDescription(), cancellationToken);
 

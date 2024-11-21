@@ -980,6 +980,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
   modalDialogClass?: string;
   modalFullScreen?: boolean;
 
@@ -1045,6 +1046,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
   modalDialogClass?: string;
   modalFullScreen?: boolean;
 
