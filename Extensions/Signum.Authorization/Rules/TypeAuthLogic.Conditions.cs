@@ -151,7 +151,7 @@ public static partial class TypeAuthLogic
 
             foreach (var e in gr)
             {
-                e.TypeConditions = list.GetOrThrow(e.Id);
+                e._TypeConditions = list.GetOrThrow(e.Id);
             }
         }
     }
