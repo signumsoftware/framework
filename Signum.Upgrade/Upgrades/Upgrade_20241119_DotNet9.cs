@@ -67,7 +67,7 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
                 "assets-webpack-plugin": "7.1.1",
                 "css-loader": "7.1.2",
                 "file-loader": "6.2.0",
-                "sass": "1.81.0",
+                "sass": "1.61.0",
                 "raw-loader": "4.0.2",
                 "rimraf": "6.0.1",
                 "sass-loader": "16.0.3",
