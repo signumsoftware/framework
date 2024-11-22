@@ -201,6 +201,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     }
 
     public override int? Count
+
     {
         get { return rows.IsValueCreated ? rows.Value.Count : (int?)null; }
     }

@@ -11,11 +11,6 @@ public abstract class RuleEntity<R> : Entity
 
     public R Resource { get; set; }
 
-    protected override void PreSaving(PreSavingContext ctx)
-    {
-        this.toStr = this.ToString();
-    }
-
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         if (pi.Name == nameof(Role) && RoleEntity.RetrieveFromCache(Role).IsTrivialMerge)
@@ -80,6 +75,10 @@ public class RulePropertyEntity : RuleEntity<PropertyRouteEntity>
 
         return base.PropertyValidation(pi);
     }
+
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
 }
 
 [EntityKind(EntityKind.System, EntityData.Master)]
@@ -121,6 +120,9 @@ public class RuleTypeEntity : RuleEntity<TypeEntity>
 
         return base.PropertyValidation(pi);
     }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
 }
 
 [EntityKind(EntityKind.System, EntityData.Master)]

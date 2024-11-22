@@ -1,19 +1,6 @@
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration.EnvironmentVariables;
-using Signum.API;
-using Signum.API.Json;
-using Signum.Authorization;
-using Signum.Basics;
 using Signum.DynamicQuery.Tokens;
-using Signum.Entities;
-using Signum.Utilities;
-using Signum.Utilities.ExpressionTrees;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
-using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization.Rules;
 

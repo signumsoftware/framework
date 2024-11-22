@@ -189,7 +189,7 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
                 (p, ar, rule) =>
                 {
                     SetRuleAllowed(rule, ToAllowed(ar.Allowed));
-                    if (rule.IsGraphModified)
+                    if (GraphExplorer.IsGraphModifiedVirtual(rule))
                         rule.Save();
                 });
         }

@@ -192,6 +192,9 @@ public class QueryContext
         this.QueryDescription = qd;
         this.ResultTable = rt;
         this.ResultColumns = rt.Columns.ToDictionary(a => a.Token);
+        if (rt.EntityColumn != null)
+            this.ResultColumns.Add(rt.EntityColumn.Token, rt.EntityColumn);
+        
         this.CurrentRows = rt.Rows;
         this.SubQueryContext = new Dictionary<QueryToken, QueryContext>();
     }
