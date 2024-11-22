@@ -343,11 +343,11 @@ public static class AuthLogic
         return mergeStrategies.Value.GetOrThrow(role).DefaultAllowed;
     }
 
-    static bool gloaballyEnabled = true;
+    static bool globallyEnabled = true;
     public static bool GloballyEnabled
     {
-        get { return gloaballyEnabled; }
-        set { gloaballyEnabled = value; }
+        get { return globallyEnabled; }
+        set { globallyEnabled = value; }
     }
 
     static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
@@ -368,7 +368,7 @@ public static class AuthLogic
 
     public static bool IsEnabled
     {
-        get { return !tempDisabled.Value && gloaballyEnabled; }
+        get { return !tempDisabled.Value && globallyEnabled; }
     }
 
     public static event Action? OnRulesChanged;
