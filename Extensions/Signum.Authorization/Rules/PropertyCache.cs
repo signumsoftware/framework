@@ -50,7 +50,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
         var paac = taac.ToPropertyAllowed();
 
-        var adjusted = AdjustShape(paac, allowed);
+        var adjusted = AdjustShape(values: allowed, shape: paac);
 
         var coerced = CoerceSimilar(adjusted, paac);
 
@@ -84,7 +84,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     }
 
     static ConcurrentDictionary<(WithConditions<PropertyAllowed> shape, WithConditions<PropertyAllowed> values), WithConditions<PropertyAllowed>> cacheAdjustShape = new ();
-    WithConditions<PropertyAllowed> AdjustShape(WithConditions<PropertyAllowed> shape, WithConditions<PropertyAllowed> values)
+    WithConditions<PropertyAllowed> AdjustShape(WithConditions<PropertyAllowed> values, WithConditions<PropertyAllowed> shape)
     {
         if (shape.ConditionRules.Count == values.ConditionRules.Count && 
             shape.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(values.ConditionRules.Select(a=>a.TypeConditions)))
@@ -95,7 +95,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             {
                 var rule = values.ConditionRules.LastOrDefault(cr2 => cr2.TypeConditions.All(c => cr.TypeConditions.Contains(c)));
                 return new ConditionRule<PropertyAllowed>(cr.TypeConditions,
-                    rule.TypeConditions == null ? cr.Allowed : values.Fallback);
+                    rule.TypeConditions != null ? rule.Allowed : values.Fallback);
             }).ToReadOnly()).Intern());
     }
 
@@ -122,13 +122,13 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
         return cacheWithShape.GetOrAdd((taac, pa), p => new WithConditions<PropertyAllowed>(pa, p.taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, pa)).ToReadOnly()).Intern());
     }
 
-    protected override WithConditions<PropertyAllowed> Merge(PropertyRoute key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<PropertyAllowed>>> baseValues)
+    protected override WithConditions<PropertyAllowed> Merge(PropertyRoute pr, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<PropertyAllowed>>> baseValues)
     {
         var merge = AuthLogic.GetMergeStrategy(role);
 
-        var tac = GetDefaultFromType(key, role);
+        var tac = GetDefaultFromType(pr, role);
 
-        var baseAdjusted = baseValues.Select(a => AdjustShape(tac, a.Value)).ToList();
+        var baseAdjusted = baseValues.Select(a => AdjustShape(values: a.Value, shape: tac)).ToList();
 
         Func<IEnumerable<PropertyAllowed>, PropertyAllowed> collapse = merge == MergeStrategy.Union ? MaxPropertyAllowed : MinPropertyAllowed;
 
@@ -142,7 +142,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             return best;
 
 
-        var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(key);
+        var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
         PropertyAllowed AutomaticUpgrade(PropertyAllowed mergedValue, IEnumerable<(PropertyAllowed baseValue, PropertyAllowed defaultBaseValue)> bases, PropertyAllowed defaultValue)
         {
             if(bases.Where(a=>a.baseValue == mergedValue).All(a=> mergedValue == a.defaultBaseValue))
@@ -154,7 +154,7 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
             return mergedValue;
         }
 
-        var baseDefaults = baseValues.Select(a => AdjustShape(tac, GetDefaultFromType(key, role))).ToList();
+        var baseDefaults = baseValues.Select(a => AdjustShape(values: GetDefaultFromType(pr, a.Key), shape: tac)).ToList();
         var result = new WithConditions<PropertyAllowed>(AutomaticUpgrade(best.Fallback, baseAdjusted.Zip(baseDefaults, (b, d) => (b.Fallback, d.Fallback)), tac.Fallback),
             tac.ConditionRules.Select((cr, i) => new ConditionRule<PropertyAllowed>(cr.TypeConditions,
              AutomaticUpgrade(best.ConditionRules[i].Allowed, baseAdjusted.Zip(baseDefaults, (b, d) => (b.ConditionRules[i].Allowed, d.ConditionRules[i].Allowed)), cr.Allowed)
