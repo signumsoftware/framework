@@ -797,4 +797,38 @@ public static class Administrator
         return DeleteWhereScript(table, column, value.Id);
     }
 
+
+    public static IDisposable DisableHistoryTable<T>(bool includeMList = true)
+        where T : Entity
+    {
+        return DisableHistoryTable(typeof(T), includeMList);
+    }
+       
+    public static IDisposable DisableHistoryTable( Type type, bool includeMList = true)
+    {
+        var builder = new SqlBuilder(Connector.Current);
+        var table = Schema.Current.Table(type);
+        var mlist = table.TablesMList().ToArray();
+        Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
+        Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
+        if (includeMList)
+            foreach (var item in mlist)
+            {
+                Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
+                Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
+            }
+
+        return new Disposable(() =>
+        {
+            if (includeMList)
+                foreach (var item in mlist)
+                {
+                    Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
+                    Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                }
+
+            Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
+            Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
+        });
+    }
 }

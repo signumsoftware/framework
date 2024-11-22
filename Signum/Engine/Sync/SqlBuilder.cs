@@ -128,7 +128,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             }.Combine(Spacing.Simple)!;
     }
 
-    public SqlPreCommand AlterTableAddPeriod(ITable table)
+    public SqlPreCommandSimple AlterTableAddPeriod(ITable table)
     {
         return new SqlPreCommandSimple($"ALTER TABLE {table.Name} ADD {Period(table.SystemVersioned!)};");
     }
@@ -142,12 +142,12 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return $"PERIOD FOR SYSTEM_TIME ({sv.StartColumnName!.SqlEscape(isPostgres)}, {sv.EndColumnName!.SqlEscape(isPostgres)})";
     }
 
-    public SqlPreCommand AlterTableDropPeriod(ITable table)
+    public SqlPreCommandSimple AlterTableDropPeriod(ITable table)
     {
         return new SqlPreCommandSimple($"ALTER TABLE {table.Name} DROP PERIOD FOR SYSTEM_TIME;");
     }
 
-    public SqlPreCommand AlterTableEnableSystemVersioning(ITable table)
+    public SqlPreCommandSimple AlterTableEnableSystemVersioning(ITable table)
     {
         return new SqlPreCommandSimple($"ALTER TABLE {table.Name} SET (SYSTEM_VERSIONING = ON (HISTORY_TABLE = {table.SystemVersioned!.TableName.OnDatabase(null)}));");
     }

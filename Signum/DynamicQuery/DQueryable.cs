@@ -746,7 +746,7 @@ public static class DQueryable
 
     #region TimeSerieSelectMany
 
-    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
+    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTimeExtensions.OverrideSystemTime<int>(null!, null!)).GetGenericMethodDefinition();
     static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
 
     public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, HashSet<QueryToken> columns, List<Order> orders, List<Filter> timeSeriesFilter)
@@ -780,9 +780,9 @@ public static class DQueryable
         var collectionSelectorType = typeof(Func<,>).MakeGenericType(typeof(DateValue), typeof(IEnumerable<>).MakeGenericType(query.Query.ElementType));
 
         var collectionSelector = Expression.Lambda(collectionSelectorType,
-            Expression.Call(miOverrideInExpression.MakeGenericMethod(typeof(IQueryable<>).MakeGenericType(query.Query.ElementType)),
-            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date))),
-            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression),
+            Expression.Call(miOverrideInExpression.MakeGenericMethod(query.Query.ElementType),
+            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression,
+            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date)))),
             pDate);
 
 

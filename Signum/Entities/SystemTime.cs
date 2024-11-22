@@ -1,15 +1,14 @@
+using Signum.Engine.Linq;
 using Signum.Utilities.DataStructures;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Entities;
 
 
 public abstract class SystemTime
 {
-    [AvoidEagerEvaluation]
-    public static T OverrideInExpression<T>(SystemTime systemTime, T value)
-    {
-        throw new InvalidOperationException("Only for Queries");
-    }
+
 
     static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
 
@@ -117,5 +116,18 @@ public static class SystemTimeExtensions
         throw new InvalidOperationException("Only for queries");
     }
 
+    [AvoidEagerEvaluation]
+    public static IQueryable<T> OverrideSystemTime<T>(this IQueryable<T> query, SystemTime systemTime)
+    {
 
+        ArgumentNullException.ThrowIfNull(query);
+        ArgumentNullException.ThrowIfNull(systemTime);
+
+        return query.Provider.CreateQuery<T>(
+            Expression.Call(
+                null,
+                ((MethodInfo)MethodInfo.GetCurrentMethod()!).MakeGenericMethod(typeof(T)),
+                query.Expression,
+                Expression.Constant(systemTime)));
+    }
 }
