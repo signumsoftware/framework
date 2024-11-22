@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging.Abstractions;
 using Signum.API;
 using Signum.Authorization.AuthToken;
 using Signum.Authorization.Rules;
@@ -342,11 +343,11 @@ public static class AuthLogic
         return mergeStrategies.Value.GetOrThrow(role).DefaultAllowed;
     }
 
-    static bool gloaballyEnabled = true;
+    static bool globallyEnabled = true;
     public static bool GloballyEnabled
     {
-        get { return gloaballyEnabled; }
-        set { gloaballyEnabled = value; }
+        get { return globallyEnabled; }
+        set { globallyEnabled = value; }
     }
 
     static readonly Variable<bool> tempDisabled = Statics.ThreadVariable<bool>("authTempDisabled");
@@ -367,7 +368,7 @@ public static class AuthLogic
 
     public static bool IsEnabled
     {
-        get { return !tempDisabled.Value && gloaballyEnabled; }
+        get { return !tempDisabled.Value && globallyEnabled; }
     }
 
     public static event Action? OnRulesChanged;
@@ -515,10 +516,9 @@ public static class AuthLogic
             new XDeclaration("1.0", "utf-8", "yes"),
             new XElement("Auth",
                 new XElement("Roles",
-                    RolesInOrder(includeTrivialMerge: true).Select(r => new XElement("Role",
+                    RolesInOrder(includeTrivialMerge: false).Select(r => new XElement("Role",
                         new XAttribute("Name", r.ToString()!),
                         GetMergeStrategy(r) == MergeStrategy.Intersection ? new XAttribute("MergeStrategy", MergeStrategy.Intersection) : null!,
-                        RolesByLite.Value.GetOrCreate(r).IsTrivialMerge ? new XAttribute("IsTrivialMerge", true) : null!,
                         new XAttribute("Contains", rolesGraph.Value.RelatedTo(r).ToString(",")),
                         rolesDic.TryGetC(r)?.Description?.Let(d => new XAttribute("Description", d))
                         ))),
@@ -529,7 +529,7 @@ public static class AuthLogic
     {
         Replacements replacements = new Replacements { Interactive = interactive };
 
-        Dictionary<string, Lite<RoleEntity>> rolesDic = rolesGraph.Value.ToDictionary(a => a.ToString()!);
+        Dictionary<string, Lite<RoleEntity>> rolesDic = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == false).Select(r => KeyValuePair.Create(r.ToString(), r.ToLite())).ToDictionaryEx();
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
         replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
@@ -640,17 +640,13 @@ public static class AuthLogic
 
         Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
 
-        Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToString());
+        Dictionary<string, RoleEntity> rolesDic = Database.Query<RoleEntity>().Where(a => !a.IsTrivialMerge).ToDictionary(a => a.ToString());
         Replacements replacements = new Replacements();
         replacements.AskForReplacements(rolesDic.Keys.ToHashSet(), rolesXml.Keys.ToHashSet(), "Roles");
         rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");
 
-        Dictionary<string, XElement> trivialXmls = rolesXml.Extract((k, xml) => xml.Attribute("IsTrivialMerge")?.Value.ToBool() == true);
-        Dictionary<string, RoleEntity> trivialRoles = rolesDic.Extract(k => trivialXmls.ContainsKey(k));
-
-
         {
-            Console.WriteLine("Part 1: Syncronize roles without relationships");
+            Console.WriteLine("Part 1: Synchronize roles without relationships");
 
             var roleInsertsDeletes = Synchronizer.SynchronizeScript(Spacing.Double,
                 rolesXml,
@@ -663,7 +659,13 @@ public static class AuthLogic
                     IsTrivialMerge = false,
                 }, includeCollections: false),
 
-                removeOld: (name, role) => table.DeleteSqlSync(role, r => r.Name == role.Name),
+                removeOld: (name, role) =>
+                {
+                    if (SafeConsole.Ask($"Delete role '{role}' from the database?"))
+                        return table.DeleteSqlSync(role, r => r.Name == role.Name);
+                    else
+                        return null;
+                },
                 mergeBoth: (name, xElement, role) =>
                 {
                     var oldName = role.Name;
@@ -687,17 +689,16 @@ public static class AuthLogic
             }
             else
             {
-                SafeConsole.WriteLineColor(ConsoleColor.Green, "Already syncronized");
+                SafeConsole.WriteLineColor(ConsoleColor.Green, "Already synchronized");
             }
         }
 
         GlobalLazy.ResetAll();
 
         {
-            Console.WriteLine("Part 2: Syncronize roles relationships and trivial merges");
-            rolesDic = Database.Query<RoleEntity>().ToDictionary(a => a.ToString());
+            Console.WriteLine("Part 2: Synchronize roles relationships and trivial merges");
+            rolesDic = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == false).ToDictionary(a => a.ToString());
             rolesDic = replacements.ApplyReplacementsToOld(rolesDic, "Roles");
-            trivialRoles = rolesDic.Extract(k => trivialXmls.ContainsKey(k));
 
             MList<Lite<RoleEntity>> ParseInheritedFrom(string contains)
             {
@@ -705,12 +706,11 @@ public static class AuthLogic
                     .Select(rs => rolesDic.GetOrThrow(rs).ToLite()).ToMList();
             }
 
-
             var roleRelationships = Synchronizer.SynchronizeScript(Spacing.Double,
                rolesXml,
                rolesDic,
-                createNew: (name, xelement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
-                removeOld: (name, role) => { throw new InvalidOperationException("No old roles should be at this stage. Did you execute the script?"); },
+                createNew: (name, xElement) => { throw new InvalidOperationException("No new roles should be at this stage. Did you execute the script?"); },
+                removeOld: (name, role) => { return null; },
                 mergeBoth: (name, xElement, role) =>
                 {
                     var should = ParseInheritedFrom(xElement.Attribute("Contains")!.Value);
@@ -722,34 +722,18 @@ public static class AuthLogic
                 });
 
 
-            var trivialMerges = Synchronizer.SynchronizeScript(Spacing.Double,
-                trivialXmls,
-                trivialRoles,
-                createNew: (name, xElement) => table.InsertSqlSync(new RoleEntity
-                {
-                    Name = name,
-                    MergeStrategy = xElement.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union,
-                    Description = xElement.Attribute("Description")?.Value,
-                    IsTrivialMerge = true,
-                    InheritsFrom = ParseInheritedFrom(xElement.Attribute("Contains")!.Value)
-                }),
 
-                removeOld: (name, role) => table.DeleteSqlSync(role, r => r.Name == role.Name),
-                mergeBoth: (name, xElement, role) =>
-                {
-                    var oldName = role.Name;
-                    role.Name = name;
-                    role.MergeStrategy = xElement.Attribute("MergeStrategy")?.Value.ToEnum<MergeStrategy>() ?? MergeStrategy.Union;
-                    role.Description = xElement.Attribute("Description")?.Value;
-                    role.IsTrivialMerge = true;
+            var trivialMergeRoles = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == true).ToList();
 
-                    var should = ParseInheritedFrom(xElement.Attribute("Contains")!.Value);
+            var trivialMerges = trivialMergeRoles.Select(tr =>
+            {
+                var oldName = tr.Name;
+                tr.Name = RoleEntity.CalculateTrivialMergeName(tr.InheritsFrom);
+                if (tr.IsGraphModified)
+                    return table.UpdateSqlSync(tr, a => a.Name == oldName);
 
-                    if (!role.InheritsFrom.ToHashSet().SetEquals(should))
-                        role.InheritsFrom = should.ToMList();
-
-                    return table.UpdateSqlSync(role, r => r.Name == oldName, comment: oldName);
-                });
+                return null;
+            }).Combine(Spacing.Double);
 
             if (roleRelationships != null || trivialMerges != null)
             {

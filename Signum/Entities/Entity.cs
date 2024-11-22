@@ -73,12 +73,12 @@ public abstract class Entity : ModifiableEntity, IEntity
 
     ////User for property type conditions
     [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    internal IDictionary? typeConditions;
+    internal IDictionary? _typeConditions;
     [HiddenProperty]
-    public IDictionary? TypeConditions
+    public IDictionary? _TypeConditions
     {
-        get { return typeConditions; }
-        set { this.Set(ref typeConditions, value); }
+        get { return _typeConditions; }
+        set { this.Set(ref _typeConditions, value); }
     }
 
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)

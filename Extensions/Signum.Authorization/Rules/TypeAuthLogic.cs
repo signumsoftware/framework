@@ -126,7 +126,7 @@ public static partial class TypeAuthLogic
     {
         schema.EntityEvents<T>().FilterQuery += new FilterQueryEventHandler<T>(TypeAuthLogic_FilterQuery<T>);
 
-        schema.EntityEvents<T>().RegisterBinding(a => a.TypeConditions,
+        schema.EntityEvents<T>().RegisterBinding(a => a._TypeConditions,
             () => TypeConditionsForBinding(typeof(T)) != null,
             () =>
             {
