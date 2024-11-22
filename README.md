@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2024.08.19 Time Machine in Charting! ⏲📈](https://github.com/signumsoftware/framework/commit/4a7cc1097f8e862b47d2dfd61216082b1c171be0)
 * [2024.03.27 Navigator, Finder, Operations, and *Client modules get a `namespace`](https://github.com/signumsoftware/framework/commit/2cf26f9cfe05f8707930bccf3c7427cc1522b99b#commitcomment-140281789)
 * [2024.02.17 `EntityLine<T>` with TS 5.4 beta](https://github.com/signumsoftware/framework/commit/4fcdba33a4d53c32477a8b44fd3088722dc49664#commitcomment-138753911)
 * [2023.10.31 From ValueLine to AutoLine](https://github.com/signumsoftware/framework/commit/44ca21e578187949932b6861f2a3be66b78ff290#commitcomment-131412697)
