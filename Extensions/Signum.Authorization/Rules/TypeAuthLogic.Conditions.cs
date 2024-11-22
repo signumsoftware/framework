@@ -127,16 +127,16 @@ public static partial class TypeAuthLogic
 
                     if(tcs != null)
                     {
-                        miFillTypeConditions.GetInvoker(gr.Key)(gr, tcs);
+                        giFillTypeConditionsImp.GetInvoker(gr.Key)(gr, tcs);
                     }
                 }
             }
         }
     }
 
-    static GenericInvoker<Action<IEnumerable<Entity>, List<TypeConditionSymbol>>> miFillTypeConditions =
-        new((entities, conditions) => FillTypeConditions<Entity>(entities, conditions));
-    static void FillTypeConditions<T>(IEnumerable<Entity> entities, List<TypeConditionSymbol> typeConditions)
+    static GenericInvoker<Action<IEnumerable<Entity>, List<TypeConditionSymbol>>> giFillTypeConditionsImp =
+        new((entities, conditions) => FillTypeConditionsImp<Entity>(entities, conditions));
+    static void FillTypeConditionsImp<T>(IEnumerable<Entity> entities, List<TypeConditionSymbol> typeConditions)
     where T : Entity
     {
         var dic = GetTypeConditionsDictionary<T>(typeConditions);
@@ -154,6 +154,16 @@ public static partial class TypeAuthLogic
                 e._TypeConditions = list.GetOrThrow(e.Id);
             }
         }
+    }
+
+    public static void FillTypeConditions(this Entity e, bool force = false)
+    {
+        if (e._TypeConditions != null && !force)
+            return;
+
+        var tcs = TypeConditionsForBinding(e.GetType());
+        if (tcs != null)
+            giFillTypeConditionsImp.GetInvoker(e.GetType())(new[] { e }, tcs);
     }
 
 
