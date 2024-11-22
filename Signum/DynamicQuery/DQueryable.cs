@@ -779,14 +779,16 @@ public static class DQueryable
 
         var collectionSelectorType = typeof(Func<,>).MakeGenericType(typeof(DateValue), typeof(IEnumerable<>).MakeGenericType(query.Query.ElementType));
 
+        if (systemTime.timeSeriesMaxRowsPerStep == null)
+            throw new InvalidOperationException("TimeSeriesMaxRowsPerStep is not set");
+
+        var queryTake = Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep.Value, query.Query.ElementType).Expression;
+
         var collectionSelector = Expression.Lambda(collectionSelectorType,
             Expression.Call(miOverrideInExpression.MakeGenericMethod(query.Query.ElementType),
-            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression,
+            queryTake,
             Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date)))),
             pDate);
-
-
-    
 
         string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
         if (str.HasText())
