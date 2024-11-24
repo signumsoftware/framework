@@ -11,7 +11,7 @@ namespace Signum.Test;
 public class CsvTest
 {
     [Fact]
-    void SimpleCsvUntyped()
+    public void SimpleCsvUntyped()
     {
         var str = """
             Id,Name
@@ -33,7 +33,7 @@ public class CsvTest
     }
 
     [Fact]
-    void SimpleCsv()
+    public void SimpleCsv()
     {
         var str = """
             Id,Name

@@ -1,7 +1,4 @@
 using Signum.Engine.Maps;
-using Signum.Security;
-using Signum.Basics;
-using Azure.Core;
 
 namespace Signum.DynamicQuery;
 
@@ -110,7 +107,6 @@ public class DynamicQueryContainer
         ExecuteUniqueEntity,
         QueryDescription,
         GetEntities,
-        GetDQueryable,
     }
 
     public ResultTable ExecuteQuery(QueryRequest request)

@@ -948,7 +948,7 @@ export namespace Navigator {
     export function getEnumEntities(typeName: string): Promise<EnumConverter<string>>;
     export function getEnumEntities(type: string | EnumType<string>): Promise<EnumConverter<string>> {
 
-      var typeName = typeof type == "string" ? type : type.type;
+      var typeName = typeof type == "string" ? type : type.typeName;
 
       return ajaxGet<{ [enumValue: string]: Entity }>({ url: `/api/reflection/enumEntities/${typeName}` })
         .then(enumToEntity => softCast<EnumConverter<string>>({

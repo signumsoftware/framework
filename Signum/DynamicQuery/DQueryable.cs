@@ -2,16 +2,9 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections;
-using Signum.API.Json;
 using Signum.Engine.Maps;
-using Azure;
-using Signum.Utilities;
-using System.Runtime.ConstrainedExecution;
 using Signum.DynamicQuery.Tokens;
-using System.Runtime.CompilerServices;
-using Signum.Utilities.ExpressionTrees;
 using System.Linq;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 namespace Signum.DynamicQuery;
 
@@ -753,7 +746,7 @@ public static class DQueryable
 
     #region TimeSerieSelectMany
 
-    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTime.OverrideInExpression<int>(null!, 0)).GetGenericMethodDefinition();
+    static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTimeExtensions.OverrideSystemTime<int>(null!, null!)).GetGenericMethodDefinition();
     static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
 
     public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, HashSet<QueryToken> columns, List<Order> orders, List<Filter> timeSeriesFilter)
@@ -786,14 +779,16 @@ public static class DQueryable
 
         var collectionSelectorType = typeof(Func<,>).MakeGenericType(typeof(DateValue), typeof(IEnumerable<>).MakeGenericType(query.Query.ElementType));
 
+        if (systemTime.timeSeriesMaxRowsPerStep == null)
+            throw new InvalidOperationException("TimeSeriesMaxRowsPerStep is not set");
+
+        var queryTake = Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep.Value, query.Query.ElementType).Expression;
+
         var collectionSelector = Expression.Lambda(collectionSelectorType,
-            Expression.Call(miOverrideInExpression.MakeGenericMethod(typeof(IQueryable<>).MakeGenericType(query.Query.ElementType)),
-            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date))),
-            Untyped.Take(query.Query, systemTime.timeSeriesMaxRowsPerStep!.Value, query.Query.ElementType).Expression),
+            Expression.Call(miOverrideInExpression.MakeGenericMethod(query.Query.ElementType),
+            queryTake,
+            Expression.New(ciAsOf, Expression.Field(pDate, nameof(DateValue.Date)))),
             pDate);
-
-
-    
 
         string str = tokens.Select(t => QueryUtils.CanColumn(t)).NotNull().ToString("\r\n");
         if (str.HasText())
@@ -1304,9 +1299,11 @@ public static class DQueryable
     {
         var isMultiKeyGrupping = req.GroupResults && req.Columns.Count(col => col.Token is not AggregateToken) >= 2;
 
-        var resultColumns = collection.Context.Replacements.Keys.Where(a => a.HasNested() == null).Select(token =>
+        var resultColumns = collection.Context.Replacements.Where(a => a.Key.HasNested() == null).Select(kvp =>
         {
-            var expression = Expression.Lambda(token.BuildExpression(collection.Context), collection.Context.Parameter);
+            var token = kvp.Key;
+
+            var expression = Expression.Lambda(kvp.Value.GetExpression(), collection.Context.Parameter);
 
             var lambda = expression.Compile();
 
@@ -1331,7 +1328,7 @@ public static class DQueryable
         return context.Replacements.Where(a => a.Key is CollectionNestedToken).Select(kvp =>
         {
             var body = Expression.Call(miToResultTableSubQuery,
-                kvp.Key.BuildExpression(context),
+                kvp.Value.GetExpression(),
                 Expression.Constant((CollectionNestedToken)kvp.Key),
                 Expression.Constant(kvp.Value.SubQueryContext!),
                 Expression.Constant(subQueryLimit)
@@ -1353,15 +1350,15 @@ public static class DQueryable
     public static ResultTable ToResultTableSubQuery(IEnumerable collection, CollectionNestedToken nested,  BuildExpressionContext ctx, int subQueryLimit)
     {
 
-        var resultColumns = ctx.Replacements.Keys.Where(a => a.HasNested() == nested).Select(token =>
+        var resultColumns = ctx.Replacements.Where(a => a.Key.HasNested() == nested).Select(kvp =>
         {
-            var expression = Expression.Lambda(token.BuildExpression(ctx), ctx.Parameter);
+            var expression = Expression.Lambda(kvp.Value.GetExpression(), ctx.Parameter);
 
             var lambda = expression.Compile();
 
             var array = Untyped.ToArray(Untyped.Select(collection, lambda), expression.Body.Type);
 
-            var rc = new ResultColumn(token, array);
+            var rc = new ResultColumn(kvp.Key, array);
 
             return rc;
         }).ToList();

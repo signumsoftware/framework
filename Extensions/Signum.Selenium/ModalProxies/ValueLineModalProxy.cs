@@ -4,8 +4,8 @@ namespace Signum.Selenium;
 
 public class AutoLineModalProxy : ModalProxy
 {
-    PropertyRoute? route;
-    public AutoLineModalProxy(IWebElement element, PropertyRoute? route = null) : base(element)
+    PropertyRoute route;
+    public AutoLineModalProxy(IWebElement element, PropertyRoute route) : base(element)
     {
         this.route = route;
     }
@@ -22,9 +22,9 @@ public class AutoLineModalProxy : ModalProxy
 
 public static class ValueLineModalProxyExtensions
 {
-    public static AutoLineModalProxy AsAutoLineModal(this IWebElement element)
+    public static AutoLineModalProxy AsAutoLineModal(this IWebElement element, PropertyRoute pr)
     {
-        return new AutoLineModalProxy(element);
+        return new AutoLineModalProxy(element, pr);
     }
 
     public static AutoLineModalProxy AsValueLineModal<T, V>(this IWebElement element, Expression<Func<T, V>> propertyRoute)

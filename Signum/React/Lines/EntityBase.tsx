@@ -64,7 +64,7 @@ export class EntityBaseController<P extends EntityBaseProps<V>, V extends Modifi
   static getRemoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="xmark" title={EntityControlMessage.Remove.niceToString()} />;
   static getTrashIcon = (): React.JSX.Element => <FontAwesomeIcon icon="trash-can" title={EntityControlMessage.Remove.niceToString()} />;
   static getViewIcon = (): React.JSX.Element => <FontAwesomeIcon icon="arrow-right" title={EntityControlMessage.View.niceToString()} />;
-  static getMoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="bars" title={EntityControlMessage.Move.niceToString()} />;
+  static getMoveIcon = (): React.JSX.Element => <FontAwesomeIcon icon="bars" />;
   static getPasteIcon = (): React.JSX.Element => <FontAwesomeIcon icon="clipboard" title={EntityControlMessage.Paste.niceToString()} />;
 
   static hasChildrens(element: React.ReactElement): any {

@@ -15,7 +15,7 @@ export default function Role(p: { ctx: TypeContext<RoleEntity> }): React.JSX.Ele
         r.inheritsFrom.length == 1 ? AuthMessage.SameAs0.niceToString(getToString(r.inheritsFrom.single().element)) :
           (r.mergeStrategy == "Union" ? AuthMessage.MaximumOfThe0 : AuthMessage.MinumumOfThe0).niceToString(RoleEntity.niceCount(r.inheritsFrom.length)));
   }
-  const ctx = p.ctx.subCtx({ readOnly: p.ctx.value.isTrivialMerge });
+  const ctx = p.ctx.subCtx({ readOnly: p.ctx.value.isTrivialMerge ? true : undefined });
   return (
     <div>
       <AutoLine ctx={ctx.subCtx(e => e.name)} />

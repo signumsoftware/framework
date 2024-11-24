@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Signum.Utilities.Reflection;
 using System.Globalization;
 using System.IO;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Signum.Entities.Validation;
 

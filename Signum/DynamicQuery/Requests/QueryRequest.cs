@@ -1,7 +1,5 @@
 using System.ComponentModel;
 using Signum.DynamicQuery.Tokens;
-using System.Runtime.CompilerServices;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
 namespace Signum.DynamicQuery;
@@ -20,6 +18,8 @@ public abstract class BaseQueryRequest
     {
         return "{0} {1}".FormatWith(GetType().Name, QueryName);
     }
+
+    public abstract HashSet<QueryToken> AllTokens();
 }
 
 public class QueryRequest : BaseQueryRequest
@@ -46,7 +46,7 @@ public class QueryRequest : BaseQueryRequest
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
     public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-    public HashSet<QueryToken> AllTokens() => 
+    public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
         .Concat(Columns.Select(a => a.Token))
         .Concat(Orders.Select(a => a.Token))
@@ -280,7 +280,7 @@ public class QueryValueRequest : BaseQueryRequest
     public required SystemTime? SystemTime { get; set; }
 
 
-    public HashSet<QueryToken> AllTokens() => Filters
+    public override HashSet<QueryToken> AllTokens() => Filters
               .SelectMany(f => f.GetAllFilters())
               .SelectMany(f => f.GetTokens())
               .PreAnd(ValueToken)
@@ -318,7 +318,7 @@ public class UniqueEntityRequest : BaseQueryRequest
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
     public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-    public HashSet<QueryToken> AllTokens() =>
+    public override HashSet<QueryToken> AllTokens() =>
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
         .Concat(Orders.Select(a => a.Token)).ToHashSet();
 
@@ -346,7 +346,7 @@ public class QueryEntitiesRequest : BaseQueryRequest
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(AllTokens());
     public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
 
-    public HashSet<QueryToken> AllTokens() => 
+    public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
         .Concat(Orders.Select(a => a.Token))
         .ToHashSet();

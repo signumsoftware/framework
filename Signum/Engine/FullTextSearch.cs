@@ -1,9 +1,6 @@
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
-using System.Globalization;
-using static Npgsql.PostgresTypes.PostgresCompositeType;
-using static Signum.Engine.FullTextSearch;
 
 namespace Signum.Engine;
 

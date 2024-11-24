@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Filters;
-using Signum.API;
 using System.ComponentModel.DataAnnotations;
 
 namespace Signum.API.ApiControllers;

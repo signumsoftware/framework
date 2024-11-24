@@ -267,7 +267,7 @@ public static class SeleniumExtensions
 
     public static void ConsumeAlert(this WebDriver selenium)
     {
-        var alertPresent = selenium.Wait(() => MessageModalProxyExtensions.IsMessageModalPresent(selenium));
+        var alertPresent = selenium.Wait(() => selenium.GetMessageModal());
 
         var alert = selenium.Wait(() => selenium.SwitchTo().Alert());
 

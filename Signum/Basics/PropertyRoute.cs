@@ -2,7 +2,6 @@ using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Signum.Basics;
