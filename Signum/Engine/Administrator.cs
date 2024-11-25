@@ -8,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Data.Common;
 using System.Diagnostics;
+using System.IO;
 
 namespace Signum.Engine;
 
@@ -831,4 +832,40 @@ public static class Administrator
             Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
         });
     }
+
+    public static class Snapshots
+    {
+        public static void CreateSnapshot(string snapshotName, string directory, bool overwrite = true)
+        {
+            if (overwrite && Database.View<SysDatabases>().Any(a => a.name == snapshotName))
+                DropSnapshot(snapshotName);
+
+            var dbName = Connector.Current.DatabaseName();
+            Executor.ExecuteNonQuery($"CREATE DATABASE {snapshotName} ON (NAME=[{dbName}], FILENAME='{Path.Combine(directory,snapshotName)}.ss') AS SNAPSHOT OF [{dbName}]");
+        }
+
+        public static void DropSnapshot(string snapshotName)
+        {
+            Executor.ExecuteNonQuery($"DROP DATABASE {snapshotName}");
+        }
+
+        public static void RestoreSnapshot(string snapshotName)
+        {
+            var dbName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(
+                $"""
+                USE master;
+                ALTER DATABASE {dbName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+                RESTORE DATABASE {dbName}
+                FROM DATABASE_SNAPSHOT = '{snapshotName}';
+
+                ALTER DATABASE {dbName} SET MULTI_USER;
+                """
+                );
+        }
+    }
+
+
 }
