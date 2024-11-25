@@ -170,10 +170,15 @@ public static partial class TypeAuthLogic
 
     public static bool HasWriteAndRead(WithConditions<TypeAllowed> tac)
     {
-        if (tac.MaxUI() < TypeAllowedBasic.Write)
-            return false;
+        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI());
 
-        return tac.Fallback == TypeAllowed.Read || tac.ConditionRules.Any(a => a.Allowed == TypeAllowed.Read);
+        if (tac.Fallback != TypeAllowed.None)
+            conditions = conditions.And(tac.Fallback.GetUI());
+
+        if (conditions.Distinct().Count() > 1)
+            return true;
+
+        return false;
     }
 
     public static Func<Type, bool> HasTypeConditionInProperties = t => false;
