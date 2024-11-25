@@ -245,6 +245,10 @@ public static partial class TypeAuthLogic
         if (max < allowed)
             return false;
 
+        if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(entity.GetType()))
+        {
+            return allowed <= max;
+        }
 
         foreach (var cond in tac.ConditionRules.Reverse())
         {

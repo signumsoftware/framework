@@ -313,6 +313,9 @@ public static class PropertyAuthLogic
             if (e.IsNew)
                 return true;
 
+            if (!HasTypeConditionInProperties(route.Type))
+                return true;
+
             return giEvaluateAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
         }
         else
