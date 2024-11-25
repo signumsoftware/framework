@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
-using Signum.Utilities.ExpressionTrees;
 
 namespace Signum.Engine.Linq;
 
@@ -229,12 +228,12 @@ internal class QueryBinder : ExpressionVisitor
                 m.Method.Name == nameof(EntityContext.MListRowId) ? entityContext.MListRowId ?? new PrimaryKeyExpression(Expression.Constant(null, typeof(IComparable))) :
                  throw new InvalidOperationException($"EntityContext.${m.Method.Name} not supported for ${m.Arguments[0]}");
         }
-        else if (m.Method.DeclaringType == typeof(SystemTime) && m.Method.Name == nameof(SystemTime.OverrideInExpression))
+        else if (m.Method.DeclaringType == typeof(SystemTimeExtensions) && m.Method.Name == nameof(SystemTimeExtensions.OverrideSystemTime))
         {
             SystemTime? old = this.systemTime;
-            this.systemTime = ToSystemTime(m.Arguments[0]);
-
-            Expression newValue = Visit(m.Arguments[1]);
+            this.systemTime = ToSystemTime(m.Arguments[1]);
+            
+            Expression newValue = Visit(m.Arguments[0]);
 
             this.systemTime = old;
 
@@ -245,10 +244,13 @@ internal class QueryBinder : ExpressionVisitor
         return BindMethodCall(result);
     }
 
-    private SystemTime ToSystemTime(Expression expression)
+    private SystemTime? ToSystemTime(Expression expression)
     {
         if (expression is ConstantExpression ce)
+        {
+
             return (SystemTime)ce.Value!;
+        }
 
         if(expression is NewExpression ne && ne.Type == typeof(SystemTime.AsOf))
         {
@@ -2675,6 +2677,9 @@ internal class QueryBinder : ExpressionVisitor
             entity is MListElementExpression mlistEx ? (ITable)mlistEx.Table! :
             throw new UnexpectedValueException(entity);
 
+        
+
+
         Alias alias = aliasGenerator.Table(table.Name);
 
         Expression toUpdate =
@@ -2715,6 +2720,10 @@ internal class QueryBinder : ExpressionVisitor
 
         if (entity is EntityExpression ee)
         {
+            var originalTable = TableFinder.GetTable(pr.Select, ee.TableAlias!);
+            if (originalTable != null && originalTable.SystemTime is SystemTime.HistoryTable)
+                isHistory = true;
+
             Expression id = ee.Table.GetIdExpression(aliasGenerator.Table(ee.Table.GetName(isHistory)))!;
 
             condition = SmartEqualizer.EqualNullable(id, ee.ExternalId);
@@ -2722,6 +2731,10 @@ internal class QueryBinder : ExpressionVisitor
         }
         else if (entity is MListElementExpression mlee)
         {
+            var originalTable = TableFinder.GetTable(pr.Select, mlee.Alias);
+            if (originalTable != null && originalTable.SystemTime is SystemTime.HistoryTable)
+                isHistory = true;
+
             Expression id = mlee.Table.RowIdExpression(aliasGenerator.Table(mlee.Table.GetName(isHistory)));
 
             condition = SmartEqualizer.EqualNullable(id, mlee.RowId);
@@ -2736,7 +2749,6 @@ internal class QueryBinder : ExpressionVisitor
         }
         else
             throw new InvalidOperationException("Update not supported for {0}".FormatWith(entity.GetType().TypeName()));
-
 
         var result = new CommandAggregateExpression(new CommandExpression[]
         {

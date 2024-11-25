@@ -24,6 +24,8 @@ export module AuthMessage {
   export const SameAs0: MessageKey = new MessageKey("AuthMessage", "SameAs0");
   export const Nothing: MessageKey = new MessageKey("AuthMessage", "Nothing");
   export const Everything: MessageKey = new MessageKey("AuthMessage", "Everything");
+  export const UnableToDetermineIfYouCanRead0: MessageKey = new MessageKey("AuthMessage", "UnableToDetermineIfYouCanRead0");
+  export const TheQueryDoesNotEnsureThatYouCanRead0: MessageKey = new MessageKey("AuthMessage", "TheQueryDoesNotEnsureThatYouCanRead0");
 }
 
 export module LoginAuthMessage {

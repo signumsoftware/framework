@@ -89,7 +89,9 @@ public class SqlServerConnector : Connector
     public ResetLazy<Tuple<byte>> DateFirstLazy = new ResetLazy<Tuple<byte>>(() => Tuple.Create((byte)Executor.ExecuteScalar("SELECT @@DATEFIRST")!));
     public byte DateFirst => DateFirstLazy.Value.Item1;
 
-    public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => (string)Executor.ExecuteScalar("SELECT CURRENT_TIMEZONE_ID()")!);
+    public ResetLazy<string> LocalTimeZoneLazy = new ResetLazy<string>(() => ((SqlServerConnector) Connector.Current).Version < SqlServerVersion.SqlServer2022 ? 
+    TimeZoneInfo.Local.StandardName :
+    (string)Executor.ExecuteScalar("SELECT CURRENT_TIMEZONE_ID()")!);
     public override string LocalTimeZone => LocalTimeZoneLazy.Value;
 
     public SqlServerVersion Version { get; set; }

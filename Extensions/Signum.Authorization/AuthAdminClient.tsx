@@ -68,6 +68,8 @@ export namespace AuthAdminClient {
     Navigator.addSettings(new EntitySettings(RoleEntity, e => import('./Templates/Role')));
     Operations.addSettings(new EntityOperationSettings(UserOperation.SetPassword, { isVisible: ctx => false }));
     Operations.addSettings(new EntityOperationSettings(UserOperation.AutoDeactivate, { hideOnCanExecute: true, isVisible: () => false }));
+    Operations.addSettings(new EntityOperationSettings(UserOperation.Deactivate, { hideOnCanExecute: true }));
+    Operations.addSettings(new EntityOperationSettings(UserOperation.Reactivate, { hideOnCanExecute: true }));
 
     AppContext.clearSettingsActions.push(() => queryAuditorTokens.clear());
   
@@ -144,6 +146,30 @@ export namespace AuthAdminClient {
             .then(pack => Navigator.view(pack, { buttons: "close", readOnly: ctx.widgetContext?.ctx.value.isTrivialMerge == true ? true : undefined })), {
         isVisible: AppContext.isPermissionAuthorized(BasicPermission.AdminRules), icon: "shield-halved", iconColor: "red", color: "danger", group: null
       }));
+
+      getAllTypes().forEach(t => {
+        if (t.kind == "Entity") {
+          if ((t as any).typeAllowed) {
+            t.minTypeAllowed = (t as any).typeAllowed;
+            t.maxTypeAllowed = (t as any).typeAllowed;
+            delete (t as any).typeAllowed;
+          }
+
+          Object.values(t.members).forEach(m => {
+
+            if (!m.minPropertyAllowed) {
+              if ((m as any).propertyAllowed) {
+                m.minPropertyAllowed = (m as any).propertyAllowed;
+                m.maxPropertyAllowed = (m as any).propertyAllowed;
+                delete (t as any).typeAllowed;
+              } else {
+                m.minPropertyAllowed = t.minTypeAllowed;
+                m.maxPropertyAllowed = t.maxTypeAllowed;
+              }
+            }
+          });
+        }
+      });
   
       getAllTypes().filter(a => a.queryAuditors != null)
         .forEach(t => {
@@ -208,9 +234,37 @@ export namespace AuthAdminClient {
       key: "DownloadAuthRules",
       onClick: () => { API.downloadAuthRules(); return Promise.resolve(undefined); }
     });
-  
-    PropertyRoute.prototype.canModify = function () {
-      return this.member != null && this.member.propertyAllowed == "Write"
+
+    TypeContext.prototype.isMemberHidden = function () {
+
+      var m = this.propertyRoute?.member;
+
+      if (m == null) {
+        return true;
+      } 
+
+      if (m.maxPropertyAllowed == "None") {
+        throw new Error("Unexpected");
+      }
+
+      if (m.minPropertyAllowed != "None")
+        return false;
+
+      return this.binding.getIsHidden();
+    }
+
+    TypeContext.prototype.isMemberReadOnly = function () {
+
+      var m = this.propertyRoute?.member;
+
+      if (m == null) {
+        return true;
+      }
+
+      if (m.minPropertyAllowed == "Write")
+        return false;
+
+      return this.binding.getIsReadonly();
     }
   }
   
@@ -229,24 +283,17 @@ export namespace AuthAdminClient {
   export function taskAuthorizeProperties(lineBase: LineBaseController<LineBaseProps, unknown>, state: LineBaseProps): void {
     if (state.ctx.propertyRoute &&
       state.ctx.propertyRoute.propertyRouteType == "Field") {
-  
+
       const member = state.ctx.propertyRoute.member;
-  
-      switch (member!.propertyAllowed) {
-        case "None":
-          //state.visible = false;  //None is just not retuning the member info, LineBaseController.isHidden
-          break;
-        case "Read":
-          state.ctx.readOnly = true;
-          break;
-        case "Write":
-          break;
+
+      if (state.ctx.isMemberReadOnly()) {
+        state.ctx.readOnly = true;
       }
     }
   }
   
   export function navigatorIsReadOnly(typeName: PseudoType, entityPack?: EntityPack<ModifiableEntity>, options?: Navigator.IsReadonlyOptions): boolean {
-  
+
     if (options?.isEmbedded)
       return false;
   
@@ -365,12 +412,9 @@ declare module '@framework/Reflection' {
   }
 
   export interface MemberInfo {
-    propertyAllowed: PropertyAllowed;
+    minPropertyAllowed: PropertyAllowed;
+    maxPropertyAllowed: PropertyAllowed;
     queryAllowed: QueryAllowed;
-  }
-
-  export interface PropertyRoute {
-    canModify(): boolean;
   }
 }
 
@@ -379,5 +423,13 @@ declare module '@framework/Signum.Entities' {
   export interface EntityPack<T extends ModifiableEntity> {
     typeAllowed?: TypeAllowedBasic;
   }
+
+  
 }
 
+declare module '@framework/TypeContext' {
+  export interface TypeContext<T> {
+    isMemberReadOnly(): boolean;
+    isMemberHidden(): boolean;
+  }
+}

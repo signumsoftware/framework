@@ -5,9 +5,6 @@ using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
-using System.Linq;
-using Signum.Utilities;
-using System.Collections.Generic;
 using System.Collections.Frozen;
 
 namespace Signum.API;
@@ -31,10 +28,31 @@ public static class ReflectionServer
      new ConcurrentDictionary<object, Dictionary<string, TypeInfoTS>>();
 
     public static Dictionary<Assembly, HashSet<string>> EntityAssemblies = new Dictionary<Assembly, HashSet<string>>();
+    public static Dictionary<Type, string> GenericTypeToName = new Dictionary<Type, string>();
+    public static Dictionary<string, Type> GenericNameToType = new Dictionary<string, Type>();
 
     public static ResetLazy<FrozenDictionary<string, Type>> TypesByName = new (() => GetTypes().ToFrozenDictionaryEx(GetTypeName, "Types"));
 
     public static Dictionary<string, Func<bool>> OverrideIsNamespaceAllowed = new Dictionary<string, Func<bool>>();
+
+
+    public static void RegisterGenericModel(Type type, string? typeName = null)
+    {
+        if (!type.IsModelEntity())
+            throw new InvalidOperationException($"{type.TypeName()} is model entity");
+
+        if (!type.IsGenericType)
+            throw new InvalidOperationException($"{type.TypeName()} is not generic type");
+
+        if (type.IsGenericTypeDefinition)
+            throw new InvalidOperationException($"{type.TypeName()} is generic type definition");
+
+        typeName ??= type.Name.Before("`") + "_" + type.GenericTypeArguments.ToString(a => a.Name, "_");
+        GenericTypeToName.Add(type, typeName);
+        GenericNameToType.Add(typeName, type);
+        TypesByName.Reset();
+        EntityAssemblies.GetOrCreate(type.Assembly).Add(type.Namespace!);
+    }
 
     public static void RegisterLike(Type type, Func<bool> allowed)
     {
@@ -164,6 +182,12 @@ public static class ReflectionServer
 
     public static List<Type> GetTypes()
     {
+        var genericModels = ReflectionServer.GenericTypeToName.Keys
+            .GroupToDictionary(a => a.Assembly);
+
+        var genericTypes = TypeLogic.TypeToEntity.Keys.Where(a => a.IsGenericType && EnumEntity.Extract(a) == null)
+            .GroupToDictionary(a => a.Assembly);
+
         return EntityAssemblies.SelectMany(kvp =>
         {
             var name = kvp.Key.GetName().Name;
@@ -190,7 +214,13 @@ public static class ReflectionServer
 
             var allTypes = normalTypes.Concat(externalEnums).Concat(importedTypes).ToList();
 
-            var entities = allTypes.Where(a => a.IsModifiableEntity() && !a.IsAbstract && (!a.IsEntity() || TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
+            var entities = allTypes.Where(a => a.IsModifiableEntity() && !a.IsAbstract && !a.IsGenericTypeDefinition && (!a.IsEntity() || TypeLogic.TypeToEntity.ContainsKey(a))).ToList();
+
+            if (genericModels.TryGetValue(kvp.Key, out var genMods))
+                entities.AddRange(genMods);
+
+            if (genericTypes.TryGetValue(kvp.Key, out var genTypes))
+                entities.AddRange(genTypes);
 
             var enums = allTypes.Where(a => a.IsEnum && LocalizedAssembly.GetDescriptionOptions(a) != DescriptionOptions.None).ToList();
 
@@ -298,11 +328,6 @@ public static class ReflectionServer
 
     public static TypeInfoTS? GetEnumTypeInfo(Type type)
     {
-        if(type.Name == "AzureADQuery")
-        {
-
-        }
-
         var name = type.Name;
         var queries = QueryLogic.Queries;
         var descOptions = LocalizedAssembly.GetDescriptionOptions(type);
@@ -374,7 +399,7 @@ public static class ReflectionServer
     public static string GetTypeName(Type t)
     {
         if (typeof(ModifiableEntity).IsAssignableFrom(t))
-            return TypeLogic.TryGetCleanName(t) ?? t.Name;
+            return GenericTypeToName.TryGetC(t) ?? TypeLogic.TryGetCleanName(t) ?? t.Name;
 
         return t.Name;
     }

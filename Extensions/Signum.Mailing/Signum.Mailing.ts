@@ -15,16 +15,10 @@ export module AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Basics.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
 
-export const CertFileType: EnumType<CertFileType> = new EnumType<CertFileType>("CertFileType");
-export type CertFileType =
-  "CertFile" |
-  "SignedFile";
-
 export const ClientCertificationFileEmbedded: Type<ClientCertificationFileEmbedded> = new Type<ClientCertificationFileEmbedded>("ClientCertificationFileEmbedded");
 export interface ClientCertificationFileEmbedded extends Entities.EmbeddedEntity {
   Type: "ClientCertificationFileEmbedded";
   fullFilePath: string;
-  certFileType: CertFileType;
 }
 
 export interface EmailAddressEmbedded extends Entities.EmbeddedEntity {

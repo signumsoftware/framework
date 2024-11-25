@@ -1,5 +1,4 @@
 using Signum.Utilities.Reflection;
-using System.Text.Json;
 
 namespace Signum.Entities.Validation;
 

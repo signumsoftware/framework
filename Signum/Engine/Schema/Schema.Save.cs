@@ -4,8 +4,6 @@ using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Sync;
-using Signum.Entities;
-using Microsoft.AspNetCore.Server.IIS.Core;
 
 namespace Signum.Engine.Maps;
 

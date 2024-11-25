@@ -148,6 +148,10 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
   );
 
   function renderRadio(c: PermissionAllowedRule, allowed: boolean, color: string) {
-    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => { c.allowed = allowed; c.modified = true; updateFrame() }} />;
+    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color} onClicked={a => {
+      c.allowed = allowed;
+      c.modified = true;
+      updateFrame()
+    }} />;
   }
 }

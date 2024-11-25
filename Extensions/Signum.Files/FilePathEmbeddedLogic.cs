@@ -164,24 +164,24 @@ public static class FilePathEmbeddedLogic
 
         entityEvents.RegisterBinding<PrimaryKey>(route.Add(nameof(FilePathEmbedded.EntityId)),
             () => true,
-            (t, rowId) => t.Id,
+            () => (t, rowId) => t.Id,
             (t, rowId, retriever) => t.Id);
 
         entityEvents.RegisterBinding<PrimaryKey?>(route.Add(nameof(FilePathEmbedded.MListRowId)),
             () => true,
-            (t, rowId) => rowId,
+            () => (t, rowId) => rowId,
             (t, rowId, retriever) => rowId);
 
         var routeType = TypeLogic.GetCleanName(route.RootType);
         entityEvents.RegisterBinding<string>(route.Add(nameof(FilePathEmbedded.RootType)),
             () => true,
-            (t, rowId) => routeType,
+            () => (t, rowId) => routeType,
             (t, rowId, retriever) => routeType);
 
         var propertyRoute = route.PropertyString();
         entityEvents.RegisterBinding<string>(route.Add(nameof(FilePathEmbedded.PropertyRoute)),
             () => true,
-            (t, rowId) => propertyRoute,
+            () => (t, rowId) => propertyRoute,
             (t, rowId, retriever) => propertyRoute);
     }
 

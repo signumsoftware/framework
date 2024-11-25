@@ -1,4 +1,5 @@
 using OpenQA.Selenium;
+using OpenQA.Selenium.DevTools.V128.Runtime;
 
 namespace Signum.Selenium;
 
@@ -33,29 +34,15 @@ public class MessageModalProxy : ModalProxy
         this.WaitNotVisible();
     }
 
-    public static string GetMessageText(WebDriver selenium, MessageModalProxy modal)
-    {
-        return modal.Element.FindElement(By.ClassName("text-warning")).Text;
-    }
+    public string BodyText => Element.FindElement(By.ClassName("modal-body")).Text;
 
-    public static string GetMessageTitle(WebDriver selenium, MessageModalProxy modal)
-    {
-        return modal.Element.FindElement(By.ClassName("modal-title")).Text;
-    }
+    public string TitleText => Element.FindElement(By.ClassName("modal-title")).Text;
+
 }
+
 
 public static class MessageModalProxyExtensions
 {
-    public static bool IsMessageModalPresent(this WebDriver selenium)
-    {
-        var message = GetMessageModal(selenium);
-
-        if (message == null)
-            return false;
-
-        return true;
-    }
-
     public static MessageModalProxy? GetMessageModal(this WebDriver selenium)
     {
         var element = selenium.TryFindElement(By.ClassName("message-modal"));
@@ -66,6 +53,7 @@ public static class MessageModalProxyExtensions
         return new MessageModalProxy(element.GetParent());
     }
 
+  
     public static void CloseMessageModal(this WebDriver selenium, MessageModalButton button)
     {
         var message = selenium.Wait(() => GetMessageModal(selenium))!;

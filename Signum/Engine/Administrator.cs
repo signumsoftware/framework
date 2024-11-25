@@ -1,15 +1,14 @@
-using Microsoft.VisualBasic;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using Signum.Security;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Data.Common;
 using System.Diagnostics;
+using System.IO;
 
 namespace Signum.Engine;
 
@@ -798,5 +797,75 @@ public static class Administrator
 
         return DeleteWhereScript(table, column, value.Id);
     }
+
+
+    public static IDisposable DisableHistoryTable<T>(bool includeMList = true)
+        where T : Entity
+    {
+        return DisableHistoryTable(typeof(T), includeMList);
+    }
+       
+    public static IDisposable DisableHistoryTable( Type type, bool includeMList = true)
+    {
+        var builder = new SqlBuilder(Connector.Current);
+        var table = Schema.Current.Table(type);
+        var mlist = table.TablesMList().ToArray();
+        Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(table.Name));
+        Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(table));
+        if (includeMList)
+            foreach (var item in mlist)
+            {
+                Executor.ExecuteNonQuery(builder.AlterTableDisableSystemVersioning(item.Name));
+                Executor.ExecuteNonQuery(builder.AlterTableDropPeriod(item));
+            }
+
+        return new Disposable(() =>
+        {
+            if (includeMList)
+                foreach (var item in mlist)
+                {
+                    Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(item));
+                    Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(item));
+                }
+
+            Executor.ExecuteNonQuery(builder.AlterTableAddPeriod(table));
+            Executor.ExecuteNonQuery(builder.AlterTableEnableSystemVersioning(table));
+        });
+    }
+
+    public static class Snapshots
+    {
+        public static void CreateSnapshot(string snapshotName, string directory, bool overwrite = true)
+        {
+            if (overwrite && Database.View<SysDatabases>().Any(a => a.name == snapshotName))
+                DropSnapshot(snapshotName);
+
+            var dbName = Connector.Current.DatabaseName();
+            Executor.ExecuteNonQuery($"CREATE DATABASE {snapshotName} ON (NAME=[{dbName}], FILENAME='{Path.Combine(directory,snapshotName)}.ss') AS SNAPSHOT OF [{dbName}]");
+        }
+
+        public static void DropSnapshot(string snapshotName)
+        {
+            Executor.ExecuteNonQuery($"DROP DATABASE {snapshotName}");
+        }
+
+        public static void RestoreSnapshot(string snapshotName)
+        {
+            var dbName = Connector.Current.DatabaseName();
+
+            Executor.ExecuteNonQuery(
+                $"""
+                USE master;
+                ALTER DATABASE {dbName} SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+                RESTORE DATABASE {dbName}
+                FROM DATABASE_SNAPSHOT = '{snapshotName}';
+
+                ALTER DATABASE {dbName} SET MULTI_USER;
+                """
+                );
+        }
+    }
+
 
 }

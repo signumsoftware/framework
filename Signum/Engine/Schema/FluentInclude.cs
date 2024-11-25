@@ -1,6 +1,3 @@
-
-using System.Security.AccessControl;
-
 namespace Signum.Engine.Maps;
 
 public class FluentInclude<T> where T : Entity
@@ -71,7 +68,7 @@ public class FluentInclude<T> where T : Entity
     }
     public FluentInclude<T> WithAdditionalField<M>(Expression<Func<T, M>> property, Func<bool> shouldSet, Expression<Func<T, PrimaryKey?, M>> expression)
     {
-        this.SchemaBuilder.Schema.EntityEvents<T>().RegisterBinding(property, shouldSet, expression);
+        this.SchemaBuilder.Schema.EntityEvents<T>().RegisterBinding(property, shouldSet, ()=> expression);
         return this;
     }
 

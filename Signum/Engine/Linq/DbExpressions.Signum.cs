@@ -231,7 +231,7 @@ internal class FieldBinding
         if(allowForcedNull)
             ft = ft.Nullify();
 
-        if (!ft.IsAssignableFrom(binding.Type))
+        if (!ft.IsAssignableFrom(binding.Type) && !(!ft.IsValueType && binding.IsNull()))
             throw new ArgumentException("Type of expression is {0} but type of field is {1}".FormatWith(binding.Type.TypeName(), fieldInfo.FieldType.TypeName()));
 
         this.FieldInfo = fieldInfo;
