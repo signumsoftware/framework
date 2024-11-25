@@ -530,7 +530,7 @@ public static class AuthLogic
         Replacements replacements = new Replacements { Interactive = interactive };
 
         Dictionary<string, Lite<RoleEntity>> rolesDic = Database.Query<RoleEntity>().Where(a => a.IsTrivialMerge == false).Select(r => KeyValuePair.Create(r.ToString(), r.ToLite())).ToDictionaryEx();
-        Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").ToDictionary(x => x.Attribute("Name")!.Value);
+        Dictionary<string, XElement> rolesXml = doc.Root!.Element("Roles")!.Elements("Role").Where(a => a.Attribute("IsTrivialMerge")?.Value.ToBool() != true).ToDictionary(x => x.Attribute("Name")!.Value);
 
         replacements.AskForReplacements(rolesXml.Keys.ToHashSet(), rolesDic.Keys.ToHashSet(), "Roles");
 
