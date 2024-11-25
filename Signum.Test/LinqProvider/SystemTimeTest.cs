@@ -148,7 +148,7 @@ public class SystemTimeTest
              new
              {
                  dv.Date,
-                 Count = SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Count())
+                 Count = Database.Query<FolderEntity>().OverrideSystemTime(new SystemTime.AsOf(dv.Date)).Count()
              }).ToList();
 
     }
@@ -171,11 +171,11 @@ public class SystemTimeTest
               TimeSeriesUnit.Millisecond.ToString(),
               50)
             .SelectMany(dv =>
-             SystemTime.OverrideInExpression(new SystemTime.AsOf(dv.Date), Database.Query<FolderEntity>().Select(f => new
+             Database.Query<FolderEntity>().OverrideSystemTime(new SystemTime.AsOf(dv.Date)).Select(f => new
              {
                  dv.Date,
                  Folder = f
-             }))).ToList();
+             })).ToList();
 
     }
 }
