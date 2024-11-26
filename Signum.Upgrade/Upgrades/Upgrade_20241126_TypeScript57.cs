@@ -31,7 +31,7 @@ class Upgrade_20241126_TypeScript57 : CodeUpgradeBase
         {
 
             file.UpdateNpmPackages("""
-                "typescript": "5.7.1",
+                "typescript": "5.7.2",
                 """);
             //<PackageReference Include="Signum.TSGenerator" Version="9.0.0" />
         });
