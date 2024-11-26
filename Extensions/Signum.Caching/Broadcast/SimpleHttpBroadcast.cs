@@ -30,14 +30,19 @@ public class SimpleHttpBroadcast : IServerBroadcast
     //Called from Controller
     public void InvalidateTable(InvalidateTableRequest request)
     {
-        if (this.bordcastSecretHash != request.SecretHash)
-            throw new InvalidOperationException("invalidationSecret does not match");
+        AssertHash(request.SecretHash);
 
         if (request.OriginMachineName == Environment.MachineName &&
             request.OriginApplicationName == Schema.Current.ApplicationName)
             return;
 
         Receive?.Invoke(request.MethodName, request.Argument);
+    }
+
+    public void AssertHash(string secretHash)
+    {
+        if (this.bordcastSecretHash != secretHash)
+            throw new InvalidOperationException("invalidationSecret does not match");
     }
 
     public void Send(string methodName, string argument)
