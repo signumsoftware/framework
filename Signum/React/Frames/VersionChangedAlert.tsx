@@ -30,7 +30,7 @@ export const VersionChangedAlert: {
     return null;
 
   return (
-    <div className={classes("alert alert-warning", "version-alert", p.blink && "blink")} style={{ textAlign: "center" }}>
+    <div className={classes("alert alert-warning", "version-alert", (p.blink ?? true) && "blink")} style={{ textAlign: "center" }}>
       <FontAwesomeIcon icon="rotate" aria-hidden="true" />&nbsp;
                 {ConnectionMessage.ANewVersionHasJustBeenDeployedSaveChangesAnd0.niceToString()
         .formatHtml(<a href="#" onClick={handleRefresh}>{ConnectionMessage.Refresh.niceToString()}</a>)}
@@ -39,7 +39,6 @@ export const VersionChangedAlert: {
 }
 
 VersionChangedAlert.forceUpdateSingletone = undefined as (() => void) | undefined;
-(VersionChangedAlert as any).defaultProps = { blink: true };
 
 export function VersionInfo(p: { extraInformation?: string }): React.JSX.Element {
   return (
