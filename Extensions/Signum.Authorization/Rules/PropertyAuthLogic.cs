@@ -117,10 +117,12 @@ public static class PropertyAuthLogic
         });
     }
 
+
+
     static TypeConditionNode DiffNodes(this WithConditions<PropertyAllowed> propertyAllowed, WithConditions<PropertyAllowed> typeAllowed)
     {
         if (!propertyAllowed.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(
-            typeAllowed.ConditionRules.Select(a => a.TypeConditions)))
+            typeAllowed.ConditionRules.Select(a => a.TypeConditions), TypeConditionSetComparer.Instance))
             throw new InvalidOperationException("Property Allowed and Type Allowed not in sync");
 
         var baseValue = propertyAllowed.Fallback == PropertyAllowed.None && typeAllowed.Fallback > PropertyAllowed.None ? TypeConditionNode.True : TypeConditionNode.False;
@@ -313,7 +315,7 @@ public static class PropertyAuthLogic
             if (e.IsNew)
                 return true;
 
-            if (!HasTypeConditionInProperties(route.Type))
+            if (!HasTypeConditionInProperties(route.RootType))
                 return true;
 
             return giEvaluateAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
