@@ -1,5 +1,4 @@
 using OpenQA.Selenium;
-using OpenQA.Selenium.DevTools.V128.Runtime;
 
 namespace Signum.Selenium;
 

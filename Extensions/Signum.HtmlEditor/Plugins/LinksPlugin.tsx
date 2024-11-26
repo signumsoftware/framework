@@ -22,7 +22,7 @@ function extractLinks(text: string): { from: number, to: number }[]{
 
 export default class LinksPlugin implements HtmlEditorPlugin {
 
-  setLink(controller: HtmlEditorController) {
+  setLink(controller: HtmlEditorController) : void {
     const editorState = controller.editorState;
     const selection = editorState.getSelection();
     const contentState = editorState.getCurrentContent();
@@ -42,7 +42,7 @@ export default class LinksPlugin implements HtmlEditorPlugin {
 
     if (!link) {
       controller.setEditorState(draftjs.RichUtils.toggleLink(editorState, newSelection, null));
-      return 'handled';
+      return;
     }
     const content = editorState.getCurrentContent();
     const contentWithEntity = content.createEntity('LINK', 'MUTABLE', { url: link });

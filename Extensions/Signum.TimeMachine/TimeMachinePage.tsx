@@ -60,12 +60,12 @@ export function TimeMachine(p: { lite: Lite<Entity>, isModal?: boolean }): React
         if (e.ctrlKey) {
           if (checked) {
             sc.state.selectedRows?.remove(row)
-            sc.notifySelectedRowsChanged()
+            sc.notifySelectedRowsChanged("toggle")
           } else {
             if (sc.state.selectedRows && sc.state.selectedRows.length >= 2)
               return MessageModal.showError(TimeMachineMessage.YouCanNotSelectMoreThanTwoVersionToCompare.niceToString())
             sc.state.selectedRows?.push(row);
-            sc.notifySelectedRowsChanged();
+            sc.notifySelectedRowsChanged("toggle");
           }
         }
         else {
@@ -77,7 +77,7 @@ export function TimeMachine(p: { lite: Lite<Entity>, isModal?: boolean }): React
             sc.state.selectedRows?.push(nextRow);
           }
           sc.state.selectedRows?.push(row);
-          sc.notifySelectedRowsChanged();
+          sc.notifySelectedRowsChanged("toggle");
         }
       }}
       />
