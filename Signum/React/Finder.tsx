@@ -824,8 +824,8 @@ export namespace Finder {
       var result: FindOptionsParsed = {
         queryKey: qd.queryKey,
         groupResults: fo.groupResults == true,
-        pagination: fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination,
-        systemTime: fo.systemTime,
+        pagination: fixPagination(fo.pagination != null ? fo.pagination : qs?.pagination ?? Options.defaultPagination),
+        systemTime: fo.systemTime && fixSystemTime(fo.systemTime),
 
         columnOptions: (fo.columnOptions?.notNull() ?? []).map(co => ({
           token: completer.get(co.token.toString()),
@@ -846,6 +846,20 @@ export namespace Finder {
       return parseFilterValues(result.filterOptions)
         .then(() => result)
     });
+  }
+
+  function fixPagination(p: Pagination): Pagination {
+      return {
+        mode: p.mode,
+        elementsPerPage: p.mode == "All" ? undefined : p.elementsPerPage == null || p.elementsPerPage < 0 ? 20 : p.elementsPerPage,  
+        currentPage: p.mode != "Paginate" ? undefined : p.currentPage == null || p.currentPage < 0 ? 1 : p.currentPage,  
+      };
+  }
+
+  function fixSystemTime(p: SystemTime): SystemTime {
+    return {
+      ...p
+    };
   }
 
   function simplifyPinnedFilters(fos: FilterOption[]): FilterOption[] {

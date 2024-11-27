@@ -119,7 +119,7 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
 
   function renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
 
-    if (OperationAllowed.index(c.coerced) > OperationAllowed.index(allowed))
+    if (OperationAllowed.index(c.coerced) < OperationAllowed.index(allowed))
       return;
 
     return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color}

@@ -56,7 +56,7 @@ public class DynamicQueryContainer
     T Execute<T>(ExecuteType executeType, object queryName, BaseQueryRequest? request, Func<DynamicQueryBucket, T> executor)
     {
         using (ExecutionMode.UserInterface())
-        using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
+        using (HeavyProfiler.Log(executeType.ToString(), () => "\n".Combine(QueryUtils.GetKey(queryName), request?.Dump())))
         {
             try
             {
@@ -78,7 +78,7 @@ public class DynamicQueryContainer
     async Task<T> ExecuteAsync<T>(ExecuteType executeType, object queryName, BaseQueryRequest request, Func<DynamicQueryBucket, Task<T>> executor)
     {
         using (ExecutionMode.UserInterface())
-        using (HeavyProfiler.Log(executeType.ToString(), () => QueryUtils.GetKey(queryName)))
+        using (HeavyProfiler.Log(executeType.ToString() + " Async", () => "\n".Combine(QueryUtils.GetKey(queryName), request?.Dump())))
         {
             try
             {

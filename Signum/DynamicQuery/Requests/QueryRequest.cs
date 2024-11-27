@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.Reflection.Metadata.Ecma335;
+using Signum.API.Json;
 using Signum.DynamicQuery.Tokens;
 
 #pragma warning disable CS8618 // Non-nullable field is uninitialized.
@@ -20,6 +22,23 @@ public abstract class BaseQueryRequest
     }
 
     public abstract HashSet<QueryToken> AllTokens();
+
+    public abstract string Dump();
+
+    protected string DumpAnonymous(object obj)
+    {
+        return obj.GetType().GetProperties().ToString(p =>
+        {
+            var value = p.GetValue(obj);
+
+            string str = value?.ToString() ?? "null";
+
+            if (str.Contains("\n"))
+                return p.Name + ":\n" + str.Indent(4);
+
+            return p.Name + ": " + str;
+        }, "\n");
+    }
 }
 
 public class QueryRequest : BaseQueryRequest
@@ -35,6 +54,21 @@ public class QueryRequest : BaseQueryRequest
     public int SubQueryLimit { get; set; } = 10;
 
     public SystemTimeRequest? SystemTime { get; set; }
+
+    public override string Dump()
+    {
+        return DumpAnonymous(new
+        {
+            QueryName = QueryUtils.GetKey(QueryName),
+            GroupResults = GroupResults,
+            Filters = Filters.ToString("\n"),
+            Columns = Columns.ToString("\n"),
+            Orders = Orders.ToString("\n"),
+            Pagination = Pagination.ToString(),
+            SubQueryLimit = SubQueryLimit,
+            SystemTime = SystemTime?.ToString()
+        });
+    }
 
     public bool CanDoMultiplicationsInSubQueries()
     {
@@ -216,6 +250,8 @@ public abstract class Pagination : IEquatable<Pagination>
     public abstract int? GetElementsPerPage();
     public abstract int? MaxElementIndex { get; }
     public abstract bool Equals(Pagination? other);
+    public abstract override string ToString();
+
 
     public class All : Pagination
     {
@@ -223,6 +259,7 @@ public abstract class Pagination : IEquatable<Pagination>
         public override int? GetElementsPerPage() => null;
         public override int? MaxElementIndex => null;
         public override bool Equals(Pagination? other) => other is All;
+        public override string ToString() => "All";
     }
 
     public class Firsts : Pagination
@@ -240,6 +277,8 @@ public abstract class Pagination : IEquatable<Pagination>
         public override int? GetElementsPerPage() => TopElements;
         public override int? MaxElementIndex => TopElements;
         public override bool Equals(Pagination? other) => other is Firsts f && f.TopElements == this.TopElements;
+        public override string ToString() => "First " + TopElements;
+
     }
 
     public class Paginate : Pagination
@@ -268,6 +307,8 @@ public abstract class Pagination : IEquatable<Pagination>
         public override int? GetElementsPerPage() => ElementsPerPage;
         public override int? MaxElementIndex => (ElementsPerPage * (CurrentPage + 1)) - 1;
         public override bool Equals(Pagination? other) => other is Paginate p && p.ElementsPerPage == ElementsPerPage && p.CurrentPage == CurrentPage;
+        public override string ToString() => $"Paginate {ElementsPerPage} (Page = {CurrentPage})";
+
     }
 }
 
@@ -307,6 +348,17 @@ public class QueryValueRequest : BaseQueryRequest
         return result;
     }
 
+    public override string Dump()
+    {
+        return DumpAnonymous(new
+        {
+            QueryName = QueryUtils.GetKey(QueryName),
+            ValueToken = ValueToken?.ToString(),
+            MultipleValues = MultipleValues,
+            SystemTime = SystemTime?.ToString()
+        });
+    }
+
 }
 
 public class UniqueEntityRequest : BaseQueryRequest
@@ -336,6 +388,17 @@ public class UniqueEntityRequest : BaseQueryRequest
         Filter.SetIsTable(result.Filters, result.AllTokens());
 
         return result;
+    }
+
+    public override string Dump()
+    {
+        return DumpAnonymous(new
+        {
+            QueryName = QueryUtils.GetKey(QueryName),
+            Filters = Filters.ToString("\n"),
+            Orders = Orders.ToString("\n"),
+            UniqueType = UniqueType,
+        })!;
     }
 }
 
@@ -369,5 +432,17 @@ public class QueryEntitiesRequest : BaseQueryRequest
         Filter.SetIsTable(result.Filters, result.AllTokens());
 
         return result;
+    }
+
+
+    public override string Dump()
+    {
+        return DumpAnonymous(new
+        {
+            QueryName = QueryUtils.GetKey(QueryName),
+            Filters = Filters.ToString("\n"),
+            Orders = Orders.ToString("\n"),
+            Count = Count,
+        });
     }
 }

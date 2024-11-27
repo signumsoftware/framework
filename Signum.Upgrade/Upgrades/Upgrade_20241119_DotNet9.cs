@@ -31,7 +31,7 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
       uctx.ChangeCodeFile(@"package.json", file =>
         {
             file.ReplaceLine( a=> a.Contains("@types/react"), """
-                "@types/react": "18.3.2",
+                "@types/react": "18.3.12",
                 "@types/node": "22.9.0"
                 """);
         });
