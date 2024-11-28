@@ -129,13 +129,19 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
   }, [getQueryKey(p.findOptions.queryName)]);
 
 
-  const fop = useAPI(async () => {
+  const fop = useAPI<FindOptionsParsed | string | null>(async (abort, oldFop) => {
     if (qd == null || qd == "not-allowed")
       return null;
 
     const message = Finder.validateNewEntities(p.findOptions);
     if (message)
       return message;
+
+    if (oldFop && typeof oldFop == "object") {
+      const oldFo = Finder.toFindOptions(oldFop, qd, p.defaultIncludeDefaultFilters!);
+      if (Finder.findOptionsPath(p.findOptions) == Finder.findOptionsPath(oldFo))
+        return oldFop;
+    }
 
     const fop = await Finder.parseFindOptions(p.findOptions, qd, p.defaultIncludeDefaultFilters!);
 
