@@ -72,10 +72,10 @@ public class WordTemplateEntity : Entity, IUserAssetEntity, IContainsQuery
         var canAggregate = this.GroupResults ? SubTokensOptions.CanAggregate : 0;
 
         foreach (var f in Filters)
-            f.ParseData(this, description, SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate);
+            f.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate | SubTokensOptions.CanAnyAll);
 
         foreach (var o in Orders)
-            o.ParseData(this, description, SubTokensOptions.CanElement | canAggregate);
+            o.ParseData(this, description, SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate);
     }
 
     public XElement ToXml(IToXmlContext ctx)

@@ -156,7 +156,8 @@ public class CollectionToArrayToken : QueryToken
                 [cta] = new ExpressionBox(param, mlistElementRoute: cta.GetPropertyRoute())
             }, 
              context.Filters,
-             context.Orders);
+             context.Orders, 
+             context.Pagination);
         }
         else
         {
@@ -168,7 +169,9 @@ public class CollectionToArrayToken : QueryToken
             {
                 [cta] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { cta.GetPropertyRoute()! }))
             },
-            context.Filters, context.Orders);
+            context.Filters, 
+            context.Orders, 
+            context.Pagination);
         }
         // Ask Olmo CollectionNestedToken
         var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
@@ -186,7 +189,8 @@ public class CollectionToArrayToken : QueryToken
                     [ce] = new ExpressionBox(param, mlistElementRoute: ce.GetPropertyRoute())
                 }, 
                 context.Filters,
-                context.Orders);
+                context.Orders,
+                context.Pagination);
             }
             else
             {
@@ -200,7 +204,8 @@ public class CollectionToArrayToken : QueryToken
                     [ce] = new ExpressionBox(param.BuildLiteNullifyUnwrapPrimaryKey(new[] { ce.GetPropertyRoute()! }))
                 }, 
                 context.Filters, 
-                context.Orders);
+                context.Orders,
+                context.Pagination);
             }
         }
 

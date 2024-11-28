@@ -111,6 +111,7 @@ public class DynamicQueryContainer
 
     public ResultTable ExecuteQuery(QueryRequest request)
     {
+        request.AssertNeasted();
         request = request.CombineFullTextFilters();
 
         if (!request.GroupResults)
@@ -121,6 +122,7 @@ public class DynamicQueryContainer
 
     public Task<ResultTable> ExecuteQueryAsync(QueryRequest request, CancellationToken token)
     {
+        request.AssertNeasted();
         request = request.CombineFullTextFilters();
 
         if (!request.GroupResults)
