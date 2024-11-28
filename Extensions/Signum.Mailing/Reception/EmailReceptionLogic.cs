@@ -34,8 +34,8 @@ public static class EmailReceptionLogic
 
     public static bool IsStarted = false;
 
-    public static Polymorphic<Func<ScheduledTaskContext, EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, EmailReceptionEntity>> EmailReceptionServices = 
-        new Polymorphic<Func<ScheduledTaskContext ,EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, EmailReceptionEntity>>();
+    public static Polymorphic<Func< EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>> EmailReceptionServices = 
+        new Polymorphic<Func<EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>>();
 
     public static void Start(SchemaBuilder sb, Func<EmailReceptionConfigurationEntity, EmailReceptionEntity> getPop3Client, Func<string, string>? encryptPassword = null, Func<string, string>? decryptPassword = null)
     {
@@ -167,7 +167,7 @@ public static class EmailReceptionLogic
 
     
 
-        return EmailReceptionServices.Invoke(ctx, e.Service, e);
+        return EmailReceptionServices.Invoke(e.Service, e, ctx);
     }
 
 }
