@@ -115,7 +115,7 @@ export interface SearchControlLoadedProps {
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
-  onSelectionChanged?: (rows: ResultRow[]) => void;
+  onSelectionChanged?: (rows: ResultRow[], reason: SelectionChangeReason) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
@@ -126,6 +126,8 @@ export interface SearchControlLoadedProps {
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
+
+export type SelectionChangeReason = "toggle" | "toggleAll" | "newResult" | "contextMenu";
 
 export interface SearchControlLoadedState {
   resultTable?: ResultTable;
@@ -367,15 +369,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           this.fixScroll();
           if (this.props.onResult)
             this.props.onResult(rt, dataChanged ?? false, this);
-          this.notifySelectedRowsChanged();
+          this.notifySelectedRowsChanged("newResult");
         });
       });
     });
   }
 
-  notifySelectedRowsChanged(): void {
+  notifySelectedRowsChanged(reason: SelectionChangeReason): void {
     if (this.props.onSelectionChanged)
-      this.props.onSelectionChanged(this.state.selectedRows!);
+      this.props.onSelectionChanged(this.state.selectedRows!, reason);
   }
 
 
@@ -442,7 +444,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           currentMenuItems: undefined
         }, () => {
           this.loadMenuItems();
-          this.notifySelectedRowsChanged();
+          this.notifySelectedRowsChanged("contextMenu");
         });
       }
 
@@ -1231,7 +1233,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
       currentMenuItems: undefined,
     }, () => {
-      this.notifySelectedRowsChanged()
+      this.notifySelectedRowsChanged("toggleAll")
     });
   }
 
@@ -1511,7 +1513,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       selectedRows.remove(row);
     }
 
-    this.notifySelectedRowsChanged();
+    this.notifySelectedRowsChanged("toggle");
 
     this.setState({ currentMenuItems: undefined });
   }

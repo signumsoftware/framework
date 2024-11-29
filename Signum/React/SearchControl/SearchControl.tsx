@@ -4,12 +4,12 @@ import { ResultTable, ResultRow, FindOptions, FindOptionsParsed, FilterOptionPar
 import { Lite, Entity, ModifiableEntity, EntityPack } from '../Signum.Entities'
 import { tryGetTypeInfos, getQueryKey, getTypeInfos, QueryTokenString, getQueryNiceName } from '../Reflection'
 import { Navigator, ViewPromise } from '../Navigator'
-import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, ShowBarExtensionOption } from './SearchControlLoaded'
+import SearchControlLoaded, { OnDrilldownOptions, SearchControlMobileOptions, SearchControlViewMode, SelectionChangeReason, ShowBarExtensionOption } from './SearchControlLoaded'
 import { ErrorBoundary } from '../Components';
 import { Property } from 'csstype';
 import "./Search.css"
 import { ButtonBarElement, StyleContext } from '../TypeContext';
-import { areEqualDeps, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
+import { areEqualDeps, useAPI, useForceUpdate, usePrevious, useStateWithPromise } from '../Hooks'
 import { RefreshMode } from '../Signum.DynamicQuery';
 import { HeaderType, Title } from '../Lines/GroupHeader'
 
@@ -60,7 +60,7 @@ export interface SearchControlProps {
   simpleFilterBuilder?: (sfbc: Finder.SimpleFilterBuilderContext) => React.ReactElement | undefined;
   onNavigated?: (lite: Lite<Entity>) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow) => void;
-  onSelectionChanged?: (rows: ResultRow[]) => void;
+  onSelectionChanged?: (rows: ResultRow[], reason: SelectionChangeReason) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, scl: SearchControlLoaded) => void;
@@ -77,13 +77,6 @@ export interface SearchControlProps {
   title?: React.ReactElement | string;
 }
 
-export interface SearchControlState {
-  queryDescription: QueryDescription;
-  findOptionsParsed?: FindOptionsParsed;
-  deps?: React.DependencyList;
-  message?: string;
-}
-
 function is_touch_device(): boolean {
   return 'ontouchstart' in window        // works on most browsers 
     || Boolean(navigator.maxTouchPoints);       // works on IE10/11 and Surface
@@ -91,7 +84,6 @@ function is_touch_device(): boolean {
 
 export interface SearchControlHandler {
   findOptions: FindOptions;
-  state?: SearchControlState;
   doSearch(opts: { dataChanged?: boolean, force?: boolean }): void;
   doSearchPage1(force?: boolean): void;
   searchControlLoaded: SearchControlLoaded | null;
@@ -109,7 +101,6 @@ export namespace SearchControlOptions {
 
 const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.RefAttributes<SearchControlHandler>> = React.forwardRef(function SearchControl(p: SearchControlProps, ref: React.Ref<SearchControlHandler>) {
 
-  const [state, setState] = useStateWithPromise<SearchControlState | undefined>(undefined);
   const searchControlLoaded = React.useRef<SearchControlLoaded>(null);
   const lastDeps = usePrevious(p.deps);
   //const lastFO = usePrevious(p.findOptions);
@@ -120,83 +111,83 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
     get searchControlLoaded() {
       return searchControlLoaded.current;
     },
-    state: state,
     doSearch: opts => searchControlLoaded.current && searchControlLoaded.current.doSearch(opts),
     doSearchPage1: force => searchControlLoaded.current && searchControlLoaded.current.doSearchPage1(force),
   };
-  React.useImperativeHandle(ref, () => handler, [p.findOptions, state, searchControlLoaded.current]);
+  React.useImperativeHandle(ref, () => handler, [p.findOptions, searchControlLoaded.current]);
 
-  React.useEffect(() => {
-    if (state?.findOptionsParsed) {
-      const fo = Finder.toFindOptions(state.findOptionsParsed, state.queryDescription, p.defaultIncludeDefaultFilters!);
-      if (Finder.findOptionsPath(p.findOptions) == Finder.findOptionsPath(fo)) {
-        if (lastDeps != null && p.deps != null && !areEqualDeps(lastDeps, p.deps))
-          setState({ ...state, deps: p.deps });
-        return;
-      }
+  const qd = useAPI<QueryDescription | "not-allowed">(() => {
+
+    if (!Finder.isFindable(p.findOptions.queryName, false)) {
+      if (p.throwIfNotFindable)
+        throw Error(`Query ${getQueryKey(p.findOptions.queryName)} not allowed`);
+
+      return "not-allowed";
     }
 
-    setState(undefined).then(() => {
-      const fo = p.findOptions;
-      if (!Finder.isFindable(fo.queryName, false)) {
-        if (p.throwIfNotFindable)
-          throw Error(`Query ${getQueryKey(fo.queryName)} not allowed`);
+    return Finder.getQueryDescription(p.findOptions.queryName);
+  }, [getQueryKey(p.findOptions.queryName)]);
 
-        return;
-      }
 
-      Finder.getQueryDescription(fo.queryName).then(async qd => {
-        const message = Finder.validateNewEntities(fo);
+  const fop = useAPI<FindOptionsParsed | string | null>(async (abort, oldFop) => {
+    if (qd == null || qd == "not-allowed")
+      return null;
 
-        if (message)
-          setState({ queryDescription: qd, message: message });
-        else {
-          const fop = await Finder.parseFindOptions(fo, qd, p.defaultIncludeDefaultFilters!);
+    const message = Finder.validateNewEntities(p.findOptions);
+    if (message)
+      return message;
 
-          if (fop.systemTime == undefined && p.ctx?.frame?.currentDate && p.ctx.frame!.previousDate &&
-            Finder.isSystemVersioned(qd.columns["Entity"].type)) {
+    if (oldFop && typeof oldFop == "object") {
+      const oldFo = Finder.toFindOptions(oldFop, qd, p.defaultIncludeDefaultFilters!);
+      if (Finder.findOptionsPath(p.findOptions) == Finder.findOptionsPath(oldFo))
+        return oldFop;
+    }
 
-            fop.systemTime = {
-              mode: 'Between',
-              joinMode: 'FirstCompatible',
-              startDate: p.ctx.frame.previousDate,
-              endDate: p.ctx.frame.currentDate
-            };
+    const fop = await Finder.parseFindOptions(p.findOptions, qd, p.defaultIncludeDefaultFilters!);
 
-            const cops = await Finder.parseColumnOptions([
-              { token: QueryTokenString.entity().systemValidFrom(), hiddenColumn: true },
-              { token: QueryTokenString.entity().systemValidTo(), hiddenColumn: true }
-            ], fop.groupResults, qd);
+    if (fop.systemTime == undefined && p.ctx?.frame?.currentDate && p.ctx.frame!.previousDate &&
+      Finder.isSystemVersioned(qd.columns["Entity"].type)) {
 
-            fop.columnOptions = [...cops, ...fop.columnOptions];
+      fop.systemTime = {
+        mode: 'Between',
+        joinMode: 'FirstCompatible',
+        startDate: p.ctx.frame.previousDate,
+        endDate: p.ctx.frame.currentDate
+      };
 
-            fop.orderOptions = [...fop.orderOptions, { token: cops[0].token!, orderType: "Descending" }];
-          }
+      const cops = await Finder.parseColumnOptions([
+        { token: QueryTokenString.entity().systemValidFrom(), hiddenColumn: true },
+        { token: QueryTokenString.entity().systemValidTo(), hiddenColumn: true }
+      ], fop.groupResults, qd);
 
-          setState({ findOptionsParsed: fop, queryDescription: qd, deps: p.deps });
-        }
-      });
-    });
-  }, [Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate, ...(p.deps ?? [])]);
+      fop.columnOptions = [...cops, ...fop.columnOptions];
 
-  if (state?.message) {
+      fop.orderOptions = [...fop.orderOptions, { token: cops[0].token!, orderType: "Descending" }];
+    }
+
+    return fop;
+
+  }, [qd, Finder.findOptionsPath(p.findOptions), p.ctx?.frame?.currentDate, p.ctx?.frame?.previousDate], { avoidReset: true });
+
+  if (qd == null || qd == "not-allowed")
+    return null;
+
+  if (fop == null)
+    return null;
+
+  if (typeof fop == "string") {
     return (
       <div className="alert alert-danger" role="alert">
         <strong>Error in SearchControl ({getQueryKey(p.findOptions.queryName)}): </strong>
-        {state.message}
+        {fop}
       </div>
     );
   }
 
-  if (!state || !state.findOptionsParsed)
-    return null;
-
-  const fop = state.findOptionsParsed;
-  if (!Finder.isFindable(fop.queryKey, false))
+  if (fop.queryKey != qd.queryKey)
     return null;
 
   const qs = Finder.getSettings(fop.queryKey);
-  const qd = state!.queryDescription!;
 
   const tis = getTypeInfos(qd.columns["Entity"].type);
 
@@ -243,7 +234,7 @@ const SearchControl: React.ForwardRefExoticComponent<SearchControlProps & React.
         largeToolbarButtons={p.largeToolbarButtons != null ? p.largeToolbarButtons : false}
         defaultRefreshMode={p.defaultRefreshMode}
         avoidChangeUrl={p.avoidChangeUrl != null ? p.avoidChangeUrl : false}
-        deps={state.deps}
+        deps={[fop, ... (p.deps ?? [])]}
         extraOptions={p.extraOptions}
 
         enableAutoFocus={p.enableAutoFocus == null ? false : p.enableAutoFocus}

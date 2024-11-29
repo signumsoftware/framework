@@ -652,13 +652,14 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters, List<Order>? orders)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters, List<Order>? orders, Pagination? pagination)
     {
         this.ElementType = elementType;
         this.Parameter = parameter;
         this.Replacements = replacements;
         this.Filters = filters;
         this.Orders = orders;
+        this.Pagination = pagination;
     }
 
     public readonly Type ElementType;
@@ -666,6 +667,7 @@ public class BuildExpressionContext
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
     public readonly List<Filter>? Filters; //For SubQueries and  Snippet keyword detection
     public readonly List<Order>? Orders; //For SubQueries  detection
+    public readonly Pagination? Pagination; 
 
     public Expression<Func<object, T>>? TryGetSelectorUntyped<T>(string key)
     {

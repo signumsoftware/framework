@@ -73,6 +73,31 @@ public abstract class Filter
         }
     }
 
+    internal CollectionNestedToken? GetDeepestNestedToken()
+    {
+        var nested = GetTokens().Select(b => b.HasNested()).NotNull();
+
+
+        return nested.Aggregate((CollectionNestedToken?)null, (acum, token) =>
+        {
+            if (acum == null)
+                return token;
+
+            var acumFullKey = acum.FullKey();
+            var tokenFullKey = token.FullKey();
+            if (acumFullKey.StartsWith(tokenFullKey))
+                return token;
+
+            if (tokenFullKey.StartsWith(acumFullKey))
+                return acum;
+
+            throw new InvalidOperationException($"""
+                Unable to use independent nested tokens in the same filter: 
+                 {acumFullKey}
+                 {tokenFullKey}
+                """);
+        });
+    }
 }
 
 public class FilterGroup : Filter
@@ -97,6 +122,14 @@ public class FilterGroup : Filter
     {
         if (Token != null)
             yield return Token;
+
+        foreach (var item in Filters)
+        {
+            foreach (var t in item.GetTokens())
+            {
+                yield return t;
+            }
+        }
     }
 
 

@@ -196,13 +196,13 @@ public class QueryContext
             this.ResultColumns.Add(rt.EntityColumn.Token, rt.EntityColumn);
         
         this.CurrentRows = rt.Rows;
-        this.SubQueryContext = new Dictionary<QueryToken, QueryContext>();
+        this.SubQueryContext = new Dictionary<CollectionNestedToken, QueryContext>();
     }
 
     public readonly QueryDescription QueryDescription;
     public readonly ResultTable ResultTable;
     public readonly Dictionary<QueryToken, ResultColumn> ResultColumns;
-    public readonly Dictionary<QueryToken, QueryContext> SubQueryContext;
+    public readonly Dictionary<CollectionNestedToken, QueryContext> SubQueryContext;
 
     public IEnumerable<ResultRow> CurrentRows { get; private set; }
 
@@ -213,7 +213,7 @@ public class QueryContext
         return new Disposable(() => this.CurrentRows = old);
     }
 
-    internal QueryContext GetMainOrSubQueryContext(QueryToken queryToken)
+    public QueryContext GetMainOrSubQueryContext(QueryToken queryToken)
     {
         var nested = queryToken.HasNested();
 
@@ -293,33 +293,43 @@ public class TokenValueProvider : ValueProviderBase
         return value;
     }
 
-    public override void Foreach(TemplateParameters p, Action forEachElement)
+    public IDisposable? GetOrCreateQueryContext(TemplateParameters p, QueryToken token, out QueryContext qc)
     {
-        if(ParsedToken.QueryToken is CollectionNestedToken cnt)
+        if (ParsedToken.QueryToken!.HasNested() is CollectionNestedToken cnt)
         {
-            var qc = p.QueryContext!.GetMainOrSubQueryContext(cnt.Parent!);
-            var rc = qc.ResultColumns[cnt];
+            var pc = p.QueryContext!.GetMainOrSubQueryContext(cnt.Parent!);
+            var already = pc.SubQueryContext.TryGetC(cnt);
+            if (already != null)
+            {
+                qc = already;
+                return null;
+            }
 
-            var row = qc.CurrentRows.SingleEx(() => "No Current Rows", () => "More than one Row when accesing nested query " + cnt.ToString() + " Maybe mixing 'Nested' and 'Element' at the same level?");
+            var rc = pc.ResultColumns[cnt];
+
+            var row = pc.CurrentRows.SingleEx(() => "No Current Rows", () => "More than one Row when accesing nested query " + cnt.ToString() + " Maybe mixing 'Nested' and 'Element' at the same level?");
 
             var rt = (ResultTable)row[rc]!;
-            var sqc = new QueryContext(qc.QueryDescription, rt);
-            
-            
-            qc.SubQueryContext.Add(cnt, sqc);
-            var col = sqc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
-            foreach (var group in sqc.CurrentRows.GroupByColumn(col))
+            qc = new QueryContext(pc.QueryDescription, rt);
+            pc.SubQueryContext.Add(cnt, qc);
+
+            return new Disposable(() =>
             {
-                using (sqc.OverrideRows(group))
-                    forEachElement();
-            }
-            qc.SubQueryContext.Remove(cnt);
+                pc.SubQueryContext.Remove(cnt);
+            });
         }
         else
         {
-            var qc = p.QueryContext!.GetMainOrSubQueryContext(ParsedToken.QueryToken!);
-            var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
+            qc = p.QueryContext!.GetMainOrSubQueryContext(ParsedToken.QueryToken!);
+            return null;
+        }
+    }
 
+    public override void Foreach(TemplateParameters p, Action forEachElement)
+    {
+        using (GetOrCreateQueryContext(p, ParsedToken.QueryToken!, out QueryContext qc))
+        {
+            var col = qc.ResultColumns[ParsedToken.QueryTokenOrRowId!];
             foreach (var group in qc.CurrentRows.GroupByColumn(col))
             {
                 using (qc.OverrideRows(group))

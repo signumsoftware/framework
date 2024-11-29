@@ -282,7 +282,19 @@ public static class TypeConditionLogic
     [MethodExpander(typeof(InConditionExpander))]
     public static bool InCondition(this Entity entity, TypeConditionSymbol typeCondition)
     {
-        throw new InvalidProgramException("InCondition is meant to be used in database only");
+        return giInConditionImp.GetInvoker(entity.GetType())(entity, typeCondition);
+    }
+
+    static GenericInvoker<Func<Entity, TypeConditionSymbol, bool>> giInConditionImp = new((e, tc) => InConditionImp((ExceptionEntity)e, tc));
+    static bool InConditionImp<T>(T entity, TypeConditionSymbol typeCondition)
+        where T : Entity
+    {
+        var mc = GetInMemoryCondition<T>(typeCondition);
+
+        if (mc == null)
+            throw new InvalidOperationException($"TypeCondition '{typeCondition}' has not in-memory implementation for '{typeof(T).TypeName()}'");
+
+        return mc(entity);
     }
 
     class InConditionExpander : IMethodExpander
