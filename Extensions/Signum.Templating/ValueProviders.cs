@@ -307,7 +307,7 @@ public class TokenValueProvider : ValueProviderBase
 
             var rc = pc.ResultColumns[cnt];
 
-            var row = pc.CurrentRows.SingleEx(() => "No Current Rows", () => "More than one Row when accesing nested query " + cnt.ToString() + " Maybe mixing 'Nested' and 'Element' at the same level?");
+            var row = pc.CurrentRows.SingleEx(() => "No Current Rows", () => $"More than one Row when accesing nested query {cnt.FullKey()},\nmaybe mixing 'Nested' and 'Element' at the same level?");
 
             var rt = (ResultTable)row[rc]!;
             qc = new QueryContext(pc.QueryDescription, rt);
