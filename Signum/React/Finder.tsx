@@ -1528,8 +1528,10 @@ export namespace Finder {
   }
 
   export type AddToLite<T> = T extends Entity ? Lite<T> : T;
-  export type ExtractQueryToken<T> = T extends QueryTokenString<infer S> ? AddToLite<S> :
+  export type ExtractQueryToken<T> =
+    T extends QueryTokenString<infer S> ? AddToLite<S> :
     T extends TokenObject ? ExtractTokensObject<T>[] :
+    T extends undefined ? undefined :
     any;
 
   export type ExtractTokensObject<T> = {
@@ -1600,6 +1602,9 @@ export namespace Finder {
 
   function getAllColumns(tokensObject: TokenObject): ColumnOption[] {
     return Dic.getValues(tokensObject).flatMap(a => {
+      if (a == undefined)
+        return [];
+
       if (typeof a == "string" || a instanceof QueryTokenString)
         return [{ token: a }];
 
@@ -1608,11 +1613,14 @@ export namespace Finder {
   }
 
   export interface TokenObject {
-    [name: string]: QueryTokenString<any> | string | TokenObject;
+    [name: string]: QueryTokenString<any> | string | TokenObject | undefined;
   }
 
   export function toTypedRow<TO extends TokenObject>(tokensObject: TO, columns: string[], row: ResultRow): ExtractTokensObject<TO> {
     return Dic.mapObject(tokensObject, (key, value) => {
+
+      if (value == undefined)
+        return undefined;
 
       var token = value.toString();
 
