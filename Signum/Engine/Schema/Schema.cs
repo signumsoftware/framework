@@ -1,5 +1,4 @@
 using Signum.Engine.Linq;
-using Signum.Security;
 using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Globalization;
@@ -279,7 +278,7 @@ public class Schema : IImplementationsFinder
         if (entityCompleter && !ab.ShouldSet())
             return null;
 
-        return ab.ValueExpression;
+        return ab.GetValueExpression();
     }
 
     internal CacheControllerBase<T>? CacheController<T>() where T : Entity

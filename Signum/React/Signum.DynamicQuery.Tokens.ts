@@ -155,6 +155,7 @@ export module QueryTokenMessage {
   export const MatchSnippet: MessageKey = new MessageKey("QueryTokenMessage", "MatchSnippet");
   export const SnippetOf0: MessageKey = new MessageKey("QueryTokenMessage", "SnippetOf0");
   export const PartitionId: MessageKey = new MessageKey("QueryTokenMessage", "PartitionId");
+  export const Nested: MessageKey = new MessageKey("QueryTokenMessage", "Nested");
 }
 
 export const RoundingType: EnumType<RoundingType> = new EnumType<RoundingType>("RoundingType");

@@ -1,7 +1,6 @@
 using System.Collections;
 using Signum.Utilities.DataStructures;
 using System.Xml.Linq;
-using System.Runtime.Serialization;
 
 namespace Signum.Entities.Reflection;
 

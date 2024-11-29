@@ -35,7 +35,7 @@ export default function User(p: { ctx: TypeContext<UserEntity> }): React.JSX.Ele
         <div className="col-sm-8">
           <AutoLine ctx={ctx.subCtx(e => e.state, { readOnly: true })} />
           <AutoLine ctx={ctx.subCtx(e => e.userName)} readOnly={userNameReadonly(ctx.value) ? true : undefined} />
-          {!ctx.readOnly && ctx.subCtx(a => a.passwordHash).propertyRoute?.canModify() && changePasswordVisible(ctx.value) &&
+          {!ctx.readOnly && !ctx.subCtx(a => a.passwordHash).isMemberReadOnly() && changePasswordVisible(ctx.value) &&
             <DoublePassword ctx={new TypeContext<string>(ctx, undefined, undefined as any, Binding.create(ctx.value, v => v.newPassword))} initialOpen={Boolean(entity.isNew)} mandatory />}
 
           <EntityLine ctx={ctx.subCtx(e => e.role)} onFind={() =>

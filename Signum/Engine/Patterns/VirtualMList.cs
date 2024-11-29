@@ -134,7 +134,7 @@ public static class VirtualMList
         {
             sb.Schema.EntityEvents<T>().RegisterBinding<MList<L>>(mListField,
                  shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                 valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder(),
+                 valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder(),
                  valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                  Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMListWithOrder():
                  Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
@@ -145,7 +145,7 @@ public static class VirtualMList
         {
             sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
                 shouldSet: () => !defLazyRetrieve && !VirtualMList.ShouldAvoidMListType(typeof(L)),
-                valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(),
+                valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList(),
                 valueFunction: (e, rowId, retriever) => Schema.Current.CacheController<L>()!.Enabled ?
                 Schema.Current.CacheController<L>()!.RequestByBackReference<T>(retriever, backReference, e.ToLite()).ToVirtualMList() :
                 Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMList()
@@ -282,7 +282,7 @@ public static class VirtualMList
 
         sb.Schema.EntityEvents<T>().RegisterBinding(mListField,
             shouldSet: () => false,
-            valueExpression: (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
+            valueExpression: () => (e, rowId) => Database.Query<L>().DisableQueryFilter().Where(line => backReference.Evaluate(line).Is(e.ToLite())).ExpandLite(line => backReference.Evaluate(line), ExpandLite.ModelLazy).ToVirtualMListWithOrder()
             );
 
         sb.Schema.EntityEvents<T>().Saving += (T e) =>

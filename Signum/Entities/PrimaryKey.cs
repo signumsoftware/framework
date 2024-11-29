@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.Globalization;
 using Signum.Utilities.Reflection;
-using System.Runtime.Serialization;
 
 namespace Signum.Entities;
 

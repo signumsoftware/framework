@@ -67,8 +67,11 @@ public class FilterConditionProxy : FilterProxy
     {
         var qt = QueryUtils.Parse(this.QueryToken.FullKey!, QueryLogic.Queries.QueryDescription(this.QueryName), SubTokensOptions.CanElement | SubTokensOptions.CanAggregate | SubTokensOptions.CanAnyAll);
 
-       var al =  BaseLineProxy.AutoLine(this.ValueElement.Find(), qt.GetPropertyRoute()!);
+        var al = BaseLineProxy.AutoLine(this.ValueElement.Find(), qt.GetPropertyRoute()!);
 
-        al.SetValueUntyped(value);
+        if (value is PrimaryKey pk)
+            al.SetValueUntyped(pk.Object);
+        else
+            al.SetValueUntyped(value);
     }
 }

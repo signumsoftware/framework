@@ -2,15 +2,6 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Signum.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Runtime.Intrinsics.X86;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
-using System.Linq.Expressions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -85,20 +76,35 @@ public abstract class QueryToken : IEquatable<QueryToken>
         return Expression.Lambda<Func<object, T>>(BuildExpression(context), context.Parameter).Compile();
     }
 
+    public static Func<QueryToken, BuildExpressionContext, Expression?>? IsValueHidden;
+
+    private Expression WithHidden(Expression expression, BuildExpressionContext context)
+    {
+        var isHidden = IsValueHidden?.Invoke(this, context);
+
+        if (isHidden == null)
+            return expression;
+
+        return Expression.Condition(isHidden, Expression.Constant(null, expression.Type.Nullify()), expression.Nullify());
+    }
+
     public Expression BuildExpression(BuildExpressionContext context, bool searchToArray = false)
     {
+
         if (context.Replacements.TryGetValue(this, out var result))
-            return result.GetExpression();
+            return WithHidden(result.GetExpression(), context);
 
         if (searchToArray)
         {
             var cta = HasToArray();
             if (cta != null)
-                return CollectionToArrayToken.BuildToArrayExpression(this, cta, context);
+                return WithHidden(CollectionToArrayToken.BuildToArrayExpression(this, cta, context), context);
         }
 
-        return BuildExpressionInternal(context);
+        return WithHidden(BuildExpressionInternal(context), context);
     }
+
+  
 
     protected abstract Expression BuildExpressionInternal(BuildExpressionContext context);
 
@@ -119,6 +125,8 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
         return pr;
     }
+
+    public bool IsEntity() => this is ColumnToken ct && ct.Column.IsEntity;
 
     public abstract Implementations? GetImplementations();
     public abstract string? IsAllowed();
@@ -455,6 +463,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (options.HasFlag(SubTokensOptions.CanElement))
             tokens.AddRange(EnumExtensions.GetValues<CollectionElementType>().Select(cet => new CollectionElementToken(parent, cet)));
 
+        if (options.HasFlag(SubTokensOptions.CanNested))
+            tokens.AddRange(new CollectionNestedToken(parent));
+
         if (options.HasFlag(SubTokensOptions.CanAnyAll))
             tokens.AddRange(EnumExtensions.GetValues<CollectionAnyAllType>().Select(caat => new CollectionAnyAllToken(parent, caat)));
 
@@ -472,6 +483,11 @@ public abstract class QueryToken : IEquatable<QueryToken>
     public virtual bool HasAllOrAny()
     {
         return Parent != null && Parent.HasAllOrAny();
+    }
+
+    public virtual CollectionNestedToken? HasNested()
+    {
+        return Parent?.HasNested();
     }
 
     public virtual bool HasElement()
@@ -618,6 +634,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     internal bool Dominates(QueryToken t)
     {
+        if (t is CollectionNestedToken)
+            return false; 
+
         if (t is CollectionAnyAllToken)
             return false;
 
@@ -633,18 +652,22 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
 public class BuildExpressionContext
 {
-    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters)
+    public BuildExpressionContext(Type elementType, ParameterExpression parameter, Dictionary<QueryToken, ExpressionBox> replacements, List<Filter>? filters, List<Order>? orders, Pagination? pagination)
     {
         this.ElementType = elementType;
         this.Parameter = parameter;
         this.Replacements = replacements;
         this.Filters = filters;
+        this.Orders = orders;
+        this.Pagination = pagination;
     }
 
     public readonly Type ElementType;
     public readonly ParameterExpression Parameter;
     public readonly Dictionary<QueryToken, ExpressionBox> Replacements;
-    public readonly List<Filter>? Filters; //For Snippet keyword detection
+    public readonly List<Filter>? Filters; //For SubQueries and  Snippet keyword detection
+    public readonly List<Order>? Orders; //For SubQueries  detection
+    public readonly Pagination? Pagination; 
 
     public Expression<Func<object, T>>? TryGetSelectorUntyped<T>(string key)
     {
@@ -678,13 +701,13 @@ public class BuildExpressionContext
         return Expression.Lambda(Expression.Convert(entityColumn.GetExpression().ExtractEntity(false), typeof(Entity)), Parameter);
     }
 
-    internal List<CollectionElementToken> SubQueries()
-    {
-        return Replacements
-            .Where(a => a.Value.SubQueryContext != null)
-            .Select(a => (CollectionElementToken)a.Key)
-            .ToList();
-    }
+    //internal List<CollectionNestedToken> SubQueries()
+    //{
+    //    return Replacements
+    //        .Where(a => a.Value.SubQueryContext != null)
+    //        .Select(a => (CollectionNestedToken)a.Key)
+    //        .ToList();
+    //}
 }
 
 public struct ExpressionBox
@@ -797,6 +820,7 @@ public enum QueryTokenMessage
     [Description("Snippet for {0}")]
     SnippetOf0,
     PartitionId,
+    Nested,
 }
 
 //The order of the elemens matters!

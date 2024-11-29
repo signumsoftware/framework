@@ -1,7 +1,6 @@
 using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Reflection.Metadata.Ecma335;
 using System.Text.RegularExpressions;
 
 namespace Signum.API.Json;

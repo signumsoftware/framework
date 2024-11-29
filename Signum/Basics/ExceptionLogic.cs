@@ -1,6 +1,5 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
-using Signum.Security;
 using Signum.Engine.Sync;
 
 namespace Signum.Basics;
@@ -19,6 +18,7 @@ public static class ExceptionLogic
                     e.CreationDate,
                     e.ExceptionType,
                     e.Origin,
+                    e.User,
                     e.ExceptionMessage,
                     e.StackTraceHash,
                 });

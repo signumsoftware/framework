@@ -462,3 +462,26 @@ public enum UserQueryMessage
     Date,
     Pagination,
 }
+
+public class HealthCheckEmbedded : EmbeddedEntity
+{
+    HealzCheckConditionEmbedded? FailWhen { get; set; }
+    HealzCheckConditionEmbedded? DegradedWhen { get; set; }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if(pi.Name == nameof(DegradedWhen) && DegradedWhen != null)
+        {
+
+        }
+
+        return base.PropertyValidation(pi);
+    }
+}
+
+public class HealzCheckConditionEmbedded : EmbeddedEntity
+{
+    public ComparisonType Type { get; set; }
+
+    public int Value { get; set; }
+}

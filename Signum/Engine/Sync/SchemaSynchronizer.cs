@@ -1,10 +1,8 @@
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using NpgsqlTypes;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
-using Signum.Utilities;
 using System.Data;
 using System.Text.RegularExpressions;
 

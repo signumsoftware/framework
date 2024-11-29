@@ -3,6 +3,7 @@ using Signum.Utilities.Reflection;
 using System.Runtime.CompilerServices;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Collections;
 
 namespace Signum.Entities;
 
@@ -68,6 +69,16 @@ public abstract class Entity : ModifiableEntity, IEntity
     {
         get { return partitionId; }
         set { this.Set(ref partitionId, value); }
+    }
+
+    ////User for property type conditions
+    [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    internal IDictionary? _typeConditions;
+    [HiddenProperty]
+    public IDictionary? _TypeConditions
+    {
+        get { return _typeConditions; }
+        set { this.Set(ref _typeConditions, value); }
     }
 
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)

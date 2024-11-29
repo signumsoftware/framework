@@ -155,7 +155,7 @@ public static class PredictorPredictLogic
             );
         });
 
-        var mainKeys = rt.Columns.Where(rc => !(rc.Column.Token is AggregateToken)).ToArray();
+        var mainKeys = rt.Columns.Where(rc => rc.Token is not AggregateToken).ToArray();
 
         var result = rt.Rows.Select(row => new PredictDictionary(ctx.Predictor, options, row.TryEntity)
         {

@@ -1,4 +1,3 @@
-using Azure.Core;
 using System.Collections.ObjectModel;
 
 namespace Signum.Engine.Linq;

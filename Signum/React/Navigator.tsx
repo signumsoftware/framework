@@ -948,7 +948,7 @@ export namespace Navigator {
     export function getEnumEntities(typeName: string): Promise<EnumConverter<string>>;
     export function getEnumEntities(type: string | EnumType<string>): Promise<EnumConverter<string>> {
 
-      var typeName = typeof type == "string" ? type : type.type;
+      var typeName = typeof type == "string" ? type : type.typeName;
 
       return ajaxGet<{ [enumValue: string]: Entity }>({ url: `/api/reflection/enumEntities/${typeName}` })
         .then(enumToEntity => softCast<EnumConverter<string>>({
@@ -980,6 +980,7 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
   modalDialogClass?: string;
   modalFullScreen?: boolean;
 
@@ -1045,6 +1046,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   avoidFillSearchColumnWidth?: boolean;
 
   modalSize?: BsSize;
+  modalMaxWidth?: boolean;
   modalDialogClass?: string;
   modalFullScreen?: boolean;
 

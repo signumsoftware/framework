@@ -133,7 +133,10 @@ function TotalNumStepsAndRows(p: { chartTimeSeries: ChartTimeSeriesEmbedded, cha
       {QueryTokenDateMessage._0Steps1Rows2TotalRowsAprox.niceToString().formatHtml(
         <strong className={steps > 1000 ? "text-danger" : undefined}>{formatter.format(steps)}</strong>,
         <NumberBox validateKey={isNumberKey} value={st.timeSeriesMaxRowsPerStep} format={formatter} onChange={e => { st.timeSeriesMaxRowsPerStep = e ?? 10; p.onChange(); }}
-          htmlAttributes={{ className: "form-control form-control-xs ms-1", style: { width: "40px", display: "inline-block" } }}
+          htmlAttributes={{
+            className: classes("form-control form-control-xs ms-1", st.timeSeriesMaxRowsPerStep == null && "sf-mandatory"),
+            style: { width: "40px", display: "inline-block" }
+          }}
         />,
         <strong className={st.timeSeriesMaxRowsPerStep != null && steps * st.timeSeriesMaxRowsPerStep > 1000 ? "text-danger" : undefined}>
           {st.timeSeriesMaxRowsPerStep == null ? "" : formatter.format(steps * st.timeSeriesMaxRowsPerStep)}

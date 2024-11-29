@@ -19,7 +19,7 @@ public class EnumLineProxy : BaseLineProxy
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => this.SetValue(value);
 
-    public  WebElementLocator SelectLocator => this.Element.WithLocator(By.CssSelector("select, input, div"));
+    public  WebElementLocator SelectLocator => this.Element.WithLocator(By.CssSelector("select.form-select, .form-control, .form-control-plaintext"));
     public  WebElementLocator WidgetLocator => this.Element.WithLocator(By.CssSelector("div.rw-dropdown-list"));
 
     public void SetValue(object? value)

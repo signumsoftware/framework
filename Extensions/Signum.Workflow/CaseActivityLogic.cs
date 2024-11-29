@@ -1245,41 +1245,47 @@ public static class CaseActivityLogic
 
         internal static void TryToRecompose(CaseEntity childCase)
         {
-            if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
-                if (decompositionCaseActivity.DoneDate != null)
-                    throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
+                if (Database.Query<CaseEntity>().Where(cc => cc.ParentCase.Is(childCase.ParentCase) && cc.Workflow.Is(childCase.Workflow)).All(a => a.FinishDate.HasValue))
+                {
+                    var decompositionCaseActivity = childCase.DecompositionSurrogateActivity();
+                    if (decompositionCaseActivity.DoneDate != null)
+                        throw new InvalidOperationException("The DecompositionCaseActivity is already finished");
 
-                var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
-                    .Where(ca => ca != null)
-                    .Select(ca =>  new { ca!.DoneBy, ca!.Note})
-                    .ToList()
-                    .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
+                    var lastActivitiesNotes = Database.Query<CaseEntity>().Where(c => c.ParentCase.Is(childCase.ParentCase)).Select(c => c.CaseActivities().OrderByDescending(ca => ca.DoneDate).FirstOrDefault())
+                        .Where(ca => ca != null)
+                        .Select(ca => new { ca!.DoneBy, ca!.Note })
+                        .ToList()
+                        .Where(ca => ca.Note.HasText()).ToString(a => $"{a.DoneBy}: {a.Note}", "\r\n");
 
-                decompositionCaseActivity.Note = lastActivitiesNotes;
-                ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                    decompositionCaseActivity.Note = lastActivitiesNotes;
+                    ExecuteStep(decompositionCaseActivity, DoneType.Recompose, null, null);
+                }
             }
-        }
+        } 
 
         private static void Decompose(CaseEntity @case, CaseActivityEntity? previous, WorkflowActivityEntity decActivity, WorkflowConnectionEntity conn, WorkflowExecuteStepContext ctx)
         {
-            var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
-            ctx.NotifyTransitionContext(surrogate);
-            var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
-            if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
-                throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
-
-            if (subEntities.IsEmpty())
-                ExecuteStep(surrogate, DoneType.Recompose, null, null);
-            else
+            using (AuthLogic.Disable()) //Type Conditions may not give access to parent case
             {
-                var subWorkflow = decActivity.SubWorkflow.Workflow;
-                foreach (var se in subEntities)
+                var surrogate = InsertNewCaseActivity(@case, decActivity, previous);
+                ctx.NotifyTransitionContext(surrogate);
+                var subEntities = decActivity.SubWorkflow!.SubEntitiesEval.Algorithm.GetSubEntities(@case.MainEntity, new WorkflowTransitionContext(@case, previous, conn));
+                if (decActivity.Type == WorkflowActivityType.CallWorkflow && subEntities.Count > 1)
+                    throw new InvalidOperationException("More than one entity generated using CallWorkflow. Use DecompositionWorkflow instead.");
+
+                if (subEntities.IsEmpty())
+                    ExecuteStep(surrogate, DoneType.Recompose, null, null);
+                else
                 {
-                    var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
-                    caseActivity.Previous = surrogate.ToLite();
-                    caseActivity.Execute(CaseActivityOperation.Register);
+                    var subWorkflow = decActivity.SubWorkflow.Workflow;
+                    foreach (var se in subEntities)
+                    {
+                        var caseActivity = subWorkflow.ConstructFrom(CaseActivityOperation.CreateCaseActivityFromWorkflow, se, @case.ToLite());
+                        caseActivity.Previous = surrogate.ToLite();
+                        caseActivity.Execute(CaseActivityOperation.Register);
+                    }
                 }
             }
         }

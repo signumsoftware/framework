@@ -601,11 +601,11 @@ export function isStringOrNull(val: any): string | null{
 }
 
 export function isEnum(val: any, enumType: EnumType<any>): string | null{
-  return val != null && typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")})`;
+  return val != null && typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.typeName} (like ${enumType.values().joinComma(" or ")})`;
 }
 
 export function isEnumOrNull(val: any, enumType: EnumType<any>): string | null{
-  return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.type} (like ${enumType.values().joinComma(" or ")}) or null`;
+  return val == null || typeof val == "string" && enumType.values().contains(val) ? null : `The returned value (${JSON.stringify(val)}) should be a valid ${enumType.typeName} (like ${enumType.values().joinComma(" or ")}) or null`;
 }
 
 export function isObject(val: any): string | null{

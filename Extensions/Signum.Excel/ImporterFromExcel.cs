@@ -385,23 +385,46 @@ public class ImporterFromExcel
 
     private static object? ParseExcelValue(QueryToken token, string? strValue, Row row, int colIndex)
     {
-        var ut = token.Type.UnNullify();
+        try
+        {
+            var ut = token.Type.UnNullify();
 
-        object? value = !strValue.HasText() ? null :
-            ut switch
-            {
-                var t when t.IsLite() => Lite.Parse(strValue),
-                var t when t.IsEntity() => Lite.Parse(strValue).Retrieve(),
-                var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
-                var t when t == typeof(decimal) => RoundToValidator(ExcelExtensions.FromExcelNumber(strValue), token),
-                var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
-                var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
-                var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
-                var t when t == typeof(bool) => strValue == "TRUE" ? true : strValue == "FALSE" ? false : ExcelExtensions.FromExcelNumber(strValue) == 1,
-                _ => ReflectionTools.TryParse(strValue, token.Type, out value) ? value :
-                   throw new ApplicationException($"Unable to convert '{strValue}' to {token.Type.TypeName()}. Cell Reference = {CellReference(row, colIndex)}")
-            };
-        return value;
+            object? value = !strValue.HasText() ? null :
+                ut switch
+                {
+                    var t when t.IsLite() => ParseOrFindByText(strValue, token),
+                    var t when t.IsEntity() => ParseOrFindByText(strValue, token).Retrieve(),
+                    var t when t.IsEnum => EnumExtensions.TryParse(strValue, ut, true, out var result) ? result : null,
+                    var t when t == typeof(decimal) => RoundToValidator(ExcelExtensions.FromExcelNumber(strValue), token),
+                    var t when ExcelExtensions.IsNumber(t) => Convert.ChangeType(ExcelExtensions.FromExcelNumber(strValue), ut),
+                    var t when ExcelExtensions.IsDate(t) => ReflectionTools.ChangeType(ExcelExtensions.FromExcelDate(strValue, token.DateTimeKind), ut),
+                    var t when t == typeof(TimeOnly) => ExcelExtensions.FromExcelTime(strValue),
+                    var t when t == typeof(bool) => strValue == "TRUE" ? true : strValue == "FALSE" ? false : ExcelExtensions.FromExcelNumber(strValue) == 1,
+                    _ => ReflectionTools.TryParse(strValue, token.Type, out value) ? value :
+                       throw new ApplicationException($"Unable to convert '{strValue}' to {token.Type.TypeName()}. Cell Reference = {CellReference(row, colIndex)}")
+                };
+            return value;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Error converting '{strValue}' to {token.Type.TypeName()} in cell {CellReference(row, colIndex)}:\n" + e.Message, e);
+        }
+    }
+
+    private static Lite<Entity> ParseOrFindByText(string strValue, QueryToken token)
+    {
+        if (Lite.TryParseLite(strValue, out var result) == null)
+            return result!;
+
+        return giFindByText.GetInvoker(token.Type.CleanType())(strValue);
+    }
+
+    static GenericInvoker<Func<string, Lite<Entity>>> giFindByText =
+        new GenericInvoker<Func<string, Lite<Entity>>>(str => FindByText<ExceptionEntity>(str));
+    private static Lite<T> FindByText<T>(string strValue)
+        where T : Entity
+    {
+        return Database.Query<T>().Where(a => a.ToString().Trim() == strValue.Trim()).Select(a => a.ToLite()).SingleEx();
     }
 
     private static decimal RoundToValidator(decimal val, QueryToken token)
@@ -684,7 +707,7 @@ public class ImporterFromExcel
         {
             var pr = a is HasValueToken ? a.Parent!.GetPropertyRoute() : a.GetPropertyRoute();
 
-            return PropertyAuthLogic.GetAllowedFor(pr!, PropertyAllowed.Write);
+            return PropertyAuthLogic.CanBeAllowedFor(pr!, PropertyAllowed.Write);
         }).NotNull().ToList();
 
         if (authErrors.Any())

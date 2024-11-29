@@ -233,7 +233,7 @@ export function TranslationTypeDescription(p: TranslationTypeDescriptionProps): 
     <tr>
       <th className="leftCell">{loc.culture}</th>
       <th className="smallCell monospaceCell">
-        {type.hasGender && (edit ?
+        {type.hasGender && pronoms.length > 0 && (edit ?
           <select value={td.gender ?? ""} onChange={(e) => { td.gender = e.currentTarget.value; forceUpdate(); }} className={!td.gender && Boolean(td.description) ? "sf-mandatory" : undefined}>
             {initialElementIf(!td.gender).concat(
               pronoms.map(a => <option key={a.gender} value={a.gender}>{a.singular}</option>))}

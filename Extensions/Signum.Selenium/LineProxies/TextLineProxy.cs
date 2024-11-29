@@ -17,7 +17,7 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
     public override object? GetValueUntyped() => this.GetValue();
     public override void SetValueUntyped(object? value) => this.SetValue((string?)value);
 
-    public abstract WebElementLocator InputLocator { get; }
+    public WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector(".form-control, .form-control-readonly"));
 
     public void SetValue(string? value)
     {
@@ -44,8 +44,6 @@ public class TextBoxLineProxy : TextBoxBaseLineProxy
     public TextBoxLineProxy(IWebElement element, PropertyRoute route) : base(element, route)
     {
     }
-
-    public override WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector("input[type=text]"));
 }
 
 public class PasswordBoxLineProxy : TextBoxBaseLineProxy
@@ -53,8 +51,6 @@ public class PasswordBoxLineProxy : TextBoxBaseLineProxy
     public PasswordBoxLineProxy(IWebElement element, PropertyRoute route) : base(element, route)
     {
     }
-
-    public override WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector("input[type=password]"));
 }
 
 
@@ -63,6 +59,4 @@ public class ColorBoxLineProxy : TextBoxBaseLineProxy
     public ColorBoxLineProxy(IWebElement element, PropertyRoute route) : base(element, route)
     {
     }
-
-    public override WebElementLocator InputLocator => this.Element.WithLocator(By.CssSelector("input[type=color]"));
 }

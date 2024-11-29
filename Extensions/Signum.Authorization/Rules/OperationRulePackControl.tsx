@@ -10,6 +10,7 @@ import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { useForceUpdate } from '@framework/Hooks'
 import { OperationSymbol } from '@framework/Signum.Operations'
+import { GraphExplorer } from '@framework/Reflection'
 
 export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeContext<OperationRulePack>; innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
 
@@ -24,11 +25,18 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
       });
   }
 
-  const forceUpdate = useForceUpdate();
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
+  }
+
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
+    GraphExplorer.propagateAll(bc.pack.entity);
+
+    const hasChanges = bc.pack.entity.modified;
+
     return [
-      { button: <Button variant="primary" disabled={ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
+      { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 
@@ -37,13 +45,11 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
   function handleRadioClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
 
     ctx.value.rules.forEach(mle => {
-      if (!mle.element.coercedValues!.contains(hc)) {
-        mle.element.allowed = hc;
-        mle.element.modified = true;
-      }
+      mle.element.allowed = OperationAllowed.min(hc, mle.element.coerced);
+      mle.element.modified = true;
     });
 
-    forceUpdate();
+    updateFrame();
   }
 
   return (
@@ -99,7 +105,7 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
                 <GrayCheckbox readOnly={c.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
                   c.value.allowed = c.value.allowedBase;
                   ctx.value.modified = true;
-                  forceUpdate();
+                  updateFrame();
                 }} />
               </td>
             </tr>
@@ -113,10 +119,14 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
 
   function renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
 
-    if (c.coercedValues!.contains(allowed))
+    if (OperationAllowed.index(c.coerced) < OperationAllowed.index(allowed))
       return;
 
     return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color}
-      onClicked={a => { c.allowed = allowed; c.modified = true; forceUpdate() }} />;
+      onClicked={a => {
+        c.allowed = allowed;
+        c.modified = true;
+        updateFrame();
+      }} />;
   }
 }

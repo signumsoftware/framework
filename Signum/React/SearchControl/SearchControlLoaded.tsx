@@ -44,9 +44,10 @@ import { KeyNames } from '../Components'
 
 export interface ColumnParsed {
   column: ColumnOptionParsed;
+  columnIndex: number;
   hasToArray?: QueryToken;
   cellFormatter?: Finder.CellFormatter;
-  resultIndex: number;
+  resultIndex: number | "Entity";
 }
 
 export type SearchControlViewMode = "Mobile" | "Standard";
@@ -114,7 +115,7 @@ export interface SearchControlLoadedProps {
   onCreateFinished?: (entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void, scl: SearchControlLoaded) => void;
   onDoubleClick?: (e: React.MouseEvent<any>, row: ResultRow, sc?: SearchControlLoaded) => void;
   onNavigated?: (lite: Lite<Entity>) => void;
-  onSelectionChanged?: (rows: ResultRow[]) => void;
+  onSelectionChanged?: (rows: ResultRow[], reason: SelectionChangeReason) => void;
   onFiltersChanged?: (filters: FilterOptionParsed[]) => void;
   onHeighChanged?: () => void;
   onSearch?: (fo: FindOptionsParsed, dataChange: boolean, sc: SearchControlLoaded) => void;
@@ -125,6 +126,8 @@ export interface SearchControlLoadedProps {
   mobileOptions?: (fop: FindOptionsParsed) => SearchControlMobileOptions;
   onDrilldown?: (scl: SearchControlLoaded, row: ResultRow, options?: OnDrilldownOptions) => Promise<boolean | undefined>;
 }
+
+export type SelectionChangeReason = "toggle" | "toggleAll" | "newResult" | "contextMenu";
 
 export interface SearchControlLoadedState {
   resultTable?: ResultTable;
@@ -366,15 +369,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           this.fixScroll();
           if (this.props.onResult)
             this.props.onResult(rt, dataChanged ?? false, this);
-          this.notifySelectedRowsChanged();
+          this.notifySelectedRowsChanged("newResult");
         });
       });
     });
   }
 
-  notifySelectedRowsChanged(): void {
+  notifySelectedRowsChanged(reason: SelectionChangeReason): void {
     if (this.props.onSelectionChanged)
-      this.props.onSelectionChanged(this.state.selectedRows!);
+      this.props.onSelectionChanged(this.state.selectedRows!, reason);
   }
 
 
@@ -441,7 +444,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           currentMenuItems: undefined
         }, () => {
           this.loadMenuItems();
-          this.notifySelectedRowsChanged();
+          this.notifySelectedRowsChanged("contextMenu");
         });
       }
 
@@ -1230,7 +1233,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
       currentMenuItems: undefined,
     }, () => {
-      this.notifySelectedRowsChanged()
+      this.notifySelectedRowsChanged("toggleAll")
     });
   }
 
@@ -1510,7 +1513,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       selectedRows.remove(row);
     }
 
-    this.notifySelectedRowsChanged();
+    this.notifySelectedRowsChanged("toggle");
 
     this.setState({ currentMenuItems: undefined });
   }
@@ -1657,23 +1660,19 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       .filter(({ co, i }) => !co.hiddenColumn || this.state.showHiddenColumns);
   }
 
-  getVisibleColumnsWithFormatter(): {
-      column: ColumnOptionParsed
-      columnIndex: number
-      hasToArray: QueryToken | undefined
-      cellFormatter: Finder.CellFormatter | undefined
-      resultIndex: number
-  }[] {
+  getVisibleColumnsWithFormatter(): ColumnParsed[] {
     const columnOptions = this.getVisibleColumn();
     const resultColumns = this.state.resultTable?.columns;
     const qs = this.props.querySettings;
 
-    return columnOptions.map(({ co, i }) => ({
+    return columnOptions.map<ColumnParsed>(({ co, i }) => ({
       column: co,
       columnIndex: i,
       hasToArray: hasToArray(co.token),
       cellFormatter: (co.token && ((this.props.formatters && this.props.formatters[co.token.fullKey]) || Finder.getCellFormatter(qs, co.token, this))),
-      resultIndex: co.token == undefined || resultColumns == null ? -1 : resultColumns.indexOf(co.token.fullKey)
+      resultIndex: co.token == undefined || resultColumns == null ? -1 :
+        co.token.fullKey == "Entity" && !this.state.resultTable?.columns.contains("Entity") ? "Entity":
+        resultColumns.indexOf(co.token.fullKey)
     }));
   }
 
@@ -1732,9 +1731,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }> | null | undefined {
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? SearchControlLoaded.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((getRowValue(fctx.row, c.resultIndex) as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, SearchControlLoaded.maxToArrayElements) :
-        c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
+        c.cellFormatter.formatter(getRowValue(fctx.row, c.resultIndex), fctx, c.column.token!);
   }
 
   renderRows(): React.ReactNode {
@@ -1819,11 +1818,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
           {
             columns.map((c, j) =>
-              i != 0 && c.column.combineRows == "EqualValue" && equals(resultTable.rows[i - 1].columns[c.resultIndex], row.columns[c.resultIndex]) ? null :
+              i != 0 && c.column.combineRows == "EqualValue" && equals(getRowValue(resultTable.rows[i - 1], c.resultIndex), getRowValue(row, c.resultIndex)) ? null :
                 i != 0 && c.column.combineRows == "EqualEntity" && equals(resultTable.rows[i - 1].entity, row.entity) ? null :
                   <td key={j} data-column-index={j} className={c.cellFormatter && c.cellFormatter.cellClass}
                     rowSpan={
-                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => row.columns[c.resultIndex]) :
+                      c.column.combineRows == "EqualValue" ? calculateRowSpan(row => getRowValue(row, c.resultIndex)) :
                         c.column.combineRows == "EqualEntity" ? calculateRowSpan(row => row.entity) :
                           undefined}>
                     {this.getColumnElement(fctx, c)}
@@ -2224,6 +2223,13 @@ function dominates(root: QueryToken, big: QueryToken) {
 
   return big.fullKey.startsWith(root.fullKey + ".")
 
+}
+
+function getRowValue(row: ResultRow, resultIndex: number | "Entity") {
+  if (resultIndex == "Entity")
+    return row.entity;
+
+  return row.columns[resultIndex];
 }
 
 function SearchControlEllipsisMenu(p: { sc: SearchControlLoaded, isHidden: boolean }) {

@@ -1,5 +1,6 @@
 using Signum.Utilities.Reflection;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Metadata;
 
 namespace Signum.Authorization.Rules;
@@ -26,7 +27,6 @@ public class TypeCondition
 }
 
 public delegate LambdaExpression QueryAuditor(FilterQueryArgs ctx);
-
 
 
 public static class TypeConditionLogic
@@ -70,19 +70,19 @@ public static class TypeConditionLogic
         }
     }
 
-    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, bool replace = false)
           where T : Entity
     {
-        Register<T>(typeCondition, condition, null);
+        Register<T>(typeCondition, condition, null, replace: replace);
     }
 
-    public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition)
+    public static void RegisterCompile<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, bool replace = false)
           where T : Entity
     {
-        Register<T>(typeCondition, condition, condition.Compile());
+        Register<T>(typeCondition, condition, condition.Compile(), replace: replace);
     }
 
-    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition)
+    public static void Register<T>(TypeConditionSymbol typeCondition, Expression<Func<T, bool>> condition, Func<T, bool>? inMemoryCondition, bool replace = false)
         where T : Entity
     {
         if (Schema.Current.IsCompleted)
@@ -94,7 +94,16 @@ public static class TypeConditionLogic
         if (condition == null)
             throw new ArgumentNullException(nameof(condition));
 
-        infos.GetOrCreate(typeof(T))[typeCondition] = new TypeCondition(condition, inMemoryCondition);
+        var dic = infos.GetOrCreate(typeof(T));
+        if (replace)
+            dic[typeCondition] = new TypeCondition(condition, inMemoryCondition);
+        else
+        {
+            if (dic.ContainsKey(typeCondition))
+                throw new InvalidOperationException($"TypeCondition {typeCondition} already registered for {typeof(T).TypeName()}");
+
+            dic.Add(typeCondition, new TypeCondition(condition, inMemoryCondition));
+        }
     }
 
     public static void RegisterWhenAlreadyFilteringBy<T, P>(TypeConditionSymbol typeCondition, Expression<Func<T, P>> property)
@@ -273,7 +282,19 @@ public static class TypeConditionLogic
     [MethodExpander(typeof(InConditionExpander))]
     public static bool InCondition(this Entity entity, TypeConditionSymbol typeCondition)
     {
-        throw new InvalidProgramException("InCondition is meant to be used in database only");
+        return giInConditionImp.GetInvoker(entity.GetType())(entity, typeCondition);
+    }
+
+    static GenericInvoker<Func<Entity, TypeConditionSymbol, bool>> giInConditionImp = new((e, tc) => InConditionImp((ExceptionEntity)e, tc));
+    static bool InConditionImp<T>(T entity, TypeConditionSymbol typeCondition)
+        where T : Entity
+    {
+        var mc = GetInMemoryCondition<T>(typeCondition);
+
+        if (mc == null)
+            throw new InvalidOperationException($"TypeCondition '{typeCondition}' has not in-memory implementation for '{typeof(T).TypeName()}'");
+
+        return mc(entity);
     }
 
     class InConditionExpander : IMethodExpander
@@ -349,6 +370,13 @@ public static class TypeConditionLogic
         return pair.QueryAuditor!(args);
     }
 
+    public static bool HasInMemoryCondition(Type type, TypeConditionSymbol typeCondition)
+    {
+        var pair = infos.GetOrThrow(type, "There's no TypeCondition registered for type {0}").GetOrThrow(typeCondition);
+
+        return pair.InMemoryCondition != null;
+    }
+
     public static Func<T, bool>? GetInMemoryCondition<T>(TypeConditionSymbol typeCondition)
         where T : Entity
     {
@@ -357,8 +385,27 @@ public static class TypeConditionLogic
         return (Func<T, bool>?)pair.InMemoryCondition;
     }
 
+    public static bool InTypeCondition<T>(this T entity, TypeConditionSymbol typeCodition)
+        where T : Entity
+    {
+        if (entity.GetType() != typeof(T))
+            throw new InvalidOperationException("InTypeCondition should be called with the exact type");
+
+        var func = GetInMemoryCondition<T>(typeCodition);
+        if (func != null)
+            return func(entity);
+
+        var d = (Dictionary<TypeConditionSymbol, bool>)entity._TypeConditions!;
+
+        if (d == null || !d.TryGetValue(typeCodition, out var result))
+            throw new InvalidOperationException($"TypeCondition {typeCodition} can not be evaluated in-memory for {typeof(T).Name} and has not been included when retrieving the entity. Cached entities should have in-memory type conditions");
+
+        return result;
+    }
+
     public static bool IsDefined(Type type, TypeConditionSymbol typeCondition)
     {
         return infos.TryGetC(type)?.TryGetC(typeCondition) != null;
     }
 }
+
