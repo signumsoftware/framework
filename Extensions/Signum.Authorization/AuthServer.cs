@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization;
 
@@ -232,8 +233,7 @@ public static class AuthServer
                 }
                 else
                 {
-
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
 
                     if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Read))
                         return "Not Allowed";
@@ -254,9 +254,9 @@ public static class AuthServer
                 }
                 else
                 {
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
 
-                    if (!PropertyAuthLogic.IsAllowedFor(entity!, pr, PropertyAllowed.Write))
+                    if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Write))
                         return $"{pr} is not Allowed to write";
 
                     return null;

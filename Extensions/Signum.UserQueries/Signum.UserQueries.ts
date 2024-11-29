@@ -6,6 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
+import * as Validation from '../../Signum/React/Signum.Entities.Validation'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
@@ -17,6 +18,18 @@ export type AutoUpdate =
   "None" |
   "InteractionGroup" |
   "Dashboard";
+
+export const HealthCheckEmbedded: Type<HealthCheckEmbedded> = new Type<HealthCheckEmbedded>("HealthCheckEmbedded");
+export interface HealthCheckEmbedded extends Entities.EmbeddedEntity {
+  Type: "HealthCheckEmbedded";
+}
+
+export const HealzCheckConditionEmbedded: Type<HealzCheckConditionEmbedded> = new Type<HealzCheckConditionEmbedded>("HealzCheckConditionEmbedded");
+export interface HealzCheckConditionEmbedded extends Entities.EmbeddedEntity {
+  Type: "HealzCheckConditionEmbedded";
+  type: Validation.ComparisonType;
+  value: number;
+}
 
 export const SystemTimeEmbedded: Type<SystemTimeEmbedded> = new Type<SystemTimeEmbedded>("SystemTimeEmbedded");
 export interface SystemTimeEmbedded extends Entities.EmbeddedEntity {
