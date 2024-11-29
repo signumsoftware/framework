@@ -248,7 +248,7 @@ public static class AuthServer
                 if (UserEntity.Current == null)
                 {
                     if (!pr.GetAllowUnathenticated())
-                        return "Not Allowed for Unathenticated";
+                        return $"{pr} is not Allowed for Unathenticated";
 
                     return null;
                 }
@@ -257,7 +257,7 @@ public static class AuthServer
                     var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
 
                     if (!PropertyAuthLogic.IsAllowedFor(entity!, pr, PropertyAllowed.Write))
-                        return "Not Allowed to write";
+                        return $"{pr} is not Allowed to write";
 
                     return null;
                 }

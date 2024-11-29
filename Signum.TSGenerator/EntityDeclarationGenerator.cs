@@ -260,7 +260,7 @@ static class EntityDeclarationGenerator
     private static string MessageInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
@@ -276,7 +276,7 @@ static class EntityDeclarationGenerator
     private static string QueryInTypeScript(TypeDefinition type, AssemblyOptions options)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
@@ -294,7 +294,7 @@ static class EntityDeclarationGenerator
     private static string SymbolInTypeScript(TypeDefinition type, AssemblyOptions options, Dictionary<string, Dictionary<string, NamespaceTSReference>> namespacesReferences)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine($"export module {type.Name} {{");
+        sb.AppendLine($"export namespace {type.Name} {{");
         var fields = type.Fields.OrderBy(a => a.MetadataToken.RID).Where(a => a.IsPublic && a.IsStatic).ToList();
 
         foreach (var field in fields)
