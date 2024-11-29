@@ -3320,7 +3320,7 @@ internal class QueryBinder : ExpressionVisitor
         if (lambda == null)
             return null;
 
-        var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: true, log: null)!;
+        var cleanLambda = (LambdaExpression)DbQueryProvider.Clean(lambda, filter: false, log: null)!;
 
         var parentEntity = new EntityExpression(af.Route.RootType, af.BackID, af.ExternalPeriod, null, null, null, null, false);
 
