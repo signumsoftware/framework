@@ -271,12 +271,11 @@ public static class AuthServer
                 var role = RoleEntity.Current;
                 var pac = PropertyAuthLogic.GetAllowed(role, pr);
 
-                if (!pac.ConditionRules.Any())
-                    return null;
+                var tac = TypeAuthLogic.GetAllowed(pr.RootType);
 
-                var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+                var candidates = pac.CandidatesAssuming(tac);
 
-                if (pac.Equals(tac))
+                if (candidates.Distinct().Count() <= 1)
                     return null;
 
                 var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
