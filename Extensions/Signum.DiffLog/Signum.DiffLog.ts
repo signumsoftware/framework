@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Rules from '../Signum.Authorization/Rules/Signum.Authorization.Rules'
 
 
-export module DiffLogMessage {
+export namespace DiffLogMessage {
   export const PreviousLog: MessageKey = new MessageKey("DiffLogMessage", "PreviousLog");
   export const NextLog: MessageKey = new MessageKey("DiffLogMessage", "NextLog");
   export const CurrentEntity: MessageKey = new MessageKey("DiffLogMessage", "CurrentEntity");
@@ -30,7 +30,7 @@ export interface DiffLogMixin extends Entities.MixinEntity {
   cleaned: boolean;
 }
 
-export module OperationLogTypeCondition {
+export namespace OperationLogTypeCondition {
   export const FilteringByTarget : Rules.TypeConditionSymbol = registerSymbol("TypeCondition", "OperationLogTypeCondition.FilteringByTarget");
 }
 

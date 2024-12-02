@@ -8,13 +8,13 @@ import * as Basics from '../../Signum/React/Signum.Basics'
 import * as Operations from '../../Signum/React/Signum.Operations'
 
 
-export module TranslationJavascriptMessage {
+export namespace TranslationJavascriptMessage {
   export const WrongTranslationToSubstitute: MessageKey = new MessageKey("TranslationJavascriptMessage", "WrongTranslationToSubstitute");
   export const RightTranslation: MessageKey = new MessageKey("TranslationJavascriptMessage", "RightTranslation");
   export const RememberChange: MessageKey = new MessageKey("TranslationJavascriptMessage", "RememberChange");
 }
 
-export module TranslationMessage {
+export namespace TranslationMessage {
   export const RepeatedCultures0: MessageKey = new MessageKey("TranslationMessage", "RepeatedCultures0");
   export const CodeTranslations: MessageKey = new MessageKey("TranslationMessage", "CodeTranslations");
   export const InstanceTranslations: MessageKey = new MessageKey("TranslationMessage", "InstanceTranslations");
@@ -53,7 +53,7 @@ export module TranslationMessage {
   export const AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision: MessageKey = new MessageKey("TranslationMessage", "AreYouSureToContinueAutoTranslationAllAssembliesFor0WithoutRevision");
 }
 
-export module TranslationPermission {
+export namespace TranslationPermission {
   export const TranslateCode : Basics.PermissionSymbol = registerSymbol("Permission", "TranslationPermission.TranslateCode");
   export const TranslateInstances : Basics.PermissionSymbol = registerSymbol("Permission", "TranslationPermission.TranslateInstances");
 }
@@ -66,7 +66,7 @@ export interface TranslationReplacementEntity extends Entities.Entity {
   rightTranslation: string;
 }
 
-export module TranslationReplacementOperation {
+export namespace TranslationReplacementOperation {
   export const Save : Operations.ExecuteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Save");
   export const Delete : Operations.DeleteSymbol<TranslationReplacementEntity> = registerSymbol("Operation", "TranslationReplacementOperation.Delete");
 }

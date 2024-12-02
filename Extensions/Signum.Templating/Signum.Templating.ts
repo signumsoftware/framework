@@ -40,7 +40,7 @@ export interface QueryModel extends Entities.ModelEntity {
   Type: "QueryModel";
 }
 
-export module QueryModelMessage {
+export namespace QueryModelMessage {
   export const ConfigureYourQueryAndPressSearchBeforeOk: MessageKey = new MessageKey("QueryModelMessage", "ConfigureYourQueryAndPressSearchBeforeOk");
 }
 
@@ -49,7 +49,7 @@ export interface TemplateApplicableEval extends Eval.EvalEmbedded<ITemplateAppli
   Type: "TemplateApplicableEval";
 }
 
-export module TemplateTokenMessage {
+export namespace TemplateTokenMessage {
   export const Insert: MessageKey = new MessageKey("TemplateTokenMessage", "Insert");
   export const NoColumnSelected: MessageKey = new MessageKey("TemplateTokenMessage", "NoColumnSelected");
   export const YouCannotAddIfBlocksOnCollectionFields: MessageKey = new MessageKey("TemplateTokenMessage", "YouCannotAddIfBlocksOnCollectionFields");

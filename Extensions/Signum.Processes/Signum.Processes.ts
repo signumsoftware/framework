@@ -34,11 +34,11 @@ export interface PackageOperationEntity extends PackageEntity {
   operation: Operations.OperationSymbol;
 }
 
-export module PackageOperationProcess {
+export namespace PackageOperationProcess {
   export const PackageOperation : ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "PackageOperationProcess.PackageOperation");
 }
 
-export module PackageQuery {
+export namespace PackageQuery {
   export const PackageLineLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLineLastProcess");
   export const PackageLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageLastProcess");
   export const PackageOperationLastProcess: QueryKey = new QueryKey("PackageQuery", "PackageOperationLastProcess");
@@ -80,7 +80,7 @@ export interface ProcessExceptionLineEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity>;
 }
 
-export module ProcessMessage {
+export namespace ProcessMessage {
   export const Process0IsNotRunningAnymore: MessageKey = new MessageKey("ProcessMessage", "Process0IsNotRunningAnymore");
   export const ProcessStartIsGreaterThanProcessEnd: MessageKey = new MessageKey("ProcessMessage", "ProcessStartIsGreaterThanProcessEnd");
   export const ProcessStartIsNullButProcessEndIsNot: MessageKey = new MessageKey("ProcessMessage", "ProcessStartIsNullButProcessEndIsNot");
@@ -92,7 +92,7 @@ export module ProcessMessage {
   export const OnlyActive: MessageKey = new MessageKey("ProcessMessage", "OnlyActive");
 }
 
-export module ProcessOperation {
+export namespace ProcessOperation {
   export const Save : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Save");
   export const Execute : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Execute");
   export const Suspend : Operations.ExecuteSymbol<ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Suspend");
@@ -101,7 +101,7 @@ export module ProcessOperation {
   export const Retry : Operations.ConstructSymbol_From<ProcessEntity, ProcessEntity> = registerSymbol("Operation", "ProcessOperation.Retry");
 }
 
-export module ProcessPermission {
+export namespace ProcessPermission {
   export const ViewProcessPanel : Basics.PermissionSymbol = registerSymbol("Permission", "ProcessPermission.ViewProcessPanel");
 }
 

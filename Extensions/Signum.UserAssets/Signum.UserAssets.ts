@@ -25,7 +25,7 @@ export interface LiteConflictEmbedded extends Entities.EmbeddedEntity {
   to: Entities.Lite<Entities.Entity> | null;
 }
 
-export module UserAssetMessage {
+export namespace UserAssetMessage {
   export const ExportToXml: MessageKey = new MessageKey("UserAssetMessage", "ExportToXml");
   export const ImportUserAssets: MessageKey = new MessageKey("UserAssetMessage", "ImportUserAssets");
   export const ImportPreview: MessageKey = new MessageKey("UserAssetMessage", "ImportPreview");
@@ -38,7 +38,7 @@ export module UserAssetMessage {
   export const TheFilterOperation0isNotCompatibleWith1: MessageKey = new MessageKey("UserAssetMessage", "TheFilterOperation0isNotCompatibleWith1");
 }
 
-export module UserAssetPermission {
+export namespace UserAssetPermission {
   export const UserAssetsToXML : Basics.PermissionSymbol = registerSymbol("Permission", "UserAssetPermission.UserAssetsToXML");
 }
 

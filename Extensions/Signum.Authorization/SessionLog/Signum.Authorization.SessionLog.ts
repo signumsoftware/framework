@@ -19,7 +19,7 @@ export interface SessionLogEntity extends Entities.Entity {
   userAgent: string | null;
 }
 
-export module SessionLogPermission {
+export namespace SessionLogPermission {
   export const TrackSession : Basics.PermissionSymbol = registerSymbol("Permission", "SessionLogPermission.TrackSession");
 }
 

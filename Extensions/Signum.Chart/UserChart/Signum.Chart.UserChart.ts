@@ -61,7 +61,7 @@ export interface UserChartLiteModel extends Entities.ModelEntity {
   hideQuickLink: boolean;
 }
 
-export module UserChartOperation {
+export namespace UserChartOperation {
   export const Save : Operations.ExecuteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Save");
   export const Delete : Operations.DeleteSymbol<UserChartEntity> = registerSymbol("Operation", "UserChartOperation.Delete");
 }

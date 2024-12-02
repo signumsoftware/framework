@@ -17,14 +17,14 @@ export interface ColorPaletteEntity extends Entities.Entity {
   specificColors: Entities.MList<SpecificColorEmbedded>;
 }
 
-export module ColorPaletteMessage {
+export namespace ColorPaletteMessage {
   export const FillAutomatically: MessageKey = new MessageKey("ColorPaletteMessage", "FillAutomatically");
   export const Select0OnlyIfYouWantToOverrideTheAutomaticColor: MessageKey = new MessageKey("ColorPaletteMessage", "Select0OnlyIfYouWantToOverrideTheAutomaticColor");
   export const ShowPalette: MessageKey = new MessageKey("ColorPaletteMessage", "ShowPalette");
   export const ShowList: MessageKey = new MessageKey("ColorPaletteMessage", "ShowList");
 }
 
-export module ColorPaletteOperation {
+export namespace ColorPaletteOperation {
   export const Save : Operations.ExecuteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Save");
   export const Delete : Operations.DeleteSymbol<ColorPaletteEntity> = registerSymbol("Operation", "ColorPaletteOperation.Delete");
 }

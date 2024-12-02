@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 
 
-export module AzureADQuery {
+export namespace AzureADQuery {
   export const ActiveDirectoryUsers: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryUsers");
   export const ActiveDirectoryGroups: QueryKey = new QueryKey("AzureADQuery", "ActiveDirectoryGroups");
 }

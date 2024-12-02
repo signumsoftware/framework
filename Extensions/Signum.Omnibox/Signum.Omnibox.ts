@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export module OmniboxMessage {
+export namespace OmniboxMessage {
   export const No: MessageKey = new MessageKey("OmniboxMessage", "No");
   export const NotFound: MessageKey = new MessageKey("OmniboxMessage", "NotFound");
   export const Omnibox_DatabaseAccess: MessageKey = new MessageKey("OmniboxMessage", "Omnibox_DatabaseAccess");
@@ -27,7 +27,7 @@ export module OmniboxMessage {
   export const Search: MessageKey = new MessageKey("OmniboxMessage", "Search");
 }
 
-export module OmniboxPermission {
+export namespace OmniboxPermission {
   export const ViewOmnibox : Basics.PermissionSymbol = registerSymbol("Permission", "OmniboxPermission.ViewOmnibox");
 }
 

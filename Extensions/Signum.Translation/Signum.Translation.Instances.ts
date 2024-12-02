@@ -19,7 +19,7 @@ export interface TranslatedInstanceEntity extends Entities.Entity {
   originalText: string;
 }
 
-export module TranslatedInstanceOperation {
+export namespace TranslatedInstanceOperation {
   export const Delete : Operations.DeleteSymbol<TranslatedInstanceEntity> = registerSymbol("Operation", "TranslatedInstanceOperation.Delete");
 }
 
