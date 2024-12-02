@@ -58,7 +58,7 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
   }).catch((e) => {
 
     if (e instanceof ServiceError && "status" in e.httpError && "description" in e.httpError)
-      return softCast<StatusInfo>({ result: e.httpError });
+      return softCast<StatusInfo>({ result: e.httpError as HealthCheckResult });
 
     return softCast<StatusInfo>({ error: e });
   }), [p.element.checkURL]);
