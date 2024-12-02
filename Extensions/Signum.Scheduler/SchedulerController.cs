@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Signum.API;
 using Signum.API.Filters;
 
 namespace Signum.Scheduler;
@@ -13,10 +14,11 @@ public class SchedulerController : ControllerBase
         return state;
     }
 
-    [HttpGet("api/scheduler/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus SimpleStatus()
+    [HttpGet("api/scheduler/healthCheck"), SignumAllowAnonymous]
+    public SignumHealthResult HealthCheck()
     {
-        return ScheduleTaskRunner.GetSimpleStatus();
+        var status = ScheduleTaskRunner.GetHealthStatus();
+        return new SignumHealthResult(status);
     }
 
     [HttpPost("api/scheduler/start")]

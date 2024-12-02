@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
 using Signum.API.Controllers;
 using Signum.API.Filters;
@@ -49,15 +50,12 @@ public class ProcessController : ControllerBase
         Thread.Sleep(1000);
     }
 
-    [HttpGet("api/processes/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus SimpleStatus()
-    {
-        return ProcessRunner.GetSimpleStatus();
-    }
 
     [HttpGet("api/processes/healthCheck"), SignumAllowAnonymous]
-    public HealthCheckStatus HealthCheck()
+    public SignumHealthResult HealthCheck()
     {
-        return ProcessRunner.GetSimpleStatus() == Basics.SimpleStatus.Ok ? HealthCheckStatus.Ok : HealthCheckStatus.Error;
+        var status = ProcessRunner.GetHealthStatus();
+
+        return new SignumHealthResult(status);
     }
 }
