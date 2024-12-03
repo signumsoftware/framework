@@ -2,6 +2,8 @@ using Signum.UserAssets;
 using System.Xml.Linq;
 using Signum.Utilities.DataStructures;
 using System.ComponentModel;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Dashboard;
 
@@ -133,6 +135,14 @@ public interface IPartEntity : IEntity
 
     XElement ToXml(IToXmlContext ctx);
     void FromXml(XElement element, IFromXmlContext ctx);
+}
+
+public static class PanelPartExtensions
+{
+    public static DashboardEntity GetDashboard(this IPartEntity e)
+    {
+        return ((ModifiableEntity)e).GetParentEntity<PanelPartEmbedded>().GetParentEntity<DashboardEntity>();
+    }
 }
 
 public enum InteractionGroup

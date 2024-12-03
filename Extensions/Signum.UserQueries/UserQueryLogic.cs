@@ -343,11 +343,8 @@ public static class UserQueryLogic
     {
         TypeConditionLogic.RegisterCompile<UserQueryEntity>(typeCondition, condition);
 
-        TypeConditionLogic.Register<ValueUserQueryListPartEntity>(typeCondition,
-             cscp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(cscp)));
-
-        TypeConditionLogic.Register<UserQueryPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+        DashboardLogic.RegisterTypeConditionForPart<ValueUserQueryListPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<UserQueryPartEntity>(typeCondition);
     }
 
     static SqlPreCommand? Schema_Synchronizing(Replacements replacements)
