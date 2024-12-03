@@ -4,7 +4,7 @@ import { TypeContext } from '@framework/TypeContext'
 import { ScheduledTaskEntity, ScheduledTaskLogEntity } from '../Signum.Scheduler'
 import { SearchValueLine } from '@framework/Search';
 
-export default function ScheduledTask(p : { ctx: TypeContext<ScheduledTaskEntity> }): React.JSX.Element {
+export default function ScheduledTask(p: { ctx: TypeContext<ScheduledTaskEntity> }): React.JSX.Element {
   const ctx = p.ctx;
 
   return (
