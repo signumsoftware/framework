@@ -6,7 +6,6 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from '../../Sign
 import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 import * as DynamicQuery from '../../Signum/React/Signum.DynamicQuery'
-import * as Validation from '../../Signum/React/Signum.Entities.Validation'
 import * as Operations from '../../Signum/React/Signum.Operations'
 import * as UserAssets from '../Signum.UserAssets/Signum.UserAssets'
 import * as Queries from '../Signum.UserAssets/Signum.UserAssets.Queries'
@@ -19,16 +18,18 @@ export type AutoUpdate =
   "InteractionGroup" |
   "Dashboard";
 
+export const HealthCheckConditionEmbedded: Type<HealthCheckConditionEmbedded> = new Type<HealthCheckConditionEmbedded>("HealthCheckConditionEmbedded");
+export interface HealthCheckConditionEmbedded extends Entities.EmbeddedEntity {
+  Type: "HealthCheckConditionEmbedded";
+  operation: DynamicQuery.FilterOperation;
+  value: number;
+}
+
 export const HealthCheckEmbedded: Type<HealthCheckEmbedded> = new Type<HealthCheckEmbedded>("HealthCheckEmbedded");
 export interface HealthCheckEmbedded extends Entities.EmbeddedEntity {
   Type: "HealthCheckEmbedded";
-}
-
-export const HealzCheckConditionEmbedded: Type<HealzCheckConditionEmbedded> = new Type<HealzCheckConditionEmbedded>("HealzCheckConditionEmbedded");
-export interface HealzCheckConditionEmbedded extends Entities.EmbeddedEntity {
-  Type: "HealzCheckConditionEmbedded";
-  type: Validation.ComparisonType;
-  value: number;
+  failWhen: HealthCheckConditionEmbedded | null;
+  degradedWhen: HealthCheckConditionEmbedded | null;
 }
 
 export const SystemTimeEmbedded: Type<SystemTimeEmbedded> = new Type<SystemTimeEmbedded>("SystemTimeEmbedded");
@@ -62,6 +63,7 @@ export interface UserQueryEntity extends Entities.Entity, UserAssets.IUserAssetE
   paginationMode: DynamicQuery.PaginationMode | null;
   elementsPerPage: number | null;
   systemTime: SystemTimeEmbedded | null;
+  healthCheck: HealthCheckEmbedded | null;
   customDrilldowns: Entities.MList<Entities.Lite<Entities.Entity>>;
   guid: string /*Guid*/;
 }
@@ -86,6 +88,7 @@ export namespace UserQueryMessage {
   export const TheSelected0: MessageKey = new MessageKey("UserQueryMessage", "TheSelected0");
   export const Date: MessageKey = new MessageKey("UserQueryMessage", "Date");
   export const Pagination: MessageKey = new MessageKey("UserQueryMessage", "Pagination");
+  export const _0CountOf1Is2Than3: MessageKey = new MessageKey("UserQueryMessage", "_0CountOf1Is2Than3");
 }
 
 export namespace UserQueryOperation {

@@ -117,11 +117,6 @@ export interface HealthCheckPartEntity extends Entities.Entity, IPartEntity {
   requiresTitle: boolean;
 }
 
-export const HealthCheckStatus: EnumType<HealthCheckStatus> = new EnumType<HealthCheckStatus>("HealthCheckStatus");
-export type HealthCheckStatus =
-  "Ok" |
-  "Error";
-
 export const ImagePartEntity: Type<ImagePartEntity> = new Type<ImagePartEntity>("ImagePart");
 export interface ImagePartEntity extends Entities.Entity, IPartEntity {
   Type: "ImagePart";

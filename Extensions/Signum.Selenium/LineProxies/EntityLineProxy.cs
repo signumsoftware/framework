@@ -75,7 +75,7 @@ public class EntityLineProxy : EntityBaseProxy
 
     public bool IsDisabled()
     {
-        return this.Element.GetAttribute("disabled") == "true";
+        return this.Element.GetDomProperty("disabled") == "true";
     }
 
 

@@ -13,7 +13,7 @@ export interface IsolationEntity extends Entities.Entity {
   name: string;
 }
 
-export module IsolationMessage {
+export namespace IsolationMessage {
   export const Entity0HasIsolation1ButCurrentIsolationIs2: MessageKey = new MessageKey("IsolationMessage", "Entity0HasIsolation1ButCurrentIsolationIs2");
   export const SelectAnIsolation: MessageKey = new MessageKey("IsolationMessage", "SelectAnIsolation");
   export const Entity0HasIsolation1ButEntity2HasIsolation3: MessageKey = new MessageKey("IsolationMessage", "Entity0HasIsolation1ButEntity2HasIsolation3");
@@ -27,7 +27,7 @@ export interface IsolationMixin extends Entities.MixinEntity {
   isolation: Entities.Lite<IsolationEntity> | null;
 }
 
-export module IsolationOperation {
+export namespace IsolationOperation {
   export const Save : Operations.ExecuteSymbol<IsolationEntity> = registerSymbol("Operation", "IsolationOperation.Save");
 }
 

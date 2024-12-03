@@ -26,7 +26,7 @@ public class GuidBoxLineProxy : BaseLineProxy
     {
         var textLine = InputLocator.Find();
 
-        var str = textLine.GetAttribute("value");
+        var str = textLine.GetDomProperty("value");
 
         if (str.HasText())
             return Guid.Parse(str);
@@ -38,6 +38,6 @@ public class GuidBoxLineProxy : BaseLineProxy
     {
         var element = InputLocator.Find();
 
-        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetAttribute("readonly") != null;
+        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomProperty("readonly") != null;
     }
 }

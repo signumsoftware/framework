@@ -290,11 +290,8 @@ public static class UserChartLogic
     {
         TypeConditionLogic.RegisterCompile<UserChartEntity>(typeCondition, conditionExpression);
 
-        TypeConditionLogic.Register<UserChartPartEntity>(typeCondition,
-             ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
-
-        TypeConditionLogic.Register<CombinedUserChartPartEntity>(typeCondition,
-            ucp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(ucp)));
+        DashboardLogic.RegisterTypeConditionForPart<UserChartPartEntity>(typeCondition);
+        DashboardLogic.RegisterTypeConditionForPart<CombinedUserChartPartEntity>(typeCondition);
     }
 
     public static void RegisterTranslatableRoutes()

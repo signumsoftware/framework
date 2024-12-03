@@ -404,19 +404,20 @@ public static class DashboardLogic
         TypeConditionLogic.RegisterCompile<DashboardEntity>(typeCondition, conditionExpression);
 
         TypeConditionLogic.Register<TokenEquivalenceGroupEntity>(typeCondition,
-            teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)));
+            teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)),
+            teg => teg.GetParentEntity<DashboardEntity>().InCondition(typeCondition));
 
-        TypeConditionLogic.Register<LinkListPartEntity>(typeCondition,
-             llp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(llp)));
+        RegisterTypeConditionForPart<LinkListPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
+        RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);
+    }
 
-        TypeConditionLogic.Register<ImagePartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
-
-        TypeConditionLogic.Register<SeparatorPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
-
-        TypeConditionLogic.Register<HealthCheckPartEntity>(typeCondition,
-            uqp => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(uqp)));
+    public static void RegisterTypeConditionForPart<T>(TypeConditionSymbol typeCondition)
+        where T : Entity, IPartEntity
+    {
+        TypeConditionLogic.Register<T>(typeCondition,
+             p => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.ContainsContent(p)),
+             p => p.GetDashboard().InCondition(typeCondition));
     }
 
     public static List<CachedQueryDefinition> GetCachedQueryDefinitions(DashboardEntity db)

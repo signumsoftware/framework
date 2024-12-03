@@ -25,7 +25,7 @@ export function FormGroup(p: FormGroupProps): React.JSX.Element {
     const c = p.children?.(controlId);
 
     return (
-      <span {...p.htmlAttributes} className={errorClass} {...errorAtts}>
+      <span {...p.htmlAttributes} className={classes(errorClass, p.htmlAttributes?.className)} {...errorAtts}>
         {c}
       </span>
     );

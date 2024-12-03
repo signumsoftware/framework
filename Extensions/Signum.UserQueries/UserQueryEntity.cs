@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Signum.Dashboard;
 using Signum.DynamicQuery;
 using Signum.UserAssets;
@@ -61,6 +62,8 @@ public class UserQueryEntity : Entity, IUserAssetEntity, IHasEntityType
     public int? ElementsPerPage { get; set; }
 
     public SystemTimeEmbedded? SystemTime { get; set; }
+
+    public HealthCheckEmbedded? HealthCheck { get; set; }
 
     [PreserveOrder, NoRepeatValidator]
     [ImplementedBy(typeof(UserQueryEntity))]
@@ -461,27 +464,32 @@ public enum UserQueryMessage
     TheSelected0,
     Date,
     Pagination,
+    [Description("{0} count of {1} is {2} than {3}")]
+    _0CountOf1Is2Than3,
 }
 
 public class HealthCheckEmbedded : EmbeddedEntity
 {
-    HealzCheckConditionEmbedded? FailWhen { get; set; }
-    HealzCheckConditionEmbedded? DegradedWhen { get; set; }
+    public HealthCheckConditionEmbedded? FailWhen { get; set; }
+    public HealthCheckConditionEmbedded? DegradedWhen { get; set; }
 
     protected override string? PropertyValidation(PropertyInfo pi)
     {
-        if(pi.Name == nameof(DegradedWhen) && DegradedWhen != null)
+        if(pi.Name == nameof(DegradedWhen) && DegradedWhen == null && FailWhen == null)
         {
-
+            return ValidationMessage._0Or1ShouldBeSet.NiceToString(NicePropertyName(() => FailWhen), pi.NiceName());
         }
 
         return base.PropertyValidation(pi);
     }
 }
 
-public class HealzCheckConditionEmbedded : EmbeddedEntity
+public class HealthCheckConditionEmbedded : EmbeddedEntity
 {
-    public ComparisonType Type { get; set; }
+    public FilterOperation Operation { get; set; }
 
     public int Value { get; set; }
+
+    [Ignore]
+    internal Func<int, bool> _CachedPredicate;
 }

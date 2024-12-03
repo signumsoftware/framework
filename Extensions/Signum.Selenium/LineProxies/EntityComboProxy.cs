@@ -39,7 +39,7 @@ public class EntityComboProxy : EntityBaseProxy
         set
         {
             var val = value == null ? "" : value.Key();
-            this.Element.GetDriver().Wait(() => this.ComboElement.Options.Any(o => o.GetAttribute("value") == val));
+            this.Element.GetDriver().Wait(() => this.ComboElement.Options.Any(o => o.GetDomProperty("value") == val));
             this.ComboElement.SelectByValue(val);
         }
     }
@@ -47,7 +47,7 @@ public class EntityComboProxy : EntityBaseProxy
     public List<Lite<Entity>?> Options()
     {
         return this.ComboElement.Options
-            .Select(o => Lite.Parse(o.GetAttribute("value"))?.Do(l => l.SetModel(o.Text)))
+            .Select(o => Lite.Parse(o.GetDomProperty("value"))?.Do(l => l.SetModel(o.Text)))
             .ToList();
     }
 

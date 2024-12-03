@@ -11,10 +11,11 @@ import { ProcessProgressBar } from './Templates/Process'
 import { FrameMessage } from '../../Signum/React/Signum.Entities';
 import { Overlay, Tooltip } from "react-bootstrap";
 import * as AppContext from '@framework/AppContext';
+import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton';
 
 export default function ProcessPanelPage(): React.JSX.Element {
 
-  
+
   const [state, reloadState] = useAPIWithReload(() => ProcessClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
@@ -23,7 +24,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
     reloadState();
   }, [tick]);
 
-  useTitle("ProcessLogic state");
+  useTitle("Process Runner");
 
   function handleStop(e: React.MouseEvent<any>) {
     e.preventDefault();
@@ -40,10 +41,15 @@ export default function ProcessPanelPage(): React.JSX.Element {
     return <h2>ProcesLogic state (loading...) </h2>;
 
   const s = state;
+  const url = window.location;
 
   return (
     <div>
-      <div className='d-flex align-items-center'><h2 className="display-6"><FontAwesomeIcon icon={"gears"} /> Process Panel</h2><CopyHealthCheckButton /></div>
+      <div className='d-flex align-items-center'><h2 className="display-6"><FontAwesomeIcon icon={"gears"} /> Process Panel <CopyHealthCheckButton
+        name={url.hostname + " Process Runner"}
+        healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck')}
+        clickUrl={url.href}
+      /></h2></div>
       <div className="btn-toolbar mt-3">
         <button className={classes("sf-button btn", s.running ? "btn-success disabled" : "btn-outline-success")} onClick={!s.running ? handleStart : undefined}><FontAwesomeIcon icon="play" /> Start</button>
         <button className={classes("sf-button btn", !s.running ? "btn-danger disabled" : "btn-outline-danger")} onClick={s.running ? handleStop : undefined}><FontAwesomeIcon icon="stop" /> Stop</button>
@@ -54,7 +60,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-          <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />
@@ -113,40 +119,4 @@ export default function ProcessPanelPage(): React.JSX.Element {
       </pre>
     </div>
   );
-}
-
-function CopyHealthCheckButton(): React.JSX.Element | null {
-
-  const supportsClipboard = (navigator.clipboard && window.isSecureContext);
-  if (!supportsClipboard)
-    return null;
-
-  const link = React.useRef<HTMLAnchorElement>(null);
-  const [showTooltip, setShowTooltip] = React.useState<boolean>(false);
-  const elapsed = useInterval(showTooltip ? 1000 : null, 0, d => d + 1);
-
-  React.useEffect(() => {
-    setShowTooltip(false);
-  }, [elapsed]);
-
-  return (
-    <span >
-      <a ref={link} className="btn btn-sm btn-light text-dark sf-pointer mx-1" onClick={handleCopyLiteButton}
-        title="Copy Health Check dashboard data">
-        <FontAwesomeIcon icon="heart-pulse" color="gray" />
-      </a>
-      <Overlay target={link.current} show={showTooltip} placement="bottom">
-        <Tooltip>
-          {FrameMessage.Copied.niceToString()}
-        </Tooltip>
-      </Overlay>
-    </span>
-  );
-
-  function handleCopyLiteButton(e: React.MouseEvent<any>) {
-    e.preventDefault();
-    var url = window.location;
-    navigator.clipboard.writeText(url.hostname + ' Process engine$#$' + url.origin + AppContext.toAbsoluteUrl('/api/processes/healthCheck') + "$#$" + url.href)
-      .then(() => setShowTooltip(true));
-  }
 }
