@@ -44,7 +44,7 @@ export interface AlertEntity extends Entities.Entity {
   avoidSendMail: boolean;
 }
 
-export module AlertMessage {
+export namespace AlertMessage {
   export const Alert: MessageKey = new MessageKey("AlertMessage", "Alert");
   export const NewAlert: MessageKey = new MessageKey("AlertMessage", "NewAlert");
   export const Alerts: MessageKey = new MessageKey("AlertMessage", "Alerts");
@@ -78,7 +78,7 @@ export module AlertMessage {
   export const Ringing: MessageKey = new MessageKey("AlertMessage", "Ringing");
 }
 
-export module AlertOperation {
+export namespace AlertOperation {
   export const CreateAlertFromEntity : Operations.ConstructSymbol_From<AlertEntity, Entities.Entity> = registerSymbol("Operation", "AlertOperation.CreateAlertFromEntity");
   export const Create : Operations.ConstructSymbol_Simple<AlertEntity> = registerSymbol("Operation", "AlertOperation.Create");
   export const Save : Operations.ExecuteSymbol<AlertEntity> = registerSymbol("Operation", "AlertOperation.Save");
@@ -93,7 +93,7 @@ export type AlertState =
   "Saved" |
   "Attended";
 
-export module AlertTypeOperation {
+export namespace AlertTypeOperation {
   export const Save : Operations.ExecuteSymbol<AlertTypeSymbol> = registerSymbol("Operation", "AlertTypeOperation.Save");
   export const Delete : Operations.DeleteSymbol<AlertTypeSymbol> = registerSymbol("Operation", "AlertTypeOperation.Delete");
 }
@@ -128,7 +128,7 @@ export interface SendNotificationEmailTaskEntity extends Entities.Entity, Schedu
   alertTypes: Entities.MList<AlertTypeSymbol>;
 }
 
-export module SendNotificationEmailTaskOperation {
+export namespace SendNotificationEmailTaskOperation {
   export const Save : Operations.ExecuteSymbol<SendNotificationEmailTaskEntity> = registerSymbol("Operation", "SendNotificationEmailTaskOperation.Save");
 }
 
