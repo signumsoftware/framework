@@ -85,7 +85,8 @@ function HealthCheckElement(p: { element: HealthCheckElementEmbedded }) {
       minHeight: 80,
       backgroundColor: bgc,
       color: foreColor,
-      boxShadow: "3px 3px 12px 3px " + color.withAlpha(.2).toString()
+      boxShadow: "3px 3px 12px 3px " + color.withAlpha(.2).toString(),
+      textAlign: "center",
     }} onClick={e => {
       var path = AppContext.toAbsoluteUrl(p.element.navigateURL);
       window.open(path);

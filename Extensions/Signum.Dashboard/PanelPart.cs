@@ -300,6 +300,7 @@ public class SeparatorPartEntity : Entity, IPartEntity
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class HealthCheckPartEntity : Entity, IPartEntity
 {
+    [PreserveOrder]
     public MList<HealthCheckElementEmbedded> Items { get; set; } = [];
 
     public override string ToString()
