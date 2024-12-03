@@ -59,7 +59,7 @@ public static partial class TypeAuthLogic
             AuthLogic.ImportFromXml += cache.ImportXml;
 
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-            TypeConditionLogic.Register(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
+            TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
         }
     }
 
