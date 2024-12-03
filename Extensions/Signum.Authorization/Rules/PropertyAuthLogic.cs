@@ -324,10 +324,10 @@ public static class PropertyAuthLogic
             if (e.IsNew)
                 return true;
 
-            if (!HasTypeConditionInProperties(route.RootType))
-            {
-                throw new InvalidOperationException("Unexpected");
-            }
+            //if (!HasTypeConditionInProperties(route.RootType))
+            //{
+            //    throw new InvalidOperationException("Unexpected");  //Type is Write / Read and property same
+            //}
 
             return giEvaluateAllowed.GetInvoker(root.GetType())(e, paac) >= allowed;
         }
