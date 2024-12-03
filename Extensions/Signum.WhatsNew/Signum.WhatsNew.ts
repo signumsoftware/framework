@@ -22,7 +22,7 @@ export interface WhatsNewEntity extends Entities.Entity {
   related: Entities.Lite<Entities.Entity> | null;
 }
 
-export module WhatsNewFileType {
+export namespace WhatsNewFileType {
   export const WhatsNewAttachmentFileType : Files.FileTypeSymbol = registerSymbol("FileType", "WhatsNewFileType.WhatsNewAttachmentFileType");
   export const WhatsNewPreviewFileType : Files.FileTypeSymbol = registerSymbol("FileType", "WhatsNewFileType.WhatsNewPreviewFileType");
 }
@@ -35,11 +35,11 @@ export interface WhatsNewLogEntity extends Entities.Entity {
   readOn: string /*DateTime*/;
 }
 
-export module WhatsNewLogOperation {
+export namespace WhatsNewLogOperation {
   export const Delete : Operations.DeleteSymbol<WhatsNewLogEntity> = registerSymbol("Operation", "WhatsNewLogOperation.Delete");
 }
 
-export module WhatsNewMessage {
+export namespace WhatsNewMessage {
   export const News: MessageKey = new MessageKey("WhatsNewMessage", "News");
   export const NewNews: MessageKey = new MessageKey("WhatsNewMessage", "NewNews");
   export const YourNews: MessageKey = new MessageKey("WhatsNewMessage", "YourNews");
@@ -68,7 +68,7 @@ export interface WhatsNewMessageEmbedded extends Entities.EmbeddedEntity {
   description: string;
 }
 
-export module WhatsNewOperation {
+export namespace WhatsNewOperation {
   export const Save : Operations.ExecuteSymbol<WhatsNewEntity> = registerSymbol("Operation", "WhatsNewOperation.Save");
   export const Delete : Operations.DeleteSymbol<WhatsNewEntity> = registerSymbol("Operation", "WhatsNewOperation.Delete");
   export const Publish : Operations.ExecuteSymbol<WhatsNewEntity> = registerSymbol("Operation", "WhatsNewOperation.Publish");

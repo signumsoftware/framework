@@ -19,20 +19,20 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
 
       <div className="row">
         <div className="col-sm-6">
-      <AutoLine ctx={ctx.subCtx(e => e.name)} />
+          <AutoLine ctx={ctx.subCtx(e => e.name)} />
         </div>
         <div className="col-sm-6">
-      <AutoLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
+          <AutoLine ctx={ctx.subCtx(e => e.type)} onChange={() => { ctx.value.decisionOptionName = null; forceUpdate(); }} />
         </div>
       </div>
 
 
       {ctx.value.type == "Decision" &&
         < FormGroup ctx={ctx.subCtx(e => e.decisionOptionName)} label={ctx.niceName(e => e.decisionOptionName)}>
-        {inputId => <select id={inputId} value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
+          {inputId => <select id={inputId} value={ctx.value.decisionOptionName ? ctx.value.decisionOptionName : ""} className="form-select" onChange={handleDecisionNameChange} >
             <option value="" />
             {(ctx.value.decisionOptions ?? []).map((d, i) => <option key={i} value={d.element.name} selected={d.element.name == ctx.value.decisionOptionName}>{d.element.name}</option>)}
-            </select>
+          </select>
           }
         </FormGroup>}
 
@@ -61,7 +61,7 @@ export default function WorkflowConnectionModelComponent(p: { ctx: TypeContext<W
             : <div className="alert alert-warning">{WorkflowMessage.ToUse0YouSouldSetTheWorkflow1.niceToString(ctx.niceName(e => e.action), ctx.niceName(e => e.mainEntityType))}</div>}
 
         </div>
-      </div>    
+      </div>
     </div>
   );
 }
