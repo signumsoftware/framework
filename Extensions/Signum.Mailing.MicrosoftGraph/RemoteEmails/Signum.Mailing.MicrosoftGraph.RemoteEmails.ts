@@ -33,7 +33,7 @@ export interface RemoteEmailFolderModel extends Entities.ModelEntity {
   displayName: string;
 }
 
-export module RemoteEmailMessage {
+export namespace RemoteEmailMessage {
   export const NotAuthorizedToViewEmailsFromOtherUsers: MessageKey = new MessageKey("RemoteEmailMessage", "NotAuthorizedToViewEmailsFromOtherUsers");
 }
 
@@ -64,11 +64,11 @@ export interface RemoteEmailMessageModel extends Entities.ModelEntity {
   extension3: string | null;
 }
 
-export module RemoteEmailMessagePermission {
+export namespace RemoteEmailMessagePermission {
   export const ViewEmailMessagesFromOtherUsers : Basics.PermissionSymbol = registerSymbol("Permission", "RemoteEmailMessagePermission.ViewEmailMessagesFromOtherUsers");
 }
 
-export module RemoteEmailMessageQuery {
+export namespace RemoteEmailMessageQuery {
   export const RemoteEmailMessages: QueryKey = new QueryKey("RemoteEmailMessageQuery", "RemoteEmailMessages");
 }
 
