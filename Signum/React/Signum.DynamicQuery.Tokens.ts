@@ -27,7 +27,7 @@ export type CollectionElementType =
   "Element2" |
   "Element3";
 
-export module ColumnFieldMessage {
+export namespace ColumnFieldMessage {
   export const ColumnsHelp: MessageKey = new MessageKey("ColumnFieldMessage", "ColumnsHelp");
   export const YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity: MessageKey = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyColumnOfTheQuery0OrAnyFieldOf1OrAnyRelatedEntity");
   export const YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity: MessageKey = new MessageKey("ColumnFieldMessage", "YouCanSelectAFieldExpressionToPointToAnyFieldOfThe0OrAnyRelatedEntity");
@@ -42,7 +42,7 @@ export type ContainerTokenKey =
   "Operations" |
   "QuickLinks";
 
-export module FieldExpressionMessage {
+export namespace FieldExpressionMessage {
   export const LearnMoreAboutFieldExpressions: MessageKey = new MessageKey("FieldExpressionMessage", "LearnMoreAboutFieldExpressions");
   export const YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems: MessageKey = new MessageKey("FieldExpressionMessage", "YouCanNavigateDatabaseRelationshipsByContinuingTheExpressionWithMoreItems");
   export const SimpleValues: MessageKey = new MessageKey("FieldExpressionMessage", "SimpleValues");
@@ -65,7 +65,7 @@ export module FieldExpressionMessage {
   export const FinallyRememberThatYouCan01FullFieldExpression: MessageKey = new MessageKey("FieldExpressionMessage", "FinallyRememberThatYouCan01FullFieldExpression");
 }
 
-export module FilterFieldMessage {
+export namespace FilterFieldMessage {
   export const FiltersHelp: MessageKey = new MessageKey("FilterFieldMessage", "FiltersHelp");
   export const AFilterConsistsOfA0AComparison1AndAConstant2: MessageKey = new MessageKey("FilterFieldMessage", "AFilterConsistsOfA0AComparison1AndAConstant2");
   export const Field: MessageKey = new MessageKey("FilterFieldMessage", "Field");
@@ -79,7 +79,7 @@ export module FilterFieldMessage {
   export const TheSameElement: MessageKey = new MessageKey("FilterFieldMessage", "TheSameElement");
 }
 
-export module QueryTokenDateMessage {
+export namespace QueryTokenDateMessage {
   export const TimeOfDay: MessageKey = new MessageKey("QueryTokenDateMessage", "TimeOfDay");
   export const Date: MessageKey = new MessageKey("QueryTokenDateMessage", "Date");
   export const Year: MessageKey = new MessageKey("QueryTokenDateMessage", "Year");
@@ -115,7 +115,7 @@ export module QueryTokenDateMessage {
   export const _0Steps1Rows2TotalRowsAprox: MessageKey = new MessageKey("QueryTokenDateMessage", "_0Steps1Rows2TotalRowsAprox");
 }
 
-export module QueryTokenMessage {
+export namespace QueryTokenMessage {
   export const _0As1: MessageKey = new MessageKey("QueryTokenMessage", "_0As1");
   export const And: MessageKey = new MessageKey("QueryTokenMessage", "And");
   export const AnyEntity: MessageKey = new MessageKey("QueryTokenMessage", "AnyEntity");

@@ -53,7 +53,7 @@ export interface FileEntity extends Entities.ImmutableEntity {
   binaryFile: string /*Byte[]*/;
 }
 
-export module FileMessage {
+export namespace FileMessage {
   export const DownloadFile: MessageKey = new MessageKey("FileMessage", "DownloadFile");
   export const ErrorSavingFile: MessageKey = new MessageKey("FileMessage", "ErrorSavingFile");
   export const FileTypes: MessageKey = new MessageKey("FileMessage", "FileTypes");
@@ -97,7 +97,7 @@ export interface FilePathEntity extends Entities.Entity {
   fileType: FileTypeSymbol;
 }
 
-export module FilePathOperation {
+export namespace FilePathOperation {
   export const Save : Operations.ExecuteSymbol<FilePathEntity> = registerSymbol("Operation", "FilePathOperation.Save");
 }
 

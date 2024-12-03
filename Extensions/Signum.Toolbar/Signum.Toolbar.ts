@@ -64,19 +64,19 @@ export interface ToolbarMenuEntity extends Entities.Entity, UserAssets.IUserAsse
   elements: Entities.MList<ToolbarElementEmbedded>;
 }
 
-export module ToolbarMenuOperation {
+export namespace ToolbarMenuOperation {
   export const Save : Operations.ExecuteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Save");
   export const Delete : Operations.DeleteSymbol<ToolbarMenuEntity> = registerSymbol("Operation", "ToolbarMenuOperation.Delete");
 }
 
-export module ToolbarMessage {
+export namespace ToolbarMessage {
   export const RecursionDetected: MessageKey = new MessageKey("ToolbarMessage", "RecursionDetected");
   export const _0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships: MessageKey = new MessageKey("ToolbarMessage", "_0CyclesHaveBeenFoundInTheToolbarDueToTheRelationships");
   export const FirstElementCanNotBeExtraIcon: MessageKey = new MessageKey("ToolbarMessage", "FirstElementCanNotBeExtraIcon");
   export const ExtraIconCanNotComeAfterDivider: MessageKey = new MessageKey("ToolbarMessage", "ExtraIconCanNotComeAfterDivider");
 }
 
-export module ToolbarOperation {
+export namespace ToolbarOperation {
   export const Save : Operations.ExecuteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Save");
   export const Delete : Operations.DeleteSymbol<ToolbarEntity> = registerSymbol("Operation", "ToolbarOperation.Delete");
 }

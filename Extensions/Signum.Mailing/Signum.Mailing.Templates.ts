@@ -36,7 +36,7 @@ export interface EmailMasterTemplateMessageEmbedded extends Entities.EmbeddedEnt
   text: string;
 }
 
-export module EmailMasterTemplateOperation {
+export namespace EmailMasterTemplateOperation {
   export const Create : Operations.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Save");
 }
@@ -83,7 +83,7 @@ export interface EmailTemplateFromEmbedded extends EmailTemplateAddressEmbedded 
   azureUserId: string /*Guid*/ | null;
 }
 
-export module EmailTemplateMessage {
+export namespace EmailTemplateMessage {
   export const EndDateMustBeHigherThanStartDate: MessageKey = new MessageKey("EmailTemplateMessage", "EndDateMustBeHigherThanStartDate");
   export const ThereAreNoMessagesForTheTemplate: MessageKey = new MessageKey("EmailTemplateMessage", "ThereAreNoMessagesForTheTemplate");
   export const ThereMustBeAMessageFor0: MessageKey = new MessageKey("EmailTemplateMessage", "ThereMustBeAMessageFor0");
@@ -105,7 +105,7 @@ export interface EmailTemplateMessageEmbedded extends Entities.EmbeddedEntity {
   subject: string;
 }
 
-export module EmailTemplateOperation {
+export namespace EmailTemplateOperation {
   export const CreateEmailTemplateFromModel : Operations.ConstructSymbol_From<EmailTemplateEntity, Mailing.EmailModelEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromModel");
   export const Create : Operations.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
@@ -120,7 +120,7 @@ export interface EmailTemplateRecipientEmbedded extends EmailTemplateAddressEmbe
   whenMany: WhenManyRecipiensBehaviour;
 }
 
-export module EmailTemplateViewMessage {
+export namespace EmailTemplateViewMessage {
   export const InsertMessageContent: MessageKey = new MessageKey("EmailTemplateViewMessage", "InsertMessageContent");
   export const Insert: MessageKey = new MessageKey("EmailTemplateViewMessage", "Insert");
   export const Language: MessageKey = new MessageKey("EmailTemplateViewMessage", "Language");

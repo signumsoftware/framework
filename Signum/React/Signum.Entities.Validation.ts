@@ -15,7 +15,7 @@ export type ComparisonType =
   "LessThan" |
   "LessThanOrEqualTo";
 
-export module ValidationMessage {
+export namespace ValidationMessage {
   export const _0DoesNotHaveAValid1Format: MessageKey = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1Format");
   export const _0DoesNotHaveAValid1IdentifierFormat: MessageKey = new MessageKey("ValidationMessage", "_0DoesNotHaveAValid1IdentifierFormat");
   export const _0HasAnInvalidFormat: MessageKey = new MessageKey("ValidationMessage", "_0HasAnInvalidFormat");

@@ -27,7 +27,7 @@ export interface ExcelAttachmentEntity extends Entities.Entity, Templates.IAttac
   related: Entities.Lite<Entities.Entity> | null;
 }
 
-export module ExcelMessage {
+export namespace ExcelMessage {
   export const Data: MessageKey = new MessageKey("ExcelMessage", "Data");
   export const Download: MessageKey = new MessageKey("ExcelMessage", "Download");
   export const Excel2007Spreadsheet: MessageKey = new MessageKey("ExcelMessage", "Excel2007Spreadsheet");
@@ -41,7 +41,7 @@ export module ExcelMessage {
   export const CreateNew: MessageKey = new MessageKey("ExcelMessage", "CreateNew");
 }
 
-export module ExcelPermission {
+export namespace ExcelPermission {
   export const PlainExcel : Basics.PermissionSymbol = registerSymbol("Permission", "ExcelPermission.PlainExcel");
   export const ImportFromExcel : Basics.PermissionSymbol = registerSymbol("Permission", "ExcelPermission.ImportFromExcel");
 }
@@ -54,7 +54,7 @@ export interface ExcelReportEntity extends Entities.Entity {
   file: Files.FileEmbedded;
 }
 
-export module ExcelReportOperation {
+export namespace ExcelReportOperation {
   export const Save : Operations.ExecuteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Save");
   export const Delete : Operations.DeleteSymbol<ExcelReportEntity> = registerSymbol("Operation", "ExcelReportOperation.Delete");
 }
@@ -78,7 +78,7 @@ export interface ImportExcelModel extends Entities.ModelEntity {
   collections: Entities.MList<CollectionElementEmbedded>;
 }
 
-export module ImportFromExcelMessage {
+export namespace ImportFromExcelMessage {
   export const ImportFromExcel: MessageKey = new MessageKey("ImportFromExcelMessage", "ImportFromExcel");
   export const _0Errors: MessageKey = new MessageKey("ImportFromExcelMessage", "_0Errors");
   export const Importing0: MessageKey = new MessageKey("ImportFromExcelMessage", "Importing0");

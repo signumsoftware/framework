@@ -25,7 +25,7 @@ export interface CachedQueryEntity extends Entities.Entity {
   uploadDuration: number;
 }
 
-export module CachedQueryFileType {
+export namespace CachedQueryFileType {
   export const CachedQuery : Files.FileTypeSymbol = registerSymbol("FileType", "CachedQueryFileType.CachedQuery");
 }
 
@@ -73,7 +73,7 @@ export interface DashboardLiteModel extends Entities.ModelEntity {
   hideQuickLink: boolean;
 }
 
-export module DashboardMessage {
+export namespace DashboardMessage {
   export const CreateNewPart: MessageKey = new MessageKey("DashboardMessage", "CreateNewPart");
   export const DashboardDN_TitleMustBeSpecifiedFor0: MessageKey = new MessageKey("DashboardMessage", "DashboardDN_TitleMustBeSpecifiedFor0");
   export const Preview: MessageKey = new MessageKey("DashboardMessage", "Preview");
@@ -91,14 +91,14 @@ export module DashboardMessage {
   export const CopyHealthCheckDashboardData: MessageKey = new MessageKey("DashboardMessage", "CopyHealthCheckDashboardData");
 }
 
-export module DashboardOperation {
+export namespace DashboardOperation {
   export const Save : Operations.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Save");
   export const RegenerateCachedQueries : Operations.ExecuteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.RegenerateCachedQueries");
   export const Clone : Operations.ConstructSymbol_From<DashboardEntity, DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Clone");
   export const Delete : Operations.DeleteSymbol<DashboardEntity> = registerSymbol("Operation", "DashboardOperation.Delete");
 }
 
-export module DashboardPermission {
+export namespace DashboardPermission {
   export const ViewDashboard : Basics.PermissionSymbol = registerSymbol("Permission", "DashboardPermission.ViewDashboard");
 }
 

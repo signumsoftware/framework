@@ -24,11 +24,11 @@ export interface RestApiKeyEntity extends Entities.Entity {
   apiKey: string;
 }
 
-export module RestApiKeyMessage {
+export namespace RestApiKeyMessage {
   export const GenerateApiKey: MessageKey = new MessageKey("RestApiKeyMessage", "GenerateApiKey");
 }
 
-export module RestApiKeyOperation {
+export namespace RestApiKeyOperation {
   export const Save : Operations.ExecuteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Save");
   export const Delete : Operations.DeleteSymbol<RestApiKeyEntity> = registerSymbol("Operation", "RestApiKeyOperation.Delete");
 }

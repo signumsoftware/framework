@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export module TimeMachineMessage {
+export namespace TimeMachineMessage {
   export const TimeMachine: MessageKey = new MessageKey("TimeMachineMessage", "TimeMachine");
   export const EntityDeleted: MessageKey = new MessageKey("TimeMachineMessage", "EntityDeleted");
   export const CompareVersions: MessageKey = new MessageKey("TimeMachineMessage", "CompareVersions");
@@ -26,7 +26,7 @@ export module TimeMachineMessage {
   export const ThisVersionDidNotChange: MessageKey = new MessageKey("TimeMachineMessage", "ThisVersionDidNotChange");
 }
 
-export module TimeMachinePermission {
+export namespace TimeMachinePermission {
   export const ShowTimeMachine : Basics.PermissionSymbol = registerSymbol("Permission", "TimeMachinePermission.ShowTimeMachine");
 }
 

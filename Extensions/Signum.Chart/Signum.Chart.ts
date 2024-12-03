@@ -35,7 +35,7 @@ export interface ChartColumnEmbedded extends Entities.EmbeddedEntity {
   orderByType: DynamicQuery.OrderType | null;
 }
 
-export module ChartColumnMessage {
+export namespace ChartColumnMessage {
   export const SplitLines: MessageKey = new MessageKey("ChartColumnMessage", "SplitLines");
   export const Height: MessageKey = new MessageKey("ChartColumnMessage", "Height");
   export const Height2: MessageKey = new MessageKey("ChartColumnMessage", "Height2");
@@ -114,7 +114,7 @@ export type ChartColumnType =
   "Positionable" |
   "Any";
 
-export module ChartMessage {
+export namespace ChartMessage {
   export const _0CanOnlyBeCreatedFromTheChartWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheChartWindow");
   export const _0CanOnlyBeCreatedFromTheSearchWindow: MessageKey = new MessageKey("ChartMessage", "_0CanOnlyBeCreatedFromTheSearchWindow");
   export const Chart: MessageKey = new MessageKey("ChartMessage", "Chart");
@@ -165,7 +165,7 @@ export interface ChartParameterEmbedded extends Entities.EmbeddedEntity {
   value: string | null;
 }
 
-export module ChartParameterGroupMessage {
+export namespace ChartParameterGroupMessage {
   export const Stroke: MessageKey = new MessageKey("ChartParameterGroupMessage", "Stroke");
   export const Number: MessageKey = new MessageKey("ChartParameterGroupMessage", "Number");
   export const Opacity: MessageKey = new MessageKey("ChartParameterGroupMessage", "Opacity");
@@ -195,7 +195,7 @@ export module ChartParameterGroupMessage {
   export const Scale: MessageKey = new MessageKey("ChartParameterGroupMessage", "Scale");
 }
 
-export module ChartParameterMessage {
+export namespace ChartParameterMessage {
   export const CompleteValues: MessageKey = new MessageKey("ChartParameterMessage", "CompleteValues");
   export const Scale: MessageKey = new MessageKey("ChartParameterMessage", "Scale");
   export const Labels: MessageKey = new MessageKey("ChartParameterMessage", "Labels");
@@ -296,7 +296,7 @@ export type ChartParameterType =
   "String" |
   "Special";
 
-export module ChartPermission {
+export namespace ChartPermission {
   export const ViewCharting : Basics.PermissionSymbol = registerSymbol("Permission", "ChartPermission.ViewCharting");
 }
 
@@ -325,7 +325,7 @@ export interface ChartTimeSeriesEmbedded extends Entities.EmbeddedEntity {
   timeSeriesMaxRowsPerStep: number | null;
 }
 
-export module D3ChartScript {
+export namespace D3ChartScript {
   export const Bars : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Bars");
   export const Columns : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Columns");
   export const Line : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Line");
@@ -345,12 +345,12 @@ export module D3ChartScript {
   export const Treemap : ChartScriptSymbol = registerSymbol("ChartScript", "D3ChartScript.Treemap");
 }
 
-export module GoogleMapsChartScript {
+export namespace GoogleMapsChartScript {
   export const Heatmap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsChartScript.Heatmap");
   export const Markermap : ChartScriptSymbol = registerSymbol("ChartScript", "GoogleMapsChartScript.Markermap");
 }
 
-export module HtmlChartScript {
+export namespace HtmlChartScript {
   export const PivotTable : ChartScriptSymbol = registerSymbol("ChartScript", "HtmlChartScript.PivotTable");
 }
 
@@ -359,7 +359,7 @@ export type SpecialParameterType =
   "ColorCategory" |
   "ColorInterpolate";
 
-export module SvgMapsChartScript {
+export namespace SvgMapsChartScript {
   export const SvgMap : ChartScriptSymbol = registerSymbol("ChartScript", "SvgMapsChartScript.SvgMap");
 }
 

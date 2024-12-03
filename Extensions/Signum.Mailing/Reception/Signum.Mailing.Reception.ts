@@ -14,7 +14,7 @@ export type CompareInbox =
   "Full" |
   "LastNEmails";
 
-export module EmailReceptionAction {
+export namespace EmailReceptionAction {
   export const ReceiveAllActiveEmailConfigurations : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "EmailReceptionAction.ReceiveAllActiveEmailConfigurations");
 }
 
@@ -28,7 +28,7 @@ export interface EmailReceptionConfigurationEntity extends Entities.Entity, Sche
   service: EmailReceptionServiceEntity;
 }
 
-export module EmailReceptionConfigurationOperation {
+export namespace EmailReceptionConfigurationOperation {
   export const Save : Operations.ExecuteSymbol<EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.Save");
   export const ReceiveEmails : Operations.ConstructSymbol_From<EmailReceptionEntity, EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.ReceiveEmails");
   export const ReceiveLastEmails : Operations.ConstructSymbol_From<EmailReceptionEntity, EmailReceptionConfigurationEntity> = registerSymbol("Operation", "EmailReceptionConfigurationOperation.ReceiveLastEmails");

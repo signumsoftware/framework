@@ -19,7 +19,7 @@ export type BootstrapStyle =
   "Warning" |
   "Danger";
 
-export module ChangeLogMessage {
+export namespace ChangeLogMessage {
   export const ThereIsNotAnyNewChangesFrom0: MessageKey = new MessageKey("ChangeLogMessage", "ThereIsNotAnyNewChangesFrom0");
   export const SeeMore: MessageKey = new MessageKey("ChangeLogMessage", "SeeMore");
 }
@@ -31,7 +31,7 @@ export interface ChangeLogViewLogEntity extends Entities.Entity {
   lastDate: string /*DateTime*/;
 }
 
-export module ChangeLogViewLogOperation {
+export namespace ChangeLogViewLogOperation {
   export const Delete : Operations.DeleteSymbol<ChangeLogViewLogEntity> = registerSymbol("Operation", "ChangeLogViewLogOperation.Delete");
 }
 
@@ -44,7 +44,7 @@ export interface ClientErrorModel extends Entities.ModelEntity {
   name: string | null;
 }
 
-export module CollapsableCardMessage {
+export namespace CollapsableCardMessage {
   export const Collapse: MessageKey = new MessageKey("CollapsableCardMessage", "Collapse");
   export const Expand: MessageKey = new MessageKey("CollapsableCardMessage", "Expand");
 }
@@ -57,7 +57,7 @@ export interface CultureInfoEntity extends Entities.Entity {
   englishName: string;
 }
 
-export module CultureInfoOperation {
+export namespace CultureInfoOperation {
   export const Save : Operations.ExecuteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Save");
   export const Delete : Operations.DeleteSymbol<CultureInfoEntity> = registerSymbol("Operation", "CultureInfoOperation.Delete");
 }
@@ -79,7 +79,7 @@ export interface DeleteLogsTypeOverridesEmbedded extends Entities.EmbeddedEntity
   deleteLogsWithExceptionsOlderThan: number | null;
 }
 
-export module DisabledMessage {
+export namespace DisabledMessage {
   export const ParentIsDisabled: MessageKey = new MessageKey("DisabledMessage", "ParentIsDisabled");
 }
 
@@ -89,7 +89,7 @@ export interface DisabledMixin extends Entities.MixinEntity {
   isDisabled: boolean;
 }
 
-export module DisableOperation {
+export namespace DisableOperation {
   export const Disable : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Disable");
   export const Enabled : Operations.ExecuteSymbol<Entities.Entity> = registerSymbol("Operation", "DisableOperation.Enabled");
 }
@@ -145,7 +145,7 @@ export interface PropertyRouteEntity extends Entities.Entity {
   rootType: TypeEntity;
 }
 
-export module PropertyRouteMessage {
+export namespace PropertyRouteMessage {
   export const Translated: MessageKey = new MessageKey("PropertyRouteMessage", "Translated");
 }
 
@@ -155,7 +155,7 @@ export interface QueryEntity extends Entities.Entity {
   key: string;
 }
 
-export module SearchVisualTip {
+export namespace SearchVisualTip {
   export const SearchHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.SearchHelp");
   export const GroupHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.GroupHelp");
   export const FilterHelp : VisualTipSymbol = registerSymbol("VisualTip", "SearchVisualTip.FilterHelp");
@@ -203,7 +203,7 @@ export interface VisualTipConsumedEntity extends Entities.Entity {
   consumedOn: string /*DateTime*/;
 }
 
-export module VisualTipConsumedOperation {
+export namespace VisualTipConsumedOperation {
   export const Delete : Operations.DeleteSymbol<VisualTipConsumedEntity> = registerSymbol("Operation", "VisualTipConsumedOperation.Delete");
 }
 
