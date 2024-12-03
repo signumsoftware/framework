@@ -11,7 +11,7 @@ public class QueryTokenBuilderProxy
         this.Element = element;
     }
 
-    public string? FullKey => this.Element.GetAttribute("data-token");
+    public string? FullKey => this.Element.GetDomAttribute("data-token");
 
     public WebElementLocator TokenElement(int tokenIndex)
     {

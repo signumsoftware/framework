@@ -5,6 +5,9 @@ using System.Collections;
 using Signum.Engine.Maps;
 using Signum.DynamicQuery.Tokens;
 using System.Linq;
+using Azure.Core;
+using Signum.Utilities.ExpressionTrees;
+using System.Collections.Generic;
 
 namespace Signum.DynamicQuery;
 
@@ -66,7 +69,7 @@ public static class DQueryable
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
             cd => new ExpressionBox(Expression.PropertyOrField(pe, cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!)));
 
-        return new DQueryable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, null, null));
+        return new DQueryable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, null, null, null));
     }
 
 
@@ -75,7 +78,7 @@ public static class DQueryable
         return query
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
-            .OrderBy(request.Orders)
+            .OrderBy(request.Orders, request.Pagination)
             .Select(request.Columns.Select(a => a.Token).ToHashSet())
             .TryPaginateAsync(request.Pagination, request.SystemTime, token);
     }
@@ -85,7 +88,7 @@ public static class DQueryable
         return query
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
-            .OrderBy(request.Orders)
+            .OrderBy(request.Orders, request.Pagination)
             .Select(request.Columns.Select(a => a.Token).ToHashSet())
             .TryPaginate(request.Pagination, request.SystemTime);
     }
@@ -112,7 +115,7 @@ public static class DQueryable
     {
         if (columns.Any(c => c.HasNested() != null))
         {
-            return SelectWithSubQueries(query, columns);
+            return SelectWithNestedQueries(query, columns);
         }
 
         var selector = SelectTupleConstructor(query.Context, columns, out BuildExpressionContext newContext);
@@ -152,25 +155,26 @@ public static class DQueryable
                     Expr = TupleReflection.TupleChainProperty(pe, i)
                 }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)),
                 context.Filters,
-                context.Orders);
+                context.Orders,
+                context.Pagination);
 
         return Expression.Lambda(ctor, context.Parameter);
     }
 
-    static DQueryable<T> SelectWithSubQueries<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
+    static DQueryable<T> SelectWithNestedQueries<T>(this DQueryable<T> query, HashSet<QueryToken> columns)
     {
-        var selector = SelectTupleWithSubQueriesConstructor(query.Context, columns, out BuildExpressionContext newContext);
+        var selector = SelectTupleWithNestedQueriesConstructor(query.Context, columns, out BuildExpressionContext newContext);
 
         return new DQueryable<T>(Untyped.Select(query.Query, selector), newContext);
     }
 
-    static LambdaExpression SelectTupleWithSubQueriesConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
+    static LambdaExpression SelectTupleWithNestedQueriesConstructor(BuildExpressionContext context, HashSet<QueryToken> tokens, out BuildExpressionContext newContext)
     {
         string str = tokens.Select(t => new { t, error = QueryUtils.CanColumn(t) }).Where(a => a.error != null).ToString(a => a.t.FullKey() + ": " + a.error, "\r\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
-        var tokenGroups = tokens.GroupBy(a => a.Follow(_ => _.Parent).OfType<CollectionNestedToken>().FirstOrDefault()).ToList();
+        var tokenGroups = tokens.GroupBy(a => a.HasNested()).ToList();
 
         var tree = TreeHelper.ToTreeC(tokenGroups, gr =>
         {
@@ -188,12 +192,28 @@ public static class DQueryable
 
         }).SingleEx();
 
-        return SubQueryConstructor(context, tree, out newContext);
+        var filters = (from f in context.Filters.EmptyIfNull()
+                       let nt = f.GetDeepestNestedToken()
+                       where nt != null
+                       group f by nt into g
+                       select KeyValuePair.Create(g.Key, g.ToList())).ToDictionaryEx();
+
+
+        var orders = (from o in context.Orders.EmptyIfNull()
+                      let nt = o.Token.HasNested()
+                       where nt != null
+                       group o by nt into g
+                       select KeyValuePair.Create(g.Key, g.ToList())).ToDictionaryEx();
+
+        return NestedQueryConstructor(context, tree, filters, orders, out newContext);
     }
 
     public static MethodInfo miToList = ReflectionTools.GetMethodInfo(() => Enumerable.Empty<int>().ToList()).GetGenericMethodDefinition();
 
-    static LambdaExpression SubQueryConstructor(BuildExpressionContext context, Node<IGrouping<CollectionNestedToken?, QueryToken>> node, out BuildExpressionContext newContext)
+    static LambdaExpression NestedQueryConstructor(BuildExpressionContext context, Node<IGrouping<CollectionNestedToken?, QueryToken>> node, 
+        Dictionary<CollectionNestedToken, List<Filter>> filters,
+        Dictionary<CollectionNestedToken, List<Order>> orders,
+        out BuildExpressionContext newContext)
     {
         var simpleTokens = node.Value.ToList();
 
@@ -217,14 +237,34 @@ public static class DQueryable
                         pe2.BuildLiteNullifyUnwrapPrimaryKey(new[] { cet.GetPropertyRoute() }.NotNull().ToArray()),
                         mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
                     )
-            }, context.Filters, context.Orders);
+            },
+            context.Filters,
+            context.Orders,
+            context.Pagination);
 
-            var subQueryExp = SubQueryConstructor(subQueryCtx, child, out var newSubContext);
+            var myFilters = filters.TryGetC(cet);
+            if(myFilters != null)
+            {
+                LambdaExpression? predicate = GetPredicateExpression(subQueryCtx, myFilters, inMemory: false);
+                if (predicate != null)
+                {
+                    colExpre = Expression.Call(Untyped.miWhereQ.MakeGenericMethod(elementType), colExpre, predicate);
+                }
+            }
+            var myOrders = orders.TryGetC(cet);
+            if(myOrders != null && context.Pagination is not Pagination.All) 
+            {
+                colExpre = ApplyOrders(colExpre, myOrders, subQueryCtx);
+            }
 
-            var tupleType = subQueryExp.Body.Type;
+            var subQueryConstructor = NestedQueryConstructor(subQueryCtx, child, filters, orders, out var newSubContext);
+
+            var tupleType = subQueryConstructor.Body.Type;
 
             var miSelect = colExpre.Type.IsInstanceOfType(typeof(IQueryable<>)) ? OverloadingSimplifier.miSelectQ : OverloadingSimplifier.miSelectE;
-            var select = Expression.Call(miSelect.MakeGenericMethod(pe2.Type!, tupleType), colExpre, subQueryExp);
+            var select = Expression.Call(miSelect.MakeGenericMethod(pe2.Type!, tupleType), colExpre, subQueryConstructor);
+
+
             var toList = Expression.Call(miToList.MakeGenericMethod(tupleType), select);
 
             expressions.Add(toList);
@@ -250,7 +290,7 @@ public static class DQueryable
             replacements.Add(collectionElementToken, new ExpressionBox(exp, subQueryContext: subContext[i]));
         }
 
-        newContext = new BuildExpressionContext(ctor.Type, pe, replacements, context.Filters, context.Orders);
+        newContext = new BuildExpressionContext(ctor.Type, pe, replacements, context.Filters, context.Orders, context.Pagination);
 
         return Expression.Lambda(ctor, context.Parameter);
     }
@@ -285,7 +325,8 @@ public static class DQueryable
                 )
             }, 
             context.Filters, 
-            context.Orders);
+            context.Orders, 
+            context.Pagination);
 
             eptML = MListElementPropertyToken.AsMListEntityProperty(collectionToken);
 
@@ -334,7 +375,7 @@ public static class DQueryable
             cd => (QueryToken)new ColumnToken(cd, description.QueryName),
             cd => new ExpressionBox(Expression.PropertyOrField(pe, cd.Name).BuildLiteNullifyUnwrapPrimaryKey(cd.PropertyRoutes!)));
 
-        return new DEnumerable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, null, null));
+        return new DEnumerable<T>(query, new BuildExpressionContext(typeof(T), pe, dic, null, null, null));
     }
 
     public static DEnumerableCount<T> WithCount<T>(this DEnumerable<T> result, int? totalElements)
@@ -409,7 +450,10 @@ public static class DQueryable
 
         newReplacements.AddRange(fft.Tokens, keySelector: t => new FullTextRankToken(t), valueSelector: t => new ExpressionBox(rank, mlistElementRoute: null));
 
-        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, query.Context.Filters, query.Context.Orders);
+        var newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, 
+            query.Context.Filters, 
+            query.Context.Orders, 
+            query.Context.Pagination);
 
         return new DQueryable<T>(join, newContext);
     }
@@ -499,96 +543,8 @@ public static class DQueryable
             mlistElementRoute: eptML != null ? cet.GetPropertyRoute() : null
         ));
 
-        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, context.Filters, context.Orders);
+        newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, context.Filters, context.Orders, context.Pagination);
     }
-
-    //public static DEnumerableCount<T> SelectManySubQueries<T>(this DEnumerableCount<T> collection)
-    //{
-    //    var subqueries = collection.Context.SubQueries();
-
-    //    if (!subqueries.Any())
-    //        return collection;
-
-    //    var nc = collection.SelectManySubQueries(subqueries);
-
-    //    var count = Untyped.Count(nc.Collection, nc.Context.ElementType);
-
-    //    return new DEnumerableCount<T>(nc.Collection, nc.Context, count);
-    //}
-
-    //static DEnumerable<T> SelectManySubQueries<T>(this DEnumerable<T> collection, List<CollectionNestedToken> elementTokens)
-    //{
-    //    foreach (var cet in elementTokens)
-    //    {
-    //        var subQueryContext = collection.Context.Replacements[cet].SubQueryContext!;
-
-    //        collection = collection.SelectManySubQuery(cet);
-
-    //        var subQueries = subQueryContext.SubQueries();
-    //        if (subQueries.Any())
-    //        {
-    //            collection = collection.SelectManySubQueries(subQueries);
-    //        }
-    //    }
-
-    //    return collection;
-    //}
-
-    //static DEnumerable<T> SelectManySubQuery<T>(this DEnumerable<T> collection, CollectionNestedToken cet)
-    //{
-    //    SelectManySubQueriesConstructor(collection.Context, cet,
-    //        out LambdaExpression collectionSelector,
-    //        out LambdaExpression resultSelector,
-    //        out BuildExpressionContext newContext);
-
-    //    var newQuery = Untyped.SelectMany(collection.Collection, collectionSelector.Compile(), resultSelector.Compile());
-
-    //    return new DEnumerable<T>(newQuery, newContext);
-    //}
-
-    //static void SelectManySubQueriesConstructor(BuildExpressionContext context, CollectionNestedToken cet, out LambdaExpression collectionSelector, out LambdaExpression resultSelector, out BuildExpressionContext newContext)
-    //{
-    //    var subQueryContext = context.Replacements[cet].SubQueryContext!;
-
-    //    var collectionSelectorBody =
-    //        Expression.Call(miDefaultIfEmptyE.MakeGenericMethod(subQueryContext.ElementType),
-    //        Expression.Call(miEmptyIfNull.MakeGenericMethod(subQueryContext.ElementType),
-    //        context.Replacements[cet].RawExpression));
-
-    //    collectionSelector = Expression.Lambda(
-    //        typeof(Func<,>).MakeGenericType(context.ElementType, typeof(IEnumerable<>).MakeGenericType(subQueryContext.ElementType)),
-    //        collectionSelectorBody,
-    //        context.Parameter);
-
-    //    var replacement = context.Replacements.Where(a => a.Key != cet).ToDictionary();
-
-    //    var properties = replacement.Values.Select(box => box.RawExpression).ToList();
-
-    //    properties.AddRange(subQueryContext.Replacements.Values.Select(box => Expression.Condition(
-    //        Expression.Equal(subQueryContext.Parameter, Expression.Constant(null, subQueryContext.Parameter.Type)),
-    //        Expression.Constant(null, box.RawExpression.Type),
-    //        box.RawExpression)));
-
-    //    var ctor = TupleReflection.TupleChainConstructor(properties);
-
-    //    resultSelector = Expression.Lambda(ctor, context.Parameter, subQueryContext.Parameter);
-    //    var parameter = Expression.Parameter(ctor.Type);
-
-    //    var newReplacements = replacement.Select((kvp, i) => KeyValuePair.Create(kvp.Key,
-    //        new ExpressionBox(TupleReflection.TupleChainProperty(parameter, i),
-    //        mlistElementRoute: kvp.Value.MListElementRoute,
-    //        subQueryContext: kvp.Value.SubQueryContext)
-    //    )).ToDictionary();
-
-    //    newReplacements.AddRange(subQueryContext.Replacements.Select((kvp, i) => KeyValuePair.Create(kvp.Key,
-    //        new ExpressionBox(TupleReflection.TupleChainProperty(parameter, i + replacement.Count),
-    //        mlistElementRoute: kvp.Value.MListElementRoute,
-    //        subQueryContext: kvp.Value.SubQueryContext)
-    //    )));
-
-    //    newContext = new BuildExpressionContext(ctor.Type, parameter, newReplacements, context.Filters, context.Orders);
-    //}
-
 
     #endregion
 
@@ -601,15 +557,24 @@ public static class DQueryable
 
     public static DQueryable<T> Where<T>(this DQueryable<T> query, List<Filter> filters)
     {
-        LambdaExpression? predicate = GetPredicateExpression(query.Context, filters, inMemory: false);
-        if (predicate == null)
+        if (filters.Count == 0)
             return query;
+
+        var simpleFilters = filters.Where(a => a.GetDeepestNestedToken() == null).ToList();
+        LambdaExpression? predicate = GetPredicateExpression(query.Context, simpleFilters, inMemory: false);
 
         var context = query.Context;
 
-        var newContext = new BuildExpressionContext(context.ElementType, context.Parameter, context.Replacements, context.Filters.EmptyIfNull().Concat(filters).ToList(), context.Orders);
+        var newContext = new BuildExpressionContext(context.ElementType,
+            context.Parameter,
+            context.Replacements,
+            context.Filters.EmptyIfNull().Concat(filters).ToList(),
+            context.Orders,
+            context.Pagination);
 
-        return new DQueryable<T>(Untyped.Where(query.Query, predicate), newContext);
+        var newQuery = predicate == null ? query.Query : Untyped.Where(query.Query, predicate);
+
+        return new DQueryable<T>(newQuery, newContext);
     }
 
     public static DQueryable<T> Where<T>(this DQueryable<T> query, Expression<Func<object, bool>> filter)
@@ -658,16 +623,28 @@ public static class DQueryable
 
 
 
-    public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders)
+    public static DQueryable<T> OrderBy<T>(this DQueryable<T> query, List<Order> orders, Pagination? pagination)
     {
         string str = orders.Select(f => QueryUtils.CanOrder(f.Token)).NotNull().ToString("\r\n");
         if (str.HasText())
             throw new ApplicationException(str);
 
-        var pairs = orders.Select(o => (
+        var pairs = orders.Where(a => a.Token.HasNested() == null).Select(o => (
             lambda: QueryUtils.CreateOrderLambda(o.Token, query.Context),
             orderType: o.OrderType
         )).ToList();
+
+        if (orders.Any(a => a.Token.HasNested() != null))
+        {
+            var ctx = query.Context;
+            return new DQueryable<T>(Untyped.OrderBy(query.Query, pairs), new BuildExpressionContext(
+                ctx.ElementType,
+                ctx.Parameter,
+                ctx.Replacements,
+                filters: ctx.Filters,
+                orders: ctx.Orders.EmptyIfNull().Concat(orders).ToList(),
+                pagination: pagination));
+        }
 
         return new DQueryable<T>(Untyped.OrderBy(query.Query, pairs), query.Context);
     }
@@ -675,23 +652,93 @@ public static class DQueryable
 
     public static DEnumerable<T> OrderBy<T>(this DEnumerable<T> collection, List<Order> orders)
     {
-        var pairs = orders.Select(o => (
+        var pairs = orders.Where(a => a.Token.HasNested() == null).Select(o => (
           lambda: QueryUtils.CreateOrderLambda(o.Token, collection.Context),
           orderType: o.OrderType
         )).ToList();
 
+        var orderedColl = Untyped.OrderBy(collection.Collection, pairs);
 
-        return new DEnumerable<T>(Untyped.OrderBy(collection.Collection, pairs), collection.Context);
+        var nestedOrders = orders.Where(a => a.Token.HasNested() != null).ToList();
+
+        if (!nestedOrders.Any())
+            return new DEnumerable<T>(orderedColl, collection.Context);
+
+        var nestedOrdersDictionary = nestedOrders.GroupToDictionary(a => a.Token.HasNested()!);
+
+        LambdaExpression selector = GetSelector(collection.Context, nestedOrdersDictionary);
+
+        var nestedOrderedCol = Untyped.Select(orderedColl, selector.Compile());
+
+        return new DEnumerable<T>(nestedOrderedCol, collection.Context);
+    }
+
+    static MethodInfo miSelect = ReflectionTools.GetMethodInfo(() => Enumerable.Select<int, long>(null!, a => a)).GetGenericMethodDefinition();
+    private static LambdaExpression GetSelector(BuildExpressionContext context, Dictionary<CollectionNestedToken, List<Order>> nestedOrdersDictionary)
+    {  
+        return Expression.Lambda(
+            TupleReflection.TupleChainConstructor(context.Replacements.Select(r =>
+            {
+                if (r.Value.SubQueryContext != null)
+                {
+                    var query = r.Value.RawExpression;
+                    var type = query.Type.ElementType()!;
+
+                    if (r.Value.SubQueryContext.Replacements.Any(a => a.Value.SubQueryContext != null))
+                    {
+                        var getSelector = GetSelector(r.Value.SubQueryContext!, nestedOrdersDictionary);
+                        var miSel = miSelect.MakeGenericMethod(type, type);
+                        query = Expression.Call(miSel, query, getSelector);
+                    }
+
+                    var orders = nestedOrdersDictionary.TryGetC((CollectionNestedToken)r.Key);
+
+                    if (orders != null)
+                    {
+                        query = ApplyOrders(query, orders, r.Value.SubQueryContext!);
+                    }
+
+                    return Expression.Call(miToList.MakeGenericMethod(type), query);
+                }
+                else
+                {
+                    return r.Value.RawExpression;
+                }
+            })), context.Parameter);
+    }
+
+    internal static Expression ApplyOrders(Expression query, List<Order> orders, Tokens.BuildExpressionContext ctx)
+    {
+        var type = query.Type.ElementType()!;
+        bool isQuery = typeof(IQueryable).IsAssignableFrom(query.Type);
+        bool isFirst = true;
+        foreach (var o in orders)
+        {
+            var mi = isQuery ?
+                (isFirst ?
+             (o.OrderType == OrderType.Ascending ? Untyped.miOrderByQ : Untyped.miOrderByDescendingQ) :
+             (o.OrderType == OrderType.Ascending ? Untyped.miThenByQ : Untyped.miThenByDescendingQ)
+                ) :
+                (isFirst ?
+             (o.OrderType == OrderType.Ascending ? Untyped.miOrderByE : Untyped.miOrderByDescendingE) :
+             (o.OrderType == OrderType.Ascending ? Untyped.miThenByE : Untyped.miThenByDescendingE));
+
+            if (isFirst)
+                isFirst = false;
+
+            var lambda = QueryUtils.CreateOrderLambda(o.Token, ctx);
+
+            query = Expression.Call(mi.MakeGenericMethod(type, lambda.Body.Type), query, lambda);
+        }
+
+        return query;
     }
 
     public static DEnumerableCount<T> OrderBy<T>(this DEnumerableCount<T> collection, List<Order> orders)
     {
-        var pairs = orders.Select(o => (
-          lambda: QueryUtils.CreateOrderLambda(o.Token, collection.Context),
-          orderType: o.OrderType
-        )).ToList();
+        var result = OrderBy<T>(new DEnumerable<T>(collection.Collection, collection.Context), orders);
 
-        return new DEnumerableCount<T>(Untyped.OrderBy(collection.Collection, pairs), collection.Context, collection.TotalElements);
+        return new DEnumerableCount<T>(result.Collection, result.Context, collection.TotalElements);
     }
 
     #endregion
@@ -749,18 +796,18 @@ public static class DQueryable
     static MethodInfo miOverrideInExpression = ReflectionTools.GetMethodInfo(() => SystemTimeExtensions.OverrideSystemTime<int>(null!, null!)).GetGenericMethodDefinition();
     static ConstructorInfo ciAsOf= ReflectionTools.GetConstuctorInfo(() => new SystemTime.AsOf(DateTime.Now));
 
-    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, HashSet<QueryToken> columns, List<Order> orders, List<Filter> timeSeriesFilter)
+    public static DQueryable<T> SelectManyTimeSeries<T>(this DQueryable<T> query, SystemTimeRequest systemTime, HashSet<QueryToken> columns, List<Order> orders, List<Filter> timeSeriesFilter, Pagination? pagination)
     {
         var tokens = columns.Concat(orders.Select(a => a.Token))
             .Concat(timeSeriesFilter.SelectMany(a => a.GetTokens()))
             .ToHashSet();
 
         return query
-            .OrderBy(orders.Where(a => a.Token is not TimeSeriesToken).ToList())
+            .OrderBy(orders.Where(a => a.Token is not TimeSeriesToken).ToList(), pagination)
             .Select(tokens.Where(t => t is not TimeSeriesToken).ToHashSet())
             .SelectManyTimeSeries(systemTime, tokens)
             .Where(timeSeriesFilter)
-            .OrderBy(orders.ToList())
+            .OrderBy(orders.ToList(), pagination)
             .Select(columns);
 
     }
@@ -807,7 +854,8 @@ public static class DQueryable
                     Expr = TupleReflection.TupleChainProperty(pe, i)
                 }).ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)),
                 query.Context.Filters,
-                query.Context.Orders);
+                query.Context.Orders,
+                query.Context.Pagination);
 
         var resultSelector = Expression.Lambda(ctor, pDate, query.Context.Parameter);
 
@@ -1067,7 +1115,8 @@ public static class DQueryable
                 var tempContext = new BuildExpressionContext(keyTupleType, pk,
                     replacements: rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i)))).ToDictionary(),
                     context.Filters,
-                    context.Orders);
+                    context.Orders,
+                    context.Pagination);
 
                 resultExpressions.AddRange(redundantKeyTokens.Select(t => KeyValuePair.Create(t, t.BuildExpression(tempContext, searchToArray: true))));
             }
@@ -1097,7 +1146,8 @@ public static class DQueryable
         newContext = new BuildExpressionContext(resultConstructor.Type, pg,
             replacements: resultExpressions.Keys.Select((t, i) => KeyValuePair.Create(t, new ExpressionBox(TupleReflection.TupleChainProperty(pg, i)))).ToDictionary(),
             context.Filters, 
-            context.Orders);
+            context.Orders,
+            context.Pagination);
 
         return Expression.Lambda(resultConstructor, pk, pe);
     }
@@ -1288,7 +1338,8 @@ public static class DQueryable
                 .Select((t, i) => new { Token = t, Expr = TupleReflection.TupleChainProperty(pe, i) })
                 .ToDictionary(t => t.Token!, t => new ExpressionBox(t.Expr)), 
                 query.Context.Filters, 
-                query.Context.Orders);
+                query.Context.Orders, 
+                query.Context.Pagination);
 
         var selector = Expression.Lambda(ctor, query.Context.Parameter);
 
@@ -1299,7 +1350,7 @@ public static class DQueryable
     {
         var isMultiKeyGrupping = req.GroupResults && req.Columns.Count(col => col.Token is not AggregateToken) >= 2;
 
-        var resultColumns = collection.Context.Replacements.Where(a => a.Key.HasNested() == null).Select(kvp =>
+        var resultColumns = collection.Context.Replacements.Where(a => a.Value.SubQueryContext == null).Select(kvp =>
         {
             var token = kvp.Key;
 
@@ -1318,20 +1369,20 @@ public static class DQueryable
         }).ToList();
 
 
-        var nestedResultTablesColumns = GetSubQueryColumns(collection.Collection, collection.Context, req.SubQueryLimit);
+        var nestedResultTablesColumns = GetSubQueryColumns(collection.Collection, collection.Context, req.Pagination);
 
         return new ResultTable(resultColumns.Concat(nestedResultTablesColumns).ToArray(), collection.TotalElements, req.Pagination, req.GroupResults);
     }
 
-    private static List<ResultColumn> GetSubQueryColumns(IEnumerable collection, BuildExpressionContext context, int subQueryLimit)
+    private static List<ResultColumn> GetSubQueryColumns(IEnumerable collection, BuildExpressionContext context, Pagination pagination)
     {
-        return context.Replacements.Where(a => a.Key is CollectionNestedToken).Select(kvp =>
+        return context.Replacements.Where(a => a.Value.SubQueryContext != null).Select(kvp =>
         {
             var body = Expression.Call(miToResultTableSubQuery,
                 kvp.Value.GetExpression(),
                 Expression.Constant((CollectionNestedToken)kvp.Key),
                 Expression.Constant(kvp.Value.SubQueryContext!),
-                Expression.Constant(subQueryLimit)
+                Expression.Constant(pagination)
             );
 
             var expression = Expression.Lambda(body, context.Parameter);
@@ -1346,11 +1397,11 @@ public static class DQueryable
         }).ToList();
     }
 
-    public static MethodInfo miToResultTableSubQuery = ReflectionTools.GetMethodInfo(() => ToResultTableSubQuery(new int[0], null!, null!, 3));
-    public static ResultTable ToResultTableSubQuery(IEnumerable collection, CollectionNestedToken nested,  BuildExpressionContext ctx, int subQueryLimit)
+    public static MethodInfo miToResultTableSubQuery = ReflectionTools.GetMethodInfo(() => ToResultTableSubQuery(new int[0], null!, null!, null!));
+    public static ResultTable ToResultTableSubQuery(IEnumerable collection, CollectionNestedToken nested,  BuildExpressionContext ctx, Pagination pagination)
     {
 
-        var resultColumns = ctx.Replacements.Where(a => a.Key.HasNested() == nested).Select(kvp =>
+        var resultColumns = ctx.Replacements.Where(a => a.Value.SubQueryContext == null).Select(kvp =>
         {
             var expression = Expression.Lambda(kvp.Value.GetExpression(), ctx.Parameter);
 
@@ -1363,8 +1414,8 @@ public static class DQueryable
             return rc;
         }).ToList();
 
-        var subQueryColumns = GetSubQueryColumns(collection, ctx, subQueryLimit);
+        var subQueryColumns = GetSubQueryColumns(collection, ctx, pagination);
 
-        return new ResultTable(resultColumns.Concat(subQueryColumns).ToArray(), null, new Pagination.Firsts(subQueryLimit), isGroupResults: false);
+        return new ResultTable(resultColumns.Concat(subQueryColumns).ToArray(), null, pagination, isGroupResults: false);
     }
 }

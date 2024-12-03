@@ -13,7 +13,7 @@ export interface UserEntity {
     newPassword: string;
 }
 
-export module AuthMessage {
+export namespace AuthMessage {
   export const NotAuthorizedTo0The1WithId2: MessageKey = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0: MessageKey = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
   export const OnlyActive: MessageKey = new MessageKey("AuthMessage", "OnlyActive");
@@ -28,7 +28,7 @@ export module AuthMessage {
   export const TheQueryDoesNotEnsureThatYouCanRead0: MessageKey = new MessageKey("AuthMessage", "TheQueryDoesNotEnsureThatYouCanRead0");
 }
 
-export module LoginAuthMessage {
+export namespace LoginAuthMessage {
   export const ThePasswordMustHaveAtLeast0Characters: MessageKey = new MessageKey("LoginAuthMessage", "ThePasswordMustHaveAtLeast0Characters");
   export const NotUserLogged: MessageKey = new MessageKey("LoginAuthMessage", "NotUserLogged");
   export const Username0IsNotValid: MessageKey = new MessageKey("LoginAuthMessage", "Username0IsNotValid");
@@ -94,7 +94,7 @@ export interface RoleEntity extends Entities.Entity {
   description: string | null;
 }
 
-export module RoleOperation {
+export namespace RoleOperation {
   export const Save : Operations.ExecuteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Save");
   export const Delete : Operations.DeleteSymbol<RoleEntity> = registerSymbol("Operation", "RoleOperation.Delete");
 }
@@ -122,7 +122,7 @@ export interface UserLiteModel extends Entities.ModelEntity {
   photoSuffix: string | null;
 }
 
-export module UserOperation {
+export namespace UserOperation {
   export const Create : Operations.ConstructSymbol_Simple<UserEntity> = registerSymbol("Operation", "UserOperation.Create");
   export const Save : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Save");
   export const Reactivate : Operations.ExecuteSymbol<UserEntity> = registerSymbol("Operation", "UserOperation.Reactivate");
@@ -139,7 +139,7 @@ export type UserState =
   "Deactivated" |
   "AutoDeactivate";
 
-export module UserTypeCondition {
+export namespace UserTypeCondition {
   export const DeactivatedUsers : Rules.TypeConditionSymbol = registerSymbol("TypeCondition", "UserTypeCondition.DeactivatedUsers");
 }
 

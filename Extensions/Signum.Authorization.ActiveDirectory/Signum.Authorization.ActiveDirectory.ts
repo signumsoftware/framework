@@ -11,7 +11,7 @@ import * as Files from '../Signum.Files/Signum.Files'
 import * as Scheduler from '../Signum.Scheduler/Signum.Scheduler'
 
 
-export module ActiveDirectoryAuthorizerMessage {
+export namespace ActiveDirectoryAuthorizerMessage {
   export const ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication: MessageKey = new MessageKey("ActiveDirectoryAuthorizerMessage", "ActiveDirectoryUser0IsNotAssociatedWithAUserInThisApplication");
 }
 
@@ -36,7 +36,7 @@ export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedE
   defaultRole: Entities.Lite<Authorization.RoleEntity> | null;
 }
 
-export module ActiveDirectoryMessage {
+export namespace ActiveDirectoryMessage {
   export const Id: MessageKey = new MessageKey("ActiveDirectoryMessage", "Id");
   export const DisplayName: MessageKey = new MessageKey("ActiveDirectoryMessage", "DisplayName");
   export const Mail: MessageKey = new MessageKey("ActiveDirectoryMessage", "Mail");
@@ -55,11 +55,11 @@ export module ActiveDirectoryMessage {
   export const HasUser: MessageKey = new MessageKey("ActiveDirectoryMessage", "HasUser");
 }
 
-export module ActiveDirectoryPermission {
+export namespace ActiveDirectoryPermission {
   export const InviteUsersFromAD : Basics.PermissionSymbol = registerSymbol("Permission", "ActiveDirectoryPermission.InviteUsersFromAD");
 }
 
-export module ActiveDirectoryTask {
+export namespace ActiveDirectoryTask {
   export const DeactivateUsers : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "ActiveDirectoryTask.DeactivateUsers");
 }
 
@@ -69,12 +69,12 @@ export interface ADGroupEntity extends Entities.Entity {
   displayName: string;
 }
 
-export module ADGroupOperation {
+export namespace ADGroupOperation {
   export const Save : Operations.ExecuteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Save");
   export const Delete : Operations.DeleteSymbol<ADGroupEntity> = registerSymbol("Operation", "ADGroupOperation.Delete");
 }
 
-export module AuthADFileType {
+export namespace AuthADFileType {
   export const CachedProfilePhoto : Files.FileTypeSymbol = registerSymbol("FileType", "AuthADFileType.CachedProfilePhoto");
 }
 
@@ -94,7 +94,7 @@ export interface CachedProfilePhotoEntity extends Entities.Entity {
   creationDate: string /*DateTime*/;
 }
 
-export module CachedProfilePhotoOperation {
+export namespace CachedProfilePhotoOperation {
   export const Save : Operations.ExecuteSymbol<CachedProfilePhotoEntity> = registerSymbol("Operation", "CachedProfilePhotoOperation.Save");
   export const Delete : Operations.DeleteSymbol<CachedProfilePhotoEntity> = registerSymbol("Operation", "CachedProfilePhotoOperation.Delete");
 }
@@ -106,7 +106,7 @@ export interface RoleMappingEmbedded extends Entities.EmbeddedEntity {
   role: Entities.Lite<Authorization.RoleEntity>;
 }
 
-export module UserADMessage {
+export namespace UserADMessage {
   export const Find0InActiveDirectory: MessageKey = new MessageKey("UserADMessage", "Find0InActiveDirectory");
   export const FindInActiveDirectory: MessageKey = new MessageKey("UserADMessage", "FindInActiveDirectory");
   export const NoUserContaining0FoundInActiveDirectory: MessageKey = new MessageKey("UserADMessage", "NoUserContaining0FoundInActiveDirectory");
@@ -122,7 +122,7 @@ export interface UserADMixin extends Entities.MixinEntity {
   sID: string | null;
 }
 
-export module UserOIDMessage {
+export namespace UserOIDMessage {
   export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
 }
 

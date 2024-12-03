@@ -79,7 +79,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
 
 
               <FilterBuilderEmbedded ctx={ctx.subCtx(e => e.filters)} onChanged={forceUpdate}
-                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | canAggregate}
+                subTokenOptions={SubTokensOptions.CanAnyAll | SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate}
                 queryKey={ctx.value.query!.key} />
               <EntityTable ctx={ctx.subCtx(e => e.orders)} onChange={forceUpdate} columns={[
                 {
@@ -87,7 +87,7 @@ export default function EmailTemplate(p: { ctx: TypeContext<EmailTemplateEntity>
                   template: ctx => <QueryTokenEmbeddedBuilder
                     ctx={ctx.subCtx(a => a.token, { formGroupStyle: "SrOnly" })}
                     queryKey={p.ctx.value.query!.key}
-                    subTokenOptions={SubTokensOptions.CanElement | canAggregate} />
+                    subTokenOptions={SubTokensOptions.CanElement | SubTokensOptions.CanNested | canAggregate} />
                 },
                 { property: a => a.orderType }
               ]} />

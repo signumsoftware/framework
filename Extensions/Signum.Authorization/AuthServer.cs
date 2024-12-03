@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Frozen;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Authorization;
 
@@ -232,8 +233,7 @@ public static class AuthServer
                 }
                 else
                 {
-
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
 
                     if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Read))
                         return "Not Allowed";
@@ -248,16 +248,16 @@ public static class AuthServer
                 if (UserEntity.Current == null)
                 {
                     if (!pr.GetAllowUnathenticated())
-                        return "Not Allowed for Unathenticated";
+                        return $"{pr} is not Allowed for Unathenticated";
 
                     return null;
                 }
                 else
                 {
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
 
-                    if (!PropertyAuthLogic.IsAllowedFor(entity!, pr, PropertyAllowed.Write))
-                        return "Not Allowed to write";
+                    if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Write))
+                        return $"{pr} is not Allowed to write";
 
                     return null;
                 }
@@ -271,12 +271,11 @@ public static class AuthServer
                 var role = RoleEntity.Current;
                 var pac = PropertyAuthLogic.GetAllowed(role, pr);
 
-                if (!pac.ConditionRules.Any())
-                    return null;
+                var tac = TypeAuthLogic.GetAllowed(pr.RootType);
 
-                var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+                var candidates = pac.CandidatesAssuming(tac);
 
-                if (pac.Equals(tac))
+                if (candidates.Distinct().Count() <= 1)
                     return null;
 
                 var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;

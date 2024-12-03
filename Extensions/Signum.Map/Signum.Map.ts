@@ -7,7 +7,7 @@ import * as Entities from '../../Signum/React/Signum.Entities'
 import * as Basics from '../../Signum/React/Signum.Basics'
 
 
-export module MapMessage {
+export namespace MapMessage {
   export const Map: MessageKey = new MessageKey("MapMessage", "Map");
   export const Namespace: MessageKey = new MessageKey("MapMessage", "Namespace");
   export const TableSize: MessageKey = new MessageKey("MapMessage", "TableSize");
@@ -23,7 +23,7 @@ export module MapMessage {
   export const TableSizeHistory: MessageKey = new MessageKey("MapMessage", "TableSizeHistory");
 }
 
-export module MapPermission {
+export namespace MapPermission {
   export const ViewMap : Basics.PermissionSymbol = registerSymbol("Permission", "MapPermission.ViewMap");
 }
 

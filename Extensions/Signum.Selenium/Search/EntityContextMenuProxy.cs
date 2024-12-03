@@ -114,7 +114,7 @@ public class EntityContextMenuProxy
 
     public bool OperationIsDisabled(IOperationSymbolContainer symbolContainer)
     {
-        return Operation(symbolContainer).WaitVisible().GetAttribute("disabled").HasText();
+        return Operation(symbolContainer).WaitVisible().GetDomProperty("disabled").HasText();
     }
 
     public IWebElement OperationClickCapture(IOperationSymbolContainer symbolContainer)

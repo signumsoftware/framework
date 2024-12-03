@@ -19,11 +19,11 @@ export interface EmailMessagePackageMixin extends Entities.MixinEntity {
   package: Entities.Lite<EmailPackageEntity> | null;
 }
 
-export module EmailMessagePackageOperation {
+export namespace EmailMessagePackageOperation {
   export const ReSendEmails : Operations.ConstructSymbol_FromMany<Processes.ProcessEntity, Mailing.EmailMessageEntity> = registerSymbol("Operation", "EmailMessagePackageOperation.ReSendEmails");
 }
 
-export module EmailMessageProcess {
+export namespace EmailMessageProcess {
   export const CreateEmailsSendAsync : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.CreateEmailsSendAsync");
   export const SendEmails : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "EmailMessageProcess.SendEmails");
 }
@@ -51,7 +51,7 @@ export interface SendEmailTaskEntity extends Entities.Entity, Scheduler.ITaskEnt
   modelConverter: Templating.ModelConverterSymbol | null;
 }
 
-export module SendEmailTaskOperation {
+export namespace SendEmailTaskOperation {
   export const Save : Operations.ExecuteSymbol<SendEmailTaskEntity> = registerSymbol("Operation", "SendEmailTaskOperation.Save");
 }
 

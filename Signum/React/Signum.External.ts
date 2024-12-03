@@ -6,7 +6,7 @@ import { MessageKey, QueryKey, Type, EnumType, registerSymbol } from './Reflecti
 import * as Entities from './Signum.Entities'
 
 
-export module CollectionMessage {
+export namespace CollectionMessage {
   export const And: MessageKey = new MessageKey("CollectionMessage", "And");
   export const Or: MessageKey = new MessageKey("CollectionMessage", "Or");
   export const No0Found: MessageKey = new MessageKey("CollectionMessage", "No0Found");

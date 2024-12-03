@@ -1,4 +1,5 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.Authorization;
 using Signum.Cache;
 using System.Threading.Channels;
@@ -66,11 +67,11 @@ public static class ProcessRunner
 
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+            initialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+            new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static void StartRunningProcessesAfter(int delayMilliseconds)

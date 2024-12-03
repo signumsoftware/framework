@@ -1,15 +1,18 @@
 import * as React from 'react'
-import { SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
-import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail } from '@framework/Lines'
+import { HealthCheckConditionEmbedded, SystemTimeEmbedded, UserQueryEntity, UserQueryMessage } from '../Signum.UserQueries'
+import { FormGroup, AutoLine, EntityLine, EntityTable, EntityStrip, CheckboxLine, TextBoxLine, EntityDetail, EnumLine, NumberLine } from '@framework/Lines'
+import * as AppContext from '@framework/AppContext'
 import { Finder } from '@framework/Finder'
-import { FilterConditionOption, FindOptions, SubTokensOptions } from '@framework/FindOptions'
+import { FilterConditionOption, filterOperations, FindOptions, getFilterOperations, SubTokensOptions } from '@framework/FindOptions'
 import { getQueryNiceName, getTypeInfos } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import QueryTokenEmbeddedBuilder from '../../Signum.UserAssets/Templates/QueryTokenEmbeddedBuilder'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded';
 import { useAPI, useForceUpdate } from '@framework/Hooks'
-import { SearchMessage, getToString } from '@framework/Signum.Entities'
-import { QueryColumnEmbedded, QueryOrderEmbedded, QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { SearchMessage, getToString, toLite } from '@framework/Signum.Entities'
+import { QueryTokenEmbedded } from '../../Signum.UserAssets/Signum.UserAssets.Queries'
+import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButton'
+import { UserQueryClient } from '../UserQueryClient'
 
 const CurrentEntityKey = "[CurrentEntity]";
 
@@ -32,6 +35,7 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
   var qs = Finder.querySettings[query.key];
 
   var hasSystemTime = qs?.allowSystemTime ?? getTypeInfos(qd.columns["Entity"].type);
+  const url = window.location;
 
   return (
     <div>
@@ -150,7 +154,21 @@ export default function UserQuery(p: { ctx: TypeContext<UserQueryEntity> }): Rea
           </div>
 
           {(hasSystemTime || ctx.value.systemTime) && <EntityDetail ctx={ctx.subCtx(a => a.systemTime)} avoidFieldSet="h5"
-            getComponent={st => <SystemTime ctx={st} />} />}
+          getComponent={st => <SystemTime ctx={st} />} />}
+
+        <EntityDetail ctx={ctx.subCtx(a => a.healthCheck)} avoidFieldSet="h5"
+          showAsCheckBox
+          extraButtons={() => !ctx.value.healthCheck || ctx.value.isNew ? undefined :
+            <CopyHealthCheckButton name={ctx.value.displayName}
+              healthCheckUrl={url.origin + AppContext.toAbsoluteUrl('/api/userQueries/healthCheck/' + ctx.value.id)}
+              clickUrl={url.origin + AppContext.toAbsoluteUrl(UserQueryClient.userQueryUrl(toLite(ctx.value)))} />
+          }
+          onChange={()=>forceUpdate()}
+          getComponent={hcctx => 
+            <div>
+              <HealthCondition ctx={hcctx.subCtx(a => a.failWhen)} color="rgb(255 177 177)" queryNiceName={getQueryNiceName(qd.queryKey)} />
+              <HealthCondition ctx={hcctx.subCtx(a => a.degradedWhen)} color="rgb(255 241 183)" queryNiceName={getQueryNiceName(qd.queryKey)} />
+            </div>} />
         </div>)
       }
     </div>
@@ -230,4 +248,28 @@ function SystemTime(p: { ctx: TypeContext<SystemTimeEmbedded> }) {
       }
     </div>
   );
+}
+
+function HealthCondition(p: { ctx: TypeContext<HealthCheckConditionEmbedded | null>, color: string, queryNiceName: string }) {
+  const ctx = p.ctx.subCtx({ formGroupStyle: "None", formSize: "xs" }) as TypeContext<HealthCheckConditionEmbedded>;
+  const forceUpdate = useForceUpdate();
+  return (<>
+    <label className="d-flex flex-row align-items-center">
+      <input type="checkbox" checked={p.ctx.value != null}
+        className="form-check-input me-2"
+        onChange={() => { p.ctx.value = p.ctx.value == null ? HealthCheckConditionEmbedded.New() : null; forceUpdate() }} />
+      {p.ctx.value == null ? p.ctx.niceName() :
+        <span style={{ backgroundColor: p.color }} className="p-2">
+          {
+            UserQueryMessage._0CountOf1Is2Than3.niceToString().formatHtml(
+              <strong>{ctx.niceName()}</strong>,
+              p.queryNiceName,
+              <EnumLine ctx={ctx.subCtx(a => a.operation)} optionItems={filterOperations["Integer"]} formGroupHtmlAttributes={{ className: "d-inline-block" }} />,
+              <NumberLine ctx={ctx.subCtx(a => a.value)} formGroupHtmlAttributes={{ className: "d-inline-block" }} />,
+            )
+          }
+        </span>
+      }
+    </label>
+  </>);
 }

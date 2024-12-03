@@ -51,8 +51,6 @@ public class QueryRequest : BaseQueryRequest
 
     public required Pagination Pagination { get; set; }
 
-    public int SubQueryLimit { get; set; } = 10;
-
     public SystemTimeRequest? SystemTime { get; set; }
 
     public override string Dump()
@@ -65,16 +63,21 @@ public class QueryRequest : BaseQueryRequest
             Columns = Columns.ToString("\n"),
             Orders = Orders.ToString("\n"),
             Pagination = Pagination.ToString(),
-            SubQueryLimit = SubQueryLimit,
             SystemTime = SystemTime?.ToString()
         });
     }
 
-    public bool CanDoMultiplicationsInSubQueries()
+    public void AssertNeasted()
     {
-        return GroupResults == false && Pagination is Pagination.All && SystemTime == null &&
-            Orders.Select(a => a.Token).Concat(Columns.Select(a => a.Token)).Any(a => a.HasElement()) &&
-            !Filters.SelectMany(f => f.GetAllFilters()).SelectMany(f => f.GetTokens()).Any(t => t.HasElement());
+        var columns = Columns.Select(a => a.Token.HasNested()).NotNull().Distinct().ToList();
+        var filterProblems = Filters.Select(a => a.GetDeepestNestedToken()).NotNull().Distinct().Where(f => !columns.Contains(f)).ToString(a => a.FullKey(), "\n");
+        var orderProblems = Orders.Select(a => a.Token.HasNested()).NotNull().Distinct().Where(f => !columns.Contains(f)).ToString(a => a.FullKey(), "\n");
+        if (filterProblems.HasText() || orderProblems.HasText())
+        {
+            throw new InvalidOperationException("\n\n".Combine(
+                filterProblems == null ? null : $"Unable to filter by Nested token not selected in columns:\n{filterProblems.Indent(4)}",
+                orderProblems == null ? null : $"Unable to order by Nested token not selected in columns:\n{orderProblems.Indent(4)}"));
+        }
     }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());

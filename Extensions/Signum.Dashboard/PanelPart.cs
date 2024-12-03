@@ -359,14 +359,6 @@ public class HealthCheckElementEmbedded : EmbeddedEntity
     }
 }
 
-[InTypeScript(true), DescriptionOptions(DescriptionOptions.Members)]
-public enum HealthCheckStatus
-{
-    Ok,
-    Error
-}
-
-
 
 [EntityKind(EntityKind.Part, EntityData.Master)]
 public class TextPartEntity : Entity, IPartEntity

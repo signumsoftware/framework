@@ -356,11 +356,11 @@ export type BooleanEnum =
   "False" |
   "True";
 
-export module CalendarMessage {
+export namespace CalendarMessage {
   export const Today: MessageKey = new MessageKey("CalendarMessage", "Today");
 }
 
-export module ConnectionMessage {
+export namespace ConnectionMessage {
   export const VersionInfo: MessageKey = new MessageKey("ConnectionMessage", "VersionInfo");
   export const ANewVersionHasJustBeenDeployedSaveChangesAnd0: MessageKey = new MessageKey("ConnectionMessage", "ANewVersionHasJustBeenDeployedSaveChangesAnd0");
   export const OutdatedClientApplication: MessageKey = new MessageKey("ConnectionMessage", "OutdatedClientApplication");
@@ -368,7 +368,7 @@ export module ConnectionMessage {
   export const Refresh: MessageKey = new MessageKey("ConnectionMessage", "Refresh");
 }
 
-export module ContainerToggleMessage {
+export namespace ContainerToggleMessage {
   export const Compress: MessageKey = new MessageKey("ContainerToggleMessage", "Compress");
   export const Expand: MessageKey = new MessageKey("ContainerToggleMessage", "Expand");
 }
@@ -382,7 +382,7 @@ export interface CorruptMixin extends MixinEntity {
 export interface EmbeddedEntity extends ModifiableEntity {
 }
 
-export module EngineMessage {
+export namespace EngineMessage {
   export const ConcurrencyErrorOnDatabaseTable0Id1: MessageKey = new MessageKey("EngineMessage", "ConcurrencyErrorOnDatabaseTable0Id1");
   export const EntityWithType0AndId1NotFound: MessageKey = new MessageKey("EngineMessage", "EntityWithType0AndId1NotFound");
   export const NoWayOfMappingType0Found: MessageKey = new MessageKey("EngineMessage", "NoWayOfMappingType0Found");
@@ -393,7 +393,7 @@ export module EngineMessage {
   export const TheresAlreadyA0With1EqualsTo2_G: MessageKey = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
 }
 
-export module EntityControlMessage {
+export namespace EntityControlMessage {
   export const Create: MessageKey = new MessageKey("EntityControlMessage", "Create");
   export const Find: MessageKey = new MessageKey("EntityControlMessage", "Find");
   export const Detail: MessageKey = new MessageKey("EntityControlMessage", "Detail");
@@ -429,7 +429,7 @@ export module EntityControlMessage {
   export const _0CharactersRemaining: MessageKey = new MessageKey("EntityControlMessage", "_0CharactersRemaining");
 }
 
-export module FrameMessage {
+export namespace FrameMessage {
   export const New0_G: MessageKey = new MessageKey("FrameMessage", "New0_G");
   export const Copied: MessageKey = new MessageKey("FrameMessage", "Copied");
   export const CopyToClipboard: MessageKey = new MessageKey("FrameMessage", "CopyToClipboard");
@@ -442,7 +442,7 @@ export interface ImmutableEntity extends Entity {
   allowChange: boolean;
 }
 
-export module JavascriptMessage {
+export namespace JavascriptMessage {
   export const chooseAType: MessageKey = new MessageKey("JavascriptMessage", "chooseAType");
   export const chooseAValue: MessageKey = new MessageKey("JavascriptMessage", "chooseAValue");
   export const addFilter: MessageKey = new MessageKey("JavascriptMessage", "addFilter");
@@ -492,7 +492,7 @@ export module JavascriptMessage {
   export const Date: MessageKey = new MessageKey("JavascriptMessage", "Date");
 }
 
-export module LiteMessage {
+export namespace LiteMessage {
   export const IdNotValid: MessageKey = new MessageKey("LiteMessage", "IdNotValid");
   export const InvalidFormat: MessageKey = new MessageKey("LiteMessage", "InvalidFormat");
   export const Type0NotFound: MessageKey = new MessageKey("LiteMessage", "Type0NotFound");
@@ -502,14 +502,14 @@ export module LiteMessage {
 export interface ModelEntity extends ModifiableEntity {
 }
 
-export module NormalControlMessage {
+export namespace NormalControlMessage {
   export const ViewForType0IsNotAllowed: MessageKey = new MessageKey("NormalControlMessage", "ViewForType0IsNotAllowed");
   export const SaveChangesFirst: MessageKey = new MessageKey("NormalControlMessage", "SaveChangesFirst");
   export const CopyEntityTypeAndIdForAutocomplete: MessageKey = new MessageKey("NormalControlMessage", "CopyEntityTypeAndIdForAutocomplete");
   export const CopyEntityUrl: MessageKey = new MessageKey("NormalControlMessage", "CopyEntityUrl");
 }
 
-export module OperationMessage {
+export namespace OperationMessage {
   export const Create: MessageKey = new MessageKey("OperationMessage", "Create");
   export const CreateFromRegex: MessageKey = new MessageKey("OperationMessage", "CreateFromRegex");
   export const Create0: MessageKey = new MessageKey("OperationMessage", "Create0");
@@ -541,16 +541,16 @@ export module OperationMessage {
   export const Operation: MessageKey = new MessageKey("OperationMessage", "Operation");
 }
 
-export module PaginationMessage {
+export namespace PaginationMessage {
   export const All: MessageKey = new MessageKey("PaginationMessage", "All");
 }
 
-export module QuickLinkMessage {
+export namespace QuickLinkMessage {
   export const Quicklinks: MessageKey = new MessageKey("QuickLinkMessage", "Quicklinks");
   export const No0Found: MessageKey = new MessageKey("QuickLinkMessage", "No0Found");
 }
 
-export module ReactWidgetsMessage {
+export namespace ReactWidgetsMessage {
   export const MoveToday: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveToday");
   export const MoveBack: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveBack");
   export const MoveForward: MessageKey = new MessageKey("ReactWidgetsMessage", "MoveForward");
@@ -569,13 +569,13 @@ export module ReactWidgetsMessage {
   export const DecrementValue: MessageKey = new MessageKey("ReactWidgetsMessage", "DecrementValue");
 }
 
-export module SaveChangesMessage {
+export namespace SaveChangesMessage {
   export const ThereAreChanges: MessageKey = new MessageKey("SaveChangesMessage", "ThereAreChanges");
   export const YoureTryingToCloseAnEntityWithChanges: MessageKey = new MessageKey("SaveChangesMessage", "YoureTryingToCloseAnEntityWithChanges");
   export const LoseChanges: MessageKey = new MessageKey("SaveChangesMessage", "LoseChanges");
 }
 
-export module SearchMessage {
+export namespace SearchMessage {
   export const ChooseTheDisplayNameOfTheNewColumn: MessageKey = new MessageKey("SearchMessage", "ChooseTheDisplayNameOfTheNewColumn");
   export const Field: MessageKey = new MessageKey("SearchMessage", "Field");
   export const ColumnField: MessageKey = new MessageKey("SearchMessage", "ColumnField");
@@ -670,7 +670,7 @@ export module SearchMessage {
   export const Options: MessageKey = new MessageKey("SearchMessage", "Options");
 }
 
-export module SelectorMessage {
+export namespace SelectorMessage {
   export const ConstructorSelector: MessageKey = new MessageKey("SelectorMessage", "ConstructorSelector");
   export const PleaseChooseAValueToContinue: MessageKey = new MessageKey("SelectorMessage", "PleaseChooseAValueToContinue");
   export const PleaseSelectAConstructor: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAConstructor");
@@ -687,12 +687,12 @@ export module SelectorMessage {
   export const PleaseSelectAtLeastOneValueToContinue: MessageKey = new MessageKey("SelectorMessage", "PleaseSelectAtLeastOneValueToContinue");
 }
 
-export module SynchronizerMessage {
+export namespace SynchronizerMessage {
   export const EndOfSyncScript: MessageKey = new MessageKey("SynchronizerMessage", "EndOfSyncScript");
   export const StartOfSyncScriptGeneratedOn0: MessageKey = new MessageKey("SynchronizerMessage", "StartOfSyncScriptGeneratedOn0");
 }
 
-export module VoidEnumMessage {
+export namespace VoidEnumMessage {
   export const Instance: MessageKey = new MessageKey("VoidEnumMessage", "Instance");
 }
 

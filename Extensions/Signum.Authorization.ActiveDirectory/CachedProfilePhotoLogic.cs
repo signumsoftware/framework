@@ -44,21 +44,20 @@ public static class CachedProfilePhotoLogic
     {
         using (AuthLogic.Disable())
         {
+            size = AzureADLogic.ToAzureSize(size);
+            
             var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
 
             if (result != null)
                 return result;
 
-            size = AzureADLogic.ToAzureSize(size);
-
-            var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
-
             using (var tr = new Transaction())
             {
-                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size); //Check again
                 if (result != null)
                     return result;
 
+                var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
                 var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
                 result = new CachedProfilePhotoEntity

@@ -23,7 +23,7 @@ class Upgrade_20241119_DotNet9 : CodeUpgradeBase
             file.Replace("sdk:8.0", "sdk:9.0");
         });
 
-        uctx.ChangeCodeFile(@"deploy*.ps1", file =>
+        uctx.ForeachCodeFile(@"deploy*.ps1", file =>
         {
             file.Replace("net8.0", "net9.0");
         });

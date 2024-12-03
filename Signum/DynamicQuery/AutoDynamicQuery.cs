@@ -1,5 +1,6 @@
 using Signum.Utilities.Reflection;
 using Signum.DynamicQuery.Tokens;
+using System;
 
 namespace Signum.DynamicQuery;
 
@@ -110,7 +111,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             inMemoryOrders = null;
 
             return query
-               .SelectManyTimeSeries(request.SystemTime, columns, request.Orders, timeSeriesFilters);
+               .SelectManyTimeSeries(request.SystemTime, columns, request.Orders, timeSeriesFilters, request.Pagination);
 
         }
         else if (request.Pagination is Pagination.All)
@@ -128,7 +129,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             inMemoryOrders = null;
 
             return query
-                .OrderBy(request.Orders)
+                .OrderBy(request.Orders, request.Pagination)
                 .Select(columns);
         }
 
@@ -151,12 +152,12 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .GroupBy(keys, allAggregates)
             .Where(aggregateFilters);
 
-        if(request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
+        if (request.SystemTime != null && request.SystemTime.mode == SystemTimeMode.TimeSeries)
         {
             inMemoryOrders = null;
 
             return query
-                .SelectManyTimeSeries(request.SystemTime, request.Columns.Select(a => a.Token).ToHashSet(), request.Orders, timeSeriesFilter);
+                .SelectManyTimeSeries(request.SystemTime, request.Columns.Select(a => a.Token).ToHashSet(), request.Orders, timeSeriesFilter, request.Pagination);
 
         }
         else if (request.Pagination is Pagination.All)
@@ -167,7 +168,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         else
         {
             inMemoryOrders = null;
-            return query.OrderBy(request.Orders);
+            return query.OrderBy(request.Orders, request.Pagination);
         }
     }
 
@@ -218,7 +219,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .ToDQueryable(GetQueryDescription())
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
-            .OrderBy(request.Orders);
+            .OrderBy(request.Orders, null);
 
         var result = orderQuery
             .SelectOne(ex)
@@ -235,7 +236,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
             .ToDQueryable(GetQueryDescription())
             .SelectMany(request.Multiplications(), request.FullTextTableFilters())
             .Where(request.Filters)
-            .OrderBy(request.Orders);
+            .OrderBy(request.Orders, null);
 
         var result = await orderQuery
             .SelectOne(ex)
@@ -251,7 +252,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         DQueryable<T> query = Query
          .ToDQueryable(GetQueryDescription())
          .SelectMany(request.Multiplications(), request.FullTextTableFilters())
-         .OrderBy(request.Orders)
+         .OrderBy(request.Orders, null)
          .Where(request.Filters)
          .Select(new HashSet<QueryToken> { ex });
 
@@ -270,7 +271,7 @@ public class AutoDynamicQueryCore<T> : DynamicQueryCore<T>
         DQueryable<T> query = Query
          .ToDQueryable(GetQueryDescription())
          .SelectMany(request.Multiplications(), request.FullTextTableFilters())
-         .OrderBy(request.Orders)
+         .OrderBy(request.Orders, null)
          .Where(request.Filters)
          .Select(new HashSet<QueryToken>{ ex });
 

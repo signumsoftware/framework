@@ -1,6 +1,7 @@
 using Signum.DynamicQuery.Tokens;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Diagnostics.Eventing.Reader;
 
 namespace Signum.Authorization.Rules;
 
@@ -108,16 +109,23 @@ public static class PropertyAuthLogic
         var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
-            var tac = TypeAuthLogic.GetAllowed(e.type).ToPropertyAllowed();
-
-            if (tac.ConditionRules.IsEmpty())
+            var taac = TypeAuthLogic.GetAllowed(e.type);
+            if (taac.ConditionRules.IsEmpty())
                 return false;
 
-            return PropertyRoute.GenerateRoutes(e.type).Any(pr => !cache.GetAllowed(e.role, pr).Equals(tac));
+            var def = taac.ToPropertyAllowed();
+
+            return PropertyRoute.GenerateRoutes(e.type).Any(pr => {
+
+                var paac = cache.GetAllowed(e.role, pr);
+
+                if (paac.Equals(def))
+                    return false;
+
+                return paac.CandidatesAssuming(taac).Distinct().Count() > 1; //If for all the type rules that are visible the property has the same value, we don't need the type conditions
+            });
         });
     }
-
-
 
     static TypeConditionNode DiffNodes(this WithConditions<PropertyAllowed> propertyAllowed, WithConditions<PropertyAllowed> typeAllowed)
     {
@@ -249,7 +257,7 @@ public static class PropertyAuthLogic
     public static bool IsAllowedFor<T, S>(T mod, Expression<Func<T, S>> property, PropertyAllowed allowed, FilterQueryArgs args)
         where T : ModifiableEntity, IRootEntity
     {
-        return IsAllowedFor(mod, PropertyRoute.Construct(property), allowed);
+        return IsAllowedFor(mod, PropertyRoute.Construct(property), allowed)!;
     }
 
     public class IsAllowedForPropertyExpander : IMethodExpander
@@ -297,28 +305,35 @@ public static class PropertyAuthLogic
         return giEvaluateAllowed.GetInvoker(rootEntity.GetType())(rootEntity, paac);
     }
 
-    public static bool IsAllowedFor(IRootEntity mod, PropertyRoute route, PropertyAllowed allowed)
+    public static bool IsAllowedFor(IRootEntity? root, PropertyRoute route, PropertyAllowed allowed)
     {
-        var paac = PropertyAuthLogic.GetPropertyAllowed(route);
-
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
             return true;
 
-        if (allowed <= paac.Min())
+        var paac = PropertyAuthLogic.GetPropertyAllowed(route);
+        var taac = TypeAuthLogic.GetAllowed(route.RootType);
+
+        if (allowed <= paac.Min(assumingTaac: taac))
             return true;
 
-        if (paac.Max() < allowed)
+        if (paac.Max(assumingTaac: taac) < allowed)
             return false;
 
-        if (mod is Entity e)
+        if (root is Entity e)
         {
             if (e.IsNew)
                 return true;
 
             if (!HasTypeConditionInProperties(route.RootType))
-                return true;
+            {
+                throw new InvalidOperationException("Unexpected");
+            }
 
-            return giEvaluateAllowed.GetInvoker(mod.GetType())(e, paac) >= allowed;
+            return giEvaluateAllowed.GetInvoker(root.GetType())(e, paac) >= allowed;
+        }
+        else if(root == null) //For example Embedded in a Query 
+        {
+            return false;
         }
         else
             throw new InvalidOperationException("Unexpected");
