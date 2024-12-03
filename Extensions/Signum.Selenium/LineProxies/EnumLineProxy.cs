@@ -54,14 +54,14 @@ public class EnumLineProxy : BaseLineProxy
         string? strValue = null;
         if (rw != null)
         {
-            strValue = rw.FindElement(By.CssSelector("[data-value]")).GetAttribute("data-value");
+            strValue = rw.FindElement(By.CssSelector("[data-value]")).GetDomAttribute("data-value");
         }
         else
         {
             var elem = this.SelectLocator.Find();
 
-            strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetAttribute("value").ToString() :
-                elem.GetAttribute("data-value");
+            strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetDomProperty("value").ToString() :
+                elem.GetDomAttribute("data-value");
 
         }
 

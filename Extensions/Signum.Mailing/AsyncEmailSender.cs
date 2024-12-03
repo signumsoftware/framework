@@ -2,6 +2,7 @@ using Microsoft.Data.SqlClient;
 using Signum.Authorization;
 using Signum.Cache;
 using Signum.Basics;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 namespace Signum.Mailing;
 
@@ -41,11 +42,11 @@ public static class AsyncEmailSender
         });
     }
 
-    public static SimpleStatus GetSimpleStatus()
+    public static HealthCheckResult GetHealthStatus()
     {
-        return running ? SimpleStatus.Ok :
-            initialDelayMilliseconds == null ? SimpleStatus.Disabled :
-            SimpleStatus.Error;
+        return running ? new HealthCheckResult(HealthStatus.Healthy, "Running") :
+          initialDelayMilliseconds == null ? new HealthCheckResult(HealthStatus.Healthy, "Disabled") :
+          new HealthCheckResult(HealthStatus.Unhealthy, "Not Running!");
     }
 
     public static void StartAsyncEmailSender()

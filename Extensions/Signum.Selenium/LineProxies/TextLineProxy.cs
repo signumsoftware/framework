@@ -28,14 +28,14 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
     {
         var textLine = InputLocator.Find(); 
 
-        return /*textLine.GetAttribute("data-value") ??*/ textLine.GetAttribute("value");
+        return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value");
     }
 
     public bool IsReadonly()
     {
         var element = InputLocator.Find();
 
-        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetAttribute("readonly") != null;
+        return element.HasClass("readonly") || element.HasClass("form-control-plaintext") || element.GetDomProperty("readonly") != null;
     }
 }
 

@@ -53,7 +53,7 @@ export interface WordTemplateEntity extends Entities.Entity, UserAssets.IUserAss
   wordConverter: WordConverterSymbol | null;
 }
 
-export module WordTemplateMessage {
+export namespace WordTemplateMessage {
   export const ModelShouldBeSetToUseModel0: MessageKey = new MessageKey("WordTemplateMessage", "ModelShouldBeSetToUseModel0");
   export const Type0DoesNotHaveAPropertyWithName1: MessageKey = new MessageKey("WordTemplateMessage", "Type0DoesNotHaveAPropertyWithName1");
   export const ChooseAReportTemplate: MessageKey = new MessageKey("WordTemplateMessage", "ChooseAReportTemplate");
@@ -64,14 +64,14 @@ export module WordTemplateMessage {
   export const WordReport: MessageKey = new MessageKey("WordTemplateMessage", "WordReport");
 }
 
-export module WordTemplateOperation {
+export namespace WordTemplateOperation {
   export const Save : Operations.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Save");
   export const Delete : Operations.DeleteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.Delete");
   export const CreateWordReport : Operations.ExecuteSymbol<WordTemplateEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordReport");
   export const CreateWordTemplateFromWordModel : Operations.ConstructSymbol_From<WordTemplateEntity, WordModelEntity> = registerSymbol("Operation", "WordTemplateOperation.CreateWordTemplateFromWordModel");
 }
 
-export module WordTemplatePermission {
+export namespace WordTemplatePermission {
   export const GenerateReport : Basics.PermissionSymbol = registerSymbol("Permission", "WordTemplatePermission.GenerateReport");
 }
 

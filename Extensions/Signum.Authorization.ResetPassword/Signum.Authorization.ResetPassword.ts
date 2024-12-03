@@ -8,7 +8,7 @@ import * as Operations from '../../Signum/React/Signum.Operations'
 import * as Authorization from '../Signum.Authorization/Signum.Authorization'
 
 
-export module ResetPasswordMessage {
+export namespace ResetPasswordMessage {
   export const YouRecentlyRequestedANewPassword: MessageKey = new MessageKey("ResetPasswordMessage", "YouRecentlyRequestedANewPassword");
   export const YourUsernameIs: MessageKey = new MessageKey("ResetPasswordMessage", "YourUsernameIs");
   export const YouCanResetYourPasswordByFollowingTheLinkBelow: MessageKey = new MessageKey("ResetPasswordMessage", "YouCanResetYourPasswordByFollowingTheLinkBelow");
@@ -31,7 +31,7 @@ export interface ResetPasswordRequestEntity extends Entities.Entity {
   used: boolean;
 }
 
-export module ResetPasswordRequestOperation {
+export namespace ResetPasswordRequestOperation {
   export const Execute : Operations.ExecuteSymbol<ResetPasswordRequestEntity> = registerSymbol("Operation", "ResetPasswordRequestOperation.Execute");
 }
 

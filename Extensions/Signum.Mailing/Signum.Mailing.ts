@@ -11,7 +11,7 @@ import * as Files from '../Signum.Files/Signum.Files'
 
 import * as External from './Signum.Mailing.External'
 
-export module AsyncEmailSenderPermission {
+export namespace AsyncEmailSenderPermission {
   export const ViewAsyncEmailSenderPanel : Basics.PermissionSymbol = registerSymbol("Permission", "AsyncEmailSenderPermission.ViewAsyncEmailSenderPanel");
 }
 
@@ -55,7 +55,7 @@ export interface EmailConfigurationEmbedded extends Entities.EmbeddedEntity {
   asyncSenderPeriod: number;
 }
 
-export module EmailFileType {
+export namespace EmailFileType {
   export const Attachment : Files.FileTypeSymbol = registerSymbol("FileType", "EmailFileType.Attachment");
 }
 
@@ -89,7 +89,7 @@ export interface EmailMessageEntity extends Entities.Entity {
   attachments: Entities.MList<EmailAttachmentEmbedded>;
 }
 
-export module EmailMessageMessage {
+export namespace EmailMessageMessage {
   export const TheEmailMessageCannotBeSentFromState0: MessageKey = new MessageKey("EmailMessageMessage", "TheEmailMessageCannotBeSentFromState0");
   export const Message: MessageKey = new MessageKey("EmailMessageMessage", "Message");
   export const Messages: MessageKey = new MessageKey("EmailMessageMessage", "Messages");
@@ -98,7 +98,7 @@ export module EmailMessageMessage {
   export const _01requiresExtraParameters: MessageKey = new MessageKey("EmailMessageMessage", "_01requiresExtraParameters");
 }
 
-export module EmailMessageOperation {
+export namespace EmailMessageOperation {
   export const Save : Operations.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Save");
   export const ReadyToSend : Operations.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.ReadyToSend");
   export const Send : Operations.ExecuteSymbol<EmailMessageEntity> = registerSymbol("Operation", "EmailMessageOperation.Send");
@@ -147,7 +147,7 @@ export interface EmailSenderConfigurationEntity extends Entities.Entity {
   service: EmailServiceEntity;
 }
 
-export module EmailSenderConfigurationOperation {
+export namespace EmailSenderConfigurationOperation {
   export const Save : Operations.ExecuteSymbol<EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Save");
   export const Clone : Operations.ConstructSymbol_From<EmailSenderConfigurationEntity, EmailSenderConfigurationEntity> = registerSymbol("Operation", "EmailSenderConfigurationOperation.Clone");
 }

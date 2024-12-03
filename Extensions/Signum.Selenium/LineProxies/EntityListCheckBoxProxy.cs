@@ -21,7 +21,7 @@ public class EntityListCheckBoxProxy : EntityBaseProxy
     {
         return this.Element.WithLocator(By.CssSelector("label.sf-checkbox-element")).FindElements().Select(e =>
         {
-            var lite = Lite.Parse(e.FindElement(By.CssSelector("input[type=checkbox]")).GetAttribute("name"));
+            var lite = Lite.Parse(e.FindElement(By.CssSelector("input[type=checkbox]")).GetDomProperty("name"));
             lite.SetModel(e.FindElement(By.CssSelector("span.sf-entitStrip-link")).Text);
             return lite;
         }).ToList();

@@ -11,11 +11,11 @@ export interface EvalEmbedded<T> extends Entities.EmbeddedEntity {
   script: string;
 }
 
-export module EvalPanelMessage {
+export namespace EvalPanelMessage {
   export const OpenErrors: MessageKey = new MessageKey("EvalPanelMessage", "OpenErrors");
 }
 
-export module EvalPanelPermission {
+export namespace EvalPanelPermission {
   export const ViewDynamicPanel : Basics.PermissionSymbol = registerSymbol("Permission", "EvalPanelPermission.ViewDynamicPanel");
 }
 

@@ -18,7 +18,7 @@ export interface ViewLogEntity extends Entities.Entity {
   data: Entities.BigStringEmbedded;
 }
 
-export module ViewLogMessage {
+export namespace ViewLogMessage {
   export const ViewLogMyLast: MessageKey = new MessageKey("ViewLogMessage", "ViewLogMyLast");
 }
 

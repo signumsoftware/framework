@@ -57,7 +57,7 @@ public class ResultTableProxy
     {
         return RowsLocator.FindElements()
             .Where(tr => tr.IsElementPresent(By.CssSelector("input.sf-td-selection:checked")))
-            .Select(a => Lite.Parse<IEntity>(a.GetAttribute("data-entity")))
+            .Select(a => Lite.Parse<IEntity>(a.GetDomAttribute("data-entity")))
             .ToList();
     }
 
@@ -118,7 +118,7 @@ public class ResultTableProxy
     {
         var ths = this.Element.FindElements(By.CssSelector("thead > tr > th")).ToList();
 
-        return ths.Select(a => a.GetAttribute("data-column-name")).ToArray();
+        return ths.Select(a => a.GetDomAttribute("data-column-name")).ToArray();
     }
 
     public WebElementLocator HeaderCellElement(string token)
@@ -264,7 +264,7 @@ public class ResultTableProxy
 
     public Lite<Entity> EntityInIndex(int rowIndex)
     {
-        var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + (rowIndex + 1) + ")")).GetAttribute("data-entity");
+        var result = this.Element.FindElement(By.CssSelector("tbody > tr:nth-child(" + (rowIndex + 1) + ")")).GetDomAttribute("data-entity");
 
         return Lite.Parse(result);
     }

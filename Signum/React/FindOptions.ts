@@ -628,102 +628,104 @@ export function getFilterGroupUnifiedFilterType(tr: TypeReference): FilterType |
   return null;
 }
 
-export const filterOperations: { [a: string /*FilterType*/]: FilterOperation[] } = {};
-filterOperations["String"] = [
-  "Contains",
-  "EqualTo",
-  "StartsWith",
-  "EndsWith",
-  "Like",
-  "NotContains",
-  "DistinctTo",
-  "NotStartsWith",
-  "NotEndsWith",
-  "NotLike",
-  "IsIn",
-  "IsNotIn"
-];
+export const filterOperations: Record<FilterType, FilterOperation[]> = {
+  "String": [
+    "Contains",
+    "EqualTo",
+    "StartsWith",
+    "EndsWith",
+    "Like",
+    "NotContains",
+    "DistinctTo",
+    "NotStartsWith",
+    "NotEndsWith",
+    "NotLike",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["DateTime"] = [
-  "EqualTo",
-  "DistinctTo",
-  "GreaterThan",
-  "GreaterThanOrEqual",
-  "LessThan",
-  "LessThanOrEqual",
-  "IsIn",
-  "IsNotIn"
-];
+  "DateTime": [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Time"] = [
-  "EqualTo",
-  "DistinctTo",
-  "GreaterThan",
-  "GreaterThanOrEqual",
-  "LessThan",
-  "LessThanOrEqual",
-  "IsIn",
-  "IsNotIn"
-];
+  "Time": [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Integer"] = [
-  "EqualTo",
-  "DistinctTo",
-  "GreaterThan",
-  "GreaterThanOrEqual",
-  "LessThan",
-  "LessThanOrEqual",
-  "IsIn",
-  "IsNotIn"
-];
+  "Integer": [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Decimal"] = [
-  "EqualTo",
-  "DistinctTo",
-  "GreaterThan",
-  "GreaterThanOrEqual",
-  "LessThan",
-  "LessThanOrEqual",
-  "IsIn",
-  "IsNotIn"
-];
+  "Decimal": [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Enum"] = [
-  "EqualTo",
-  "DistinctTo",
-  "GreaterThan",
-  "GreaterThanOrEqual",
-  "LessThan",
-  "LessThanOrEqual",
-  "IsIn",
-  "IsNotIn",
-];
+  "Enum": [
+    "EqualTo",
+    "DistinctTo",
+    "GreaterThan",
+    "GreaterThanOrEqual",
+    "LessThan",
+    "LessThanOrEqual",
+    "IsIn",
+    "IsNotIn",
+  ],
 
-filterOperations["Guid"] = [
-  "EqualTo",
-  "DistinctTo",
-  "IsIn",
-  "IsNotIn"
-];
+  "Guid": [
+    "EqualTo",
+    "DistinctTo",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Lite"] = [
-  "EqualTo",
-  "DistinctTo",
-  "IsIn",
-  "IsNotIn"
-];
+  "Lite": [
+    "EqualTo",
+    "DistinctTo",
+    "IsIn",
+    "IsNotIn"
+  ],
 
-filterOperations["Embedded"] = [
-  "EqualTo",
-  "DistinctTo",
-];
+  "Embedded": [
+    "EqualTo",
+    "DistinctTo",
+  ],
 
-filterOperations["Model"] = [
-  "EqualTo",
-  "DistinctTo",
-];
+  "Model": [
+    "EqualTo",
+    "DistinctTo",
+  ],
 
-filterOperations["Boolean"] = [
-  "EqualTo",
-  "DistinctTo",
-];
+  "Boolean": [
+    "EqualTo",
+    "DistinctTo",
+  ]
+};
+

@@ -30,7 +30,7 @@ public class DateTimeLineProxy : BaseLineProxy
     {
         var textLine = InputLocator.Find();
 
-        var strValue = textLine.GetAttribute("value");
+        var strValue = textLine.GetDomProperty("value");
 
         return strValue == null ? null : (IFormattable?)ReflectionTools.Parse(strValue, this.Route.Type);
     }

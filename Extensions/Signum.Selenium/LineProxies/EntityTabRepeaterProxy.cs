@@ -35,7 +35,7 @@ public class EntityTabRepeaterProxy : EntityBaseProxy
     {
         var active = this.Element.FindElement(By.CssSelector(".nav-tabs .nav-item .nav-link.active"));
 
-        return int.Parse(active.GetAttribute("data-rr-ui-event-key"));
+        return int.Parse(active.GetDomAttribute("data-rr-ui-event-key"));
     }
 
     public LineContainer<T> Details<T>() where T : ModifiableEntity

@@ -60,7 +60,7 @@ export interface QueryTokenEmbedded extends Entities.EmbeddedEntity {
   tokenString: string;
 }
 
-export module UserAssetQueryMessage {
+export namespace UserAssetQueryMessage {
   export const SwitchToValue: MessageKey = new MessageKey("UserAssetQueryMessage", "SwitchToValue");
   export const SwitchToExpression: MessageKey = new MessageKey("UserAssetQueryMessage", "SwitchToExpression");
 }

@@ -18,7 +18,7 @@ export interface ConcurrentUserEntity extends Entities.Entity {
   isModified: boolean;
 }
 
-export module ConcurrentUserMessage {
+export namespace ConcurrentUserMessage {
   export const ConcurrentUsers: MessageKey = new MessageKey("ConcurrentUserMessage", "ConcurrentUsers");
   export const CurrentlyEditing: MessageKey = new MessageKey("ConcurrentUserMessage", "CurrentlyEditing");
   export const DatabaseChangesDetected: MessageKey = new MessageKey("ConcurrentUserMessage", "DatabaseChangesDetected");
@@ -33,7 +33,7 @@ export module ConcurrentUserMessage {
   export const ConsiderOpening0InANewTabAndApplyYourChangesManually: MessageKey = new MessageKey("ConcurrentUserMessage", "ConsiderOpening0InANewTabAndApplyYourChangesManually");
 }
 
-export module ConcurrentUserOperation {
+export namespace ConcurrentUserOperation {
   export const Delete : Operations.DeleteSymbol<ConcurrentUserEntity> = registerSymbol("Operation", "ConcurrentUserOperation.Delete");
 }
 

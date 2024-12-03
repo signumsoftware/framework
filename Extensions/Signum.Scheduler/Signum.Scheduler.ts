@@ -18,7 +18,7 @@ export interface HolidayCalendarEntity extends Entities.Entity, UserAssets.IUser
   holidays: Entities.MList<HolidayEmbedded>;
 }
 
-export module HolidayCalendarOperation {
+export namespace HolidayCalendarOperation {
   export const Save : Operations.ExecuteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Save");
   export const Delete : Operations.DeleteSymbol<HolidayCalendarEntity> = registerSymbol("Operation", "HolidayCalendarOperation.Delete");
 }
@@ -37,14 +37,14 @@ export interface IScheduleRuleEntity extends Entities.Entity, UserAssets.IUserAs
 export interface ITaskEntity extends Entities.Entity {
 }
 
-export module ITaskMessage {
+export namespace ITaskMessage {
   export const Execute: MessageKey = new MessageKey("ITaskMessage", "Execute");
   export const Executions: MessageKey = new MessageKey("ITaskMessage", "Executions");
   export const LastExecution: MessageKey = new MessageKey("ITaskMessage", "LastExecution");
   export const ExceptionLines: MessageKey = new MessageKey("ITaskMessage", "ExceptionLines");
 }
 
-export module ITaskOperation {
+export namespace ITaskOperation {
   export const ExecuteSync : Operations.ConstructSymbol_From<ScheduledTaskLogEntity, ITaskEntity> = registerSymbol("Operation", "ITaskOperation.ExecuteSync");
 }
 
@@ -74,16 +74,16 @@ export interface ScheduledTaskLogEntity extends Entities.Entity {
   remarks: string | null;
 }
 
-export module ScheduledTaskLogOperation {
+export namespace ScheduledTaskLogOperation {
   export const CancelRunningTask : Operations.ExecuteSymbol<ScheduledTaskLogEntity> = registerSymbol("Operation", "ScheduledTaskLogOperation.CancelRunningTask");
 }
 
-export module ScheduledTaskOperation {
+export namespace ScheduledTaskOperation {
   export const Save : Operations.ExecuteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Save");
   export const Delete : Operations.DeleteSymbol<ScheduledTaskEntity> = registerSymbol("Operation", "ScheduledTaskOperation.Delete");
 }
 
-export module SchedulerMessage {
+export namespace SchedulerMessage {
   export const Each0Minutes: MessageKey = new MessageKey("SchedulerMessage", "Each0Minutes");
   export const ScheduleRuleWeekDaysDN_AndHoliday: MessageKey = new MessageKey("SchedulerMessage", "ScheduleRuleWeekDaysDN_AndHoliday");
   export const ScheduleRuleWeekDaysDN_At: MessageKey = new MessageKey("SchedulerMessage", "ScheduleRuleWeekDaysDN_At");
@@ -99,7 +99,7 @@ export module SchedulerMessage {
   export const TaskIsNotRunning: MessageKey = new MessageKey("SchedulerMessage", "TaskIsNotRunning");
 }
 
-export module SchedulerPermission {
+export namespace SchedulerPermission {
   export const ViewSchedulerPanel : Basics.PermissionSymbol = registerSymbol("Permission", "SchedulerPermission.ViewSchedulerPanel");
 }
 

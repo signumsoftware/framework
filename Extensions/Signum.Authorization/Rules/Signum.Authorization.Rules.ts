@@ -19,7 +19,7 @@ export interface AllowedRuleCoerced<R, A> extends AllowedRule<R, A> {
   coerced: A;
 }
 
-export module AuthAdminMessage {
+export namespace AuthAdminMessage {
   export const _0of1: MessageKey = new MessageKey("AuthAdminMessage", "_0of1");
   export const TypeRules: MessageKey = new MessageKey("AuthAdminMessage", "TypeRules");
   export const PermissionRules: MessageKey = new MessageKey("AuthAdminMessage", "PermissionRules");
@@ -73,7 +73,7 @@ export interface BaseRulePack<T> extends Entities.ModelEntity {
   rules: Entities.MList<T>;
 }
 
-export module BasicPermission {
+export namespace BasicPermission {
   export const AdminRules : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AdminRules");
   export const AutomaticUpgradeOfProperties : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfProperties");
   export const AutomaticUpgradeOfQueries : Basics.PermissionSymbol = registerSymbol("Permission", "BasicPermission.AutomaticUpgradeOfQueries");
