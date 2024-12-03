@@ -30,6 +30,8 @@ class Upgrade_20241203_CorsHealthCheck : CodeUpgradeBase
                 file.InsertAfterFirstLine(a => a.Contains("app.UseRouting();"), """
                 app.UseCors("HealthCheck");
                 """);
+
+                file.RemoveAllLines(a => a.Contains("IISServerOptions") && a.Contains("AllowSynchronousIO"));
             }
         });
     }
