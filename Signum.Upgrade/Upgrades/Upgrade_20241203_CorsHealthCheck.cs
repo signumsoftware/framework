@@ -12,7 +12,7 @@ class Upgrade_20241203_CorsHealthCheck : CodeUpgradeBase
 
     public override void Execute(UpgradeContext uctx)
     {
-        uctx.ForeachCodeFile("Southwind.Server\\Program.cs", file =>
+        uctx.ChangeCodeFile("Southwind.Server\\Program.cs", file =>
         {
             if (SafeConsole.Ask(@"Enable CORS policy ""HealtchCheck""?"))
             {
