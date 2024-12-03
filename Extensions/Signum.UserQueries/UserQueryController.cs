@@ -7,6 +7,7 @@ using System.Threading;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Signum.Authorization;
+using Microsoft.AspNetCore.Cors;
 
 namespace Signum.UserQueries;
 
@@ -39,7 +40,7 @@ public class UserQueryController : ControllerBase
         return UserQueryLogic.GetUserQueries(QueryLogic.ToQueryName(queryKey), appendFilters : true);
     }
 
-    [HttpGet("api/userQueries/healthCheck/{id}"), SignumAllowAnonymous]
+    [HttpGet("api/userQueries/healthCheck/{id}"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
     public async Task<SignumHealthResult> HealthCheck(string id, CancellationToken cancellationToken)
     {
         var pId = PrimaryKey.Parse(id, typeof(UserQueryEntity));

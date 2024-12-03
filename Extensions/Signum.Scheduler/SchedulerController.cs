@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
@@ -14,7 +15,7 @@ public class SchedulerController : ControllerBase
         return state;
     }
 
-    [HttpGet("api/scheduler/healthCheck"), SignumAllowAnonymous]
+    [HttpGet("api/scheduler/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
     public SignumHealthResult HealthCheck()
     {
         var status = ScheduleTaskRunner.GetHealthStatus();

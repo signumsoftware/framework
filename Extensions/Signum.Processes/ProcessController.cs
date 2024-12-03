@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Signum.API;
@@ -51,7 +52,7 @@ public class ProcessController : ControllerBase
     }
 
 
-    [HttpGet("api/processes/healthCheck"), SignumAllowAnonymous]
+    [HttpGet("api/processes/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
     public SignumHealthResult HealthCheck()
     {
         var status = ProcessRunner.GetHealthStatus();
