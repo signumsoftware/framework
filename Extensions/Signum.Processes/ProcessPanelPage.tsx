@@ -15,7 +15,7 @@ import { CopyHealthCheckButton } from '@framework/Components/CopyHealthCheckButt
 
 export default function ProcessPanelPage(): React.JSX.Element {
 
-  
+
   const [state, reloadState] = useAPIWithReload(() => ProcessClient.API.view(), [], { avoidReset: true });
 
   const tick = useInterval(state == null || state.running ? 500 : null, 0, n => n + 1);
@@ -60,7 +60,7 @@ export default function ProcessPanelPage(): React.JSX.Element {
             <span style={{ color: "green" }}> RUNNING </span> :
             <span style={{ color: state.initialDelayMilliseconds == null ? "gray" : "red" }}> STOPPED </span>
           }</strong>
-          <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
+        <a className="ms-2" href={AppContext.toAbsoluteUrl("/api/processes/simpleStatus")} target="_blank">SimpleStatus</a>
         <br />
         JustMyProcesses: {s.justMyProcesses.toString()}
         <br />

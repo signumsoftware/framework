@@ -10,6 +10,8 @@ using Signum.Engine.Sync;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync.SqlServer;
 using Signum.API;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 
 namespace Signum.Cache;
 
@@ -115,6 +117,17 @@ public static class CacheLogic
         {
             cont.CachedTable.SchemaCompleted();
         }
+
+        var missingInMemory = (from t in TypeConditionLogic.Types
+                               where controllers.ContainsKey(t)
+                               from tc in TypeConditionLogic.ConditionsFor(t)
+                               where !TypeConditionLogic.HasInMemoryCondition(t, tc)
+                               select new { t, tc }).ToList();
+
+        if (missingInMemory.Any())
+            throw new InvalidOperationException("The following types are cached, but do not have in-memory TypeConditions defined: " +
+                missingInMemory.GroupBy(a => a.t, a => a.tc).ToString(gr => " * " + gr.Key.TypeName() + ": " + gr.ToString(a => a.Key, ", "), "\n")
+                );
     }
 
     static void ServerBroadcast_Receive(string methodName, string argument)

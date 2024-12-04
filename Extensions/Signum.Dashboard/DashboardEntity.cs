@@ -49,7 +49,7 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     [NoRepeatValidator]
     public MList<PanelPartEmbedded> Parts { get; set; } = new MList<PanelPartEmbedded>();
 
-    [Ignore, QueryableProperty]
+    [Ignore, QueryableProperty, BindParent]
     public MList<TokenEquivalenceGroupEntity> TokenEquivalencesGroups { get; set; } = new MList<TokenEquivalenceGroupEntity>();
 
     [UniqueIndex]

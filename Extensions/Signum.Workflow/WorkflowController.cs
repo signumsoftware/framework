@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API;
 using Signum.API.Filters;
 using Signum.API.Json;
 using Signum.Basics;
+using Signum.Processes;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -213,10 +215,12 @@ public class WorkflowController : Controller
         public bool validationResult;
     }
 
-    [HttpGet("api/workflow/scriptRunner/simpleStatus"), SignumAllowAnonymous]
-    public SimpleStatus GetSimpleStatus()
+    [HttpGet("api/workflow/healthCheck"), SignumAllowAnonymous, EnableCors(PolicyName = "HealthCheck")]
+    public SignumHealthResult HealthCheck()
     {
-        return WorkflowScriptRunner.GetSimpleStatus();
+        var status = WorkflowScriptRunner.GetHealthStatus();
+
+        return new SignumHealthResult(status);
     }
 
     [HttpGet("api/workflow/scriptRunner/view")]
