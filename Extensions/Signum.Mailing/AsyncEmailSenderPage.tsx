@@ -70,6 +70,8 @@ export default function AsyncEmailSenderPage(): React.JSX.Element {
         <br />
         NextPlannedExecution: {state.nextPlannedExecution} ({state.nextPlannedExecution == undefined ? "-None-" : DateTime.fromISO(state.nextPlannedExecution).toRelative()})
         <br />
+        LastExecutionFinishedOn: {state.lastExecutionFinishedOn} ({state.lastExecutionFinishedOn == undefined ? "-None-" : DateTime.fromISO(state.lastExecutionFinishedOn).toRelative()})
+        <br />
         IsCancelationRequested: {state.isCancelationRequested}
         <br />
         QueuedItems: {state.queuedItems}
@@ -80,7 +82,7 @@ export default function AsyncEmailSenderPage(): React.JSX.Element {
         queryName: EmailMessageEntity,
         orderOptions: [{ token: EmailMessageEntity.token(e => e.entity.creationDate), orderType: "Descending" }],
         pagination: { elementsPerPage: 10, mode: "Firsts" }
-      }} />
+      }} deps={[state.lastExecutionFinishedOn]}/>
     </div>
   );
 }

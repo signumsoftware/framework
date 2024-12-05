@@ -1,4 +1,5 @@
 using Signum.Authorization.Rules;
+using Signum.Cache;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Utilities.Reflection;
@@ -90,6 +91,15 @@ public static class ProcessLogic
                     p.Exception,
                 });
 
+            if (CacheLogic.ServerBroadcast != null)
+            {
+                CacheLogic.ServerBroadcast.Receive += (method, args) =>
+                {
+                    if (method == "ProcessChanged")
+                        ProcessRunner.WakeUp("ServerBroadcast Notification", null);
+                };
+            }
+
             PermissionLogic.RegisterPermissions(ProcessPermission.ViewProcessPanel);
 
             SymbolLogic<ProcessAlgorithmSymbol>.Start(sb, () => registeredProcesses.Keys.ToHashSet());
@@ -114,6 +124,13 @@ public static class ProcessLogic
             sb.Schema.Table<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
 
         }
+    }
+
+    internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
+    {
+        CacheLogic.ServerBroadcast?.Send("ProcessChanged", "");
+
+        ProcessRunner.WakeUp("Execute in this machine", null);
     }
 
     private static SqlPreCommand? SimpleTaskLogic_PreDeleteSqlSync(Entity arg)
@@ -214,8 +231,8 @@ public static class ProcessLogic
 
                     p.SetAsQueued();
 
-                    Transaction.PostRealCommit -= ProcessRunner.WakeupExecuteInThisMachine;
-                    Transaction.PostRealCommit += ProcessRunner.WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit -= WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit += WakeupExecuteInThisMachine;
                 }
             }.Register();
 
@@ -228,8 +245,8 @@ public static class ProcessLogic
                     p.State = ProcessState.Suspending;
                     p.SuspendDate = Clock.Now;
 
-                    Transaction.PostRealCommit -= ProcessRunner.WakeupExecuteInThisMachine;
-                    Transaction.PostRealCommit += ProcessRunner.WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit -= WakeupExecuteInThisMachine;
+                    Transaction.PostRealCommit += WakeupExecuteInThisMachine;
                 }
             }.Register();
 

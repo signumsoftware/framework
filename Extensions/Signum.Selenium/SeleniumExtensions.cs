@@ -311,7 +311,7 @@ public static class SeleniumExtensions
 
     public static IEnumerable<string> GetClasses(this IWebElement element)
     {
-        return element.GetDomProperty("class").Split(' ');
+        return element.GetDomAttribute("class").Split(' ');
     }
 
     public static bool HasClass(this IWebElement element, string className)

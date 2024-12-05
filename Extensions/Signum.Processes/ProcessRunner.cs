@@ -120,6 +120,8 @@ public static class ProcessRunner
 
     internal static void WakeupExecuteInThisMachine(Dictionary<string, object> dic)
     {
+        CacheLogic.ServerBroadcast?.Send("ProcessChanged", "");
+
         ProcessRunner.WakeUp("Execute in this machine", null);
     }
 
