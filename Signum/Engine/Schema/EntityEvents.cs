@@ -7,8 +7,19 @@ namespace Signum.Engine.Maps;
 public class EntityEvents<T> : IEntityEvents
         where T : Entity
 {
+    /// <summary>
+    /// Before validation
+    /// </summary>
     public event PreSavingEventHandler<T>? PreSaving;
+
+    /// <summary>
+    /// After validation, before DB Save
+    /// </summary>
     public event SavingEventHandler<T>? Saving;
+
+    /// <summary>
+    /// After DB Save and clean modifications, but inside transaction
+    /// </summary>
     public event SavedEventHandler<T>? Saved;
 
     public event AlternativeRetrieveEventHandler<T>? AlternativeRetrieve;
