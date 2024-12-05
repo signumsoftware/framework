@@ -259,6 +259,7 @@ export namespace MailingClient {
     machineName: string;
     isCancelationRequested: boolean;
     nextPlannedExecution: string;
+    lastExecutionFinishedOn: string;
     queuedItems: number;
     currentProcessIdentifier: string;
   }
