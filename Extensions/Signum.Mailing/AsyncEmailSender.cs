@@ -217,12 +217,7 @@ public static class AsyncEmailSender
         return queuedItems > 0;
     }
 
-    internal static void WakeupReadyToSendInThisMachine(Dictionary<string, object> dic)
-    {
-        CacheLogic.ServerBroadcast?.Send("EmailReadyToSend", "");
 
-        WakeUp("ReadyToSend in this machine", null);
-    }
 
     internal static bool WakeUp(string reason, SqlNotificationEventArgs? args)
     {
