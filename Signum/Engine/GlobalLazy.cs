@@ -25,6 +25,8 @@ public struct InvalidateWith
 
         this.types = types;
     }
+
+    public bool UseBaseImplementation { get; set; }
 }
 
 
