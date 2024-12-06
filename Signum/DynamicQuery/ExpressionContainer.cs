@@ -249,6 +249,8 @@ public class Box<T>
     {
         Value = value;
     }
+
+    public static implicit operator Box<T>(T value) => new Box<T>(value);
 }
 
 public class ExtensionInfo
