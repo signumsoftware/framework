@@ -1,3 +1,4 @@
+using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync.SqlServer;
 using System.IO;
@@ -94,6 +95,9 @@ public static class SchemaGenerator
 
         if (indices != null)
             indices.GoAfter = true;
+
+        if (fullTextSearchCatallogs.Any() && !Connector.Current.SupportsFullTextSearch)
+            throw new InvalidOperationException("Current database does not support Full-Text Search");
 
         var catallogs = fullTextSearchCatallogs.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
         if (catallogs != null)
