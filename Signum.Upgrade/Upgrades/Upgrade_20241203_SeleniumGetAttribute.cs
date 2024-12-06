@@ -16,12 +16,9 @@ class Upgrade_20241203_SeleniumGetAttribute : CodeUpgradeBase
         var regex = new Regex("""\.GetAttribute\("(?<attr>[\w-]+)"\)""");
         uctx.ForeachCodeFile("*.cs", new[] { "Southwind.Test.React", "Framework\\Extensions\\Signum.Selenium" }, file =>
         {
-            file.Replace(regex, a => a.Groups["attr"].Value.Let(a => a.StartsWith("data-") || a.StartsWith("aria-") ?
+            file.Replace(regex, a => a.Groups["attr"].Value.Let(a => a.StartsWith("data-") || a.StartsWith("aria-") || a == "class" ?
             $@".GetDomAttribute(""{a}"")" :
             $@".GetDomProperty(""{a}"")")); 
-           
-
-
         });
     }
 }
