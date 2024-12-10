@@ -624,7 +624,7 @@ public class CsvReadOptions<T> : CsvReadOptions
 
 public class CsvReadOptions
 {
-    public bool AsumeSingleLine = false;
+    public bool AsumeSingleLine = true;
     public Func<Exception, Match?, bool>? SkipError;
     public TimeSpan RegexTimeout = Regex.InfiniteMatchTimeout;
     public char? ListSeparator;
