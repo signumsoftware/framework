@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Signum.DynamicQuery.Tokens;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Linq;
@@ -196,9 +197,35 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     }
 
 
+    public static WithConditions<PropertyAllowed> CoerceSimple(WithConditions<PropertyAllowed> value, PropertyAllowed maxValue)
+    {
+        if (value.Fallback <= maxValue && value.ConditionRules.All(a=>a.Allowed <=  maxValue))
+            return value;
+
+        PropertyAllowed Min(PropertyAllowed a) => a < maxValue ? a : maxValue;
+
+        return new WithConditions<PropertyAllowed>(Min(value.Fallback),
+            value.ConditionRules.Select(c => new ConditionRule<PropertyAllowed>(c.TypeConditions, Min(c.Allowed))).ToReadOnly()
+            ).Intern();
+    }
+
     protected override Func<PropertyRoute, WithConditions<PropertyAllowed>> GetDefaultValue(Lite<RoleEntity> role)
     {
-        return pr => GetDefaultFromType(pr, role);
+        return pr =>
+        {
+            var typeAllowed = TypeAuthLogic.GetAllowed(role, pr.RootType).ToPropertyAllowed();
+            if (AuthLogic.GetDefaultAllowed(role))
+                return typeAllowed;
+
+            if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfProperties, role))
+                return CoerceSimple(typeAllowed, PropertyAllowed.None);
+
+            var maxUp = PropertyAuthLogic.MaxAutomaticUpgrade.TryGetS(pr);
+            if (maxUp == null)
+                return typeAllowed;
+
+            return CoerceSimple(typeAllowed, maxUp.Value);
+        };
     }
 
     WithConditions<PropertyAllowed> GetDefaultFromType(PropertyRoute key, Lite<RoleEntity> role)

@@ -74,6 +74,9 @@ public static class SchemaSynchronizer
                                       from fti in kvp.Value.Values.OfType<FullTextTableIndex>()
                                       select new FullTextCatallogName(fti.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
 
+        if (modelFullTextCatallogs.Any() && !Connector.Current.SupportsFullTextSearch)
+            throw new InvalidOperationException("Current database does not support Full-Text Search");
+
         List<FullTextCatallogName> databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetFullTextSearchCatallogs(s.DatabaseNames()) :
             SysTablesSchema.GetFullTextSearchCatallogs(s.DatabaseNames());

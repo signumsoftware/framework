@@ -281,7 +281,10 @@ public static class AuthServer
                 var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
 
                 if (entity == null)
-                    throw new InvalidOperationException("Not IRootEntity found");
+                {
+                    return null; //Embedded in SearchControl
+                    //throw new InvalidOperationException("Not IRootEntity found");
+                }
 
                 var allowed = PropertyAuthLogic.GetAllowed((Entity)entity, pr);
 

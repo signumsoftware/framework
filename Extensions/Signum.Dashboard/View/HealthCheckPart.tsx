@@ -25,7 +25,7 @@ export default function HealthCheckPart(p: PanelPartContentProps<HealthCheckPart
     </span>;
 
   return (
-    <div className="mt-3">
+    <div className="my-3">
       <h5 style={{ color: p.partEmbedded.titleColor ?? undefined }} >{title}</h5>
       <div className="d-flex flex-wrap">
         {

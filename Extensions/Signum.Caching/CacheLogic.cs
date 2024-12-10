@@ -120,6 +120,7 @@ public static class CacheLogic
 
         var missingInMemory = (from t in TypeConditionLogic.Types
                                where controllers.ContainsKey(t)
+                               where !semiControllers.ContainsKey(t) || semiControllers[t].Any(a => a.Type.IsEntity())
                                from tc in TypeConditionLogic.ConditionsFor(t)
                                where !TypeConditionLogic.HasInMemoryCondition(t, tc)
                                select new { t, tc }).ToList();
@@ -843,7 +844,7 @@ Remember that the Start could be called with an empty database!");
     {
         public override void AttachInvalidations(SchemaBuilder sb, InvalidateWith invalidateWith, EventHandler invalidate)
         {
-            if (CacheLogic.GloballyDisabled)
+            if (CacheLogic.GloballyDisabled || invalidateWith.UseBaseImplementation)
             {
                 base.AttachInvalidations(sb, invalidateWith, invalidate);
             }
@@ -878,7 +879,7 @@ Remember that the Start could be called with an empty database!");
 
         public override void OnLoad(SchemaBuilder sb, InvalidateWith invalidateWith)
         {
-            if (CacheLogic.GloballyDisabled)
+            if (CacheLogic.GloballyDisabled || invalidateWith.UseBaseImplementation)
             {
                 base.OnLoad(sb, invalidateWith);
             }
@@ -887,14 +888,6 @@ Remember that the Start could be called with an empty database!");
                 foreach (var t in invalidateWith.Types)
                     sb.Schema.CacheController(t)!.Load();
             }
-        }
-    }
-
-    public static void LoadAllControllers()
-    {
-        foreach (var c in controllers.Values.NotNull())
-        {
-            c.Load();
         }
     }
 

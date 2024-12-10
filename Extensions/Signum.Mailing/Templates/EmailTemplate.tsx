@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine } from '@framework/Lines'
+import { FormGroup, AutoLine, EntityLine, EntityCombo, EntityDetail, EntityRepeater, EntityTabRepeater, EntityTable, EntityAccordion, Binding, CheckboxLine, TextAreaLine } from '@framework/Lines'
 import { SubTokensOptions } from '@framework/FindOptions'
 import { TypeContext } from '@framework/TypeContext'
 import { TemplateApplicableEval } from '../../Signum.Templating/Signum.Templating'
@@ -255,10 +255,13 @@ export function EmailTemplateMessageComponent(p: EmailTemplateMessageComponentPr
       <div>
         <TemplateControls queryKey={p.queryKey} forHtml={true} />
         <AutoLine ctx={ec.subCtx(e => e.subject)} formGroupStyle={"SrOnly"} placeholderLabels={true} labelHtmlAttributes={{ style: { width: "100px" } }} />
-        {p.messageFormat != 'HtmlSimple' ?
+        {
+          p.messageFormat == 'PlainText' ? <TextAreaLine ctx={ec.subCtx(e => e.text)} formGroupStyle="SrOnly" /> :
+          p.messageFormat == 'HtmlSimple' ?  <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} /> :
           <div className="code-container">
             <HtmlCodeMirror ctx={ec.subCtx(e => e.text)} onChange={handleCodeMirrorChange} />
-          </div> : <HtmlEditor binding={Binding.create(ec.value, e => e.text)} readOnly={ec.readOnly} />}
+          </div>
+         }
         <br />
         {p.messageFormat == 'HtmlComplex' && <a href="#" onClick={handlePreviewClick}>
           {showPreview ?

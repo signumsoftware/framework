@@ -407,6 +407,7 @@ public static class DashboardLogic
             teg => Database.Query<DashboardEntity>().WhereCondition(typeCondition).Any(d => d.TokenEquivalencesGroups.Contains(teg)),
             teg => teg.GetParentEntity<DashboardEntity>().InCondition(typeCondition));
 
+        RegisterTypeConditionForPart<TextPartEntity>(typeCondition);
         RegisterTypeConditionForPart<LinkListPartEntity>(typeCondition);
         RegisterTypeConditionForPart<SeparatorPartEntity>(typeCondition);
         RegisterTypeConditionForPart<HealthCheckPartEntity>(typeCondition);

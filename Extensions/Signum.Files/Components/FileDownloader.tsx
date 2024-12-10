@@ -76,20 +76,22 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
     return !p.children ? null : (typeof p.children === 'function') ? p.children(info) : p.children
   }
 
+  const download = p.download ?? "ViewOrSave";
+
   return (
     <div {...p.htmlAttributes}>
       <a
         href="#"
         onClick={e => {
           e.preventDefault();
-          handleOnClick(e, p.download == "SaveAs" || p.download == "ViewOrSave" && !(info?.browserView));
+          handleOnClick(e, download == "SaveAs" || download == "ViewOrSave" && !(info?.browserView));
         }}
         title={toStr ?? undefined}
         target="_blank"
       >
         {getChildren() ??
           <>
-          {p.showFileIcon && <FontAwesomeIcon className="me-1"
+          {(p.showFileIcon ?? true) && <FontAwesomeIcon className="me-1"
             icon={info?.icon ?? "file"}
             color={info?.color ?? "grey"} />}
             {!p.hideFileName && toStr}
@@ -107,17 +109,6 @@ export function FileDownloader(p: FileDownloaderProps): React.JSX.Element {
       }
     </div>
   );
-}
-export declare namespace FileDownloader {
-    export var defaultProps: {
-        download: string
-        showFileIcon: boolean
-    }
-}
-
-FileDownloader.defaultProps = {
-  download: "ViewOrSave",
-  showFileIcon: true,
 }
 
 export const configurations: { [typeName: string]: FileDownloaderConfiguration<IFile> } = {};
