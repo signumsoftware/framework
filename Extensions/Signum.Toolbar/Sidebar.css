@@ -57,7 +57,8 @@
 }
 
 .sidebar-inner {
-    margin-bottom: 20px;
+    overflow: auto;
+    scrollbar-width: thin;
 }
 
     .sidebar-inner .nav-item-sub-menu {
@@ -260,6 +261,7 @@
 
 .sidebar.sidebar-nav {
     user-select: none;
+    max-height: 100vh;
 }
 
     .sidebar.sidebar-nav.hidden {
