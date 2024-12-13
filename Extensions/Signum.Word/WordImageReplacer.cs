@@ -191,12 +191,6 @@ public static class WordTextReplacer
         foreach (var shape in shapes)
         {
             shape.Remove();
-            //doc.MainDocumentPart!.DeletePart(blip.Embed!);
-
-            //if (removeFullDrawing)
-            //    ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
-            //else
-            //    blip.Remove();
         }
     }
 
