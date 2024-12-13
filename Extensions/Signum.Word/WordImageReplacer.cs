@@ -4,6 +4,9 @@ using DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
+using System.Linq;
+using System.Reflection.Metadata;
+using Shape = DocumentFormat.OpenXml.Vml.Shape;
 #pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Signum.Word;
@@ -17,8 +20,8 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null, 
-        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+    public static void ReplaceImage<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage image, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null,
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center,
         ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         var blip = doc.FindBlip(titleOrDescription);
@@ -37,8 +40,8 @@ public static class WordImageReplacer
     /// 
     /// Word Image -> Right Click -> Format Picture -> Alt Text -> Title 
     /// </param>
-    public static void ReplaceMultipleImages<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null, 
-        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center, 
+    public static void ReplaceMultipleImages<TImage>(this WordprocessingDocument doc, string titleOrDescription, TImage[] images, IImageConverter<TImage> converter, string newImagePartId, bool adaptSize = false, PartTypeInfo? imagePartType = null,
+        ImageVerticalPosition verticalPosition = ImageVerticalPosition.Center,
         ImageHorizontalPosition horizontalPosition = ImageHorizontalPosition.Center)
     {
         Blip[] blips = FindAllBlips(doc, d => d.Title == titleOrDescription || d.Description == titleOrDescription);
@@ -166,6 +169,58 @@ public static class WordImageReplacer
         return doc.MainDocumentPart!.Document.Descendants<Drawing>()
                     .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Drawing>()))
                     .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Drawing>()));
+    }
+}
+
+public static class WordTextReplacer
+{
+    public static void RemoveDraftMessage(this WordprocessingDocument doc)
+    {
+        doc.RemoveMultipleShapes("DraftMessage");
+    }
+
+    static void RemoveShape(this WordprocessingDocument doc, string watermarkId)
+    {
+        Shape theShape = doc.FindShape(watermarkId);
+
+        theShape.Remove();
+    }
+    static void RemoveMultipleShapes(this WordprocessingDocument doc, string shapeId)
+    {
+        Shape[] shapes = FindAllShapes(doc, shapeId);
+        foreach (var shape in shapes)
+        {
+            shape.Remove();
+            //doc.MainDocumentPart!.DeletePart(blip.Embed!);
+
+            //if (removeFullDrawing)
+            //    ((OpenXmlElement)blip).Follow(a => a.Parent).OfType<Drawing>().FirstEx().Remove();
+            //else
+            //    blip.Remove();
+        }
+    }
+
+    static Shape FindShape(this WordprocessingDocument doc, string shapeId)
+    {
+        var query = GetShapes(doc);
+
+        var shape = query.SingleEx(r => r.Alternate!.InnerText == shapeId);
+
+        return shape;
+    }
+
+    static Shape[] FindAllShapes(this WordprocessingDocument doc, string shapeId)
+    {
+        var query = GetShapes(doc);
+
+        return query.Where(r => r.Alternate!.InnerText == shapeId).ToArray();
+    }
+
+    static IEnumerable<Shape> GetShapes(WordprocessingDocument doc)
+    {
+        return doc.MainDocumentPart!.Document.Descendants<Shape>()
+            .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Shape>()))
+            .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Shape>()));
     }
 }
 
