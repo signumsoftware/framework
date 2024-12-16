@@ -247,7 +247,7 @@ export namespace AuthAdminClient {
         throw new Error("Unexpected");
       }
 
-      if (m.minPropertyAllowed != "None")
+      if (m.minPropertyAllowed != "None") //Allways visible
         return false;
 
       return this.binding.getIsHidden();
@@ -261,8 +261,11 @@ export namespace AuthAdminClient {
         return true;
       }
 
-      if (m.minPropertyAllowed == "Write")
+      if (m.minPropertyAllowed == "Write") //Always writable
         return false;
+
+      if (m.maxPropertyAllowed == "Read") //Never writable
+        return true;
 
       return this.binding.getIsReadonly();
     }

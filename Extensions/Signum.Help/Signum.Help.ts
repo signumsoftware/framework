@@ -18,7 +18,7 @@ export interface AppendixHelpEntity extends Entities.Entity, IHelpImageTarget {
   description: string | null;
 }
 
-export module AppendixHelpOperation {
+export namespace AppendixHelpOperation {
   export const Save : Operations.ExecuteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Save");
   export const Delete : Operations.DeleteSymbol<AppendixHelpEntity> = registerSymbol("Operation", "AppendixHelpOperation.Delete");
 }
@@ -31,11 +31,11 @@ export interface HelpImageEntity extends Entities.Entity {
   file: Files.FilePathEmbedded;
 }
 
-export module HelpImageFileType {
+export namespace HelpImageFileType {
   export const Image : Files.FileTypeSymbol = registerSymbol("FileType", "HelpImageFileType.Image");
 }
 
-export module HelpKindMessage {
+export namespace HelpKindMessage {
   export const HisMainFunctionIsTo0: MessageKey = new MessageKey("HelpKindMessage", "HisMainFunctionIsTo0");
   export const RelateOtherEntities: MessageKey = new MessageKey("HelpKindMessage", "RelateOtherEntities");
   export const ClassifyOtherEntities: MessageKey = new MessageKey("HelpKindMessage", "ClassifyOtherEntities");
@@ -48,7 +48,7 @@ export module HelpKindMessage {
   export const andIsTransactionalDataCreatedRegularly: MessageKey = new MessageKey("HelpKindMessage", "andIsTransactionalDataCreatedRegularly");
 }
 
-export module HelpMessage {
+export namespace HelpMessage {
   export const _0IsA1_G: MessageKey = new MessageKey("HelpMessage", "_0IsA1_G");
   export const AnEmbeddedEntityOfType0: MessageKey = new MessageKey("HelpMessage", "AnEmbeddedEntityOfType0");
   export const AReference1ToA2_G: MessageKey = new MessageKey("HelpMessage", "AReference1ToA2_G");
@@ -96,18 +96,18 @@ export module HelpMessage {
   export const ViewMore: MessageKey = new MessageKey("HelpMessage", "ViewMore");
 }
 
-export module HelpPermissions {
+export namespace HelpPermissions {
   export const ViewHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.ViewHelp");
   export const DownloadHelp : Basics.PermissionSymbol = registerSymbol("Permission", "HelpPermissions.DownloadHelp");
 }
 
-export module HelpSearchMessage {
+export namespace HelpSearchMessage {
   export const Search: MessageKey = new MessageKey("HelpSearchMessage", "Search");
   export const _0ResultsFor1In2: MessageKey = new MessageKey("HelpSearchMessage", "_0ResultsFor1In2");
   export const Results: MessageKey = new MessageKey("HelpSearchMessage", "Results");
 }
 
-export module HelpSyntaxMessage {
+export namespace HelpSyntaxMessage {
   export const BoldText: MessageKey = new MessageKey("HelpSyntaxMessage", "BoldText");
   export const ItalicText: MessageKey = new MessageKey("HelpSyntaxMessage", "ItalicText");
   export const UnderlineText: MessageKey = new MessageKey("HelpSyntaxMessage", "UnderlineText");
@@ -149,7 +149,7 @@ export interface NamespaceHelpEntity extends Entities.Entity, IHelpImageTarget {
   description: string | null;
 }
 
-export module NamespaceHelpOperation {
+export namespace NamespaceHelpOperation {
   export const Save : Operations.ExecuteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Save");
   export const Delete : Operations.DeleteSymbol<NamespaceHelpEntity> = registerSymbol("Operation", "NamespaceHelpOperation.Delete");
 }
@@ -190,7 +190,7 @@ export interface QueryHelpEntity extends Entities.Entity, IHelpImageTarget {
   isEmpty: boolean;
 }
 
-export module QueryHelpOperation {
+export namespace QueryHelpOperation {
   export const Save : Operations.ExecuteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Save");
   export const Delete : Operations.DeleteSymbol<QueryHelpEntity> = registerSymbol("Operation", "QueryHelpOperation.Delete");
 }
@@ -208,7 +208,7 @@ export interface TypeHelpEntity extends Entities.Entity, IHelpImageTarget {
   info: string | null;
 }
 
-export module TypeHelpOperation {
+export namespace TypeHelpOperation {
   export const Save : Operations.ExecuteSymbol<TypeHelpEntity> = registerSymbol("Operation", "TypeHelpOperation.Save");
   export const Delete : Operations.DeleteSymbol<TypeHelpEntity> = registerSymbol("Operation", "TypeHelpOperation.Delete");
 }

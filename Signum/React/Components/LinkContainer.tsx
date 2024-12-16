@@ -4,6 +4,7 @@ import * as PropTypes from 'prop-types'
 import { useHref, useLocation, useMatch, useNavigate, Location } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { PathMatch } from 'react-router';
+import { classes } from '../Globals';
 
 const isModifiedEvent = (event: React.MouseEvent<any>) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey)
@@ -67,7 +68,7 @@ export function LinkContainer({
       event.preventDefault();
 
       navigate(to, {
-        replace,
+        replace: replace,
         state,
       });
     }
@@ -75,27 +76,9 @@ export function LinkContainer({
 
   return React.cloneElement(child, {
     ...props,
-    className: [
-      className,
-      child.props.className,
-      isActive ? activeClassName : null,
-    ]
-      .join(' ')
-      .trim(),
+    className: classes(className, child.props.className,isActive ? (activeClassName ?? "active") : null),
     style: isActive ? { ...style, ...activeStyle } : style,
     href,
     onClick: handleClick,
   });
-}
-
-export namespace LinkContainer {
-  export const defaultProps = {
-    replace: false,
-    activeClassName: 'active',
-    onClick: null,
-    className: null,
-    style: null,
-    activeStyle: null,
-    isActive: null,
-  };
 }

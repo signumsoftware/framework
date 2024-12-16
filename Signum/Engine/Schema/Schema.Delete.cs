@@ -71,9 +71,11 @@ public partial class Table
 
         string queryCommandString = queryCommand.PlainSql().Lines().ToString(" ");
 
+        var columnType = Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey);
+
         var result = Schema.Current.Settings.IsPostgres ?
-        new SqlPreCommandSimple(@$"{variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = ({queryCommandString});") :
-        new SqlPreCommandSimple($"DECLARE {variableName} {Connector.Current.SqlBuilder.GetColumnType(this.PrimaryKey)} = COALESCE(({queryCommandString}), {(this.PrimaryKey.DbType.SqlServer == SqlDbType.UniqueIdentifier ? "CAST(CAST(1 / 0 AS BINARY) AS UNIQUEIDENTIFIER)" : "1 / 0")});");
+        new SqlPreCommandSimple(@$"{variableName} {columnType} = ({queryCommandString});") :
+        new SqlPreCommandSimple($"DECLARE {variableName} {columnType} = COALESCE(({queryCommandString}), CAST('{typeof(T).TypeName()} not found!' as {columnType}));");
 
         return result;
     }

@@ -28,7 +28,7 @@ export interface MultipleSMSModel extends Entities.ModelEntity {
   certified: boolean;
 }
 
-export module SMSCharactersMessage {
+export namespace SMSCharactersMessage {
   export const Insert: MessageKey = new MessageKey("SMSCharactersMessage", "Insert");
   export const Message: MessageKey = new MessageKey("SMSCharactersMessage", "Message");
   export const RemainingCharacters: MessageKey = new MessageKey("SMSCharactersMessage", "RemainingCharacters");
@@ -65,7 +65,7 @@ export interface SMSMessageEntity extends Entities.Entity {
   exception: Entities.Lite<Basics.ExceptionEntity> | null;
 }
 
-export module SMSMessageOperation {
+export namespace SMSMessageOperation {
   export const Send : Operations.ExecuteSymbol<SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.Send");
   export const UpdateStatus : Operations.ExecuteSymbol<SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.UpdateStatus");
   export const CreateUpdateStatusPackage : Operations.ConstructSymbol_FromMany<Processes.ProcessEntity, SMSMessageEntity> = registerSymbol("Operation", "SMSMessageOperation.CreateUpdateStatusPackage");
@@ -73,7 +73,7 @@ export module SMSMessageOperation {
   export const SendMultipleSMSMessages : Operations.ConstructSymbol_FromMany<Processes.ProcessEntity, Entities.Entity> = registerSymbol("Operation", "SMSMessageOperation.SendMultipleSMSMessages");
 }
 
-export module SMSMessageProcess {
+export namespace SMSMessageProcess {
   export const Send : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "SMSMessageProcess.Send");
   export const UpdateStatus : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "SMSMessageProcess.UpdateStatus");
 }
@@ -86,7 +86,7 @@ export type SMSMessageState =
   "Delivered" |
   "DeliveryFailed";
 
-export module SMSMessageTask {
+export namespace SMSMessageTask {
   export const UpdateSMSStatus : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "SMSMessageTask.UpdateSMSStatus");
 }
 
@@ -122,7 +122,7 @@ export interface SMSTemplateEntity extends Entities.Entity {
   isActive: boolean;
 }
 
-export module SMSTemplateMessage {
+export namespace SMSTemplateMessage {
   export const ThereAreNoMessagesForTheTemplate: MessageKey = new MessageKey("SMSTemplateMessage", "ThereAreNoMessagesForTheTemplate");
   export const ThereMustBeAMessageFor0: MessageKey = new MessageKey("SMSTemplateMessage", "ThereMustBeAMessageFor0");
   export const TheresMoreThanOneMessageForTheSameLanguage: MessageKey = new MessageKey("SMSTemplateMessage", "TheresMoreThanOneMessageForTheSameLanguage");
@@ -138,7 +138,7 @@ export interface SMSTemplateMessageEmbedded extends Entities.EmbeddedEntity {
   message: string;
 }
 
-export module SMSTemplateOperation {
+export namespace SMSTemplateOperation {
   export const CreateSMSTemplateFromModel : Operations.ConstructSymbol_From<SMSTemplateEntity, SMSModelEntity> = registerSymbol("Operation", "SMSTemplateOperation.CreateSMSTemplateFromModel");
   export const Create : Operations.ConstructSymbol_Simple<SMSTemplateEntity> = registerSymbol("Operation", "SMSTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<SMSTemplateEntity> = registerSymbol("Operation", "SMSTemplateOperation.Save");

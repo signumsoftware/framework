@@ -11,7 +11,7 @@ export default function TextPart(p:  PanelPartContentProps<TextPartEntity> ): Re
       return (<text>{p.content.textContent}</text>)
 
     if (p.content?.textPartType == "Markdown")
-      return (<Markdown>{p.content.textContent}</Markdown>)
+      return (<Markdown components={{ a: LinkRenderer }}>{p.content.textContent}</Markdown>)
 
     if (p.content?.textPartType == "HTML" && p.content?.textContent != null)
       return (<HtmlViewer text={p.content.textContent} />)
@@ -27,5 +27,13 @@ export default function TextPart(p:  PanelPartContentProps<TextPartEntity> ): Re
         </div>
       </div>
     </div>
+  );
+}
+
+function LinkRenderer(props: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  return (
+    <a href={props.href} target="_blank" rel="noreferrer">
+      {props.children}
+    </a>
   );
 }
