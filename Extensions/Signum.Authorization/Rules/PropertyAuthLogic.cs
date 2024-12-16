@@ -311,7 +311,7 @@ public static class PropertyAuthLogic
             return true;
 
         var paac = PropertyAuthLogic.GetPropertyAllowed(route);
-        var taac = TypeAuthLogic.GetAllowed(route.RootType);
+        var taac = root is ModifiableEntity mod && mod.Modified == ModifiedState.Sealed ? null : TypeAuthLogic.GetAllowed(route.RootType);
 
         if (allowed <= paac.Min(assumingTaac: taac))
             return true;
