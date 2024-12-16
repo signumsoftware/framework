@@ -233,12 +233,9 @@ public static class AuthServer
                 }
                 else
                 {
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
-
-                    if (entity == null && mod is MixinEntity mixin)
-                    {
-                        entity = mixin.MainEntity as IRootEntity;
-                    }
+                    var entity = mod as IRootEntity ??
+                    (mod is MixinEntity mix ? mix.MainEntity as IRootEntity : null) ??
+                    EntityJsonContext.FindCurrentRootEntity();
 
                     if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Read))
                         return "Not Allowed";
@@ -259,12 +256,9 @@ public static class AuthServer
                 }
                 else
                 {
-                    var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity();
-
-                    if (entity == null && mod is MixinEntity mixin)
-                    {
-                        entity = mixin.MainEntity as IRootEntity;
-                    }
+                    var entity = mod as IRootEntity ??
+                    (mod is MixinEntity mix ? mix.MainEntity as IRootEntity : null) ??
+                    EntityJsonContext.FindCurrentRootEntity();
 
                     if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Write))
                         return $"{pr} is not Allowed to write";
