@@ -4,9 +4,6 @@ using DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO;
-using System.Linq;
-using System.Reflection.Metadata;
-using Shape = DocumentFormat.OpenXml.Vml.Shape;
 #pragma warning disable CA1416 // Validate platform compatibility
 
 namespace Signum.Word;
@@ -169,52 +166,6 @@ public static class WordImageReplacer
         return doc.MainDocumentPart!.Document.Descendants<Drawing>()
                     .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Drawing>()))
                     .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Drawing>()));
-    }
-}
-
-public static class WordTextReplacer
-{
-    public static void RemoveDraftMessage(this WordprocessingDocument doc)
-    {
-        doc.RemoveMultipleShapes("DraftMessage");
-    }
-
-    static void RemoveShape(this WordprocessingDocument doc, string watermarkId)
-    {
-        Shape theShape = doc.FindShape(watermarkId);
-
-        theShape.Remove();
-    }
-    static void RemoveMultipleShapes(this WordprocessingDocument doc, string shapeId)
-    {
-        Shape[] shapes = FindAllShapes(doc, shapeId);
-        foreach (var shape in shapes)
-        {
-            shape.Remove();
-        }
-    }
-
-    static Shape FindShape(this WordprocessingDocument doc, string shapeId)
-    {
-        var query = GetShapes(doc);
-
-        var shape = query.SingleEx(r => r.Alternate!.InnerText == shapeId);
-
-        return shape;
-    }
-
-    static Shape[] FindAllShapes(this WordprocessingDocument doc, string shapeId)
-    {
-        var query = GetShapes(doc);
-
-        return query.Where(r => r.Alternate!.InnerText == shapeId).ToArray();
-    }
-
-    static IEnumerable<Shape> GetShapes(WordprocessingDocument doc)
-    {
-        return doc.MainDocumentPart!.Document.Descendants<Shape>()
-            .Concat(doc.MainDocumentPart!.HeaderParts.SelectMany(hp => hp.Header.Descendants<Shape>()))
-            .Concat(doc.MainDocumentPart!.FooterParts.SelectMany(hp => hp.Footer.Descendants<Shape>()));
     }
 }
 

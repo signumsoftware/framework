@@ -123,11 +123,6 @@ public static class EnumExtensions
         Type type = Enum.GetUnderlyingType(value.GetType());
         return (IComparable)Convert.ChangeType(value, type)!;
     }
-
-    public static bool In<T>(this T enumValue, params T[] values) where T : Enum
-    {
-        return values.Contains(enumValue);
-    }
 }
 
 

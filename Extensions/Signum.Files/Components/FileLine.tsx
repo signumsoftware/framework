@@ -23,21 +23,21 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */| Lite</*I
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
   maxSizeInBytes?: number;
-  getFileFromAttachment?: (actx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createAttachmentFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
+  getFileFromElement?: (actx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
+  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
 }
 
 
 export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile &*/ Entity> | null> extends EntityBaseController<FileLineProps<V>, V>{
 
   overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
-    p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromAttachment != null;
+    p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
 
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
-    if(pr && p.getFileFromAttachment)
-      pr = pr.addLambda(p.getFileFromAttachment);
+    if(pr && p.getFileFromElement)
+      pr = pr.addLambda(p.getFileFromElement);
 
     const m = pr?.member;
     if (m?.defaultFileTypeInfo) {
@@ -55,8 +55,8 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity): void => {
-    if(this.props.createAttachmentFromFile)
-      this.props.createAttachmentFromFile(file)
+    if(this.props.createElementFromFile)
+      this.props.createElementFromFile(file)
         .then(att => att && this.setValue(att));
     else
       this.convert(file as unknown as Aprox<V>)
@@ -89,13 +89,13 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
    function renderFile() {
        const content = p.download == "None" ?
        <span className={classes(ctx.formControlClass, "file-control")} >
-         {getToString(p.getFileFromAttachment ? p.getFileFromAttachment(val): val)}</span > :
+         {getToString(p.getFileFromElement ? p.getFileFromElement(val): val)}</span > :
        <FileDownloader
          configuration={p.configuration}
          download={p.download}
          showFileIcon={p.showFileIcon}
-         containerEntity={p.getFileFromAttachment ? val as ModifiableEntity : undefined}
-         entityOrLite={p.getFileFromAttachment ? p.getFileFromAttachment(val) : val as ModifiableEntity & IFile | Lite<IFile & Entity>}
+         containerEntity={p.getFileFromElement ? val as ModifiableEntity : undefined}
+         entityOrLite={p.getFileFromElement ? p.getFileFromElement(val) : val as ModifiableEntity & IFile | Lite<IFile & Entity>}
          htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
 
      const buttons =
@@ -124,8 +124,8 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
        dragAndDropMessage={p.dragAndDropMessage}
        fileType={p.fileType}
        onFileLoaded={c.handleFileLoaded}
-       typeName={p.getFileFromAttachment ?
-         p.ctx.propertyRoute!.addLambda(p.getFileFromAttachment).typeReference().name! :
+       typeName={p.getFileFromElement ?
+         p.ctx.propertyRoute!.addLambda(p.getFileFromElement).typeReference().name! :
          p.ctx.propertyRoute!.typeReference().name}
        buttonCss={p.ctx.buttonClass}
        fileDropCssClass={c.mandatoryClass ?? undefined}
