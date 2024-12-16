@@ -54,6 +54,7 @@ Signum Framework doesn't use any numeric versioning, since is distributed as sou
 
 Whenever there are big changes worth to mention, we typicaly write it in the related commit. Here is the list of the relevant changes: 
 
+* [2024.08.28 CSV Performance Improvements?](https://github.com/signumsoftware/framework/commit/e17aeb8df452dfd8289586ccb0135019ad92de38#commitcomment-150176560)
 * [2024.08.19 Time Machine in Charting! ⏲📈](https://github.com/signumsoftware/framework/commit/4a7cc1097f8e862b47d2dfd61216082b1c171be0)
 * [2024.07.02 Isolated Declarations](https://github.com/signumsoftware/framework/commit/bf08a77c430dd133b8eca50d502a14b91224267a)
 * [2024.03.27 Navigator, Finder, Operations, and *Client modules get a `namespace`](https://github.com/signumsoftware/framework/commit/2cf26f9cfe05f8707930bccf3c7427cc1522b99b#commitcomment-140281789)
