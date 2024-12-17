@@ -36,6 +36,19 @@ public class SysDatabases : IView
     public bool is_read_committed_snapshot_on;
 }
 
+[TableName("sys.database_files")]
+public class SysDatabaseFiles : IView
+{
+    [ViewPrimaryKey]
+    public int file_id;
+    public Guid file_guid;
+    public int type;
+    public string type_desc;
+    public int data_space_id;
+    public string name;
+    public string physical_name;
+}
+
 
 [TableName("sys.server_principals")]
 public class SysServerPrincipals : IView
