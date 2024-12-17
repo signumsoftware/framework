@@ -392,8 +392,11 @@ public static class ProperyAllowedAndConditionsExtensions
         return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
     }
 
-    public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed> assumingTaac)
+    public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
     {
+        if (assumingTaac == null)
+            return paac.Min();
+
         List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
 
         if (candidates.IsEmpty())
@@ -420,8 +423,11 @@ public static class ProperyAllowedAndConditionsExtensions
         return (PropertyAllowed)Math.Max((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Max());
     }
 
-    public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed> assumingTaac)
+    public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
     {
+        if (assumingTaac == null)
+            return paac.Max();
+
         List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
 
         if (candidates.IsEmpty())

@@ -78,7 +78,7 @@ export interface CaseActivityExecutedTimerEntity extends Entities.Entity {
   boundaryEvent: Entities.Lite<WorkflowEventEntity>;
 }
 
-export module CaseActivityMessage {
+export namespace CaseActivityMessage {
   export const CaseContainsOtherActivities: MessageKey = new MessageKey("CaseActivityMessage", "CaseContainsOtherActivities");
   export const NoNextConnectionThatSatisfiesTheConditionsFound: MessageKey = new MessageKey("CaseActivityMessage", "NoNextConnectionThatSatisfiesTheConditionsFound");
   export const CaseIsADecompositionOf0: MessageKey = new MessageKey("CaseActivityMessage", "CaseIsADecompositionOf0");
@@ -115,7 +115,7 @@ export interface CaseActivityMixin extends Entities.MixinEntity {
   caseActivity: Entities.Lite<CaseActivityEntity> | null;
 }
 
-export module CaseActivityOperation {
+export namespace CaseActivityOperation {
   export const CreateCaseActivityFromWorkflow : Operations.ConstructSymbol_From<CaseActivityEntity, WorkflowEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseActivityFromWorkflow");
   export const CreateCaseFromWorkflowEventTask : Operations.ConstructSymbol_From<CaseEntity, WorkflowEventTaskEntity> = registerSymbol("Operation", "CaseActivityOperation.CreateCaseFromWorkflowEventTask");
   export const Register : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.Register");
@@ -131,15 +131,15 @@ export module CaseActivityOperation {
   export const ScriptFailureJump : Operations.ExecuteSymbol<CaseActivityEntity> = registerSymbol("Operation", "CaseActivityOperation.ScriptFailureJump");
 }
 
-export module CaseActivityProcessAlgorithm {
+export namespace CaseActivityProcessAlgorithm {
   export const Timeout : Processes.ProcessAlgorithmSymbol = registerSymbol("ProcessAlgorithm", "CaseActivityProcessAlgorithm.Timeout");
 }
 
-export module CaseActivityQuery {
+export namespace CaseActivityQuery {
   export const Inbox: QueryKey = new QueryKey("CaseActivityQuery", "Inbox");
 }
 
-export module CaseActivityTask {
+export namespace CaseActivityTask {
   export const Timeout : Scheduler.SimpleTaskSymbol = registerSymbol("SimpleTask", "CaseActivityTask.Timeout");
 }
 
@@ -168,7 +168,7 @@ export interface CaseJunctionEntity extends Entities.Entity {
   to: Entities.Lite<CaseActivityEntity>;
 }
 
-export module CaseMessage {
+export namespace CaseMessage {
   export const DeleteMainEntity: MessageKey = new MessageKey("CaseMessage", "DeleteMainEntity");
   export const DoYouWAntToAlsoDeleteTheMainEntity0: MessageKey = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntity0");
   export const DoYouWAntToAlsoDeleteTheMainEntities: MessageKey = new MessageKey("CaseMessage", "DoYouWAntToAlsoDeleteTheMainEntities");
@@ -185,7 +185,7 @@ export interface CaseNotificationEntity extends Entities.Entity {
   state: CaseNotificationState;
 }
 
-export module CaseNotificationOperation {
+export namespace CaseNotificationOperation {
   export const SetRemarks : Operations.ExecuteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.SetRemarks");
   export const Delete : Operations.DeleteSymbol<CaseNotificationEntity> = registerSymbol("Operation", "CaseNotificationOperation.Delete");
   export const CreateCaseNotificationFromCaseActivity : Operations.ConstructSymbol_From<CaseNotificationEntity, CaseActivityEntity> = registerSymbol("Operation", "CaseNotificationOperation.CreateCaseNotificationFromCaseActivity");
@@ -199,7 +199,7 @@ export type CaseNotificationState =
   "Done" |
   "DoneByOther";
 
-export module CaseOperation {
+export namespace CaseOperation {
   export const SetTags : Operations.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.SetTags");
   export const Cancel : Operations.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Cancel");
   export const Reactivate : Operations.ExecuteSymbol<CaseEntity> = registerSymbol("Operation", "CaseOperation.Reactivate");
@@ -229,7 +229,7 @@ export interface CaseTagTypeEntity extends Entities.Entity {
   color: string;
 }
 
-export module CaseTagTypeOperation {
+export namespace CaseTagTypeOperation {
   export const Save : Operations.ExecuteSymbol<CaseTagTypeEntity> = registerSymbol("Operation", "CaseTagTypeOperation.Save");
 }
 
@@ -268,7 +268,7 @@ export interface InboxFilterModel extends Entities.ModelEntity {
   toDate: string /*DateTime*/ | null;
 }
 
-export module InboxMessage {
+export namespace InboxMessage {
   export const Clear: MessageKey = new MessageKey("InboxMessage", "Clear");
   export const Activity: MessageKey = new MessageKey("InboxMessage", "Activity");
   export const SenderNote: MessageKey = new MessageKey("InboxMessage", "SenderNote");
@@ -349,7 +349,7 @@ export interface WorkflowActionEval extends Eval.EvalEmbedded<IWorkflowActionExe
   Type: "WorkflowActionEval";
 }
 
-export module WorkflowActionOperation {
+export namespace WorkflowActionOperation {
   export const Clone : Operations.ConstructSymbol_From<WorkflowActionEntity, WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Clone");
   export const Save : Operations.ExecuteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowActionEntity> = registerSymbol("Operation", "WorkflowActionOperation.Delete");
@@ -376,7 +376,7 @@ export interface WorkflowActivityEntity extends Entities.Entity, IWorkflowNodeEn
   userHelp: string | null;
 }
 
-export module WorkflowActivityMessage {
+export namespace WorkflowActivityMessage {
   export const DuplicateViewNameFound0: MessageKey = new MessageKey("WorkflowActivityMessage", "DuplicateViewNameFound0");
   export const ChooseADestinationForWorkflowJumping: MessageKey = new MessageKey("WorkflowActivityMessage", "ChooseADestinationForWorkflowJumping");
   export const CaseFlow: MessageKey = new MessageKey("WorkflowActivityMessage", "CaseFlow");
@@ -413,7 +413,7 @@ export interface WorkflowActivityModel extends Entities.ModelEntity {
   subWorkflow: SubWorkflowEmbedded | null;
 }
 
-export module WorkflowActivityMonitorMessage {
+export namespace WorkflowActivityMonitorMessage {
   export const WorkflowActivityMonitor: MessageKey = new MessageKey("WorkflowActivityMonitorMessage", "WorkflowActivityMonitor");
   export const Draw: MessageKey = new MessageKey("WorkflowActivityMonitorMessage", "Draw");
   export const ResetZoom: MessageKey = new MessageKey("WorkflowActivityMonitorMessage", "ResetZoom");
@@ -423,7 +423,7 @@ export module WorkflowActivityMonitorMessage {
   export const OpenWorkflow: MessageKey = new MessageKey("WorkflowActivityMonitorMessage", "OpenWorkflow");
 }
 
-export module WorkflowActivityOperation {
+export namespace WorkflowActivityOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowActivityEntity> = registerSymbol("Operation", "WorkflowActivityOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowActivityEntity> = registerSymbol("Operation", "WorkflowActivityOperation.Delete");
 }
@@ -450,7 +450,7 @@ export interface WorkflowConditionEval extends Eval.EvalEmbedded<IWorkflowCondit
   Type: "WorkflowConditionEval";
 }
 
-export module WorkflowConditionOperation {
+export namespace WorkflowConditionOperation {
   export const Clone : Operations.ConstructSymbol_From<WorkflowConditionEntity, WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Clone");
   export const Save : Operations.ExecuteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowConditionEntity> = registerSymbol("Operation", "WorkflowConditionOperation.Delete");
@@ -494,7 +494,7 @@ export interface WorkflowConnectionModel extends Entities.ModelEntity {
   decisionOptions: Entities.MList<ButtonOptionEmbedded>;
 }
 
-export module WorkflowConnectionOperation {
+export namespace WorkflowConnectionOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowConnectionEntity> = registerSymbol("Operation", "WorkflowConnectionOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowConnectionEntity> = registerSymbol("Operation", "WorkflowConnectionOperation.Delete");
 }
@@ -536,7 +536,7 @@ export interface WorkflowEventModel extends Entities.ModelEntity {
   bpmnElementId: string;
 }
 
-export module WorkflowEventOperation {
+export namespace WorkflowEventOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowEventEntity> = registerSymbol("Operation", "WorkflowEventOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowEventEntity> = registerSymbol("Operation", "WorkflowEventOperation.Delete");
 }
@@ -579,7 +579,7 @@ export interface WorkflowEventTaskModel extends Entities.ModelEntity {
   action: WorkflowEventTaskActionEval | null;
 }
 
-export module WorkflowEventTaskOperation {
+export namespace WorkflowEventTaskOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowEventTaskEntity> = registerSymbol("Operation", "WorkflowEventTaskOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowEventTaskEntity> = registerSymbol("Operation", "WorkflowEventTaskOperation.Delete");
 }
@@ -617,7 +617,7 @@ export interface WorkflowGatewayModel extends Entities.ModelEntity {
   direction: WorkflowGatewayDirection;
 }
 
-export module WorkflowGatewayOperation {
+export namespace WorkflowGatewayOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowGatewayEntity> = registerSymbol("Operation", "WorkflowGatewayOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowGatewayEntity> = registerSymbol("Operation", "WorkflowGatewayOperation.Delete");
 }
@@ -662,7 +662,7 @@ export interface WorkflowLaneModel extends Entities.ModelEntity {
   combineActorAndActorEvalWhenContinuing: boolean;
 }
 
-export module WorkflowLaneOperation {
+export namespace WorkflowLaneOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowLaneEntity> = registerSymbol("Operation", "WorkflowLaneOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowLaneEntity> = registerSymbol("Operation", "WorkflowLaneOperation.Delete");
 }
@@ -673,7 +673,7 @@ export type WorkflowMainEntityStrategy =
   "SelectByUser" |
   "Clone";
 
-export module WorkflowMessage {
+export namespace WorkflowMessage {
   export const _0BelongsToADifferentWorkflow: MessageKey = new MessageKey("WorkflowMessage", "_0BelongsToADifferentWorkflow");
   export const Condition0IsDefinedFor1Not2: MessageKey = new MessageKey("WorkflowMessage", "Condition0IsDefinedFor1Not2");
   export const JumpsToSameActivityNotAllowed: MessageKey = new MessageKey("WorkflowMessage", "JumpsToSameActivityNotAllowed");
@@ -705,7 +705,7 @@ export interface WorkflowModel extends Entities.ModelEntity {
   entities: Entities.MList<BpmnEntityPairEmbedded>;
 }
 
-export module WorkflowOperation {
+export namespace WorkflowOperation {
   export const Create : Operations.ConstructSymbol_Simple<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Create");
   export const Clone : Operations.ConstructSymbol_From<WorkflowEntity, WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Clone");
   export const Save : Operations.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Save");
@@ -714,7 +714,7 @@ export module WorkflowOperation {
   export const Deactivate : Operations.ExecuteSymbol<WorkflowEntity> = registerSymbol("Operation", "WorkflowOperation.Deactivate");
 }
 
-export module WorkflowPermission {
+export namespace WorkflowPermission {
   export const ViewWorkflowPanel : Basics.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewWorkflowPanel");
   export const ViewCaseFlow : Basics.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.ViewCaseFlow");
   export const WorkflowToolbarMenu : Basics.PermissionSymbol = registerSymbol("Permission", "WorkflowPermission.WorkflowToolbarMenu");
@@ -735,7 +735,7 @@ export interface WorkflowPoolModel extends Entities.ModelEntity {
   name: string;
 }
 
-export module WorkflowPoolOperation {
+export namespace WorkflowPoolOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowPoolEntity> = registerSymbol("Operation", "WorkflowPoolOperation.Delete");
 }
@@ -770,7 +770,7 @@ export interface WorkflowScriptEval extends Eval.EvalEmbedded<IWorkflowScriptExe
   customTypes: string | null;
 }
 
-export module WorkflowScriptOperation {
+export namespace WorkflowScriptOperation {
   export const Clone : Operations.ConstructSymbol_From<WorkflowScriptEntity, WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Clone");
   export const Save : Operations.ExecuteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowScriptEntity> = registerSymbol("Operation", "WorkflowScriptOperation.Delete");
@@ -790,7 +790,7 @@ export interface WorkflowScriptRetryStrategyEntity extends Entities.Entity, User
   guid: string /*Guid*/;
 }
 
-export module WorkflowScriptRetryStrategyOperation {
+export namespace WorkflowScriptRetryStrategyOperation {
   export const Save : Operations.ExecuteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowScriptRetryStrategyEntity> = registerSymbol("Operation", "WorkflowScriptRetryStrategyOperation.Delete");
 }
@@ -809,7 +809,7 @@ export interface WorkflowTimerConditionEval extends Eval.EvalEmbedded<IWorkflowT
   Type: "WorkflowTimerConditionEval";
 }
 
-export module WorkflowTimerConditionOperation {
+export namespace WorkflowTimerConditionOperation {
   export const Clone : Operations.ConstructSymbol_From<WorkflowTimerConditionEntity, WorkflowTimerConditionEntity> = registerSymbol("Operation", "WorkflowTimerConditionOperation.Clone");
   export const Save : Operations.ExecuteSymbol<WorkflowTimerConditionEntity> = registerSymbol("Operation", "WorkflowTimerConditionOperation.Save");
   export const Delete : Operations.DeleteSymbol<WorkflowTimerConditionEntity> = registerSymbol("Operation", "WorkflowTimerConditionOperation.Delete");
@@ -823,7 +823,7 @@ export interface WorkflowTimerEmbedded extends Entities.EmbeddedEntity {
   condition: Entities.Lite<WorkflowTimerConditionEntity> | null;
 }
 
-export module WorkflowValidationMessage {
+export namespace WorkflowValidationMessage {
   export const NodeType0WithId1IsInvalid: MessageKey = new MessageKey("WorkflowValidationMessage", "NodeType0WithId1IsInvalid");
   export const ParticipantsAndProcessesAreNotSynchronized: MessageKey = new MessageKey("WorkflowValidationMessage", "ParticipantsAndProcessesAreNotSynchronized");
   export const MultipleStartEventsAreNotAllowed: MessageKey = new MessageKey("WorkflowValidationMessage", "MultipleStartEventsAreNotAllowed");
