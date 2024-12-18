@@ -20,8 +20,6 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Tool
 
 export default function ToolbarRenderer(p: {
   onAutoClose?: () => void;
-  appTitle: React.ReactNode;
-  madeBy: React.ReactNode;
 }): React.ReactElement | null {
 
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
@@ -54,8 +52,6 @@ export default function ToolbarRenderer(p: {
   }
 
   return (
-    <>
-    {p.appTitle}
     <div className={"sidebar-inner"}>
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
@@ -65,9 +61,7 @@ export default function ToolbarRenderer(p: {
       <ul>
         {response && response.elements && response.elements.map((res: ToolbarResponse<any>, i: number) => renderNavItem(res, active, i, handleRefresh, p.onAutoClose))}
         </ul>
-        {p.madeBy}
       </div>
-    </>
   );
 }
 

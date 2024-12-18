@@ -64,18 +64,18 @@ public class UpgradeContext
         return new CodeFile(fileName, this);
     }
 
-    public void DeleteFile(string fileName, WarningLevel showWarning = WarningLevel.Error)
+    public void DeleteFile(string fileName, WarningLevel fileWarning = WarningLevel.Error)
     {
         var fullFileName = this.AbsolutePathSouthwind(fileName);
         if (!File.Exists(fullFileName))
         {
-            if (showWarning != WarningLevel.None)
+            if (fileWarning != WarningLevel.None)
             {
                 if (HasWarnings != WarningLevel.Error)
-                    HasWarnings = showWarning;
+                    HasWarnings = fileWarning;
 
-                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
-                     showWarning.ToString().ToUpper() + " file " + fileName + " not found");
+                SafeConsole.WriteLineColor(fileWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                     fileWarning.ToString().ToUpper() + " file " + fileName + " not found");
             }
 
         }
@@ -88,18 +88,18 @@ public class UpgradeContext
 
 
 
-    public void CreateCodeFile(string fileName, string content, WarningLevel showWarning = WarningLevel.Error)
+    public void CreateCodeFile(string fileName, string content, WarningLevel fileWarning = WarningLevel.Error)
     {
         fileName = this.AbsolutePathSouthwind(fileName);
         if (File.Exists(fileName))
         {
-            if (showWarning != WarningLevel.None)
+            if (fileWarning != WarningLevel.None)
             {
                 if (HasWarnings != WarningLevel.Error)
-                    HasWarnings = showWarning;
+                    HasWarnings = fileWarning;
 
-                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
-                    showWarning.ToString().ToUpper() + " file " + fileName + " already exists");
+                SafeConsole.WriteLineColor(fileWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                    fileWarning.ToString().ToUpper() + " file " + fileName + " already exists");
             }
         }
         else
@@ -125,59 +125,74 @@ public class UpgradeContext
 
     public static string[] DefaultIgnoreDirectories = new[] { "bin", "obj", "CodeGen", "node_modules", "ts_out", "dist", "Framework", ".git", ".vs", ".vscode" };
 
-    public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarning = WarningLevel.Error)
+    public void ChangeCodeFile(string fileName, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.Error)
     {
         fileName = fileName.Replace("Southwind", ApplicationName);
         if (!File.Exists(this.AbsolutePath(fileName)))
         {
-            if (showWarning != WarningLevel.None)
+            if (showWarnings != WarningLevel.None)
             {
                 if (HasWarnings != WarningLevel.Error)
-                    HasWarnings = showWarning;
+                    HasWarnings = showWarnings;
 
-                SafeConsole.WriteLineColor(showWarning == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
-                    showWarning.ToString().ToUpper() + " file " + fileName + " not found");
+                SafeConsole.WriteLineColor(showWarnings == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                    showWarnings.ToString().ToUpper() + " file " + fileName + " not found");
             }
         }
         else
         {
-            var codeFile = new CodeFile(fileName, this) { WarningLevel = showWarning };
+            var codeFile = new CodeFile(fileName, this) { WarningLevel = showWarnings };
             action(codeFile);
             codeFile.SaveIfNecessary();
         }
     }
 
 
-    public void ForeachCodeFile(string searchPattern, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None, string[]? ignoreDirectories = null) =>
-        ForeachCodeFile(searchPattern, new[] { RootFolder }, action, showWarnings, ignoreDirectories);
+    public void ForeachCodeFile(string searchPattern, Action<CodeFile> action, WarningLevel codeWarning = WarningLevel.None, WarningLevel directoryWarning = WarningLevel.Error, string[]? ignoreDirectories = null) =>
+        ForeachCodeFile(searchPattern, new[] { RootFolder }, action, codeWarning, directoryWarning, ignoreDirectories);
 
-    public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None, string[]? ignoreDirectories = null) =>
-        ForeachCodeFile(searchPattern, new[] { directory }, action, showWarnings, ignoreDirectories);
+    public void ForeachCodeFile(string searchPattern, string directory, Action<CodeFile> action, WarningLevel codeWarning = WarningLevel.None, WarningLevel directoryWarning = WarningLevel.Error, string[]? ignoreDirectories = null) =>
+        ForeachCodeFile(searchPattern, new[] { directory }, action, codeWarning, directoryWarning, ignoreDirectories);
 
-    public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, WarningLevel showWarnings = WarningLevel.None, string[]? ignoreDirectories = null)
+    public void ForeachCodeFile(string searchPattern, string[] directories, Action<CodeFile> action, WarningLevel codeWarning = WarningLevel.None, WarningLevel directoryWarning = WarningLevel.Error, string[]? ignoreDirectories = null)
     {
         var searchPatterns = searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray();
 
         foreach (var dir in directories)
         {
-            var codeFiles = GetCodeFiles(dir, searchPatterns, ignoreDirectories);
+            var codeFiles = GetCodeFiles(dir, searchPatterns, ignoreDirectories, directoryWarning);
             foreach (var codeFile in codeFiles)
             {
-                codeFile.WarningLevel = showWarnings;
+                codeFile.WarningLevel = codeWarning;
                 action(codeFile);
                 codeFile.SaveIfNecessary();
             }
         }
     }
 
-    public List<CodeFile> GetCodeFiles(string directory, string[] searchPatterns, string[]? ignoreDirectories)
+    public List<CodeFile> GetCodeFiles(string directory, string[] searchPatterns, string[]? ignoreDirectories, WarningLevel showWarnings)
     {
         ignoreDirectories ??= DefaultIgnoreDirectories;
 
         var result = new List<CodeFile>();
 
-        FillSourceCodeFiles(result, this.AbsolutePathSouthwind(directory), searchPatterns, ignoreDirectories);
+        var absoluteDirectory = this.AbsolutePathSouthwind(directory);
 
+        if (!Directory.Exists(absoluteDirectory))
+        {
+            if (showWarnings != WarningLevel.None)
+            {
+                if (HasWarnings != WarningLevel.Error)
+                    HasWarnings = showWarnings;
+
+                SafeConsole.WriteLineColor(showWarnings == WarningLevel.Error ? ConsoleColor.Red : ConsoleColor.Yellow,
+                    showWarnings.ToString().ToUpper() + " directory " + absoluteDirectory + " not found");
+            }
+        }
+        else
+        {
+            FillSourceCodeFiles(result, absoluteDirectory, searchPatterns, ignoreDirectories);
+        }
 
         return result;
     }
@@ -197,9 +212,9 @@ public class UpgradeContext
 
    
 
-    public void MoveFiles(string source, string destination, string searchPattern, string[]? ignoreDirectories = null, bool @override = false)
+    public void MoveFiles(string source, string destination, string searchPattern, string[]? ignoreDirectories = null, bool @override = false, WarningLevel directoryWarning = WarningLevel.Error)
     {
-        var files = GetCodeFiles(source, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), ignoreDirectories);
+        var files = GetCodeFiles(source, searchPattern.SplitNoEmpty(',').Select(a => a.Trim()).ToArray(), ignoreDirectories, directoryWarning);
 
         string Normalize(string dirName)
         {
