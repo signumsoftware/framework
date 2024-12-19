@@ -57,7 +57,8 @@
 }
 
 .sidebar-inner {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
     scrollbar-width: thin;
 }
 
