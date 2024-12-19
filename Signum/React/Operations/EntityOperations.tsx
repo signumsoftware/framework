@@ -83,7 +83,7 @@ export namespace EntityOperations {
           eoc.frame.onClose(pack);
           return Promise.resolve(undefined);
         };
-        eoc.click();
+        return eoc.click();
       }
     });
   }
@@ -104,7 +104,7 @@ export namespace EntityOperations {
           return (eoc.frame.createNew!(pack) ?? Promise.resolve(undefined))
             .then(newPack => newPack && eoc.frame.onReload(newPack, reloadComponent));
         };
-        eoc.defaultClick();
+        return eoc.defaultClick();
       }
     });
   }
@@ -296,7 +296,7 @@ interface OperationButtonProps extends ButtonProps {
   color?: BsColor;
   textInTitle?: boolean;
   avoidAlternatives?: boolean;
-  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => void;
+  onOperationClick?: (eoc: EntityOperationContext<any /*Entity*/>) => Promise<void>;
   children?: React.ReactNode;
   hideOnCanExecute?: boolean;
 }
@@ -324,9 +324,9 @@ export function OperationButton({ group, onOperationClick, canExecute, eoc: eocO
     name: "main",
     onClick: eoc => {
       if (onOperationClick)
-        onOperationClick(eoc);
+        return onOperationClick(eoc);
       else
-        eoc.click();
+        return eoc.click();
     },
     text: eoc.settings?.text ? eoc.settings.text(eoc) :
       group?.simplifyName ? group.simplifyName(eoc.operationInfo.niceName) :
