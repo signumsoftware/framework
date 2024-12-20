@@ -18,6 +18,7 @@ class Upgrade_20241220_ScrollableSideBar : CodeUpgradeBase
         {
             a.InsertBeforeFirstLine(a => a.Contains("<VersionChangedAlert"), "<div className=\"container-fluid overflow-auto pt-2\">");
             a.InsertAfterFirstLine(a => a.Contains("<Outlet"), "</div>");
+            a.Replace("<Outlet", "<Outlet context={{ sidebarMode }}");
             a.Replace("appTitle={renderTitle()} ", "");
             a.InsertBeforeFirstLine(a => a.Contains("<ToolbarRenderer"), "{renderTitle()}");
             SafeConsole.WriteLineColor(ConsoleColor.Magenta, "Check the changes in Layout.tsx, maybe you need to make fixes in renderTitle() function or site.css");
