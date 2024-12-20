@@ -1,16 +1,13 @@
 import * as React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLocation, useParams } from 'react-router'
 import { Finder } from '../Finder'
-import { FindOptions, FilterOption, QueryDescription, isFilterGroup } from '../FindOptions'
+import { FindOptions, QueryDescription } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
-import { Navigator } from '../Navigator'
 import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
-import { namespace } from 'd3'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
-import { useAPI, useForceUpdate, useUpdatedRef } from '../Hooks'
+import { useAPI, useForceUpdate } from '../Hooks'
 
 
 function SearchPage(): React.JSX.Element {
@@ -38,7 +35,7 @@ function SearchPage(): React.JSX.Element {
     }
   }
 
-  const searchControl = React.useRef<SearchControlHandler>(null);
+  const searchControl = React.useRef<SearchControlHandler | null | undefined>();
 
   const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
@@ -63,10 +60,10 @@ function SearchPage(): React.JSX.Element {
       </div>
     );
 
-  const setSearchControl = React.useCallback(function (sc: SearchControlLoaded | null) {
+  const setSearchControl = React.useCallback(function (sc: SearchControlHandler | null) {
     searchControl.current = sc;
     onResize();
-  });
+  }, []);
 
   var qs = Finder.getSettings(fo.queryName);
   return (
