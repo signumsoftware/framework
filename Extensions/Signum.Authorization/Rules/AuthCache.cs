@@ -271,12 +271,9 @@ public abstract class AuthCache<RT, AR, R, K, A, AM> : IManualAuth<K, A>
 
         public A GetAllowed(K key)
         {
-            using (var a = HeavyProfiler.LogNoStackTrace("RoleAllowedCache.GetAllowed"))
-            {
-                var raw = rules.GetAllowed(key);
+            var raw = rules.GetAllowed(key);
 
-                return cache.CoerceValue(Role, key, raw);
-            }
+            return cache.CoerceValue(Role, key, raw);
         }
 
         public A GetAllowedBase(K key)

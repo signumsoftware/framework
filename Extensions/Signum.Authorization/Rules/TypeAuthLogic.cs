@@ -230,15 +230,28 @@ public static partial class TypeAuthLogic
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().FormatWith(type.NicePluralName()));
     }
 
-    public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
+    public static TypeRulePack GetTypeRules(Lite<RoleEntity> role)
     {
-        var result = new TypeRulePack { Role = roleLite };
-        Schema s = Schema.Current;
-        cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRules"))
+        {
+            var result = new TypeRulePack { Role = role };
+            Schema s = Schema.Current;
+            var types = TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value);
+            cache.GetRules(result, types);
 
+            return result;
+        }
+    }
 
-        return result;
-
+    public static Dictionary<Type, WithConditions<TypeAllowed>> GetTypeRulesSimple(Lite<RoleEntity> role)
+    {
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRulesSimple"))
+        {
+            Schema s = Schema.Current;
+            return TypeLogic.TypeToEntity
+                .Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null)
+                .ToDictionary(kvp => kvp.Key, kvp => GetAllowed(role, kvp.Key));
+        }
     }
 
     public static void SetTypeRules(TypeRulePack rules)
@@ -248,25 +261,22 @@ public static partial class TypeAuthLogic
 
     public static WithConditions<TypeAllowed> GetAllowed(Type type)
     {
-        using (HeavyProfiler.LogNoStackTrace("TypeAuthLogic.GetAllowed", () => type.Name))
-        {
-            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
+        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-            if (!TypeLogic.TypeToEntity.ContainsKey(type))
-                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
+        if (!TypeLogic.TypeToEntity.ContainsKey(type))
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-            if (type.IsEnumEntity())
-                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
+        if (type.IsEnumEntity())
+            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
-            var allowed = cache.GetAllowed(RoleEntity.Current, type);
+        var allowed = cache.GetAllowed(RoleEntity.Current, type);
 
-            var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
-            if (overrideTypeAllowed != null)
-                return overrideTypeAllowed(allowed);
+        var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
+        if (overrideTypeAllowed != null)
+            return overrideTypeAllowed(allowed);
 
-            return allowed;
-        }
+        return allowed;
     }
 
     public static WithConditions<TypeAllowed> GetAllowed(Lite<RoleEntity> role, Type type)

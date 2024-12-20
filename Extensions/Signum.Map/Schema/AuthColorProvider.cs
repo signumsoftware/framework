@@ -11,7 +11,7 @@ public class AuthColorProvider
             return new MapColorProvider[0];
 
         var roleRules = AuthLogic.RolesInOrder(includeTrivialMerge: false).ToDictionary(r => r,
-            r => TypeAuthLogic.GetTypeRules(r).Rules.ToDictionary(a => a.Resource.CleanName, a => a.Allowed));
+            r => TypeAuthLogic.GetTypeRulesSimple(r).ToDictionary(a => TypeLogic.GetCleanName(a.Key), a => a.Value));
 
         return roleRules.Keys.Select((r, i) => new MapColorProvider
         {
@@ -38,7 +38,7 @@ public class AuthColorProvider
         return "auth-" + list.ToString("-");
     }
 
-    static List<TypeAllowedBasic> ToStringList(WithConditionsModel<TypeAllowed> tac, bool userInterface)
+    static List<TypeAllowedBasic> ToStringList(WithConditions<TypeAllowed> tac, bool userInterface)
     {
         List<TypeAllowedBasic> result = [tac.Fallback.Get(userInterface)];
 

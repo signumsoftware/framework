@@ -45,26 +45,23 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
 
     public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual = false)
     {
-        using (var a = HeavyProfiler.LogNoStackTrace("PropertyCache.CoerceValue"))
+        if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
+            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
+
+        var taac = manual ?
+            TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
+            TypeAuthLogic.GetAllowed(role, key.RootType);
+
+        return coerceCache.GetOrAdd((allowed, taac), p =>
         {
-            if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
-                return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
+            var ptaac = p.taac.ToPropertyAllowed();
 
-            var taac = manual ?
-                TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
-                TypeAuthLogic.GetAllowed(role, key.RootType);
+            var adjusted = AdjustShape(values: p.allowed, shape: ptaac);
 
-            return coerceCache.GetOrAdd((allowed, taac), p =>
-            {
-                var ptaac = p.taac.ToPropertyAllowed();
+            var coerced = CoerceSimilar(adjusted, ptaac);
 
-                var adjusted = AdjustShape(values: p.allowed, shape: ptaac);
-
-                var coerced = CoerceSimilar(adjusted, ptaac);
-
-                return coerced;
-            });
-        }
+            return coerced;
+        });
     }
 
     public static WithConditions<PropertyAllowed> CoerceSimilar(WithConditions<PropertyAllowed> value, WithConditions<PropertyAllowed> maxValue)

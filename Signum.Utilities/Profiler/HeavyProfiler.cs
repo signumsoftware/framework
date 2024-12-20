@@ -73,7 +73,7 @@ public static class HeavyProfiler
         return tracer;
     }
 
-    public static Tracer? LogNoStackTrace(string role, Func<string> additionalData)
+    public static Tracer? LogNoStackTrace(string role, Func<string?> additionalData)
     {
         if (!enabled)
             return null;
