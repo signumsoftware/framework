@@ -160,7 +160,7 @@ public static partial class TypeAuthLogic
 
         var tac = GetAllowed(type);
 
-        if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(type))
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type))
             return null;
 
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
@@ -169,17 +169,17 @@ public static partial class TypeAuthLogic
     }
 
 
-    public static bool HasWriteAndRead(WithConditions<TypeAllowed> tac)
+    public static TypeAllowedBasic? TrivialTypeGetUI(WithConditions<TypeAllowed> tac)
     {
-        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI());
+        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI()).ToHashSet();
 
         if (tac.Fallback != TypeAllowed.None)
-            conditions = conditions.And(tac.Fallback.GetUI());
+            conditions.Add(tac.Fallback.GetUI());
 
-        if (conditions.Distinct().Count() > 1)
-            return true;
+        if (conditions.Count > 1)
+            return null;
 
-        return false;
+        return conditions.SingleEx();
     }
 
     public static Func<Type, bool> HasTypeConditionInProperties = t => false;

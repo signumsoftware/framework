@@ -49,7 +49,7 @@ public static class PropertyAuthLogic
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
             QueryToken.IsValueHidden = QueryToken_IsValueHidden;
-            TypeAuthLogic.HasTypeConditionInProperties = HasTypeConditionInProperties;
+            TypeAuthLogic.HasTypeConditionInProperties = RequiresTypeConditionForProperties;
         }
     }
 
@@ -108,7 +108,7 @@ public static class PropertyAuthLogic
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
-    static bool HasTypeConditionInProperties(Type type)
+    static bool RequiresTypeConditionForProperties(Type type)
     {
         var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
@@ -428,6 +428,14 @@ public static class PropertyAuthLogic
                 taac.ToPropertyAllowed().Max(),
                 paacDic?.ToDictionary(a => a.Key, a => a.Value.Max())
             );
+        }
+
+        var trivial = TypeAuthLogic.TrivialTypeGetUI(taac);
+        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(type))
+        {
+            return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
+                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).SingleEx())
+                );
         }
 
         for (int i = taac.ConditionRules.Count - 1; i >= 0; i--)
