@@ -32,7 +32,6 @@ function SearchPage(): React.JSX.Element {
     const scl = sc?.searchControlLoaded;
     const containerDiv = scl?.containerDiv;
     if (containerDiv) {
-
       const marginTop = containerDiv.offsetTop;
       const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
@@ -64,7 +63,10 @@ function SearchPage(): React.JSX.Element {
       </div>
     );
 
-
+  const setSearchControl = React.useCallback(function (sc: SearchControlLoaded | null) {
+    searchControl.current = sc;
+    onResize();
+  });
 
   var qs = Finder.getSettings(fo.queryName);
   return (
@@ -76,7 +78,7 @@ function SearchPage(): React.JSX.Element {
         </>
         }
       </h3>
-      {qd && <SearchControl ref={searchControl}
+      {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="SearchPage"
@@ -103,7 +105,7 @@ function SearchPage(): React.JSX.Element {
 }
 
 namespace SearchPage {
-  export let marginDown = 90;
+  export let marginDown = 70;
   export let minHeight = 600;
   export let showFilters = (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => {
     return false;
