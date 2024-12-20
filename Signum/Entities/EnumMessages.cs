@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 namespace Signum.Entities;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Property | AttributeTargets.Field, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum, AllowMultiple = false)]
 public sealed class AllowUnathenticatedAttribute : Attribute
 {
 

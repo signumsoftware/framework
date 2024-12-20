@@ -19,40 +19,36 @@ public static class EntityJsonContext
             {
                 ejcf,
                 new LiteJsonConverterFactory(),
-                new MListJsonConverterFactory(ejcf.AssertCanWrite),
+                new MListJsonConverterFactory((pr, root, metadata)=> ejcf.AssertCanWrite(pr, root as ModifiableEntity, metadata)),
                 new JsonStringEnumConverter(),
                 new ResultTableConverter(),
                 new TimeSpanConverter(),
                 new DateOnlyConverter(),
                 new TimeOnlyConverter()
-    }
+            }
         };
     }
 
-    static readonly AsyncThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>?> currentPropertyRoute = Statics.ThreadVariable<ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>?>("jsonPropertyRoute");
+    static readonly AsyncThreadVariable<SerializationPath?> currentSerializationPath = 
+        Statics.ThreadVariable<SerializationPath?>("jsonPropertyRoute");
 
-    public static (PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)? CurrentPropertyRouteAndEntity
+    public static SerializationPath? CurrentSerializationPath => currentSerializationPath.Value;
+
+    public static IDisposable AddSerializationStep(SerializationStep step)
     {
-        get { return currentPropertyRoute.Value?.Peek(); }
-    }
+        var current = currentSerializationPath.Value;
 
-    public static IRootEntity? FindCurrentRootEntity()
-    {
-        return currentPropertyRoute.Value?.FirstOrDefault(a => a.mod is IRootEntity).mod as IRootEntity;
-    }
-
-    public static PrimaryKey? FindCurrentRowId()
-    {
-        return currentPropertyRoute.Value?.Where(a => a.rowId != null).FirstOrDefault().rowId;
-    }
-
-    public static IDisposable SetCurrentPropertyRouteAndEntity((PropertyRoute, ModifiableEntity?, PrimaryKey? rowId) pair)
-    {
-        var old = currentPropertyRoute.Value;
-
-        currentPropertyRoute.Value = (old ?? ImmutableStack<(PropertyRoute pr, ModifiableEntity? mod, PrimaryKey? rowId)>.Empty).Push(pair);
-
-        return new Disposable(() => { currentPropertyRoute.Value = old; });
+        if(current != null)
+        {
+            current.Push(step);
+            return new Disposable(()=> { current.Pop(); });
+        }
+        else
+        {
+            currentSerializationPath.Value = current = new SerializationPath();
+            current.Push(step);
+            return new Disposable(() => { currentSerializationPath.Value = null; });
+        }
     }
 
     static readonly AsyncThreadVariable<bool> allowDirectMListChangesVariable = Statics.ThreadVariable<bool>("allowDirectMListChanges");
@@ -70,7 +66,77 @@ public static class EntityJsonContext
 
         return new Disposable(() => { allowDirectMListChangesVariable.Value = old; });
     }
+}
 
+public class SerializationPath : Stack<SerializationStep>
+{
+    public PropertyRoute? CurrentPropertyRoute()
+    {
+        foreach (var item in this)
+        {
+            if (item.Route != null)
+                return item.Route;
+        }
+        return null;
+    }
 
+    public IRootEntity? CurrentRootEntity()
+    {
+        foreach (var item in this)
+        {
+            if (item.RootEntity != null)
+                return item.RootEntity;
+        }
+        return null;
+    }
 
+    public PrimaryKey? CurrentRowId()
+    {
+        foreach (var item in this)
+        {
+            if (item.RowId != null)
+                return item.RowId;
+        }
+        return null;
+    }
+
+    public SerializationMetadata? CurrentSerializationMetadata()
+    {
+        foreach (var item in this)
+        {
+            if (item.SerializationMetadata != null)
+                return item.SerializationMetadata;
+        }
+        return null;
+    }
+}
+
+public readonly struct SerializationStep
+{
+    public readonly PropertyRoute Route;
+    public readonly IRootEntity? RootEntity;
+    public readonly PrimaryKey? RowId;
+    public readonly SerializationMetadata? SerializationMetadata;
+
+    public SerializationStep(PropertyRoute route, PrimaryKey? rowId = null)
+    {
+        this.Route = route;
+        this.RowId = rowId; 
+    }
+    public SerializationStep(PropertyRoute route, IRootEntity rootEntity, SerializationMetadata? serializationMetadata)
+    {
+        Route = route;
+        RootEntity = rootEntity;
+        SerializationMetadata = serializationMetadata;
+    }
+
+    public override string ToString()
+    {
+        return ", ".Combine(
+            Route.ToString(),
+            RootEntity == null ? null : "RootEntity = " + RootEntity,
+            RowId == null ? null : "RowId = " + RowId,
+            SerializationMetadata == null ? null : "SerializationMetadata = " + SerializationMetadata.ToString()
+            );
+    }
 }

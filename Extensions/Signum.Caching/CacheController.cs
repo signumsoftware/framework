@@ -48,10 +48,7 @@ public class CacheController : ControllerBase
     {
         CachePermission.InvalidateCache.AssertAuthorized();
 
-        CacheLogic.ForceReset();
-        GlobalLazy.ResetAll();
-        Schema.Current.InvalidateMetadata();
-        GC.Collect(2);
+        CleanImplementation();
     }
 
     [HttpPost("api/cache/invalidateAll"), SignumAllowAnonymous]
@@ -59,7 +56,15 @@ public class CacheController : ControllerBase
     {
         GetSimpleHttpBroadcast().AssertHash(req.SecretHash);
 
-        Clear();
+        CleanImplementation();
+    }
+
+    private static void CleanImplementation()
+    {
+        CacheLogic.ForceReset();
+        GlobalLazy.ResetAll();
+        Schema.Current.InvalidateMetadata();
+        GC.Collect(2);
     }
 
 

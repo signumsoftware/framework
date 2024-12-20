@@ -40,22 +40,31 @@ class PropertyCache : AuthCache<RulePropertyEntity, PropertyAllowedRule, Propert
     protected override WithConditions<PropertyAllowed> ToAllowed(WithConditionsModel<PropertyAllowed> allowedModel) => allowedModel.ToImmutable();
     protected override WithConditionsModel<PropertyAllowed> ToAllowedModel(WithConditions<PropertyAllowed> allowed) => allowed.ToModel();
 
+    static ConcurrentDictionary<(WithConditions<PropertyAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<PropertyAllowed>> coerceCache =
+        new ConcurrentDictionary<(WithConditions<PropertyAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<PropertyAllowed>>();
+
     public override WithConditions<PropertyAllowed> CoerceValue(Lite<RoleEntity> role, PropertyRoute key, WithConditions<PropertyAllowed> allowed, bool manual = false)
     {
-        if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
-            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
+        using (var a = HeavyProfiler.LogNoStackTrace("PropertyCache.CoerceValue"))
+        {
+            if (!TypeLogic.TypeToEntity.ContainsKey(key.RootType))
+                return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
-        var taac = manual ? 
-            TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
-            TypeAuthLogic.GetAllowed(role, key.RootType);
+            var taac = manual ?
+                TypeAuthLogic.Manual.GetAllowed(role, key.RootType) :
+                TypeAuthLogic.GetAllowed(role, key.RootType);
 
-        var paac = taac.ToPropertyAllowed();
+            return coerceCache.GetOrAdd((allowed, taac), p =>
+            {
+                var ptaac = p.taac.ToPropertyAllowed();
 
-        var adjusted = AdjustShape(values: allowed, shape: paac);
+                var adjusted = AdjustShape(values: p.allowed, shape: ptaac);
 
-        var coerced = CoerceSimilar(adjusted, paac);
+                var coerced = CoerceSimilar(adjusted, ptaac);
 
-        return coerced;
+                return coerced;
+            });
+        }
     }
 
     public static WithConditions<PropertyAllowed> CoerceSimilar(WithConditions<PropertyAllowed> value, WithConditions<PropertyAllowed> maxValue)

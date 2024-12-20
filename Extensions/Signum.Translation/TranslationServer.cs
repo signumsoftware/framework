@@ -60,9 +60,11 @@ public class TranslationServer
 
                     var hastMList = pr.GetMListItemsRoute() != null;
 
-                    var entity = ctx.Entity as Entity ?? (Entity?)EntityJsonContext.FindCurrentRootEntity();
+                    var path = EntityJsonContext.CurrentSerializationPath;
 
-                    var rowId = hastMList ? EntityJsonContext.FindCurrentRowId() : null;
+                    var entity = ctx.Entity as Entity ?? (Entity?)path?.CurrentRootEntity();
+
+                    var rowId = hastMList ? path?.CurrentRowId() : null;
 
                     writer.WritePropertyName(ctx.LowerCaseName);
 

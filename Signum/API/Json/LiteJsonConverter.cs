@@ -49,8 +49,8 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
 
                 var pr = PropertyRoute.Root(lite.Model.GetType());
                 var model = (ModelEntity)lite.Model;
-                using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, model, null)))
-                    JsonSerializer.Serialize(writer, model, options);
+                //using (EntityJsonContext.AddSerializationStep(new (pr, model, null)))
+                JsonSerializer.Serialize(writer, model, options);
             }
         }
 
@@ -59,9 +59,9 @@ public class LiteJsonConverter<T> : JsonConverterWithExisting<Lite<T>>
             writer.WritePropertyName("entity");
 
             var pr = PropertyRoute.Root(lite.Entity.GetType());
-            var entity = (ModifiableEntity)(IEntity)lite.EntityOrNull;
-            using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((pr, entity, null)))
-                JsonSerializer.Serialize(writer, lite.Entity, options);
+            var entity = (IEntity)lite.EntityOrNull;
+            //using (EntityJsonContext.AddSerializationStep(new (pr, entity, null)))
+            JsonSerializer.Serialize(writer, lite.Entity, options);
         }
 
         writer.WriteEndObject();

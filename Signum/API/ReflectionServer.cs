@@ -185,7 +185,7 @@ public static class ReflectionServer
         var genericModels = ReflectionServer.GenericTypeToName.Keys
             .GroupToDictionary(a => a.Assembly);
 
-        var genericTypes = TypeLogic.TypeToEntity.Keys.Where(a => a.IsGenericType && EnumEntity.Extract(a) == null)
+        var genericTypes = TypeLogic.TypeToEntity.Keys.Where(a => a.IsGenericType && !a.IsEnumEntity())
             .GroupToDictionary(a => a.Assembly);
 
         return EntityAssemblies.SelectMany(kvp =>

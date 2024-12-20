@@ -9,14 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Senders\**" />
-	  <Content Remove="Senders\**" />
-	  <EmbeddedResource Remove="Senders\**" />
-	  <None Remove="Senders\**" />
-	  <TypeScriptCompile Remove="Senders\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.7.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -39,7 +31,4 @@
 		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Attachments\" />
-	</ItemGroup>
 </Project>

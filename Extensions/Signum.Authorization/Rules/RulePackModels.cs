@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.ObjectModel;
@@ -19,12 +21,15 @@ public class DefaultDictionary<K, A>
     public Dictionary<K, A>? OverrideDictionary { get; private set; }
     public Func<K, A> DefaultAllowed { get; private set; }
 
+    public IDictionary? AdditionalDictionary; //Used to get the PropertyRoutes of a Type
+
     public A GetAllowed(K key)
     {
         if (OverrideDictionary != null && OverrideDictionary.TryGetValue(key, out A? result))
             return result;
 
-        return DefaultAllowed(key);
+        using (HeavyProfiler.LogNoStackTrace("DefaultAllowed", () => key.ToString()!))
+            return DefaultAllowed(key);
     }
 }
 
@@ -386,54 +391,114 @@ public static class ProperyAllowedAndConditionsExtensions
 {
     public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac)
     {
-        if (!paac.ConditionRules.Any())
-            return paac.Fallback;
+        using (HeavyProfiler.LogNoStackTrace("Min"))
+        {
+            if (!paac.ConditionRules.Any())
+                return paac.Fallback;
 
-        return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+            return (PropertyAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+        }
     }
 
     public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
     {
-        if (assumingTaac == null)
-            return paac.Min();
+        using (HeavyProfiler.LogNoStackTrace("Min2"))
+        {
+            if (assumingTaac == null)
+                return paac.Min();
 
-        List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+            List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
 
-        if (candidates.IsEmpty())
-            return PropertyAllowed.None;
+            if (candidates.IsEmpty())
+                return PropertyAllowed.None;
 
-        return candidates.MinBy(a => (int)a);
+            return candidates.MinBy(a => (int)a);
+        }
+    }
+
+    public static PropertyAllowed Min(this WithConditions<PropertyAllowed> paac, WithConditions<PropertyAllowed>? assumingPaac)
+    {
+        using (HeavyProfiler.LogNoStackTrace("Min2"))
+        {
+            if (assumingPaac == null)
+                return paac.Min();
+
+            List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingPaac);
+
+            if (candidates.IsEmpty())
+                return PropertyAllowed.None;
+
+            return candidates.MinBy(a => (int)a);
+        }
     }
 
     public static List<PropertyAllowed> CandidatesAssuming(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed> assumingTaac)
     {
-        var candidates = paac.ConditionRules.Where((a, i) => assumingTaac.ConditionRules[i].Allowed.GetUI() > TypeAllowedBasic.None).Select(a => a.Allowed).ToList();
+        using (HeavyProfiler.LogNoStackTrace("CandidatesAssuming"))
+        {
+            var candidates = paac.ConditionRules.Where((a, i) => assumingTaac.ConditionRules[i].Allowed.GetUI() > TypeAllowedBasic.None).Select(a => a.Allowed).ToList();
 
-        if (assumingTaac.Fallback.GetUI() > TypeAllowedBasic.None)
-            candidates.Add(paac.Fallback);
+            if (assumingTaac.Fallback.GetUI() > TypeAllowedBasic.None)
+                candidates.Add(paac.Fallback);
 
-        return candidates;
+            return candidates;
+        }
+    }
+
+    public static List<PropertyAllowed> CandidatesAssuming(this WithConditions<PropertyAllowed> paac, WithConditions<PropertyAllowed> assumingPaac)
+    {
+        using (HeavyProfiler.LogNoStackTrace("CandidatesAssuming"))
+        {
+            var candidates = paac.ConditionRules.Where((a, i) => assumingPaac.ConditionRules[i].Allowed > PropertyAllowed.None).Select(a => a.Allowed).ToList();
+
+            if (assumingPaac.Fallback > PropertyAllowed.None)
+                candidates.Add(paac.Fallback);
+
+            return candidates;
+        }
     }
 
     public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac)
     {
-        if (!paac.ConditionRules.Any())
-            return paac.Fallback;
+        using (HeavyProfiler.LogNoStackTrace("Max"))
+        {
+            if (!paac.ConditionRules.Any())
+                return paac.Fallback;
 
-        return (PropertyAllowed)Math.Max((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Max());
+            return (PropertyAllowed)Math.Max((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Max());
+        }
     }
 
     public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
     {
-        if (assumingTaac == null)
-            return paac.Max();
+        using (HeavyProfiler.LogNoStackTrace("Max2"))
+        {
+            if (assumingTaac == null)
+                return paac.Max();
 
-        List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+            List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
 
-        if (candidates.IsEmpty())
-            return PropertyAllowed.None;
+            if (candidates.IsEmpty())
+                return PropertyAllowed.None;
 
-        return candidates.MaxBy(a => (int)a);
+            return candidates.MaxBy(a => (int)a);
+        }
+    }
+
+    public static PropertyAllowed Max(this WithConditions<PropertyAllowed> paac, WithConditions<PropertyAllowed>? assumingPaac)
+    {
+        using (HeavyProfiler.LogNoStackTrace("Max2"))
+        {
+            if (assumingPaac == null)
+                return paac.Max();
+
+            List<PropertyAllowed> candidates = CandidatesAssuming(paac, assumingPaac);
+
+            if (candidates.IsEmpty())
+                return PropertyAllowed.None;
+
+            return candidates.MaxBy(a => (int)a);
+        }
     }
 }
 

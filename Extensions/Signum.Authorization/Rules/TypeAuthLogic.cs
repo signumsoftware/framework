@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Routing;
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
 using System.Collections;
@@ -247,22 +248,25 @@ public static partial class TypeAuthLogic
 
     public static WithConditions<TypeAllowed> GetAllowed(Type type)
     {
-        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
+        using (HeavyProfiler.LogNoStackTrace("TypeAuthLogic.GetAllowed", () => type.Name))
+        {
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        if (!TypeLogic.TypeToEntity.ContainsKey(type))
-            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
+            if (!TypeLogic.TypeToEntity.ContainsKey(type))
+                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        if (EnumEntity.Extract(type) != null)
-            return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
+            if (type.IsEnumEntity())
+                return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
-        var allowed = cache.GetAllowed(RoleEntity.Current, type);
+            var allowed = cache.GetAllowed(RoleEntity.Current, type);
 
-        var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
-        if (overrideTypeAllowed != null)
-            return overrideTypeAllowed(allowed);
+            var overrideTypeAllowed = TypeAuthLogic.GetOverrideTypeAllowed(type);
+            if (overrideTypeAllowed != null)
+                return overrideTypeAllowed(allowed);
 
-        return allowed;
+            return allowed;
+        }
     }
 
     public static WithConditions<TypeAllowed> GetAllowed(Lite<RoleEntity> role, Type type)
