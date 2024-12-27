@@ -67,24 +67,32 @@ declare global {
     count(this: Array<T>, predicate: (element: T, index: number, array: T[]) => boolean): number;
 
     first(this: Array<T>, errorContext?: string): T;
-    first(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T;
+    first<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S;
+    first(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
 
     firstOrNull(this: Array<T>): T | null;
-    firstOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+    firstOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
+    firstOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
     last(this: Array<T>, errorContext?: string): T;
-    last(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T;
+    last<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): T;
+    last(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
 
-    lastOrNull(this: Array<T>, ): T | null;
-    lastOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+    lastOrNull(this: Array<T>): T | null;
+    lastOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
+    lastOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
     single(this: Array<T>, errorContext?: string): T;
-    single(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T;
+    single<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S;
+    single(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T;
 
     singleOrNull(this: Array<T>, errorContext?: string): T | null;
-    singleOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+    singleOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
+    singleOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
-    onlyOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => boolean): T | null;
+    onlyOrNull(this: Array<T>): T | null;
+    onlyOrNull<S extends T>(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => element is S): S | null;
+    onlyOrNull(this: Array<T>, predicate?: (element: T, index: number, array: T[]) => unknown): T | null;
 
     contains(this: Array<T>, element: T): boolean;
     remove(this: Array<T>, element: T): boolean;
@@ -524,7 +532,7 @@ Array.prototype.count = function (this: any[], predicate: (element: any, index: 
 };
 
 
-Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.first = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -535,7 +543,7 @@ Array.prototype.first = function (this: any[], errorContextOrPredicate?: string 
 };
 
 
-Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof predicate == "function" ? this.filter(predicate) : this;
 
@@ -545,7 +553,7 @@ Array.prototype.firstOrNull = function (this: any[], predicate?: ((element: any,
   return array[0];
 };
 
-Array.prototype.last = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.last = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -556,7 +564,7 @@ Array.prototype.last = function (this: any[], errorContextOrPredicate?: string |
 };
 
 
-Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof predicate == "function" ? this.filter(predicate) : this;
 
@@ -566,7 +574,7 @@ Array.prototype.lastOrNull = function (this: any[], predicate?: ((element: any, 
   return array[array.length - 1];
 };
 
-Array.prototype.single = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.single = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -579,7 +587,7 @@ Array.prototype.single = function (this: any[], errorContextOrPredicate?: string
   return array[0];
 };
 
-Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => boolean)) {
+Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: string | ((element: any, index: number, array: any[]) => unknown)) {
 
   var array = typeof errorContextOrPredicate == "function" ? this.filter(errorContextOrPredicate) : this;
 
@@ -593,7 +601,7 @@ Array.prototype.singleOrNull = function (this: any[], errorContextOrPredicate?: 
 };
 
 
-Array.prototype.onlyOrNull = function (this: any[], predicate : (element: any, index: number, array: any[]) => boolean) {
+Array.prototype.onlyOrNull = function (this: any[], predicate?: (element: any, index: number, array: any[]) => unknown) {
 
   var array = predicate ? this.filter(predicate) : this;
 
