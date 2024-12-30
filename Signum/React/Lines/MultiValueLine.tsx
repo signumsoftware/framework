@@ -92,6 +92,7 @@ export const MultiValueLine: <V>(props: MultiValueLineProps<V> & React.RefAttrib
     <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
       helpText={p.helpText}
+      helpTextOnTop={p.helpTextOnTop}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <>
         <div className="row">

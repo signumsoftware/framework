@@ -116,6 +116,7 @@ export const EntityCombo: <V extends Entity | Lite<Entity> | null>(props: Entity
     <FormGroup ctx={c.props.ctx}
       label={getLabelText()} labelIcon={p.labelIcon}
       helpText={p.helpText}
+      helpTextOnTop={p.helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-combo">

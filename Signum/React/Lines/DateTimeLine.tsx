@@ -45,7 +45,7 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
     if (s.ctx.readOnly)
         return (
-          <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+          <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={s.ctx} innerRef={c.setRefs}>
                     {m && toFormatWithFixes(m, luxonFormat)}
                 </FormControlReadonly>)}
@@ -75,7 +75,7 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
         htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
 
     return (
-        <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
             {inputId => c.withItemGroup(
                 <div className={classes(s.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
                     <DatePicker

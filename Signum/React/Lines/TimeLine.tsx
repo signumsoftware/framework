@@ -32,7 +32,7 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
 
   if (s.ctx.readOnly) {
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => c.withItemGroup(
           <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={s.ctx} className={classes(c.props.valueHtmlAttributes?.className, "numeric")} innerRef={c.setRefs}>
             {timeToString(s.ctx.value, s.format)}
@@ -57,7 +57,7 @@ export const TimeLine: React.MemoExoticComponent<React.ForwardRefExoticComponent
     htmlAttributes.placeholder = timePlaceholder(durationFormat);
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
         <TimeTextBox htmlAttributes={htmlAttributes}
           id={inputId}

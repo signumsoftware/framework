@@ -27,6 +27,7 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
   helpText?: React.ReactNode | null;
+  helpTextOnTop?: React.ReactNode | null;
   mandatory?: boolean | "warning";
 }
 

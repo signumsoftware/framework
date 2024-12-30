@@ -62,7 +62,7 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
     }
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId =>
           vl.withItemGroup(
             <FormControlReadonly
@@ -98,7 +98,7 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
     }
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => vl.withItemGroup(
           <DropdownList<OptionItem> className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formControlClass, vl.mandatoryClass, "p-0")} data={optionItems}
             id={inputId}
@@ -124,7 +124,7 @@ function internalDropDownList<V extends string | number | boolean | null>(vl: En
     };
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => vl.withItemGroup(
           <select id={inputId} {...vl.props.valueHtmlAttributes} value={toStr(s.ctx.value)} className={classes(vl.props.valueHtmlAttributes?.className, s.ctx.formSelectClass, vl.mandatoryClass)} onChange={handleEnumOnChange} >
             {!optionItems.some(a => toStr(a.value) == toStr(s.ctx.value)) && <option key={-1} value={toStr(s.ctx.value)}>{toStr(s.ctx.value)}</option>}
@@ -155,7 +155,7 @@ function internalComboBoxText<V extends string | number | boolean | null>(el: En
     }
 
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => el.withItemGroup(
           <FormControlReadonly id={inputId} htmlAttributes={{
             ...el.props.valueHtmlAttributes,
@@ -171,7 +171,7 @@ function internalComboBoxText<V extends string | number | boolean | null>(el: En
   var renderItem = el.props.onRenderDropDownListItem ? (a: any) => el.props.onRenderDropDownListItem!(a.item) : undefined;
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...el.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => el.withItemGroup(
         <Combobox<OptionItem> id={inputId} className={classes(el.props.valueHtmlAttributes?.className, s.ctx.formControlClass, el.mandatoryClass)} data={optionItems} onChange={(e: string | OptionItem, md) => {
           el.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
@@ -201,7 +201,7 @@ function internalRadioGroup<V extends string | number | boolean | null>(elc: Enu
   };
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...elc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...elc.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => <>
         {getTimeMachineIcon({ ctx: s.ctx })}
         <div style={getColumnStyle()}>

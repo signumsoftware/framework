@@ -115,6 +115,7 @@ export const EntityMultiSelect: <V extends Lite<Entity> | Entity>(props: EntityM
       label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
+      helpTextOnTop={p.helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined)}>
         <Multiselect<any>

@@ -44,7 +44,7 @@ export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     }
     else {
       return (
-        <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+        <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
           {inputId => <>
             {getTimeMachineIcon({ ctx: s.ctx })}
             <input id={inputId} type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}

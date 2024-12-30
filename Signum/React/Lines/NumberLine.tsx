@@ -46,7 +46,7 @@ function numericTextBox(vl: NumberLineController, validateKey: (e: React.Keyboar
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => vl.withItemGroup(
           <FormControlReadonly id={inputId} htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.setRefs}>
             {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
@@ -79,7 +79,7 @@ function numericTextBox(vl: NumberLineController, validateKey: (e: React.Keyboar
   const limits = numberLimits[s.type?.name!];
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => vl.withItemGroup(
         <NumberBox
           id={inputId}

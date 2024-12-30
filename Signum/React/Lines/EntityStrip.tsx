@@ -98,6 +98,7 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
       label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
       helpText={p.helpText}
+      helpTextOnTop={p.helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className="sf-entity-strip sf-control-container">
         {p.groupElementsBy == undefined ?

@@ -45,7 +45,7 @@ export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExo
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date")} ctx={s.ctx} innerRef={c.setRefs}>
           {dt && toFormatWithFixes(dt, luxonFormat)}
         </FormControlReadonly>)}
@@ -64,7 +64,7 @@ export const DateTimeSplittedLine: React.MemoExoticComponent<React.ForwardRefExo
   };
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
         <DateTimePickerSplitted value={dt?.toJSDate()} onChange={handleDatePickerOnChange}
           id={inputId}

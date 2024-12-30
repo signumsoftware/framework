@@ -36,7 +36,7 @@ export const TextAreaLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
 
   if (s.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
         {inputId => <>
           {getTimeMachineIcon({ ctx: s.ctx })}
           <TextArea id={inputId} {...htmlAtts} autoResize={autoResize} className={classes(htmlAtts?.className, s.ctx.formControlClass, c.mandatoryClass)} value={s.ctx.value || ""}
