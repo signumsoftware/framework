@@ -127,6 +127,7 @@ declare global {
     startsWith(this: string, str: string): boolean;
     endsWith(this: string, str: string): boolean;
     formatWith(this: string, ...parameters: any[]): string;
+    splitByRegex(this: string, regex: RegExp): { isMatch: boolean, value: string }[];
     forGenderAndNumber(this: string, number: number): string;
     forGenderAndNumber(this: string, gender: string | undefined): string;
     forGenderAndNumber(this: string, gender: any, number?: number): string;
@@ -813,6 +814,34 @@ String.prototype.formatWith = function () {
   });
 };
 
+String.prototype.splitByRegex = function splitByRegex(this: string, regex: RegExp): { isMatch: boolean, value: string }[] {
+  const result: { isMatch: boolean, value: string }[] = [];
+  let lastIndex = 0;
+
+  // Iterate over matches
+  for (const match of this.matchAll(regex)) {
+    const matchStart = match.index;
+    const matchEnd = matchStart + match[0].length;
+
+    // Add the non-matching part before this match
+    if (lastIndex < matchStart) {
+      result.push({ isMatch: false, value: this.slice(lastIndex, matchStart) });
+    }
+
+    // Add the matching part
+    result.push({ isMatch: true, value: match[0] });
+
+    // Update lastIndex
+    lastIndex = matchEnd;
+  }
+
+  // Add any remaining non-matching part at the end
+  if (lastIndex < this.length) {
+    result.push({ isMatch: false, value: this.slice(lastIndex) });
+  }
+
+  return result;
+};
 
 String.prototype.forGenderAndNumber = function (this: string, gender: any, number?: number) {
   
