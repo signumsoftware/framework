@@ -63,7 +63,8 @@ export function useSignalRConnection(url: string, options?: signalR.IHttpConnect
       return () => {
         promise
           .then(() => {
-            connection.stop();
+            connection.stop().then(() => console.log("Connection stopped"))
+              .catch(err => console.error("Error stopping connection:", err));
           });
         isMounted = false;
       };
@@ -103,20 +104,61 @@ export function useSignalRGroup(connection: signalR.HubConnection | undefined, o
   }, [connection, connection?.state, ...options.deps]);
 }
 
-export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]) {
+//export function useSignalRCallback(connection: signalR.HubConnection | undefined, methodName: string, callback: (...args: any[]) => void, deps: any[]) {
 
-  var callback = React.useCallback(callback, deps);
+//  var callback = React.useCallback(callback, deps);
+
+//  React.useEffect(() => {
+//    if (!connection || connection.state != HubConnectionState.Connected) {
+//      return;
+//    }
+
+//    connection.on(methodName, callback);
+
+//    return () => {
+//      connection.off(methodName, callback);
+//    }
+
+//  }, [connection, connection?.state, callback, methodName]);
+//}
+
+
+
+export function useSignalRCallback(
+  connection: signalR.HubConnection | undefined,
+  methodName: string,
+  callback: (...args: any[]) => void,
+  deps: any[]
+) {
+  const memoizedCallback = React.useCallback(callback, deps);
 
   React.useEffect(() => {
-    if (!connection || connection.state != HubConnectionState.Connected) {
+    if (!connection) {
+      console.warn("SignalR connection is undefined");
       return;
     }
 
-    connection.on(methodName, callback);
+    // Helper function to register the callback
+    const registerCallback = () => {
+      if (connection.state === signalR.HubConnectionState.Connected) {
+        connection.on(methodName, memoizedCallback);
+      } else {
+        console.warn(`Cannot register callback for ${methodName}. Connection not established.`);
+      }
+    };
 
+    // Register the callback initially
+    registerCallback();
+
+    // Handle reconnections
+    connection.onreconnected(() => {
+      console.log(`Reconnected to SignalR hub. Re-registering callback for ${methodName}.`);
+      registerCallback();
+    });
+
+    // Cleanup: remove the callback
     return () => {
-      connection.off(methodName, callback);
-    }
-
-  }, [connection, connection?.state, callback, methodName]);
+      connection.off(methodName, memoizedCallback);
+    };
+  }, [connection, memoizedCallback, methodName]);
 }
