@@ -7,7 +7,7 @@
     <Member Name="Resource" Description="Ressource" />
   </Type>
   <Type Name="AllowedRuleCoerced`2">
-    <Member Name="CoercedValues" Description="Umgewandelte Werte" />
+    <Member Name="Coerced" Description="Gezwungen" />
   </Type>
   <Type Name="AuthAdminMessage">
     <Member Name="_0CyclesHaveBeenFoundInTheGraphOfRolesDueToTheRelationships" Description="{0} Zyklen wurden im Diagramm der Rollen aufgrund der Beziehungen gefunden:" />
@@ -24,7 +24,10 @@
     <Member Name="CanNotBeReadBecauseIsNotInCondition0" Description="Kann nicht gelesen werden, da es die Bedingung {0} nicht erfüllt" />
     <Member Name="Check" Description="Aktivieren" />
     <Member Name="Deny" Description="Verweigern" />
+    <Member Name="Fallback" Description="Fallback" />
     <Member Name="Filter" Description="Filter" />
+    <Member Name="FirstRule" Description="1. Regel" />
+    <Member Name="NthRule" Description="{0}. Regel" />
     <Member Name="Overriden" Description="Überschrieben" />
     <Member Name="PermissionRules" Description="Berechtigungsregeln" />
     <Member Name="PleaseSaveChangesFirst" Description="Bitte erst Änderungen speichern" />
@@ -34,6 +37,7 @@
     <Member Name="Role0InheritsFromTrivialMergeRole1" Description="Rolle {0} erbt von der triviale Zusammenführung Rolle {1}" />
     <Member Name="Role0IsTrivialMerge" Description="Rolle {0} ist triviale Zusammenführung" />
     <Member Name="Save" Description="Speichern" />
+    <Member Name="SecondRule" Description="2. Regel" />
     <Member Name="SelectMoreThanOneToOverrideAccessFor0ThatSatisfyAllTheConditionsAtTheSameTime" Description="Wählen Sie mehr als einen aus, um den Zugriff für {0} zu überschreiben, die alle Bedingungen gleichzeitig erfüllen." />
     <Member Name="SelectOneToOverrideTheAccessFor0ThatSatisfyThisCondition" Description="Wählen Sie eine Option aus, um den Zugriff für {0} zu überschreiben, die diese Bedingung erfüllen." />
     <Member Name="SelectTypeConditions" Description="Wählen Sie Typbedingung(en)" />
@@ -41,6 +45,7 @@
     <Member Name="TheFollowingTypeConditionsHaveAlreadyBeenUsed" Description="Der folgende Typbedingungen wurden bereits verwendet:" />
     <Member Name="ThereAre0TypeConditionsDefinedFor1" Description="Es sind {0} Typbedingungen für {1} definiert." />
     <Member Name="TheUserStateMustBeDisabled" Description="Der Benutzerstatus muss deaktiviert werden." />
+    <Member Name="ThirdRule" Description="3. Regel" />
     <Member Name="TypeRules" Description="Typregeln" />
     <Member Name="Uncheck" Description="Deaktivieren" />
     <Member Name="UsedByRoles" Description="Verwendet von Rollen" />
@@ -56,6 +61,8 @@
     <Member Name="Nothing" Description="Nichts" />
     <Member Name="OnlyActive" Description="Nur aktive" />
     <Member Name="SameAs0" Description="Wie {0}" />
+    <Member Name="TheQueryDoesNotEnsureThatYouCanRead0" Description="Die Abfrage stellt nicht sicher, dass Sie lesen {0} können. " />
+    <Member Name="UnableToDetermineIfYouCanRead0" Description="Es kann nicht festgestellt werden, ob Sie {0} lesen können" />
   </Type>
   <Type Name="AuthThumbnail" Description="Auth-Miniaturansicht">
     <Member Name="All" Description="Alle" />
@@ -76,6 +83,10 @@
     <Member Name="AutomaticUpgradeOfOperations" Description="Automatische Aktualisierung der Operationen" />
     <Member Name="AutomaticUpgradeOfProperties" Description="Automatische Aktualisierung von Eigenschaften" />
     <Member Name="AutomaticUpgradeOfQueries" Description="Automatische Aktualisierung von Abfragen" />
+  </Type>
+  <Type Name="ConditionRuleModel`1">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="TypeConditions" Description="Typbedingungen" />
   </Type>
   <Type Name="LoginAuthMessage">
     <Member Name="_0HasBeenSucessfullyAssociatedWithUser1InThisDevice" Description="{0} wurde erfolgreich mit benutzerdefinierten {1} in diesem Gerät verknüpft." />
@@ -153,6 +164,7 @@
   </Type>
   <Type Name="PropertyAllowedRule" Description="Erlaubte Eigenschaftenregel" />
   <Type Name="PropertyRulePack" Description="Eigenschaftsregelpack">
+    <Member Name="AvailableTypeConditions" Description="Verfügbare Typenbedingungen" />
     <Member Name="Type" Description="Typ" />
   </Type>
   <Type Name="QueryAllowed">
@@ -175,15 +187,29 @@
     <Member Name="Delete" Description="Löschen" />
     <Member Name="Save" Description="Speichern" />
   </Type>
-  <Type Name="RuleEntity`2">
-    <Member Name="Allowed" Description="Erlaubt" />
+  <Type Name="RuleEntity`1">
     <Member Name="Resource" Description="Ressource" />
     <Member Name="Role" Description="Rolle" />
   </Type>
-  <Type Name="RuleOperationEntity" Description="Operationsregel" PluralDescription="Operationsregeln" Gender="f" />
-  <Type Name="RulePermissionEntity" Description="Berechtigungsregel" PluralDescription="Berechtigungsregeln" Gender="f" />
-  <Type Name="RulePropertyEntity" Description="Eigenschaftsregel" PluralDescription="Eigenschaftsregeln" Gender="f" />
-  <Type Name="RuleQueryEntity" Description="Abfrageregel" PluralDescription="Abfrageregeln" Gender="f" />
+  <Type Name="RuleOperationEntity" Description="Operationsregel" PluralDescription="Operationsregeln" Gender="f">
+    <Member Name="Allowed" Description="Erlaubt" />
+  </Type>
+  <Type Name="RulePermissionEntity" Description="Berechtigungsregel" PluralDescription="Berechtigungsregeln" Gender="f">
+    <Member Name="Allowed" Description="Erlaubt" />
+  </Type>
+  <Type Name="RulePropertyConditionEntity" Description="Rule-Eigenschaft-Bedingung " PluralDescription="Rule-Eigenschaft-Bedingungen" Gender="f">
+    <Member Name="Allowed" Description="Erlaubt" />
+    <Member Name="Conditions" Description="Bedingungen" />
+    <Member Name="Order" Description="Rheinfolge" />
+    <Member Name="RuleProperty" Description="Eigenschaftsregel" />
+  </Type>
+  <Type Name="RulePropertyEntity" Description="Eigenschaftsregel" PluralDescription="Eigenschaftsregeln" Gender="f">
+    <Member Name="ConditionRules" Description="Bedingungsregeln" />
+    <Member Name="Fallback" Description="Fallback" />
+  </Type>
+  <Type Name="RuleQueryEntity" Description="Abfrageregel" PluralDescription="Abfrageregeln" Gender="f">
+    <Member Name="Allowed" Description="Erlaubt" />
+  </Type>
   <Type Name="RuleTypeConditionEntity" Description="Regeltypbedingung" PluralDescription="Bedingungen für Regeltypen">
     <Member Name="Allowed" Description="Erlaubt" />
     <Member Name="Conditions" Description="Bedingungen" />
@@ -192,6 +218,7 @@
   </Type>
   <Type Name="RuleTypeEntity" Description="Typregel" PluralDescription="Typregeln" Gender="m">
     <Member Name="ConditionRules" Description="Bedingungsregeln" />
+    <Member Name="Fallback" Description="Fallback" />
   </Type>
   <Type Name="SessionLogEntity" Description="Sitzungsprotokoll" PluralDescription="Sitzungsprotokolle" Gender="n">
     <Member Name="Duration" Description="Dauer" />
@@ -213,10 +240,6 @@
     <Member Name="Read" Description="Lesen" />
     <Member Name="Write" Description="schreiben" />
   </Type>
-  <Type Name="TypeAllowedAndConditions" Description="Erlaubte Typen und Bedingungen">
-    <Member Name="ConditionRules" Description="Bedingungsregeln" />
-    <Member Name="Fallback" Description="Fallback" />
-  </Type>
   <Type Name="TypeAllowedBasic">
     <Member Name="None" Description="Kein" />
     <Member Name="Read" Description="Lesen" />
@@ -227,10 +250,6 @@
     <Member Name="Operations" Description="Operationen" />
     <Member Name="Properties" Description="Eigenschaften" />
     <Member Name="Queries" Description="Abfragen" />
-  </Type>
-  <Type Name="TypeConditionRuleModel" Description="Typbedingungsregel">
-    <Member Name="Allowed" Description="Erlaubt" />
-    <Member Name="TypeConditions" Description="Typbedingungen" />
   </Type>
   <Type Name="TypeConditionSymbol" Description="Typbedingung" />
   <Type Name="TypeRulePack" Description="Typregelpack" />
@@ -275,5 +294,9 @@
   </Type>
   <Type Name="UserTypeCondition">
     <Member Name="DeactivatedUsers" Description="Deaktivierte Benutzer" />
+  </Type>
+  <Type Name="WithConditionsModel`1">
+    <Member Name="ConditionRules" Description="Bedingungsregeln" />
+    <Member Name="Fallback" Description="Fallback" />
   </Type>
 </Translations>
