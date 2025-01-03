@@ -39,59 +39,61 @@ export const NumberLine: React.MemoExoticComponent<React.ForwardRefExoticCompone
 });
 
 
-function numericTextBox(vl: NumberLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
-  const s = vl.props
+function numericTextBox(c: NumberLineController, validateKey: (e: React.KeyboardEvent<any>) => boolean) {
+  const p = c.props
 
-  const numberFormat = toNumberFormat(s.format);
+  const numberFormat = toNumberFormat(p.format);
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-  if (s.ctx.readOnly)
+  if (p.ctx.readOnly)
     return (
-      <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-        {inputId => vl.withItemGroup(
-          <FormControlReadonly id={inputId} htmlAttributes={vl.props.valueHtmlAttributes} ctx={s.ctx} className="numeric" innerRef={vl.setRefs}>
-            {s.ctx.value == null ? "" : numberFormat.format(s.ctx.value)}
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+        {inputId => c.withItemGroup(
+          <FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} ctx={p.ctx} className="numeric" innerRef={c.setRefs}>
+            {p.ctx.value == null ? "" : numberFormat.format(p.ctx.value)}
           </FormControlReadonly>)}
       </FormGroup>
     );
 
   const handleOnChange = (newValue: number | null) => {
-    vl.setValue(newValue);
+    c.setValue(newValue);
   };
 
-  var incNumber = typeof vl.props.incrementWithArrow == "number" ? vl.props.incrementWithArrow : 1;
+  var incNumber = typeof c.props.incrementWithArrow == "number" ? c.props.incrementWithArrow : 1;
 
   const handleKeyDown = (e: React.KeyboardEvent<any>) => {
     if (e.key == KeyNames.arrowDown) {
       e.preventDefault();
-      vl.setValue((s.ctx.value ?? 0) - incNumber, e);
+      c.setValue((p.ctx.value ?? 0) - incNumber, e);
     } else if (e.key == KeyNames.arrowUp) {
       e.preventDefault();
-      vl.setValue((s.ctx.value ?? 0) + incNumber, e);
+      c.setValue((p.ctx.value ?? 0) + incNumber, e);
     }
   }
 
   const htmlAttributes = {
-    placeholder: vl.getPlaceholder(),
-    onKeyDown: (vl.props.incrementWithArrow || vl.props.incrementWithArrow == undefined ) ? handleKeyDown : undefined,
-    ...vl.props.valueHtmlAttributes
+    placeholder: c.getPlaceholder(),
+    onKeyDown: (c.props.incrementWithArrow || c.props.incrementWithArrow == undefined ) ? handleKeyDown : undefined,
+    ...c.props.valueHtmlAttributes
   } as React.AllHTMLAttributes<any>;
 
-  const limits = numberLimits[s.type?.name!];
+  const limits = numberLimits[p.type?.name!];
 
   return (
-    <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...vl.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-      {inputId => vl.withItemGroup(
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+      {inputId => c.withItemGroup(
         <NumberBox
           id={inputId}
-          minValue={s.minValue != undefined ? s.minValue : limits?.min}
-          maxValue={s.maxValue != undefined ? s.maxValue : limits?.max}
+          minValue={p.minValue != undefined ? p.minValue : limits?.min}
+          maxValue={p.maxValue != undefined ? p.maxValue : limits?.max}
           htmlAttributes={htmlAttributes}
-          value={s.ctx.value}
+          value={p.ctx.value}
           onChange={handleOnChange}
-          formControlClass={classes(s.ctx.formControlClass, vl.mandatoryClass)}
+          formControlClass={classes(p.ctx.formControlClass, c.mandatoryClass)}
           validateKey={validateKey}
           format={numberFormat}
-          innerRef={vl.setRefs}
+          innerRef={c.setRefs}
         />
       )}
     </FormGroup>

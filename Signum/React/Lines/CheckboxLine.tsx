@@ -22,33 +22,36 @@ export const CheckboxLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     if (c.isHidden)
       return null;
 
-    const s = c.props;
+    const p = c.props;
     const handleCheckboxOnChange = (e: React.SyntheticEvent<any>) => {
       const input = e.currentTarget as HTMLInputElement;
       c.setValue(input.checked, e);
     };
 
-    if (s.inlineCheckbox) {
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
 
-      var { style, className, ...otherAtts } = { ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes, ...s.labelHtmlAttributes };
+    if (p.inlineCheckbox) {
+
+      var { style, className, ...otherAtts } = { ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes, ...p.labelHtmlAttributes };
       return (
-        <label style={{ display: s.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(s.ctx.labelClass, c.props.ctx.errorClass, className)}>
-          {getTimeMachineIcon({ ctx: s.ctx })}
-          <input type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange} disabled={s.ctx.readOnly}
+        <label style={{ display: p.inlineCheckbox == "block" ? "block" : undefined, ...style }} {...otherAtts} className={classes(p.ctx.labelClass, c.props.ctx.errorClass, className)}>
+          {getTimeMachineIcon({ ctx: p.ctx })}
+          <input type="checkbox" {...c.props.valueHtmlAttributes} checked={p.ctx.value || false} onChange={handleCheckboxOnChange} disabled={p.ctx.readOnly}
             className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")}
           />
-          {" "}{s.label}{s.labelIcon && " "}{s.labelIcon}
-          {s.helpText && <small className="d-block form-text text-muted">{s.helpText}</small>}
+          {" "}{p.label}{p.labelIcon && " "}{p.labelIcon}
+          {p.helpText && <small className="d-block form-text text-muted">{helpText}</small>}
         </label>
       );
     }
     else {
+      const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
       return (
-        <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} helpTextOnTop={s.helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }}>
+        <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
           {inputId => <>
-            {getTimeMachineIcon({ ctx: s.ctx })}
-            <input id={inputId} type="checkbox" {...c.props.valueHtmlAttributes} checked={s.ctx.value || false} onChange={handleCheckboxOnChange}
-              className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")} disabled={s.ctx.readOnly} />
+            {getTimeMachineIcon({ ctx: p.ctx })}
+            <input id={inputId} type="checkbox" {...c.props.valueHtmlAttributes} checked={p.ctx.value || false} onChange={handleCheckboxOnChange}
+              className={classes(c.props.valueHtmlAttributes?.className, "form-check-input")} disabled={p.ctx.readOnly} />
           </>
           }
         </FormGroup>

@@ -22,12 +22,12 @@ export interface LineBaseProps<V = unknown> extends StyleOptions {
   hideIfNull?: boolean;
   onChange?: (e: ChangeEvent) => void;
   onValidate?: (val: any) => string;
-  extraButtons?: (vl: LineBaseController<any, V>) => React.ReactNode;
-  extraButtonsBefore?: (vl: LineBaseController<any, V>) => React.ReactNode;
+  extraButtons?: (c: LineBaseController<any, V>) => React.ReactNode;
+  extraButtonsBefore?: (c: LineBaseController<any, V>) => React.ReactNode;
   labelHtmlAttributes?: React.LabelHTMLAttributes<HTMLLabelElement>;
   formGroupHtmlAttributes?: React.HTMLAttributes<any>;
-  helpText?: React.ReactNode | null;
-  helpTextOnTop?: React.ReactNode | null;
+  helpText?: React.ReactNode | null | ((c: LineBaseController<any, V>) => React.ReactNode | null);
+  helpTextOnTop?: React.ReactNode | null | ((c: LineBaseController<any, V>) => React.ReactNode | null);
   mandatory?: boolean | "warning";
 }
 

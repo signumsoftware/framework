@@ -143,8 +143,11 @@ export const EntityLine: <V extends ModifiableEntity | Lite<Entity> | null>(prop
     </>
   );
 
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   return (
-    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={p.helpText} helpTextOnTop={p.helpTextOnTop}
+    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...EntityBaseController.entityHtmlAttributes(p.ctx.value!), ...p.formGroupHtmlAttributes }}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <div className="sf-entity-line">

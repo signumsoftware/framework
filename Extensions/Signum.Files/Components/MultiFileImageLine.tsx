@@ -76,64 +76,70 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
 export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V> & React.RefAttributes<MultiFileImageLineController<V>>) => React.ReactNode | null =
   genericForwardRef(function MultiFileLine<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile &*/ Entity>>(props: MultiFileImageLineProps<V>, ref: React.Ref<MultiFileImageLineController<V>>) {
 
-  const c = useController(MultiFileImageLineController<V>, props, ref);
-  const p = c.props;
+    const c = useController(MultiFileImageLineController<V>, props, ref);
+    const p = c.props;
 
-  if (c.isHidden)
-    return null;
-
-  return (
-    <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
-      htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      helpText={p.helpText}
-      labelHtmlAttributes={p.labelHtmlAttributes}>
-      {() => <div>
-        <div className="d-flex">
-          {
-            c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
-              <div className="sf-file-image-container m-2" key={mlec.index}>
-                {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :
-                  p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
-                    renderFile(p.getFile ? mlec.subCtx(p.getFile) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
-                {!p.ctx.readOnly &&
-                  <a href="#" title={EntityControlMessage.Remove.niceToString()}
-                    className="sf-line-button sf-remove"
-                    onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
-                    <FontAwesomeIcon icon="xmark" />
-                  </a>}
-              </div>
-            )
-          }
-        </div>
-        <div>
-          {p.ctx.readOnly ? undefined :
-            <FileUploader
-              accept={p.accept || "image/*"}
-              multiple={true}
-              maxSizeInBytes={p.maxSizeInBytes}
-              dragAndDrop={p.dragAndDrop}
-              dragAndDropMessage={p.dragAndDropMessage}
-              fileType={p.fileType}
-              onFileLoaded={c.handleFileLoaded}
-              typeName={p.getFile ?
-                p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFile).typeReference().name! :
-                p.ctx.propertyRoute!.typeReference().name}
-              buttonCss={p.ctx.buttonClass}
-              divHtmlAttributes={{ className: "sf-file-line-new" }} />}
-        </div>
-      </div>}
-    </FormGroup>
-  );
+    if (c.isHidden)
+      return null;
 
 
-  function renderFile(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>) {
-    const val = ctx.value!;
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
-    return ctx.propertyRoute!.typeReference().isLite ?
-      <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
-      <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} />;
-  }
-});
+
+    return (
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
+        htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
+        helpText={helpText}
+        helpTextOnTop={helpTextOnTop}
+        labelHtmlAttributes={p.labelHtmlAttributes}>
+        {() => <div>
+          <div className="d-flex">
+            {
+              c.getMListItemContext(p.ctx.subCtx({ formGroupStyle: "None" })).map(mlec =>
+                <div className="sf-file-image-container m-2" key={mlec.index}>
+                  {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :
+                    p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
+                      renderFile(p.getFile ? mlec.subCtx(p.getFile) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
+                  {!p.ctx.readOnly &&
+                    <a href="#" title={EntityControlMessage.Remove.niceToString()}
+                      className="sf-line-button sf-remove"
+                      onClick={e => { e.preventDefault(); c.handleDeleteValue(mlec.index!); }}>
+                      <FontAwesomeIcon icon="xmark" />
+                    </a>}
+                </div>
+              )
+            }
+          </div>
+          <div>
+            {p.ctx.readOnly ? undefined :
+              <FileUploader
+                accept={p.accept || "image/*"}
+                multiple={true}
+                maxSizeInBytes={p.maxSizeInBytes}
+                dragAndDrop={p.dragAndDrop}
+                dragAndDropMessage={p.dragAndDropMessage}
+                fileType={p.fileType}
+                onFileLoaded={c.handleFileLoaded}
+                typeName={p.getFile ?
+                  p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFile).typeReference().name! :
+                  p.ctx.propertyRoute!.typeReference().name}
+                buttonCss={p.ctx.buttonClass}
+                divHtmlAttributes={{ className: "sf-file-line-new" }} />}
+          </div>
+        </div>}
+      </FormGroup>
+    );
+
+
+    function renderFile(ctx: TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>) {
+      const val = ctx.value!;
+
+      return ctx.propertyRoute!.typeReference().isLite ?
+        <FetchAndRemember lite={val! as Lite<IFile & Entity>}>{file => <FileImage file={file} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} />}</FetchAndRemember> :
+        <FileImage file={val as IFile & ModifiableEntity} {...p.imageHtmlAttributes} style={{ maxWidth: "100px" }} onClick={e => ImageModal.show(val as IFile & ModifiableEntity, e)} />;
+    }
+  });
 
 (MultiFileImageLine as any).defaultProps = {
   download: "SaveAs",
