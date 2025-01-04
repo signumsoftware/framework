@@ -142,7 +142,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
   }
 }
 
-function internalComboBoxText<V extends string | number | boolean | null>(c: EnumLineController<V>, strict: boolean) {
+function internalComboBoxText<V extends string | number | boolean | null>(c: EnumLineController<V>) {
 
   var optionItems = getOptionsItems(c);
 
@@ -184,20 +184,20 @@ function internalComboBoxText<V extends string | number | boolean | null>(c: Enu
   return (
     <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => c.withItemGroup(
-        //<Combobox<OptionItem>
-        //  id={inputId}
-        //  className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)} data={optionItems}
-        //  onChange={(e: string | OptionItem, md) => {
-        //    c.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
-        //  }}
-        //  value={p.ctx.value}
-        //  dataKey="value"
-        //  textField="label"
-        //  focusFirstItem
-        //  autoSelectMatches
-        //  renderListItem={renderItem}
-        //  {...(p.valueHtmlAttributes as any)}
-        ///>
+        <Combobox<OptionItem>
+          id={inputId}
+          className={classes(c.props.valueHtmlAttributes?.className, p.ctx.formControlClass, c.mandatoryClass)} data={optionItems}
+          onChange={(e: string | OptionItem, md) => {
+            c.setValue(e == null ? null : typeof e == "string" ? e : e.value, md.originalEvent);
+          }}
+          value={p.ctx.value}
+          dataKey="value"
+          textField="label"
+          focusFirstItem
+          autoSelectMatches
+          renderListItem={renderItem}
+          {...(p.valueHtmlAttributes as any)}
+        />
       )
       }
     </FormGroup>

@@ -25,7 +25,7 @@ export class EnumMultiSelectController<V extends string> extends LineBaseControl
     }
   }
 
-  handleOnSelect = (values: V[], e: React.SyntheticEvent) => {
+  handleOnSelect = (values: V[], e?: React.SyntheticEvent) => {
     var current = this.props.ctx.value;
 
     values.filter(val => !current.some(mle => mle.element == val)).forEach(val => {
