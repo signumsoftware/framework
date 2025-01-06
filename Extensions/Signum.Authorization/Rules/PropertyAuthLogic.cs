@@ -434,7 +434,7 @@ public static class PropertyAuthLogic
         if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(type))
         {
             return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
-                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).SingleEx())
+                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())
                 );
         }
 

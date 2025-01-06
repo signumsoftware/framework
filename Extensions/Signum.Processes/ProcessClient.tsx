@@ -74,6 +74,8 @@ export namespace ProcessClient {
       icon: "clone",
       color: "info",
     }));
+
+    AppContext.clearSettingsActions.push(() => Dic.clear(processOperationSettings));
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
