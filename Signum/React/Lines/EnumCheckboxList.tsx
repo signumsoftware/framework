@@ -60,25 +60,6 @@ export const EnumCheckboxList: <V extends string>(props: EnumCheckboxListProps<V
     </GroupHeader >
   );
 
-  if (p.avoidFieldSet == true)
-    return (
-      <div{...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
-        {renderContent()}
-      </div>
-    );
-
-  return (
-    <fieldset className={classes("sf-checkbox-list", p.ctx.errorClass)} {...c.baseHtmlAttributes()} {...p.formGroupHtmlAttributes}>
-      <legend>
-        <div>
-          <span>{p.label}</span>
-        </div>
-      </legend>
-      {renderContent()}
-    </fieldset>
-  );
-
-
   function renderContent() {
     if (p.data == null)
       return null;

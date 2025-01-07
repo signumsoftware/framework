@@ -25,7 +25,7 @@ public static class AuthServer
     public static Action<ActionContext, UserEntity> UserLogged;
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
-    
+
     public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
@@ -189,40 +189,37 @@ public static class AuthServer
         {
             ReflectionServer.PropertyRouteExtension += (mi, pr) =>
             {
-                using (HeavyProfiler.LogNoStackTrace("CanWritePropertyRoute", ()=> pr.ToString()))
+                if (UserEntity.Current == null)
                 {
-                    if (UserEntity.Current == null)
-                    {
-                        if (!pr.Type.HasAttribute<AllowUnathenticatedAttribute>())
-                            return null;
+                    if (!pr.Type.HasAttribute<AllowUnathenticatedAttribute>())
+                        return null;
 
-                        mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);
-                    }
-                    else
-                    {
-                        var pac = pr.GetPropertyAllowed();
-                        if (pac.Max() == PropertyAllowed.None)
-                            return null;
-
-                        var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
-                        if (!pac.Equals(tac))
-                        {
-                            var min = pac.Min();
-                            var max = pac.Max();
-                            if (min != max)
-                            {
-                                mi.Extension.Add("minPropertyAllowed", min);
-                                mi.Extension.Add("maxPropertyAllowed", max);
-                            }
-                            else
-                            {
-                                mi.Extension.Add("propertyAllowed", min);
-                            }
-                        }
-
-                    }
-                    return mi;
+                    mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);
                 }
+                else
+                {
+                    var pac = pr.GetPropertyAllowed();
+                    if (pac.Max() == PropertyAllowed.None)
+                        return null;
+
+                    var tac = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
+                    if (!pac.Equals(tac))
+                    {
+                        var min = pac.Min();
+                        var max = pac.Max();
+                        if (min != max)
+                        {
+                            mi.Extension.Add("minPropertyAllowed", min);
+                            mi.Extension.Add("maxPropertyAllowed", max);
+                        }
+                        else
+                        {
+                            mi.Extension.Add("propertyAllowed", min);
+                        }
+                    }
+
+                }
+                return mi;
             };
 
             SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadata += root =>
@@ -355,7 +352,7 @@ public static class AuthServer
         if (sm is not AuthSerializationMetadata asm)
             throw new InvalidOperationException("No AuthSerializationMetadata found");
 
-        if(asm.Type != rootType)
+        if (asm.Type != rootType)
             throw new InvalidOperationException($"AuthSerializationMetadata is for {asm.Type.TypeName()} instead of {rootType.TypeName()}");
 
         return asm;

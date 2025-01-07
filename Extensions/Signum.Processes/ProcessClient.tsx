@@ -74,6 +74,8 @@ export namespace ProcessClient {
       icon: "clone",
       color: "info",
     }));
+
+    AppContext.clearSettingsActions.push(() => Dic.clear(processOperationSettings));
   }
   
   export const processOperationSettings: { [key: string]: ContextualOperationSettings<any> } = {};
@@ -122,13 +124,13 @@ export namespace ProcessClient {
     };
   }
   
-  function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) {
+  export function defaultConstructProcessFromMany(coc: ContextualOperationContext<Entity>, ...args: any[]) : Promise<void> {
     var event = coc.event!;
   
     event!.preventDefault();
     event.stopPropagation();
   
-    ContextualOperations.confirmInNecessary(coc).then(conf => {
+    return ContextualOperations.confirmInNecessary(coc).then(conf => {
       if (!conf)
         return;
   
@@ -148,7 +150,7 @@ export namespace ProcessClient {
       });
     });
   }
-  
+
   export module API {
   
     export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {

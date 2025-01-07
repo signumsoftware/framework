@@ -22,6 +22,7 @@
 		<ProjectReference Include="..\..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\..\Signum\Signum.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.HtmlEditor\Signum.HtmlEditor.csproj" />
 		<ProjectReference Include="..\Signum.Omnibox\Signum.Omnibox.csproj" />
 		<ProjectReference Include="..\Signum.Scheduler\Signum.Scheduler.csproj" />
 		<ProjectReference Include="..\Signum.Toolbar\Signum.Toolbar.csproj" />

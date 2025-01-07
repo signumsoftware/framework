@@ -187,8 +187,6 @@ public static class PropertyAuthLogic
 
     public static WithConditions<PropertyAllowed> GetPropertyAllowed(this PropertyRoute route)
     {
-        using (HeavyProfiler.LogNoStackTrace("GetPropertyAllowed", () => route.ToString()))
-        {
             if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
@@ -198,7 +196,6 @@ public static class PropertyAuthLogic
                 return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
             return cache.GetAllowed(RoleEntity.Current, route);
-        }
     }
 
 
@@ -437,7 +434,7 @@ public static class PropertyAuthLogic
         if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(type))
         {
             return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
-                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).SingleEx())
+                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())
                 );
         }
 
