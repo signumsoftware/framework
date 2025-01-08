@@ -254,7 +254,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
             ModifiableEntity mod = (ModifiableEntity)(IModifiableEntity)value!;
 
-            using (mod is IRootEntity root ? EntityJsonContext.AddSerializationStep(new (tup.pr, root, tup.metadata)) : null)
+            using (mod is IRootEntity root ?
+                EntityJsonContext.AddSerializationStep(new (tup.pr, root, tup.metadata)) :
+                EntityJsonContext.AddSerializationStep(new (tup.pr, mod)))
             {
                 writer.WriteStartObject();
 
@@ -339,7 +341,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                     {
                         var prm = tup.pr.Add(m.GetType());
 
-                        using (EntityJsonContext.AddSerializationStep(new SerializationStep(prm)))
+                        using (EntityJsonContext.AddSerializationStep(new SerializationStep(prm, m)))
                         {
                             writer.WritePropertyName(m.GetType().Name);
                             JsonSerializer.Serialize(writer, m, options);
@@ -379,7 +381,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                     return;
             }
 
-            using (EntityJsonContext.AddSerializationStep(new (pr)))
+            using (EntityJsonContext.AddSerializationStep(new (pr, mod)))
             {
                 writer.WritePropertyName(lowerCaseName);
                 var val = pc.GetValue!(mod);
@@ -410,7 +412,9 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                 var tup = Factory.GetCurrentPropertyRouteAndMetadata(mod);
 
                 var dic = Factory.GetPropertyConverters(mod.GetType());
-                using (mod is IRootEntity root ? EntityJsonContext.AddSerializationStep(new(tup.pr, root, tup.metadata)) : null)
+                using (mod is IRootEntity root ? 
+                    EntityJsonContext.AddSerializationStep(new(tup.pr, root, tup.metadata)) :
+                    EntityJsonContext.AddSerializationStep(new(tup.pr, mod)))
                 using (EntityJsonContext.SetAllowDirectMListChanges(Factory.Strategy == EntityJsonConverterStrategy.Full || markedAsModified))
                     while (reader.TokenType == JsonTokenType.PropertyName)
                     {
@@ -430,7 +434,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
                                     reader.Read();
 
                                     var converter = (IJsonConverterWithExisting)options.GetConverter(mixin.GetType());
-                                    using (EntityJsonContext.AddSerializationStep(new (tup.pr.Add(mixin.GetType()))))
+                                    using (EntityJsonContext.AddSerializationStep(new (tup.pr.Add(mixin.GetType()), mixin)))
                                         converter.Read(ref reader, mixin.GetType(), options, mixin, null);
 
                                     reader.Read();
@@ -499,7 +503,7 @@ public class EntityJsonConverter<T> : JsonConverterWithExisting<T>
 
             var pr = parentRoute.Add(pi);
 
-            using (EntityJsonContext.AddSerializationStep(new (pr)))
+            using (EntityJsonContext.AddSerializationStep(new (pr, oldValue as ModifiableEntity)))
             {
                 try
                 {

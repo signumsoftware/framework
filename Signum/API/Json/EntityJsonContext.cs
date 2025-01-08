@@ -19,7 +19,7 @@ public static class EntityJsonContext
             {
                 ejcf,
                 new LiteJsonConverterFactory(),
-                new MListJsonConverterFactory((pr, root, metadata)=> ejcf.AssertCanWrite(pr, root as ModifiableEntity, metadata)),
+                new MListJsonConverterFactory((pr, mod, metadata)=> ejcf.AssertCanWrite(pr, mod, metadata)),
                 new JsonStringEnumConverter(),
                 new ResultTableConverter(),
                 new TimeSpanConverter(),
@@ -84,8 +84,18 @@ public class SerializationPath : Stack<SerializationStep>
     {
         foreach (var item in this)
         {
-            if (item.RootEntity != null)
-                return item.RootEntity;
+            if (item.Entity is IRootEntity re)
+                return re;
+        }
+        return null;
+    }
+
+    public ModifiableEntity? CurrentModifiableEntity()
+    {
+        foreach (var item in this)
+        {
+            if (item.Entity != null)
+                return item.Entity;
         }
         return null;
     }
@@ -114,19 +124,20 @@ public class SerializationPath : Stack<SerializationStep>
 public readonly struct SerializationStep
 {
     public readonly PropertyRoute Route;
-    public readonly IRootEntity? RootEntity;
+    public readonly ModifiableEntity? Entity;
     public readonly PrimaryKey? RowId;
     public readonly SerializationMetadata? SerializationMetadata;
 
-    public SerializationStep(PropertyRoute route, PrimaryKey? rowId = null)
+    public SerializationStep(PropertyRoute route, ModifiableEntity? modifiable = null, PrimaryKey? rowId = null)
     {
         this.Route = route;
         this.RowId = rowId; 
+        this.Entity = modifiable;
     }
-    public SerializationStep(PropertyRoute route, IRootEntity rootEntity, SerializationMetadata? serializationMetadata)
+    public SerializationStep(PropertyRoute route, IRootEntity modifiable, SerializationMetadata? serializationMetadata)
     {
         Route = route;
-        RootEntity = rootEntity;
+        Entity = (ModifiableEntity)modifiable;
         SerializationMetadata = serializationMetadata;
     }
 
@@ -134,7 +145,7 @@ public readonly struct SerializationStep
     {
         return ", ".Combine(
             Route.ToString(),
-            RootEntity == null ? null : "RootEntity = " + RootEntity,
+            Entity == null ? null : "Entity = " + Entity,
             RowId == null ? null : "RowId = " + RowId,
             SerializationMetadata == null ? null : "SerializationMetadata = " + SerializationMetadata.ToString()
             );
