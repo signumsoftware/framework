@@ -9,14 +9,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Senders\**" />
-	  <Content Remove="Senders\**" />
-	  <EmbeddedResource Remove="Senders\**" />
-	  <None Remove="Senders\**" />
-	  <TypeScriptCompile Remove="Senders\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.7.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -32,6 +24,7 @@
 		<ProjectReference Include="..\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Caching\Signum.Caching.csproj" />
 		<ProjectReference Include="..\Signum.Files\Signum.Files.csproj" />
+		<ProjectReference Include="..\Signum.HtmlEditor\Signum.HtmlEditor.csproj" />
 		<ProjectReference Include="..\Signum.Templating\Signum.Templating.csproj" />
 		<ProjectReference Include="..\Signum.UserAssets\Signum.UserAssets.csproj" />
 		<ProjectReference Include="..\Signum.Processes\Signum.Processes.csproj" />
@@ -39,7 +32,4 @@
 		<ProjectReference Include="..\Signum.UserQueries\Signum.UserQueries.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Attachments\" />
-	</ItemGroup>
 </Project>

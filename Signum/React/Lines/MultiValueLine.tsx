@@ -88,10 +88,15 @@ export const MultiValueLine: <V>(props: MultiValueLineProps<V> & React.RefAttrib
   if (c.isHidden)
     return null;
 
+
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   return (
     <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}
-      helpText={p.helpText}
+      helpText={helpText}
+      helpTextOnTop={helpTextOnTop}
       labelHtmlAttributes={p.labelHtmlAttributes}>
       {inputId => <>
         <div className="row">

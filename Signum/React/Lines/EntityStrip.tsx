@@ -92,12 +92,17 @@ export const EntityStrip: <V extends ModifiableEntity | Lite<Entity>>(props: Ent
   if (c.isHidden)
     return null;
 
+
+  const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+  const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
   const readOnly = p.ctx.readOnly;
   return (
     <FormGroup ctx={p.ctx!}
       label={p.label} labelIcon={p.labelIcon}
       labelHtmlAttributes={p.labelHtmlAttributes}
-      helpText={p.helpText}
+      helpText={helpText}
+      helpTextOnTop={helpTextOnTop}
       htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }}>
       {inputId => <div className="sf-entity-strip sf-control-container">
         {p.groupElementsBy == undefined ?

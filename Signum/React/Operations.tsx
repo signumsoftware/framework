@@ -931,7 +931,7 @@ export interface AlternativeOperationSetting<T extends Entity> {
   inDropdown?: boolean;
   isDefault?: boolean;
   confirmMessage?: (eoc: EntityOperationContext<T>) => string | undefined | null;
-  onClick: (eoc: EntityOperationContext<T>) => void;
+  onClick: (eoc: EntityOperationContext<T>) => Promise<void>;
   keyboardShortcut?: KeyboardShortcut;
 }
 

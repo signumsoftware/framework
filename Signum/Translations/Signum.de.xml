@@ -510,6 +510,7 @@
     <Member Name="MatchSnippet" Description="Match-Snippet" />
     <Member Name="Modulo0" Description="Modulo {0}" />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
+    <Member Name="Nested" Description="Verschachtelt" />
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />

@@ -6,6 +6,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using static Signum.API.Controllers.OperationController;
+using Signum.API.Json;
 
 namespace Signum.API.Controllers;
 
@@ -204,7 +205,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
         }, cancellationToken);
@@ -218,7 +219,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
         }, cancellationToken);
@@ -232,7 +233,7 @@ public class OperationController : ControllerBase
         {
             var entity = await lite.RetrieveAsync(cancellationToken);
             if (request.Setters.HasItems())
-                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()));
+                MultiSetter.SetSetters(entity, request.Setters, PropertyRoute.Root(entity.GetType()), null);
 
             var op = request.GetOperationSymbol(operationKey, entity.GetType());
             OperationLogic.ServiceDelete(entity, op, request.ParseArgs(op));
@@ -420,8 +421,11 @@ public class OperationController : ControllerBase
 
 internal static class MultiSetter
 {
-    public static void SetSetters(ModifiableEntity entity, List<PropertySetter> setters, PropertyRoute route)
+    public static void SetSetters(ModifiableEntity entity, List<PropertySetter> setters, PropertyRoute route, SerializationMetadata? metadata)
     {
+        if (entity is IRootEntity root)
+            metadata = SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadata?.Invoke(root);
+
         var options = SignumServer.JsonSerializerOptions;
 
         foreach (var setter in setters)
@@ -429,9 +433,9 @@ internal static class MultiSetter
             var pr = route.AddMany(setter.Property);
 
             if (pr.Parent!.Type.IsMixinEntity())
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity));
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, pr.Parent.GetLambdaExpression<ModifiableEntity, MixinEntity>(false).Compile()(entity), metadata);
             else
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity);
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(pr, entity, metadata);
 
             if (pr.Type.IsMList())
             {
@@ -451,7 +455,7 @@ internal static class MultiSetter
                             var item = (ModifiableEntity)Activator.CreateInstance(elementPr.Type)!;
                             var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                                 
-                            SetSetters(item, setter.Setters!, normalizedPr);
+                            SetSetters(item, setter.Setters!, normalizedPr, metadata);
                             ((IList)mlist).Add(item);
                         }
                         break;
@@ -462,7 +466,7 @@ internal static class MultiSetter
                             var normalizedPr = elementPr.Type.IsEntity() ? PropertyRoute.Root(elementPr.Type) : elementPr;
                             foreach (var item in toChange)
                             {
-                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr);
+                                SetSetters((ModifiableEntity)item, setter.Setters!, normalizedPr, metadata);
                             }
                         }
                         break;
@@ -490,7 +494,7 @@ internal static class MultiSetter
             {
                 var subPr = pr.Type.IsEmbeddedEntity() ? pr : PropertyRoute.Root(TypeLogic.GetType(setter.EntityType!));
                 var item = (ModifiableEntity)Activator.CreateInstance(subPr.Type)!;
-                SetSetters(item, setter.Setters!, subPr);
+                SetSetters(item, setter.Setters!, subPr, metadata);
                 SetProperty(entity, pr, route, item);
             }
             else if (setter.Operation == PropertyOperation.ModifyEntity)
@@ -499,7 +503,7 @@ internal static class MultiSetter
                 if (!(item is ModifiableEntity mod))
                     throw new InvalidOperationException($"Unable to change entity in {pr}: {item}");
 
-                SetSetters(mod, setter.Setters!, pr);
+                SetSetters(mod, setter.Setters!, pr, metadata);
                 SetProperty(entity, pr, route, mod);
             }
             else if (setter.Operation == PropertyOperation.Set)

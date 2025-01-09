@@ -35,18 +35,21 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
     if (c.isHidden)
         return null;
 
-    const s = c.props;
+    const p = c.props;
     const type = c.props.type!.name as "DateOnly" | "DateTime";
-    const luxonFormat = toLuxonFormat(s.format, type);
+    const luxonFormat = toLuxonFormat(p.format, type);
 
-    const m = s.ctx.value ? DateTime.fromISO(s.ctx.value) : undefined;
-    const showTime = s.showTimeBox != null ? s.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
+    const m = p.ctx.value ? DateTime.fromISO(p.ctx.value) : undefined;
+    const showTime = p.showTimeBox != null ? p.showTimeBox : type != "DateOnly" && luxonFormat != "D" && luxonFormat != "DD" && luxonFormat != "DDD";
     const monthOnly = luxonFormat == "LLLL yyyy";
 
-    if (s.ctx.readOnly)
+    const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
+    const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
+
+    if (p.ctx.readOnly)
         return (
-          <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
-            {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={s.ctx} innerRef={c.setRefs}>
+          <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
+            {inputId => c.withItemGroup(<FormControlReadonly id={inputId} htmlAttributes={c.props.valueHtmlAttributes} className={classes(c.props.valueHtmlAttributes?.className, "sf-readonly-date", c.mandatoryClass)} ctx={p.ctx} innerRef={c.setRefs}>
                     {m && toFormatWithFixes(m, luxonFormat)}
                 </FormControlReadonly>)}
             </FormGroup>
@@ -57,7 +60,7 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
         var m = date && DateTime.fromJSDate(date);
 
         if (m)
-            m = trimDateToFormat(m, type, s.format);
+            m = trimDateToFormat(m, type, p.format);
 
         // bug fix with farsi locale : luxon cannot parse Jalaali dates so we force using en-GB for parsing and formatting
         c.setValue(m == null || !m.isValid ? null :
@@ -75,9 +78,9 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
         htmlAttributes.placeholder = dateTimePlaceholder(luxonFormat);
 
     return (
-        <FormGroup ctx={s.ctx} label={s.label} labelIcon={s.labelIcon} helpText={s.helpText} htmlAttributes={{ ...c.baseHtmlAttributes(), ...s.formGroupHtmlAttributes }} labelHtmlAttributes={s.labelHtmlAttributes}>
+      <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon} helpText={helpText} helpTextOnTop={helpTextOnTop} htmlAttributes={{ ...c.baseHtmlAttributes(), ...p.formGroupHtmlAttributes }} labelHtmlAttributes={p.labelHtmlAttributes}>
             {inputId => c.withItemGroup(
-                <div className={classes(s.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, s.calendarAlignEnd && "sf-calendar-end")}>
+                <div className={classes(p.ctx.rwWidgetClass, c.mandatoryClass ? c.mandatoryClass + "-widget" : undefined, p.calendarAlignEnd && "sf-calendar-end")}>
                     <DatePicker
                         id={inputId}
                         value={m?.toJSDate()} onChange={handleDatePickerOnChange} autoFocus={Boolean(c.props.initiallyFocused)}
@@ -87,12 +90,12 @@ export const DateTimeLine: React.MemoExoticComponent<React.ForwardRefExoticCompo
                         inputProps={htmlAttributes as any}
                         placeholder={htmlAttributes.placeholder}
                         messages={{ dateButton: JavascriptMessage.Date.niceToString() }}
-                        min={s.minDate}
-                        max={s.maxDate}
+                        min={p.minDate}
+                        max={p.maxDate}
                         calendarProps={{
                             renderDay: defaultRenderDay,
                             views: monthOnly ? ["year", "decade", "century"] : undefined,
-                            ...s.calendarProps
+                            ...p.calendarProps
                         }} />
                 </div>
             )}

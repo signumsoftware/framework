@@ -28,7 +28,7 @@ export function SidebarContainer(p: SidebarContainerProps): React.JSX.Element{
   return (
     <div className="sidebar-container">
       {p.sidebarContent && renderSideBar()}
-      <div className="container-fluid sf-page-container">
+      <div className="sf-page-container">
         <ErrorBoundary>
           {p.children}
         </ErrorBoundary>

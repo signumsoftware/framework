@@ -1458,7 +1458,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         if (this.SystemVersioned != null)
             cols.AddRange(this.SystemVersioned.Columns());
 
-        Columns = cols.ToDictionary(a => a.Name);
+        Columns = cols.ToDictionaryEx(a => a.Name);
     }
 
     List<TableIndex>? allIndexes;

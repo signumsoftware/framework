@@ -152,7 +152,7 @@ export default function SchemaMapPage(): React.JSX.Element | null {
     return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
       {renderFilter()}
       {!(schemaInfo && schemaInfo && providers) ?
         <span>{JavascriptMessage.loading.niceToString()}</span> :

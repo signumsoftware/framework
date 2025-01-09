@@ -10,6 +10,7 @@ export interface FormGroupProps {
   labelHtmlAttributes?: React.HTMLAttributes<HTMLLabelElement>;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   helpText?: React.ReactNode;
+  helpTextOnTop?: React.ReactNode;
   children?: (inputId: string) => React.ReactNode;
 }
 
@@ -56,10 +57,12 @@ export function FormGroup(p: FormGroupProps): React.JSX.Element {
       className={classes(p.htmlAttributes?.className, formGroupClasses)}
       {...errorAtts}>
       {(ctx.formGroupStyle == "Basic" || ctx.formGroupStyle == "LabelColumns" || ctx.formGroupStyle == "SrOnly") && label}
+      {p.helpTextOnTop && ctx.formGroupStyle != "LabelColumns" && <small className="form-text d-block">{p.helpTextOnTop}</small>}
       {
         ctx.formGroupStyle != "LabelColumns" ? p.children?.(controlId) :
           (
             <div className={ctx.valueColumnsCss} >
+              {p.helpTextOnTop && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpTextOnTop}</small>}
               {p.children?.(controlId)}
               {p.helpText && ctx.formGroupStyle == "LabelColumns" && <small className="form-text d-block">{p.helpText}</small>}
             </div>

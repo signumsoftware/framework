@@ -457,11 +457,17 @@ input[type=checkbox].form-control-xs {
 
 .rw-widget-sm .rw-multiselect-tag {
     min-height: inherit;
+    margin-top: 0px;
 }
 
-.rw-widget-sm .rw-widget-input,
-.rw-widget-sm .rw-multiselect-input {
+.rw-widget-sm .rw-widget-input {
     padding: 3px 6px;
+    min-height: 28px;
+    font-size: 0.875rem;
+}
+
+.rw-widget-sm .rw-multiselect .rw-widget-input {
+    padding: 4px 3px;
     min-height: 28px;
     font-size: 0.875rem;
 }

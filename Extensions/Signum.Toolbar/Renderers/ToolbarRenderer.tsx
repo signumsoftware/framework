@@ -20,7 +20,6 @@ import { ToolbarEntity, ToolbarMenuEntity, ToolbarMessage } from '../Signum.Tool
 
 export default function ToolbarRenderer(p: {
   onAutoClose?: () => void;
-  appTitle: React.ReactNode
 }): React.ReactElement | null {
 
   Navigator.useEntityChanged(ToolbarEntity, () => reload(), []);
@@ -54,7 +53,6 @@ export default function ToolbarRenderer(p: {
 
   return (
     <div className={"sidebar-inner"}>
-      {p.appTitle}
       <div className={"close-sidebar"}
         onClick={() => p.onAutoClose && p.onAutoClose()}>
         <FontAwesomeIcon icon={"angles-left"} aria-label="Close" />

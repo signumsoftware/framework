@@ -144,15 +144,52 @@ public static class PlainExcelGenerator
 
                     var cta = c.Token.HasCollectionToArray();
                     var value = cta != null ?
-                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\n"):
+                        ((IEnumerable?)r[rt])?.Cast<object>().ToString(cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct? ", " : "\r\n"):
                         r[rt];
 
-                    return CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
+                    var cell = CellBuilder.Cell(value, t.defaultStyle, t.styleIndex, forImport);
+
+                    if ((cta != null && (cta.ToArrayType is CollectionToArrayType.SeparatedByComma or CollectionToArrayType.SeparatedByCommaDistinct) == false))
+                        ApplyWrapTextStyle(workbookPart, cell);
+
+                    return cell;
                 }).ToRow()
             }.ToSheetDataWithIndexes());
 
             workbookPart.Workbook.Save();
         }
+    }
+
+    private static void ApplyWrapTextStyle(WorkbookPart workbookPart, Cell cell)
+    {
+       
+        var stylesheet = workbookPart.WorkbookStylesPart?.Stylesheet;
+        if (stylesheet == null)
+        {
+            workbookPart.AddNewPart<WorkbookStylesPart>().Stylesheet = new Stylesheet();
+            stylesheet = workbookPart.WorkbookStylesPart!.Stylesheet;
+
+            stylesheet.Fonts = new Fonts(new Font());
+            stylesheet.Fills = new Fills(new Fill());
+            stylesheet.Borders = new Borders(new Border());
+            stylesheet.CellFormats = new CellFormats(new CellFormat()); 
+            stylesheet.Save();
+        }
+
+
+        var cellFormat = new CellFormat()
+        {
+            ApplyAlignment = true,
+            Alignment = new Alignment() { WrapText = true}
+        };
+
+   
+        stylesheet.CellFormats!.Append(cellFormat);
+        stylesheet.CellFormats!.Count!++;
+        stylesheet.Save();
+
+ 
+        cell.StyleIndex = (uint)(stylesheet.CellFormats.Count - 1);
     }
 
     public static byte[] WritePlainExcel<T>(IEnumerable<T> results, string? title = null)
@@ -247,4 +284,5 @@ public static class PlainExcelGenerator
             return data.Descendants<Row>().Skip(1).Select(r => selector(r.Descendants<Cell>().Select(c => document.GetCellValue(c)!).ToArray())).ToList();
         }
     }
+
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Routing;
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
 using System.Collections;
@@ -159,7 +160,7 @@ public static partial class TypeAuthLogic
 
         var tac = GetAllowed(type);
 
-        if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(type))
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type))
             return null;
 
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
@@ -168,17 +169,17 @@ public static partial class TypeAuthLogic
     }
 
 
-    public static bool HasWriteAndRead(WithConditions<TypeAllowed> tac)
+    public static TypeAllowedBasic? TrivialTypeGetUI(WithConditions<TypeAllowed> tac)
     {
-        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI());
+        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI()).ToHashSet();
 
         if (tac.Fallback != TypeAllowed.None)
-            conditions = conditions.And(tac.Fallback.GetUI());
+            conditions.Add(tac.Fallback.GetUI());
 
-        if (conditions.Distinct().Count() > 1)
-            return true;
+        if (conditions.Count > 1)
+            return null;
 
-        return false;
+        return conditions.SingleEx();
     }
 
     public static Func<Type, bool> HasTypeConditionInProperties = t => false;
@@ -229,15 +230,28 @@ public static partial class TypeAuthLogic
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().FormatWith(type.NicePluralName()));
     }
 
-    public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
+    public static TypeRulePack GetTypeRules(Lite<RoleEntity> role)
     {
-        var result = new TypeRulePack { Role = roleLite };
-        Schema s = Schema.Current;
-        cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRules"))
+        {
+            var result = new TypeRulePack { Role = role };
+            Schema s = Schema.Current;
+            var types = TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value);
+            cache.GetRules(result, types);
 
+            return result;
+        }
+    }
 
-        return result;
-
+    public static Dictionary<Type, WithConditions<TypeAllowed>> GetTypeRulesSimple(Lite<RoleEntity> role)
+    {
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRulesSimple"))
+        {
+            Schema s = Schema.Current;
+            return TypeLogic.TypeToEntity
+                .Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null)
+                .ToDictionary(kvp => kvp.Key, kvp => GetAllowed(role, kvp.Key));
+        }
     }
 
     public static void SetTypeRules(TypeRulePack rules)
@@ -253,7 +267,7 @@ public static partial class TypeAuthLogic
         if (!TypeLogic.TypeToEntity.ContainsKey(type))
             return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        if (EnumEntity.Extract(type) != null)
+        if (type.IsEnumEntity())
             return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
         var allowed = cache.GetAllowed(RoleEntity.Current, type);
