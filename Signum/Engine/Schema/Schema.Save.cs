@@ -958,7 +958,7 @@ public partial class TableMList
         void RelationalInserts(List<EntityForbidden> entities);
         void RelationalUpdates(List<EntityForbidden> entities);
 
-        object?[] BulkInsertDataRow(Entity entity, object value, int order);
+        object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId);
     }
 
     internal class TableMListCache<T> : IMListCache
@@ -1063,6 +1063,7 @@ public partial class TableMList
 
         internal Func<string[], bool, string> sqlInsert = null!;
         public Action<Entity, T, int, Forbidden, string, List<DbParameter>> InsertParameters = null!;
+        public Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>> InsertParametersDisableIdentity = null!;
         public ConcurrentDictionary<int, Action<List<MListInsert>>> insertCache =
             new ConcurrentDictionary<int, Action<List<MListInsert>>>();
 
@@ -1080,7 +1081,7 @@ public partial class TableMList
                     for (int i = 0; i < num; i++)
                     {
                         var pair = list[i];
-                        InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString(), result);
+                        InsertParameters(pair.Entity, pair.MList.InnerList[pair.Index].Element, pair.Index, pair.Forbidden, i.ToString(),  result);
                     }
 
                     DataTable dt = new SqlPreCommandSimple(sqlMulti, result).ExecuteDataTable();
@@ -1114,10 +1115,14 @@ public partial class TableMList
             }
         }
 
-        public object?[] BulkInsertDataRow(Entity entity, object value, int order)
+        public object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId)
         {
             List<DbParameter> paramList = new List<DbParameter>();
-            InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);
+            if(rowId == null)
+                InsertParameters(entity, (T)value, order, new Forbidden(null), "", paramList);
+            else
+                InsertParametersDisableIdentity.Value(entity, (T)value, order, new Forbidden(null), "", rowId.Value, paramList);
+
             return paramList.Select(a => a.Value).ToArray();
         }
 
@@ -1353,6 +1358,22 @@ public partial class TableMList
                 Table.CreateBlock(trios.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramList);
 
             result.InsertParameters = expr.Compile();
+
+            result.InsertParametersDisableIdentity = new Lazy<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(() =>
+            {
+                var paramRowId = Expression.Parameter(typeof(PrimaryKey), "rowId");
+
+                var trioIdent = new List<Table.Trio>
+                {
+                    new Table.Trio(this.PrimaryKey, Expression.Field(paramRowId, nameof(Signum.Entities.PrimaryKey.Object)), paramSuffix)
+                };
+                trioIdent.AddRange(trios);
+
+                var exprDI = Expression.Lambda<Action<Entity, T, int, Forbidden, string, PrimaryKey, List<DbParameter>>>(
+                    Table.CreateBlock(trioIdent.Select(a => a.ParameterBuilder), assigments, paramList), paramIdent, paramItem, paramOrder, paramForbidden, paramSuffix, paramRowId, paramList);
+
+                return exprDI.Compile();
+            });
         }
 
         result.hasOrder = this.Order != null;

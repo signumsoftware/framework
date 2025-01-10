@@ -1543,9 +1543,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
     public bool IdentityBehaviour => true; //For now
 
-    internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
+    internal object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId)
     {
-        return this.cache.Value.BulkInsertDataRow(entity, value, order);
+        return this.cache.Value.BulkInsertDataRow(entity, value, order, rowId);
     }
 
     public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
