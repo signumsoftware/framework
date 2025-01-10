@@ -1,16 +1,13 @@
 import * as React from 'react'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { useLocation, useParams } from 'react-router'
 import { Finder } from '../Finder'
-import { FindOptions, FilterOption, QueryDescription, isFilterGroup } from '../FindOptions'
+import { FindOptions, QueryDescription } from '../FindOptions'
 import { getQueryNiceName } from '../Reflection'
-import { Navigator } from '../Navigator'
 import * as AppContext from '../AppContext';
 import SearchControl, { SearchControlHandler } from './SearchControl'
-import { namespace } from 'd3'
 import { useTitle } from '../AppContext'
 import { QueryString } from '../QueryString'
-import { useAPI, useForceUpdate, useUpdatedRef } from '../Hooks'
+import { useAPI, useForceUpdate } from '../Hooks'
 
 
 function SearchPage(): React.JSX.Element {
@@ -32,14 +29,13 @@ function SearchPage(): React.JSX.Element {
     const scl = sc?.searchControlLoaded;
     const containerDiv = scl?.containerDiv;
     if (containerDiv) {
-
       const marginTop = containerDiv.offsetTop;
       const maxHeight = (window.innerHeight - (marginTop + SearchPage.marginDown));
       containerDiv.style.maxHeight = Math.max(maxHeight, SearchPage.minHeight) + "px";
     }
   }
 
-  const searchControl = React.useRef<SearchControlHandler>(null);
+  const searchControl = React.useRef<SearchControlHandler | null | undefined>();
 
   const subTitle = searchControl.current?.searchControlLoaded?.pageSubTitle;
 
@@ -64,7 +60,10 @@ function SearchPage(): React.JSX.Element {
       </div>
     );
 
-
+  const setSearchControl = React.useCallback(function (sc: SearchControlHandler | null) {
+    searchControl.current = sc;
+    onResize();
+  }, []);
 
   var qs = Finder.getSettings(fo.queryName);
   return (
@@ -76,7 +75,7 @@ function SearchPage(): React.JSX.Element {
         </>
         }
       </h3>
-      {qd && <SearchControl ref={searchControl}
+      {qd && <SearchControl ref={setSearchControl}
         defaultIncludeDefaultFilters={true}
         findOptions={fo}
         tag="SearchPage"
@@ -103,7 +102,7 @@ function SearchPage(): React.JSX.Element {
 }
 
 namespace SearchPage {
-  export let marginDown = 90;
+  export let marginDown = 70;
   export let minHeight = 600;
   export let showFilters = (fo: FindOptions, qd: QueryDescription, qs: Finder.QuerySettings | undefined) => {
     return false;

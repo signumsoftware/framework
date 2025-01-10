@@ -377,8 +377,8 @@ public static class QueryUtils
         if (string.IsNullOrEmpty(tokenString))
             throw new ArgumentNullException(nameof(tokenString));
 
-        //https://stackoverflow.com/questions/35418597/split-string-on-the-dot-characters-that-are-not-inside-of-brackets
-        string[] parts = Regex.Split(tokenString, @"\.(?!([^[]*\]|[^(]*\)))");
+        //Dot not inside of brackets
+        string[] parts = Regex.Split(tokenString, @"(?<!\[[^\]]*)\.(?![^\[]*\])");
 
         string firstPart = parts.FirstEx();
 

@@ -840,8 +840,10 @@ public static class Administrator
             if (overwrite && Database.View<SysDatabases>().Any(a => a.name == snapshotName))
                 DropSnapshot(snapshotName);
 
+            var file = Database.View<SysDatabaseFiles>().SingleEx(a => a.type == 0);
+
             var dbName = Connector.Current.DatabaseName();
-            Executor.ExecuteNonQuery($"CREATE DATABASE {snapshotName} ON (NAME=[{dbName}], FILENAME='{Path.Combine(directory,snapshotName)}.ss') AS SNAPSHOT OF [{dbName}]");
+            Executor.ExecuteNonQuery($"CREATE DATABASE {snapshotName} ON (NAME=[{file.name}], FILENAME='{Path.Combine(directory,snapshotName)}.ss') AS SNAPSHOT OF [{dbName}]");
         }
 
         public static void DropSnapshot(string snapshotName)

@@ -78,7 +78,7 @@ public abstract class Entity : ModifiableEntity, IEntity
     public IDictionary? _TypeConditions
     {
         get { return _typeConditions; }
-        set { this.Set(ref _typeConditions, value); }
+        set { _typeConditions = value; }
     }
 
     protected bool SetIfNew<T>(ref T field, T value, [CallerMemberName]string? automaticPropertyName = null)

@@ -128,7 +128,7 @@ public class QueryController : ControllerBase
 
     class QueryValueResolver : IEmbeddedPropertyRouteResolver
     {
-        public PropertyRoute GetPropertyRoute(EmbeddedEntity embedde, FilterContext filterContext)
+        PropertyRoute IEmbeddedPropertyRouteResolver.GetPropertyRoute(EmbeddedEntity embedded, FilterContext filterContext)
         {
             var qvr = (QueryValueRequest)filterContext.HttpContext.Items["queryValueRequests"]!;
             return qvr.ValueToken!.GetPropertyRoute()!;

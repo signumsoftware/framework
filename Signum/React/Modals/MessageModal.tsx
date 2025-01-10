@@ -178,7 +178,7 @@ function MessageModal(p: MessageModalProps): React.JSX.Element {
 }
 
 namespace MessageModal {
-  export function show(options: MessageModalProps): Promise<MessageModalResult | undefined> {
+  export function show(options: MessageModalProps): Promise<MessageModalResult> {
     return openModal<MessageModalResult>(<MessageModal {...options} />);
   }
 

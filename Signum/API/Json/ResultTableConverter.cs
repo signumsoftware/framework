@@ -33,7 +33,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
                 {
                     var pair = giUniqueValues.GetInvoker(rc.Token.Type)(rc.Values);
 
-                    using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((rc.Token.GetPropertyRoute()!, null, null)))
+                    using (EntityJsonContext.AddSerializationStep(new (rc.Token.GetPropertyRoute()!)))
                     {
                         JsonSerializer.Serialize(writer, pair.UniqueValues, pair.UniqueValues.GetType(), options);
                     }
@@ -78,7 +78,7 @@ public class ResultTableConverter : JsonConverter<ResultTable>
                     }
                     else
                     {
-                        using (EntityJsonContext.SetCurrentPropertyRouteAndEntity((column.Token.GetPropertyRoute()!, null, null)))
+                        using (EntityJsonContext.AddSerializationStep(new(column.Token.GetPropertyRoute()!)))
                         {
                             JsonSerializer.Serialize(writer, row[column], options);
                         }

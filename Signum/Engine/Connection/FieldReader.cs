@@ -736,7 +736,7 @@ public class FieldReaderException : DbException
                 text += "\r\nCalling: row.Reader.{0}({1})".FormatWith(MethodName, Ordinal);
 
             if (Projector != null)
-                text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToString().Indent(4));
+                text += "\r\nProjector:\r\n{0}".FormatWith(Projector.ToStringIndented().Indent(4));
 
             if(Command != null)
                 text += "\r\nCommand:\r\n{0}".FormatWith(Command.PlainSql().Indent(4));

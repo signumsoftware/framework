@@ -108,7 +108,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
         return type =>
         {
-            if (EnumEntity.Extract(type) != null)
+            if (type.IsEnumEntity())
                 return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
             return WithConditions<TypeAllowed>.Simple(allowed);

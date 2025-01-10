@@ -118,7 +118,6 @@ public static class EnumEntity
             return enumEntityType.GetGenericArguments()[0];
         return null;
     }
-
 }
 
 class FromEnumMethodExpander : IMethodExpander

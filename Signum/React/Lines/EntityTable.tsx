@@ -243,7 +243,9 @@ export const EntityTable: <V extends ModifiableEntity, RS>(props: EntityTablePro
 
     return (
       <div ref={c.containerDiv}
-        className={classes(p.scrollable ? "sf-scroll-table-container" : undefined, p.responsive && "table-responsive")}
+        className={classes(
+          p.scrollable ? "sf-scroll-table-container position-relative" /*Fix chrome double scroll bar (in div and in page)*/ : undefined,
+          p.responsive && "table-responsive")}
         style={{ maxHeight: p.scrollable ? p.maxResultsHeight : undefined }}>
         <table className={classes("table table-sm sf-table", p.tableClasses, c.mandatoryClass)} >
           {
