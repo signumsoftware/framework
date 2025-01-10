@@ -4,6 +4,10 @@ using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.API;
 using System.Collections.Frozen;
+using System;
+using System.Globalization;
+using System.Threading;
+
 
 namespace Signum.Basics;
 
@@ -94,5 +98,28 @@ public static class CultureInfoLogic
     public static CultureInfoEntity GetCultureInfoEntity(string cultureName)
     {
         return CultureInfoToEntity.Value.GetOrThrow(cultureName);
+    }
+}
+
+
+
+
+public class CultureScope : IDisposable
+{
+    private readonly CultureInfo _originalCulture;
+    private readonly CultureInfo _originalUICulture;
+
+    public CultureScope(CultureInfo newCulture)
+    {
+        _originalCulture = Thread.CurrentThread.CurrentCulture;
+        _originalUICulture = Thread.CurrentThread.CurrentUICulture;
+        Thread.CurrentThread.CurrentCulture = newCulture;
+        Thread.CurrentThread.CurrentUICulture = newCulture;
+    }
+
+    public void Dispose()
+    {
+        Thread.CurrentThread.CurrentCulture = _originalCulture;
+        Thread.CurrentThread.CurrentUICulture = _originalUICulture;
     }
 }
