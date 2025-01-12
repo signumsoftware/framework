@@ -245,7 +245,7 @@ export const EntityComboSelect: <V extends Entity | Lite<Entity> | null>(props: 
         {ctx.value &&
           (p.onRenderItem ? p.onRenderItem({ entity: lite } as ResultRow, "Value", undefined) :
           p.liteToString ? getToString(lite!, p.liteToString) :
-            Navigator.renderLite(lite!))
+            Navigator.renderLite((p.toStringFromData ? p.data?.singleOrNull(a=> is(a, lite)) : null) ?? lite!))
         }
       </FormControlReadonly>
     );
