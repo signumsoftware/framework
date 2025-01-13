@@ -52,7 +52,7 @@ public class ReflectionController : ControllerBase
         var clientException = new ExceptionEntity(error)
         {
             UserAgent = Try(300, () => req.Headers["User-Agent"].FirstOrDefault()),
-            RequestUrl = Try(int.MaxValue, () => req.GetDisplayUrl()),
+            RequestUrl = Try(int.MaxValue, () => error.Url),
             UrlReferer = Try(int.MaxValue, () => req.Headers["Referer"].ToString()),
             UserHostAddress = Try(100, () => connFeature.RemoteIpAddress?.ToString()),
             UserHostName = Try(100, () => connFeature.RemoteIpAddress == null ? null : Dns.GetHostEntry(connFeature.RemoteIpAddress).HostName),

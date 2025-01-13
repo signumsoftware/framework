@@ -115,6 +115,7 @@ function logError(error: Error) {
     return;
 
   var errorModel = ClientErrorModel.New({
+    url: (error as any)?.url,
     errorType: (error as Object).constructor.name,
     message: error.message || error.toString(),
     stack: error.stack ?? null,
@@ -125,6 +126,7 @@ function logError(error: Error) {
 
   if (lastError != null) {
     if (
+      lastError.model.url == errorModel.url &&
       lastError.model.errorType == errorModel.errorType &&
       lastError.model.message == errorModel.message &&
       lastError.model.stack == errorModel.stack &&

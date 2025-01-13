@@ -204,6 +204,8 @@ public class DeleteLogsTypeOverridesEmbedded : EmbeddedEntity
 [AllowUnathenticated]
 public class ClientErrorModel : ModelEntity
 {
+    public string? Url { get; set; }
+
     public string ErrorType { get; set; }
 
     public string Message { get; set; }
