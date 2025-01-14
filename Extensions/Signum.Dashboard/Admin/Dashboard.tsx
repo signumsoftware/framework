@@ -126,10 +126,13 @@ export default function Dashboard(p: { ctx: TypeContext<DashboardEntity> }): Rea
     <div>
       <div>
         <div className="row">
-          <div className="col-sm-8">
+          <div className="col-sm-6">
             <EntityLine ctx={ctx.subCtx(cp => cp.owner)} create={false} />
           </div>
-          <div className="col-sm-4">
+          <div className="col-sm-3">
+            <AutoLine ctx={ctxLabel5.subCtx(cp => cp.code)} />
+          </div>
+          <div className="col-sm-3">
             <NumberLine ctx={ctxLabel5.subCtx(cp => cp.dashboardPriority)} />
           </div>
         </div>

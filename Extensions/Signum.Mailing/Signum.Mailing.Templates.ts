@@ -39,6 +39,7 @@ export interface EmailMasterTemplateMessageEmbedded extends Entities.EmbeddedEnt
 export namespace EmailMasterTemplateOperation {
   export const Create : Operations.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Save");
+  export const Delete : Operations.DeleteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Delete");
 }
 
 export const EmailMessageFormat: EnumType<EmailMessageFormat> = new EnumType<EmailMessageFormat>("EmailMessageFormat");
@@ -107,6 +108,7 @@ export interface EmailTemplateMessageEmbedded extends Entities.EmbeddedEntity {
 
 export namespace EmailTemplateOperation {
   export const CreateEmailTemplateFromModel : Operations.ConstructSymbol_From<EmailTemplateEntity, Mailing.EmailModelEntity> = registerSymbol("Operation", "EmailTemplateOperation.CreateEmailTemplateFromModel");
+  export const Clone : Operations.ConstructSymbol_From<EmailTemplateEntity, EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Clone");
   export const Create : Operations.ConstructSymbol_Simple<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Save");
   export const Delete : Operations.DeleteSymbol<EmailTemplateEntity> = registerSymbol("Operation", "EmailTemplateOperation.Delete");

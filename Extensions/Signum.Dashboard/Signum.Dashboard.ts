@@ -51,6 +51,7 @@ export interface DashboardEntity extends Entities.Entity, UserAssets.IUserAssetE
   embeddedInEntity: DashboardEmbedededInEntity | null;
   owner: Entities.Lite<Entities.Entity> | null;
   dashboardPriority: number | null;
+  code: string | null;
   autoRefreshPeriod: number | null;
   displayName: string;
   hideDisplayName: boolean;

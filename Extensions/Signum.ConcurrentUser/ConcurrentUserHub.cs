@@ -12,13 +12,22 @@ public interface IConcurrentUserClient
 
 public class ConcurrentUserHub : Hub<IConcurrentUserClient>
 {
+    private static int _connectionCount = 0;
+
     public override Task OnConnectedAsync()
-    {        
+    {
+        Interlocked.Increment(ref _connectionCount);
+        System.Diagnostics.Debug.WriteLine("ConcurrentUserHub conectios {0}".FormatWith(_connectionCount));
+
         return base.OnConnectedAsync();
     }
 
     public override Task OnDisconnectedAsync(Exception? exception)
     {
+
+        Interlocked.Decrement(ref _connectionCount);
+        System.Diagnostics.Debug.WriteLine("ConcurrentUserHub conectios {0}".FormatWith(_connectionCount));
+
         using (AuthLogic.Disable())
         {
             var entities = Database.Query<ConcurrentUserEntity>()

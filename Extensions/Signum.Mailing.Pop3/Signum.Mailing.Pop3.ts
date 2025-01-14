@@ -15,6 +15,7 @@ export interface Pop3EmailReceptionServiceEntity extends Reception.EmailReceptio
   host: string;
   username: string | null;
   password: string | null;
+  newPassword: string | null;
   enableSSL: boolean;
   readTimeout: number;
   clientCertificationFiles: Entities.MList<Mailing.ClientCertificationFileEmbedded>;

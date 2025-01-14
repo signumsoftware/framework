@@ -37,10 +37,11 @@ export default function ResetPassword(): React.JSX.Element {
 
         AuthClient.setAuthToken(lr.token, lr.authenticationType);
         AuthClient.setCurrentUser(lr.userEntity);
+        AuthClient.Options.onLogin("/auth/ResetPassword?code=OK");
 
         setSuccess(true);
         //Navigator.resetUI();
-        AppContext.navigate("/auth/ResetPassword?code=OK");
+        //AppContext.navigate("/auth/ResetPassword?code=OK");
       } catch (ex) {
         if (ex instanceof ValidationError) {
           if (ex.modelState)

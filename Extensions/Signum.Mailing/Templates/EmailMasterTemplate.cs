@@ -76,8 +76,10 @@ public class EmailMasterTemplateEntity : Entity, IUserAssetEntity
 [AutoInit]
 public static class EmailMasterTemplateOperation
 {
+    public static ConstructSymbol<EmailMasterTemplateEntity>.From<EmailMasterTemplateEntity> Clone;
     public static ConstructSymbol<EmailMasterTemplateEntity>.Simple Create;
     public static ExecuteSymbol<EmailMasterTemplateEntity> Save;
+    public static DeleteSymbol<EmailMasterTemplateEntity> Delete;
 }
 
 public class EmailMasterTemplateMessageEmbedded : EmbeddedEntity
@@ -107,5 +109,14 @@ public class EmailMasterTemplateMessageEmbedded : EmbeddedEntity
         }
 
         return base.PropertyValidation(pi);
+    }
+
+    public EmailMasterTemplateMessageEmbedded Clone()
+    {
+        return new EmailMasterTemplateMessageEmbedded()
+        {
+            Text = this.Text,
+            CultureInfo = this.CultureInfo,
+        };
     }
 }

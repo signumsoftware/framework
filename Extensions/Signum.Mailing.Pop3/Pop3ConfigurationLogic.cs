@@ -34,7 +34,9 @@ public static class Pop3ConfigurationLogic
 
             sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
 
-            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, EmailReceptionEntity>(ReceiveEmails));
+
+                                                  
+            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity >(ReceiveEmails));
 
             if(sb.WebServerBuilder != null)
             {
@@ -62,7 +64,12 @@ public static class Pop3ConfigurationLogic
 
     public static event Func<EmailReceptionConfigurationEntity, IDisposable>? SurroundReceiveEmail;
 
-    public static EmailReceptionEntity ReceiveEmails(Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config)
+
+
+
+
+
+    public static EmailReceptionEntity ReceiveEmails(   Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config, ScheduledTaskContext ctx)
     {
         if (!EmailLogic.Configuration.ReciveEmails)
             throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");
@@ -95,7 +102,9 @@ public static class Pop3ConfigurationLogic
                     string lastSuid = "";
                     foreach (var mi in messagesToSave)
                     {
-                        if (CancelationToken.IsCancellationRequested)
+
+
+                        if (CancelationToken.IsCancellationRequested || ctx.CancellationToken.IsCancellationRequested)
                             break;
 
                         var sent = SaveEmail(config, reception, client, mi, ref anomalousReception);

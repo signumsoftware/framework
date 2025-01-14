@@ -1,8 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-
 using System.IO;
-using System.Reflection.Metadata;
 
 namespace Signum.Files.FileTypeAlgorithms;
 
@@ -77,20 +75,16 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes", () => fp.Suffix))
         {
-      
-            return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
+            try
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
         }
-    }
-
-    public BlobClient GetBlobClient(IFilePath fp)
+            catch (Exception ex)
     {
-        var client = GetClient(fp);
-        return client.GetBlobClient(fp.Suffix);
-    }
-
-    public  string GetAsString(IFilePath fp)
-    {
-        return GetAsString(GetBlobClient(fp));
+   ex.Data["suffix"] = fp.Suffix;
+                throw;
+            }
 
     }
 
@@ -101,7 +95,6 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         return content;
     }
-
 
     public virtual void SaveFile(IFilePath fp)
     {
@@ -182,7 +175,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    string? alreadyCreated; 
+    string? alreadyCreated;
 
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
@@ -240,11 +233,11 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         {
             ContentType = contentType,
             ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
-            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "",
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp)
     {
         using (HeavyProfiler.Log("AzureBlobStorage MoveFile", () => ofp.FileName))
         {
