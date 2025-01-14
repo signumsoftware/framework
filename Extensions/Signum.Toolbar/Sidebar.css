@@ -48,8 +48,12 @@
 }
 
 .sidebar-inner {
-    overflow: auto;
+    overflow-y: hidden;
     scrollbar-width: thin;
+}
+
+.sidebar-inner:hover {
+    overflow: scroll;
 }
 
     .sidebar-inner .nav-item-sub-menu {

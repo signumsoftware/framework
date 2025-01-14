@@ -317,7 +317,7 @@ public static class BulkInserter
 
             foreach (var e in list)
             {
-                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder));
+                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder, disableMListIdentity ? e.RowId : null));
             }
 
             using (var tr = new Transaction())
