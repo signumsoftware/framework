@@ -48,7 +48,7 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
         Type type = r.Resource.ToType();
 
         if (OperationAuthLogic.IsStarted)
-            r.Operations = OperationAuthLogic.GetAllowedThumbnail(ruleCache.Role, type);
+            r.Operations = OperationAuthLogic.GetAllowedThumbnail(ruleCache.Role, type, r.Allowed.ToImmutable());
 
         if (PropertyAuthLogic.IsStarted)
             r.Properties = PropertyAuthLogic.GetAllowedThumbnail(ruleCache.Role, type, r.Allowed.ToImmutable());

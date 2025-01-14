@@ -4,6 +4,7 @@ using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
+using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Data.Common;
@@ -415,6 +416,28 @@ public static class Administrator
 
         return prov.Translate(query.Expression, tr => tr.MainCommand);
     }
+
+    public static SqlPreCommand? UnsafeDeletePreCommandVirtualMList<T>(IQueryable<T> query, bool force = false)
+        where T : Entity
+    {
+        var virtualMList = VirtualMList.RegisteredVirtualMLists.GetOrThrow(typeof(T));
+
+        var mlist = virtualMList.Select(a => giUnsafeDeletePreCommandVirtualMListPrivate.GetInvoker(a.Value.BackReferenceRoute.RootType, typeof(T))(query, a.Value.BackReferenceExpression, force)).Combine(Spacing.Simple);
+
+        var basic = UnsafeDeletePreCommand<T>(query, force);
+
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, basic);
+    }
+
+    static GenericInvoker<Func<IQueryable, LambdaExpression, bool, SqlPreCommandSimple?>> giUnsafeDeletePreCommandVirtualMListPrivate =
+        new((query, backReference, force) => UnsafeDeletePreCommandVirtualMListPrivate<ExceptionEntity, ExceptionEntity>((IQueryable<ExceptionEntity>)query, (Expression<Func<ExceptionEntity, Lite<ExceptionEntity>>>)backReference, force));
+    static SqlPreCommandSimple? UnsafeDeletePreCommandVirtualMListPrivate<V, T>(IQueryable<T> query, Expression<Func<V, Lite<T>>> backReference, bool force)
+    where T : Entity
+        where V : Entity
+    {
+        return UnsafeDeletePreCommand(query.SelectMany(e => Database.Query<V>().Where(v => backReference.Evaluate(v).Is(e))), force);
+    }
+
 
     public static SqlPreCommandSimple? UnsafeDeletePreCommand<T>(IQueryable<T> query, bool force = false, bool avoidMList = false)
         where T : Entity

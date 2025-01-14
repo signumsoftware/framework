@@ -1,5 +1,6 @@
 using System.Collections;
 using Signum.Engine.Linq;
+using Signum.Engine.Sync;
 using Signum.Utilities.Reflection;
 
 namespace Signum.Engine.Maps;
@@ -31,6 +32,8 @@ public class EntityEvents<T> : IEntityEvents
 
     public event PreUnsafeDeleteHandler<T>? PreUnsafeDelete;
     public event PreUnsafeMListDeleteHandler<T>? PreUnsafeMListDelete;
+
+    public event Func<T, SqlPreCommand?> PreDeleteSqlSync;
 
     public event PreUnsafeUpdateHandler<T>? PreUnsafeUpdate;
 
@@ -85,6 +88,15 @@ public class EntityEvents<T> : IEntityEvents
                 result = Disposable.Combine(result, action(mlistQuery, entityQuery));
 
         return result;
+    }
+
+
+    internal SqlPreCommand? OnPreDeleteSqlSync(T entity)
+    {
+        if (PreDeleteSqlSync == null)
+            return null;
+
+        return PreDeleteSqlSync.GetInvocationListTyped().Reverse().Select(a => a(entity)).Combine(Spacing.Simple);
     }
 
     IDisposable? IEntityEvents.OnPreUnsafeUpdate(IUpdateable update)

@@ -21,6 +21,7 @@ import {
   WithConditionsModel,
   ConditionRuleModel,
   PropertyAllowed,
+  OperationAllowed,
 } from './Signum.Authorization.Rules'
 
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
@@ -404,10 +405,10 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
           )}
         </td>}
         {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
-          {link("bolt", rule.modified ? "Invalidated" : rule.operations,
+          {link("bolt", rule.modified ? "Invalidated" : rule.operations?.fallback ?? null,
             () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
-            m => rule.operations = m.rules.every(a => a.element.allowed == "None") ? "None" :
-              m.rules.every(a => a.element.allowed == "Allow") ? "All" : "Mix")}
+            m => rule.operations = collapseOperationRules(m, rule.allowed)
+          )}
         </td>}
         {AuthAdminClient.queries && <td style={{ textAlign: "center" }}>
           {link("search", rule.modified ? "Invalidated" : rule.queries,
@@ -468,6 +469,13 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
                 { initialTypeConditions: cr.typeConditions.map(a=>a.element) }
               )}
             </td>}
+            {AuthAdminClient.operations && <td style={{ textAlign: "center" }}>
+              {link("bolt", rule.modified ? "Invalidated" : rule.operations?.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.typeConditions))?.element.allowed ?? null,
+                () => AuthAdminClient.API.fetchOperationRulePack(rule.resource.cleanName, roleId),
+                m => rule.operations = collapseOperationRules(m, rule.allowed),
+                { initialTypeConditions: cr.typeConditions.map(a=>a.element) }                
+              )}
+            </td>}
             <td style={{ textAlign: "center" }} colSpan={1 + Number(AuthAdminClient.properties) + Number(AuthAdminClient.operations) + Number(AuthAdminClient.queries)}>
             </td>
           </tr>
@@ -490,6 +498,27 @@ function collapsePropertyRules(pack: PropertyRulePack, tar: WithConditionsModel<
   }
 
 
+
+  return WithConditionsModel(AuthThumbnail).New({
+    fallback: collapse(pack.rules.map(mle => mle.element.allowed.fallback)),
+    conditionRules: tar.conditionRules.map(cr => newMListElement(ConditionRuleModel(AuthThumbnail).New({
+      typeConditions: cr.element.typeConditions,
+      allowed: collapse(pack.rules.map(mle => mle.element.allowed.conditionRules.singleOrNull(a => matches(a.element.typeConditions, cr.element.typeConditions))?.element.allowed).notNull())
+    })))
+  });
+}
+
+function collapseOperationRules(pack: OperationRulePack, tar: WithConditionsModel<TypeAllowed>): WithConditionsModel<AuthThumbnail> {
+
+  function collapse(operations: OperationAllowed[]): AuthThumbnail {
+    if (operations.every(a => a == "None"))
+      return "None";
+
+    if (operations.every(a => a == "Allow"))
+      return "All";
+
+    return "Mix";
+  }
 
   return WithConditionsModel(AuthThumbnail).New({
     fallback: collapse(pack.rules.map(mle => mle.element.allowed.fallback)),

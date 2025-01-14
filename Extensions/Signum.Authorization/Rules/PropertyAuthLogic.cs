@@ -44,12 +44,19 @@ public static class PropertyAuthLogic
             TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
                 new InvalidateWith(typeof(RulePropertyEntity), typeof(RulePropertyConditionEntity)));
 
-            AuthLogic.ExportToXml += cache.ExportXml;
-            AuthLogic.ImportFromXml += cache.ImportXml;
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-            sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+
             QueryToken.IsValueHidden = QueryToken_IsValueHidden;
             TypeAuthLogic.HasTypeConditionInProperties = RequiresTypeConditionForProperties;
+
+
+            AuthLogic.ExportToXml += cache.ExportXml;
+            AuthLogic.ImportFromXml += cache.ImportXml;
         }
     }
 
@@ -149,12 +156,6 @@ public static class PropertyAuthLogic
                 return new AndNode([new NotNode(iExp), acum]);
         });
     }
-
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
-    {
-        return Administrator.DeleteWhereScript((RulePropertyEntity rt) => rt.Resource, (PropertyRouteEntity)arg);
-    }
-
 
     public static PropertyRulePack GetPropertyRules(Lite<RoleEntity> role, TypeEntity typeEntity)
     {

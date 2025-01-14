@@ -1,6 +1,8 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Signum.Authorization;
 using Signum.Operations;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Authorization.Rules;
 
@@ -9,7 +11,7 @@ public static class OperationAuthLogic
 {
     static OperationCache cache = null!;
 
-    public static IManualAuth<(OperationSymbol operation, Type type), OperationAllowed> Manual { get { return cache; } }
+    public static IManualAuth<(OperationSymbol operation, Type type), WithConditions<OperationAllowed>> Manual { get { return cache; } }
 
     public static bool IsStarted { get { return cache != null; } }
 
@@ -25,9 +27,13 @@ public static class OperationAuthLogic
             OperationLogic.AllowOperation += OperationLogic_AllowOperation;
 
             sb.Include<RuleOperationEntity>()
-                 .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role });
+                .WithUniqueIndex(rt => new { rt.Resource.Operation, rt.Resource.Type, rt.Role })
+                .WithVirtualMList(rt => rt.ConditionRules, c => c.RuleOperation);            
 
             cache = new OperationCache(sb);
+
+            TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
+                new InvalidateWith(typeof(RuleOperationEntity), typeof(RuleOperationConditionEntity)));
 
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query =>
             {
@@ -40,19 +46,39 @@ public static class OperationAuthLogic
 
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-            sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteOperationSqlSync);
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteTypeSqlSync);
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleOperationConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleOperation.Entity.Resource.Type, rtc => rtc.RuleOperation.Entity.Role);
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleOperationEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += op => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Operation.Is(op)));
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleOperationEntity>().Where(a => a.Resource.Type.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleOperationConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+
+
+            TypeAuthLogic.HasTypeConditionInOperations = RequiresTypeConditionForOperations;
         }
     }
 
-    static SqlPreCommand AuthCache_PreDeleteOperationSqlSync(Entity arg)
+    static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
+    static bool RequiresTypeConditionForOperations(Type type)
     {
-        return Administrator.DeleteWhereScript((RuleOperationEntity rt) => rt.Resource.Operation, (OperationSymbol)arg);
-    }
+        var role = RoleEntity.Current;
+        return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
+        {
+            var taac = TypeAuthLogic.GetAllowed(e.type);
+            if (taac.ConditionRules.IsEmpty())
+                return false;
 
-    static SqlPreCommand AuthCache_PreDeleteTypeSqlSync(Entity arg)
-    {
-        return Administrator.DeleteWhereScript((RuleOperationEntity rt) => rt.Resource.Type, (TypeEntity)arg);
+            var def = taac.ToOperationAllowed();
+
+            return OperationLogic.GetAllOperationInfos(type).Any(op => {
+
+                var paac = cache.GetAllowed(e.role, (op.OperationSymbol, type));
+
+                if (paac.Equals(def))
+                    return false;
+
+                return paac.CandidatesAssuming(taac).Distinct().Count() > 1; //If for all the type rules that are visible the property has the same value, we don't need the type conditions
+            });
+        });
     }
 
     public static T SetMaxAutomaticUpgrade<T>(this T operation, OperationAllowed allowed) where T : IOperation
@@ -62,9 +88,27 @@ public static class OperationAuthLogic
         return operation;
     }
 
-    static bool OperationLogic_AllowOperation(OperationSymbol operationKey, Type entityType, bool inUserInterface)
+    static GenericInvoker<Func<Entity, WithConditions<OperationAllowed>, bool, bool>> giAllowOperation = new((e, ta, inUI) => AllowOperation<Entity>((Entity)e, ta, inUI));
+    static bool AllowOperation<T>(T entity, WithConditions<OperationAllowed> ta, bool inUserInterface)
+        where T : Entity
     {
-        return GetOperationAllowed(operationKey, entityType, inUserInterface);
+        foreach (var c in ta.ConditionRules.Reverse())
+        {
+            if (c.TypeConditions.All(a => entity.InTypeCondition(a)))
+                return c.Allowed.ToBoolean(inUserInterface);
+        }
+
+        return ta.Fallback.ToBoolean(inUserInterface);
+    }
+
+    static bool OperationLogic_AllowOperation(OperationSymbol operationKey, Type entityType, bool inUserInterface, Entity? entity)
+    {
+        var ta = GetOperationAllowed(operationKey, entityType);
+
+        if (entity == null)
+            return ta.Max().ToBoolean(inUserInterface);
+
+        return giAllowOperation.GetInvoker(entity.GetType())(entity, ta, inUserInterface);
     }
 
     public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)
@@ -79,9 +123,11 @@ public static class OperationAuthLogic
         result.Rules.ForEach(r =>
         {
             var operationType = (operation: r.Resource.Operation, type: r.Resource.Type.ToType());
-
-            r.Coerced = cache.CoerceValue(role, operationType, OperationAllowed.Allow);
+            r.Coerced = cache.CoerceValue(role, operationType, WithConditions<OperationAllowed>.Simple(OperationAllowed.Allow)).ToModel();
         });
+
+        Type type = typeEntity.ToType();
+        result.AvailableTypeConditions = TypeAuthLogic.GetAllowed(role, type).ConditionRules.Select(a => a.TypeConditions.ToList()).ToList();
 
         return result;
     }
@@ -91,37 +137,37 @@ public static class OperationAuthLogic
         cache.SetRules(rules, r => r.Type.Is(rules.Type));
     }
 
-    public static bool GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operation, Type entityType, bool inUserInterface)
-    {
-        OperationAllowed allowed = GetOperationAllowed(role, operation, entityType);
-
-        return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
-    }
-
-    public static OperationAllowed GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operation, Type entityType)
+    public static WithConditions<OperationAllowed> GetOperationAllowed(Lite<RoleEntity> role, OperationSymbol operation, Type entityType)
     {
         return cache.GetAllowed(role, (operation, entityType));
     }
 
-    public static bool GetOperationAllowed(OperationSymbol operation, Type type, bool inUserInterface)
+    public static WithConditions<OperationAllowed> GetOperationAllowed(OperationSymbol operation, Type type)
     {
         if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return true;
+            return WithConditions<OperationAllowed>.Simple(OperationAllowed.Allow);
 
         if (GetTemporallyAllowed(operation))
-            return true;
+            return WithConditions<OperationAllowed>.Simple(OperationAllowed.Allow);
 
-        OperationAllowed allowed = cache.GetAllowed(RoleEntity.Current, (operation, type));
-
-        return allowed == OperationAllowed.Allow || allowed == OperationAllowed.DBOnly && !inUserInterface;
+        return cache.GetAllowed(RoleEntity.Current, (operation, type));
     }
 
-    public static AuthThumbnail? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType)
+    public static WithConditionsModel<AuthThumbnail>? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType, WithConditions<TypeAllowed> typeAllowedModel)
     {
-        return OperationLogic.GetAllOperationInfos(entityType).Select(oi => cache.GetAllowed(role, (oi.OperationSymbol, entityType))).Collapse();
+        var wcps = OperationLogic.GetAllOperationInfos(entityType).Select(op => cache.GetAllowed(role, (op.OperationSymbol, entityType))).ToList();
+
+        return new WithConditionsModel<AuthThumbnail>(
+            wcps.Select(a => a.Fallback).Collapse()!.Value,
+            typeAllowedModel.ConditionRules.Select(crt =>
+            {
+                var thumbnail = wcps.Select(a => a.ConditionRules.Single(cr => crt.TypeConditions.SequenceEqual(cr.TypeConditions)).Allowed).Collapse()!.Value;
+
+                return new ConditionRuleModel<AuthThumbnail>(crt.TypeConditions, thumbnail);
+            }));
     }
 
-    public static Dictionary<(OperationSymbol operation, Type type), OperationAllowed> AllowedOperations()
+    public static Dictionary<(OperationSymbol operation, Type type), WithConditions<OperationAllowed>> AllowedOperations()
     {
         return AllOperationTypes().ToDictionary(a => a, a => cache.GetAllowed(RoleEntity.Current, a));
     }

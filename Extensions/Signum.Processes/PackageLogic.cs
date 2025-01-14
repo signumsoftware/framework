@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Signum.API.Controllers;
 using Signum.API.Json;
 using Signum.Authorization;
@@ -58,10 +59,8 @@ public static class PackageLogic
 
             if(packages || packageOperations)
             {
-                sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += typeEntity =>
                 {
-                    var typeEntity = ((TypeEntity)arg);
-
                     var targetLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Target.GetType().ToTypeEntity().Is(typeEntity)));
                     var resultLines = Administrator.UnsafeDeletePreCommand(Database.Query<PackageLineEntity>().Where(pl => pl.Result!.Entity.GetType().ToTypeEntity().Is(typeEntity)));
                     return SqlPreCommand.Combine(Spacing.Simple, targetLines, resultLines);
@@ -130,10 +129,8 @@ public static class PackageLogic
                 ProcessLogic.Register(PackageOperationProcess.PackageOperation, new PackageOperationAlgorithm());
                 ExceptionLogic.DeleteLogs += ExceptionLogic_DeletePackages<PackageOperationEntity>;
 
-                sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
                 {
-                    var operation = (OperationSymbol)arg;
-
                     if (!Administrator.ExistsTable<PackageOperationEntity>() || !Database.Query<PackageOperationEntity>().Any(a => a.Operation.Is(operation)))
                         return null;
 
@@ -261,16 +258,16 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
             args=lo.ToArray();  
         }
 
-
-
-
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
             OperationType operationType = OperationLogic.GetOperationInfo(line.Target.GetType(), operationSymbol).OperationType;
 
+            OperationLogic.AssertOperationAllowed(operationSymbol, line.Target.GetType(), inUserInterface: true, entity: line.Target);
+            
             switch (operationType)
             {
                 case OperationType.Execute:
+
                     OperationLogic.ServiceExecute(line.Target, operationSymbol, args);
                     break;
                 case OperationType.Delete:

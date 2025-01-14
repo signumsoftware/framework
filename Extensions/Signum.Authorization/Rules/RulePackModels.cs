@@ -134,7 +134,7 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditionsModel<TypeA
 {
     public WithConditionsModel<AuthThumbnail>? Properties { get; set; }
 
-    public AuthThumbnail? Operations { get; set; }
+    public WithConditionsModel<AuthThumbnail>? Operations { get; set; }
 
     public AuthThumbnail? Queries { get; set; }
 
@@ -483,6 +483,111 @@ public static class ProperyAllowedAndConditionsExtensions
     }
 }
 
+public static class OperationAllowedAndConditionsExtensions
+{
+    public static OperationAllowed Min(this WithConditions<OperationAllowed> paac)
+    {
+        if (!paac.ConditionRules.Any())
+            return paac.Fallback;
+
+        return (OperationAllowed)Math.Min((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Min());
+    }
+
+    public static OperationAllowed Min(this WithConditions<OperationAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
+    {
+        if (assumingTaac == null)
+            return paac.Min();
+
+        List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+
+        if (candidates.IsEmpty())
+            return OperationAllowed.None;
+
+        return candidates.MinBy(a => (int)a);
+    }
+
+    public static OperationAllowed Min(this WithConditions<OperationAllowed> paac, WithConditions<OperationAllowed>? assumingPaac)
+    {
+        if (assumingPaac == null)
+            return paac.Min();
+
+        List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingPaac);
+
+        if (candidates.IsEmpty())
+            return OperationAllowed.None;
+
+        return candidates.MinBy(a => (int)a);
+    }
+
+    public static List<OperationAllowed> CandidatesAssuming(this WithConditions<OperationAllowed> paac, WithConditions<TypeAllowed> assumingTaac)
+    {
+        var candidates = paac.ConditionRules.Where((a, i) => assumingTaac.ConditionRules[i].Allowed.GetUI() > TypeAllowedBasic.None).Select(a => a.Allowed).ToList();
+
+        if (assumingTaac.Fallback.GetUI() > TypeAllowedBasic.None)
+            candidates.Add(paac.Fallback);
+
+        return candidates;
+    }
+
+    public static List<OperationAllowed> CandidatesAssuming(this WithConditions<OperationAllowed> paac, WithConditions<OperationAllowed> assumingPaac)
+    {
+        var candidates = paac.ConditionRules.Where((a, i) => assumingPaac.ConditionRules[i].Allowed > OperationAllowed.None).Select(a => a.Allowed).ToList();
+
+        if (assumingPaac.Fallback > OperationAllowed.None)
+            candidates.Add(paac.Fallback);
+
+        return candidates;
+    }
+
+    public static OperationAllowed Max(this WithConditions<OperationAllowed> paac)
+    {
+        if (!paac.ConditionRules.Any())
+            return paac.Fallback;
+
+        return (OperationAllowed)Math.Max((int)paac.Fallback, paac.ConditionRules.Select(a => (int)a.Allowed).Max());
+    }
+
+    public static OperationAllowed Max(this WithConditions<OperationAllowed> paac, WithConditions<TypeAllowed>? assumingTaac)
+    {
+        using (HeavyProfiler.LogNoStackTrace("Max2"))
+        {
+            if (assumingTaac == null)
+                return paac.Max();
+
+            List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingTaac);
+
+            if (candidates.IsEmpty())
+                return OperationAllowed.None;
+
+            return candidates.MaxBy(a => (int)a);
+        }
+    }
+
+    public static OperationAllowed Max(this WithConditions<OperationAllowed> paac, WithConditions<OperationAllowed>? assumingPaac)
+    {
+        using (HeavyProfiler.LogNoStackTrace("Max2"))
+        {
+            if (assumingPaac == null)
+                return paac.Max();
+
+            List<OperationAllowed> candidates = CandidatesAssuming(paac, assumingPaac);
+
+            if (candidates.IsEmpty())
+                return OperationAllowed.None;
+
+            return candidates.MaxBy(a => (int)a);
+        }
+    }
+
+    public static bool ToBoolean(this OperationAllowed oa, bool inUserInterface)
+    {
+        if (inUserInterface)
+            return oa == OperationAllowed.Allow;
+
+        return oa >= OperationAllowed.DBOnly;
+    }
+}
+
 public class ConditionRuleModel<A> : ModelEntity, IEquatable<ConditionRuleModel<A>>
     where A: struct, Enum
 {
@@ -567,12 +672,14 @@ public class OperationRulePack : BaseRulePack<OperationAllowedRule>
 
     public TypeEntity Type { get; internal set; }
 
+    public List<List<TypeConditionSymbol>> AvailableTypeConditions { get; set; }
+
     public override string ToString()
     {
         return AuthAdminMessage._0RulesFor1.NiceToString().FormatWith(typeof(OperationSymbol).NiceName(), Role);
     }
 }
-public class OperationAllowedRule : AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> { }
+public class OperationAllowedRule : AllowedRuleCoerced<OperationTypeEmbedded, WithConditionsModel<OperationAllowed>> { }
 
 public class PermissionRulePack : BaseRulePack<PermissionAllowedRule>
 {

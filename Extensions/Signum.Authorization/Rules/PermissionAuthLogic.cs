@@ -49,13 +49,13 @@ public static class PermissionAuthLogic
 
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
 
-            sb.Schema.Table<PermissionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.EntityEvents<PermissionSymbol>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
         }
     }
 
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand AuthCache_PreDeleteSqlSync(PermissionSymbol permission)
     {
-        return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, (PermissionSymbol)arg);
+        return Administrator.DeleteWhereScript((RulePermissionEntity rt) => rt.Resource, permission);
     }
 
     public static bool IsAuthorized(PermissionSymbol permissionSymbol)
