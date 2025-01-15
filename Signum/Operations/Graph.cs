@@ -13,7 +13,6 @@ public class Graph<T>
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Constructor;
-        bool IOperation.Returns => true;
         Type? IOperation.ReturnType => typeof(T);
         IList? IOperation.UntypedFromStates => null;
         IList? IOperation.UntypedToStates => new List<Enum>();
@@ -162,7 +161,6 @@ public class Graph<T>
         public bool CanBeModified { get; set; }
         public bool LogAlsoIfNotSaved { get; set; }
 
-        bool IOperation.Returns { get { return true; } }
         Type? IOperation.ReturnType { get { return typeof(T); } }
 
         protected readonly Type baseType;
@@ -348,7 +346,6 @@ public class Graph<T>
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(F);
         OperationType IOperation.OperationType => OperationType.ConstructorFromMany;
-        bool IOperation.Returns => true;
         Type? IOperation.ReturnType => typeof(T);
 
         protected readonly Type baseType;
@@ -530,7 +527,6 @@ public class Graph<T>
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Execute;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns => true;
         Type? IOperation.ReturnType => null;
         Type? IOperation.StateType => null;
         LambdaExpression? IOperation.GetStateExpression() => null;
@@ -707,7 +703,6 @@ public class Graph<T>
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Delete;
         public bool CanBeModified { get; set; }
-        bool IOperation.Returns => false;
         Type? IOperation.ReturnType => null;
         IList? IOperation.UntypedFromStates => new List<Enum>();
         IList? IOperation.UntypedToStates => null;

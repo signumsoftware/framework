@@ -1,3 +1,4 @@
+using Signum.Operations;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Linq;
@@ -35,28 +36,27 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
     protected override WithConditions<OperationAllowed> ToAllowed(WithConditionsModel<OperationAllowed> allowedModel) => allowedModel.ToImmutable();
     protected override WithConditionsModel<OperationAllowed> ToAllowedModel(WithConditions<OperationAllowed> allowed) => allowed.ToModel();
 
-    static ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>> coerceCache =
-    new ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>>();
+    //static ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>> coerceCache =
+    //new ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>>();
 
     public override WithConditions<OperationAllowed> CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, WithConditions<OperationAllowed> allowed, bool manual = false)
     {
-        if (!TypeLogic.TypeToEntity.ContainsKey(key.type))
-            return WithConditions<OperationAllowed>.Simple(OperationAllowed.Allow);
+        var operation = OperationLogic.FindOperation(key.type, key.operation);
 
         var taac = manual ?
             TypeAuthLogic.Manual.GetAllowed(role, key.type) :
             TypeAuthLogic.GetAllowed(role, key.type);
 
-        return coerceCache.GetOrAdd((allowed, taac), p =>
-        {
-            var ptaac = p.taac.ToOperationAllowed();
+       var maxResultAllowed = operation.OperationType is OperationType.ConstructorFrom or OperationType.ConstructorFromMany ?
+            (manual ? TypeAuthLogic.Manual.GetAllowed(role, key.type) : TypeAuthLogic.GetAllowed(role, operation.ReturnType!)).MaxCombined() :
+            (TypeAllowed?)null;
 
-            var adjusted = AdjustShape(values: p.allowed, shape: ptaac);
 
-            var coerced = CoerceSimilar(adjusted, ptaac);
+        var maxValue = taac.ToOperationAllowed(operation, maxResultAllowed);
 
-            return coerced;
-        });
+        var adjusted = AdjustShape(values: allowed, shape: maxValue);
+
+        return CoerceSimilar(adjusted, maxValue);
     }
 
     public static WithConditions<OperationAllowed> CoerceSimilar(WithConditions<OperationAllowed> value, WithConditions<OperationAllowed> maxValue)
@@ -201,25 +201,34 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
     {
         return key =>
         {
-            var typeAllowed = TypeAuthLogic.GetAllowed(role, key.type).ToOperationAllowed();
+            var operationAllowed = GetDefaultFromType(key, role);
 
             if (AuthLogic.GetDefaultAllowed(role))
-                return typeAllowed;
+                return operationAllowed;
 
             if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
-                return CoerceSimple(typeAllowed, OperationAllowed.None);
+                return CoerceSimple(operationAllowed, OperationAllowed.None);
 
             var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
             if (maxUp == null)
-                return typeAllowed;
+                return operationAllowed;
 
-            return CoerceSimple(typeAllowed, maxUp.Value);
+            return CoerceSimple(operationAllowed, maxUp.Value);
         };
     }
 
     WithConditions<OperationAllowed> GetDefaultFromType((OperationSymbol operation, Type type) key, Lite<RoleEntity> role)
     {
-        return TypeAuthLogic.GetAllowed(role, key.type).ToOperationAllowed();
+        var operation = OperationLogic.FindOperation(key.type, key.operation);
+
+        var ta = TypeAuthLogic.GetAllowed(role, key.type);
+
+        var maxResultAllowed = operation.OperationType is OperationType.ConstructorFrom or OperationType.ConstructorFromMany ?
+            TypeAuthLogic.GetAllowed(role, operation.ReturnType!).MaxCombined() : (TypeAllowed?)null;
+
+        var result = ta.ToOperationAllowed(operation, maxResultAllowed);
+
+        return result;
     }
 
     public static WithConditions<OperationAllowed> CoerceSimple(WithConditions<OperationAllowed> value, OperationAllowed maxValue)

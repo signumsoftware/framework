@@ -9,7 +9,7 @@ import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMes
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
 import { OperationSymbol } from '@framework/Signum.Operations'
-import { Binding, GraphExplorer } from '@framework/Reflection'
+import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
 import { useDragAndDrop } from './TypeRulePackControl'
 
 
@@ -45,19 +45,14 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
     ctx.frame!.frameComponent.forceUpdate();
   }
 
-  function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
-
-    ctx.value.rules.forEach(mle => {
-      const value = OperationAllowed.min(getBinding(mle.element.coerced, typeConditions).getValue(), hc);
-      getBinding(mle.element.allowed, typeConditions).setValue(value);
-      mle.element.modified = true;
-    });
-
-    updateFrame();
+  function hasOverrides(tcs: TypeConditionSymbol[] | undefined): undefined | "fw-bold" {
+    return ctx.value.rules.filter(a => !isConstructor(a.element)).some(r => getBinding(r.element.allowed, tcs).getValue() != getBinding(r.element.allowedBase, tcs).getValue()) ? "fw-bold" : undefined;
   }
 
-  function hasOverrides(tcs: TypeConditionSymbol[] | undefined): undefined | "fw-bold" {
-    return ctx.value.rules.some(r => getBinding(r.element.allowed, tcs).getValue() != getBinding(r.element.allowedBase, tcs).getValue()) ? "fw-bold" : undefined;
+
+
+  function isConstructor(oar: OperationAllowedRule) {
+    return getOperationInfo(oar.resource.operation, ctx.value.type.cleanName).operationType == "Constructor"
   }
 
   return (
@@ -66,49 +61,80 @@ export default function OperationRulePackControl({ ctx, initialTypeConditions, i
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
-        <FormGroup ctx={ctx} label="Type Conditions">
-          {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
-            if (e.currentTarget.value == "Fallback")
-              setTypeConditions(undefined);
-            else {
-              var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
-              setTypeConditions(tcs);
-            }
-          }} >
-            <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
-            {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
-              {arr.map(a => a.key.after(".")).join(" & ")}
-            </option>)}
-          </select>}
-        </FormGroup>
-      </div>
-      <table className="table table-sm sf-auth-rules">
-        <thead>
-          <tr>
-            <th>
-              {OperationSymbol.niceName()}
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              {AuthAdminMessage.Overriden.niceToString()}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {ctx.mlistItemCtxs(a => a.rules).map((tctx, i) => <OperationRow key={i} tctx={tctx} updateFrame={updateFrame} getBidning={tac => getBinding(tac, typeConditions)} />)}
-        </tbody>
-      </table>
 
+
+      </div>
+      {ctx.value.rules.some(a => isConstructor(a.element)) &&
+        <OperationTable ctx={ctx} filter={oar => isConstructor(oar)} typeConditions={undefined} updateFrame={updateFrame} />}
+
+      {ctx.value.rules.some(a => !isConstructor(a.element)) &&
+        <div className="form-compact">
+          <FormGroup ctx={ctx} label="Type Conditions">
+            {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
+              if (e.currentTarget.value == "Fallback")
+                setTypeConditions(undefined);
+              else {
+                var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
+                setTypeConditions(tcs);
+              }
+            }} >
+              <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+              {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
+                {arr.map(a => a.key.after(".")).join(" & ")}
+              </option>)}
+            </select>}
+          </FormGroup>
+          <OperationTable ctx={ctx} filter={oar => !isConstructor(oar)} typeConditions={typeConditions} updateFrame={updateFrame} />
+        </div>
+      }
     </div>
   );
+}
+
+function OperationTable(p: {
+  ctx: TypeContext<OperationRulePack>,
+  typeConditions: TypeConditionSymbol[] | undefined,
+  filter: (operation: OperationAllowedRule) => boolean,
+  updateFrame: () => void
+}) {
+
+  function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+
+    p.ctx.value.rules.filter(a => p.filter(a.element)).forEach(mle => {
+      const value = OperationAllowed.min(getBinding(mle.element.coerced, p.typeConditions).getValue(), hc);
+      getBinding(mle.element.allowed, p.typeConditions).setValue(value);
+      mle.element.modified = true;
+    });
+
+    p.updateFrame();
+  }
+
+  return (
+    <table className="table table-sm sf-auth-rules">
+      <thead>
+        <tr>
+          <th style={{ width: "50%" }}>
+            {OperationSymbol.niceName()}
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            {AuthAdminMessage.Overriden.niceToString()}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {p.ctx.mlistItemCtxs(a => a.rules).filter(a => p.filter(a.value)).map((tctx, i) => <OperationRow key={i} tctx={tctx} updateFrame={p.updateFrame} getBidning={tac => getBinding(tac, p.typeConditions)} />)}
+      </tbody>
+    </table>
+  )
 }
 
 function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<OperationAllowed>) => Binding<OperationAllowed> }): React.JSX.Element {

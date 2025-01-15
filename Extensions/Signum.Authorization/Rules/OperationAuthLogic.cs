@@ -67,14 +67,9 @@ public static class OperationAuthLogic
             if (taac.ConditionRules.IsEmpty())
                 return false;
 
-            var def = taac.ToOperationAllowed();
-
             return OperationLogic.GetAllOperationInfos(type).Any(op => {
 
                 var paac = cache.GetAllowed(e.role, (op.OperationSymbol, type));
-
-                if (paac.Equals(def))
-                    return false;
 
                 return paac.CandidatesAssuming(taac).Distinct().Count() > 1; //If for all the type rules that are visible the property has the same value, we don't need the type conditions
             });
@@ -103,12 +98,21 @@ public static class OperationAuthLogic
 
     static bool OperationLogic_AllowOperation(OperationSymbol operationKey, Type entityType, bool inUserInterface, Entity? entity)
     {
-        var ta = GetOperationAllowed(operationKey, entityType);
+        var oa = GetOperationAllowed(operationKey, entityType);
 
-        if (entity == null)
-            return ta.Max().ToBoolean(inUserInterface);
+        if (entity == null || entity.IsNew)
+            return oa.Max().ToBoolean(inUserInterface);
 
-        return giAllowOperation.GetInvoker(entity.GetType())(entity, ta, inUserInterface);
+        if(!RequiresTypeConditionForOperations(entityType))
+        {
+            var ta = TypeAuthLogic.GetAllowed(entityType);
+
+            var single = oa.CandidatesAssuming(ta).Distinct().SingleEx();
+
+            return single.ToBoolean(inUserInterface);
+        }
+
+        return giAllowOperation.GetInvoker(entity.GetType())(entity, oa, inUserInterface);
     }
 
     public static OperationRulePack GetOperationRules(Lite<RoleEntity> role, TypeEntity typeEntity)
@@ -155,13 +159,20 @@ public static class OperationAuthLogic
 
     public static WithConditionsModel<AuthThumbnail>? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType, WithConditions<TypeAllowed> typeAllowedModel)
     {
-        var wcps = OperationLogic.GetAllOperationInfos(entityType).Select(op => cache.GetAllowed(role, (op.OperationSymbol, entityType))).ToList();
+        var ops = OperationLogic.GetAllOperationInfos(entityType);
+
+        if(ops.IsEmpty())
+            return null;    
+
+        var wcps = ops.Select(op => cache.GetAllowed(role, (op.OperationSymbol, entityType))).ToList();
 
         return new WithConditionsModel<AuthThumbnail>(
             wcps.Select(a => a.Fallback).Collapse()!.Value,
             typeAllowedModel.ConditionRules.Select(crt =>
             {
-                var thumbnail = wcps.Select(a => a.ConditionRules.Single(cr => crt.TypeConditions.SequenceEqual(cr.TypeConditions)).Allowed).Collapse()!.Value;
+                var thumbnail = wcps.Where(a => a.ConditionRules.Count > 0 /*Constructor*/)
+                .Select(a => a.ConditionRules.Single(cr => crt.TypeConditions.SequenceEqual(cr.TypeConditions)).Allowed)
+                .Collapse() ?? AuthThumbnail.None;
 
                 return new ConditionRuleModel<AuthThumbnail>(crt.TypeConditions, thumbnail);
             }));
@@ -198,45 +209,38 @@ public static class OperationAuthLogic
         return ta.Contains(operationKey);
     }
 
-    public static OperationAllowed InferredOperationAllowed((OperationSymbol operation, Type type) operationType, Func<Type, WithConditions<TypeAllowed>> allowed)
+
+    static OperationAllowed ToOperationAllowed(TypeAllowed allowed, TypeAllowedBasic checkFor)
     {
-        Func<Type, TypeAllowedBasic, OperationAllowed> operationAllowed = (t, checkFor) =>
+        return checkFor <= allowed.GetUI() ? OperationAllowed.Allow :
+                 checkFor <= allowed.GetDB() ? OperationAllowed.DBOnly :
+                 OperationAllowed.None;
+    }
+
+    static ConcurrentDictionary<(WithConditions<TypeAllowed> allowed, TypeAllowedBasic checkFor), WithConditions<OperationAllowed>> toOperationAllowedCache = new ();
+    static ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, OperationAllowed limit), WithConditions<OperationAllowed>> limitCache = new ();
+
+    public static WithConditions<OperationAllowed> ToOperationAllowed(this WithConditions<TypeAllowed> allowed, IOperation operation, TypeAllowed? maxReturnAllowed)
+    {
+        if (operation.OperationType == OperationType.Constructor)
+            return WithConditions<OperationAllowed>.Simple(ToOperationAllowed(allowed.MaxCombined(), TypeAllowedBasic.Write));
+
+        TypeAllowedBasic checkFor = operation.OperationType switch
         {
-            if (!TypeLogic.TypeToEntity.ContainsKey(t))
-                return OperationAllowed.Allow;
-
-            var ta = allowed(t);
-
-            return checkFor <= ta.MaxUI() ? OperationAllowed.Allow :
-                checkFor <= ta.MaxDB() ? OperationAllowed.DBOnly :
-                OperationAllowed.None;
+            OperationType.ConstructorFrom => TypeAllowedBasic.Read,
+            OperationType.ConstructorFromMany => TypeAllowedBasic.Read,
+            OperationType.Execute => ((IExecuteOperation)operation).ForReadonlyEntity ? TypeAllowedBasic.Read : TypeAllowedBasic.Write,
+            OperationType.Delete => TypeAllowedBasic.Write,
+            _ => throw new UnexpectedValueException(operation.OperationType),
         };
 
-        var operation = OperationLogic.FindOperation(operationType.type ?? /*Temp*/  OperationLogic.FindTypes(operationType.operation).First(), operationType.operation);
+        var result = toOperationAllowedCache.GetOrAdd((allowed, checkFor), tuple => tuple.allowed.MapWithConditions(a => ToOperationAllowed(a, tuple.checkFor)));
+        if (operation.ReturnType == null)
+            return result;
 
-        switch (operation.OperationType)
-        {
-            case OperationType.Execute:
-                var defaultAllowed = ((IExecuteOperation)operation).ForReadonlyEntity ? TypeAllowedBasic.Read : TypeAllowedBasic.Write;
-                return operationAllowed(operation.OverridenType, defaultAllowed);
+        var limit = ToOperationAllowed(maxReturnAllowed!.Value, TypeAllowedBasic.Write);
 
-            case OperationType.Delete:
-                return operationAllowed(operation.OverridenType, TypeAllowedBasic.Write);
-
-            case OperationType.Constructor:
-                return operationAllowed(operation.ReturnType!, TypeAllowedBasic.Write);
-
-            case OperationType.ConstructorFrom:
-            case OperationType.ConstructorFromMany:
-                {
-                    var fromTypeAllowed = operationAllowed(operation.OverridenType, TypeAllowedBasic.Read);
-                    var returnTypeAllowed = operationAllowed(operation.ReturnType!, TypeAllowedBasic.Write);
-
-                    return returnTypeAllowed < fromTypeAllowed ? returnTypeAllowed : fromTypeAllowed;
-                }
-
-            default:
-                throw new UnexpectedValueException(operation.OperationType);
-        }
+        return limitCache.GetOrAdd((result, limit), tuple => tuple.allowed.MapWithConditions(a => a < limit ? a : limit));
     }
+
 }
