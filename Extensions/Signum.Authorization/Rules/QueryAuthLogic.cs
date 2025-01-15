@@ -39,15 +39,15 @@ public static class QueryAuthLogic
             AuthLogic.ExportToXml += cache.ExportXml;
             AuthLogic.ImportFromXml += cache.ImportXml;
             AuthLogic.HasRuleOverridesEvent += cache.HasRealOverrides;
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += AuthCache_PreDeleteSqlSync;
         }
     }
 
   
 
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand AuthCache_PreDeleteSqlSync(QueryEntity query)
     {
-        return Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, (QueryEntity)arg);
+        return Administrator.DeleteWhereScript((RuleQueryEntity rt) => rt.Resource, query);
     }
 
     public static void SetMaxAutomaticUpgrade(object queryName, QueryAllowed allowed)

@@ -115,17 +115,17 @@ public static class HelpLogic
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
 
-            sb.Schema.Table<OperationSymbol>().PreDeleteSqlSync += operation =>
-                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation.Is((OperationSymbol)operation)));
+            sb.Schema.EntityEvents<OperationSymbol>().PreDeleteSqlSync += operation =>
+                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Operations, Database.MListQuery((TypeHelpEntity eh) => eh.Operations).Where(mle => mle.Element.Operation.Is(operation)));
 
-            sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += property =>
-                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property.Is((PropertyRouteEntity)property)));
+            sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += property =>
+                Administrator.UnsafeDeletePreCommandMList((TypeHelpEntity eh) => eh.Properties, Database.MListQuery((TypeHelpEntity eh) => eh.Properties).Where(mle => mle.Element.Property.Is(property)));
 
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += type =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type.Is((TypeEntity)type)));
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += type =>
+                Administrator.UnsafeDeletePreCommand(Database.Query<TypeHelpEntity>().Where(e => e.Type.Is(type)));
 
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += query =>
-                Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query.Is((QueryEntity)query)));
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += query =>
+                Administrator.UnsafeDeletePreCommand(Database.Query<QueryHelpEntity>().Where(e => e.Query.Is(query)));
 
             Types = sb.GlobalLazy<ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>>(() => new ConcurrentDictionary<CultureInfo, Dictionary<Type, TypeHelp>>(),
              invalidateWith: new InvalidateWith(typeof(TypeHelpEntity)));

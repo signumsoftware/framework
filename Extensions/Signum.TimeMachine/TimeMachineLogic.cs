@@ -61,7 +61,7 @@ public static class TimeMachineLogic
         return entity;
     }
 
-    private static T RestoreDeletedEntity<T> (PrimaryKey id, DateTime lastVersion)
+    public static T RestoreDeletedEntity<T> (PrimaryKey id, DateTime lastVersion)
         where T : Entity
     {
         using (var tr = new Transaction())

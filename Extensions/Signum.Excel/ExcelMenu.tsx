@@ -4,13 +4,14 @@ import { Finder } from '@framework/Finder'
 import { getToString, Lite, SearchMessage, SelectorMessage } from '@framework/Signum.Entities'
 import { Navigator } from '@framework/Navigator'
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded'
-import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage } from './Signum.Excel'
+import { ExcelReportEntity, ExcelMessage, ExcelReportOperation, ImportFromExcelMessage, ExcelPermission } from './Signum.Excel'
 import { ExcelClient } from './ExcelClient'
 import { Dropdown } from 'react-bootstrap';
 import { Operations } from '@framework/Operations';
 import SelectorModal from '@framework/SelectorModal'
 import { PaginationMode, QueryRequest } from '@framework/FindOptions'
 import { onImportFromExcel } from './Templates/ImportExcelModel'
+import { isPermissionAuthorized } from '@framework/AppContext'
 
 
 export interface ExcelMenuProps {
@@ -77,7 +78,7 @@ export default function ExcelMenu(p: ExcelMenuProps): React.JSX.Element {
       <Dropdown.Menu>
         {...addDropdownDividers([
           p.plainExcel && <Dropdown.Item onClick={handlePlainExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ExcelMessage.ExcelReport.niceToString()}</span></Dropdown.Item>,
-          p.importFromExcel && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
+          p.importFromExcel && isPermissionAuthorized(ExcelPermission.ImportFromExcel) && <Dropdown.Item onClick={handleImportFromExcel} ><span><FontAwesomeIcon icon={"file-excel"} />&nbsp; {ImportFromExcelMessage.ImportFromExcel.niceToString()}</span></Dropdown.Item>,
           p.excelReport && addDropdownDividers([
             excelReports?.map((uq, i) =>
             <Dropdown.Item key={i}

@@ -95,7 +95,7 @@ export type OperationAllowed =
   "Allow";
 
 export const OperationAllowedRule: Type<OperationAllowedRule> = new Type<OperationAllowedRule>("OperationAllowedRule");
-export interface OperationAllowedRule extends AllowedRuleCoerced<OperationTypeEmbedded, OperationAllowed> {
+export interface OperationAllowedRule extends AllowedRuleCoerced<OperationTypeEmbedded, WithConditionsModel<OperationAllowed>> {
   Type: "OperationAllowedRule";
 }
 
@@ -103,6 +103,7 @@ export const OperationRulePack: Type<OperationRulePack> = new Type<OperationRule
 export interface OperationRulePack extends BaseRulePack<OperationAllowedRule> {
   Type: "OperationRulePack";
   type: Basics.TypeEntity;
+  availableTypeConditions: Array<Array<TypeConditionSymbol>>;
 }
 
 export const OperationTypeEmbedded: Type<OperationTypeEmbedded> = new Type<OperationTypeEmbedded>("OperationTypeEmbedded");
@@ -162,10 +163,20 @@ export interface RuleEntity<R> extends Entities.Entity {
   resource: R;
 }
 
+export const RuleOperationConditionEntity: Type<RuleOperationConditionEntity> = new Type<RuleOperationConditionEntity>("RuleOperationCondition");
+export interface RuleOperationConditionEntity extends Entities.Entity {
+  Type: "RuleOperationCondition";
+  ruleOperation: Entities.Lite<RuleOperationEntity>;
+  conditions: Entities.MList<TypeConditionSymbol>;
+  allowed: OperationAllowed;
+  order: number;
+}
+
 export const RuleOperationEntity: Type<RuleOperationEntity> = new Type<RuleOperationEntity>("RuleOperation");
 export interface RuleOperationEntity extends RuleEntity<OperationTypeEmbedded> {
   Type: "RuleOperation";
-  allowed: OperationAllowed;
+  fallback: OperationAllowed;
+  conditionRules: Entities.MList<RuleOperationConditionEntity>;
 }
 
 export const RulePermissionEntity: Type<RulePermissionEntity> = new Type<RulePermissionEntity>("RulePermission");
@@ -231,7 +242,7 @@ export const TypeAllowedRule: Type<TypeAllowedRule> = new Type<TypeAllowedRule>(
 export interface TypeAllowedRule extends AllowedRule<Basics.TypeEntity, WithConditionsModel<TypeAllowed>> {
   Type: "TypeAllowedRule";
   properties: WithConditionsModel<AuthThumbnail> | null;
-  operations: AuthThumbnail | null;
+  operations: WithConditionsModel<AuthThumbnail> | null;
   queries: AuthThumbnail | null;
   availableConditions: Array<TypeConditionSymbol>;
 }

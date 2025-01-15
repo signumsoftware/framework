@@ -35,7 +35,6 @@ public static partial class TypeAuthLogic
                 }
             };
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
 
             sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
             {
@@ -48,9 +47,11 @@ public static partial class TypeAuthLogic
 
             cache = new TypeCache(sb);
 
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Type);
-            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Condition);
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+            
             Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
             
    
@@ -62,29 +63,6 @@ public static partial class TypeAuthLogic
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
         }
-    }
-
-    static SqlPreCommand? AuthCache_PreDeleteSqlSync_Type(Entity arg)
-    {
-        TypeEntity type = (TypeEntity)arg;
-
-        var ruleTypeConditions = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(a => a.RuleType.Entity.Resource.Is(type)));
-        var ruleTypesCommand = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
-
-        return SqlPreCommand.Combine(Spacing.Simple, ruleTypeConditions, ruleTypesCommand);
-    }
-
-    static SqlPreCommand? AuthCache_PreDeleteSqlSync_Condition(Entity arg)
-    {
-        TypeConditionSymbol condition = (TypeConditionSymbol)arg;
-
-        if (!Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Any(mle => mle.Element.Is(condition)))
-            return null;
-
-        var mlist = Administrator.UnsafeDeletePreCommandMList((RuleTypeConditionEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Where(mle => mle.Element.Is(condition)));
-        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(rt => rt.Conditions.Count == 0), force: true, avoidMList: true);
-
-        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
     }
 
     static string? TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
@@ -163,6 +141,9 @@ public static partial class TypeAuthLogic
         if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type))
             return null;
 
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInOperations(type))
+            return null;
+
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
             .Where(cond => !TypeConditionLogic.HasInMemoryCondition(type, cond))
             .ToList();
@@ -183,6 +164,8 @@ public static partial class TypeAuthLogic
     }
 
     public static Func<Type, bool> HasTypeConditionInProperties = t => false;
+
+    public static Func<Type, bool> HasTypeConditionInOperations = t => false;
 
   
 

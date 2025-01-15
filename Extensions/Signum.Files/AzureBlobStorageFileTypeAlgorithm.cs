@@ -56,7 +56,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public BlobProperties GetProperties(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
+        using (HeavyProfiler.Log("AzureBlobStorage GetProperties", () => fp.Suffix))
         {
             var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).GetProperties();
@@ -66,7 +66,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public Stream OpenRead(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+        using (HeavyProfiler.Log("AzureBlobStorage OpenRead", () => fp.Suffix))
         {
             var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
@@ -75,7 +75,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public byte[] ReadAllBytes(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
+        using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes", () => fp.Suffix))
         {
       
             return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
@@ -244,9 +244,9 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
+        using (HeavyProfiler.Log("AzureBlobStorage MoveFile", () => ofp.FileName))
         {
             if (WeakFileReference)
                 return;

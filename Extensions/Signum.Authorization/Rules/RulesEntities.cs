@@ -38,10 +38,27 @@ public class RulePermissionEntity : RuleEntity<PermissionSymbol>
 
 public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded> 
 {
-    public OperationAllowed Allowed { get; set; }
+    public OperationAllowed Fallback { get; set; }
+
+    [PreserveOrder, Ignore, QueryableProperty]
+    [BindParent]
+    public MList<RuleOperationConditionEntity> ConditionRules { get; set; } = new MList<RuleOperationConditionEntity>();
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.Conditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(this.Resource, errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Allowed}");
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
 }
 
 
@@ -53,6 +70,23 @@ public class OperationTypeEmbedded : EmbeddedEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{Operation}/{Type}");
+}
+
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RuleOperationConditionEntity : Entity, ICanBeOrdered
+{
+    [NotNullValidator(Disabled = true)]
+    public Lite<RuleOperationEntity> RuleOperation { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
+
+    public OperationAllowed Allowed { get; set; }
+
+    public int Order { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
 }
 
 public class RulePropertyEntity : RuleEntity<PropertyRouteEntity> 
@@ -159,6 +193,8 @@ public enum OperationAllowed
     Allow = 2,
 }
 
+
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum PropertyAllowed
 {
@@ -237,6 +273,22 @@ public static class TypeAllowedExtensions
     {
         return cache.GetOrAdd(taac, taac =>
             new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly()).Intern()
+        );
+    }
+
+    public static OperationAllowed ToOperationAllowed(this TypeAllowedBasic ta)
+    {
+        OperationAllowed oa =
+            ta == TypeAllowedBasic.None ? OperationAllowed.None :
+            ta == TypeAllowedBasic.Read ? OperationAllowed.None : OperationAllowed.Allow;
+        return oa;
+    }
+
+    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>> operationCache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>>();
+    public static WithConditions<OperationAllowed> ToOperationAllowed(this WithConditions<TypeAllowed> taac)
+    {
+        return operationCache.GetOrAdd(taac, taac =>
+            new WithConditions<OperationAllowed>(taac.Fallback.GetUI().ToOperationAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<OperationAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToOperationAllowed())).ToReadOnly()).Intern()
         );
     }
 }

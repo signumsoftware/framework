@@ -280,7 +280,7 @@ public static class AuthServer
             ReflectionServer.OperationExtension += (oits, oi, type) =>
             {
                 var allowed = UserEntity.Current == null ? false :
-                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true);
+                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type).Max().ToBoolean(inUserInterface: true);
 
                 if (!allowed)
                     return null;
