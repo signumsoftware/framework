@@ -6,14 +6,15 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { EvalClient } from '../Signum.Eval/EvalClient';
 import {
-  EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
+  EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString,
+  JavascriptMessage
 } from '@framework/Signum.Entities'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQueryNiceName, getOperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { Finder } from '@framework/Finder'
-import { Operations, EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
+import { Operations, EntityOperationSettings, EntityOperationContext, ContextualOperationContext } from '@framework/Operations'
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations'
 import TypeHelpButtonBarComponent from '../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import {
@@ -59,6 +60,7 @@ import WorkflowToolbarConfig from './WorkflowToolbarConfig';
 import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
 import { isPermissionAuthorized } from '@framework/AppContext';
 import "./Case/Inbox.css";
+import { useAPI } from '../../Signum/React/Hooks';
 
 export namespace WorkflowClient {
 
@@ -365,6 +367,7 @@ export namespace WorkflowClient {
         settersConfig: coc => "NoDialog",
         isVisible: ctx => true,
         createMenuItems: coc => {
+
           const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
           if (wa.type == "Task") {
 
@@ -380,11 +383,15 @@ export namespace WorkflowClient {
       },
       contextualFromMany: {
         isVisible: ctx => true,
-        color: "primary"
+        color: "primary",
+        createMenuItems: coc => {
+          return [<CaseActivitiyOperations caseActivities={coc.context.lites} coc={coc} />]
+        },
+        settersConfig: coc => "NoDialog",
       },
-
     }));
 
+    
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
       hideOnCanExecute: true,
       color: "danger",
@@ -844,6 +851,10 @@ export namespace WorkflowClient {
     export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
       return ajaxPost({ url: "/api/workflow/nextConnections" }, request);
     }
+
+    export function getSameCaseActivities(caseActivities: Lite<CaseActivityEntity>[]): Promise<Array<CaseActivityEntity>> {
+      return ajaxPost({ url: "/api/workflow/sameCaseActivities" }, caseActivities);
+    }
   }
 
   export interface NextConnectionsRequest {
@@ -949,5 +960,31 @@ export namespace WorkflowClient {
   export interface CaseFlowEntityPack {
     pack: EntityPack<CaseEntity>,
     workflowActivity: IWorkflowNodeEntity;
+  }
+
+  export function CaseActivitiyOperations(p: { caseActivities: Lite<CaseActivityEntity>[], coc: ContextualOperationContext<CaseActivityEntity> }): React.JSX.Element[] {
+
+    const ca: CaseActivityEntity[] | undefined = useAPI(() => WorkflowClient.API.getSameCaseActivities(p.caseActivities).then(ca => ca), []);
+
+    if (ca == undefined)
+      return [<div>{JavascriptMessage.loading.niceToString()}</div>];
+
+    if (ca.length == 0)
+      return [];
+
+    const wa = ca[0].workflowActivity as WorkflowActivityEntity;
+
+
+      if (wa.type == "Task") {
+
+        return [wa.customNextButton == null ? <ContextualOperations.OperationMenuItem coc={p.coc} />
+          : <ContextualOperations.OperationMenuItem coc={p.coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</ContextualOperations.OperationMenuItem>];
+
+      } else if (wa.type == "Decision") {
+        return wa.decisionOptions.map(mle => <ContextualOperations.OperationMenuItem onOperationClick={() => p.coc.defaultClick(mle.element.name)}
+            coc={p.coc} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</ContextualOperations.OperationMenuItem>);
+      }
+      else
+        return [];
   }
 }
