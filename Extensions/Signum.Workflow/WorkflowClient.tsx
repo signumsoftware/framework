@@ -391,7 +391,7 @@ export namespace WorkflowClient {
       },
     }));
 
-    
+
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
       hideOnCanExecute: true,
       color: "danger",
@@ -852,8 +852,8 @@ export namespace WorkflowClient {
       return ajaxPost({ url: "/api/workflow/nextConnections" }, request);
     }
 
-    export function getSameCaseActivities(caseActivities: Lite<CaseActivityEntity>[]): Promise<Array<CaseActivityEntity>> {
-      return ajaxPost({ url: "/api/workflow/sameCaseActivities" }, caseActivities);
+    export function getOnlyWorkflowActivity(caseActivities: Lite<CaseActivityEntity>[]): Promise<WorkflowActivityEntity | null> {
+      return ajaxPost({ url: "/api/workflow/onlyWorkflowActivity" }, caseActivities);
     }
   }
 
@@ -962,29 +962,31 @@ export namespace WorkflowClient {
     workflowActivity: IWorkflowNodeEntity;
   }
 
-  export function CaseActivitiyOperations(p: { caseActivities: Lite<CaseActivityEntity>[], coc: ContextualOperationContext<CaseActivityEntity> }): React.JSX.Element[] {
+  export function CaseActivitiyOperations(p: { caseActivities: Lite<CaseActivityEntity>[], coc: ContextualOperationContext<CaseActivityEntity> }): React.JSX.Element | null {
 
-    const ca: CaseActivityEntity[] | undefined = useAPI(() => WorkflowClient.API.getSameCaseActivities(p.caseActivities).then(ca => ca), []);
+    const wa = useAPI(() => WorkflowClient.API.getOnlyWorkflowActivity(p.caseActivities), [p.caseActivities]);
 
-    if (ca == undefined)
-      return [<div>{JavascriptMessage.loading.niceToString()}</div>];
+    if (wa === undefined)
+      return <div>{JavascriptMessage.loading.niceToString()}</div>;
 
-    if (ca.length == 0)
-      return [];
+    if (wa === null)
+      return null;
 
-    const wa = ca[0].workflowActivity as WorkflowActivityEntity;
+    if (wa.type == "Task") {
+      return (
+        <ContextualOperations.OperationMenuItem coc={p.coc} color={wa.customNextButton?.style.toLowerCase() as BsColor}>
+          {wa.customNextButton?.name}
+        </ContextualOperations.OperationMenuItem>
+      );
+    }
 
+    if (wa.type == "Decision") {
+      return (<>
+        {wa.decisionOptions.map(mle => <ContextualOperations.OperationMenuItem onOperationClick={() => p.coc.defaultClick(mle.element.name)}
+          coc={p.coc} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</ContextualOperations.OperationMenuItem>)}
+      </>);
+    }
 
-      if (wa.type == "Task") {
-
-        return [wa.customNextButton == null ? <ContextualOperations.OperationMenuItem coc={p.coc} />
-          : <ContextualOperations.OperationMenuItem coc={p.coc} color={wa.customNextButton.style.toLowerCase() as BsColor}>{wa.customNextButton.name}</ContextualOperations.OperationMenuItem>];
-
-      } else if (wa.type == "Decision") {
-        return wa.decisionOptions.map(mle => <ContextualOperations.OperationMenuItem onOperationClick={() => p.coc.defaultClick(mle.element.name)}
-            coc={p.coc} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</ContextualOperations.OperationMenuItem>);
-      }
-      else
-        return [];
+    return null;
   }
 }

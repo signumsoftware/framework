@@ -276,17 +276,18 @@ public class WorkflowController : Controller
             .ToList();
     }
 
-    [HttpPost("api/workflow/sameCaseActivities")]
-    public List<CaseActivityEntity>? GetSameCaseActivities([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
+    [HttpPost("api/workflow/onlyWorkflowActivity")]
+    public WorkflowActivityEntity? OnlyWorkflowActivity([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
     {
-        var caseActivities = Database.Query<CaseActivityEntity>().Where( ca => caseActivitiesLites.Contains(ca.ToLite())).ToList();
-
-        if (caseActivities.Select(ca => new { ca.WorkflowActivity }).Distinct().Count() == 1)
+        var workflowActivities = caseActivitiesLites.Chunks(100).SelectMany(cas =>
         {
-            return caseActivities;
-        }
-        else
-            return new List<CaseActivityEntity>();
+            return Database.Query<CaseActivityEntity>().Where(ca => cas.Contains(ca.ToLite()))
+            .Select(ca => ca.WorkflowActivity)
+            .Distinct()
+            .ToList();
+        }).Distinct().ToList();
+
+        return workflowActivities.Only();
     }
 }
 
