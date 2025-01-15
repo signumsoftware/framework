@@ -221,7 +221,8 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }): React.J
 
   return (
     <div>
-      {textDanger(p.error.httpError.exceptionMessage)}
+
+      {ErrorModalOptions.preferPreFormated(p.error) ? <pre style={{ whiteSpace: "pre-wrap" }}>{p.error.httpError.exceptionMessage}</pre> : textDanger(p.error.httpError.exceptionMessage)}
       {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
           <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
@@ -278,6 +279,9 @@ export namespace ErrorModalOptions {
     return false;
   }
 
+  export function preferPreFormated(se: ServiceError): boolean {
+    return se.httpError.exceptionType.contains("FieldReaderException");
+  }
   export function renderServiceMessage(se: ServiceError): React.ReactNode {
     return <RenderServiceMessageDefault error={se} />;
   }
