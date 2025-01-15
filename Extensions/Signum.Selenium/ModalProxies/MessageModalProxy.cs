@@ -37,6 +37,8 @@ public class MessageModalProxy : ModalProxy
 
     public string TitleText => Element.FindElement(By.ClassName("modal-title")).Text;
 
+
+
 }
 
 
@@ -52,7 +54,6 @@ public static class MessageModalProxyExtensions
         return new MessageModalProxy(element.GetParent());
     }
 
-  
     public static void CloseMessageModal(this WebDriver selenium, MessageModalButton button)
     {
         var message = selenium.Wait(() => GetMessageModal(selenium))!;

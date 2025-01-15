@@ -210,7 +210,6 @@ public class OperationInfo
     public bool? HasCanExecute { get; internal set; }
     public bool? HasCanExecuteExpression { get; internal set; }
 
-    public bool Returns { get; internal set; }
     public Type? ReturnType { get; internal set; }
     public Type? BaseType { get; internal set; }
 

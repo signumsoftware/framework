@@ -404,7 +404,6 @@ Consider the following options:
     {
         return new OperationInfo(oper.OperationSymbol, oper.OperationType)
         {
-            Returns = oper.Returns,
             ReturnType = oper.ReturnType,
             HasStates = (oper as IGraphHasStatesOperation)?.HasFromStates,
             HasCanExecute = (oper as IEntityOperation)?.HasCanExecute,
@@ -928,7 +927,6 @@ public interface IOperation
     OperationSymbol OperationSymbol { get; }
     Type OverridenType { get; }
     OperationType OperationType { get; }
-    bool Returns { get; }
     Type? ReturnType { get; }
     void AssertIsValid();
 

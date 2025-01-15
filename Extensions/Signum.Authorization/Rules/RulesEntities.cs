@@ -275,22 +275,6 @@ public static class TypeAllowedExtensions
             new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly()).Intern()
         );
     }
-
-    public static OperationAllowed ToOperationAllowed(this TypeAllowedBasic ta)
-    {
-        OperationAllowed oa =
-            ta == TypeAllowedBasic.None ? OperationAllowed.None :
-            ta == TypeAllowedBasic.Read ? OperationAllowed.None : OperationAllowed.Allow;
-        return oa;
-    }
-
-    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>> operationCache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>>();
-    public static WithConditions<OperationAllowed> ToOperationAllowed(this WithConditions<TypeAllowed> taac)
-    {
-        return operationCache.GetOrAdd(taac, taac =>
-            new WithConditions<OperationAllowed>(taac.Fallback.GetUI().ToOperationAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<OperationAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToOperationAllowed())).ToReadOnly()).Intern()
-        );
-    }
 }
 
 [InTypeScript(true)]
