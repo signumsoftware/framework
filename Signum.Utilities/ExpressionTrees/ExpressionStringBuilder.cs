@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Utilities.ExpressionTrees;
 
@@ -590,20 +591,32 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
         Out("new ");
         Out(node.Type.Name);
         Out('(');
+
+        bool indent = node.Members != null || TupleReflection.IsTuple(node.Type);
+        
         ReadOnlyCollection<MemberInfo>? members = node.Members;
-        for (int i = 0; i < node.Arguments.Count; i++)
+        using (indent ? this.Indent() : null)
         {
-            if (i > 0)
-            {
-                Out(", ");
+            if (indent)
+                this.NewLine();
+            for (int i = 0; i < node.Arguments.Count; i++)
+            {         
+                if (members != null)
+                {
+                    string name = members[i].Name;
+                    Out(name);
+                    Out(" = ");
+                }
+                Visit(node.Arguments[i]);
+
+                if (i < node.Arguments.Count - 1)
+                {
+                    Out(", ");
+                }
+
+                if (indent)
+                    this.NewLine();
             }
-            if (members != null)
-            {
-                string name = members[i].Name;
-                Out(name);
-                Out(" = ");
-            }
-            Visit(node.Arguments[i]);
         }
         Out(')');
         return node;
