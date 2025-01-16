@@ -100,7 +100,13 @@ public abstract class QueryToken : IEquatable<QueryToken>
     {
 
         if (context.Replacements.TryGetValue(this, out var result))
-            return WithHidden(result.GetExpression(), context);
+        {
+            var exp = result.GetExpression();
+            if (result.AlreadyHidden)
+                return exp;
+
+            return WithHidden(exp, context);
+        }
 
         if (searchToArray)
         {
@@ -723,12 +729,14 @@ public struct ExpressionBox
     public readonly Expression RawExpression;
     public readonly PropertyRoute? MListElementRoute;
     public readonly BuildExpressionContext? SubQueryContext;
+    public readonly bool AlreadyHidden;
 
-    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null)
+    public ExpressionBox(Expression rawExpression, PropertyRoute? mlistElementRoute = null, BuildExpressionContext? subQueryContext = null, bool alreadyHidden = false)
     {
         RawExpression = rawExpression;
         MListElementRoute = mlistElementRoute;
         SubQueryContext = subQueryContext;
+        AlreadyHidden = alreadyHidden;
     }
 
     public Expression GetExpression()
