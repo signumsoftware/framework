@@ -62,7 +62,7 @@ public class Query<T> : IQueryable<T>, IQueryable, IEnumerable<T>, IEnumerable, 
         if (expression is ConstantExpression ce && ce.Value == this)
             return this.GetType().TypeName().CleanIdentifiers();
         else
-            return expression.ToString();
+            return expression.ToStringIndented();
     }
 
     public string QueryText

@@ -453,14 +453,17 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
             Visit(node.NewExpression);
         }
         Out(" {");
-        for (int i = 0, n = node.Bindings.Count; i < n; i++)
+        using (Indent())
         {
-            MemberBinding b = node.Bindings[i];
-            if (i > 0)
+            for (int i = 0, n = node.Bindings.Count; i < n; i++)
             {
+                MemberBinding b = node.Bindings[i];
+
+                VisitMemberBinding(b);
                 Out(", ");
+                NewLine();
+
             }
-            VisitMemberBinding(b);
         }
         Out('}');
         return node;
@@ -553,6 +556,9 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
         if (ob != null)
         {
             Visit(ob);
+            if (ob.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
+                ob.Type.IsInstantiationOf(typeof(IQueryable<>)))
+                NewLine();
             Out('.');
         }
         Out(node.Method.Name);
@@ -593,14 +599,14 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
         Out('(');
 
         bool indent = node.Members != null || TupleReflection.IsTuple(node.Type);
-        
+
         ReadOnlyCollection<MemberInfo>? members = node.Members;
         using (indent ? this.Indent() : null)
         {
             if (indent)
                 this.NewLine();
             for (int i = 0; i < node.Arguments.Count; i++)
-            {         
+            {
                 if (members != null)
                 {
                     string name = members[i].Name;

@@ -1113,7 +1113,7 @@ public static class DQueryable
             if (isQueryable)
             {
                 var tempContext = new BuildExpressionContext(keyTupleType, pk,
-                    replacements: rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i)))).ToDictionary(),
+                    replacements: rootKeyTokens.Select((kqt, i) => KeyValuePair.Create(kqt, new ExpressionBox(TupleReflection.TupleChainProperty(pk, i), alreadyHidden: true))).ToDictionary(),
                     context.Filters,
                     context.Orders,
                     context.Pagination);

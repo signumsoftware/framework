@@ -755,7 +755,18 @@ internal static class SmartEqualizer
 
     static Expression EmbeddedNullEquals(EmbeddedEntityExpression eee)
     {
-        return Expression.Equal(eee.HasValue.Nullify(), Expression.Constant(null, typeof(bool?)));
+        if (eee.HasValue is ColumnExpression ce)
+            return Expression.NotEqual(ce.Nullify(), Expression.Constant(true, typeof(bool?)));
+
+        if (eee.HasValue is BinaryExpression be)
+        {
+            if (be.NodeType == ExpressionType.NotEqual)
+                return Expression.Equal(be.Left, be.Right);
+            if (be.NodeType == ExpressionType.Equal)
+                return Expression.NotEqual(be.Left, be.Right);
+        }
+
+        return Expression.Not(eee.HasValue);
     }
 
     static Expression EntityEntityEquals(EntityExpression e1, EntityExpression e2)
