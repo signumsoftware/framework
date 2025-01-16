@@ -79,9 +79,8 @@ public static class PropertyAuthLogic
 
         var ta = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
 
-        if (ta.Equals(pa))
+        if (ta.EqualsForRead(pa))
             return null;
-
 
         var parent = expression.Follow(a => a.Parent).FirstOrDefault(a => a.GetPropertyRoute() is PropertyRoute r && r.PropertyRouteType == PropertyRouteType.Root && r.RootType == pr.RootType);
 

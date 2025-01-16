@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
 
 namespace Signum.Authorization.Rules;
 
@@ -267,6 +268,22 @@ public static class TypeAllowedExtensions
         return pa;
     }
 
+    public static bool EqualsForRead(this WithConditions<PropertyAllowed> a, WithConditions<PropertyAllowed> b)
+    {
+        bool CanRead(PropertyAllowed pa) => pa >= PropertyAllowed.Read;
+        if (CanRead(a.Fallback) != CanRead(b.Fallback))
+            return false;
+
+        for (int i = 0; i < a.ConditionRules.Count; i++)
+        {
+            Debug.Assert(a.ConditionRules[i].TypeConditions.SetEquals(b.ConditionRules[i].TypeConditions));
+
+            if (CanRead(a.ConditionRules[i].Allowed) != CanRead(b.ConditionRules[i].Allowed))
+                return false;
+        }
+
+        return true;
+    }
 
     static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
