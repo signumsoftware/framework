@@ -85,6 +85,14 @@ public abstract class QueryToken : IEquatable<QueryToken>
         if (isHidden == null)
             return expression;
 
+        if (isHidden is ConstantExpression ce && ce.Value != null)
+        {
+            if(ce.Value.Equals(true))
+                return Expression.Constant(null, expression.Type.Nullify());
+            if (ce.Value.Equals(false))
+                return expression;
+        }
+
         return Expression.Condition(isHidden, Expression.Constant(null, expression.Type.Nullify()), expression.Nullify());
     }
 
