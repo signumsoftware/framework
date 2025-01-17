@@ -113,8 +113,9 @@ public static class FilePathLogic
                 Transaction.PreRealCommit += data =>
                 {
                     //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                    var a = fp; //For ebuggin
+                    var a = fp; //For debugging
                     task.Wait();
+                    fp.CleanBinaryFile();
                 };
             }
         }

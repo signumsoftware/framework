@@ -11,6 +11,7 @@ public interface IFilePath : IFile
     void SetPrefixPair(PrefixPair prefixPair);
 
     string Suffix { get; set; }
+    void CleanBinaryFile();
 }
 
 public interface IFile
