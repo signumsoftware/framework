@@ -86,7 +86,7 @@ public class ImportFromExcelRequest
     {
         var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-        OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+        OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true, null);
 
         return symbol;
     }

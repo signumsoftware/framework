@@ -28,7 +28,7 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/constructFromEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS? ConstructFromEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
 
         var entity = OperationLogic.ServiceConstructFrom(request.entity, op, request.ParseArgs(op));
 
@@ -38,16 +38,16 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/constructFromLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS? ConstructFromLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        var entity = OperationLogic.ServiceConstructFromLite(request.lite, op, request.ParseArgs(op));
-        return entity == null ? null : SignumServer.GetEntityPack(entity);
+        var entity = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, entity);
+        var result = OperationLogic.ServiceConstructFrom(entity, op, request.ParseArgs(op));
+        return result == null ? null : SignumServer.GetEntityPack(result);
     }
-
 
     [HttpPost("api/operation/executeEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public ActionResult<EntityPackTS> ExecuteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
         Entity entity;
         try
         {
@@ -70,20 +70,22 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/executeLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public EntityPackTS ExecuteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op));
+        var entity = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, entity);
+        var result = OperationLogic.ServiceExecute(entity, op, request.ParseArgs(op));
 
-        return SignumServer.GetEntityPack(entity);
+        return SignumServer.GetEntityPack(result);
     }
 
     [HttpPost("api/operation/executeLiteWithProgress/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public IAsyncEnumerable<ProgressStep<EntityPackTS>> ExecuteLiteWithProgress(string operationKey, [Required, FromBody] LiteOperationRequest request, CancellationToken cancellationToken)
     {
-        var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
+        var e = request.lite.Retrieve();
+        var op = request.GetOperationSymbol(operationKey, e);
 
         return WithProgressProxy(pp =>
         {
-            var entity = OperationLogic.ServiceExecuteLite(request.lite, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
+            var entity = OperationLogic.ServiceExecute(e, op, request.ParseArgs(op).EmptyIfNull().And(pp).ToArray());
             return SignumServer.GetEntityPack(entity);
         }, ControllerContext, cancellationToken);
     }
@@ -91,15 +93,16 @@ public class OperationController : ControllerBase
     [HttpPost("api/operation/deleteEntity/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public void DeleteEntity(string operationKey, [Required, FromBody] EntityOperationRequest request)
     {
-        var op = request.GetOperationSymbol(operationKey, request.entity.GetType());
+        var op = request.GetOperationSymbol(operationKey, request.entity);
         OperationLogic.ServiceDelete(request.entity, op, request.ParseArgs(op));
     }
 
     [HttpPost("api/operation/deleteLite/{operationKey}"), ProfilerActionSplitter("operationKey")]
     public void DeleteLite(string operationKey, [Required, FromBody] LiteOperationRequest request)
     {
+        var e = request.lite.Retrieve();
         var op = request.GetOperationSymbol(operationKey, request.lite.EntityType);
-        OperationLogic.ServiceDelete(request.lite, op, request.ParseArgs(op));
+        OperationLogic.ServiceDelete(e, op, request.ParseArgs(op));
     }
 
 
@@ -120,13 +123,14 @@ public class OperationController : ControllerBase
 
     public class BaseOperationRequest
     {
-        public OperationSymbol GetOperationSymbol(string operationKey, Type entityType) => ParseOperationAssert(operationKey, entityType);
+        public OperationSymbol GetOperationSymbol(string operationKey, Entity entity) => ParseOperationAssert(operationKey, entity.GetType(), entity);
+        public OperationSymbol GetOperationSymbol(string operationKey, Type entityType) => ParseOperationAssert(operationKey, entityType, null);
 
-        public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType)
+        public static OperationSymbol ParseOperationAssert(string operationKey, Type entityType, Entity? entity)
         {
             var symbol = SymbolLogic<OperationSymbol>.ToSymbol(operationKey);
 
-            OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true);
+            OperationLogic.AssertOperationAllowed(symbol, entityType, inUserInterface: true, entity: entity);
 
             return symbol;
         }
@@ -386,7 +390,7 @@ public class OperationController : ControllerBase
         var types = request.Lites.Select(a => a.EntityType).ToHashSet();
 
         var operationSymbols = request.OperationKeys
-            .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t)).Distinct().SingleEx())
+            .Select(operationKey => types.Select(t => BaseOperationRequest.ParseOperationAssert(operationKey, t, null)).Distinct().SingleEx())
             .ToList();
 
         var result = OperationLogic.GetContextualCanExecute(request.Lites, operationSymbols);

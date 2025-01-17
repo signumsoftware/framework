@@ -53,7 +53,7 @@ public class Graph<T>
         {
             using (HeavyProfiler.Log("Construct", () => operationSymbol.Key))
             {
-                OperationLogic.AssertOperationAllowed(operationSymbol, typeof(T), inUserInterface: false);
+                OperationLogic.AssertOperationAllowed(operationSymbol, typeof(T), inUserInterface: false, entity: null);
 
                 OperationLogEntity? log = new OperationLogEntity
                 {
@@ -236,7 +236,7 @@ public class Graph<T>
         {
             using (HeavyProfiler.Log("ConstructFrom", () => operationSymbol.Key))
             {
-                OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false);
+                OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false, entity: (Entity)origin);
 
                 OperationLogEntity? log = new OperationLogEntity
                 {
@@ -421,7 +421,7 @@ public class Graph<T>
             {
                 foreach (var type in lites.Select(a => a.EntityType).Distinct())
                 {
-                    OperationLogic.AssertOperationAllowed(operationSymbol, type, inUserInterface: false);
+                    OperationLogic.AssertOperationAllowed(operationSymbol, type, inUserInterface: false, entity: null);
                 }
 
                 OperationLogEntity? log = new OperationLogEntity
@@ -591,7 +591,7 @@ public class Graph<T>
         {
             using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
             {
-                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
+                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
 
                 OperationLogEntity log = new OperationLogEntity
                 {
@@ -765,7 +765,7 @@ public class Graph<T>
         {
             using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
             {
-                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false);
+                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
 
                 OperationLogEntity log = new OperationLogEntity
                 {

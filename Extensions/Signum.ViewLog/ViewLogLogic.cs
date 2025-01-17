@@ -53,7 +53,7 @@ public static class ViewLogLogic
             }
 
             QueryLogic.Queries.QueryExecuted += Current_QueryExecuted;
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += Type_PreDeleteSqlSync;
             ExecutionMode.OnApiRetrieved += ExecutionMode_OnApiRetrieved;
         }
     }
@@ -64,11 +64,11 @@ public static class ViewLogLogic
     }
 
   
-    static SqlPreCommand Type_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand Type_PreDeleteSqlSync(TypeEntity type)
     {
         var t = Schema.Current.Table<ViewLogEntity>();
         var f = ((FieldImplementedByAll)Schema.Current.Field((ViewLogEntity vl) => vl.Target)).TypeColumn;
-        return Administrator.DeleteWhereScript(t, f, arg.Id);
+        return Administrator.DeleteWhereScript(t, f, type.Id);
     }
 
     static IDisposable? Current_QueryExecuted(DynamicQueryContainer.ExecuteType type, object queryName, BaseQueryRequest? request)

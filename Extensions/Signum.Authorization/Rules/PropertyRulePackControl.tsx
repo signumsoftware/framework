@@ -2,17 +2,14 @@ import * as React from 'react'
 import { Button } from 'react-bootstrap';
 import { PropertyRouteEntity } from '@framework/Signum.Basics';
 import { Operations } from '@framework/Operations'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { TypeContext, ButtonsContext, IRenderButtons } from '@framework/TypeContext'
-import { EntityLine, AutoLine, EntityBaseController, Binding, FormGroup } from '@framework/Lines'
+import { EntityLine, AutoLine, Binding, FormGroup } from '@framework/Lines'
 import { AuthAdminClient } from '../AuthAdminClient'
 import { PropertyRulePack, PropertyAllowedRule, PropertyAllowed, AuthAdminMessage, TypeConditionSymbol, WithConditionsModel, ConditionRuleModel } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
-import { useForceUpdate } from '@framework/Hooks';
-import { RoleEntity } from '../Signum.Authorization';
-import { getToString, is, Lite, newMListElement } from '@framework/Signum.Entities';
-import { getRuleTitle, addConditionClick, useDragAndDrop } from './TypeRulePackControl';
+import { is } from '@framework/Signum.Entities';
+import { useDragAndDrop } from './TypeRulePackControl';
 import { GraphExplorer } from '@framework/Reflection';
 
 export default function PropertyRulesPackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<PropertyRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef?: React.Ref<IRenderButtons> }): React.JSX.Element {
