@@ -843,7 +843,7 @@ export namespace Navigator {
   }
 
 
-  export module API {
+  export namespace API {
 
     export function fillLiteModels(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
       return fillLiteModelsArray(lites.filter(l => l != null) as Lite<Entity>[]);

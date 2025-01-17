@@ -211,7 +211,7 @@ export namespace MailingClient {
       .then(pack => pack && Navigator.view(pack));
   }
   
-  export module API {
+  export namespace API {
     export function start(): Promise<void> {
       return ajaxPost({ url: "/api/asyncEmailSender/start" }, undefined);
     }

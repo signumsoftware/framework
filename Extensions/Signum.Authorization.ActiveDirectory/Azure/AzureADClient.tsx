@@ -185,7 +185,7 @@ export namespace AzureADClient {
 
   MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
 
-  export module API {
+  export namespace API {
 
     export function loginWithAzureAD(jwt: string, accessToken: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
       return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });

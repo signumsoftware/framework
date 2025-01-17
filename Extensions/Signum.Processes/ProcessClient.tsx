@@ -151,7 +151,7 @@ export namespace ProcessClient {
     });
   }
 
-  export module API {
+  export namespace API {
   
     export function processFromMany<T extends Entity>(lites: Lite<T>[], operationKey: string | ExecuteSymbol<T> | DeleteSymbol<T> | ConstructSymbol_From<any, T>, args?: any[]): Promise<EntityPack<ProcessEntity>> {
       GraphExplorer.propagateAll(lites, args);

@@ -1773,7 +1773,7 @@ export namespace Finder {
     return rt;
   }
 
-  export module API {
+  export namespace API {
 
     export function fetchQueryDescription(queryKey: string): Promise<QueryDescription> {
       return ajaxGet({ url: "/api/query/description/" + queryKey });
@@ -1849,7 +1849,7 @@ export namespace Finder {
     return pinned != null && (pinned.active == "Always" || pinned.active == "WhenHasValue");
   }
 
-  export module Encoder {
+  export namespace Encoder {
 
 
 
@@ -1944,7 +1944,7 @@ export namespace Finder {
 
   const HIDDEN = "__";
 
-  export module Decoder {
+  export namespace Decoder {
 
     export const decodeModel: { [typeName: string]: (string: any) => ModelEntity | null } = {};
 
@@ -2064,7 +2064,7 @@ export namespace Finder {
   }
 
 
-  export module ButtonBarQuery {
+  export namespace ButtonBarQuery {
 
     interface ButtonBarQueryContext {
       searchControl: SearchControlLoaded;

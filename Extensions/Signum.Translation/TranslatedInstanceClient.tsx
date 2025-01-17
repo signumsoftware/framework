@@ -82,7 +82,7 @@ export namespace TranslatedInstanceClient {
   
 
   
-  export module API {
+  export namespace API {
   
     export function status(): Promise<TranslatedTypeSummary[]> {
       return ajaxGet({ url: "/api/translatedInstance" });
