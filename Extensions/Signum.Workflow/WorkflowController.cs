@@ -275,6 +275,20 @@ public class WorkflowController : Controller
             .Select(a => a.To.ToLite())
             .ToList();
     }
+
+    [HttpPost("api/workflow/onlyWorkflowActivity")]
+    public WorkflowActivityEntity? OnlyWorkflowActivity([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
+    {
+        var workflowActivities = caseActivitiesLites.Chunks(100).SelectMany(cas =>
+        {
+            return Database.Query<CaseActivityEntity>().Where(ca => cas.Contains(ca.ToLite()))
+            .Select(ca => ca.WorkflowActivity)
+            .Distinct()
+            .ToList();
+        }).Distinct().ToList();
+
+        return workflowActivities.Only();
+    }
 }
 
 public class NextConnectionsRequest

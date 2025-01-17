@@ -61,6 +61,11 @@ public class FilePathEntity : Entity, IFile, IFilePath
         }
     }
 
+    public void CleanBinaryFile()
+    {
+        binaryFile = null!;
+    }
+
     public string? Hash { get; private set; }
 
     [Format("N0")]

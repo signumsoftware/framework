@@ -111,9 +111,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             {
                 var blobHeaders = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
                 var blobClient = client.GetBlobClient(fp.Suffix);
-                var binaryFile = fp.BinaryFile; //For consistency with async
-                fp.BinaryFile = null!;
-                SaveFileInAzure(blobClient, blobHeaders, binaryFile);
+                SaveFileInAzure(blobClient, blobHeaders, fp.BinaryFile);
+                fp.CleanBinaryFile();
             }
             catch (Exception ex)
             {
@@ -147,8 +146,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var blobClient = client.GetBlobClient(fp.Suffix);
 
                 var binaryFile = fp.BinaryFile;
-                fp.BinaryFile = null!; //So the entity is not modified after await
-
+                //fp.CleanBinaryFile(); at the end of transaction
                 return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, cancellationToken);
             }
             catch (Exception ex)

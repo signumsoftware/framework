@@ -30,7 +30,7 @@ export namespace TranslationClient {
   }
   
   
-  export module API {
+  export namespace API {
     export function status(): Promise<TranslationFileStatus[]> {
       return ajaxGet({ url: "/api/translation/state" });
     }

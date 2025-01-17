@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Signum.Utilities.Reflection;
 
 namespace Signum.Utilities.ExpressionTrees;
 
@@ -452,14 +453,17 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
             Visit(node.NewExpression);
         }
         Out(" {");
-        for (int i = 0, n = node.Bindings.Count; i < n; i++)
+        using (Indent())
         {
-            MemberBinding b = node.Bindings[i];
-            if (i > 0)
+            for (int i = 0, n = node.Bindings.Count; i < n; i++)
             {
+                MemberBinding b = node.Bindings[i];
+
+                VisitMemberBinding(b);
                 Out(", ");
+                NewLine();
+
             }
-            VisitMemberBinding(b);
         }
         Out('}');
         return node;
@@ -552,6 +556,9 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
         if (ob != null)
         {
             Visit(ob);
+            if (ob.Type.IsInstantiationOf(typeof(IEnumerable<>)) ||
+                ob.Type.IsInstantiationOf(typeof(IQueryable<>)))
+                NewLine();
             Out('.');
         }
         Out(node.Method.Name);
@@ -590,20 +597,32 @@ internal sealed class ExpressionStringBuilder : ExpressionVisitor
         Out("new ");
         Out(node.Type.Name);
         Out('(');
+
+        bool indent = node.Members != null || TupleReflection.IsTuple(node.Type);
+
         ReadOnlyCollection<MemberInfo>? members = node.Members;
-        for (int i = 0; i < node.Arguments.Count; i++)
+        using (indent ? this.Indent() : null)
         {
-            if (i > 0)
+            if (indent)
+                this.NewLine();
+            for (int i = 0; i < node.Arguments.Count; i++)
             {
-                Out(", ");
+                if (members != null)
+                {
+                    string name = members[i].Name;
+                    Out(name);
+                    Out(" = ");
+                }
+                Visit(node.Arguments[i]);
+
+                if (i < node.Arguments.Count - 1)
+                {
+                    Out(", ");
+                }
+
+                if (indent)
+                    this.NewLine();
             }
-            if (members != null)
-            {
-                string name = members[i].Name;
-                Out(name);
-                Out(" = ");
-            }
-            Visit(node.Arguments[i]);
         }
         Out(')');
         return node;

@@ -46,10 +46,14 @@ public static class SeleniumExtensions
         }
         catch (WebDriverTimeoutException ex)
         {
-            if (Debugger.IsAttached)
+            var errorModal = selenium.GetErrorModal();
+
+            if (errorModal != null)
             {
-                Debugger.Break();
-                return default!;
+                throw new WebDriverTimeoutException(
+                    $"ErrorModal '{errorModal.TitleText}' ..waiting for {(actionDescription?.Invoke() ?? "visual condition")}\n" +
+                    errorModal.BodyText
+                );
             }
 
             throw new WebDriverTimeoutException(ex.Message + ": waiting for {0} in page {1}({2})".FormatWith(
@@ -400,16 +404,16 @@ public static class SeleniumExtensions
 
         return result;
     }
-    public static void ContextClick(this IWebElement element)
+    public static void ContextClick(this IWebElement element, int offsetX = 2, int offsetY = 2)
     {
         Actions builder = new Actions(element.GetDriver());
-        builder.MoveToElement(element, 2, 2).ContextClick().Build().Perform();
+        builder.MoveToElement(element, offsetX, offsetY).ContextClick().Build().Perform();
     }
 
-    public static void DoubleClick(this IWebElement element)
+    public static void DoubleClick(this IWebElement element, int offsetX = 2, int offsetY = 2)
     {
         Actions builder = new Actions(element.GetDriver());
-        builder.MoveToElement(element, 2, 2).DoubleClick().Build().Perform();
+        builder.MoveToElement(element, offsetX, offsetY).DoubleClick().Build().Perform();
     }
 
     public static void SafeSendKeys(this IWebElement element, string? text)

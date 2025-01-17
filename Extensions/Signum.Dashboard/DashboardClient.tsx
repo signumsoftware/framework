@@ -203,7 +203,7 @@ export namespace DashboardClient {
     partRenderers[type.typeName] = renderer as PartRenderer<any> as PartRenderer<IPartEntity>;
   }
 
-  export module API {
+  export namespace API {
     export function forEntityType(type: string): Promise<Lite<DashboardEntity>[]> {
       return ajaxGet({ url: `/api/dashboard/forEntityType/${type}` });
     }

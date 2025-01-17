@@ -97,7 +97,7 @@ export namespace ColorPaletteClient {
     return h;
   }
   
-  export module API {
+  export namespace API {
   
     export function colorPalette(typeName: string): Promise<ColorPalette> {
       return ajaxGet({ url: `/api/colorPalette/${typeName}`, });

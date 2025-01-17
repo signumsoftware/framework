@@ -158,6 +158,12 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
         _hashCode = CalculateHash();
     }
 
+    public WithConditions<T> MapWithConditions<T>(Func<A, T> func)
+        where T : struct, Enum
+    {
+        return new WithConditions<T>(func(Fallback), ConditionRules.Select(cr => new ConditionRule<T>(cr.TypeConditions, func(cr.Allowed))).ToReadOnly());
+    }   
+
     static FrozenDictionary<A, WithConditions<A>> simpleCache = EnumExtensions.GetValues<A>().ToFrozenDictionary(a => a, a => new WithConditions<A>(a, ReadOnlyCollection<ConditionRule<A>>.Empty));
     public static WithConditions<A> Simple(A value) => simpleCache.GetOrThrow(value);
 

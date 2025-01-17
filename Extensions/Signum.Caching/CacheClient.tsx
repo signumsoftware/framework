@@ -28,7 +28,7 @@ export namespace CacheClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function enable(): Promise<void> {
       return ajaxPost({ url: "/api/cache/enable" }, undefined);

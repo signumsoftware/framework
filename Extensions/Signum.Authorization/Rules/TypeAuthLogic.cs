@@ -138,10 +138,7 @@ public static partial class TypeAuthLogic
 
         var tac = GetAllowed(type);
 
-        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type))
-            return null;
-
-        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInOperations(type))
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type) && !HasTypeConditionInOperations(type))
             return null;
 
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()

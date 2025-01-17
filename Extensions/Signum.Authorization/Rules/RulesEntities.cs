@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
 
 namespace Signum.Authorization.Rules;
 
@@ -267,28 +268,28 @@ public static class TypeAllowedExtensions
         return pa;
     }
 
+    public static bool EqualsForRead(this WithConditions<PropertyAllowed> a, WithConditions<PropertyAllowed> b)
+    {
+        bool CanRead(PropertyAllowed pa) => pa >= PropertyAllowed.Read;
+        if (CanRead(a.Fallback) != CanRead(b.Fallback))
+            return false;
+
+        for (int i = 0; i < a.ConditionRules.Count; i++)
+        {
+            Debug.Assert(a.ConditionRules[i].TypeConditions.SetEquals(b.ConditionRules[i].TypeConditions));
+
+            if (CanRead(a.ConditionRules[i].Allowed) != CanRead(b.ConditionRules[i].Allowed))
+                return false;
+        }
+
+        return true;
+    }
 
     static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)
     {
         return cache.GetOrAdd(taac, taac =>
             new WithConditions<PropertyAllowed>(taac.Fallback.GetUI().ToPropertyAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<PropertyAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToPropertyAllowed())).ToReadOnly()).Intern()
-        );
-    }
-
-    public static OperationAllowed ToOperationAllowed(this TypeAllowedBasic ta)
-    {
-        OperationAllowed oa =
-            ta == TypeAllowedBasic.None ? OperationAllowed.None :
-            ta == TypeAllowedBasic.Read ? OperationAllowed.None : OperationAllowed.Allow;
-        return oa;
-    }
-
-    static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>> operationCache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<OperationAllowed>>();
-    public static WithConditions<OperationAllowed> ToOperationAllowed(this WithConditions<TypeAllowed> taac)
-    {
-        return operationCache.GetOrAdd(taac, taac =>
-            new WithConditions<OperationAllowed>(taac.Fallback.GetUI().ToOperationAllowed(), taac.ConditionRules.Select(cr => new ConditionRule<OperationAllowed>(cr.TypeConditions, cr.Allowed.GetUI().ToOperationAllowed())).ToReadOnly()).Intern()
         );
     }
 }

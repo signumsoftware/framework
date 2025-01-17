@@ -41,8 +41,8 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             EnsureDirectory(fp);
 
             var binaryFile = fp.BinaryFile;
-            fp.BinaryFile = null!; //For consistency with async
             SaveFileInDisk(fp.FullPhysicalPath(), binaryFile);
+            fp.CleanBinaryFile();
         }
     }
 
@@ -58,7 +58,7 @@ public class FileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
             EnsureDirectory(fp);
 
             var binaryFile = fp.BinaryFile;
-            fp.BinaryFile = null!; //So the entity is not modified after await
+            //fp.CleanBinaryFile(); at the end of transaction
             return SaveFileInDiskAsync(fp.FullPhysicalPath(), binaryFile, token);
         }
     }

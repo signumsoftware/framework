@@ -238,7 +238,7 @@ export namespace ActiveDirectoryClient {
   
   
   
-  export module API {
+  export namespace API {
   
     export function findADUsers(request: Finder.API.AutocompleteRequest, signal?: AbortSignal): Promise<ActiveDirectoryUser[]> {
       return ajaxGet({ url: "/api/findADUsers?" + QueryString.stringify({ ...request }), signal });

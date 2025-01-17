@@ -58,7 +58,7 @@ export namespace SchedulerClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function start(): Promise<void> {
       return ajaxPost({ url: "/api/scheduler/start" }, undefined);
