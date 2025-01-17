@@ -109,7 +109,7 @@ export interface NumberBoxProps {
   maxValue?: number | null;
   format: Intl.NumberFormat;
   formControlClass?: string;
-  htmlAttributes?: React.HTMLAttributes<HTMLInputElement>;
+  htmlAttributes?: React.InputHTMLAttributes<HTMLInputElement>;
   innerRef?: ((ta: HTMLInputElement | null) => void) | React.RefObject<HTMLInputElement>;
   id?: string;
 }

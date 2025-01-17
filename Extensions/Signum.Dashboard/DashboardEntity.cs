@@ -32,7 +32,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
     public Lite<Entity>? Owner { get; set; }
 
     public int? DashboardPriority { get; set; }
-    public string? Code { get; set; }
 
     [Unit("s"), NumberIsValidator(ComparisonType.GreaterThanOrEqualTo, 10)]
     public int? AutoRefreshPeriod { get; set; }
@@ -157,7 +156,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
             EmbeddedInEntity = this.EmbeddedInEntity,
             Owner = Owner,
             DashboardPriority = DashboardPriority,
-            Code = Code,
             AutoRefreshPeriod = this.AutoRefreshPeriod,
             DisplayName = "Clone {0}".FormatWith(this.DisplayName),
             HideDisplayName = this.HideDisplayName,
@@ -177,7 +175,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
             Owner == null ? null! : new XAttribute("Owner", Owner.KeyLong()),
             HideDisplayName == false ? null! : new XAttribute("HideDisplayName", HideDisplayName.ToString()),
             DashboardPriority == null ? null! : new XAttribute("DashboardPriority", DashboardPriority.Value.ToString()),
-            Code == null ? null! : new XAttribute("Code", Code),
             EmbeddedInEntity == null ? null! : new XAttribute("EmbeddedInEntity", EmbeddedInEntity.Value.ToString()),
             new XAttribute("CombineSimilarRows", CombineSimilarRows),
             IconName == null ? null! : new XAttribute("IconName", IconName),
@@ -197,7 +194,6 @@ public class DashboardEntity : Entity, IUserAssetEntity, IHasEntityType, ITaskEn
         Owner = element.Attribute("Owner")?.Let(a => ctx.ParseLite(a.Value, this, d => d.Owner));
         HideDisplayName = element.Attribute("HideDisplayName")?.Let(a => bool.Parse(a.Value)) ?? false;
         DashboardPriority = element.Attribute("DashboardPriority")?.Let(a => int.Parse(a.Value));
-        Code = element.Attribute("Code")?.Let(a => a.Value);
         EmbeddedInEntity = element.Attribute("EmbeddedInEntity")?.Let(a => a.Value.ToEnum<DashboardEmbedededInEntity>());
         CombineSimilarRows = element.Attribute("CombineSimilarRows")?.Let(a => bool.Parse(a.Value)) ?? false;
         IconName = element.Attribute("IconName")?.Value;

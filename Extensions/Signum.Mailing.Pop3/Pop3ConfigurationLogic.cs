@@ -35,10 +35,10 @@ public static class Pop3ConfigurationLogic
             sb.Settings.AssertImplementedBy((EmailReceptionConfigurationEntity e) => e.Service, typeof(Pop3EmailReceptionServiceEntity));
 
 
-                                                  
-            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity >(ReceiveEmails));
 
-            if(sb.WebServerBuilder != null)
+            EmailReceptionLogic.EmailReceptionServices.Register(new Func<Pop3EmailReceptionServiceEntity, EmailReceptionConfigurationEntity, ScheduledTaskContext, EmailReceptionEntity>(ReceiveEmails));
+
+            if (sb.WebServerBuilder != null)
             {
                 var piPassword = ReflectionTools.GetPropertyInfo((Pop3EmailReceptionServiceEntity e) => e.Password);
                 var pcs = SignumServer.WebEntityJsonConverterFactory.GetPropertyConverters(typeof(Pop3EmailReceptionServiceEntity));
@@ -69,7 +69,7 @@ public static class Pop3ConfigurationLogic
 
 
 
-    public static EmailReceptionEntity ReceiveEmails(   Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config, ScheduledTaskContext ctx)
+    public static EmailReceptionEntity ReceiveEmails(Pop3EmailReceptionServiceEntity service, EmailReceptionConfigurationEntity config, ScheduledTaskContext ctx)
     {
         if (!EmailLogic.Configuration.ReciveEmails)
             throw new InvalidOperationException("EmailLogic.Configuration.ReciveEmails is set to false");

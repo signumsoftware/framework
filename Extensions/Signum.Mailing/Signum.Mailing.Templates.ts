@@ -37,6 +37,7 @@ export interface EmailMasterTemplateMessageEmbedded extends Entities.EmbeddedEnt
 }
 
 export namespace EmailMasterTemplateOperation {
+  export const Clone : Operations.ConstructSymbol_From<EmailMasterTemplateEntity, EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Clone");
   export const Create : Operations.ConstructSymbol_Simple<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Create");
   export const Save : Operations.ExecuteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Save");
   export const Delete : Operations.DeleteSymbol<EmailMasterTemplateEntity> = registerSymbol("Operation", "EmailMasterTemplateOperation.Delete");

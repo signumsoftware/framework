@@ -69,7 +69,6 @@ public static class DashboardLogic
                     cp.EntityType,
                     cp.Owner,
                     cp.DashboardPriority,
-                    cp.Code
                 });
 
             sb.Schema.EntityEvents<DashboardEntity>().Retrieved += DashboardLogic_Retrieved;

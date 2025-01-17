@@ -79,18 +79,19 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             {
                 var client = GetClient(fp);
                 return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
-        }
+            }
             catch (Exception ex)
-    {
-   ex.Data["suffix"] = fp.Suffix;
+            {
+                ex.Data["suffix"] = fp.Suffix;
                 throw;
             }
+        }
 
     }
 
-    public   string GetAsString( BlobClient blobClient)
+    public string GetAsString(BlobClient blobClient)
     {
-        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
+        BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
         string content = downloadResult.Content.ToString();
 
         return content;
@@ -237,7 +238,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp)
+    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
     {
         using (HeavyProfiler.Log("AzureBlobStorage MoveFile", () => ofp.FileName))
         {
@@ -285,6 +286,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         blobClient.SetHttpHeaders(headers);
     }
+
+
 
     public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
     {
@@ -984,6 +987,3 @@ public static class BlobExtensions
         return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
     }
 }
-
-
-
