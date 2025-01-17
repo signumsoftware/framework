@@ -44,8 +44,8 @@ public static class FilePathEmbeddedLogic
                         {
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                             var a = fpe; //For debugging
-
                             task.WaitSafe();
+                            fpe.CleanBinaryFile();
                         };
                     }
                 }
