@@ -171,10 +171,12 @@ ErrorModal.register = () => {
 
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
 
-    if (error.alreadyConsumed)
-      return;
+    if (error != null) {
+      if ((error as any).alreadyConsumed)
+        return;
 
-    error.alreadyConsumed = true;
+      (error as any).alreadyConsumed = true;
+    }
 
     if (error != null)
       logError(error);
