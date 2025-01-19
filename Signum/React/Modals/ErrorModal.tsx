@@ -151,6 +151,12 @@ function logError(error: Error) {
 ErrorModal.register = () => {
   window.onunhandledrejection = p => {
     var error = p.reason;
+
+    if (error.alreadyConsumed)
+      return;
+
+    error.alreadyConsumed = true;
+
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
@@ -164,6 +170,11 @@ ErrorModal.register = () => {
   var oldOnError = window.onerror;
 
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
+
+    if (error.alreadyConsumed)
+      return;
+
+    error.alreadyConsumed = true;
 
     if (error != null)
       logError(error);

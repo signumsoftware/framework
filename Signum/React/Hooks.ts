@@ -27,7 +27,7 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 
 export function useForceUpdatePromise(): () => Promise<void> {
   var [count, setCount] = useStateWithPromise(0);
-  return () => setCount(c => c + 1) as Promise<any>;
+  return () => setCount(c => c + 1) as Promise<any> as Promise<undefined>;
 }
 
 export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>): T {
