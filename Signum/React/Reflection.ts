@@ -26,6 +26,7 @@ export interface TypeInfo {
   gender?: string;
   entityKind?: EntityKind;
   entityData?: EntityData;
+  noSchema?: boolean;
   toStringFunction?: string;
   toStringFunctionTokens?: string[];
   customLiteModels?: { [modelType: string]: CustomLiteModel };

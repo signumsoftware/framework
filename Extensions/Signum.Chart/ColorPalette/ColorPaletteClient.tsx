@@ -4,7 +4,7 @@ import * as React from 'react';
 import { RouteObject } from 'react-router'
 import * as AppContext from '@framework/AppContext'
 import * as ColorUtils from './ColorUtils'
-import { PseudoType, getTypeName } from '@framework/Reflection';
+import { PseudoType, getTypeInfo, getTypeName } from '@framework/Reflection';
 import { Lite } from '@framework/Signum.Entities';
 import { Constructor } from '@framework/Constructor';
 import { Finder } from '@framework/Finder';
@@ -41,13 +41,16 @@ export namespace ColorPaletteClient {
   
   export let colorPalette: { [typeName: string]: Promise<ColorPalette | null> } = {};
   export function getColorPalette(type: PseudoType): Promise<ColorPalette | null> {
-  
-    const typeName = getTypeName(type);
-  
-    if (colorPalette[typeName] !== undefined)
-      return colorPalette[typeName];
-  
-    return colorPalette[typeName] = API.colorPalette(typeName).then(pal => {
+
+    const ti = getTypeInfo(type);
+
+    if (colorPalette[ti.name] !== undefined)
+      return colorPalette[ti.name];
+
+    if (ti.noSchema)
+      return colorPalette[ti.name] = Promise.resolve(null);
+
+    return colorPalette[ti.name] = API.colorPalette(ti.name).then(pal => {
       if (pal == null)
         return pal;
   
