@@ -52,9 +52,9 @@
     scrollbar-width: thin;
 }
 
-.sidebar-inner:hover {
-    overflow: scroll;
-}
+    .sidebar-inner:hover {
+        overflow-y: auto;
+    }
 
     .sidebar-inner .nav-item-sub-menu {
         background-color: #f3f3f3;
