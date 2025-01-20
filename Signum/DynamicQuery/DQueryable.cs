@@ -589,7 +589,6 @@ public static class DQueryable
 
     public static DEnumerable<T> Where<T>(this DEnumerable<T> collection, List<Filter> filters)
     {
-        Database.Query<ExceptionEntity>().Where(a => a.Id > 0);
         LambdaExpression? where = GetPredicateExpression(collection.Context, filters, inMemory: true);
         if (where == null)
             return collection;
