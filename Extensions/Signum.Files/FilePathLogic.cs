@@ -99,7 +99,7 @@ public static class FilePathLogic
 
     public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
     {
-        if (fp.IsNew && !fp.KeepSuffix)
+        if (fp.Suffix == null && fp.BinaryFile != null)
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);

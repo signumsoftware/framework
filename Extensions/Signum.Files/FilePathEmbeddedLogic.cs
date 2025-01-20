@@ -33,7 +33,7 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {
-                if (fpe.BinaryFile != null && !fpe.KeepSuffix) //First time
+                if (fpe.Suffix == null && fpe.BinaryFile != null)
                 {
                     if (SyncFileSave)
                         fpe.SaveFile();
