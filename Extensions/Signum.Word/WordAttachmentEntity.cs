@@ -2,6 +2,7 @@ using Signum.UserAssets;
 using Signum.Mailing.Templates;
 using Signum.Templating;
 using System.Xml.Linq;
+using Signum.Excel;
 
 namespace Signum.Word;
 
@@ -59,5 +60,16 @@ public class WordAttachmentEntity : Entity, IAttachmentGeneratorEntity
         FileName = element.Attribute(nameof(FileName))?.Value;
         OverrideModel = element.Attribute(nameof(OverrideModel))?.Let(om => ctx.ParseLite(om.Value, userAsset, PropertyRoute.Construct((WordAttachmentEntity wa) => wa.OverrideModel)));
         ModelConverter = element.Attribute(nameof(ModelConverter))?.Let(om => ctx.GetSymbol<ModelConverterSymbol>(om.Value));
+    }
+
+    public IAttachmentGeneratorEntity Clone()
+    {
+        return new WordAttachmentEntity()
+        {
+            FileName = this.FileName,
+            WordTemplate = this.WordTemplate,
+            OverrideModel = this.OverrideModel,
+            ModelConverter = this.ModelConverter,
+        }.Let(c => c.CopyMixinsFrom(this));
     }
 }

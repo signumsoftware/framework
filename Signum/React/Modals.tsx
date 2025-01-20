@@ -1,6 +1,6 @@
 import * as AppContext from './AppContext';
 import * as React from 'react'
-import { useStateWithPromise, useUpdatedRef} from './Hooks';
+import { useForceUpdatePromise, useStateWithPromise, useUpdatedRef} from './Hooks';
 import { useLocation } from 'react-router';
 
 declare global {
@@ -31,30 +31,41 @@ export function isStarted(): boolean {
 
 
 interface GlobalModalContainerHandles {
-  pushModal(element: React.ReactElement) : Promise<any>;
-  popModal(element: React.ReactElement): Promise<any>;
+  pushModal(element: React.ReactElement): number;
+  popModal(index: number): Promise<void>;
   getCount(): number;
 }
 
 export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
     className: string;
 }, HTMLElement> {
+
+
   React.useEffect(() => {
     window.addEventListener("keydown", hanldleKeyDown);
     return () => window.removeEventListener("keydown", hanldleKeyDown);
   }, []);
 
-  const [modals, setModals] = useStateWithPromise<React.ReactElement<IModalProps<any>>[]>([]);
-  const modalsLengthRef = useUpdatedRef(modals.length);
+  const forceUpdatePromise = useForceUpdatePromise();
+
   const location = useLocation();
 
-  React.useEffect(() => { setModals([]); }, [location]);
+  const modals = React.useMemo<React.ReactElement<IModalProps<any>>[]>(() => [], [location]);
 
   React.useEffect(() => {
     current = {
-      pushModal: e => setModals(ms => [...ms, e]),
-      popModal: e => setModals(ms => ms.filter(a => a != e)),
-      getCount: () => modalsLengthRef.current
+      pushModal: e => {
+        modals.push(e);
+        forceUpdatePromise();
+        return modals.length;
+      },
+      popModal: async index => {
+        if (index != modals.length)
+          throw new Error("Unexpected index");
+        modals.pop();
+        await forceUpdatePromise();
+      },
+      getCount: () => modals.length
     };
     return () => { current = null!; };
   }, []);
@@ -70,26 +81,27 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
     }
   }
 
-
-
-  return React.createElement("div", { className: "sf-modal-container" }, ...modals);
+  return React.createElement("div", { className: "sf-modal-container", id: "modal-container" }, ...modals);
 }
 
 export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise<T> {
 
   return new Promise<T>((resolve) => {
     let cloned: React.ReactElement<IModalProps<T>>;
-    const onExited = (val: T) => {
-      current.popModal(cloned)
-        .then(() => resolve(val));
-    }
 
-    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, { onExited: onExited, key: current.getCount() } as any),
+    cloned = FunctionalAdapter.withRef(React.cloneElement(modal, {
+
+      onExited: (val: T) => {
+        current.popModal(index!).then(() => resolve(val));
+      },
+
+      key: current.getCount()
+    } as any),
       c => {
         c ? modalInstances.push(c) : modalInstances.pop();
       });
 
-    return current.pushModal(cloned);
+    let index: number = current.pushModal(cloned);;
   });
 }
 

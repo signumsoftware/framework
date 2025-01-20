@@ -119,6 +119,7 @@ function logError(error: Error) {
     return;
 
   var errorModel = ClientErrorModel.New({
+    url: (error as any)?.url,
     errorType: (error as Object).constructor.name,
     message: error.message || error.toString(),
     stack: error.stack ?? null,
@@ -129,6 +130,7 @@ function logError(error: Error) {
 
   if (lastError != null) {
     if (
+      lastError.model.url == errorModel.url &&
       lastError.model.errorType == errorModel.errorType &&
       lastError.model.message == errorModel.message &&
       lastError.model.stack == errorModel.stack &&
@@ -149,6 +151,12 @@ function logError(error: Error) {
 ErrorModal.register = () => {
   window.onunhandledrejection = p => {
     var error = p.reason;
+
+    if (error.alreadyConsumed)
+      return;
+
+    error.alreadyConsumed = true;
+
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
@@ -162,6 +170,13 @@ ErrorModal.register = () => {
   var oldOnError = window.onerror;
 
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
+
+    if (error != null) {
+      if ((error as any).alreadyConsumed)
+        return;
+
+      (error as any).alreadyConsumed = true;
+    }
 
     if (error != null)
       logError(error);

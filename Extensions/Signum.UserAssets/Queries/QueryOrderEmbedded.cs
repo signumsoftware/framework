@@ -43,4 +43,13 @@ public class QueryOrderEmbedded : EmbeddedEntity
     {
         return "{0} {1}".FormatWith(Token, OrderType);
     }
+
+    public QueryOrderEmbedded Clone()
+    {
+        return new QueryOrderEmbedded()
+        {
+            OrderType = this.OrderType,
+            Token = this.Token.Clone(),
+        };
+    }
 }

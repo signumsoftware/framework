@@ -2,8 +2,8 @@ namespace Signum.Basics;
 
 public class FileContent
 {
-    public string FileName { get; private set; }
-    public byte[] Bytes { get; private set; }
+    public string FileName { get;  set; }
+    public byte[] Bytes { get;  set; }
 
     public FileContent(string fileName, byte[] bytes)
     {

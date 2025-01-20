@@ -1,8 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-
 using System.IO;
-using System.Reflection.Metadata;
 
 namespace Signum.Files.FileTypeAlgorithms;
 
@@ -77,31 +75,27 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes", () => fp.Suffix))
         {
-      
-            return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
+            try
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            }
+            catch (Exception ex)
+            {
+                ex.Data["suffix"] = fp.Suffix;
+                throw;
+            }
         }
-    }
-
-    public BlobClient GetBlobClient(IFilePath fp)
-    {
-        var client = GetClient(fp);
-        return client.GetBlobClient(fp.Suffix);
-    }
-
-    public  string GetAsString(IFilePath fp)
-    {
-        return GetAsString(GetBlobClient(fp));
 
     }
 
-    public   string GetAsString( BlobClient blobClient)
+    public string GetAsString(BlobClient blobClient)
     {
-        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
+        BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
         string content = downloadResult.Content.ToString();
 
         return content;
     }
-
 
     public virtual void SaveFile(IFilePath fp)
     {
@@ -180,7 +174,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    string? alreadyCreated; 
+    string? alreadyCreated;
 
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
@@ -238,7 +232,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         {
             ContentType = contentType,
             ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
-            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "",
         };
     }
 
@@ -290,6 +284,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         blobClient.SetHttpHeaders(headers);
     }
+
+
 
     public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
     {
@@ -989,6 +985,3 @@ public static class BlobExtensions
         return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
     }
 }
-
-
-

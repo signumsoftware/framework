@@ -235,10 +235,12 @@ public static class ScheduleTaskRunner
             });
     }
 
+    public static event Func<ITaskEntity, ScheduledTaskEntity?, IUserEntity, IDisposable>? SurroundExecuteTask;
 
     public static ScheduledTaskLogEntity ExecuteSync(ITaskEntity task, ScheduledTaskEntity? scheduledTask, IUserEntity user)
     {
         using (ExecutionMode.SetIsolation((Entity)user) ?? ExecutionMode.SetIsolation((Entity)task))
+        using (Disposable.Combine(SurroundExecuteTask, func => func(task, scheduledTask, user)))
         {
             ScheduledTaskLogEntity stl = new ScheduledTaskLogEntity
             {
