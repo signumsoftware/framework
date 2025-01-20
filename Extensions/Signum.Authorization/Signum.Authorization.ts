@@ -16,6 +16,7 @@ export interface UserEntity {
 export namespace AuthMessage {
   export const NotAuthorizedTo0The1WithId2: MessageKey = new MessageKey("AuthMessage", "NotAuthorizedTo0The1WithId2");
   export const NotAuthorizedToRetrieve0: MessageKey = new MessageKey("AuthMessage", "NotAuthorizedToRetrieve0");
+  export const NotAuthorizedToSave0: MessageKey = new MessageKey("AuthMessage", "NotAuthorizedToSave0");
   export const OnlyActive: MessageKey = new MessageKey("AuthMessage", "OnlyActive");
   export const IncludeTrivialMerges: MessageKey = new MessageKey("AuthMessage", "IncludeTrivialMerges");
   export const DefaultAuthorization: MessageKey = new MessageKey("AuthMessage", "DefaultAuthorization");
