@@ -73,6 +73,11 @@ public static class HtmlToWordConverter
                     rp.Append(new Underline() { Val = UnderlineValues.Single });
                 }), addParagraphProperties, document));
 
+            case "del":
+                return htmlNode.ChildNodes.SelectMany(c => HtmlToWordPrivate(c, addRunProperties + ((RunProperties rp) =>
+                {
+                    rp.Append(new Strike() { Val = true });
+                }), addParagraphProperties, document));
 
             case "h1":
             case "h2":
@@ -125,8 +130,9 @@ public static class HtmlToWordConverter
                              new StyleParagraphProperties(
                                  new KeepNext(),
                                  new KeepLines(),
-                                 new SpacingBetweenLines() { Before = hi == "1" ? "240" : "40", After = "0" },
-                                 new OutlineLevel() { Val = int.Parse(hi) -1 }),
+                                 new SpacingBetweenLines() { Before = hi == "1" ? "240" : "40", After = "0" }
+                                 //new OutlineLevel() { Val = int.Parse(hi) -1 }),
+                             ),
                              new StyleRunProperties(
                                  new RunFonts() { AsciiTheme = ThemeFontValues.MajorHighAnsi, HighAnsiTheme = ThemeFontValues.MajorHighAnsi, EastAsiaTheme = ThemeFontValues.MajorEastAsia, ComplexScriptTheme = ThemeFontValues.MajorBidi },
                                  new Color() { Val = color, ThemeColor = ThemeColorValues.Accent1, ThemeShade = themeShade },
