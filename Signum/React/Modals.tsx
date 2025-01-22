@@ -55,6 +55,7 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
 
   React.useEffect(() => {
     modals.clear();
+    forceUpdatePromise();
   }, [location]);
 
   React.useEffect(() => {
