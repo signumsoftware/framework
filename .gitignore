@@ -40,3 +40,4 @@ Signum.Analyzer/packages/*
 /Utils/CheckUrl/.vs/**
 **/ts_out/**
 /Extensions/Signum.Help/node_modules/.bin/marked
+/Signum/node_modules/*
