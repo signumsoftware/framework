@@ -335,6 +335,143 @@ public class StringDistance
         return num[str1.Length, str2.Length];
     }
 
+
+
+
+    public (int, string? result) SmithWatermanScoreWithResult(string text, string pattern, IEqualityComparer<char>? comparer = null) 
+    {
+        var result = SmithWatermanScoreWithResult<char>(text.ToArray(), pattern.ToArray(), comparer);
+
+        return (result.distance, new string(result.result));
+    }
+
+    public (int distance, T[]? result) SmithWatermanScoreWithResult<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
+    {
+        if (comparer == null)
+            comparer = EqualityComparer<T>.Default;
+
+        var dist = SmithWatermanScore(text, pattern, comparer);
+        var result = FindBestMatchingSubstringSmithWaterman(text, pattern, comparer);
+
+        return (dist, result);
+    }
+
+    public int SmithWatermanScore(string text, string pattern, IEqualityComparer<char>? comparer = null)
+    {
+        return SmithWatermanScore(text.ToArray(), pattern.ToArray(), comparer);
+    }
+
+    public int SmithWatermanScore<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
+    {
+        if (text == null)
+            throw new ArgumentNullException("text");
+
+        if (pattern == null)
+            throw new ArgumentNullException("pattern");
+
+        if (text.Length == 0 || pattern.Length == 0)
+            return 0;
+
+        if (comparer == null)
+            comparer = EqualityComparer<T>.Default;
+
+        int M1 = text.Length + 1;
+        int M2 = pattern.Length + 1;
+
+        var num = ResizeArray(M1, M2);
+
+        int rows = text.Length + 1;
+        int cols = pattern.Length + 1;
+
+        _cachedNum = new int[rows, cols];
+        int maxScore = 0;
+
+        // Scoring parameters
+        int match = 2;       // Score for a match
+        int mismatch = -1;   // Penalty for a mismatch
+        int gap = -1;        // Penalty for a gap
+
+        for (int i = 1; i < rows; i++)
+        {
+            for (int j = 1; j < cols; j++)
+            {
+                // Determine if characters match
+                int scoreMatch = comparer.Equals(text[i - 1], pattern[j - 1]) ? match : mismatch;
+
+                // Calculate scores based on possible options
+                int diag = _cachedNum[i - 1, j - 1] + scoreMatch; // Diagonal (match/mismatch)
+                int up = _cachedNum[i - 1, j] + gap;              // Up (gap in text)
+                int left = _cachedNum[i, j - 1] + gap;            // Left (gap in pattern)
+                int maxCellScore = Math.Max(0, Math.Max(diag, Math.Max(up, left)));
+
+                _cachedNum[i, j] = maxCellScore;
+
+                // Track the highest score for alignment
+                maxScore = Math.Max(maxScore, maxCellScore);
+            }
+        }
+
+        return maxScore;
+    }
+
+    T[]? FindBestMatchingSubstringSmithWaterman<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
+    {
+        if (text.Length == 0 || pattern.Length == 0 || _cachedNum == null)
+            return null;
+
+        if (text == null)
+            throw new ArgumentNullException("text");
+
+        if (pattern == null)
+            throw new ArgumentNullException("pattern");
+
+        if (comparer == null)
+            comparer = EqualityComparer<T>.Default;
+
+        // Find the cell with the maximum score
+        int maxRow = 0, maxCol = 0, maxScore = 0;
+        for (int i = 1; i < _cachedNum.GetLength(0); i++)
+        {
+            for (int j = 1; j < _cachedNum.GetLength(1); j++)
+            {
+                if (_cachedNum[i, j] > maxScore)
+                {
+                    maxScore = _cachedNum[i, j];
+                    maxRow = i;
+                    maxCol = j;
+                }
+            }
+        }
+
+        // Backtrack to find the best alignment
+        List<T> result = new List<T>();
+        int row = maxRow, col = maxCol;
+        while (row > 0 && col > 0 && _cachedNum[row, col] > 0)
+        {
+            if (_cachedNum[row, col] == _cachedNum[row - 1, col - 1] +
+                (comparer.Equals(text[row - 1], pattern[col - 1]) ? 2 : -1))
+            {
+                // Diagonal (match/mismatch)
+                result.Insert(0, text[row - 1]);
+                row--;
+                col--;
+            }
+            else if (_cachedNum[row, col] == _cachedNum[row - 1, col] - 1)
+            {
+                // Gap in pattern
+                row--;
+            }
+            else
+            {
+                // Gap in text
+                col--;
+            }
+        }
+
+        return result.ToArray();
+    }
+
+
     private int [,] ResizeArray(int M1, int M2)
     {
         if (_cachedNum == null || M1 > _cachedNum.GetLength(0) || M2 > _cachedNum.GetLength(1))

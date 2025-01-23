@@ -50,7 +50,13 @@ export function GlobalModalContainer(): React.DetailedReactHTMLElement<{
 
   const location = useLocation();
 
-  const modals = React.useMemo<React.ReactElement<IModalProps<any>>[]>(() => [], [location]);
+
+  const modals = React.useMemo<React.ReactElement<IModalProps<any>>[]>(() => [], []);
+
+  React.useEffect(() => {
+    modals.clear();
+    forceUpdatePromise();
+  }, [location]);
 
   React.useEffect(() => {
     current = {
@@ -90,12 +96,10 @@ export function openModal<T>(modal: React.ReactElement<IModalProps<T>>): Promise
     let cloned: React.ReactElement<IModalProps<T>>;
 
     cloned = FunctionalAdapter.withRef(React.cloneElement(modal, {
-
+      key: current.getCount(),
       onExited: (val: T) => {
         current.popModal(index!).then(() => resolve(val));
       },
-
-      key: current.getCount()
     } as any),
       c => {
         c ? modalInstances.push(c) : modalInstances.pop();
