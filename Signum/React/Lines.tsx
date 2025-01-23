@@ -47,6 +47,9 @@ export { TextAreaLine, TextAreaLineController } from './Lines/TextAreaLine'
 export { TextBoxLine, PasswordLine, ColorLine, GuidLine, TextBoxLineController } from './Lines/TextBoxLine'
 export type { TextBoxLineProps } from './Lines/TextBoxLine'
 
+//For some reason automatic imports in VS 2022 don't work directly to @fortawesome
+export { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+
 export { EntityLine } from './Lines/EntityLine'
 
 export { EntityCombo } from './Lines/EntityCombo'
