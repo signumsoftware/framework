@@ -14,6 +14,7 @@ import { EntityListBaseController, EntityListBaseProps } from '@framework/Lines/
 import { genericForwardRef, useController } from '@framework/Lines/LineBase'
 import { EntityBaseController } from '@framework/Lines'
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
+import { FilesClient } from '../FilesClient'
 
 export { FileTypeSymbol };
 
@@ -39,8 +40,14 @@ export class MultiFileLineController<V extends ModifiableEntity /*& IFile*/ | Li
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
-    if (pr && p.getFileFromElement)
-      pr = pr.addMember("Indexer", "", true).addLambda(p.getFileFromElement);
+    if (pr) {
+      let prElement = pr!.addMember("Indexer", "", true);
+      if (p.getFileFromElement)
+        pr = prElement.addLambda(p.getFileFromElement);
+      else if (!FilesClient.fileEntityTypeNames[pr.member!.type.name]) {
+        throw new Error("getFileFromElement is mandatory because " + pr.member!.type.name + " is not a file");
+      }
+    }
 
     const m = pr?.member;
     if (m?.defaultFileTypeInfo) {
