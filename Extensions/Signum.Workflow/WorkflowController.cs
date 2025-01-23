@@ -6,6 +6,7 @@ using Signum.API.Json;
 using Signum.Basics;
 using Signum.Processes;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using static Signum.API.Controllers.OperationController;
@@ -279,7 +280,7 @@ public class WorkflowController : Controller
     [HttpPost("api/workflow/onlyWorkflowActivity")]
     public WorkflowActivityEntity? OnlyWorkflowActivity([Required, FromBody] List<Lite<CaseActivityEntity>> caseActivitiesLites)
     {
-        var workflowActivities = caseActivitiesLites.Chunks(100).SelectMany(cas =>
+        var workflowActivities = caseActivitiesLites.Chunk(100).SelectMany(cas =>
         {
             return Database.Query<CaseActivityEntity>().Where(ca => cas.Contains(ca.ToLite()))
             .Select(ca => ca.WorkflowActivity)
@@ -287,7 +288,7 @@ public class WorkflowController : Controller
             .ToList();
         }).Distinct().ToList();
 
-        return workflowActivities.Only();
+        return (WorkflowActivityEntity?)workflowActivities.Only();
     }
 }
 
