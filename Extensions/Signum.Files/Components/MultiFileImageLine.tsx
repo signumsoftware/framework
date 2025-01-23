@@ -17,6 +17,7 @@ import { FileImage } from './FileImage';
 import { genericForwardRef, useController } from '@framework/Lines/LineBase'
 import { ImageModal } from './ImageModal'
 import { Aprox, AsEntity } from '@framework/Lines/EntityBase'
+import { FilesClient } from '../FilesClient'
 
 export { FileTypeSymbol };
 
@@ -29,8 +30,8 @@ interface MultiFileImageLineProps<V extends ModifiableEntity/* & IFile*/ | Lite<
   configuration?: FileDownloaderConfiguration<IFile>;
   imageHtmlAttributes?: React.ImgHTMLAttributes<HTMLImageElement>;
   maxSizeInBytes?: number;
-  getFile?: (ectx: V) => ModifiableEntity & IFile | Lite<IFile & Entity>;
-  createEmbedded?: (file: ModifiableEntity & IFile | Lite<IFile & Entity>) => Promise<V>;
+  getFileFromElement?: (ectx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
+  createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
 }
 
 export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/ | Lite</*IFile & */Entity>> extends EntityListBaseController<MultiFileImageLineProps<V>, V> {
@@ -39,9 +40,13 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
-    if (pr && p.getFile)
-      pr = pr.addMember("Indexer", "", true).addLambda(p.getFile);
-
+    if (pr) {
+      if (p.getFileFromElement)
+        pr = pr.addMember("Indexer", "", true).addLambda(p.getFileFromElement);
+      else if (!FilesClient.fileEntityTypeNames[pr.member!.type.name])
+        throw new Error("getFileFromElement is mandatory because " + pr.member!.type.name + " is not a file");
+    }
+    
     const m = pr?.member;
     if (m?.defaultFileTypeInfo) {
 
@@ -64,8 +69,8 @@ export class MultiFileImageLineController<V extends ModifiableEntity /*& IFile*/
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity): void => {
-    if (this.props.createEmbedded)
-      this.props.createEmbedded(file)
+    if (this.props.createElementFromFile)
+      this.props.createElementFromFile(file)
         .then(em => em && this.addElement(em));
     else
       this.convert(file as unknown as Aprox<V>)
@@ -100,7 +105,7 @@ export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite<
                 <div className="sf-file-image-container m-2" key={mlec.index}>
                   {p.getComponent ? p.getComponent(mlec as TypeContext<AsEntity<V>>) :
                     p.download == "None" ? <span className={classes(mlec.formControlClass, "file-control")} > {getToString(mlec.value)}</span > :
-                      renderFile(p.getFile ? mlec.subCtx(p.getFile) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
+                      renderFile(p.getFileFromElement ? mlec.subCtx(p.getFileFromElement) : mlec as unknown as TypeContext<ModifiableEntity & IFile | Lite<IFile & Entity>>)}
                   {!p.ctx.readOnly &&
                     <a href="#" title={EntityControlMessage.Remove.niceToString()}
                       className="sf-line-button sf-remove"
@@ -121,8 +126,8 @@ export const MultiFileImageLine: <V extends ModifiableEntity /*& IFile*/ | Lite<
                 dragAndDropMessage={p.dragAndDropMessage}
                 fileType={p.fileType}
                 onFileLoaded={c.handleFileLoaded}
-                typeName={p.getFile ?
-                  p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFile).typeReference().name! :
+                typeName={p.getFileFromElement ?
+                  p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
                   p.ctx.propertyRoute!.typeReference().name}
                 buttonCss={p.ctx.buttonClass}
                 divHtmlAttributes={{ className: "sf-file-line-new" }} />}

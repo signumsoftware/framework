@@ -2,7 +2,7 @@ import * as React from 'react'
 import { RouteObject } from 'react-router'
 import { Finder } from '@framework/Finder'
 import { Navigator } from '@framework/Navigator'
-import { Type, PropertyRoute } from '@framework/Reflection'
+import { Type, PropertyRoute, getTypeName } from '@framework/Reflection'
 import { AutoLine } from '@framework/Lines/AutoLine'
 import { FileEntity, FilePathEntity, FileEmbedded, FilePathEmbedded, IFile } from './Signum.Files'
 import { FileLine } from './Components/FileLine'
@@ -34,9 +34,12 @@ export namespace FilesClient {
     registerToString(FilePathEntity, f => f.toStr ?? f.fileName);
     registerToString(FilePathEmbedded, f => f.toStr ?? f.fileName);
   }
-  
-  
+
+  export const fileEntityTypeNames: Record<string, boolean> = {};;
   function registerAutoFileLine(type: Type<IFile & ModifiableEntity>) {
+
+    fileEntityTypeNames[getTypeName(type)] = true;
+
     AutoLine.registerComponent(type.typeName, (tr, pr) => { 
       if (tr.isCollection)
         return ({ ctx, ...rest }) => <MultiFileLine ctx={ctx as any} {...rest as any} />;
@@ -162,13 +165,10 @@ interface FileThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 }
 
 export function FileThumbnail({ file, ...attrs }: FileThumbnailProps): React.JSX.Element {
-  return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} />
-}
 
-export namespace FileThumbnail {
-  export const defaultProps = {
-    style: { maxWidth: "150px" }
-  } as Partial<FileThumbnailProps>;
+  const style = attrs?.style ?? { maxWidth: "150px" };
+
+  return <FileImage file={file} onClick={e => ImageModal.show(file, e)} {...attrs} style={style} />
 }
 
 declare module '@framework/Reflection' {
