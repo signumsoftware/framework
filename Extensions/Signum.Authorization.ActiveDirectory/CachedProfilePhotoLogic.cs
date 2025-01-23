@@ -31,6 +31,7 @@ public static class CachedProfilePhotoLogic
                     Entity = e,
                     e.Id,
                     e.CreationDate,
+                    e.InvalidationDate,
                     e.Size,
                     e.User,
                     e.Photo,
@@ -44,33 +45,39 @@ public static class CachedProfilePhotoLogic
     {
         using (AuthLogic.Disable())
         {
-            size = AzureADLogic.ToAzureSize(size);
-            
             var result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
 
-            if (result != null)
+            if (result != null && result.InvalidationDate >= Clock.Today)
                 return result;
+
+            size = AzureADLogic.ToAzureSize(size);
+
+            var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
+            var newresult = new CachedProfilePhotoEntity();
 
             using (var tr = new Transaction())
             {
-                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size); //Check again
-                if (result != null)
+                result = await Database.Query<CachedProfilePhotoEntity>().SingleOrDefaultAsync(a => a.User.Entity.Mixin<UserADMixin>().OID == oid && a.Size == size);
+                if (result != null && result.InvalidationDate >= Clock.Today)
                     return result;
 
-                var stream = await AzureADLogic.GetUserPhoto(oid, size).ContinueWith(promise => promise.IsFaulted || promise.IsCanceled ? null : promise.Result);
                 var user = Database.Query<UserEntity>().Where(u => u.Mixin<UserADMixin>().OID == oid).Select(a => a.ToLite()).SingleEx();
 
-                result = new CachedProfilePhotoEntity
+                if (result != null)
+                    result.Delete();
+
+                newresult = new CachedProfilePhotoEntity
                 {
-                    Photo = stream == null ? null :  new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
+                    Photo = stream == null ? null : new FilePathEmbedded(AuthADFileType.CachedProfilePhoto, oid.ToString() + "x" + size + ".jpg", stream.ReadAllBytes()),
                     User = user,
+                    InvalidationDate = stream == null ? Clock.Today.AddDays(7) : Clock.Today.AddMonths(1),
                     Size = size
                 }.Save();
 
                 tr.Commit();
             }
 
-            return result;
+            return newresult;
         }
     }
 

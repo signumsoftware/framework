@@ -15,6 +15,8 @@ public class CachedProfilePhotoEntity : Entity
     [DefaultFileType(nameof(AuthADFileType.CachedProfilePhoto))]
     public FilePathEmbedded? Photo { get; set; }
 
+    public DateOnly InvalidationDate { get; set; }
+
     public DateTime CreationDate { get; private set; } = Clock.Now;
 
     protected override string? PropertyValidation(PropertyInfo pi)
