@@ -1,11 +1,12 @@
 using System.Threading;
 using System.Collections;
+using System.Collections.Concurrent;
 
 namespace Signum.Utilities;
 
 public static class Statics
 {
-    static readonly Dictionary<string, IThreadVariable> threadVariables = new Dictionary<string, IThreadVariable>();
+    static readonly ConcurrentDictionary<string, IThreadVariable> threadVariables = new ConcurrentDictionary<string, IThreadVariable>();
 
 
     public static IThreadVariable? GetVariable(string name)

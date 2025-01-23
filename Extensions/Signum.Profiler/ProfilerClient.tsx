@@ -40,9 +40,9 @@ export namespace ProfilerClient {
   }
   
   
-  export module API {
+  export namespace API {
   
-    export module Heavy {
+    export namespace Heavy {
       export function setEnabled(isEnabled: boolean): Promise<void> {
         return ajaxPost({ url: "/api/profilerHeavy/setEnabled/" + isEnabled }, undefined);
       }
@@ -77,7 +77,7 @@ export namespace ProfilerClient {
       }
     }
   
-    export module Times {
+    export namespace Times {
   
       export function clear(): Promise<void> {
         return ajaxPost({ url: "/api/profilerTimes/clear" }, undefined);

@@ -336,7 +336,7 @@ export namespace AuthAdminClient {
     return ti != null && ti.maxTypeAllowed == "Write";
   }
   
-  export module API {
+  export namespace API {
   
     export function fetchPermissionRulePack(roleId: number | string): Promise<PermissionRulePack> {
       return ajaxGet({ url: "/api/authAdmin/permissionRules/" + roleId, cache: "no-cache" });

@@ -154,7 +154,7 @@ export namespace UserChartClient {
   }
   
   
-  export module Converter {
+  export namespace Converter {
   
   
     export async function applyUserChart(cr: ChartRequestModel, uc: UserChartEntity, entity?: Lite<Entity>): Promise<ChartRequestModel> {
@@ -234,7 +234,7 @@ export namespace UserChartClient {
   }
   
   
-  export module API {
+  export namespace API {
     export function forEntityType(type: string): Promise<Lite<UserChartEntity>[]> {
       return ajaxGet({ url: "/api/userChart/forEntityType/" + type });
     }

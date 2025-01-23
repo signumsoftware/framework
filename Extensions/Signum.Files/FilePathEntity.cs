@@ -61,6 +61,11 @@ public class FilePathEntity : Entity, IFile, IFilePath
         }
     }
 
+    public void CleanBinaryFile()
+    {
+        binaryFile = null!;
+    }
+
     public string? Hash { get; private set; }
 
     [Format("N0")]
@@ -73,10 +78,6 @@ public class FilePathEntity : Entity, IFile, IFilePath
     public string Suffix { get; set; }
 
     public FileTypeSymbol FileType { get; internal set; }
-
-    //Old UnsafeMode
-    [Ignore]
-    public bool KeepSuffix;
 
     [Ignore]
     internal PrefixPair _prefixPair;

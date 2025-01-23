@@ -339,6 +339,7 @@ public static class ReflectionServer
         {
             Kind = kind,
             FullName = type.FullName!,
+            NoSchema = kind == KindOfType.Enum && !TypeLogic.NameToType.ContainsKey(type.Name),
             NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
             Members = type.GetFields(staticFlags)
                           .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
@@ -419,6 +420,7 @@ public class TypeInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsSystemVersioned { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ToStringFunction { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool QueryDefined { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool NoSchema { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, CustomLiteModelTS>? CustomLiteModels { get; set; } = null!;

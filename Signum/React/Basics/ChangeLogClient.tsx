@@ -76,7 +76,7 @@ export namespace ChangeLogClient {
     export let changeLogs: { [key: string]: () => Promise<{ default: ChangeLogDic }> } = {};
   }
   
-  export module API {
+  export namespace API {
     export function getLastDate(): Promise<string | null> {
       return ajaxGet({ url: "/api/changelog/getLastDate" });
     }

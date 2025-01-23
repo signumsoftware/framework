@@ -195,7 +195,12 @@ public static partial class TypeAuthLogic
                 return;
 
             if (max < requested)
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            {
+                if (ident.IsNew)
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToSave0.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName()));
+                else
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            }
 
             Schema_Saving_Instance(ident);
         }

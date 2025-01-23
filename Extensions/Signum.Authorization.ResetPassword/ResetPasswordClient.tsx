@@ -24,7 +24,7 @@ export namespace ResetPasswordClient {
     </span>;
   }
   
-  export module API {
+  export namespace API {
   
     export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<string> {
       return ajaxPost({ url: "/api/auth/forgotPasswordEmail" }, request);

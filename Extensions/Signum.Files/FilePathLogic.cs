@@ -99,7 +99,7 @@ public static class FilePathLogic
 
     public static void FilePath_PreSaving(FilePathEntity fp, PreSavingContext ctx)
     {
-        if (fp.IsNew && !fp.KeepSuffix)
+        if (fp.Suffix == null && fp.BinaryFile != null)
         {
             var alg = fp.FileType.GetAlgorithm();
             alg.ValidateFile(fp);
@@ -113,8 +113,9 @@ public static class FilePathLogic
                 Transaction.PreRealCommit += data =>
                 {
                     //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
-                    var a = fp; //For ebuggin
+                    var a = fp; //For debugging
                     task.Wait();
+                    fp.CleanBinaryFile();
                 };
             }
         }

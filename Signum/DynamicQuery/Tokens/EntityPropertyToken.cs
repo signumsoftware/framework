@@ -65,6 +65,9 @@ public class EntityPropertyToken : QueryToken
     {
         var baseExpression = parent.BuildExpression(context);
 
+        if(baseExpression is ConstantExpression ce && ce.Value == null) //Hidden property
+            return Expression.Constant(null, PropertyInfo.PropertyType.Nullify()).BuildLiteNullifyUnwrapPrimaryKey(new[] { this.PropertyRoute });
+
         if (PropertyInfo.Name == nameof(Entity.Id) ||
             PropertyInfo.Name == nameof(Entity.ToStringProperty))
         {

@@ -85,6 +85,12 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
         }
     }
 
+
+    public void CleanBinaryFile()
+    {
+        binaryFile = null!;
+    }
+
     public string? Hash { get; private set; }
 
     [Format("N0")]
@@ -98,11 +104,6 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
 
     [ForceNotNullable]
     public FileTypeSymbol FileType { get; internal set; }
-
-    //Old UnsafeMode
-    [Ignore]
-    public bool KeepSuffix;
-
 
     [Ignore]
     internal PrefixPair? _prefixPair;
@@ -162,4 +163,6 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     }
 
     public FilePathEmbedded Clone() => new FilePathEmbedded(FileType, FileName, this.GetByteArray());
+
+
 }

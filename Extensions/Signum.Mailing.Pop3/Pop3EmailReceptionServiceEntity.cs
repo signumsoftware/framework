@@ -17,6 +17,11 @@ public class Pop3EmailReceptionServiceEntity : EmailReceptionServiceEntity
     [StringLengthValidator(Max = 100)]
     public string? Password { get; set; }
 
+    [Format(FormatAttribute.Password)]
+    [StringLengthValidator(Max = 100),Ignore]
+    public string? NewPassword { get; set; }
+
+
     bool enableSSL;
     public bool EnableSSL
     {

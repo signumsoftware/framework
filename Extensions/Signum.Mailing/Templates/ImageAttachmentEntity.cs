@@ -62,5 +62,20 @@ public class ImageAttachmentEntity : Entity, IAttachmentGeneratorEntity
         Type = element.Attribute(nameof(Type))!.Value.ToEnum<EmailAttachmentType>();
         (File ??= new FileEmbedded()).FromXml(element.Element(nameof(File))!);
     }
+
+    public IAttachmentGeneratorEntity Clone()
+    {
+        return new ImageAttachmentEntity()
+        {
+            FileName = this.FileName,
+            Type = this.Type,
+            ContentId = this.ContentId,
+            File = new FileEmbedded() 
+            { 
+                FileName = this.File.FileName, 
+                BinaryFile = this.File.BinaryFile 
+            },
+        }.Let(c => c.CopyMixinsFrom(this));
+    }
 }
 

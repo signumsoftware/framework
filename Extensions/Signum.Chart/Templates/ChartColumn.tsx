@@ -165,7 +165,7 @@ export function ChartColumn(p: ChartColumnProps): React.JSX.Element {
               </div>
               {getColorPalettes().map((t, i) =>
                 <div className="col-sm-3" key={i}>
-                  {t && <ChartPaletteLink ctx={ctxBasic} type={t} refresh={forceUpdate} />}
+                  {t && !t.noSchema && < ChartPaletteLink ctx={ctxBasic} type={t} refresh={forceUpdate} />}
                 </div>)
               }
             </div>

@@ -585,7 +585,7 @@ export namespace ChartClient {
     col.modified = true;
   }
   
-  export module Encoder {
+  export namespace Encoder {
   
     export function toChartOptions(cr: ChartRequestModel, cs: ChartScript | null): ChartOptions {
   
@@ -675,7 +675,7 @@ export namespace ChartClient {
     }
   }
   
-  export module Decoder {
+  export namespace Decoder {
   
     export let DefaultMaxRows = 1000;
   
@@ -784,7 +784,7 @@ export namespace ChartClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function getRequest(request: ChartRequestModel): QueryRequest {
       var ts = request.chartTimeSeries;
