@@ -336,30 +336,32 @@ public class StringDistance
     }
 
 
-    public int ComputeSmithWaterman<T>(string text, string pattern, IEqualityComparer<char>? comparer = null)
-    {
-        return  ComputeSmithWaterman<char>(text.ToArray(), pattern.ToArray(), comparer);
-    }
 
-    public (int, string? result) ComputeSmithWatermanWithResult<T>(string text, string pattern, IEqualityComparer<char>? comparer = null) 
+
+    public (int, string? result) SmithWatermanScoreWithResult(string text, string pattern, IEqualityComparer<char>? comparer = null) 
     {
-        var result = ComputeSmithWatermanWithResult<char>(text.ToArray(), pattern.ToArray(), comparer);
+        var result = SmithWatermanScoreWithResult<char>(text.ToArray(), pattern.ToArray(), comparer);
 
         return (result.distance, new string(result.result));
     }
 
-    public (int distance, T[]? result) ComputeSmithWatermanWithResult<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
+    public (int distance, T[]? result) SmithWatermanScoreWithResult<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
     {
         if (comparer == null)
             comparer = EqualityComparer<T>.Default;
 
-        var dist = ComputeSmithWaterman(text, pattern, comparer);
+        var dist = SmithWatermanScore(text, pattern, comparer);
         var result = FindBestMatchingSubstringSmithWaterman(text, pattern, comparer);
 
         return (dist, result);
     }
 
-    public int ComputeSmithWaterman<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
+    public int SmithWatermanScore(string text, string pattern, IEqualityComparer<char>? comparer = null)
+    {
+        return SmithWatermanScore(text.ToArray(), pattern.ToArray(), comparer);
+    }
+
+    public int SmithWatermanScore<T>(T[] text, T[] pattern, IEqualityComparer<T>? comparer = null)
     {
         if (text == null)
             throw new ArgumentNullException("text");
