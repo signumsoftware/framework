@@ -126,45 +126,55 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
     protected override WithConditions<OperationAllowed> Merge((OperationSymbol operation, Type type) key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<OperationAllowed>>> baseValues)
     {
-        var merge = AuthLogic.GetMergeStrategy(role);
+        MergeStrategy merge = AuthLogic.GetMergeStrategy(role);
 
-        var tac = GetDefaultFromType(key, role);
+        WithConditions<OperationAllowed> tac = GetDefaultFromType(key, role);
 
-        var baseAdjusted = baseValues.Select(a => AdjustShape(values: a.Value, shape: tac)).ToList();
+        List<WithConditions<OperationAllowed>> baseAdjusted = baseValues.Select(a => AdjustShape(values: a.Value, shape: tac)).ToList();
 
         Func<IEnumerable<OperationAllowed>, OperationAllowed> collapse = merge == MergeStrategy.Union ? MaxOperationAllowed : MinOperationAllowed ;
 
-        var best =
+        WithConditions<OperationAllowed> best =
             baseAdjusted.Count == 0 ? WithShape(tac, merge == MergeStrategy.Union ? OperationAllowed.None : OperationAllowed.Allow) :
             baseAdjusted.Count == 1 ? baseAdjusted.SingleEx() :
             new WithConditions<OperationAllowed>(collapse(baseAdjusted.Select(a => a.Fallback)),
-                tac.ConditionRules.Select((a, i) => new ConditionRule<OperationAllowed>(a.TypeConditions, collapse(baseAdjusted.Select(b => b.ConditionRules[i].Allowed)))).ToReadOnly());
+                tac.ConditionRules
+                .Select((a, i) => new ConditionRule<OperationAllowed>(a.TypeConditions, collapse(baseAdjusted.Select(b => b.ConditionRules[i].Allowed))))
+                .ToReadOnly());
 
         if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
             return best;
 
 
-        var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
-        OperationAllowed AutomaticUpgrade(OperationAllowed mergedValue, IEnumerable<(OperationAllowed baseValue, OperationAllowed defaultBaseValue)> bases, OperationAllowed defaultValue)
+        OperationAllowed? maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
+        OperationAllowed AutomaticUpgrade(OperationAllowed mergedValue, IEnumerable<(OperationAllowed baseValue, OperationAllowed fromType)> bases, OperationAllowed fromType)
         {
-            if (bases.Where(a => a.baseValue == mergedValue).All(a => mergedValue == a.defaultBaseValue))
+            if (maxUp.HasValue && maxUp <= mergedValue)
+                return mergedValue;
+
+            if (bases.Where(a => a.baseValue == mergedValue).All(a => mergedValue == a.fromType))
             {
-                var upgrade = maxUp.HasValue && maxUp <= defaultValue ? maxUp.Value : defaultValue;
-                return upgrade;
+                var result = fromType;
+                if (maxUp.HasValue)
+                    result = Min(result, maxUp.Value);
+
+                return result;
             }
 
             return mergedValue;
         }
 
-        var baseDefaults = baseValues.Select(a => AdjustShape(values: GetDefaultFromType(key, a.Key), shape: tac)).ToList();
-        var result = new WithConditions<OperationAllowed>(AutomaticUpgrade(best.Fallback, baseAdjusted.Zip(baseDefaults, (b, d) => (b.Fallback, d.Fallback)), tac.Fallback),
+        List<WithConditions<OperationAllowed>> baseFromType = baseValues.Select(a => AdjustShape(values: GetDefaultFromType(key, a.Key), shape: tac)).ToList();
+        WithConditions<OperationAllowed> result = new WithConditions<OperationAllowed>(AutomaticUpgrade(best.Fallback, baseAdjusted.Zip(baseFromType, (b, ft) => (b.Fallback, ft.Fallback)), tac.Fallback),
             tac.ConditionRules.Select((cr, i) => new ConditionRule<OperationAllowed>(cr.TypeConditions,
-             AutomaticUpgrade(best.ConditionRules[i].Allowed, baseAdjusted.Zip(baseDefaults, (b, d) => (b.ConditionRules[i].Allowed, d.ConditionRules[i].Allowed)), cr.Allowed)
+             AutomaticUpgrade(best.ConditionRules[i].Allowed, baseAdjusted.Zip(baseFromType, (b, ft) => (b.ConditionRules[i].Allowed, ft.ConditionRules[i].Allowed)), cr.Allowed)
             )).ToReadOnly());
 
         return result.Intern();
     }
 
+    static OperationAllowed Max(OperationAllowed a, OperationAllowed b) => a > b  ? a : b;
+    static OperationAllowed Min(OperationAllowed a, OperationAllowed b) => a < b  ? a : b;
     static OperationAllowed MaxOperationAllowed(IEnumerable<OperationAllowed> baseValues)
     {
         OperationAllowed result = OperationAllowed.None;
