@@ -11,6 +11,7 @@ import { FileUploader } from './FileUploader'
 
 import "./Files.css"
 import { genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
+import { FilesClient } from '../FilesClient'
 
 export { FileTypeSymbol };
 
@@ -36,8 +37,12 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
     super.overrideProps(p, overridenProps);
 
     let pr = p.ctx.propertyRoute;
-    if (pr && p.getFileFromElement)
-      pr = pr.addLambda(p.getFileFromElement);
+    if (pr) {
+      if (p.getFileFromElement)
+        pr = pr.addLambda(p.getFileFromElement);
+      else if (!FilesClient.fileEntityTypeNames[pr.member!.type.name])
+        throw new Error("getFileFromElement is mandatory because " + pr.member!.type.name + " is not a file");
+    }
 
     const m = pr?.member;
     if (m?.defaultFileTypeInfo) {
