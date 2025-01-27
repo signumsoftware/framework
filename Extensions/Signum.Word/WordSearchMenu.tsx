@@ -40,6 +40,7 @@ export default function WordSearchMenu(p : WordSearchMenuProps): React.JSX.Eleme
   return (
     <DropdownButton id="wordTemplateDropDown" className="sf-word-dropdown" title={label}>
       {
+        wordReports == "error" ? <Dropdown.Item className="text-danger">Error</Dropdown.Item> : 
         wordReports.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleOnClick(wt)}>

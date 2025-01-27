@@ -9,6 +9,7 @@ import BasicCommandsPlugin from './Plugins/BasicCommandsPlugin';
 import './HtmlEditorLine.css';
 import { classes } from '@framework/Globals';
 import { FormGroup } from '@framework/Lines';
+import { useForceUpdate } from '@framework/Hooks';
 
 export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draftjs.EditorProps>, "binding"> {
   ctx: TypeContext<string | null | undefined>;
@@ -19,6 +20,7 @@ export interface HtmlEditorLineProps extends Omit<HtmlEditorProps & Partial<draf
 
 export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButtons, extraButtonsBefore, ...p }: HtmlEditorLineProps): React.JSX.Element {
 
+  const forceUpdate = useForceUpdate();
   return (
     <FormGroup ctx={ctx} >
       {id =>
@@ -27,7 +29,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
             {extraButtonsBefore && <div className={ctx.inputGroupVerticalClass("before")}>
               {extraButtonsBefore()}
             </div>}
-            <div className={classes("html-editor-line")} style={{
+            <div className={classes("html-editor-line", p.mandatory ?? (ctx.propertyRoute?.member?.required && !ctx.value) ? "sf-mandatory" : undefined)} style={{
               backgroundColor: readOnly ? "#e9ecef" : undefined,
               flexGrow: 1,
               ...p.htmlAttributes?.style
@@ -42,6 +44,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
                   new BasicCommandsPlugin(),
                 ]}
                 {...p}
+                onEditorBlur={(e, controller) => { forceUpdate(); p.onEditorBlur?.(e, controller); }}
               />
             </div>
             {extraButtons && <div className={ctx.inputGroupVerticalClass("after")}>
