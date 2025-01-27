@@ -300,6 +300,10 @@ export class FindOptionsAutocompleteConfig implements AutocompleteConfig<ResultR
 
   renderItem(item: ResultRow | AutocompleteConstructor<Entity>, hl: TextHighlighter): React.ReactNode {
     if (isAutocompleteConstructor<Entity>(item)) {
+
+      if (item.customElement)
+        return item.customElement;
+
       var ti = getTypeInfo(item.type);
       return <em>{SearchMessage.CreateNew0_G.niceToString().forGenderAndNumber(ti.gender).formatWith(ti.niceName)} "{hl.query}"</em>;
     }
