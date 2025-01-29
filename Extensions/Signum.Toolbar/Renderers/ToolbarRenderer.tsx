@@ -180,7 +180,9 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
       <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
         icon={
           <div style={{ display: 'inline-block', position: 'relative' }}>
-            <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
+            <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
+              <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
+            </div>
             <div className="nav-icon-with-arrow">
               {p.icon ?? <div className="icon" />}
             </div>
