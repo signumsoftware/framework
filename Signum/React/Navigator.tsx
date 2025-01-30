@@ -805,6 +805,10 @@ export namespace Navigator {
     return lite.entity;
   }
 
+  export function useFetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number): T | undefined {
+    return useAPI(signal => API.fetchEntity(type, id, partitionId), [getTypeName(type), id, partitionId]);
+  }
+
   export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
     return useAPI(signal => API.fetchAll(type), []);
   }
