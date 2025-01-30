@@ -805,27 +805,27 @@ export namespace Navigator {
     return lite.entity;
   }
 
-  export function useFetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number): T | undefined {
-    return useAPI(signal => API.fetchEntity(type, id, partitionId), [getTypeName(type), id, partitionId]);
+  export function useFetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number, deps?: React.DependencyList, options?: APIHookOptions): T | undefined {
+    return useAPI(signal => API.fetchEntity(type, id, partitionId), [type, id, partitionId, ...(deps ?? [])], options);
   }
 
-  export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-    return useAPI(signal => API.fetchAll(type), []);
+  export function useFetchAll<T extends Entity>(type: Type<T>, deps?: React.DependencyList): T[] | undefined {
+    return useAPI(signal => API.fetchAll(type), [type, ...(deps ?? [])]);
   }
 
-  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string, deps?: React.DependencyList, options?: APIHookOptions): Lite<T> {
 
-    var lite = React.useMemo(() => newLite(type, id), [type, id]);
+    var lite = React.useMemo(() => newLite(type, id), [type, id, ...(deps ?? [])]);
 
-    useAPI(() => API.fillLiteModels(lite), [lite]);
+    useAPI(() => API.fillLiteModels(lite), [lite, ...(deps ?? [])], options);
 
     return lite;
   }
 
-  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
+  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false, deps?: React.DependencyList): void {
     useAPI(() => {
       return lite == null || ((lite.model != null || lite.entity != null) && !force) ? Promise.resolve() : API.fillLiteModels(lite);
-    }, [lite]);
+    }, [lite, ...(deps ?? [])]);
   }
 
 
