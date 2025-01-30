@@ -188,8 +188,10 @@
     flex-grow: 1;
 }
 
-.nav-arrow-icon {
+.sidebar-inner .nav-item .nav-arrow-icon .icon {
     margin-left: -18px;
+    width: 15px;
+    height: 15px;
 }
 
 @media (min-width: 768px) {
