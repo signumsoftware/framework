@@ -81,6 +81,10 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
     const val = ctx.value!;
     const hasValue = !!val;
 
+    const download = p.download ?? "ViewOrSave";
+    const showFileIcon = p.showFileIcon ?? true;
+    const dragAndDrop = p.dragAndDrop ?? true;
+
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
@@ -97,13 +101,13 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
 
 
     function renderFile() {
-      const content = p.download == "None" ?
+      const content = download == "None" ?
         <span className={classes(ctx.formControlClass, "file-control")} >
           {getToString(p.getFileFromElement ? p.getFileFromElement(val) : val)}</span > :
         <FileDownloader
           configuration={p.configuration}
-          download={p.download}
-          showFileIcon={p.showFileIcon}
+          download={download}
+          showFileIcon={showFileIcon}
           containerEntity={p.getFileFromElement ? val as ModifiableEntity : undefined}
           entityOrLite={p.getFileFromElement ? p.getFileFromElement(val) : val as ModifiableEntity & IFile | Lite<IFile & Entity>}
           htmlAttributes={{ className: classes(ctx.formControlClass, "file-control") }} />;
@@ -130,7 +134,7 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
       const content = <FileUploader
         accept={p.accept}
         maxSizeInBytes={p.maxSizeInBytes}
-        dragAndDrop={p.dragAndDrop}
+        dragAndDrop={dragAndDrop}
         dragAndDropMessage={p.dragAndDropMessage}
         fileType={p.fileType}
         onFileLoaded={c.handleFileLoaded}
@@ -154,8 +158,3 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
     }
   }, (prev, next) => FileLineController.propEquals(prev, next));
 
-(FileLine as any).defaultProps = {
-  download: "ViewOrSave",
-  dragAndDrop: true,
-  showFileIcon: true
-} as FileLineProps<any>;
