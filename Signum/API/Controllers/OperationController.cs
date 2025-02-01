@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using static Signum.API.Controllers.OperationController;
 using Signum.API.Json;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Signum.API.Controllers;
 
@@ -326,7 +327,7 @@ public class OperationController : ControllerBase
             catch(Exception ex)
             {
                 SignumExceptionFilterAttribute.LogException(ex, context).Wait();
-                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(ex);
+                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(new ResourceExecutedContext(context, []) { Exception = ex });
                 lastProgress = new ProgressStep<T>
                 {
                     IsFinished = true,
