@@ -247,7 +247,8 @@ public static partial class TypeAuthLogic
 
         if (entity.Modified != ModifiedState.Sealed)
         {
-            if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(entity.GetType()) && !HasTypeConditionInOperations(entity.GetType()))
+            var role = RoleEntity.Current;
+            if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, entity.GetType()) && !HasTypeConditionInOperations(role, entity.GetType()))
             {
                 return allowed <= max;
             }
