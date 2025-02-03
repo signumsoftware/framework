@@ -27,12 +27,21 @@ public static class WordServer
             if (ep.entity.IsNew || !WordTemplatePermission.GenerateReport.IsAuthorized())
                 return;
 
-            var wordTemplates = WordTemplateLogic.TemplatesByEntityType.Value.TryGetC(ep.entity.GetType());
-            if (wordTemplates != null)
+            try
             {
-                var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
-                if (applicable.HasItems())
-                    ep.extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                var wordTemplates = WordTemplateLogic.TemplatesByEntityType.Value.TryGetC(ep.entity.GetType());
+                if (wordTemplates != null)
+                {
+                    var applicable = wordTemplates.Where(a => a.IsApplicable(ep.entity));
+                    if (applicable.HasItems())
+                        ep.extension.Add("wordTemplates", applicable.Select(a => a.ToLite()).ToList());
+                }
+
+            }
+            catch (Exception e)
+            {
+                e.LogException(); //An error could make the applicaiton unusable
+                ep.extension.Add("wordTemplates", "error");
             }
         };
 
@@ -41,10 +50,18 @@ public static class WordServer
             object type = QueryLogic.ToQueryName(qd.queryKey);
             if (Schema.Current.IsAllowed(typeof(WordTemplateEntity), true) == null)
             {
-                var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
+                try
+                {
+                    var templates = WordTemplateLogic.GetApplicableWordTemplates(type, null, WordTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("wordTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("wordTemplates", templates);
+                }
+                catch (Exception e)
+                {
+                    e.LogException(); //An error could make the applicaiton unusable
+                    qd.Extension.Add("wordTemplates", "error");
+                }
             }
         };
 

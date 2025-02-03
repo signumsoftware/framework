@@ -269,7 +269,7 @@ export namespace MailingClient {
 declare module '@framework/FindOptions' {
 
   export interface QueryDescription {
-    emailTemplates?: Array<Lite<EmailTemplateEntity>>;
+    emailTemplates?: Array<Lite<EmailTemplateEntity>> | "error";
   }
 }
 

@@ -507,6 +507,11 @@ public class Transaction : IDisposableException
         get { return currents.Value != null && currents.Value!.ContainsKey(Connector.Current); }
     }
 
+    public static Exception? HasRollbackedTransaction
+    {
+        get { return currents.Value?.TryGetC(Connector.Current)?.IsRolledback; }
+    }
+
     public static DbConnection? CurrentConnection
     {
         get
@@ -526,6 +531,8 @@ public class Transaction : IDisposableException
             return tran.Transaction;
         }
     }
+
+
 
     public static string CurrentStatus()
     {

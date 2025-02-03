@@ -159,7 +159,7 @@ public static class PropertyAuthLogic
     public static PropertyRulePack GetPropertyRules(Lite<RoleEntity> role, TypeEntity typeEntity)
     {
         var result = new PropertyRulePack { Role = role, Type = typeEntity };
-        var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id").ToList();
+        var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity)/*.Where(a => a.Path != "Id")*/.ToList();
         cache.GetRules(result, properties);
 
         result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write)).ToModel());

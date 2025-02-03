@@ -17,7 +17,7 @@
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
 		<PackageReference Include="Signum.TSGenerator" Version="9.0.1" />
-		<PackageReference Include="Microsoft.Graph" Version="5.64.0" />
+		<PackageReference Include="Microsoft.Graph" Version="5.69.0" />
 	</ItemGroup>
 
 	<ItemGroup>
