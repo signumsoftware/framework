@@ -114,9 +114,8 @@ public static class PropertyAuthLogic
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
-    static bool RequiresTypeConditionForProperties(Type type)
+    static bool RequiresTypeConditionForProperties(Lite<RoleEntity> role, Type type)
     {
-        var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
             var taac = TypeAuthLogic.GetAllowed(e.type);

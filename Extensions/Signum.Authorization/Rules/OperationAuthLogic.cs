@@ -58,9 +58,8 @@ public static class OperationAuthLogic
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
-    static bool RequiresTypeConditionForOperations(Type type)
+    static bool RequiresTypeConditionForOperations(Lite<RoleEntity> role, Type type)
     {
-        var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
             var taac = TypeAuthLogic.GetAllowed(e.type);
@@ -103,7 +102,7 @@ public static class OperationAuthLogic
         if (entity == null || entity.IsNew)
             return oa.Max().ToBoolean(inUserInterface);
 
-        if(!RequiresTypeConditionForOperations(entityType))
+        if(!RequiresTypeConditionForOperations(RoleEntity.Current, entityType))
         {
             var ta = TypeAuthLogic.GetAllowed(entityType);
 

@@ -142,7 +142,7 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditionsModel<TypeA
 }
 
 public class WithConditions<A> : IEquatable<WithConditions<A>>
-    where A : struct, Enum
+    where A : struct
 {
 
     public A Fallback { get; }
@@ -209,9 +209,6 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
 
         return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
     }
-
-    internal WithConditionsModel<A> ToModel() => new WithConditionsModel<A>(Fallback,
-            ConditionRules.Select(r => new ConditionRuleModel<A>(r.TypeConditions, r.Allowed)));
 }
 
 public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
@@ -338,6 +335,8 @@ public class WithConditionsModel<A> : ModelEntity
 
 public static class TypeAllowAndConditionsExtensions
 {
+    public static WithConditionsModel<A> ToModel<A>(this WithConditions<A> wc)  where A : struct, Enum => new WithConditionsModel<A>(wc.Fallback,
+        wc.ConditionRules.Select(r => new ConditionRuleModel<A>(r.TypeConditions, r.Allowed)));
 
     public static TypeAllowedBasic Min(this WithConditions<TypeAllowed> taac, bool inUserInterface)
     {
