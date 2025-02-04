@@ -159,7 +159,7 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
     }
 
     public WithConditions<T> MapWithConditions<T>(Func<A, T> func)
-        where T : struct, Enum
+        where T : struct
     {
         return new WithConditions<T>(func(Fallback), ConditionRules.Select(cr => new ConditionRule<T>(cr.TypeConditions, func(cr.Allowed))).ToReadOnly());
     }   

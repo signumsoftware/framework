@@ -1,4 +1,6 @@
 using Microsoft.VisualBasic;
+using Signum.Authorization;
+using Signum.Authorization.Rules;
 using Signum.Basics;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
@@ -71,23 +73,20 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
                     TypeAuthLogic.HasTypeConditionInProperties(role, key);
 
             if (!hasPrima)
-                return kvp.Value.MapWithConditions(a => new TypeAllowedPrima(a));
+                return kvp.Value.MapWithConditions(a => new TypeAllowedPrima(a, Prima: null));
 
             var pre = ('a' + i).ToString(); 
 
             return new WithConditions<TypeAllowedPrima>(
-                new TypeAllowedPrima(kvp.Value.Fallback, pre + "0")
-
-
-                func(Fallback), ConditionRules.Select(cr => new ConditionRule<T>(cr.TypeConditions, func(cr.Allowed))).ToReadOnly());
-
-
+                new TypeAllowedPrima(kvp.Value.Fallback, pre),
+                kvp.Value.ConditionRules.Select((cr, j) => new ConditionRule<TypeAllowedPrima>(cr.TypeConditions, new TypeAllowedPrima(cr.Allowed, pre + j))).ToReadOnly());
         }).ToList();
 
-        if (strategy == MergeStrategy.Union)
-            return TypeConditionMerger.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
-        else
-            return TypeConditionMerger.MergeBase(strategy, baseValues.Select(a => a.Value).ToList(), MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
+        var result = strategy == MergeStrategy.Union ? 
+            TypeConditionMerger.MergeBase(strategy, values, MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None):
+            TypeConditionMerger.MergeBase(strategy, values, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
+
+        return result.MapWithConditions(a => a.Value);
     }
 
     internal static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
@@ -205,8 +204,6 @@ public readonly record struct TypeAllowedPrima(TypeAllowed Value, string? Prima)
 
 internal static class TypeConditionMerger
 {
-
-
     static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<TypeAllowedPrima>> tuple), WithConditions<TypeAllowedPrima>> cache = new();
 
     public static WithConditions<TypeAllowedPrima> MergeBase(MergeStrategy mergeStrage, List<WithConditions<TypeAllowedPrima>> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
@@ -219,6 +216,10 @@ internal static class TypeConditionMerger
         WithConditions<TypeAllowedPrima>? only = baseRules.Only();
         if (only != null)
             return only;
+
+        WithConditions<TypeAllowedPrima>? onlyNotMin = baseRules.Where(ta => !(ta.ConditionRules.IsEmpty() && ta.Fallback.Value == min)).Only();
+        if (onlyNotMin != null)
+            return onlyNotMin;
 
 
         if (baseRules.All(tac => tac.ConditionRules.Count == 0))
