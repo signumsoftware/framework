@@ -1111,7 +1111,7 @@ public class SchemaBuilder
             GlobalLazyManager.OnLoad(this, invalidateWith);
 
             return func();
-        });
+        }, mode);
 
         GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) =>
         {

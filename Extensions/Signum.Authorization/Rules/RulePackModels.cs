@@ -227,11 +227,18 @@ public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
 
     public int CalculateHash()
     {
+        int hash = this.TypeConditionsHash();
+
+        hash = hash * 31 + Allowed.GetHashCode();
+
+        return hash;
+    }
+
+    public int TypeConditionsHash()
+    {
         int hash = 17;
         foreach (var condition in TypeConditions)
             hash = hash * 31 + condition.GetHashCode();
-
-        hash = hash * 31 + Allowed.GetHashCode();
 
         return hash;
     }

@@ -69,25 +69,21 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
 
         var values = baseValues.Select((kvp,i) =>
         {
-            var hasPrima = TypeAuthLogic.HasTypeConditionInOperations(role, key) ||
-                    TypeAuthLogic.HasTypeConditionInProperties(role, key);
+            //var hasPrima = TypeAuthLogic.HasTypeConditionInOperations(role, key) ||
+            //     TypeAuthLogic.HasTypeConditionInProperties(role, key);  
+            var hasPrima = !kvp.Value.IsSimplest(); //Heuristic without using cyclic dependency between operations (or properties) and types
 
-            if (!hasPrima)
-                return kvp.Value.MapWithConditions(a => new TypeAllowedPrima(a, Prima: null));
-
-            var pre = ('a' + i).ToString(); 
-
-            return new WithConditions<TypeAllowedPrima>(
-                new TypeAllowedPrima(kvp.Value.Fallback, pre),
-                kvp.Value.ConditionRules.Select((cr, j) => new ConditionRule<TypeAllowedPrima>(cr.TypeConditions, new TypeAllowedPrima(cr.Allowed, pre + j))).ToReadOnly());
+            return kvp.Value.WithPrima(hasPrima);
+           
         }).ToList();
 
         var result = strategy == MergeStrategy.Union ? 
             TypeConditionMerger.MergeBase(strategy, values, MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None):
             TypeConditionMerger.MergeBase(strategy, values, MinTypeAllowed, TypeAllowed.None, TypeAllowed.Write);
 
-        return result.MapWithConditions(a => a.Value);
+        return result.RemovePrima();
     }
+
 
     internal static TypeAllowed MinTypeAllowed(IEnumerable<TypeAllowed> collection)
     {
@@ -199,11 +195,27 @@ class TypeCache : AuthCache<RuleTypeEntity, TypeAllowedRule, TypeEntity, Type, W
     }
 }
 
-// Used to differentiate type conditions that should be preserved because there could be overrides in properties or operations.
-public readonly record struct TypeAllowedPrima(TypeAllowed Value, string? Prima);
+public readonly record struct TypeAllowedPrima(TypeAllowed Allowed, string? Prima);
+
 
 internal static class TypeConditionMerger
 {
+    // Used to differentiate type conditions that should be preserved because there could be overrides in properties or operations.
+
+    public static WithConditions<TypeAllowedPrima> WithPrima(this WithConditions<TypeAllowed> tac, bool hasPrima)
+    {
+        if (!hasPrima)
+            return new WithConditions<TypeAllowedPrima>(
+                        new TypeAllowedPrima(tac.Fallback, null),
+                        tac.ConditionRules.Select((cr, i) => new ConditionRule<TypeAllowedPrima>(cr.TypeConditions, new TypeAllowedPrima(cr.Allowed, null))).ToReadOnly());
+
+        return new WithConditions<TypeAllowedPrima>(
+               new TypeAllowedPrima(tac.Fallback, null),
+               tac.ConditionRules.Select((cr, i) => new ConditionRule<TypeAllowedPrima>(cr.TypeConditions, new TypeAllowedPrima(cr.Allowed, cr.TypeConditionsHash().ToString()))).ToReadOnly());
+    }
+
+    public static WithConditions<TypeAllowed> RemovePrima(this WithConditions<TypeAllowedPrima> tac) => tac.MapWithConditions(a => a.Allowed);
+
     static ConcurrentDictionary<(MergeStrategy strategy, StructureList<WithConditions<TypeAllowedPrima>> tuple), WithConditions<TypeAllowedPrima>> cache = new();
 
     public static WithConditions<TypeAllowedPrima> MergeBase(MergeStrategy mergeStrage, List<WithConditions<TypeAllowedPrima>> baseRules, Func<IEnumerable<TypeAllowed>, TypeAllowed> maxMerge, TypeAllowed max, TypeAllowed min)
@@ -217,15 +229,19 @@ internal static class TypeConditionMerger
         if (only != null)
             return only;
 
-        WithConditions<TypeAllowedPrima>? onlyNotMin = baseRules.Where(ta => !(ta.ConditionRules.IsEmpty() && ta.Fallback.Value == min)).Only();
+        WithConditions<TypeAllowedPrima>? onlyNotMin = baseRules.Where(ta => !(ta.ConditionRules.IsEmpty() && ta.Fallback.Allowed == min)).Only();
         if (onlyNotMin != null)
             return onlyNotMin;
 
 
         if (baseRules.All(tac => tac.ConditionRules.Count == 0))
-            return WithConditions<TypeAllowedPrima>.Simple(new TypeAllowedPrima(maxMerge(baseRules.Select(tap => tap.Fallback.Value)), " "));
+            return WithConditions<TypeAllowed>.Simple(maxMerge(baseRules.Select(tap => tap.Fallback.Allowed))).WithPrima(false);
 
-        var conditions = baseRules.SelectMany(TypeAllowed => TypeAllowed.ConditionRules).SelectMany(TypeAllowed => TypeAllowed.TypeConditions).Distinct().OrderBy(TypeAllowed => TypeAllowed.ToString()).ToList();
+        var conditions = baseRules.SelectMany(ta => ta.ConditionRules)
+            .SelectMany(rule => rule.TypeConditions)
+            .Distinct()
+            .OrderBy(tc => tc.ToString())
+            .ToList();
 
         if (conditions.Count > 31)
             throw new InvalidOperationException("You can not merge more than 31 type conditions");
@@ -240,14 +256,44 @@ internal static class TypeConditionMerger
         {
             var values = matrixes.Select(m => m[i]);
 
-            return new TypeAllowedPrima(maxMerge(values.Select(a=>a.Value)), values.ToString(""));
+            return new TypeAllowedPrima(maxMerge(values.Select(a=>a.Allowed)), values.ToString(a => a.Prima ?? "", "-"));
         }).ToArray();
 
         return GetRules(maxMatrix, numCells, conditionDictionary);
     }
 
 
-    static TypeAllowedPrima[] GetMatrix(WithConditions<TypeAllowedPrima> tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    static ConcurrentDictionary<WithConditions<TypeAllowed>, bool> IsSimplestCache = new ConcurrentDictionary<WithConditions<TypeAllowed>, bool>();
+
+    public static bool IsSimplest(this WithConditions<TypeAllowed> taac)
+    {
+        return IsSimplestCache.GetOrAdd(taac, taac =>
+        {
+            var conditions = taac.ConditionRules
+            .SelectMany(cr => cr.TypeConditions)
+            .Distinct()
+            .OrderBy(tc => tc.ToString())
+            .ToList();
+
+            if (conditions.Count > 31)
+                throw new InvalidOperationException("You can not merge more than 31 type conditions");
+
+            var conditionDictionary = conditions.Select((tc, i) => KeyValuePair.Create(tc, 1 << i)).ToDictionaryEx();
+
+            int numCells = 1 << conditionDictionary.Count;
+
+            var matrix = GetMatrix(taac, numCells, conditionDictionary);
+
+            var rule = GetRules(matrix, numCells, conditionDictionary);
+
+            return rule.Equals(taac);
+        });
+    }
+
+
+
+    static TA[] GetMatrix<TA>(WithConditions<TA> tac, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+        where TA : struct
     {
         var matrix = 0.To(numCells).Select(TypeAllowed => tac.Fallback).ToArray();
 
@@ -267,11 +313,12 @@ internal static class TypeConditionMerger
         return matrix;
     }
 
-    static WithConditions<TypeAllowedPrima> GetRules(TypeAllowedPrima[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+    static WithConditions<TA> GetRules<TA>(TA[] matrix, int numCells, Dictionary<TypeConditionSymbol, int> conditionDictionary)
+        where TA: struct
     {
-        var array = matrix.Select(ta => (TypeAllowedPrima?)ta).ToArray();
+        var array = matrix.Select(ta => (TA?)ta).ToArray();
 
-        var conditionRules = new List<ConditionRule<TypeAllowedPrima>>();
+        var conditionRules = new List<ConditionRule<TA>>();
 
         var availableTypeConditions = conditionDictionary.Keys.ToList();
 
@@ -281,7 +328,7 @@ internal static class TypeConditionMerger
                 var ta = OnlyOneValue(0);
 
                 if (ta != null)
-                    return new WithConditions<TypeAllowedPrima>(ta.Value, conditionRules.AsEnumerable().Reverse().ToReadOnly());
+                    return new WithConditions<TA>(ta.Value, conditionRules.AsEnumerable().Reverse().ToReadOnly());
             }
 
             { //1 Condition
@@ -293,7 +340,7 @@ internal static class TypeConditionMerger
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<TypeAllowedPrima>(new[] { tc }.ToFrozenSet(), ta.Value));
+                        conditionRules.Add(new ConditionRule<TA>(new[] { tc }.ToFrozenSet(), ta.Value));
                         availableTypeConditions.Remove(tc);
 
                         ClearArray(mask);
@@ -313,7 +360,7 @@ internal static class TypeConditionMerger
 
                     if (ta.HasValue)
                     {
-                        conditionRules.Add(new ConditionRule<TypeAllowedPrima>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToFrozenSet(), ta.Value));
+                        conditionRules.Add(new ConditionRule<TA>(availableTypeConditions.Where(tc => (conditionDictionary[tc] & mask) == conditionDictionary[tc]).ToFrozenSet(), ta.Value));
 
                         ClearArray(mask);
 
@@ -326,9 +373,9 @@ internal static class TypeConditionMerger
         }
 
 
-        TypeAllowedPrima? OnlyOneValue(int mask)
+        TA? OnlyOneValue(int mask)
         {
-            TypeAllowedPrima? currentValue = null;
+            TA? currentValue = null;
 
             for (int i = 0; i < numCells; i++)
             {
