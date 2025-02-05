@@ -1,8 +1,154 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
-  <Type Name="UserChartEntity" Description="Graphique utilisateur">
-    <Member Name="DisplayName" Description="Nom d'affichage" />
+  <Type Name="ChartColumnEmbedded" Description="Colonne du graphique">
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+    <Member Name="Format" Description="Format" />
+    <Member Name="OrderByIndex" Description="Trier par index" />
+    <Member Name="OrderByType" Description="Trier par type" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="ChartColumnType">
+    <Member Name="DateOnly" Description="Date uniquement" />
+    <Member Name="DateTime" Description="Date et heure" />
+    <Member Name="Enum" Description="Énumération" />
+    <Member Name="Groupable" Description="Groupable" />
+    <Member Name="Integer" Description="Entier" />
+    <Member Name="Lite" Description="Lite" />
+    <Member Name="Magnitude" Description="Taille" />
+    <Member Name="Positionable" Description="Positionnable" />
+    <Member Name="Real" Description="Réel" />
+    <Member Name="RealGroupable" Description="Véritablement groupable" />
+    <Member Name="String" Description="Chaîne de caractères" />
+    <Member Name="Time" Description="Heure" />
+  </Type>
+  <Type Name="ChartMessage">
+    <Member Name="_0CanOnlyBeCreatedFromTheChartWindow" Description="{0} ne peut être créé qu’à partir de la fenêtre du graphique" />
+    <Member Name="_0CanOnlyBeCreatedFromTheSearchWindow" Description="{0} ne peut être créé qu’à partir de la fenêtre de recherche" />
+    <Member Name="_0IsAnAggregateButTheChartIsNotGrouping" Description="{0} est un agrégat, mais le graphique n’est pas un regroupement" />
+    <Member Name="_0IsKeyBut1IsAnAggregate" Description="{0} est la clé, mais {1} est un agrégat" />
+    <Member Name="_0IsNot1" Description="{0} n’est pas {1}" />
+    <Member Name="_0IsNotOptional" Description="{0} n’est pas facultatif" />
+    <Member Name="_0ShouldBeAnAggregate" Description="{0} doit être un agrégat" />
+    <Member Name="_0ShouldBeNull" Description="{0} doit être null" />
+    <Member Name="_0ShouldBeSet" Description="{0} doit être définis" />
+    <Member Name="ApplyChanges" Description="Appliquer les modifications" />
+    <Member Name="Chart" Description="Diagramme" />
+    <Member Name="ChartFor" Description="Diagramme pour" />
+    <Member Name="ChartOf0" Description="Diagramme de {0}" />
+    <Member Name="ChartSettings" Description="Paramètres du graphique" />
+    <Member Name="ChartToken" Description="Diagramme" />
+    <Member Name="ChooseABasePalette" Description="Choisissez une palette de base" />
+    <Member Name="ColorsFor0" Description="Couleurs pour {0}" />
+    <Member Name="CreateNew" Description="Créer" />
+    <Member Name="CreatePalette" Description="Créer une palette" />
+    <Member Name="Data" Description="Données" />
+    <Member Name="DeletePalette" Description="Supprimer la palette" />
+    <Member Name="Dimension" Description="Dimension" />
+    <Member Name="DrawChart" Description="Tracer le graphique" />
+    <Member Name="Edit" Description="Éditer" />
+    <Member Name="Group" Description="Groupe" />
+    <Member Name="HideChartSettings" Description="Masquer les paramètres du graphique" />
+    <Member Name="Maximize" Description="Maximiser" />
+    <Member Name="Minimize" Description="Minimiser" />
+    <Member Name="MyCharts" Description="Mes cartes" />
+    <Member Name="NewPalette" Description="Nouvelle palette" />
+    <Member Name="Preview" Description="Aperçu" />
+    <Member Name="Query0IsNotAllowed" Description="La requête {0} n'est pas autorisée" />
+    <Member Name="QueryResultReachedMaxRows0" Description="Le résultat de la requête a atteint le nombre maximal de lignes ({0})" />
+    <Member Name="Reload" Description="Recharger" />
+    <Member Name="SavePalette" Description="Enregistrer la palette" />
+    <Member Name="ShowChartSettings" Description="Afficher les paramètres du graphique" />
+    <Member Name="ToggleInfo" Description="Afficher/masquer les informations" />
+    <Member Name="Type0NotFoundInTheDatabase" Description="Le type {0} n’est pas dans la base de données" />
+    <Member Name="TypeNotFound" Description="Type introuvable" />
+    <Member Name="ViewPalette" Description="Voir la palette" />
+  </Type>
+  <Type Name="ChartParameterEmbedded" Description="Paramètre du graphique">
+    <Member Name="Name" Description="Nom" />
+    <Member Name="ScriptParameter" Description="Paramètre de script" />
+    <Member Name="Value" Description="Valeur" />
+  </Type>
+  <Type Name="ChartPermission">
+    <Member Name="ViewCharting" Description="Affichage des graphiques" />
+  </Type>
+  <Type Name="ChartRequestModel" Description="Demande de graphiques">
+    <Member Name="ChartScript" Description="Script de graphique" />
+    <Member Name="Columns" Description="Colonnes" />
     <Member Name="Filters" Description="Filtres" />
+    <Member Name="MaxRows" Description="Nombre maximal de lignes" />
+    <Member Name="Multiplications" Description="Multiplications" />
+    <Member Name="Parameters" Description="Paramètres" />
+    <Member Name="QueryName" Description="Nom de la requête" />
+  </Type>
+  <Type Name="ChartScriptSymbol" Description="Script de diagramme" PluralDescription="Scripts de diagramme" />
+  <Type Name="ClientCertificationFileEmbedded" Description="Fichier de certificat client">
+    <Member Name="CertFileType" Description="Type de certificat" />
+    <Member Name="FullFilePath" Description="Chemin d’accès complet au fichier" />
+  </Type>
+  <Type Name="CombinedUserChartElementEmbedded" Description="Combined user chart element">
+    <Member Name="IsQueryCached" Description="La requête est-elle mise en cache ?" />
+    <Member Name="UserChart" Description="Graphique utilisateur" />
+  </Type>
+  <Type Name="CombinedUserChartPartEntity" Description="Combined user chart part" PluralDescription="Combined user chart parts">
+    <Member Name="AllowChangeShowData" Description="Autoriser la modification des données affichées" />
+    <Member Name="CombinePinnedFiltersWithSameLabel" Description="Combiner des filtres épinglés avec la même étiquette" />
+    <Member Name="MinHeight" Description="Hauteur minimale" />
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="ShowData" Description="Afficher les données" />
+    <Member Name="UserCharts" Description="Graphiques utilisateur" />
+    <Member Name="UseSameScale" Description="Utiliser la même échelle" />
+  </Type>
+  <Type Name="D3ChartScript">
+    <Member Name="Bars" Description="Bars" />
+    <Member Name="BubblePack" Description="Bulles" />
+    <Member Name="Bubbleplot" Description="Nuage de bulles" />
+    <Member Name="CalendarStream" Description="Flux de calendrier" />
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="Line" Description="Ligne" />
+    <Member Name="MultiBars" Description="Multi-barres" />
+    <Member Name="MultiColumns" Description="Multi-colonnes" />
+    <Member Name="MultiLines" Description="Multi-lignes" />
+    <Member Name="ParallelCoordinates" Description="Coordonnées parallèles" />
+    <Member Name="Pie" Description="Camembert" />
+    <Member Name="Punchcard" Description="Carte perforée" />
+    <Member Name="Scatterplot" Description="Nuage de points" />
+    <Member Name="StackedBars" Description="Barres empilées" />
+    <Member Name="StackedColumns" Description="Colonnes empilées" />
+    <Member Name="StackedLines" Description="Lignes empilées" />
+    <Member Name="Treemap" Description="Arborescence" />
+  </Type>
+  <Type Name="HtmlChartScript">
+    <Member Name="PivotTable" Description="Tableau croisé dynamique" />
+  </Type>
+  <Type Name="SvgMapsChartScript">
+    <Member Name="SvgMap" Description="Carte SVG" />
+  </Type>
+  <Type Name="UserChartEntity" Description="Graphique utilisateur">
+    <Member Name="ChartScript" Description="Script de graphique" />
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="DisplayName" Description="Nom d'affichage" />
+    <Member Name="EntityType" Description="Type d’entité" />
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="HideQuickLink" Description="Masquer le lien rapide" />
+    <Member Name="IncludeDefaultFilters" Description="Inclure les filtres par défaut" />
+    <Member Name="MaxRows" Description="Nombre maximal de lignes" />
+    <Member Name="Owner" Description="Propriétaire" />
+    <Member Name="Parameters" Description="Paramètres" />
     <Member Name="Query" Description="Requête" />
+  </Type>
+  <Type Name="UserChartOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="UserChartPartEntity" Description="User chart part" PluralDescription="User chart parts">
+    <Member Name="AllowChangeShowData" Description="Autoriser la modification des données affichées" />
+    <Member Name="AutoRefresh" Description="Actualisation automatique" />
+    <Member Name="CreateNew" Description="Créer un nouveau" />
+    <Member Name="IsQueryCached" Description="La requête est-elle mise en cache ?" />
+    <Member Name="MinHeight" Description="Hauteur minimale" />
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="ShowData" Description="Afficher les données" />
+    <Member Name="UserChart" Description="Graphique utilisateur" />
   </Type>
 </Translations>
