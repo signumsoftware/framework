@@ -1,10 +1,118 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="DashboardEmbedededInEntity" Description="Tableau de bord intégré">
+    <Member Name="Bottom" Description="En bas" />
+    <Member Name="None" Description="Aucun" />
+    <Member Name="Tab" Description="Onglet" />
+    <Member Name="Top" Description="En haut" />
+  </Type>
   <Type Name="DashboardEntity" Description="Panneau de commande">
+    <Member Name="AutoRefreshPeriod" Description="Période d’actualisation automatique" />
+    <Member Name="CacheQueryConfiguration" Description="Configuration du cache de requête" />
+    <Member Name="CombineSimilarRows" Description="Combiner les lignes similaires" />
+    <Member Name="DashboardPriority" Description="Panneau d’information Priorité" />
     <Member Name="DisplayName" Description="Nom d'affichage" />
+    <Member Name="EmbeddedInEntity" Description="Intégré dans l’entité" />
+    <Member Name="EntityType" Description="Type d’entité" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="HideDisplayName" Description="Masquer le nom d’affichage" />
+    <Member Name="Key" Description="Clé" />
+    <Member Name="Owner" Description="Propriétaire" />
     <Member Name="Parts" Description="Pièces" />
+    <Member Name="TokenEquivalencesGroups" Description="Token equivalences groups" />
+  </Type>
+  <Type Name="DashboardMessage">
+    <Member Name="_0Is1InstedOf2In3" Description="{0} est {1} (au lieu de {2}) dans {3}" />
+    <Member Name="CreateNewPart" Description="Créer une nouvelle pièce" />
+    <Member Name="DashboardDN_TitleMustBeSpecifiedFor0" Description="Le titre doit être précisé pour {0}" />
+    <Member Name="ForPerformanceReasonsThisDashboardMayShowOutdatedInformation" Description="Pour des raisons de performances, ce tableau de bord peut afficher des informations obsolètes" />
+    <Member Name="LasUpdateWasOn0" Description="La dernière mise à jour a eu lieu le {0}" />
+    <Member Name="Part0IsTooLarge" Description="La pièce {0} est trop grande" />
+    <Member Name="Part0OverlapsWith1" Description="Une partie {0} chevauche {1}" />
+    <Member Name="Preview" Description="Aperçu" />
+    <Member Name="RowsSelected" Description="Ligne(s) sélectionnée(s)" />
+    <Member Name="TheUserQuery0HasNoColumnWithSummaryHeader" Description="La requête utilisateur '{0}' n’a pas de colonne avec en-tête" />
+  </Type>
+  <Type Name="DashboardOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="RegenerateCachedQueries" Description="Régénérer les requêtes mises en cache" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="DashboardPermission">
+    <Member Name="ViewDashboard" Description="Voir le tableau de bord" />
   </Type>
   <Type Name="LinkListPartEntity" Description="Lien liste partie">
     <Member Name="Links" Description="Liens" />
+  </Type>
+  <Type Name="CachedQueryEntity" Description="Requête mise en cache" PluralDescription="Requêtes mises en cache">
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="Dashboard" Description="Tableau de bord" />
+    <Member Name="File" Description="Fichier" />
+    <Member Name="NumColumns" Description="Nombre de colonnes" />
+    <Member Name="NumRows" Description="Nombre de lignes" />
+    <Member Name="QueryDuration" Description="Durée de la requête" />
+    <Member Name="UploadDuration" Description="Durée de téléchargement" />
+    <Member Name="UserAssets" Description="Ressources de l’utilisateur" />
+  </Type>
+  <Type Name="CachedQueryFileType">
+    <Member Name="CachedQuery" Description="Requête mise en cache" />
+  </Type>
+  <Type Name="CacheQueryConfigurationEmbedded" Description="Configuration de la mise en cache des requêtes">
+    <Member Name="AutoRegenerateWhenOlderThan" Description="Régénération automatique si plus ancienne que" />
+    <Member Name="MaxRows" Description="Nombre maximal de lignes" />
+    <Member Name="TimeoutForQueries" Description="Délai d’expiration des requêtes" />
+  </Type>
+  <Type Name="ImagePartEntity" Description="Partie Image" PluralDescription="Parties Image">
+    <Member Name="ClickActionURL" Description="Click action URL" />
+    <Member Name="ImageSrcContent" Description="Contenu de l’image src" />
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+  </Type>
+ <Type Name="InteractionGroup" Description="Groupe d’interaction">
+    <Member Name="Group1" Description="Groupe 1" />
+    <Member Name="Group2" Description="Groupe 2" />
+    <Member Name="Group3" Description="Groupe 3" />
+    <Member Name="Group4" Description="Groupe 4" />
+    <Member Name="Group5" Description="Groupe 5" />
+    <Member Name="Group6" Description="Groupe 6" />
+    <Member Name="Group7" Description="Groupe 7" />
+    <Member Name="Group8" Description="Groupe 8" />
+  </Type>
+  <Type Name="IPartEntity">
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+  </Type>
+  <Type Name="LinkElementEmbedded" Description="Élément lien">
+    <Member Name="Label" Description="Étiquette" />
+    <Member Name="Link" Description="Lien" />
+    <Member Name="OpensInNewTab" Description="S’ouvre dans un nouvel onglet" />
+  </Type>
+  <Type Name="LinkListPartEntity" Description="Lien liste partie">
+    <Member Name="Links" Description="Liens" />
+    <Member Name="RequiresTitle" Description="Titre requis" />
+  </Type>
+  <Type Name="PanelPartEmbedded" Description="Partie panneau">
+    <Member Name="Columns" Description="Colonnes" />
+    <Member Name="Content" Description="Contenu" />
+    <Member Name="CustomColor" Description="Couleur personnalisée" />
+    <Member Name="IconColor" Description="Couleur de l’icône" />
+    <Member Name="IconName" Description="Nom de l’icône" />
+    <Member Name="InteractionGroup" Description="Groupe d’interaction" />
+    <Member Name="Row" Description="Ligne" />
+    <Member Name="StartColumn" Description="Colonne de départ" />
+    <Member Name="Title" Description="Titre" />
+    <Member Name="UseIconColorForTitle" Description="Utiliser la couleur de l’icône pour le titre" />
+  </Type>
+  <Type Name="SeparatorPartEntity" Description="Separator part" PluralDescription="Separator parts">
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="Title" Description="Titre" />
+  </Type>
+  <Type Name="TokenEquivalenceEmbedded" Description="Équivalence de jeton">
+    <Member Name="Query" Description="Requête" />
+    <Member Name="Token" Description="Jeton" />
+  </Type>
+  <Type Name="TokenEquivalenceGroupEntity" Description="Token equivalence group" PluralDescription="Token equivalence groups">
+    <Member Name="Dashboard" Description="Tableau de bord" />
+    <Member Name="InteractionGroup" Description="Groupe d’interaction" />
+    <Member Name="TokenEquivalences" Description="Équivalences de jetons" />
   </Type>
 </Translations>
