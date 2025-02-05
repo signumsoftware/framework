@@ -54,16 +54,16 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 
     public string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
-    public string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
+    public string? TryGetClaim(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
 
-    public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+    public virtual Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
     public string? SID => null;
 
     public virtual string UserName => GetClaim("preferred_username");
     public virtual string? EmailAddress => GetClaim("preferred_username");
 
-    public virtual string? FullName => TryGetClain("name");
+    public virtual string? FullName => TryGetClaim("name");
 
     public virtual string FirstName
     {
@@ -104,9 +104,11 @@ public class AzureB2CClaimsAutoCreateUserContext : AzureClaimsAutoCreateUserCont
     public override string UserName => GetClaim("emails");
     public override string? EmailAddress => GetClaim("emails");
 
-    public override string? FullName => " ".Combine(FirstName, LastName);
+    public override string? FullName => TryGetClaim("name") ?? " ".Combine(FirstName, LastName);
     public override string FirstName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
     public override string LastName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
+
+    public override Guid? OID => Guid.Parse(GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
 
     public AzureB2CClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken) : base(claimsPrincipal, accessToken)
     {

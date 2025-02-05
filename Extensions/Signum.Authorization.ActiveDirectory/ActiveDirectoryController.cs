@@ -26,7 +26,7 @@ public class ActiveDirectoryController : ControllerBase
             return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
 
         if (config.DomainName.HasText())
-            return WindowsActiveDirectoryLogic.SearchUser(subString);
+            return WindowsActiveDirectoryLogic.SearchUser(subString, count);
 
         throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
     }

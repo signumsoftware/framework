@@ -37,10 +37,18 @@ public static class MailingServer
             object type = QueryLogic.ToQueryName(qd.queryKey);
             if (Schema.Current.IsAllowed(typeof(EmailTemplateEntity), true) == null)
             {
-                var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null, EmailTemplateVisibleOn.Query);
+                try
+                {
+                    var templates = EmailTemplateLogic.GetApplicableEmailTemplates(type, null, EmailTemplateVisibleOn.Query);
 
-                if (templates.HasItems())
-                    qd.Extension.Add("emailTemplates", templates);
+                    if (templates.HasItems())
+                        qd.Extension.Add("emailTemplates", templates);
+                } 
+                catch (Exception e)
+                {
+                    e.LogException(); //An error could make the applicaiton unusable
+                    qd.Extension.Add("emailTemplates", "error");
+                }
             }
         };
 

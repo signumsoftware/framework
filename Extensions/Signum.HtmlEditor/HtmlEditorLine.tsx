@@ -29,7 +29,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
             {extraButtonsBefore && <div className={ctx.inputGroupVerticalClass("before")}>
               {extraButtonsBefore()}
             </div>}
-            <div className={classes("html-editor-line", p.mandatory ?? ctx.propertyRoute?.member?.required && !ctx.value ? "sf-mandatory" : undefined)} style={{
+            <div className={classes("html-editor-line", p.mandatory ?? (ctx.propertyRoute?.member?.required && !ctx.value) ? "sf-mandatory" : undefined)} style={{
               backgroundColor: readOnly ? "#e9ecef" : undefined,
               flexGrow: 1,
               ...p.htmlAttributes?.style
@@ -44,7 +44,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
                   new BasicCommandsPlugin(),
                 ]}
                 {...p}
-                onEditorBlur={() => { forceUpdate(); p.onEditorBlur?.(); }}
+                onEditorBlur={(e, controller) => { forceUpdate(); p.onEditorBlur?.(e, controller); }}
               />
             </div>
             {extraButtons && <div className={ctx.inputGroupVerticalClass("after")}>
