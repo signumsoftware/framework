@@ -118,7 +118,7 @@ public static class PropertyAuthLogic
     {
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
-            var taac = TypeAuthLogic.GetAllowed(e.type);
+            var taac = TypeAuthLogic.GetAllowed(e.role, e.type);
             if (taac.ConditionRules.IsEmpty())
                 return false;
 
@@ -430,7 +430,7 @@ public static class PropertyAuthLogic
         }
 
         var trivial = TypeAuthLogic.TrivialTypeGetUI(taac);
-        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(type))
+        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(RoleEntity.Current, type))
         {
             return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
                 paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())

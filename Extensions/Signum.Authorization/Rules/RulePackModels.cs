@@ -159,7 +159,7 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
     }
 
     public WithConditions<T> MapWithConditions<T>(Func<A, T> func)
-        where T : struct, Enum
+        where T : struct
     {
         return new WithConditions<T>(func(Fallback), ConditionRules.Select(cr => new ConditionRule<T>(cr.TypeConditions, func(cr.Allowed))).ToReadOnly());
     }   
@@ -227,11 +227,18 @@ public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
 
     public int CalculateHash()
     {
+        int hash = this.TypeConditionsHash();
+
+        hash = hash * 31 + Allowed.GetHashCode();
+
+        return hash;
+    }
+
+    public int TypeConditionsHash()
+    {
         int hash = 17;
         foreach (var condition in TypeConditions)
             hash = hash * 31 + condition.GetHashCode();
-
-        hash = hash * 31 + Allowed.GetHashCode();
 
         return hash;
     }
