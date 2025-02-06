@@ -6,6 +6,7 @@ import { AuthClient } from "../../Signum.Authorization/AuthClient";
 import LoginPage, { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
 import { ExternalServiceError, ajaxPost } from "@framework/Services";
 import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
+import { classes } from "@framework/Globals";
 
 export namespace AzureADClient {
 
@@ -16,15 +17,17 @@ export namespace AzureADClient {
 
     LoginPage.customLoginButtons = ctx =>
       <>
-        <MicrosoftSignIn ctx={ctx} />
+        {window.__azureADConfig?.loginWithAzureAD && <MicrosoftSignIn ctx={ctx} />}
+        {window.__azureADConfig?.azureB2C && <AzureB2CSignIn ctx={ctx} />}
       </>;
     LoginPage.showLoginForm = "initially_not";
-    AuthClient.authenticators.push(loginWithAzureAD);
+    AuthClient.authenticators.push(loginWithAzureADSilent);
+
+    const config = window.__azureADConfig;
 
     var msalConfig: msal.Configuration = {
       auth: {
-        clientId: window.__azureApplicationId!, //This is your client ID
-        authority: window.__azureB2CTenantName ? getAzureB2C_Authority(window.__azureB2CSignInSignUp_UserFlow!) : ("https://login.microsoftonline.com/" + window.__azureTenantId)!, //This is your tenant info
+        clientId: config?.applicationId!, //This is your client ID
         redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
         postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
       },
@@ -34,8 +37,11 @@ export namespace AzureADClient {
       }
     };
 
-    if (window.__azureB2CTenantName)
-      msalConfig.auth.knownAuthorities = [getAzureB2C_AuthorityDomain()];
+    if (config?.azureB2C && config?.azureB2C.tenantName)
+      msalConfig.auth.knownAuthorities = [
+        config.loginWithAzureAD ? `login.microsoftonline.com` : null,
+        `${config?.azureB2C.tenantName}.b2clogin.com`
+      ].notNull();
 
     msalClient = new msal.PublicClientApplication(msalConfig);
   }
@@ -50,14 +56,20 @@ export namespace AzureADClient {
 
   export namespace Config {
     export let scopes: string[] = ["user.read"];
+    export let scopesB2C: string[] = ["openid", "profile", "email"];
   }
 
 
-  export function signIn(ctx: LoginContext): void {
+  export function signIn(ctx: LoginContext, mode?: "B2C_SignIn" | "B2C_ResetPassword"): void {
     ctx.setLoading("azureAD");
 
+    const config = window.__azureADConfig;
+
     var userRequest: msal.PopupRequest = {
-      scopes: Config.scopes,
+      scopes: mode == undefined ? Config.scopes : Config.scopesB2C,
+      authority: mode == "B2C_SignIn" ? getAzureB2C_Authority(config?.azureB2C?.signInSignUp_UserFlow!) :
+        mode == "B2C_ResetPassword" ? getAzureB2C_Authority(config?.azureB2C?.resetPassword_UserFlow!) :
+          "https://login.microsoftonline.com/" + config!.tenantId
     };
 
     (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
@@ -79,6 +91,13 @@ export namespace AzureADClient {
         if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
           return;
 
+        if (e instanceof msal.AuthError && e.errorCode == "access_denied" && e.message.startsWith("AADB2C90118")) {
+
+          signIn(ctx, "B2C_ResetPassword")
+
+          return;
+        }
+
         //if (e instanceof msal.AuthError)
         //  throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
 
@@ -86,9 +105,9 @@ export namespace AzureADClient {
       });
   }
 
-  export function loginWithAzureAD(): Promise<AuthClient.API.LoginResponse | undefined> {
+  export function loginWithAzureADSilent(): Promise<AuthClient.API.LoginResponse | undefined> {
 
-    if (location.search.contains("avoidAD"))
+    if (location.search.contains("avoidAD") || window.__azureADConfig)
       return Promise.resolve(undefined);
 
     var ai = getMsalAccount();
@@ -161,7 +180,7 @@ export namespace AzureADClient {
   export function signOut(): void {
     var account = getMsalAccount();
     if (account) {
-      msalClient.logout({
+      msalClient.logoutPopup({
         account: account
       });
     }
@@ -179,6 +198,18 @@ export namespace AzureADClient {
     );
   }
 
+  export function AzureB2CSignIn({ ctx }: { ctx: LoginContext }): React.JSX.Element {
+    return (
+      <div className="row mt-4">
+        <div className="col-md-6 offset-md-3">
+          <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, "B2C_SignIn"); }}>
+            {"Login with Azure B2C"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   export declare namespace MicrosoftSignIn {
     export var iconUrl: string;
   }
@@ -186,29 +217,33 @@ export namespace AzureADClient {
   MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
 
   export namespace API {
-
     export function loginWithAzureAD(jwt: string, accessToken: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
       return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });
     }
   }
 
-
-  export function getAzureB2C_AuthorityDomain(): string {
-    return `${window.__azureB2CTenantName}.b2clogin.com`;
-  }
-
   export function getAzureB2C_Authority(userFlow: string): string {
-    return `https://${window.__azureB2CTenantName}.b2clogin.com/${window.__azureB2CTenantName}.onmicrosoft.com/${window.__azureB2CSignInSignUp_UserFlow}`;
+    const tenantName = window.__azureADConfig?.azureB2C?.tenantName;
+    return `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/${userFlow}`;
   }
 
 }
 
 declare global {
   interface Window {
-    __azureApplicationId: string | null;
-    __azureTenantId: string | null;
-
-    __azureB2CTenantName: string | null;
-    __azureB2CSignInSignUp_UserFlow: string | null;
+    __azureADConfig?: AzureADConfig;
   }
+}
+
+interface AzureADConfig {
+  loginWithAzureAD: boolean;
+  applicationId: string;
+  tenantId: string;
+  azureB2C?: AzureB2CConfig;
+}
+
+interface AzureB2CConfig {
+  tenantName: string;
+  signInSignUp_UserFlow: string;
+  resetPassword_UserFlow?: string;
 }
