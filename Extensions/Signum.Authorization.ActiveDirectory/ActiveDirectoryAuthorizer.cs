@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Authorization;
 using Signum.Authorization.ActiveDirectory.Azure;
 using System.DirectoryServices.AccountManagement;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -147,11 +148,13 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         {
             var config = this.GetConfig();
 
-            if (config.LoginWithActiveDirectoryRegistry)
+            var windowsAD = config.WindowsAD;
+
+            if (windowsAD != null && windowsAD.LoginWithActiveDirectoryRegistry)
             {
                 try
                 {
-                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName, userName, password))
+                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, windowsAD.DomainName, userName, password))
                     {
                         if (pc.ValidateCredentials(userName, password, ContextOptions.Negotiate))
                         {
@@ -265,11 +268,11 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                     return null;
             }
         }
-        else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
+        else if (ctx.OID != null && this.GetConfig().AzureAD?.ApplicationID != null)
         {
             if (config.RoleMapping.Any())
             {
-                var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
+                var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().AzureAD!.UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
                     AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
 
                 var roles = config.RoleMapping.Where(m =>
