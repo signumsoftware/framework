@@ -5,8 +5,10 @@ import * as Reflection from "@framework/Reflection";
 import { AuthClient } from "../../Signum.Authorization/AuthClient";
 import LoginPage, { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
 import { ExternalServiceError, ajaxPost } from "@framework/Services";
-import { LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
+import { AuthMessage, LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
 import { classes } from "@framework/Globals";
+import { QueryString } from "@framework/QueryString";
+import MessageModal from "@framework/Modals/MessageModal";
 
 export namespace AzureADClient {
 
@@ -28,6 +30,7 @@ export namespace AzureADClient {
     var msalConfig: msal.Configuration = {
       auth: {
         clientId: config?.applicationId!, //This is your client ID
+        //authority: config?.azureB2C ? getAzureB2C_Authority(config.azureB2C.signInSignUp_UserFlow!) : ("https://login.microsoftonline.com/" + config?.tenantId)!, //This is your tenant info
         redirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
         postLogoutRedirectUri: window.location.origin + AppContext.toAbsoluteUrl("/"),
       },
@@ -59,50 +62,85 @@ export namespace AzureADClient {
     export let scopesB2C: string[] = ["openid", "profile", "email"];
   }
 
+  export function getAuthority(mode?: "B2C" | "B2C_ResetPassword") : string {
+    const config = window.__azureADConfig;
 
-  export function signIn(ctx: LoginContext, mode?: "B2C_SignIn" | "B2C_ResetPassword"): void {
+    return mode == "B2C" ? getAzureB2C_Authority(config?.azureB2C?.signInSignUp_UserFlow!) :
+      mode == "B2C_ResetPassword" ? getAzureB2C_Authority(config?.azureB2C?.resetPassword_UserFlow!) :
+        "https://login.microsoftonline.com/" + config!.tenantId;
+  }
+
+
+  export async function signIn(ctx: LoginContext, b2c: boolean): Promise<void> {
+    ctx.setLoading(b2c ? "azureB2C" : "azureAD");
+
+    const config = window.__azureADConfig;
+
+    (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
+
+    try {
+      const authResult = await msalClient.loginPopup({
+        scopes: b2c ? Config.scopesB2C : Config.scopes,
+        authority: getAuthority(b2c ? "B2C" : undefined),
+      });
+
+      const loginResponse = await API.loginWithAzureAD(authResult.idToken, authResult.accessToken, { azureB2C: b2c, throwErrors: true })
+      if (loginResponse == null)
+        throw new Error("User " + authResult.account?.username + " not found in the database");
+
+      AuthClient.setAuthToken(loginResponse!.token, loginResponse!.authenticationType);
+      AuthClient.setCurrentUser(loginResponse!.userEntity);
+      AuthClient.Options.onLogin();
+      setMsalAccount(authResult.account!.username, b2c);
+
+    } catch (e) {
+      ctx.setLoading(undefined);
+      if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
+        return;
+
+      if (e instanceof msal.AuthError && e.errorCode == "access_denied" && e.errorMessage.startsWith("AADB2C90118")) {
+        resetPasswordB2C(ctx)
+        return;
+      }
+
+      throw e;
+    }
+  }
+
+  export async function resetPasswordB2C(ctx: LoginContext): Promise<void> {
     ctx.setLoading("azureAD");
 
     const config = window.__azureADConfig;
 
-    var userRequest: msal.PopupRequest = {
-      scopes: mode == undefined ? Config.scopes : Config.scopesB2C,
-      authority: mode == "B2C_SignIn" ? getAzureB2C_Authority(config?.azureB2C?.signInSignUp_UserFlow!) :
-        mode == "B2C_ResetPassword" ? getAzureB2C_Authority(config?.azureB2C?.resetPassword_UserFlow!) :
-          "https://login.microsoftonline.com/" + config!.tenantId
-    };
+    try {
 
-    (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
-    msalClient.loginPopup(userRequest)
-      .then(a => {
-        return API.loginWithAzureAD(a.idToken, a.accessToken, true)
-          .then(r => {
-            if (r == null)
-              throw new Error("User " + a.account?.username + " not found in the database");
+      (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
 
-            AuthClient.setAuthToken(r!.token, r!.authenticationType);
-            AuthClient.setCurrentUser(r!.userEntity);
-            AuthClient.Options.onLogin();
-            setMsalAccount(a.account!.username);
-          })
-      })
-      .catch(e => {
-        ctx.setLoading(undefined);
-        if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
-          return;
-
-        if (e instanceof msal.AuthError && e.errorCode == "access_denied" && e.message.startsWith("AADB2C90118")) {
-
-          signIn(ctx, "B2C_ResetPassword")
-
-          return;
-        }
-
-        //if (e instanceof msal.AuthError)
-        //  throw new ExternalServiceError("MSAL", e, e.name + ": " + e.errorCode, e.errorMessage, e.subError + "\n" + e.stack);
-
-        throw e;
+      const resetPasswordResult = await msalClient.loginPopup({
+        scopes: Config.scopesB2C,
+        authority: getAuthority("B2C_ResetPassword"),
       });
+
+      await MessageModal.show({
+        title: LoginAuthMessage.PasswordChanged.niceToString(),
+        message: LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString(),
+        buttons: "ok",
+      });
+
+      ctx.setLoading(undefined);
+
+    } catch (e) {
+      ctx.setLoading(undefined);
+      if (e instanceof msal.InteractionRequiredAuthError ||
+        e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
+        return Promise.resolve(undefined);
+
+      throw e;
+    }
+  }
+
+  export function isB2C(): boolean {
+    return localStorage.getItem("msalAccountIsBTC") == "true";
   }
 
   export function loginWithAzureADSilent(): Promise<AuthClient.API.LoginResponse | undefined> {
@@ -115,14 +153,17 @@ export namespace AzureADClient {
     if (!ai)
       return Promise.resolve(undefined);
 
+    const b2c = isB2C();
+
     var userRequest: msal.SilentRequest = {
-      scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
+      scopes: b2c ? Config.scopesB2C : Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
       account: ai,
+      authority: getAuthority(b2c ? "B2C" : undefined)
     };
 
     return msalClient.acquireTokenSilent(userRequest)
       .then(res => {
-        return API.loginWithAzureAD(res.idToken, res.accessToken, false);
+        return API.loginWithAzureAD(res.idToken, res.accessToken, { throwErrors: false, azureB2C: b2c });
       }, e => {
         if (e instanceof msal.InteractionRequiredAuthError ||
           e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
@@ -133,11 +174,16 @@ export namespace AzureADClient {
       });
   }
 
-  export function setMsalAccount(accountName: string | null): void {
-    if (accountName == null)
+  export function setMsalAccount(accountName: string | null, isB2C: boolean): void {
+    if (accountName == null) {
       localStorage.removeItem("msalAccount");
-    else
+      localStorage.removeItem("msalAccountIsBTC");
+    }
+    else {
       localStorage.setItem("msalAccount", accountName);
+      if (isB2C)
+        localStorage.setItem("msalAccountIsBTC", isB2C.toString());
+    }
   }
 
   export function getMsalAccount(): msal.AccountInfo | null | undefined {
@@ -158,6 +204,7 @@ export namespace AzureADClient {
     var userRequest: msal.SilentRequest = {
       scopes: Config.scopes, // https://github.com/AzureAD/microsoft-authentication-library-for-js/issues/1246
       account: ai,
+      authority: getAuthority(isB2C() ? "B2C" : undefined),
     };
 
     return adquireTokenSilentOrPopup(userRequest)
@@ -181,6 +228,7 @@ export namespace AzureADClient {
     var account = getMsalAccount();
     if (account) {
       msalClient.logoutPopup({
+        authority: getAuthority(isB2C() ? "B2C" : undefined),
         account: account
       });
     }
@@ -190,7 +238,7 @@ export namespace AzureADClient {
     return (
       <div className="row mt-2">
         <div className="col-md-6 offset-md-3">
-          <a href="#" className={ctx.loading != null ? "disabled" : undefined} onClick={e => { e.preventDefault(); signIn(ctx); }}>
+          <a href="#" className={ctx.loading != null ? "disabled" : undefined} onClick={e => { e.preventDefault(); signIn(ctx, false); }}>
             <img src={MicrosoftSignIn.iconUrl} alt={LoginAuthMessage.SignInWithMicrosoft.niceToString()} title={LoginAuthMessage.SignInWithMicrosoft.niceToString()} />
           </a>
         </div>
@@ -202,7 +250,7 @@ export namespace AzureADClient {
     return (
       <div className="row mt-4">
         <div className="col-md-6 offset-md-3">
-          <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, "B2C_SignIn"); }}>
+          <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true); }}>
             {"Login with Azure B2C"}
           </button>
         </div>
@@ -217,8 +265,9 @@ export namespace AzureADClient {
   MicrosoftSignIn.iconUrl = AppContext.toAbsoluteUrl("/signin_light.svg");
 
   export namespace API {
-    export function loginWithAzureAD(jwt: string, accessToken: string, throwErrors: boolean): Promise<AuthClient.API.LoginResponse | undefined> {
-      return ajaxPost({ url: "/api/auth/loginWithAzureAD?throwErrors=" + throwErrors, avoidAuthToken: true }, { idToken: jwt, accessToken });
+    export function loginWithAzureAD(jwt: string, accessToken: string, opts: { throwErrors: boolean, azureB2C: boolean }): Promise<AuthClient.API.LoginResponse | undefined> {
+      return ajaxPost({
+        url: "/api/auth/loginWithAzureAD?" + QueryString.stringify(opts), avoidAuthToken: true }, { idToken: jwt, accessToken });
     }
   }
 

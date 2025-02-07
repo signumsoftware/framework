@@ -26,7 +26,7 @@ public class AzureADAuthenticationServer
                     return false;
 
                 AzureClaimsAutoCreateUserContext ctx;
-                if (!azureB2C)
+                if (azureB2C)
                 {
                     if (azureAD.AzureB2C?.LoginWithAzureB2C != true)
                         return false;

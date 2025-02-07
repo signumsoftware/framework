@@ -78,7 +78,7 @@ public class AzureActiveDirectoryEmbedded : EmbeddedEntity
     public AzureADConfigTS? ToAzureADConfigTS() => !LoginWithAzureAD && AzureB2C == null ? null : new AzureADConfigTS
     {
         LoginWithAzureAD = LoginWithAzureAD,
-        ApplicationID = ApplicationID.ToString(),
+        ApplicationId = ApplicationID.ToString(),
         TenantId = DirectoryID.ToString(),
         AzureB2C = AzureB2C == null || AzureB2C.LoginWithAzureB2C == false ? null : AzureB2C.ToAzureB2CConfigTS()
     };
@@ -168,7 +168,7 @@ public static class ActiveDirectoryTask
 public class AzureADConfigTS
 {
     public bool LoginWithAzureAD;
-    public string ApplicationID;
+    public string ApplicationId;
     public string TenantId;
 
     public AzureB2CConfigTS? AzureB2C;
