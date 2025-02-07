@@ -95,6 +95,7 @@ export interface CachedProfilePhotoEntity extends Entities.Entity {
   user: Entities.Lite<Authorization.UserEntity>;
   size: number;
   photo: Files.FilePathEmbedded | null;
+  invalidationDate: string /*DateTime*/;
   creationDate: string /*DateTime*/;
 }
 

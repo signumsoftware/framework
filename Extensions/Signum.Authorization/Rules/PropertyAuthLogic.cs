@@ -114,12 +114,11 @@ public static class PropertyAuthLogic
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
-    static bool RequiresTypeConditionForProperties(Type type)
+    static bool RequiresTypeConditionForProperties(Lite<RoleEntity> role, Type type)
     {
-        var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
-            var taac = TypeAuthLogic.GetAllowed(e.type);
+            var taac = TypeAuthLogic.GetAllowed(e.role, e.type);
             if (taac.ConditionRules.IsEmpty())
                 return false;
 
@@ -431,7 +430,7 @@ public static class PropertyAuthLogic
         }
 
         var trivial = TypeAuthLogic.TrivialTypeGetUI(taac);
-        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(type))
+        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(RoleEntity.Current, type))
         {
             return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
                 paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())

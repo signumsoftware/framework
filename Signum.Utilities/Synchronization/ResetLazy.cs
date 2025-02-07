@@ -61,6 +61,7 @@ public class ResetLazy<T>: IResetLazy
 
     object syncLock = new();
 
+    bool loading;
     Box? box;
 
     readonly Type declaringType; 
@@ -88,7 +89,18 @@ public class ResetLazy<T>: IResetLazy
                     if (b2 != null)
                         return b2.Value;
 
-                    this.box = new Box(InternalLoaded());
+                    if (this.loading == true)
+                        throw new InvalidOperationException("Cyclic dependency detected loading " + this.GetType());
+
+                    this.loading = true;
+                    try
+                    {
+                        this.box = new Box(InternalLoaded());
+                    }
+                    finally
+                    {
+                        this.loading = false;
+                    }
 
                     return box.Value;
                 }
@@ -147,6 +159,7 @@ public class ResetLazy<T>: IResetLazy
             lock (syncLock)
             {
                 this.box = null;
+                this.loading = false;
                 this.LoadedOn = null;
             }
         }

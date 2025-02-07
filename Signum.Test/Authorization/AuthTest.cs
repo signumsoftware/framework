@@ -15,9 +15,9 @@ public class AuthTest
         {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write),
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
-        var max = WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
+        var max = WithConditions<TypeAllowed>.Simple(TypeAllowed.Write).WithPrima(false);
 
         var result = TypeConditionMerger.MergeBaseImplementations(new() { a, max }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
@@ -32,9 +32,9 @@ public class AuthTest
         {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write),
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
-        var min = WithConditions<TypeAllowed>.Simple(TypeAllowed.None);
+        var min = WithConditions<TypeAllowed>.Simple(TypeAllowed.None).WithPrima(false);
 
         var result = TypeConditionMerger.MergeBaseImplementations(new() { a, min }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
@@ -49,7 +49,7 @@ public class AuthTest
         {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write),
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
         var result = TypeConditionMerger.MergeBaseImplementations(new() { a, a }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
@@ -59,26 +59,44 @@ public class AuthTest
     [Fact]
     public void MergeTypes()
     {
-
-        var germany = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
+        var spain = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
         {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write),
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
-        var spain = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
+        var germany = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
 {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read)
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
-        var result = TypeConditionMerger.MergeBaseImplementations(new() { germany, spain }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+        var result = TypeConditionMerger.MergeBaseImplementations(new() { spain, germany }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
         var mix = new WithConditions<TypeAllowed>(TypeAllowed.None, new[]
         {
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Germany}.ToFrozenSet(), TypeAllowed.Read),
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write)
-        }.ToReadOnly());
+        }.ToReadOnly()).WithPrima(false);
 
         Assert.Equal(mix, result);
+    }
+
+    [Fact]
+    public void MergeTypesPrima()
+    {
+        var spain = new WithConditions<TypeAllowed>(TypeAllowed.Write, new[]
+        {
+            new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write),
+        }.ToReadOnly());
+
+        var simple = WithConditions<TypeAllowed>.Simple(TypeAllowed.Write).WithPrima(false);
+
+        var resultSimple = TypeConditionMerger.MergeBaseImplementations(new() { simple, spain.WithPrima(false) }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+
+        Assert.Equal(WithConditions<TypeAllowed>.Simple(TypeAllowed.Write), resultSimple.RemovePrima());
+
+        var resultPrima = TypeConditionMerger.MergeBaseImplementations(new() { simple, spain.WithPrima(true) }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
+
+        Assert.Equal(spain, resultPrima.RemovePrima());
     }
 }
 
