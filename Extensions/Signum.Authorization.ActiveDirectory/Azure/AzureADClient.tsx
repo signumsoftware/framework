@@ -174,16 +174,15 @@ export namespace AzureADClient {
       });
   }
 
-  export function setMsalAccount(accountName: string | null, isB2C: boolean): void {
-    if (accountName == null) {
-      localStorage.removeItem("msalAccount");
-      localStorage.removeItem("msalAccountIsBTC");
-    }
-    else {
-      localStorage.setItem("msalAccount", accountName);
-      if (isB2C)
-        localStorage.setItem("msalAccountIsBTC", isB2C.toString());
-    }
+  export function cleantMsalAccount(): void {
+    localStorage.removeItem("msalAccount");
+    localStorage.removeItem("msalAccountIsBTC");
+  }
+
+  export function setMsalAccount(accountName: string, isB2C: boolean): void {
+    localStorage.setItem("msalAccount", accountName);
+    if (isB2C)
+      localStorage.setItem("msalAccountIsBTC", isB2C.toString());
   }
 
   export function getMsalAccount(): msal.AccountInfo | null | undefined {
@@ -224,13 +223,17 @@ export namespace AzureADClient {
       });
   }
 
-  export function signOut(): void {
+  export async function signOut(): Promise<void> {
+    debugger;
     var account = getMsalAccount();
     if (account) {
-      msalClient.logoutPopup({
-        authority: getAuthority(isB2C() ? "B2C" : undefined),
+      const b2c = isB2C();
+      await msalClient.logoutPopup({
+        authority: getAuthority(b2c ? "B2C" : undefined),
         account: account
       });
+
+      AzureADClient.cleantMsalAccount();
     }
   }
 
