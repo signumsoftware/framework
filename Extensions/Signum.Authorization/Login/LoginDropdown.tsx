@@ -4,7 +4,7 @@ import { LoginAuthMessage, UserEntity } from '../Signum.Authorization'
 import { AuthClient } from '../AuthClient'
 import { LinkContainer } from '@framework/Components';
 import { Dropdown, NavItem, NavDropdown, Nav } from 'react-bootstrap';
-import { Lite, toLite, is } from '@framework/Signum.Entities';
+import { Lite, toLite, is, getToString } from '@framework/Signum.Entities';
 import { CultureClient } from '@framework/Basics/CultureClient'
 import { SmallProfilePhoto } from '../Templates/ProfilePhoto';
 
@@ -43,7 +43,7 @@ function LoginDropdown(p: {
   var extraButtons = p.extraMenuItems && p.extraMenuItems(user);
 
   return (
-    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center">{LoginDropdown.customLoginIcon(user)} &nbsp;{p.renderName ? p.renderName(user) : user.userName!}</span>} align="end">
+    <NavDropdown className="sf-login-dropdown" id="sfLoginDropdown" title={<span className="d-inline-flex align-items-center">{LoginDropdown.customLoginIcon(user)} &nbsp;{p.renderName ? p.renderName(user) : getToString(user)}</span>} align="end">
       {pv && <NavDropdown.Item id="sf-auth-profile" onClick={handleProfileClick}><FontAwesomeIcon icon="user-pen" fixedWidth className="me-2" /> {LoginAuthMessage.MyProfile.niceToString()}</NavDropdown.Item>}
       {cpv && <LinkContainer to="/auth/changePassword">
         <NavDropdown.Item><FontAwesomeIcon icon="key" fixedWidth className="me-2" /> {LoginAuthMessage.ChangePassword.niceToString()}</NavDropdown.Item>

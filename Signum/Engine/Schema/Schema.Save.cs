@@ -792,17 +792,12 @@ END $$;"); ;
         var sql = uc.SqlUpdatePattern(suffix, false);
         var parameters = new List<DbParameter>().Do(ps => uc.UpdateParameters(entity, (entity as Entity)?.Ticks ?? -1, new Forbidden(), suffix, ps));
 
+        SqlPreCommandSimple? declare = null;
         SqlPreCommand? update;
         if (where != null)
         {
-            bool isPostgres = Schema.Current.Settings.IsPostgres;
-
-            var declare = DeclarePrimaryKeyVariable(entity, where);
-            var updateSql = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter( entity.Id.VariableName);
-
-            update = isPostgres ?
-                PostgresDoBlock(entity.Id.VariableName!, declare, updateSql) :
-                SqlPreCommand.Combine(Spacing.Simple, declare, updateSql); ;
+            declare = DeclarePrimaryKeyVariable(entity, where);
+            update = new SqlPreCommandSimple(sql, parameters).AddComment(comment).ReplaceFirstParameter(entity.Id.VariableName);
         }
         else
         {
@@ -821,7 +816,14 @@ END $$;"); ;
         var cc = saveCollections.Value;
         SqlPreCommand? collections = cc?.UpdateCollectionsSync((Entity)entity, suffix, where != null);
 
-        return SqlPreCommand.Combine(Spacing.Double, update, collections, virtualMList);
+        var script = SqlPreCommand.Combine(Spacing.Double, update, collections, virtualMList);
+        if (declare == null)
+            return script;
+
+        if (Schema.Current.Settings.IsPostgres)
+            return PostgresDoBlock(entity.Id.VariableName!, declare, script!);
+        else
+            return SqlPreCommand.Combine(Spacing.Simple, declare, script);
     }
 
     static GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>> giUpdateVirtualMListSync = new GenericInvoker<Func<Entity, VirtualMListInfo, SqlPreCommand>>(
@@ -1284,7 +1286,7 @@ public partial class TableMList
                 if (this.PartitionId != null)
                     sql += " AND {0} = {1}".FormatWith(this.PartitionId.Name.SqlEscape(isPostgres), ParameterBuilder.GetParameterName(PartitionId.Name));
 
-                return sql;
+                return sql + ";";
             },
             DeleteParameters = (entity, suffix) => 
             {
@@ -1310,7 +1312,7 @@ public partial class TableMList
                 sql += " AND {0} NOT IN ({1})"
                     .FormatWith(PrimaryKey.Name.SqlEscape(isPostgres), 0.To(num).Select(i => ParameterBuilder.GetParameterName("e" + i)).ToString(", "));
 
-                return sql;
+                return sql + ";";
             },
 
             DeleteExceptParameters = delete =>

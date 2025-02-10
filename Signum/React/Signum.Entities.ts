@@ -182,6 +182,7 @@ function compileFunction(functionString: string): (e: any) => any {
     dateToString: Reflection.dateToString,
     timeToString: Reflection.timeToString,
     getTypeInfo: Reflection.getTypeInfo,
+    symbolNiceName: Reflection.symbolNiceName,
     newNiceName: newNiceName,
     New : Reflection.New,
     toLite: toLite,

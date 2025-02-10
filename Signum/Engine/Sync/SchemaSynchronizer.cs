@@ -780,7 +780,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             if (defaultValue == "force")
                 return sqlBuilder.AlterTableAddColumn(table, column);
 
-            if (column is FieldEmbedded.EmbeddedHasValueColumn hv && defaultValue == "0")
+            if (column is FieldEmbedded.EmbeddedHasValueColumn hv && (defaultValue == (isPostgres ? "false" :"0")))
                 hasValueFalse.Add(hv);
 
             var tempDefault = new SqlBuilder.DefaultConstraint(

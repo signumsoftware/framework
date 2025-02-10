@@ -1,12 +1,116 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="HolidayCalendarEntity" Description=" Calendrier des jours fériés" PluralDescription="Calendriers des jours fériés">
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="Holidays" Description="Vacances" />
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="HolidayCalendarOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
   <Type Name="HolidayEmbedded" Description="Vacances">
     <Member Name="Date" Description="Date" />
     <Member Name="Name" Description="Nom" />
   </Type>
   <Type Name="ScheduledTaskEntity" Description="Tâches planifiées">
+    <Member Name="ApplicationName" Description="Nom de l’application" />
+    <Member Name="MachineName" Description="Nom de la machine" />
     <Member Name="Rule" Description="Règle" />
     <Member Name="Suspended" Description="Suspendu" />
     <Member Name="Task" Description="Tâche" />
+    <Member Name="User" Description="Utilisateur" />
   </Type>
+  <Type Name="ScheduledTaskLogEntity" Description="Log des tâches planifiées" PluralDescription="Logs des tâches planifiées">
+    <Member Name="ApplicationName" Description="Nom de l’application" />
+    <Member Name="Duration" Description="Durée" />
+    <Member Name="EndTime" Description="Heure de fin" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="MachineName" Description="Nom de la machine" />
+    <Member Name="ProductEntity" Description="Entité de produit" />
+    <Member Name="Remarks" Description="Remarques" />
+    <Member Name="ScheduledTask" Description="Tâches planifiées" />
+    <Member Name="StartTime" Description="Heure de début" />
+    <Member Name="Task" Description="Tâche" />
+    <Member Name="User" Description="Utilisateur" />
+  </Type>
+  <Type Name="ScheduledTaskLogOperation">
+    <Member Name="CancelRunningTask" Description="Annuler la tâche en cours d’exécution" />
+  </Type>
+  <Type Name="ScheduledTaskOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="SchedulerMessage">
+    <Member Name="Day0At1In2" Description="Journée {0} à {1} dans {2}" />
+    <Member Name="Each0Minutes" Description="Toutes les {0} minutes" />
+    <Member Name="ScheduleRuleWeekDaysDN_AndHoliday" Description="et jours fériés" />
+    <Member Name="ScheduleRuleWeekDaysDN_At" Description="à" />
+    <Member Name="ScheduleRuleWeekDaysDN_ButHoliday" Description="sauf jours fériés" />
+    <Member Name="ScheduleRuleWeekDaysDN_Fr" Description="Ve" />
+    <Member Name="ScheduleRuleWeekDaysDN_Mo" Description="Lu" />
+    <Member Name="ScheduleRuleWeekDaysDN_Sa" Description="Sa" />
+    <Member Name="ScheduleRuleWeekDaysDN_Su" Description="Di" />
+    <Member Name="ScheduleRuleWeekDaysDN_Th" Description="Je" />
+    <Member Name="ScheduleRuleWeekDaysDN_Tu" Description="Ma" />
+    <Member Name="ScheduleRuleWeekDaysDN_We" Description="Me" />
+    <Member Name="TaskIsNotRunning" Description="La tâche n’est pas en cours d’exécution" />
+  </Type>
+  <Type Name="SchedulerPermission">
+    <Member Name="ViewSchedulerPanel" Description="Afficher le tableau des tâches planifiées" />
+  </Type>
+  <Type Name="SchedulerTaskExceptionLineEntity" Description="la ligne d’exception de tâche planifiée" PluralDescription="Lignes d’exception de tâche planifiée">
+    <Member Name="ElementInfo" Description="Informations sur l’élément" />
+    <Member Name="Exception" Description="Exception" />
+    <Member Name="SchedulerTaskLog" Description="Logs des tâches planifiées" />
+  </Type>
+  <Type Name="ScheduleRuleMinutelyEntity" Description="Schedule rule minutely" PluralDescription="Schedule rule minutelies">
+    <Member Name="EachMinutes" Description="Chaque minute" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="IsAligned" Description="Est aligné" />
+    <Member Name="StartingOn" Description="À partir de" />
+  </Type>
+  <Type Name="ScheduleRuleMonthsEntity" Description="Schedule rule month" PluralDescription="Schedule rule months">
+    <Member Name="April" Description="Avril" />
+    <Member Name="August" Description="Août" />
+    <Member Name="December" Description="Décembre" />
+    <Member Name="February" Description="Février" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="January" Description="Janvier" />
+    <Member Name="July" Description="Juillet" />
+    <Member Name="June" Description="Juin" />
+    <Member Name="March" Description="Mars" />
+    <Member Name="May" Description="Mai" />
+    <Member Name="November" Description="Novembre" />
+    <Member Name="October" Description="Octobre" />
+    <Member Name="September" Description="Septembre" />
+    <Member Name="StartingOn" Description="À partir de" />
+  </Type>
+  <Type Name="ScheduleRuleWeekDaysEntity" Description="Schedule rule week day" PluralDescription="Schedule rule week days">
+    <Member Name="Calendar" Description="Calendrier" />
+    <Member Name="Friday" Description="Vendredi" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="Holiday" Description="Vacances" />
+    <Member Name="Monday" Description="Lundi" />
+    <Member Name="Saturday" Description="Samedi" />
+    <Member Name="StartingOn" Description="À partir de" />
+    <Member Name="Sunday" Description="Dimanche" />
+    <Member Name="Thursday" Description="Jeudi" />
+    <Member Name="Tuesday" Description="Mardi" />
+    <Member Name="Wednesday" Description="Mercredi" />
+  </Type>
+  <Type Name="IScheduleRuleEntity">
+    <Member Name="StartingOn" Description="À partir de" />
+  </Type>
+  <Type Name="ITaskMessage">
+    <Member Name="ExceptionLines" Description="Lignes d’exception" />
+    <Member Name="Execute" Description="Executer" />
+    <Member Name="Executions" Description="Exécutions" />
+    <Member Name="LastExecution" Description="Dernière exécution" />
+  </Type>
+  <Type Name="ITaskOperation">
+    <Member Name="ExecuteAsync" Description="Exécuter de manière asynchrone" />
+    <Member Name="ExecuteSync" Description="Exécuter la synchronisation" />
+  </Type>
+  <Type Name="SimpleTaskSymbol" Description="Tâche simple" />
 </Translations>

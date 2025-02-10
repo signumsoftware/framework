@@ -4,6 +4,8 @@ import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
 import { StyleContext } from '../TypeContext';
 import { Dropdown } from 'react-bootstrap';
+import { softCast } from '../Globals';
+import ErrorModal from '../Modals/ErrorModal';
 
 export interface MenuItemBlock {
   header: string;
@@ -35,14 +37,26 @@ export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promis
 
 export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement[]> {
 
-  const blockPromises = onContextualItems.map(func => func(ctx));
+  const blockPromises = onContextualItems.map(func => func(ctx)?.catch(a => ({ error: a, func })));
 
   return Promise.all(blockPromises).then(blocks => {
 
     const result: React.ReactElement[] = []
     blocks.forEach(block => {
 
-      if (block == undefined || block.menuItems == undefined || block.menuItems.length == 0)
+      if (block == undefined)
+        return;
+
+      if ("error" in block) {
+        result.push(
+          <Dropdown className="text-danger" onClick={() => ErrorModal.showErrorModal(block.error)}>
+            Error in {block.func.name}
+          </Dropdown >
+        );
+        return;
+      }
+        
+      if (block.menuItems == undefined || block.menuItems.length == 0)
         return;
 
       if (result.length)

@@ -142,7 +142,7 @@ public class TypeAllowedRule : AllowedRule<TypeEntity, WithConditionsModel<TypeA
 }
 
 public class WithConditions<A> : IEquatable<WithConditions<A>>
-    where A : struct, Enum
+    where A : struct
 {
 
     public A Fallback { get; }
@@ -159,7 +159,7 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
     }
 
     public WithConditions<T> MapWithConditions<T>(Func<A, T> func)
-        where T : struct, Enum
+        where T : struct
     {
         return new WithConditions<T>(func(Fallback), ConditionRules.Select(cr => new ConditionRule<T>(cr.TypeConditions, func(cr.Allowed))).ToReadOnly());
     }   
@@ -209,9 +209,6 @@ public class WithConditions<A> : IEquatable<WithConditions<A>>
 
         return "{0} | {1}".FormatWith(Fallback, ConditionRules.ToString(" | "));
     }
-
-    internal WithConditionsModel<A> ToModel() => new WithConditionsModel<A>(Fallback,
-            ConditionRules.Select(r => new ConditionRuleModel<A>(r.TypeConditions, r.Allowed)));
 }
 
 public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
@@ -230,11 +227,18 @@ public readonly struct ConditionRule<A> : IEquatable<ConditionRule<A>>
 
     public int CalculateHash()
     {
+        int hash = this.TypeConditionsHash();
+
+        hash = hash * 31 + Allowed.GetHashCode();
+
+        return hash;
+    }
+
+    public int TypeConditionsHash()
+    {
         int hash = 17;
         foreach (var condition in TypeConditions)
             hash = hash * 31 + condition.GetHashCode();
-
-        hash = hash * 31 + Allowed.GetHashCode();
 
         return hash;
     }
@@ -338,6 +342,8 @@ public class WithConditionsModel<A> : ModelEntity
 
 public static class TypeAllowAndConditionsExtensions
 {
+    public static WithConditionsModel<A> ToModel<A>(this WithConditions<A> wc)  where A : struct, Enum => new WithConditionsModel<A>(wc.Fallback,
+        wc.ConditionRules.Select(r => new ConditionRuleModel<A>(r.TypeConditions, r.Allowed)));
 
     public static TypeAllowedBasic Min(this WithConditions<TypeAllowed> taac, bool inUserInterface)
     {

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="IsolationEntity" Description="Isolation" PluralDescription="Isolations">
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="IsolationMessage">
+    <Member Name="Entity0HasIsolation1ButCurrentIsolationIs2" Description="L’entité {0} dispose d’une isolation {1}, mais l’isolement actuel est {2}" />
+    <Member Name="Entity0HasIsolation1ButEntity2HasIsolation3" Description="L’entité '{0}' a une isolation {1}, mais l’entité '{2}' a une isolation {3} " />
+    <Member Name="GlobalEntity" Description="Entité mondiale" />
+    <Member Name="GlobalMode" Description="Mode global" />
+    <Member Name="SelectAnIsolation" Description="Sélectionner une isolation" />
+  </Type>
+  <Type Name="IsolationMixin">
+    <Member Name="Isolation" Description="Isolation" />
+  </Type>
+  <Type Name="IsolationOperation">
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="IsolationStrategy" Description="Stratégie d’isolation">
+    <Member Name="Isolated" Description="Isolé" />
+    <Member Name="None" Description="Aucun" />
+    <Member Name="Optional" Description="Optionnel" />
+  </Type>
+</Translations>

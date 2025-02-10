@@ -36,7 +36,7 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
   const [isOver, setIsOver] = React.useState<boolean>(false);
   const [errors, setErrors] = React.useState<any[]>([]);
 
-
+  const dragAndDrop = p.dragAndDrop ?? true;
 
   function handleDragOver(e: React.DragEvent<any>) {
     e.stopPropagation();
@@ -87,7 +87,7 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
   return (
     <div {...p.divHtmlAttributes}>
       {isLoading ? <div className="sf-file-drop">{JavascriptMessage.loading.niceToString()}</div> :
-        (p.dragAndDrop ? <div className={classes("sf-file-drop", p.fileDropCssClass, isOver ? "sf-file-drop-over" : undefined)}
+        (dragAndDrop ? <div className={classes("sf-file-drop", p.fileDropCssClass, isOver ? "sf-file-drop-over" : undefined)}
           onDragEnter={handleDragOver}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -118,10 +118,7 @@ export function FileUploader(p: FileUploaderProps): React.JSX.Element {
   );
 }
 
-export namespace FileUploader {
-  export const defaultProps = {
-    dragAndDrop: true
-  };
+export namespace FileUploader {  
 }
 
 

@@ -31,10 +31,9 @@ export namespace ActiveDirectoryClient {
     User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null);
     User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
     User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
-  
-    if (window.__azureApplicationId) {
+
+    if (window.__azureADConfig) {
       urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-  
   
         var oid =
           (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
@@ -65,8 +64,8 @@ export namespace ActiveDirectoryClient {
       return url;
     });
   
-  
-    Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) ? ({
+
+    Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) && str.length > 2 ? ({
       type: UserEntity,
       customElement: <em><FontAwesomeIcon icon="address-book" />&nbsp;{UserADMessage.Find0InActiveDirectory.niceToString().formatHtml(<strong>{str}</strong>)}</em>,
       onClick: () => importADUser(str),

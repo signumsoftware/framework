@@ -7,15 +7,58 @@
   <Type Name="FileEntity" Description="Fichier">
     <Member Name="BinaryFile" Description="Fichier binaire" />
     <Member Name="FileName" Description="Nom de fichier" />
+    <Member Name="Hash" Description="Hash" />
   </Type>
   <Type Name="FileMessage">
+    <Member Name="DownloadFile" Description="Télécharger le fichier" />
     <Member Name="ErrorSavingFile" Description="Erreur en sauvegardant l'archive" />
+    <Member Name="File0IsTooBigTheMaximumSizeIs1" Description="Le fichier '{0}' est trop volumineux, la taille maximale est de {1}" />
+    <Member Name="FileTypes" Description="Types de fichiers" />
+    <Member Name="OnlyOneFileIsSupported" Description="Un seul fichier est pris en charge" />
+    <Member Name="Open" Description="Ouvrir" />
+    <Member Name="OpeningHasNotDefaultImplementationFor0" Description="Il n'y a pas d’implémentation (Open) par défaut pour {0}" />
+    <Member Name="OrDragAFileHere" Description="ou faites glisser un fichier ici" />
+    <Member Name="Remove" Description="Supprimer" />
+    <Member Name="SavingHasNotDefaultImplementationFor0" Description="Il n'y a pas d’implémentation (Save) par défaut pour {0}" />
+    <Member Name="SelectFile" Description="Sélectionnez un Fichier" />
+    <Member Name="TheFile0IsNotA1" Description="Le fichier {0} n’est pas un {1}" />
+    <Member Name="TheNameOfTheFileMustNotContainPercentSymbol" Description="Le nom du fichier ne peut pas contenir '%'." />
+    <Member Name="ViewFile" Description="Voir le fichier" />
+    <Member Name="ViewingHasNotDefaultImplementationFor0" Description="Il n'y a pas d’implémentation (View) par défaut pour {0}" />
+    <Member Name="WebDownload" Description="Télécharger" />
+    <Member Name="WebImage" Description="Image" />
+  </Type>
+  <Type Name="FilePathEmbedded" Description="Chemin d'accès du fichier">
+    <Member Name="BinaryFile" Description="Fichier binaire" />
+    <Member Name="CalculatedDirectory" Description="Répertoire calculé" />
+    <Member Name="EntityId" Description="ID d’entité" />
+    <Member Name="FileLength" Description="Taille du fichier" />
+    <Member Name="FileLengthString" Description="Longueur de fichier" />
+    <Member Name="FileName" Description="Nom du fichier" />
+    <Member Name="FileType" Description="Type de fichier" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="MListRowId" Description="ID de la ligne MList" />
+    <Member Name="PropertyRoute" Description="Property route" />
+    <Member Name="RootType" Description="Root type" />
+    <Member Name="Suffix" Description="Suffixe" />
   </Type>
   <Type Name="FilePathEntity" Description="Chemin d'accès du fichier">
     <Member Name="BinaryFile" Description="Fichier binaire" />
+    <Member Name="CalculatedDirectory" Description="Répertoire calculé" />
+    <Member Name="CreationDate" Description="Date de création" />
     <Member Name="FileLength" Description="Longueur du fichier" />
     <Member Name="FileLengthString" Description="Longueur de fichier" />
     <Member Name="FileName" Description="Nom du fichier" />
     <Member Name="FileType" Description="Type de fichier" />
+    <Member Name="Hash" Description="Hash" />
+    <Member Name="Suffix" Description="Suffixe" />
+  </Type>
+  <Type Name="FilePathOperation">
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="FileTypeSymbol" Description="Type de fichier" PluralDescription="Types de fichier" />
+  <Type Name="GoogleMapsChartScript">
+    <Member Name="Heatmap" Description="Carte thermique" />
+    <Member Name="Markermap" Description="Carte avec marqueurs" />
   </Type>
 </Translations>
