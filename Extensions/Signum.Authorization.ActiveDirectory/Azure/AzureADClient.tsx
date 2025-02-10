@@ -224,7 +224,6 @@ export namespace AzureADClient {
   }
 
   export async function signOut(): Promise<void> {
-    debugger;
     var account = getMsalAccount();
     if (account) {
       const b2c = isB2C();
