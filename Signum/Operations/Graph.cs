@@ -767,6 +767,7 @@ public class Graph<T>
                     Operation = Symbol.Symbol,
                     Start = Clock.Now,
                     User = UserHolder.Current?.User!,
+                    Target = entity.ToLite(),
                 };
 
                 using (OperationLogic.AllowSave(entity.GetType()))
