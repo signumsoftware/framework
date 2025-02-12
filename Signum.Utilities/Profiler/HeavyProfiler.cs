@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
 using Signum.Utilities.DataStructures;
+using Microsoft.Extensions.Logging;
 
 namespace Signum.Utilities;
 
@@ -10,6 +11,22 @@ public static class HeavyProfiler
     public static TimeSpan MaxEnabledTime = TimeSpan.FromMinutes(5);
 
     public static long? TimeLimit;
+
+    public static ILoggerFactory? LoggerFactory;
+    public static ActivitySource? ActivitySource;
+
+
+    bool? fullyDisabled;
+    public bool FullyDisabled {
+        get
+        {
+
+        }
+        if(fullyDisabled != null)
+        return fullyDisabled.va
+
+
+} fullyDisabled ??= !(Enabled || LoggerFactory != null || ActivitySource != null);
 
 
     static bool enabled;
@@ -43,9 +60,9 @@ public static class HeavyProfiler
         }
     }
 
-    public static Tracer? Log(string role)
+    public static Tracer? Log(string role, LogLevel level = LogLevel.Information)
     {
-        if (!enabled)
+        if (!enabled && ActivitySource == null && LoggerFactory == null)
             return null;
 
         var tracer = CreateNewEntry(role, null, stackTrace: true);
@@ -53,9 +70,9 @@ public static class HeavyProfiler
         return tracer;
     }
 
-    public static Tracer? Log(string role, Func<string?> additionalData)
+    public static Tracer? Log(string role, Func<string?> additionalData, LogLevel level = LogLevel.Information)
     {
-        if (!enabled)
+        if (!enabled && ActivitySource == null && LoggerFactory == null)
             return null;
 
         var tracer = CreateNewEntry(role, additionalData, stackTrace: true);
@@ -65,7 +82,7 @@ public static class HeavyProfiler
 
     public static Tracer? LogNoStackTrace(string role)
     {
-        if (!enabled)
+        if (!enabled && ActivitySource == null && LoggerFactory == null)
             return null;
 
         var tracer = CreateNewEntry(role, null, stackTrace: false);
@@ -75,7 +92,7 @@ public static class HeavyProfiler
 
     public static Tracer? LogNoStackTrace(string role, Func<string?> additionalData)
     {
-        if (!enabled)
+        if (!enabled && ActivitySource == null && LoggerFactory == null)
             return null;
 
         var tracer = CreateNewEntry(role, additionalData, stackTrace: false);
