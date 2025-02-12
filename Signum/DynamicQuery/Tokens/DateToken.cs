@@ -47,13 +47,13 @@ public class DateToken : QueryToken
         return new List<QueryToken>();
     }
 
-    static MethodInfo miDate = ReflectionTools.GetMethodInfo((DateTime d) => d.ToDateOnly());
+    static MethodInfo miDate = ReflectionTools.GetMethodInfo((DateTime? d) => d.ToDateOnly());
 
     protected override Expression BuildExpressionInternal(BuildExpressionContext context)
     {
         var exp = parent.BuildExpression(context);
 
-        return Expression.Call(miDate, exp.UnNullify()).Nullify();
+        return Expression.Call(miDate, exp);
     }
 
     public override PropertyRoute? GetPropertyRoute()
