@@ -104,7 +104,7 @@ export namespace ProfilerClient {
     end: number;
     elapsed: string;
     isFinished: boolean;
-    role: string;
+    kind: string;
     color: string;
     depth: number;
     asyncDepth: number;

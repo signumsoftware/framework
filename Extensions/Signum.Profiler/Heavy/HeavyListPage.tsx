@@ -10,7 +10,7 @@ import { classes } from '@framework/Globals'
 
 export default function HeavyList(): React.JSX.Element {
 
-    const[ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
+  const [ignoreProfilerHeavyEntries, setIgnoreProfilerHeavyEntries] = React.useState<boolean>(true)
 
 
   const [enabled, reloadEnabled] = useAPIWithReload(() => ProfilerClient.API.Heavy.isEnabled(), [], { avoidReset: true });
@@ -71,7 +71,7 @@ export default function HeavyList(): React.JSX.Element {
   }
 
   const { size, setContainer } = useSize();
-  
+
   if (entries == undefined)
     return <h3 className="display-6">Heavy Profiler (loading...) </h3>;
 
@@ -144,10 +144,10 @@ function EntrieListPath({ width, entries }: { width: number, entries: ProfilerCl
   return (
     <svg width={width + "px"} height={height + "px"}>
       {data.map((v, i) => {
-        var isPH = v.role == "Web.ProfilerClient.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
+        var isPH = v.kind == "Web.ProfilerClient.API GET" && v.additionalData != null && v.additionalData.contains("/api/profilerHeavy/");
         return (<g className="entry" data-full-key={v.fullIndex} key={v.fullIndex} onClick={e => handleOnClick(e, v)} opacity={isPH ? 0.5 : undefined}>
           <rect className="left-background" x={0} y={y(i)} width={labelWidth} height={entryHeight} fill="#ddd" stroke="#fff" />
-          <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.role + " " + v.additionalData}</text>
+          <text className="label label-left" y={y(i)} dy={fontPadding + fontSize} fill="#000">{v.kind + " " + v.additionalData}</text>
           <rect className="right-background" x={labelWidth} y={y(i)} width={width - labelWidth} height={entryHeight} fill="#fff" stroke="#ddd" />
           <rect className="shape" x={x(v.start)} y={y(i)} width={x(v.end)! - x(v.start)!} height={entryHeight} fill={v.color} />
           <text className="label label-right" x={x(v.end)! + 3} y={y(i)} width={x(v.end)! - x(v.start)!} dy={fontPadding + fontSize} height={entryHeight} fill='#000'>{v.elapsed}</text>
