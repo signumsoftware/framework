@@ -55,7 +55,7 @@ public class AuthController : ControllerBase
 
         if (data.rememberMe == true)
         {
-            UserTicketServer.SaveCookie(ControllerContext);
+            UserTicketServer.OnSaveCookie(ControllerContext);
         }
 
         var token = AuthTokenServer.CreateToken(user);
