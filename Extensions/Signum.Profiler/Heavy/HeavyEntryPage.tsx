@@ -43,7 +43,7 @@ export default function HeavyEntry(): React.JSX.Element {
         <tbody>
           <tr>
             <th>Role</th>
-            <td>{current.role}</td>
+            <td>{current.kind}</td>
           </tr>
           <tr>
             <th>Time</th>
@@ -256,9 +256,9 @@ export function HeavyProfilerDetailsD3(p: HeavyProfilerDetailsD3Props): React.JS
               dy={(2 * fontPadding) + (2 * fontSize)}
               x={x(Math.max(min, d.start))! + 3}
               fill={d == sel ? '#000' : '#fff'}>
-              {d.role + (d.additionalData ? (" - " + d.additionalData.etc(30)) : "")}
+              {d.kind + (d.additionalData ? (" - " + d.additionalData.etc(30)) : "")}
             </text>
-            <title>{d.role + d.elapsed}</title>
+            <title>{d.kind + d.elapsed}</title>
           </g>
         )}
       </svg>

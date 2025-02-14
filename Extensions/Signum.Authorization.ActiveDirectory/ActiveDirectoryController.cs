@@ -22,13 +22,13 @@ public class ActiveDirectoryController : ControllerBase
         ActiveDirectoryPermission.InviteUsersFromAD.AssertAuthorized();
 
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
-        if (config.Azure_ApplicationID != null)
+        if (config.AzureAD != null)
             return AzureADLogic.FindActiveDirectoryUsers(subString, count, token);
 
-        if (config.DomainName.HasText())
+        if (config.WindowsAD != null)
             return WindowsActiveDirectoryLogic.SearchUser(subString, count);
 
-        throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
+        throw new InvalidOperationException($"Neither {nameof(config.AzureAD)} or {nameof(config.WindowsAD)} are set in {config.GetType().Name}");
     }
 
 
@@ -39,13 +39,13 @@ public class ActiveDirectoryController : ControllerBase
 
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
-        if (config.Azure_ApplicationID != null)
+        if (config.AzureAD != null)
             return AzureADLogic.CreateUserFromAD(user).ToLite();
 
-        if (config.DomainName.HasText())
+        if (config.WindowsAD != null)
             return WindowsActiveDirectoryLogic.CreateUserFromAD(user).ToLite();
 
-        throw new InvalidOperationException($"Neither {nameof(config.Azure_ApplicationID)} or {nameof(config.DomainName)} are set in {config.GetType().Name}");
+        throw new InvalidOperationException($"Neither {nameof(config.AzureAD)} or {nameof(config.WindowsAD)} are set in {config.GetType().Name}");
     }
 
 

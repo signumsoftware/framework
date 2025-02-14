@@ -20,7 +20,7 @@ export interface SimpleFilterBuilderProps {
 export interface SearchControlProps {
   findOptions: FindOptions;
   formatters?: { [token: string]: Finder.CellFormatter };
-  rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+  rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: Finder.EntityFormatter;
   selectionFromatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
 

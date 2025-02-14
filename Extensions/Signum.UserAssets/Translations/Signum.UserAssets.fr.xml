@@ -1,13 +1,73 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="EntityAction" Description="Action de l’entité">
+    <Member Name="Different" Description="Différent" />
+    <Member Name="Identical" Description="Identique" />
+    <Member Name="New" Description="Nouveau" />
+  </Type>
   <Type Name="QueryColumnEmbedded" Description="Colonne de requête">
     <Member Name="DisplayName" Description="Nom" />
+    <Member Name="HiddenColumn" Description="Colonne cachée" />
+    <Member Name="SummaryToken" Description="Summary token" />
+    <Member Name="Token" Description="Token" />
   </Type>
   <Type Name="QueryFilterEmbedded" Description="Filtre de requête">
+    <Member Name="DashboardBehaviour" Description="Dashboard behaviour" />
+    <Member Name="GroupOperation" Description="Opération de groupe" />
+    <Member Name="Indentation" Description="Indentation" />
+    <Member Name="IsGroup" Description="Est un groupe" />
     <Member Name="Operation" Description="Opération" />
+    <Member Name="Pinned" Description="Épinglé" />
+    <Member Name="Token" Description="Token" />
     <Member Name="ValueString" Description="Chaîne de valeur" />
   </Type>
   <Type Name="QueryOrderEmbedded" Description="Ordre de requête">
     <Member Name="OrderType" Description="Type d'ordre" />
+  </Type>
+  <Type Name="LiteConflictEmbedded" Description="Conflit léger">
+    <Member Name="From" Description="De" />
+    <Member Name="PropertyRoute" Description="Property route" />
+    <Member Name="To" Description="À" />
+  </Type>
+  <Type Name="PinnedQueryFilterEmbedded" Description="Filtre de requête épinglée">
+    <Member Name="Active" Description="Actif" />
+    <Member Name="Column" Description="Colonne" />
+    <Member Name="Label" Description="Étiquette" />
+    <Member Name="Row" Description="Ligne" />
+    <Member Name="SplitText" Description="Fractionner le texte" />
+  </Type>
+  <Type Name="QueryOrderEmbedded" Description="Ordre de requête">
+    <Member Name="OrderType" Description="Type d'ordre" />
+    <Member Name="Token" Description="Token" />
+  </Type>
+  <Type Name="QueryTokenEmbedded" Description="Query token">
+    <Member Name="TokenString" Description="Token string" />
+  </Type>
+  <Type Name="UserAssetMessage">
+    <Member Name="ExportToXml" Description="Exporter au format xml" />
+    <Member Name="ImportPreview" Description="Previsualiser l’importation" />
+    <Member Name="ImportUserAssets" Description="Importer des ressources utilisateur" />
+    <Member Name="LooksLikeSomeEntitiesIn0DoNotExistsOrHaveADifferentMeaningInThisDatabase" Description="On dirait que certaines entités dans {0} n’existent pas ou ont une signification différente dans cette base de données..." />
+    <Member Name="SameSelectionForAllConflictsOf0" Description="Même sélection pour tous les conflits de {0}" />
+    <Member Name="SelectTheEntitiesToOverride" Description="Sélectionnez les entités à remplacer" />
+    <Member Name="SelectTheXmlFileWithTheUserAssetsThatYouWantToImport" Description="Sélectionnez le fichier xml contenant les ressources utilisateur que vous souhaitez importer" />
+    <Member Name="SucessfullyImported" Description="Importé avec succès" />
+    <Member Name="SwitchToExpression" Description="Passer à l’expression" />
+    <Member Name="SwitchToValue" Description="Passer à la valeur" />
+  </Type>
+  <Type Name="UserAssetPermission">
+    <Member Name="UserAssetsToXML" Description="Ressources utilisateur en XML" />
+  </Type>
+  <Type Name="UserAssetPreviewLineEmbedded" Description="Ligne d’aperçu de la ressource utilisateur">
+    <Member Name="Action" Description="Action" />
+    <Member Name="CustomResolution" Description="Résolution personnalisée" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="LiteConflicts" Description="Conflits légers" />
+    <Member Name="OverrideEntity" Description="Remplacer l’entité" />
+    <Member Name="Text" Description="Texte" />
+    <Member Name="Type" Description="Type" />
+  </Type>
+  <Type Name="UserAssetPreviewModel" Description="Aperçu de la ressource utilisateur">
+    <Member Name="Lines" Description="Lignes" />
   </Type>
 </Translations>

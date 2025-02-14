@@ -33,6 +33,7 @@
     <Member Name="Message" Description="Nachricht" />
     <Member Name="Name" Description="Name" />
     <Member Name="Stack" Description="Stapel" />
+    <Member Name="Url" Description="URL" />
   </Type>
   <Type Name="CollapsableCardMessage">
     <Member Name="Collapse" Description="Einklappen" />

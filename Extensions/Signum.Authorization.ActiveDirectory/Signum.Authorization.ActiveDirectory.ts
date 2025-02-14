@@ -18,17 +18,8 @@ export namespace ActiveDirectoryAuthorizerMessage {
 export const ActiveDirectoryConfigurationEmbedded: Type<ActiveDirectoryConfigurationEmbedded> = new Type<ActiveDirectoryConfigurationEmbedded>("ActiveDirectoryConfigurationEmbedded");
 export interface ActiveDirectoryConfigurationEmbedded extends Entities.EmbeddedEntity {
   Type: "ActiveDirectoryConfigurationEmbedded";
-  domainName: string | null;
-  directoryRegistry_Username: string | null;
-  directoryRegistry_Password: string | null;
-  azure_ApplicationID: string /*Guid*/ | null;
-  azure_DirectoryID: string /*Guid*/ | null;
-  azureB2C: AzureB2CEmbedded | null;
-  azure_ClientSecret: string | null;
-  useDelegatedPermission: boolean;
-  loginWithWindowsAuthenticator: boolean;
-  loginWithActiveDirectoryRegistry: boolean;
-  loginWithAzureAD: boolean;
+  windowsAD: WindowsActiveDirectoryEmbedded | null;
+  azureAD: AzureActiveDirectoryEmbedded | null;
   allowMatchUsersBySimpleUserName: boolean;
   autoCreateUsers: boolean;
   autoUpdateUsers: boolean;
@@ -78,11 +69,24 @@ export namespace AuthADFileType {
   export const CachedProfilePhoto : Files.FileTypeSymbol = registerSymbol("FileType", "AuthADFileType.CachedProfilePhoto");
 }
 
+export const AzureActiveDirectoryEmbedded: Type<AzureActiveDirectoryEmbedded> = new Type<AzureActiveDirectoryEmbedded>("AzureActiveDirectoryEmbedded");
+export interface AzureActiveDirectoryEmbedded extends Entities.EmbeddedEntity {
+  Type: "AzureActiveDirectoryEmbedded";
+  loginWithAzureAD: boolean;
+  applicationID: string /*Guid*/;
+  directoryID: string /*Guid*/;
+  azureB2C: AzureB2CEmbedded | null;
+  clientSecret: string | null;
+  useDelegatedPermission: boolean;
+}
+
 export const AzureB2CEmbedded: Type<AzureB2CEmbedded> = new Type<AzureB2CEmbedded>("AzureB2CEmbedded");
 export interface AzureB2CEmbedded extends Entities.EmbeddedEntity {
   Type: "AzureB2CEmbedded";
+  loginWithAzureB2C: boolean;
   tenantName: string;
   signInSignUp_UserFlow: string;
+  resetPassword_UserFlow: string | null;
 }
 
 export const CachedProfilePhotoEntity: Type<CachedProfilePhotoEntity> = new Type<CachedProfilePhotoEntity>("CachedProfilePhoto");
@@ -125,5 +129,15 @@ export interface UserADMixin extends Entities.MixinEntity {
 
 export namespace UserOIDMessage {
   export const TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet: MessageKey = new MessageKey("UserOIDMessage", "TheUser0IsConnectedToActiveDirectoryAndCanNotHaveALocalPasswordSet");
+}
+
+export const WindowsActiveDirectoryEmbedded: Type<WindowsActiveDirectoryEmbedded> = new Type<WindowsActiveDirectoryEmbedded>("WindowsActiveDirectoryEmbedded");
+export interface WindowsActiveDirectoryEmbedded extends Entities.EmbeddedEntity {
+  Type: "WindowsActiveDirectoryEmbedded";
+  loginWithWindowsAuthenticator: boolean;
+  loginWithActiveDirectoryRegistry: boolean;
+  domainName: string | null;
+  directoryRegistry_Username: string | null;
+  directoryRegistry_Password: string | null;
 }
 

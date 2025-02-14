@@ -1,5 +1,72 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="AggregateFunction">
+    <Member Name="Average" Description="Moyenne" />
+    <Member Name="Count" Description="Compter" />
+    <Member Name="Max" Description="Max" />
+    <Member Name="Min" Description="Min" />
+    <Member Name="Sum" Description="Somme" />
+  </Type>
+  <Type Name="BigStringEmbedded" Description="Texte Long">
+    <Member Name="Text" Description="Texte" />
+  </Type>
+  <Type Name="BooleanEnum">
+    <Member Name="False" Description="Non" />
+    <Member Name="True" Description="Oui" />
+  </Type>
+  <Type Name="BootstrapStyle" Description="Style bootstrap">
+    <Member Name="Danger" Description="Danger" />
+    <Member Name="Dark" Description="Sombre" />
+    <Member Name="Info" Description="Info" />
+    <Member Name="Light" Description="Clair" />
+    <Member Name="Primary" Description="Primaire" />
+    <Member Name="Secondary" Description="Secondaire" />
+    <Member Name="Success" Description="Succès" />
+    <Member Name="Warning" Description="Avertissement" />
+  </Type>
+  <Type Name="CalendarMessage">
+    <Member Name="Today" Description="Aujourd'hui" />
+  </Type>
+  <Type Name="ClientErrorModel" Description="Erreur du client">
+    <Member Name="ErrorType" Description="Type d’erreur" />
+    <Member Name="Message" Description="Message" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Stack" Description="Pile" />
+  </Type>
+  <Type Name="CultureInfoEntity" Description="Culture Information" PluralDescription="Culture Informations">
+    <Member Name="EnglishName" Description="Nom en anglais" />
+    <Member Name="IsNeutral" Description="Est neutre" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="NativeName" Description="Nom natif" />
+  </Type>
+  <Type Name="CultureInfoOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="CollectionAnyAllType">
+    <Member Name="All" Description="Tout" />
+    <Member Name="Any" Description="Quelconque" />
+    <Member Name="AnyNo" Description="Aucun" />
+    <Member Name="NoOne" Description="Aucun" />
+  </Type>
+  <Type Name="CollectionElementType">
+    <Member Name="Element" Description="Élément" />
+    <Member Name="Element2" Description="Élément (2)" />
+    <Member Name="Element3" Description="Élément (3)" />
+  </Type>
+  <Type Name="CollectionToArrayType">
+    <Member Name="SeparatedByComma" Description="Séparés par une virgule" />
+    <Member Name="SeparatedByCommaDistict" Description="Séparé par une virgule (distinct)" />
+    <Member Name="SeparatedByNewLine" Description="Séparés par une nouvelle ligne" />
+    <Member Name="SeparatedByNewLineDistict" Description="Séparé par une nouvelle ligne (distinct)" />
+  </Type>
+  <Type Name="ColumnOptionsMode" Description="Mode options de colonne">
+    <Member Name="Add" Description="Ajouter" />
+    <Member Name="InsertStart" Description="Insérer le début" />
+    <Member Name="Remove" Description="Supprimer" />
+    <Member Name="ReplaceAll" Description="Remplacer tout" />
+    <Member Name="ReplaceOrAdd" Description="Remplacer ou ajouter" />
+  </Type>
   <Type Name="ComparisonType">
     <Member Name="DistinctTo" Description="différent de" />
     <Member Name="EqualTo" Description="Egale à" />
