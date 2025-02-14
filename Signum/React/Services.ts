@@ -103,7 +103,7 @@ export function wrapRequest(options: AjaxOptions, makeCall: () => Promise<Respon
 
   if (!options.avoidThrowError) {
     const call = makeCall;
-    makeCall = () => ThrowErrorFilter.throwError(call);
+    makeCall = () => ThrowErrorFilter.throwError(call, options.url);
   }
 
   if (!options.avoidAuthToken && AuthTokenFilter.addAuthToken) {
@@ -182,7 +182,7 @@ export module NotifyPendingFilter {
 }
 
 export module ThrowErrorFilter {
-  export function throwError(makeCall: () => Promise<Response>): Promise<Response> {
+  export function throwError(makeCall: () => Promise<Response>, url: string): Promise<Response> {
     return makeCall().then(response => {
       if (response.status >= 200 && response.status < 300) {
         return response;
@@ -220,7 +220,7 @@ export module ThrowErrorFilter {
             });
         });
       }
-    });
+    }).catch(error => { error.url = url; throw error; });
   }
 }
 

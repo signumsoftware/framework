@@ -76,8 +76,19 @@ public class AzureBlobStoragebFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTy
     {
         using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
         {
-            var client = GetClient(fp);
-            return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            try
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            }
+            catch (Exception ex)
+            {
+                var nex = new ApplicationException(message: "{0}{1}-{2}".FormatWith(fp,fp.Suffix,ex.Message), innerException: ex);
+                nex.LogException();
+                    
+                throw;
+            }
+
         }
     }
 

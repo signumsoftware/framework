@@ -38,6 +38,7 @@ export module ChangeLogViewLogOperation {
 export const ClientErrorModel = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
   Type: "ClientErrorModel";
+  url: string | null;
   errorType: string;
   message: string;
   stack: string | null;
