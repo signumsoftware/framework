@@ -9,6 +9,7 @@ public class Graph<T>
 {
     public class Construct : _Construct<T>, IConstructOperation
     {
+        protected readonly ConstructSymbol<T>.Simple constructSymbol;
         protected readonly OperationSymbol operationSymbol;
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(T);
@@ -29,18 +30,8 @@ public class Graph<T>
             if (symbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.Simple), nameof(symbol));
 
-            operationSymbol = symbol.Symbol;
-        }
-
-        protected Construct(OperationSymbol operationSymbol)
-        {
-            this.operationSymbol = operationSymbol ?? throw new ArgumentNullException(nameof(operationSymbol));
-        }
-
-        public static Construct Untyped<B>(ConstructSymbol<B>.Simple symbol)
-            where B : class, IEntity
-        {
-            return new Construct(symbol.Symbol);
+            this.constructSymbol = symbol;
+            this.operationSymbol = symbol.Symbol;
         }
 
         public void OverrideConstruct(Overrider<Func<object?[]?, T?>> overrider)
@@ -50,15 +41,22 @@ public class Graph<T>
 
         IEntity IConstructOperation.Construct(params object?[]? args)
         {
-            using (HeavyProfiler.Log("Construct", () => operationSymbol.Key))
+            var currentUser = UserHolder.Current?.User!;
+            using (var trace = HeavyProfiler.Log("Construct", new StructuredLogMessage("{Operation} done by {User}", operationSymbol.Key, currentUser)))
             {
+                if (trace?.activity is { } ac)
+                {
+                    ac.SetTag("Operation", operationSymbol.Key);
+                    ac.SetTag("User", currentUser);
+                }
+
                 OperationLogic.AssertOperationAllowed(operationSymbol, typeof(T), inUserInterface: false, entity: null);
 
                 OperationLogEntity? log = new OperationLogEntity
                 {
                     Operation = operationSymbol,
                     Start = Clock.Now,
-                    User = UserHolder.Current?.User!,
+                    User = currentUser,
                 };
 
                 try
@@ -149,7 +147,9 @@ public class Graph<T>
     public class ConstructFrom<F> : IConstructorFromOperation
         where F : class, IEntity
     {
+        protected readonly ConstructSymbol<T>.From<F> constructSymbol;
         protected readonly OperationSymbol operationSymbol;
+
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(F);
         OperationType IOperation.OperationType => OperationType.ConstructorFrom;
@@ -193,20 +193,9 @@ public class Graph<T>
             if (symbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.From<F>), nameof(symbol));
 
-            operationSymbol = symbol.Symbol;
+            this.constructSymbol = symbol;
+            this.operationSymbol = symbol.Symbol;
             baseType = symbol.BaseType;
-        }
-
-        protected ConstructFrom(OperationSymbol operationSymbol, Type baseType)
-        {
-            this.operationSymbol = operationSymbol ?? throw new ArgumentNullException(nameof(operationSymbol));
-            this.baseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
-        }
-
-        public static ConstructFrom<F> Untyped<B>(ConstructSymbol<B>.From<F> symbol)
-            where B : class, IEntity
-        {
-            return new ConstructFrom<F>(symbol.Symbol, symbol.BaseType);
         }
 
         LambdaExpression? IOperation.CanExecuteExpression()
@@ -232,8 +221,16 @@ public class Graph<T>
 
         IEntity IConstructorFromOperation.Construct(IEntity origin, params object?[]? args)
         {
-            using (HeavyProfiler.Log("ConstructFrom", () => operationSymbol.Key))
+            var currentUser = UserHolder.Current?.User!;
+            using (var trace = HeavyProfiler.Log("ConstructFrom", new StructuredLogMessage("{Operation} on {Entity} done by {User}", operationSymbol.Key, origin, currentUser)))
             {
+                if (trace?.activity is { } ac)
+                {
+                    ac.SetTag("Operation", operationSymbol.Key);
+                    ac.SetTag("Origin", origin);
+                    ac.SetTag("User", currentUser);
+                }
+
                 OperationLogic.AssertOperationAllowed(operationSymbol, origin.GetType(), inUserInterface: false, entity: (Entity)origin);
 
                 OperationLogEntity? log = new OperationLogEntity
@@ -320,7 +317,7 @@ public class Graph<T>
         protected virtual void AssertEntity(T entity)
         {
             if (ResultIsSaved && entity.IsNew)
-                throw new InvalidOperationException("After executing {0} the entity should be saved".FormatWith(this.operationSymbol));
+                throw new InvalidOperationException("After executing {0} the entity should be saved".FormatWith(operationSymbol));
         }
 
         public virtual void AssertIsValid()
@@ -342,6 +339,7 @@ public class Graph<T>
     public class ConstructFromMany<F> : IConstructorFromManyOperation
         where F : class, IEntity
     {
+        protected readonly ConstructSymbol<T>.FromMany<F> constructSymbol;
         protected readonly OperationSymbol operationSymbol;
         OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(F);
@@ -364,8 +362,6 @@ public class Graph<T>
             return CanConstructExpression;
         }
 
-
-
         public Func<List<Lite<F>>, object?[]?, T?> Construct { get; set; } = null!;
 
         public void OverrideConstruct(Overrider<Func<List<Lite<F>>, object?[]?, T?>> overrider)
@@ -378,21 +374,9 @@ public class Graph<T>
             if (symbol == null)
                 throw AutoInitAttribute.ArgumentNullException(typeof(ConstructSymbol<T>.FromMany<F>), nameof(symbol));
 
-            operationSymbol = symbol.Symbol;
+            this.constructSymbol = symbol;
+            this.operationSymbol = symbol.Symbol;
             baseType = symbol.BaseType;
-
-        }
-
-        protected ConstructFromMany(OperationSymbol operationSymbol, Type baseType)
-        {
-            this.operationSymbol = operationSymbol ?? throw new ArgumentNullException(nameof(operationSymbol));
-            this.baseType = baseType ?? throw new ArgumentNullException(nameof(baseType));
-        }
-
-        public static ConstructFromMany<F> Untyped<B>(ConstructSymbol<B>.FromMany<F> symbol)
-            where B : class, IEntity
-        {
-            return new ConstructFromMany<F>(symbol.Symbol, symbol.BaseType);
         }
 
         string? OnCanConstruct(IEnumerable<Lite<IEntity>> lites)
@@ -414,16 +398,23 @@ public class Graph<T>
 
         IEntity IConstructorFromManyOperation.Construct(IEnumerable<Lite<IEntity>> lites, params object?[]? args)
         {
-            using (HeavyProfiler.Log("ConstructFromMany", () => operationSymbol.Key))
+            var currentUser = UserHolder.Current?.User!;
+            using (var trace = HeavyProfiler.Log("ConstructFromMany", new StructuredLogMessage("{Operation} done by {User}", this.operationSymbol.Key, currentUser)))
             {
+                if (trace?.activity is { } ac)
+                {
+                    ac.SetTag("Operation", this.operationSymbol.Key);
+                    ac.SetTag("User", currentUser);
+                }
+
                 foreach (var type in lites.Select(a => a.EntityType).Distinct())
                 {
-                    OperationLogic.AssertOperationAllowed(operationSymbol, type, inUserInterface: false, entity: null);
+                    OperationLogic.AssertOperationAllowed(this.operationSymbol, type, inUserInterface: false, entity: null);
                 }
 
                 OperationLogEntity? log = new OperationLogEntity
                 {
-                    Operation = operationSymbol,
+                    Operation = this.operationSymbol,
                     Start = Clock.Now,
                     User = UserHolder.Current?.User!
                 };
@@ -522,8 +513,10 @@ public class Graph<T>
 
     public class Execute : _Execute<T>, IExecuteOperation
     {
-        protected readonly ExecuteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        protected readonly ExecuteSymbol<T> executeSymbol;
+        protected readonly OperationSymbol operationSymbol;
+        
+        OperationSymbol IOperation.OperationSymbol => executeSymbol.Symbol;
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Execute;
         public bool CanBeModified { get; set; }
@@ -533,7 +526,7 @@ public class Graph<T>
         public bool AvoidImplicitSave { get; set; }
         public bool ForReadonlyEntity { get; set; }
 
-        Type IEntityOperation.BaseType => Symbol.BaseType;
+        Type IEntityOperation.BaseType => executeSymbol.BaseType;
         bool IEntityOperation.HasCanExecute => CanExecute != null;
         IList? IOperation.UntypedFromStates => new List<Enum>();
         IList? IOperation.UntypedToStates => new List<Enum>();
@@ -563,7 +556,8 @@ public class Graph<T>
 
         public Execute(ExecuteSymbol<T> symbol)
         {
-            Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
+            this.executeSymbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(ExecuteSymbol<T>), nameof(symbol));
+            this.operationSymbol = symbol.Symbol;
         }
 
 
@@ -585,13 +579,20 @@ public class Graph<T>
 
         void IExecuteOperation.Execute(IEntity entity, params object?[]? args)
         {
-            using (HeavyProfiler.Log("Execute", () => Symbol.Symbol.Key))
+            var currentUser = UserHolder.Current?.User!;
+            using (var trace = HeavyProfiler.Log("Execute", new StructuredLogMessage("{Operation} on {Entity} done by {User}", this.operationSymbol.Key, entity, currentUser)))
             {
-                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
+                if (trace?.activity is { } ac)
+                {
+                    ac.SetTag("Operation", this.executeSymbol.Symbol.Key);
+                    ac.SetTag("Entity", entity);
+                    ac.SetTag("User", currentUser);
+                }
+                OperationLogic.AssertOperationAllowed(executeSymbol.Symbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
 
                 OperationLogEntity log = new OperationLogEntity
                 {
-                    Operation = Symbol.Symbol,
+                    Operation = executeSymbol.Symbol,
                     Start = Clock.Now,
                     User = UserHolder.Current?.User!
                 };
@@ -635,7 +636,7 @@ public class Graph<T>
                 }
                 catch (Exception ex)
                 {
-                    OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
+                    OperationLogic.SetExceptionData(ex, executeSymbol.Symbol, (Entity)entity, args);
 
                     if (Transaction.InTestTransaction)
                         throw;
@@ -675,31 +676,32 @@ public class Graph<T>
                 CanExecute = CanExecuteExpression.Compile();
 
             if (Execute == null)
-                throw new InvalidOperationException("Operation {0} does not have Execute initialized".FormatWith(Symbol));
+                throw new InvalidOperationException("Operation {0} does not have Execute initialized".FormatWith(executeSymbol));
 
             if (ForReadonlyEntity)
             {
                 AvoidImplicitSave = true;
 
                 if(CanBeModified)
-                    throw new InvalidOperationException("Operation {0}: CanBeModified is not compatible with OnlyReadyEntity".FormatWith(Symbol));
+                    throw new InvalidOperationException("Operation {0}: CanBeModified is not compatible with OnlyReadyEntity".FormatWith(executeSymbol));
 
                 if (CanBeNew)
-                    throw new InvalidOperationException("Operation {0}: CanBeNew is not compatible with OnlyReadyEntity".FormatWith(Symbol));
+                    throw new InvalidOperationException("Operation {0}: CanBeNew is not compatible with OnlyReadyEntity".FormatWith(executeSymbol));
             }
         }
 
         public override string ToString()
         {
-            return "{0} Execute on {1}".FormatWith(Symbol, typeof(T));
+            return "{0} Execute on {1}".FormatWith(executeSymbol, typeof(T));
         }
 
     }
 
     public class Delete : _Delete<T>, IDeleteOperation
     {
-        protected readonly DeleteSymbol<T> Symbol;
-        OperationSymbol IOperation.OperationSymbol => Symbol.Symbol;
+        protected readonly DeleteSymbol<T> deleteSymbol;
+        protected readonly OperationSymbol operationSymbol;
+        OperationSymbol IOperation.OperationSymbol => operationSymbol;
         Type IOperation.OverridenType => typeof(T);
         OperationType IOperation.OperationType => OperationType.Delete;
         public bool CanBeModified { get; set; }
@@ -711,7 +713,7 @@ public class Graph<T>
 
         public bool CanBeNew { get { return false; } }
 
-        Type IEntityOperation.BaseType { get { return Symbol.BaseType; } }
+        Type IEntityOperation.BaseType { get { return deleteSymbol.BaseType; } }
         bool IEntityOperation.HasCanExecute { get { return CanDelete != null; } }
 
         //public Action<T, object[]?> Delete { get; set; } (inherited)
@@ -732,7 +734,8 @@ public class Graph<T>
 
         public Delete(DeleteSymbol<T> symbol)
         {
-            Symbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
+            deleteSymbol = symbol ?? throw AutoInitAttribute.ArgumentNullException(typeof(DeleteSymbol<T>), nameof(symbol));
+            operationSymbol = deleteSymbol.Symbol;
         }
 
         LambdaExpression? IOperation.CanExecuteExpression()
@@ -758,15 +761,23 @@ public class Graph<T>
 
         void IDeleteOperation.Delete(IEntity entity, params object?[]? args)
         {
-            using (HeavyProfiler.Log("Delete", () => Symbol.Symbol.Key))
+            var currentUser = UserHolder.Current?.User!;
+            using (var trace = HeavyProfiler.Log("Delete", new StructuredLogMessage("{Operation} on {Entity} done by {User}", this.operationSymbol.Key, entity, currentUser)))
             {
-                OperationLogic.AssertOperationAllowed(Symbol.Symbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
+                if (trace?.activity is { } ac)
+                {
+                    ac.SetTag("Operation", this.operationSymbol.Key);
+                    ac.SetTag("Entity", entity);
+                    ac.SetTag("User", currentUser);
+                }
+                OperationLogic.AssertOperationAllowed(operationSymbol, entity.GetType(), inUserInterface: false, entity: (Entity)entity);
 
                 OperationLogEntity log = new OperationLogEntity
                 {
-                    Operation = Symbol.Symbol,
+                    Operation = operationSymbol,
                     Start = Clock.Now,
                     User = UserHolder.Current?.User!,
+                    Target = entity.ToLite(),
                 };
 
                 using (OperationLogic.AllowSave(entity.GetType()))
@@ -792,7 +803,7 @@ public class Graph<T>
                         }
                         catch (Exception ex)
                         {
-                            OperationLogic.SetExceptionData(ex, Symbol.Symbol, (Entity)entity, args);
+                            OperationLogic.SetExceptionData(ex, operationSymbol, (Entity)entity, args);
 
                             if (Transaction.InTestTransaction)
                                 throw;
@@ -832,12 +843,12 @@ public class Graph<T>
                 CanDelete = CanDeleteExpression.Compile();
 
             if (Delete == null)
-                throw new InvalidOperationException("Operation {0} does not have Delete initialized".FormatWith(Symbol.Symbol));
+                throw new InvalidOperationException("Operation {0} does not have Delete initialized".FormatWith(operationSymbol));
         }
 
         public override string ToString()
         {
-            return "{0} Delete {1}".FormatWith(Symbol.Symbol, typeof(T));
+            return "{0} Delete {1}".FormatWith(operationSymbol, typeof(T));
         }
     }
 }

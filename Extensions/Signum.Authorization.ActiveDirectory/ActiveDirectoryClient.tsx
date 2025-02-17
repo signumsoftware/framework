@@ -31,10 +31,9 @@ export namespace ActiveDirectoryClient {
     User.setChangePasswordVisibleFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID == null);
     User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
     User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
-  
-    if (window.__azureApplicationId) {
+
+    if (window.__azureADConfig) {
       urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-  
   
         var oid =
           (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :

@@ -1,11 +1,71 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="AutoUpdate" Description="Mise à jour automatique">
+    <Member Name="Dashboard" Description="Tableau de bord" />
+    <Member Name="InteractionGroup" Description="Groupe d’interaction" />
+    <Member Name="None" Description="Aucun" />
+  </Type>
   <Type Name="UserQueryEntity" Description="Recherche de l'utilisateur">
+    <Member Name="AppendFilters" Description="Ajouter des filtres" />
     <Member Name="Columns" Description="Colonne" />
     <Member Name="ColumnsMode" Description="Mode de colonnes" />
     <Member Name="DisplayName" Description="Afficher le nom" />
+    <Member Name="ElementsPerPage" Description="Éléments par page" />
+    <Member Name="EntityType" Description="Type d’entité" />
     <Member Name="Filters" Description="Filtres" />
+    <Member Name="GroupResults" Description="Résultats groupés" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="HideQuickLink" Description="Masquer le lien rapide" />
+    <Member Name="IncludeDefaultFilters" Description="Inclure les filtres par défaut" />
     <Member Name="Orders" Description="Ordres" />
+    <Member Name="Owner" Description="Propriétaire" />
+    <Member Name="PaginationMode" Description="Mode de pagination" />
     <Member Name="Query" Description="Requête" />
+    <Member Name="RefreshMode" Description="Mode de rafraîchissement" />
+  </Type>
+  <Type Name="UserQueryMessage">
+    <Member Name="_0IsNotFilterable" Description="{0} n’est pas filtrable" />
+    <Member Name="ApplyChanges" Description="Appliquer les modifications" />
+    <Member Name="BackToDefault" Description="Retour aux paramètres par défaut" />
+    <Member Name="CreateNew" Description="Créer" />
+    <Member Name="Edit" Description="Éditer" />
+    <Member Name="MakesThe0AvailableAsAQuickLinkOf1" Description="Rend le {0} disponible en tant que lien rapide de {1}" />
+    <Member Name="MakesThe0AvailableInContextualMenuWhenGrouping0" Description="Rend le {0} disponible dans le menu contextuel lorsque {1} est groupé" />
+    <Member Name="Preview" Description="Aperçu" />
+    <Member Name="TheFilterOperation0isNotCompatibleWith1" Description="L'opération de filtrage {0} n’est pas compatible avec {1}" />
+    <Member Name="TheSelected0" Description="le {0} sélectionné" />
+    <Member Name="Use0ToFilterCurrentEntity" Description="Utiliser {0} pour filtrer l’entité" />
+  </Type>
+  <Type Name="UserQueryOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="UserQueryPartEntity" Description="la partie requête utilisateur" PluralDescription="Parties de requête utilisateur">
+    <Member Name="AggregateFromSummaryHeader" Description="Agrégat à partir de en-tête résumé" />
+    <Member Name="AllowSelection" Description="Autoriser la sélection" />
+    <Member Name="AutoUpdate" Description="Mise à jour automatique" />
+    <Member Name="CreateNew" Description="Créer un nouveau" />
+    <Member Name="IsQueryCached" Description="La requête est-elle mise en cache ?" />
+    <Member Name="RenderMode" Description="Mode de rendu" />
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="ShowFooter" Description="Afficher le pied de page" />
+    <Member Name="UserQuery" Description="Requête de l’utilisateur" />
+  </Type>
+  <Type Name="UserQueryPartRenderMode" Description="Mode de rendu de la partie requête de l’utilisateur">
+    <Member Name="BigValue" Description="Grande valeur" />
+    <Member Name="SearchControl" Description="Contrôle de la recherche" />
+  </Type>
+  <Type Name="UserQueryPermission">
+    <Member Name="ViewUserQuery" Description="Afficher la requête de l’utilisateur" />
+  </Type>
+  <Type Name="ValueUserQueryElementEmbedded" Description="Value user query element">
+    <Member Name="Href" Description="Href" />
+    <Member Name="IsQueryCached" Description="La requête est-elle mise en cache ?" />
+    <Member Name="Label" Description="Étiquette" />
+    <Member Name="UserQuery" Description="Requête de l’utilisateur" />
+  </Type>
+  <Type Name="ValueUserQueryListPartEntity" Description="Value user query list part" PluralDescription="Value user query list parts">
+    <Member Name="RequiresTitle" Description="Nécessite un titre" />
+    <Member Name="UserQueries" Description="Requêtes des utilisateurs" />
   </Type>
 </Translations>

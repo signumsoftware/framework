@@ -9,12 +9,12 @@ namespace Signum.Authorization.ActiveDirectory.WindowsAuthentication;
 
 public class WindowsAuthenticationServer
 {
-    private static PrincipalContext GetPrincipalContext(ActiveDirectoryConfigurationEmbedded config)
+    private static PrincipalContext GetPrincipalContext(WindowsActiveDirectoryEmbedded windowsAD)
     {
-        if (config.DirectoryRegistry_Username.HasText())
-            return new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username, config.DirectoryRegistry_Password);
+        if (windowsAD.DirectoryRegistry_Username.HasText())
+            return new PrincipalContext(ContextType.Domain, windowsAD.DomainName, windowsAD.DirectoryRegistry_Username, windowsAD.DirectoryRegistry_Password);
 
-        return new PrincipalContext(ContextType.Domain, config.DomainName); //Uses current user
+        return new PrincipalContext(ContextType.Domain, windowsAD.DomainName); //Uses current user
     }
 
     public static bool LoginWindowsAuthentication(ActionContext ac, bool throwError)
@@ -32,10 +32,22 @@ public class WindowsAuthenticationServer
                         : false;
 
                 var config = ada.GetConfig();
+                var windows = config.WindowsAD;
 
-                if (!config.LoginWithWindowsAuthenticator)
-                    return throwError ? throw new Exception($"{ReflectionTools.GetPropertyInfo(() => ada.GetConfig().LoginWithWindowsAuthenticator)} is set to false")
-                        : false;
+                if (windows == null)
+                {
+                    if (throwError)
+                        throw new Exception($"{ReflectionTools.GetPropertyInfo((ActiveDirectoryConfigurationEmbedded ac) => ac.WindowsAD)} is not set");
+
+                    return false;
+                }
+
+                if (!windows.LoginWithWindowsAuthenticator)
+                {
+                    if (throwError)
+                        throw new Exception($"{ReflectionTools.GetPropertyInfo((WindowsActiveDirectoryEmbedded e) => e.LoginWithWindowsAuthenticator)} is set to false");
+                    return false;
+                }
 
                 var userName = wp.Identity.Name!; ;
                 var localName = userName.TryBeforeLast('@') ?? userName.TryAfter('\\') ?? userName;
@@ -60,7 +72,7 @@ public class WindowsAuthenticationServer
                             return throwError ? throw new InvalidOperationException("AutoCreateUsers is false") : false;
                         }
 
-                        using (PrincipalContext pc = GetPrincipalContext(config))
+                        using (PrincipalContext pc = GetPrincipalContext(windows))
                         {
                             user = Database.Query<UserEntity>().SingleOrDefaultEx(a => a.Mixin<UserADMixin>().SID == sid);
 
@@ -77,7 +89,7 @@ public class WindowsAuthenticationServer
 
                         if (config.AutoUpdateUsers)
                         {
-                            using (PrincipalContext pc = GetPrincipalContext(config))
+                            using (PrincipalContext pc = GetPrincipalContext(windows))
                             {
                                 ada.UpdateUser(user, new DirectoryServiceAutoCreateUserContext(pc, localName, userName));
                             }
