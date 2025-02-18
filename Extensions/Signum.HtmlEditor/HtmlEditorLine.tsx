@@ -29,7 +29,7 @@ export default function HtmlEditorLine({ ctx, htmlEditorRef, readOnly, extraButt
             {extraButtonsBefore && <div className={ctx.inputGroupVerticalClass("before")}>
               {extraButtonsBefore()}
             </div>}
-            <div className={classes("html-editor-line", p.mandatory ?? (ctx.propertyRoute?.member?.required && !ctx.value) ? "sf-mandatory" : undefined)} style={{
+            <div className={classes("html-editor-line", !ctx.value && (p.mandatory || ctx.propertyRoute?.member?.required) ? "sf-mandatory" : undefined)} style={{
               backgroundColor: readOnly ? "#e9ecef" : undefined,
               flexGrow: 1,
               ...p.htmlAttributes?.style

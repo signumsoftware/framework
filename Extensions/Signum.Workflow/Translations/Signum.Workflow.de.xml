@@ -52,7 +52,7 @@
     <Member Name="From0On1" Description="Von {0} auf {1}" />
     <Member Name="HideHelp" Description="Hilfe verstecken" />
     <Member Name="ImpossibleToDeleteCaseActivity0OnWorkflowActivity1BecauseHasNoPreviousActivity" Description="Es ist unmöglich, die Fallaktivität {0} (auf Workflowaktivität '{1}') zu löschen, da keine vorherige Aktivität vorliegt" />
-    <Member Name="LastCaseActivity" Description="Aktivität des letzten Falls" />
+    <Member Name="LastCaseActivity" Description="Letzte Fall-Aktivität" />
     <Member Name="NextActivityAlreadyInProgress" Description="Nächste Aktivität bereits im Gange" />
     <Member Name="NextActivityOfDecompositionSurrogateAlreadyInProgress" Description="Nächste Surrogat-Aktivität der Zersetzung bereits im Gange" />
     <Member Name="NoActorsFoundToInsertCaseActivityNotifications" Description="Keine Akteure gefunden, die Fallaktivitätsbenachrichtigungen einfügen" />
