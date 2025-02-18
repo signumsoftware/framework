@@ -1,4 +1,5 @@
 using System.Collections.Specialized;
+using System.Diagnostics;
 
 namespace Signum.Basics;
 
@@ -34,6 +35,7 @@ public class ExceptionEntity : Entity
         this.MachineName = System.Environment.MachineName;
         this.ApplicationName = AppDomain.CurrentDomain.FriendlyName;
         this.Origin = ExceptionOrigin.Backend_DotNet;
+        this.TraceId = Activity.Current?.Id;
     }
 #pragma warning restore CS8618 // Non-nullable field is uninitialized.
 
@@ -124,6 +126,9 @@ public class ExceptionEntity : Entity
     public bool Referenced { get; set; }
 
     public ExceptionOrigin Origin { get; set; }
+
+    [DbType(Size = 100)]
+    public string? TraceId { get; set; }
 
     public override string ToString()
     {
