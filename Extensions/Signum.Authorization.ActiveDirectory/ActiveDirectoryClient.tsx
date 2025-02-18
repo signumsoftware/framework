@@ -12,7 +12,7 @@ import { Lite, SearchMessage, tryGetMixin } from '@framework/Signum.Entities';
 import SelectorModal from '@framework/SelectorModal';
 import { QueryString } from '@framework/QueryString';
 import SearchControlLoaded from '@framework/SearchControl/SearchControlLoaded';
-import { urlProviders } from '../Signum.Authorization/Templates/ProfilePhoto';
+import * as ProfilePhoto from '../Signum.Authorization/Templates/ProfilePhoto';
 import * as AppContext from "@framework/AppContext"
 import { ADGroupEntity, ActiveDirectoryConfigurationEmbedded, ActiveDirectoryMessage, ActiveDirectoryPermission, UserADMessage, UserADMixin } from './Signum.Authorization.ActiveDirectory';
 import * as User from '../Signum.Authorization/Templates/User'
@@ -22,7 +22,7 @@ import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
 
 export namespace ActiveDirectoryClient {
   
-  export function start(options: { routes: RouteObject[], adGroups: boolean, cachedProfilePhoto: boolean; }): void {
+  export function start(options: { routes: RouteObject[], adGroups: boolean, profilePhotos: boolean | "cached"; }): void {
   
     ChangeLogClient.registerChangeLogModule("Signum.ActiveDirectory", () => import("./Changelog"));
   
@@ -32,37 +32,39 @@ export namespace ActiveDirectoryClient {
     User.setUserNameReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
     User.setEmailReadonlyFunction((user: UserEntity) => tryGetMixin(user, UserADMixin)?.oID != null);
 
-    if (window.__azureADConfig) {
-      urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-  
-        var oid =
-          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
-          tryGetMixin(u, UserADMixin)?.oID;
-  
-        if (oid == null)
-          return null;
-  
-        if (!options.cachedProfilePhoto)
+    if (options.profilePhotos) {
+      if (window.__azureADConfig) {
+        ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+
+          var oid =
+            (UserEntity.isLite(u)) ? (u.model as UserLiteModel).oID :
+              tryGetMixin(u, UserADMixin)?.oID;
+
+          if (oid == null)
+            return null;
+
+          if (options.profilePhotos == "cached")
+            return API.cachedAzureUserPhotoUrl(size, oid);
+
           return AppContext.toAbsoluteUrl("/api/azureUserPhoto/" + size + "/" + oid);
-  
-        return API.cachedAzureUserPhotoUrl(size, oid);
-      })
+        })
+      }
+
+      ProfilePhoto.urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
+        var sid =
+          (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
+            tryGetMixin(u, UserADMixin)?.sID;
+
+        if (sid == null)
+          return null;
+
+        var url = UserEntity.isLite(u) ?
+          AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
+          AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
+
+        return url;
+      });
     }
-  
-    urlProviders.push((u: UserEntity | Lite<UserEntity>, size: number) => {
-      var sid =
-        (UserEntity.isLite(u)) ? (u.model as UserLiteModel).sID :
-          tryGetMixin(u, UserADMixin)?.sID;
-  
-      if (sid == null)
-        return null;
-  
-      var url = UserEntity.isLite(u) ?
-        AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u.model as UserLiteModel)?.userName) :
-        AppContext.toAbsoluteUrl("/api/adThumbnailphoto/" + (u as UserEntity).userName);
-  
-      return url;
-    });
   
 
     Navigator.getSettings(UserEntity)!.autocompleteConstructor = (str, aac) => AppContext.isPermissionAuthorized(ActiveDirectoryPermission.InviteUsersFromAD) && str.length > 2 ? ({
