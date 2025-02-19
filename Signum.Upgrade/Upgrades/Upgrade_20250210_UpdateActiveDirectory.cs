@@ -55,7 +55,7 @@ class Upgrade_20250210_UpdateActiveDirectory : CodeUpgradeBase
         uctx.ChangeCodeFile("Southwind/Index.cshtml", cf =>
         {
             cf.Replace("var __azureApplicationId", @"var __azureADConfig");
-            cf.Replace(".Azure_ApplicationID", "?.ToAzureADConfigTS()");
+            cf.Replace(".Azure_ApplicationID", ".AzureAD?.ToAzureADConfigTS()");
             cf.RemoveAllLines(a =>
                 a.Contains("var __azureTenantId") ||
                 a.Contains("var __azureB2CSignInSignUp_UserFlow") ||

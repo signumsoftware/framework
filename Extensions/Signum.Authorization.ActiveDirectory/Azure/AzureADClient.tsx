@@ -9,6 +9,7 @@ import { AuthMessage, LoginAuthMessage } from "../../Signum.Authorization/Signum
 import { classes } from "@framework/Globals";
 import { QueryString } from "@framework/QueryString";
 import MessageModal from "@framework/Modals/MessageModal";
+import { AuthError } from "@azure/msal-browser";
 
 export namespace AzureADClient {
 
@@ -193,7 +194,7 @@ export namespace AzureADClient {
     return msalClient.getAccountByUsername(account) ?? undefined;
   }
 
-  export function getAccessToken(): Promise<string> {
+  export async function getAccessToken(): Promise<string> {
 
     var ai = getMsalAccount();
 
@@ -206,21 +207,23 @@ export namespace AzureADClient {
       authority: getAuthority(isB2C() ? "B2C" : undefined),
     };
 
-    return adquireTokenSilentOrPopup(userRequest)
-      .then(res => res.accessToken);
+    const res = await adquireTokenSilentOrPopup(userRequest);
+    return res.accessToken;
   }
 
-  function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
-    return msalClient.acquireTokenSilent(userRequest)
-      .catch(e => {
-        if (e.errorCode === "consent_required"
-          || e.errorCode === "interaction_required"
-          || e.errorCode === "login_required")
-          return msalClient.acquireTokenPopup(userRequest);
+  async function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
+    try {
+      return await msalClient.acquireTokenSilent(userRequest);
+    } catch (e) {
+      if (e instanceof AuthError &&
+        (e.errorCode === "consent_required" ||
+          e.errorCode === "interaction_required" ||
+          e.errorCode === "login_required"))
+        return msalClient.acquireTokenPopup(userRequest);
 
-        else
-          throw e;
-      });
+      else
+        throw e;
+    }
   }
 
   export async function signOut(): Promise<void> {
