@@ -41,10 +41,8 @@ export default function TypesRulesPackControl({ ctx, innerRef }: { ctx: TypeCont
 
   function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
 
-    GraphExplorer.propagateAll(bc.pack.entity);
 
-    const hasChanges = bc.pack.entity.modified;
-
+    const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
     return [
       { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },
       { button: <Button variant="warning" disabled={!hasChanges || ctx.readOnly} onClick={() => handleResetChangesClick(bc)}>{AuthAdminMessage.ResetChanges.niceToString()}</Button> },
@@ -328,9 +326,7 @@ export function TypeRow(p: { tctx: TypeContext<TypeAllowedRule>, role: Lite<Role
       return undefined;
 
     let onClick = () => {
-      GraphExplorer.propagateAll(p.tctx.value);
-
-      if (p.tctx.value.modified) {
+      if (GraphExplorer.hasChanges(p.tctx.value)) {
         MessageModal.show({
           title: NormalControlMessage.SaveChangesFirst.niceToString(),
           message: AuthAdminMessage.PleaseSaveChangesFirst.niceToString(),

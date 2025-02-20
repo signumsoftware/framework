@@ -2269,7 +2269,14 @@ export type GraphExplorerMode = "collect" | "set" | "clean" | undefined;
 export class GraphExplorer {
 
   static hasChanges(m: ModifiableEntity): boolean {
-    this.propagateAll(m);
+    const ge = new GraphExplorer("clean", {});
+    ge.isModified(m, "")
+    return m.modified;
+  }
+
+  static hasChangesNoClean(m: ModifiableEntity): boolean {
+    const ge = new GraphExplorer(undefined, {});
+    ge.isModified(m, "")
     return m.modified;
   }
 
