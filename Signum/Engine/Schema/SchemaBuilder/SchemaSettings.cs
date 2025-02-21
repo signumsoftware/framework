@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using NpgsqlTypes;
 using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine.Maps;
 
@@ -415,6 +416,9 @@ public class SchemaSettings
     {
         if (TypeValues.TryGetValue(type, out AbstractDbType result))
             return new DbTypePair(result, null);
+
+        if (this.IsPostgres && type == typeof(SqlHierarchyId))
+            return new DbTypePair(new AbstractDbType(NpgsqlDbType.LTree), null);
 
         string? udtTypeName = GetUdtName(type);
         if (udtTypeName != null)

@@ -24,7 +24,8 @@ public static class MusicStarter
                 .AddUserSecrets(typeof(MusicStarter).Assembly, optional: true)
                 .Build();
 
-            var connectionString = conf.GetConnectionString("SignumTest") ?? "Data Source=.\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true;TrustServerCertificate=true";
+            var connectionString = conf.GetConnectionString("SignumTest") ?? "Server=localhost;Port=5432;Database=SignumTest;User Id=postgres;Password=StrongP@$$;";
+            //"Data Source=" + ".\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true;TrustServerCertificate=true";
 
             Start(connectionString);
 
@@ -71,10 +72,10 @@ public static class MusicStarter
         {
             sb.Settings.UdtSqlName.Add(typeof(SqlHierarchyId), "HierarchyId");
         }
-        else
-        {
-            sb.Settings.FieldAttributes((LabelEntity a) => a.Node).Add(new Signum.Entities.IgnoreAttribute());
-        }
+        //else
+        //{
+        //    sb.Settings.FieldAttributes((LabelEntity a) => a.Node).Add(new Signum.Entities.IgnoreAttribute());
+        //}
 
         Validator.PropertyValidator((OperationLogEntity e) => e.User).Validators.Clear();
 

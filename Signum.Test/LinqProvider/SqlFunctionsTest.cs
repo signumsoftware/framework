@@ -294,8 +294,8 @@ public class SqlFunctionsTest
     [Fact]
     public void SqlHierarchyIdFunction()
     {
-        if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-            return;
+        //if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+        //    return;
 
         var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
 

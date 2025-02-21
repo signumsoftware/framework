@@ -3,6 +3,7 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine.Maps;
 
@@ -60,9 +61,10 @@ public class Schema : IImplementationsFinder
         get { return tables; }
     }
 
-    public List<string> PostgresExtensions = new List<string>()
+    public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        "uuid-ossp"
+        { "uuid-ossp", s => true },
+        { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
 
     #region Events
