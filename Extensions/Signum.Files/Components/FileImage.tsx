@@ -20,7 +20,7 @@ export function FileImage(p: FileImageProps): React.JSX.Element {
   React.useEffect(() => {
     if (file) {
 
-      if (isModifiableEntity(file) && (file.fullWebPath || file.binaryFile))
+      if (isModifiableEntity(file) && ((file as ModifiableEntity & IFilePath).fullWebPath || file.binaryFile))
         return;
 
       var url =
@@ -37,11 +37,11 @@ export function FileImage(p: FileImageProps): React.JSX.Element {
   }, [p.file]);
 
   var src = !file ? placeholderSrc :
-    isModifiableEntity(file) && file.fullWebPath ? file.fullWebPath :
+    isModifiableEntity(file) && (file as ModifiableEntity & IFilePath).fullWebPath ? (file as ModifiableEntity & IFilePath).fullWebPath :
       isModifiableEntity(file) && file.binaryFile ? "data:image/jpeg;base64," + file.binaryFile :
         objectUrl;
 
   return (
-    <img {...rest} src={src} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
+    <img {...rest} src={src!} alt={p.alt ?? FileMessage.FileImage.niceToString()} />
   );
 }

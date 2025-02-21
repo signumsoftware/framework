@@ -30,7 +30,6 @@ public static class FilePathLogic
                     p.Suffix
                 });
 
-            FilePathEntity.CalculatePrefixPair = CalculatePrefixPair;
             sb.Schema.EntityEvents<FilePathEntity>().PreSaving += FilePath_PreSaving;
             sb.Schema.EntityEvents<FilePathEntity>().PreUnsafeDelete += new PreUnsafeDeleteHandler<FilePathEntity>(FilePathLogic_PreUnsafeDelete);
 
@@ -60,12 +59,6 @@ public static class FilePathLogic
             }.Register();
 
         }
-    }
-
-    static PrefixPair CalculatePrefixPair(FilePathEntity fp)
-    {
-        using (new EntityCache(EntityCacheType.ForceNew))
-            return fp.FileType.GetAlgorithm().GetPrefixPair(fp);
     }
 
     static readonly Variable<bool> avoidDeleteFiles = Statics.ThreadVariable<bool>("filePathUnsafeMode");

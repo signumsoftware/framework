@@ -84,6 +84,7 @@ export namespace AzureADClient {
         scopes: b2c ? Config.scopesB2C : Config.scopes,
         authority: getAuthority(b2c ? "B2C" : undefined),
       });
+      setMsalAccount(authResult.account!.username, b2c);
 
       const loginResponse = await API.loginWithAzureAD(authResult.idToken, authResult.accessToken, { azureB2C: b2c, throwErrors: true })
       if (loginResponse == null)
@@ -92,8 +93,6 @@ export namespace AzureADClient {
       AuthClient.setAuthToken(loginResponse!.token, loginResponse!.authenticationType);
       AuthClient.setCurrentUser(loginResponse!.userEntity);
       AuthClient.Options.onLogin();
-      setMsalAccount(authResult.account!.username, b2c);
-
     } catch (e) {
       ctx.setLoading(undefined);
       if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
@@ -104,7 +103,7 @@ export namespace AzureADClient {
         return;
       }
 
-      throw e;
+      signOut().then(() => { throw e; });
     }
   }
 
@@ -136,7 +135,7 @@ export namespace AzureADClient {
         e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
         return Promise.resolve(undefined);
 
-      throw e;
+      signOut().then(() => { throw e; });
     }
   }
 

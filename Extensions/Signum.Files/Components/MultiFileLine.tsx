@@ -155,7 +155,7 @@ export const MultiFileLine: <V extends ModifiableEntity /*& IFile*/ | Lite</*IFi
                     dragAndDrop={p.dragAndDrop}
                     dragAndDropMessage={p.dragAndDropMessage}
                     fileType={p.fileType}
-                    onFileLoaded={c.handleFileLoaded}
+                    onFileCreated={c.handleFileLoaded}
                     typeName={p.getFileFromElement ?
                       p.ctx.propertyRoute!.addMember("Indexer", "", true).addLambda(p.getFileFromElement).typeReference().name! :
                       p.ctx.propertyRoute!.typeReference().name}
