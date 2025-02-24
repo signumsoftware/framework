@@ -9,6 +9,7 @@ import { AuthMessage, LoginAuthMessage } from "../../Signum.Authorization/Signum
 import { classes } from "@framework/Globals";
 import { QueryString } from "@framework/QueryString";
 import MessageModal from "@framework/Modals/MessageModal";
+import { AuthError } from "@azure/msal-browser";
 
 export namespace AzureADClient {
 
@@ -83,6 +84,7 @@ export namespace AzureADClient {
         scopes: b2c ? Config.scopesB2C : Config.scopes,
         authority: getAuthority(b2c ? "B2C" : undefined),
       });
+      setMsalAccount(authResult.account!.username, b2c);
 
       const loginResponse = await API.loginWithAzureAD(authResult.idToken, authResult.accessToken, { azureB2C: b2c, throwErrors: true })
       if (loginResponse == null)
@@ -91,8 +93,6 @@ export namespace AzureADClient {
       AuthClient.setAuthToken(loginResponse!.token, loginResponse!.authenticationType);
       AuthClient.setCurrentUser(loginResponse!.userEntity);
       AuthClient.Options.onLogin();
-      setMsalAccount(authResult.account!.username, b2c);
-
     } catch (e) {
       ctx.setLoading(undefined);
       if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
@@ -103,7 +103,7 @@ export namespace AzureADClient {
         return;
       }
 
-      throw e;
+      signOut().then(() => { throw e; });
     }
   }
 
@@ -135,7 +135,7 @@ export namespace AzureADClient {
         e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
         return Promise.resolve(undefined);
 
-      throw e;
+      signOut().then(() => { throw e; });
     }
   }
 
@@ -193,7 +193,7 @@ export namespace AzureADClient {
     return msalClient.getAccountByUsername(account) ?? undefined;
   }
 
-  export function getAccessToken(): Promise<string> {
+  export async function getAccessToken(): Promise<string> {
 
     var ai = getMsalAccount();
 
@@ -206,21 +206,23 @@ export namespace AzureADClient {
       authority: getAuthority(isB2C() ? "B2C" : undefined),
     };
 
-    return adquireTokenSilentOrPopup(userRequest)
-      .then(res => res.accessToken);
+    const res = await adquireTokenSilentOrPopup(userRequest);
+    return res.accessToken;
   }
 
-  function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
-    return msalClient.acquireTokenSilent(userRequest)
-      .catch(e => {
-        if (e.errorCode === "consent_required"
-          || e.errorCode === "interaction_required"
-          || e.errorCode === "login_required")
-          return msalClient.acquireTokenPopup(userRequest);
+  async function adquireTokenSilentOrPopup(userRequest: msal.SilentRequest) {
+    try {
+      return await msalClient.acquireTokenSilent(userRequest);
+    } catch (e) {
+      if (e instanceof AuthError &&
+        (e.errorCode === "consent_required" ||
+          e.errorCode === "interaction_required" ||
+          e.errorCode === "login_required"))
+        return msalClient.acquireTokenPopup(userRequest);
 
-        else
-          throw e;
-      });
+      else
+        throw e;
+    }
   }
 
   export async function signOut(): Promise<void> {

@@ -4,21 +4,22 @@ namespace Signum.Files;
 
 public interface IFilePath : IFile
 {
-    string FullPhysicalPath();
+    string? FullPhysicalPath();
+    string? FullWebPath();
 
     FileTypeSymbol FileType { get; }
 
-    void SetPrefixPair(PrefixPair prefixPair);
-
     string Suffix { get; set; }
     void CleanBinaryFile();
+
+    string? Hash { get; set; }
+    long FileLength { get; set; }
 }
 
 public interface IFile
 {
     byte[] BinaryFile { get; set; }
     string FileName { get; set; }
-    string? FullWebPath();
 }
 
 public enum FileMessage
@@ -52,6 +53,14 @@ public enum FileMessage
     File0IsTooBigTheMaximumSizeIs1,
     [Description("The name of the file must not contain '%'")]
     TheNameOfTheFileMustNotContainPercentSymbol,
-
     FileImage,
+
+    [Description("File {0} is still uploading")]
+    File0IsStillUploading,
+
+    [Description("Uploading {0} ({1})")]
+    Uploading01,
+
+    [Description("Save the {0} when finished")]
+    SaveThe0WhenFinished,
 }

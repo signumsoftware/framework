@@ -137,7 +137,7 @@ public static class HeavyProfiler
 
             if(logger.IsEnabled(logLevel.Value))
             {
-                activity = ActivitySource.CreateActivity(kind, ActivityKind.Internal);
+                activity = ActivitySource.CreateActivity("Signum." + kind, ActivityKind.Internal);
                 activity?.Start();
 
                 if(activity != null)

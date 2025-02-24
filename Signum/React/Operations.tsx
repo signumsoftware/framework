@@ -167,7 +167,7 @@ export namespace Operations {
   export namespace Defaults {
 
     export function isSave(oi: OperationInfo): boolean {
-      return oi.key.endsWith(".Save");
+      return oi.operationType == "Execute" && oi.canBeModified == true && oi.key.endsWith(".Save");
     }
 
     export function defaultSetterConfig(coc: ContextualOperationContext<any>): SettersConfig {
