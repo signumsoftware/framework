@@ -11,41 +11,42 @@ class Upgrade_20250210_UpdateActiveDirectory : CodeUpgradeBase
     {
         void ProcessAzureAndWindows(CodeFile cf)
         {
-            cf.ProcessLines(lines =>
-            {
-                bool MoveIntoBlock(string property, string embedded, List<string> properties)
+            cf.ReplaceBetween(
+                new ReplaceBetweenOption(a => a.Contains("new ActiveDirectoryConfigurationEmbedded")),
+                new ReplaceBetweenOption(a => a.Contains("}")) { SameIdentation = true}, text =>
                 {
-                    var pos = lines.FindIndex(a => properties.Any(p => a.Contains(p)));
-                    if (pos == -1)
-                        return false;
+                    var lines = text.Lines().ToList();
+                    bool MoveIntoBlock(string property, string embedded, List<string> properties)
+                    {
+                        var pos = lines.FindIndex(a => properties.Any(p => a.Contains(p)));
+                        if (pos == -1)
+                            return false;
 
-                    var indent = CodeFile.GetIndent(lines[pos]);
-                    var extract = lines.Extract(line => properties.Any(p => line.Contains(p)));
+                        var indent = CodeFile.GetIndent(lines[pos]);
+                        var extract = lines.Extract(line => properties.Any(p => line.Contains(p)));
 
-                    var main = extract.SingleOrDefault(a => a.Contains(properties.FirstEx()));
+                        var main = extract.SingleOrDefault(a => a.Contains(properties.FirstEx()));
 
-                    var text = main == null || main.Contains(" null,") ?
-                        $"{property} = null," :
-                        $$"""
+                        var text = main == null || main.Contains(" null,") ?
+                            $"{property} = null," :
+                            $$"""
                         {{property}} = new {{embedded}}
                         {
-                        {{extract.ToString(a => "    "+ a.Trim() ,"\r\n")}}
+                        {{extract.ToString(a => "    " + a.Trim(), "\r\n")}}
                         },
                         """;
 
-                    lines.InsertRange(pos + 1, text.Indent(indent.Length));
+                        lines.InsertRange(pos + 1, text.Indent(indent.Length));
 
-                    return true;
-                }
+                        return true;
+                    }
 
 
-                var result = false; 
-                
-                result |= MoveIntoBlock("WindowsAD", "WindowsADEmbedded", ["Azure_ApplicationID", "Azure_DirectoryID", "Azure_ClientSecret", "LoginWithAzureAD", "UseDelegatedPermission"]);
-                result |= MoveIntoBlock("AzureAD", "AzureADEmbedded", ["DomainName", "LoginWithActiveDirectoryRegistry", "LoginWithWindowsAuthenticator", "DirectoryRegistry_Username", "DirectoryRegistry_Password"]);
+                    MoveIntoBlock("AzureAD", "AzureActiveDirectoryEmbedded", ["Azure_ApplicationID", "Azure_DirectoryID", "Azure_ClientSecret", "LoginWithAzureAD", "UseDelegatedPermission"]);
+                    MoveIntoBlock("WindowsAD", "WindowsActiveDirectoryEmbedded", ["DomainName", "LoginWithActiveDirectoryRegistry", "LoginWithWindowsAuthenticator", "DirectoryRegistry_Username", "DirectoryRegistry_Password"]);
 
-                return result;
-            });
+                    return lines.ToString("\r\n");
+                });
         }
 
 
