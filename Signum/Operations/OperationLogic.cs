@@ -870,7 +870,6 @@ Consider the following options:
         if (!LogOperation(log))
             return;
 
-
         using (ExecutionMode.Global())
             log.Save();
     }

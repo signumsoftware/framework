@@ -71,7 +71,7 @@ export interface SearchControlLoadedProps {
   querySettings: Finder.QuerySettings | undefined;
 
   formatters?: { [token: string]: Finder.CellFormatter };
-  rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+  rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
   entityFormatter?: Finder.EntityFormatter;
   selectionFormatter?: (searchControl: SearchControlLoaded, row: ResultRow, rowIndex: number) => React.ReactElement | undefined;
   extraButtons?: (searchControl: SearchControlLoaded) => (ButtonBarElement | null | undefined | false)[];
@@ -1711,10 +1711,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   getRowAttributes(resultRow: ResultRow): React.HTMLAttributes<HTMLTableRowElement> | undefined {
     const qs = this.props.querySettings;
-    const resultColumns = this.state.resultTable!.columns;
     const rowAttributes = this.props.rowAttributes ?? qs?.rowAttributes;
 
-    return rowAttributes ? rowAttributes(resultRow, resultColumns) : undefined;
+    return rowAttributes ? rowAttributes(resultRow, this) : undefined;
   }
 
   getEntityFormatter(): Finder.EntityFormatter {

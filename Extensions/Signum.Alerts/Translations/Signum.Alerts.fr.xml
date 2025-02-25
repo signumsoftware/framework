@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="AlertCurrentState" Description="État actuel de l’alerte">
+    <Member Name="Alerted" Description="Alerté" />
+    <Member Name="Attended" Description="Terminé" />
+    <Member Name="Future" Description="Futur" />
+  </Type>
+  <Type Name="AlertDropDownGroup">
+    <Member Name="ByType" Description="Par type" />
+    <Member Name="ByTypeAndUser" Description="Par type et par utilisateur" />
+    <Member Name="ByUser" Description="Par utilisateur" />
+  </Type>
+  <Type Name="AlertEntity" Description="Alerte" PluralDescription="Alertes">
+    <Member Name="AlertDate" Description="Date de l’alerte" />
+    <Member Name="Alerted" Description="Alerté" />
+    <Member Name="AlertType" Description="Type d’alerte" />
+    <Member Name="Attended" Description="Terminé" />
+    <Member Name="AttendedBy" Description="Fait par" />
+    <Member Name="AttendedDate" Description="Date d'execution" />
+    <Member Name="CreatedBy" Description="Créé par" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="CurrentState" Description="État actuel" />
+    <Member Name="EmailNotificationsSent" Description="Notifications par e-mail envoyées" />
+    <Member Name="Future" Description="Futur" />
+    <Member Name="GroupTarget" Description="Groupe cible" />
+    <Member Name="LinkTarget" Description="Cible du lien" />
+    <Member Name="NotAttended" Description="Non exécuté" />
+    <Member Name="Recipient" Description="Destinataire" />
+    <Member Name="State" Description="Statut" />
+    <Member Name="Target" Description="Cible" />
+    <Member Name="Text" Description="Texte" />
+    <Member Name="TextArguments" Description="Paramètres du texte" />
+    <Member Name="TextField" Description="Champ de texte" />
+    <Member Name="TextFromAlertType" Description="Texte du type d’alerte" />
+    <Member Name="Title" Description="Titre" />
+    <Member Name="TitleField" Description="Champ de titre" />
+  </Type>
+  <Type Name="AlertMessage">
+    <Member Name="_0HiddenAlerts" Description="{0} alertes cachées" />
+    <Member Name="_0SimilarAlerts" Description="{0} alertes similaires" />
+    <Member Name="Alert" Description="Alerte" />
+    <Member Name="Alerts" Description="Alertes" />
+    <Member Name="Alerts_Attended" Description="Terminé" />
+    <Member Name="Alerts_Future" Description="Futur" />
+    <Member Name="Alerts_NotAttended" Description="Non exécuté" />
+    <Member Name="AllMyAlerts" Description="Toutes mes alertes" />
+    <Member Name="CheckedAlerts" Description="Vérifié" />
+    <Member Name="CloseAll" Description="Tout fermer" />
+    <Member Name="Collapse" Description="Rétractation" />
+    <Member Name="CreateAlert" Description="Créer une alerte" />
+    <Member Name="CustomDelay" Description="Délai personnalisé" />
+    <Member Name="DelayDuration" Description="Durée du retard" />
+    <Member Name="Expand" Description="Développer" />
+    <Member Name="FutureAlerts" Description="Futur(s)" />
+    <Member Name="Hi0" Description="Bonjour {0}," />
+    <Member Name="MyActiveAlerts" Description="Mes alertes actives" />
+    <Member Name="NewAlert" Description="Nouvelle alerte" />
+    <Member Name="NewUnreadNotifications" Description="Nouvelles notifications non lues" />
+    <Member Name="OtherNotifications" Description="Autres notifications" />
+    <Member Name="PleaseVisit0" Description="Veuillez visiter {0}" />
+    <Member Name="Show0AlertsMore" Description="Afficher {0} alertes de plus" />
+    <Member Name="Show0GroupsMore1Remaining" Description="Afficher {0} groupes de plus ({1} restants)" />
+    <Member Name="Text" Description="Texte" />
+    <Member Name="Title" Description="Titre" />
+    <Member Name="ViewMore" Description="Voir plus" />
+    <Member Name="WarnedAlerts" Description="Alerté" />
+    <Member Name="YouDoNotHaveAnyActiveAlert" Description="Vous n’avez pas d’alerte active" />
+    <Member Name="YouHaveSomePendingAlerts" Description="Vous avez des alertes en attente :" />
+  </Type>
+  <Type Name="AlertOperation">
+    <Member Name="Attend" Description="Terminé" />
+    <Member Name="Create" Description="Créer" />
+    <Member Name="CreateAlertFromEntity" Description="Créer une alerte à partir d’une entité" />
+    <Member Name="Delay" Description="Retarder" />
+    <Member Name="Save" Description="Sauvegarder" />
+    <Member Name="Unattend" Description="Non-executé" />
+  </Type>
+  <Type Name="AlertState" Description="Statut de la notification">
+    <Member Name="Attended" Description="Exécuté" />
+    <Member Name="New" Description="Nouveau" />
+    <Member Name="Saved" Description="Enregistré" />
+  </Type>
+  <Type Name="AlertTypeOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="AlertTypeSymbol" Description="Type d’alerte" PluralDescription="Types d’alerte" />
+  <Type Name="AllowedRule`2">
+    <Member Name="Allowed" Description="Autorisé" />
+    <Member Name="AllowedBase" Description="Base autorisée" />
+    <Member Name="Overriden" Description="Écraser" />
+    <Member Name="Resource" Description="Ressource" />
+  </Type>
+  <Type Name="DelayOption">
+    <Member Name="_15Mins" Description=" 15 minutes" />
+    <Member Name="_1Day" Description="1 jour" />
+    <Member Name="_1Hour" Description="1 heure" />
+    <Member Name="_2Hours" Description=" 2 heures" />
+    <Member Name="_30Mins" Description=" 30 minutes" />
+    <Member Name="_5Mins" Description=" 5 minutes" />
+    <Member Name="Custom" Description="Personalisé" />
+  </Type>
+  <Type Name="SendAlertTypeBehavior" Description="Comportement d’envoi d’alerte type">
+    <Member Name="All" Description="Tout" />
+    <Member Name="Exclude" Description="Exclure" />
+    <Member Name="Include" Description="Inclure" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskEntity" Description="Tâche d’envoi de notifications par e-mail" PluralDescription="Tâches d’envoi de notifications par e-mail">
+    <Member Name="AlertTypes" Description="Types d’alerte" />
+    <Member Name="IgnoreNotificationsOlderThan" Description="Ignorer les notifications antérieures à" />
+    <Member Name="SendBehavior" Description="Comportement d’envoi" />
+    <Member Name="SendNotificationsOlderThan" Description="Envoyer des notifications antérieures à" />
+  </Type>
+  <Type Name="SendNotificationEmailTaskOperation">
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+</Translations>

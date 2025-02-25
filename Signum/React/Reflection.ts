@@ -2269,7 +2269,14 @@ export type GraphExplorerMode = "collect" | "set" | "clean" | undefined;
 export class GraphExplorer {
 
   static hasChanges(m: ModifiableEntity): boolean {
-    this.propagateAll(m);
+    const ge = new GraphExplorer("clean", {});
+    ge.isModified(m, "")
+    return m.modified;
+  }
+
+  static hasChangesNoClean(m: ModifiableEntity): boolean {
+    const ge = new GraphExplorer(undefined, {});
+    ge.isModified(m, "")
     return m.modified;
   }
 
@@ -2318,9 +2325,9 @@ export class GraphExplorer {
     this.mode = mode;
   }
 
-  private mode: GraphExplorerMode;
+  mode: GraphExplorerMode;
 
-  private modelState: ModelState;
+  modelState: ModelState;
 
 
   isModified(obj: any, modelStatePrefix: string): boolean {
@@ -2477,6 +2484,9 @@ export class GraphExplorer {
       }
     }
 
+    if (GraphExplorer.onModifiable)
+      GraphExplorer.onModifiable(this, mod);
+
     if ((mod as Entity).isNew) {
       if (window.exploreGraphDebugMode)
         debugger;
@@ -2504,6 +2514,8 @@ export class GraphExplorer {
     }
     return modified;
   }
+
+  static onModifiable?: (ge: GraphExplorer, e: ModifiableEntity) => void; //Used for uploading files
 
   static TypesLazilyCreated: string[] = [];
 }

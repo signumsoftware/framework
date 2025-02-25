@@ -32,10 +32,12 @@ public static class SignumTokenCredentials
         var config = AuthLogic.Authorizer is ActiveDirectoryAuthorizer ada ? ada.GetConfig() :
             throw new InvalidOperationException("AuthLogic.Authorizer is not an ActiveDirectoryAuthorizer");
 
+        var azureAD = config.AzureAD ?? throw new InvalidOperationException("AzureAD not set");
+
         ClientSecretCredential result = new ClientSecretCredential(
-            tenantId: config.Azure_DirectoryID.ToString(),
-            clientId: config.Azure_ApplicationID.ToString(),
-            clientSecret: config.Azure_ClientSecret);
+            tenantId: azureAD.DirectoryID.ToString(),
+            clientId: azureAD.ApplicationID.ToString(),
+            clientSecret: azureAD.ClientSecret);
 
         return result;
     }

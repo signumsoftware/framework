@@ -172,9 +172,9 @@ export namespace WorkflowClient {
       hiddenColumns: [
         { token: CaseNotificationEntity.token(e => e.state) },
       ],
-      rowAttributes: (row, columns) => {
-        var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
-        switch (rowState) {
+      rowAttributes: (row, sc) => {
+        var rowState = sc.tryGetRowValue(row, CaseNotificationEntity.token(e => e.state));
+        switch (rowState?.value) {
           case "New": return { className: "new-row" };
           case "Opened": return { className: "opened-row" };
           case "InProgress": return { className: "in-progress-row" };

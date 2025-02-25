@@ -1,16 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
+  <Type Name="ExcelAttachmentEntity" Description="la pièce jointe Excel" PluralDescription="Pièces jointes Excel">
+    <Member Name="FileName" Description="Nom du fichier" />
+    <Member Name="Related" Description="Apparenté" />
+    <Member Name="Title" Description="Titre" />
+    <Member Name="UserQuery" Description="Requête de l’utilisateur" />
+  </Type>
   <Type Name="ExcelMessage">
+    <Member Name="Administer" Description="Administrer" />
+    <Member Name="CreateNew" Description="Créer un nouveau" />
     <Member Name="Data" Description="Données" />
     <Member Name="Download" Description="Télécharger" />
+    <Member Name="Excel2007Spreadsheet" Description="Feuille de calcul Microsoft Office Excel 2007(*.xlsx)|*.xlsx" />
     <Member Name="ExcelReport" Description="Rapport Excel" />
     <Member Name="ExcelTemplateMustHaveExtensionXLSXandCurrentOneHas0" Description="Modèle Excel doit avoir une extension .xlsx, et l'actuel a {0}" />
+    <Member Name="FindLocationFoExcelReport" Description="Trouver l’emplacement du rapport Excel" />
+    <Member Name="Reports" Description="Rapports" />
     <Member Name="TheExcelTemplateHasAColumn0NotPresentInTheFindWindow" Description="Le modèle Excel possède une colonne {0} n'est pas présent dans le moteur de recherche" />
     <Member Name="ThereAreNoResultsToWrite" Description="Il n'y a pas de réusltast à écrire" />
+  </Type>
+  <Type Name="ExcelPermission">
+    <Member Name="PlainExcel" Description="Simple Excel" />
   </Type>
   <Type Name="ExcelReportEntity" Description="Rapport Excel">
     <Member Name="DisplayName" Description="Afficher le nom" />
     <Member Name="File" Description="Fichier" />
     <Member Name="Query" Description="Recherche" />
+  </Type>
+  <Type Name="ExcelReportOperation">
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
   </Type>
 </Translations>

@@ -29,9 +29,8 @@ export default function PropertyRulesPackControl({ ctx, initialTypeConditions, i
   }
 
   function renderButtons(bc: ButtonsContext) {
-    GraphExplorer.propagateAll(bc.pack.entity);
 
-    const hasChanges = bc.pack.entity.modified;
+    const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
 
     return [
       { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }

@@ -39,9 +39,11 @@ public static class WindowsActiveDirectoryLogic
                 {
                     var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
+                    var windowsAD = config.GetWindowsAD();
+
                     var list = Database.Query<UserEntity>().ToList();
 
-                    using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!))
+                    using (var domainContext = new PrincipalContext(ContextType.Domain, windowsAD.DomainName, windowsAD.DirectoryRegistry_Username + "@" + windowsAD.DomainName, windowsAD.DirectoryRegistry_Password!))
                     {
                         stc.ForeachWriting(list, u => u.UserName, u =>
                         {
@@ -87,11 +89,12 @@ public static class WindowsActiveDirectoryLogic
     static PrincipalContext GetPrincipalContext()
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
+        var windowsAD = config.GetWindowsAD();
 
-        if (config.DirectoryRegistry_Username.HasText() && config.DirectoryRegistry_Password.HasText())
-            return new PrincipalContext(ContextType.Domain, config.DomainName, config.DirectoryRegistry_Username + "@" + config.DomainName, config.DirectoryRegistry_Password!);
+        if (windowsAD.DirectoryRegistry_Username.HasText() && windowsAD.DirectoryRegistry_Password.HasText())
+            return new PrincipalContext(ContextType.Domain, windowsAD.DomainName, windowsAD.DirectoryRegistry_Username + "@" + windowsAD.DomainName, windowsAD.DirectoryRegistry_Password!);
         else
-            return new PrincipalContext(ContextType.Domain, config.DomainName);
+            return new PrincipalContext(ContextType.Domain, windowsAD.DomainName);
     }
 
     public static Task<List<ActiveDirectoryUser>> SearchUser(string searchUserName, int limit)
@@ -287,7 +290,7 @@ public static class WindowsActiveDirectoryLogic
     {
         var config = ((ActiveDirectoryAuthorizer)AuthLogic.Authorizer!).GetConfig();
 
-        using (var domainContext = new PrincipalContext(ContextType.Domain, config.DomainName))
+        using (var domainContext = new PrincipalContext(ContextType.Domain, config.WindowsAD!.DomainName))
         {
             using (var foundUser = UserPrincipal.FindByIdentity(domainContext, IdentityType.SamAccountName, username))
             {

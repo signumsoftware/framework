@@ -185,12 +185,6 @@ public static class FilePathEmbeddedLogic
             (t, rowId, retriever) => propertyRoute);
     }
 
-    public static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
-    {
-        using (new EntityCache(EntityCacheType.ForceNew))
-            return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);
-    }
-
     public static byte[] GetByteArray(this FilePathEmbedded fpe)
     {
         return fpe.BinaryFile ?? fpe.FileType.GetAlgorithm().ReadAllBytes(fpe);

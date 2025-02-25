@@ -1,18 +1,262 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Translations>
   <Type Name="EmailMessageEntity" Description="Message d'email">
+    <Member Name="Attachments" Description="Pièces jointes" />
     <Member Name="Body" Description="Corps" />
+    <Member Name="BodyHash" Description="Hach corporel" />
+    <Member Name="CreationDate" Description="Date de création" />
+    <Member Name="EditableMessage" Description="Message modifiable" />
     <Member Name="Exception" Description="Exception" />
+    <Member Name="From" Description="De" />
+    <Member Name="IsBodyHtml" Description="Is body html" />
+    <Member Name="Package" Description="Paquet" />
+    <Member Name="ProcessIdentifier" Description="Identificateur de processus" />
+    <Member Name="ReceptionNotified" Description="Réception notifiée" />
+    <Member Name="Recipients" Description="Destinataires" />
+    <Member Name="SendRetries" Description="Envoyer des nouvelles tentatives" />
     <Member Name="Sent" Description="Envoyé" />
+    <Member Name="SentBy" Description="Envoyé par" />
     <Member Name="State" Description="État" />
     <Member Name="Subject" Description="Sujet" />
+    <Member Name="Target" Description="Cible" />
     <Member Name="Template" Description="Modèle" />
+    <Member Name="UniqueIdentifier" Description="Identifiant unique" />
   </Type>
-  <Type Name="EmailTemplateEntity" Description="Modèle d'email" />
-  <Type Name="SmtpNetworkDeliveryEmbedded">
+  <Type Name="AsyncEmailSenderPermission">
+    <Member Name="ViewAsyncEmailSenderPanel" Description="Afficher le panneau de l’expéditeur d’e-mail asynchrone" />
+  </Type>
+  <Type Name="CertFileType" Description="Type de certificat">
+    <Member Name="CertFile" Description="Fichier de certificat" />
+    <Member Name="SignedFile" Description="Fichier signé" />
+  </Type>
+  <Type Name="EmailAddressEmbedded" Description="Adresse email">
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+    <Member Name="EmailAddress" Description="Adresse email" />
+    <Member Name="EmailOwner" Description="Propriétaire de l’email" />
+    <Member Name="InvalidEmail" Description="Email non valide" />
+  </Type>
+  <Type Name="EmailAttachmentEmbedded" Description="Pièce jointe de l’email">
+    <Member Name="ContentId" Description="ID de contenu" />
+    <Member Name="File" Description="Fichier" />
+    <Member Name="Type" Description="Type" />
+  </Type>
+  <Type Name="EmailAttachmentType" Description="Type de pièce jointe email">
+    <Member Name="Attachment" Description="Pièce jointe" />
+    <Member Name="LinkedResource" Description="Ressource liée" />
+  </Type>
+  <Type Name="EmailConfigurationEmbedded" Description="Paramètres de messagerie">
+    <Member Name="AsyncSenderPeriod" Description="Période d’expédition asynchrone" />
+    <Member Name="AvoidSendingEmailsOlderThan" Description="Évitez d’envoyer des emails plus anciens que" />
+    <Member Name="ChunkSizeSendingEmails" Description="Taille du bloc d’envoi d’emails" />
+    <Member Name="DefaultCulture" Description="Culture par défaut" />
+    <Member Name="MaxEmailSendRetries" Description="Nombre maximal de tentatives d’envoi d’emails" />
+    <Member Name="OverrideEmailAddress" Description="Écraser l’adresse email" />
+    <Member Name="ReciveEmails" Description="Réception d’emails" />
+    <Member Name="SendEmails" Description="Envoyer des emails" />
+    <Member Name="UrlLeft" Description="Liens URL" />
+  </Type>
+  <Type Name="EmailFileType">
+    <Member Name="Attachment" Description="Pièce jointe" />
+  </Type>
+  <Type Name="EmailFromEmbedded" Description="Email de">
+    <Member Name="AzureUserId" Description="ID utilisateur Azure" />
+  </Type>
+  <Type Name="EmailMasterTemplateEntity" Description="le modèle principal d’email">
+    <Member Name="Attachments" Description="Pièces jointes" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="IsDefault" Description="Est par défaut" />
+    <Member Name="Messages" Description="Messages" />
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="EmailMasterTemplateMessageEmbedded" Description="Modèle principal de message email">
+    <Member Name="CultureInfo" Description="Langue" />
+    <Member Name="Text" Description="Texte" />
+  </Type>
+  <Type Name="EmailMasterTemplateOperation">
+    <Member Name="Create" Description="Créer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+ <Type Name="EmailMessageFormat" Description="Format du message électronique">
+    <Member Name="HtmlComplex" Description="HTML (complexe)" />
+    <Member Name="HtmlSimple" Description="HTML (simple)" />
+    <Member Name="PlainText" Description="Texte brut" />
+  </Type>
+  <Type Name="EmailMessageMessage">
+    <Member Name="_01requiresExtraParameters" Description="{0} {1} nécessite des paramètres supplémentaires" />
+    <Member Name="ExceptionMessages" Description="Messages d’erreur" />
+    <Member Name="Message" Description="Message" />
+    <Member Name="Messages" Description="Messages" />
+    <Member Name="RemainingMessages" Description="Messages restants" />
+    <Member Name="TheEmailMessageCannotBeSentFromState0" Description="L’e-mail ne peut pas être envoyé à partir de l’état {0}" />
+  </Type>
+  <Type Name="EmailMessageOperation">
+    <Member Name="CreateEmailFromTemplate" Description="Créer un e-mail à partir d’un modèle" />
+    <Member Name="CreateMail" Description="Créer un e-mail" />
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="ReadyToSend" Description="Prêt à envoyer" />
+    <Member Name="ReSend" Description="Envoyer à nouveau" />
+    <Member Name="ReSendEmails" Description="Renvoyer les e-mails" />
+    <Member Name="Save" Description="Sauvegarder" />
+    <Member Name="Send" Description="Envoyer" />
+  </Type>
+  <Type Name="EmailMessageProcess">
+    <Member Name="CreateEmailsSendAsync" Description="Créez des e-mails et envoyez-les de manière asynchrone" />
+    <Member Name="SendEmails" Description="Envoyer des emails" />
+  </Type>
+  <Type Name="EmailMessageState" Description="Statut de l’e-mail">
+    <Member Name="Created" Description="Créé" />
+    <Member Name="Draft" Description="Brouillon" />
+    <Member Name="Outdated" Description="Obsolète" />
+    <Member Name="ReadyToSend" Description="Prêt à envoyer" />
+    <Member Name="Received" Description="Reçu" />
+    <Member Name="ReceptionNotified" Description="Réception confirmée" />
+    <Member Name="RecruitedForSending" Description="Prêt pour l’envoi" />
+    <Member Name="Sent" Description="Envoyé" />
+    <Member Name="SentException" Description="Erreur d’envoi" />
+  </Type>
+  <Type Name="EmailModelEntity" Description="le modèle d’email" PluralDescription="Modèles d’email">
+    <Member Name="FullClassName" Description="Nom complet de la classe" />
+  </Type>
+  <Type Name="EmailOwnerData" Description="Données du propriétaire de l’e-mail">
+    <Member Name="AzureUserId" Description="ID utilisateur Azure" />
+    <Member Name="CultureInfo" Description="Langue" />
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+    <Member Name="Email" Description="Email" />
+    <Member Name="Owner" Description="Propriétaire" />
+  </Type>
+  <Type Name="EmailPackageEntity" Description="Paquet d'email">
+    <Member Name="Name" Description="Nom" />
+  </Type>
+  <Type Name="EmailReceptionInfoEmbedded" Description="Informations sur la réception des emails">
+    <Member Name="DeletionDate" Description="Date de suppression" />
+    <Member Name="RawContent" Description="Contenu brut" />
+    <Member Name="ReceivedDate" Description="Date de réception" />
+    <Member Name="Reception" Description="Réception" />
+    <Member Name="SentDate" Description="Date d’envoi" />
+    <Member Name="UniqueId" Description="Identifiant unique" />
+  </Type>
+  <Type Name="EmailReceptionMixin">
+    <Member Name="ReceptionInfo" Description="Infos sur la réception" />
+  </Type>
+  <Type Name="EmailRecipientEmbedded" Description="Destinataire de l’email">
+    <Member Name="Kind" Description="Sorte" />
+  </Type>
+  <Type Name="EmailRecipientKind" Description="Type de destinataire de l’e-mail">
+    <Member Name="Bcc" Description="BCC" />
+    <Member Name="Cc" Description="CC" />
+    <Member Name="To" Description="À" />
+  </Type>
+  <Type Name="EmailSenderConfigurationEntity" Description="la configuration de l’expéditeur de l’e-mail" PluralDescription="Configurations de l’expéditeur d’e-mail">
+    <Member Name="AdditionalRecipients" Description="Autres destinataires" />
+    <Member Name="DefaultFrom" Description="Par défaut de" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Service" Description="Service" />
+  </Type>
+  <Type Name="EmailSenderConfigurationOperation">
+    <Member Name="Clone" Description="Clone" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="EmailServiceEntity" Description="le service de messagerie électronique" PluralDescription="Services de messagerie électronique" />
+  <Type Name="EmailTemplateAddressEmbedded" Description="Adresse du modèle d’e-mail">
+    <Member Name="DisplayName" Description="Nom d’affichage" />
+    <Member Name="EmailAddress" Description="Adresse email" />
+    <Member Name="Token" Description="Jeton" />
+  </Type>
+  <Type Name="EmailTemplateEntity" Description="Modèle d'email">
+    <Member Name="Applicable" Description="Applicable" />
+    <Member Name="Attachments" Description="Pièces jointes" />
+    <Member Name="DisableAuthorization" Description="Désactiver l’autorisation" />
+    <Member Name="EditableMessage" Description="Message modifiable" />
+    <Member Name="Filters" Description="Filtres" />
+    <Member Name="From" Description="De" />
+    <Member Name="GroupResults" Description="Regrouper les résultats" />
+    <Member Name="Guid" Description="GUID" />
+    <Member Name="MasterTemplate" Description="Modèle principal" />
+    <Member Name="MessageFormat" Description="Format du message" />
+    <Member Name="Messages" Description="Messages" />
+    <Member Name="Model" Description="Modèle" />
+    <Member Name="Name" Description="Nom" />
+    <Member Name="Orders" Description="Ordres" />
+    <Member Name="Query" Description="Requête" />
+    <Member Name="Recipients" Description="Destinataires" />
+  </Type>
+  <Type Name="EmailTemplateFromEmbedded" Description="Email template from">
+    <Member Name="AzureUserId" Description="ID utilisateur Azure" />
+    <Member Name="WhenMany" Description="Lorsqu'il y en a plusieurs" />
+    <Member Name="WhenNone" Description="Lorsqu’il n’y en a aucun" />
+  </Type>
+  <Type Name="EmailTemplateMessage">
+    <Member Name="EndDateMustBeHigherThanStartDate" Description="La date de fin doit être supérieure à la date de début" />
+    <Member Name="HidePreview" Description="Masquer l’aperçu" />
+    <Member Name="ImpossibleToAccess0BecauseTheTemplateHAsNo1" Description="Impossible d’y accéder {0} car le modèle n’a pas de {1}" />
+    <Member Name="NewCulture" Description="Nouvelle culture" />
+    <Member Name="ShowPreview" Description="Afficher l’aperçu" />
+    <Member Name="ThereAreNoMessagesForTheTemplate" Description="Il n’y a pas de messages pour le modèle" />
+    <Member Name="ThereMustBeAMessageFor0" Description="Il doit y avoir un message pour {0}" />
+    <Member Name="TheresMoreThanOneMessageForTheSameLanguage" Description="Il y a plus d’un message pour la même langue" />
+    <Member Name="TheTextMustContain0IndicatingReplacementPoint" Description="Le texte doit contenir {0} pour indiquer le point de substitution" />
+    <Member Name="TokenAndEmailAddressCanNotBeSetAtTheSameTime" Description="Le jeton et l’adresse e-mail ne peuvent pas être définis en même temps" />
+    <Member Name="TokenMustBeA0" Description="Le jeton doit être {0}" />
+    <Member Name="TokenOrEmailAddressMustBeSet" Description="Le jeton ou l’adresse e-mail doit être défini" />
+  </Type>
+  <Type Name="EmailTemplateMessageEmbedded" Description="Email template message">
+    <Member Name="CultureInfo" Description="Culture" />
+    <Member Name="Subject" Description="Sujet" />
+    <Member Name="Text" Description="Texte" />
+  </Type>
+  <Type Name="EmailTemplateOperation">
+    <Member Name="Create" Description="Créer" />
+    <Member Name="CreateEmailTemplateFromModel" Description="Créer un modèle d’e-mail à partir d’un modèle" />
+    <Member Name="Delete" Description="Supprimer" />
+    <Member Name="Save" Description="Sauvegarder" />
+  </Type>
+  <Type Name="EmailTemplateRecipientEmbedded" Description="Email template recipient">
+    <Member Name="Kind" Description="Sorte" />
+    <Member Name="WhenMany" Description="Lorsqu'il y en a plusieurs" />
+    <Member Name="WhenNone" Description="Lorsqu’il n’y en a aucun" />
+  </Type>
+  <Type Name="EmailTemplateViewMessage">
+    <Member Name="Insert" Description="Insérer" />
+    <Member Name="InsertMessageContent" Description="Insérer le contenu du message" />
+    <Member Name="Language" Description="Langue" />
+  </Type>
+  <Type Name="ImageAttachmentEntity" Description="la pièce jointe de l’image" PluralDescription="Pièces jointes d’images">
+    <Member Name="ContentId" Description="ID de contenu" />
+    <Member Name="File" Description="Fichier" />
+    <Member Name="FileName" Description="Nom du fichier" />
+    <Member Name="Type" Description="Type" />
+  </Type>
+  <Type Name="SmtpEmailServiceEntity" Description="Service email SMTP" PluralDescription="Services email SMTP">
+    <Member Name="DeliveryFormat" Description="Format de livraison" />
+    <Member Name="DeliveryMethod" Description="Mode de livraison" />
+    <Member Name="Network" Description="Réseau" />
+    <Member Name="PickupDirectoryLocation" Description="Pickup directory location" />
+  </Type>
+  <Type Name="SmtpNetworkDeliveryEmbedded" Description="Livraison réseau SMTP">
+    <Member Name="ClientCertificationFiles" Description="Dossiers de certificats client" />
+    <Member Name="EnableSSL" Description="Activer SSL" />
+    <Member Name="Host" Description="Hôte" />
+    <Member Name="Password" Description="Mot de passe" />
+    <Member Name="Port" Description="Port" />
+    <Member Name="UseDefaultCredentials" Description="Utiliser les informations d’identification par défaut" />
     <Member Name="Username" Description="Login" />
   </Type>
-	<Type Name="EmailPackageEntity" Description="Paquet d'email">
-		<Member Name="Name" Description="Nom" />
+  <Type Name="WhenManyFromBehaviour" Description="Comportement lorsque plusieurs émetteurs ">
+    <Member Name="FistResult" Description="Premier résultat" />
+    <Member Name="SplitMessages" Description="Messages séparés" />
+  </Type>
+  <Type Name="WhenManyRecipiensBehaviour" Description="Comportement en cas de nombreux destinataires">
+    <Member Name="KeepOneMessageWithManyRecipients" Description="Conservez un message avec plusieurs destinataires" />
+    <Member Name="SplitMessages" Description="Messages séparés" />
+  </Type>
+  <Type Name="WhenNoneFromBehaviour" Description="Comportement lorsqu’aucun émetteur est définis">
+    <Member Name="DefaultFrom" Description="Émetteur par defaut" />
+    <Member Name="NoMessage" Description="Aucun message" />
+    <Member Name="ThrowException" Description="Lever l’exception" />
+  </Type>
+  <Type Name="WhenNoneRecipientsBehaviour" Description="Comportement en l’absence de destinataire">
+    <Member Name="NoMessage" Description="Aucun message" />
+    <Member Name="NoRecipients" Description="Aucun destinataire" />
+    <Member Name="ThrowException" Description="Lever l’exception" />
 	</Type>
 </Translations>
