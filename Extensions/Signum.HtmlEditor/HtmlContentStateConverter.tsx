@@ -1,39 +1,26 @@
-import * as draftjs from 'draft-js';
-import draftToHtml from 'draftjs-to-html';
-import htmlToDraft from 'html-to-draftjs';
-import { IContentStateConverter, HtmlEditorController } from "./HtmlEditor"
+import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
+import { $convertFromMarkdownString } from "@lexical/markdown";
+import { $getEditor, EditorState, LexicalEditor, LexicalNode } from "lexical";
 
-interface DraftToHtmlOptions {
-  hashConfig?: { trigger: "#", separator: " " },
-  directional?: boolean,
-  customEntityTransform?: (entity: draftjs.RawDraftEntity, text: string) => string | undefined
+export interface ITextConverter {
+  $convertToText(editor: LexicalEditor): string;
+  $convertFromText(editor: LexicalEditor, html: string): EditorState;
 }
 
-interface HtmlToDraftOptions {
-  customChunkRenderer?: (nodeName: string, node: HTMLElement) => draftjs.RawDraftEntity | undefined
-}
-
-export class HtmlContentStateConverter implements IContentStateConverter {
-
-  constructor(
-    public draftToHtmlOptions: DraftToHtmlOptions,
-    public htmlToDraftOptions: HtmlToDraftOptions)
-  {
+export class HtmlContentStateConverter implements ITextConverter {
+  $convertToText(
+    editor: LexicalEditor
+  ): ReturnType<ITextConverter["$convertToText"]> {
+    let htmlString = "";
+    editor.read(() => {
+      htmlString = $generateHtmlFromNodes($getEditor());
+    });
+    return htmlString;
   }
-
-  contentStateToText(content: draftjs.ContentState): string {
-
-    const rawContentState = draftjs.convertToRaw(content);
-    const { hashConfig, directional, customEntityTransform } = this.draftToHtmlOptions;
-    return draftToHtml(rawContentState, hashConfig, directional, customEntityTransform);
-  }
-
-  textToContentState(html: string): draftjs.ContentState {
-    //console.log("Parsing: " + html);
-    const { customChunkRenderer } = this.htmlToDraftOptions;
-    const { contentBlocks, entityMap } = htmlToDraft(html, customChunkRenderer);
-    const result = draftjs.ContentState.createFromBlockArray(contentBlocks, entityMap);
-    //console.log("Parsed: " + JSON.stringify(draftjs.convertToRaw(result), undefined, 2));
-    return result;
+  $convertFromText(
+    editor: LexicalEditor,
+    html: string
+  ): ReturnType<ITextConverter["$convertFromText"]> {
+    return editor.parseEditorState(html);
   }
 }

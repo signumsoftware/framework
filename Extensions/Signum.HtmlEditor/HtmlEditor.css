@@ -7,14 +7,15 @@
     box-shadow: inset 0px 1px 4px -3px #ABABAB;
 }
 
-    .sf-html-editor .DraftEditor-root {
-        overflow: auto;
-    }
+.sf-html-editor .DraftEditor-root {
+    overflow: auto;
+}
 
-    .sf-html-editor .public-DraftEditor-content {
-        min-height: 140px;
-        padding: 0 10px;
-    }
+.sf-html-editor .public-DraftEditor-content {
+    min-height: 140px;
+    padding: 0 10px;
+    outline: 0;
+}
 
 .sf-draft-toolbar {
     border: 1px solid #ddd;
@@ -43,27 +44,26 @@
     font-weight: bold;
 }
 
-    .sf-draft-button svg {
-        fill: #888;
-    }
+.sf-draft-button svg {
+    fill: #888;
+}
 
-    .sf-draft-button:hover, 
-    .draft-button:focus {
-        background: #f3f3f3;
-        outline: 0;
-    }
+.sf-draft-button:hover,
+.draft-button:focus {
+    background: #f3f3f3;
+    outline: 0;
+}
 
-    .sf-draft-button.sf-draft-active {
-        background-color: #ddd;
-        color: #555;
-    }
+.sf-draft-button.sf-draft-active {
+    background-color: #ddd;
+    color: #555;
+}
 
-        .sf-draft-button.sf-draft-active:hover,
-        .sf-draft-button.sf-draft-active:focus
-        {
-            background-color: #ccc;
-            color: #444;
-        }
+.sf-draft-button.sf-draft-active:hover,
+.sf-draft-button.sf-draft-active:focus {
+    background-color: #ccc;
+    color: #444;
+}
 
 
 
@@ -88,7 +88,7 @@
 
 }
 
-.sf-html-editor.small-mode:not(:has(.sf-draft-toolbar)){
+.sf-html-editor.small-mode:not(:has(.sf-draft-toolbar)) {
     padding: 0px;
 }
 
@@ -113,8 +113,17 @@
 .sf-html-editor h2 {
     font-size: 1.7rem;
 }
+
 .sf-html-editor h3 {
     font-size: 1.5rem;
+}
+
+.sf-html-editor .text-underline {
+    text-decoration: underline;
+}
+
+.sf-html-editor .text-code {
+    font-family: 'Courier New', Courier, monospace;
 }
 
 .html-viewer .sf-html-editor {
@@ -124,7 +133,7 @@
     padding: 0px;
 }
 
-    .html-viewer .sf-html-editor .public-DraftEditor-content {
-        padding: 0px;
-        min-height: initial;
-    }
+.html-viewer .sf-html-editor .public-DraftEditor-content {
+    padding: 0px;
+    min-height: initial;
+}

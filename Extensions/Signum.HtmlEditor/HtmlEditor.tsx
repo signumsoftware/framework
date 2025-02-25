@@ -1,194 +1,52 @@
-import * as React from "react";
-import * as draftjs from "draft-js";
 import { IBinding } from "@framework/Reflection";
-import { HtmlContentStateConverter } from "./HtmlContentStateConverter";
-import "./HtmlEditor.css";
-import "draft-js/dist/Draft.css";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import * as React from "react";
 import {
+  ITextConverter
+} from "./HtmlContentStateConverter";
+import "./HtmlEditor.css";
+import { classes } from "@framework/Globals";
+import { ContentEditable } from "@lexical/react/LexicalContentEditable";
+import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
+import { HeadingNode, QuoteNode } from "@lexical/rich-text";
+import { $getRoot, LexicalEditor } from "lexical";
+import { HtmlEditorExtension } from "./Extensions/types";
+import {
+  BlockStyleButton,
   InlineStyleButton,
   Separator,
-  BlockStyleButton,
   SubMenuButton,
 } from "./HtmlEditorButtons";
-import BasicCommandsPlugin from "./Plugins/BasicCommandsPlugin";
-import { classes } from "@framework/Globals";
-
-export interface IContentStateConverter {
-  contentStateToText(content: draftjs.ContentState): string;
-  textToContentState(html: string): draftjs.ContentState;
-}
+import { HtmlEditorController } from "./HtmlEditorController";
+import { useController } from "./useController";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
   mandatory?: boolean | "warning";
-  converter?: IContentStateConverter;
-  innerRef?: React.Ref<draftjs.Editor>;
-  decorators?: draftjs.DraftDecorator[];
-  plugins?: HtmlEditorPlugin[];
+  converter?: ITextConverter;
+  innerRef?: React.Ref<LexicalEditor>;
+  //   decorators?: draftjs.DraftDecorator[];
+  plugins?: HtmlEditorExtension[];
   toolbarButtons?: (
     c: HtmlEditorController
   ) => React.ReactElement | React.ReactFragment | null;
   htmlAttributes?: React.HTMLAttributes<HTMLDivElement>;
   initiallyFocused?: boolean | number;
   onEditorFocus?: (
-    e: React.SyntheticEvent,
+    e: React.FocusEvent,
     controller: HtmlEditorController
   ) => void;
   onEditorBlur?: (
-    e: React.SyntheticEvent,
+    e: React.FocusEvent,
     controller: HtmlEditorController
   ) => void;
 }
 
-export interface HtmlEditorControllerProps {
-  binding: IBinding<string | null | undefined>;
-  readOnly?: boolean;
-  small?: boolean;
-  converter: IContentStateConverter;
-  decorators?: draftjs.DraftDecorator[];
-  plugins?: HtmlEditorPlugin[];
-  innerRef?: React.Ref<draftjs.Editor>;
-  initiallyFocused?: boolean | number;
-}
-
-export class HtmlEditorController {
-  editor!: draftjs.Editor;
-
-  editorState!: draftjs.EditorState;
-  setEditorState!: (newState: draftjs.EditorState) => void;
-
-  overrideToolbar!: React.ReactFragment | React.ReactElement | undefined;
-  setOverrideToolbar!: (
-    newState: React.ReactFragment | React.ReactElement | undefined
-  ) => void;
-
-  converter!: IContentStateConverter;
-  decorators!: draftjs.DraftDecorator[];
-  plugins!: HtmlEditorPlugin[];
-  binding!: IBinding<string | null | undefined>;
-  readOnly?: boolean;
-  small?: boolean;
-  initialContentState: draftjs.ContentState = null!;
-
-  lastSavedString?: { str: string | null };
-
-  createWithContentAndDecorators(
-    contentState: draftjs.ContentState
-  ): draftjs.EditorState {
-    return draftjs.EditorState.createWithContent(
-      contentState,
-      this.decorators.length == 0
-        ? undefined
-        : new draftjs.CompositeDecorator(this.decorators)
-    );
-  }
-
-  init(p: HtmlEditorControllerProps): void {
-    this.binding = p.binding;
-    this.readOnly = p.readOnly;
-    this.small = p.small;
-    this.converter = p.converter;
-    this.plugins = p.plugins ?? [];
-    this.decorators = [
-      ...(p.decorators ?? []),
-      ...this.plugins.flatMap((p) =>
-        p.getDecorators == null ? [] : p.getDecorators(this)
-      ),
-    ];
-
-    [this.editorState, this.setEditorState] =
-      React.useState<draftjs.EditorState>(() =>
-        this.createWithContentAndDecorators(
-          this.converter!.textToContentState(this.binding.getValue() ?? "")
-        )
-      );
-
-    [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
-      React.ReactFragment | React.ReactElement | undefined
-    >(undefined);
-
-    React.useEffect(() => {
-      if (p.initiallyFocused) {
-        window.setTimeout(
-          () => {
-            if (this.editor) this.editor.focus();
-          },
-          p.initiallyFocused == true ? 0 : (p.initiallyFocused as number)
-        );
-      }
-    }, []);
-
-    var newValue = this.binding.getValue();
-    React.useEffect(() => {
-      if (this.lastSavedString && this.lastSavedString.str == newValue) {
-        this.lastSavedString = undefined;
-        return;
-      }
-
-      var contentState = this.converter.textToContentState(newValue ?? "");
-      this.initialContentState = contentState;
-      this.setEditorState(this.createWithContentAndDecorators(contentState));
-    }, [newValue]);
-
-    React.useEffect(() => {
-      return () => {
-        this.saveHtml();
-      };
-    }, []);
-
-    this.setRefs = React.useCallback(
-      (editor: draftjs.Editor | null) => {
-        this.editor = editor!;
-        if (p.innerRef) {
-          if (typeof p.innerRef == "function") p.innerRef(editor);
-          else
-            (
-              p.innerRef as React.MutableRefObject<draftjs.Editor | null>
-            ).current = editor;
-        }
-      },
-      [p.innerRef]
-    );
-  }
-
-  saveHtml(): void {
-    if (!this.readOnly) {
-      var newContent = this.editorState.getCurrentContent();
-      if (newContent != this.initialContentState) {
-        var value = !newContent.hasText()
-          ? null
-          : this.converter.contentStateToText(newContent);
-        this.lastSavedString = { str: value };
-        this.binding.setValue(value);
-      }
-    }
-  }
-
-  extraButtons(): React.ReactElement | null {
-    var buttons = this.plugins
-      .map((p) => p.getToolbarButtons && p.getToolbarButtons(this))
-      .notNull();
-
-    if (buttons.length == 0) return null;
-
-    return React.createElement(
-      React.Fragment,
-      undefined,
-      <Separator />,
-      ...buttons
-    );
-  }
-
-  setRefs!: (editor: draftjs.Editor | null) => void;
-}
-
-const HtmlEditor: React.ForwardRefExoticComponent<
-  HtmlEditorProps &
-    Partial<draftjs.EditorProps> &
-    React.RefAttributes<HtmlEditorController>
-> = React.forwardRef(function HtmlEditor(
+const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAttributes<HtmlEditorController>> = React.forwardRef(function HtmlEditor(
   {
     readOnly,
     small,
@@ -196,117 +54,91 @@ const HtmlEditor: React.ForwardRefExoticComponent<
     converter,
     innerRef,
     toolbarButtons,
-    decorators,
     plugins,
     htmlAttributes,
     mandatory,
     initiallyFocused,
-    ...props
-  }: HtmlEditorProps & Partial<draftjs.EditorProps>,
+    ...props }: HtmlEditorProps,
   ref?: React.Ref<HtmlEditorController>
 ) {
-  const textConverter = converter ?? new HtmlContentStateConverter({}, {});
-
-  plugins = plugins ?? [new BasicCommandsPlugin()];
-
-  plugins.forEach((p) => p.expandConverter && p.expandConverter(textConverter));
-
-  var c = React.useMemo(() => new HtmlEditorController(), []);
-  React.useImperativeHandle(ref, () => c, []);
-  c.init({
+  const { controller, nodes, builtinComponents } = useController({
     binding,
     readOnly,
     small,
-    converter: textConverter,
+    converter,
     innerRef,
-    decorators,
     initiallyFocused,
     plugins,
   });
 
-  const editorProps = props as draftjs.EditorProps;
+  React.useImperativeHandle(ref, () => controller, [controller]);
 
-  if (editorProps.keyBindingFn == undefined) {
-    editorProps.keyBindingFn = (e) => {
-      if (e.ctrlKey && e.key == "s") {
-        c.saveHtml();
-      }
-
-      return draftjs.getDefaultKeyBinding(e);
-    };
-  } else {
-    var userKeyBinding = editorProps.keyBindingFn;
-    editorProps.keyBindingFn = (e) => {
-      if (e.ctrlKey && e.key == "s") {
-        c.saveHtml();
-      }
-      return userKeyBinding(e);
-    };
-  }
-
-  if (editorProps.handleKeyCommand == undefined)
-    editorProps.handleKeyCommand = (command) => {
-      const newState = draftjs.RichUtils.handleKeyCommand(
-        c.editorState,
-        command
-      );
-      if (newState) {
-        c.setEditorState(newState);
-        return "handled";
-      }
-      return "not-handled";
-    };
-
-  plugins.forEach(
-    (p) => p.expandEditorProps && p.expandEditorProps(editorProps, c)
-  );
-
+  const hasText = React.useMemo(() => {
+    let hasText = false;
+    controller.editorState?.read(() => {
+      hasText = $getRoot().getTextContentSize() > 0;
+    })
+    return hasText;
+  }, [controller.editorState]);
+  
   const error = binding.getError();
 
   return (
     <>
       <div
         title={error}
-        onClick={() => c.editor.focus()}
+        onClick={() => controller.editor?.focus()}
         {...htmlAttributes}
         className={classes(
           "sf-html-editor",
           mandatory &&
-            !c.editorState.getCurrentContent().hasText() &&
+            !hasText &&
             (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
           error && "has-error",
-          c.small ? "small-mode" : "",
+          controller.small ? "small-mode" : "",
           htmlAttributes?.className
         )}
       >
-        {c.overrideToolbar ? (
-          <div className="sf-draft-toolbar">{c.overrideToolbar}</div>
-        ) : toolbarButtons ? (
-          toolbarButtons(c)
-        ) : c.readOnly || c.small ? null : (
-          defaultToolbarButtons(c)
-        )}
-
-        <draftjs.Editor
-          ref={c.setRefs}
-          editorState={c.editorState}
-          readOnly={readOnly}
-          onChange={(ev) => c.setEditorState(ev)}
-          {...props}
-          onBlur={(e: React.SyntheticEvent) => {
-            props.onBlur?.(e);
-            props.onEditorBlur?.(e, c);
-            c.saveHtml();
+        <LexicalComposer
+          initialConfig={{
+            namespace: "HtmlEditor",
+            nodes: [HeadingNode, QuoteNode, ...nodes!],
+            theme: {
+                text: {
+                    underline: 'text-underline',
+                    code: 'text-code'
+                }
+            },
+            onError: (error) => console.error('fwo#error', error),
           }}
-          onFocus={(e: React.SyntheticEvent) => {
-            props.onFocus?.(e);
-            props.onEditorFocus?.(e, c);
-          }}
-        />
+        >
+            {controller.overrideToolbar ? (
+              <div className="sf-draft-toolbar">{controller.overrideToolbar}</div>
+            ) : toolbarButtons ? (
+              toolbarButtons(controller)
+            ) : controller.readOnly || controller.small ? null : (
+              defaultToolbarButtons(controller)
+            )}
+              <RichTextPlugin
+                contentEditable={
+                  <ContentEditable
+                    className="public-DraftEditor-content"
+                    readOnly={controller.readOnly}
+                    onFocus={(event: React.FocusEvent) => {
+                      props.onEditorFocus?.(event, controller);
+                    }}
+                    onBlur={(event: React.FocusEvent) => {
+                      props.onEditorBlur?.(event, controller);
+                      controller.saveHtml();
+                    }}
+                  />
+                }
+                ErrorBoundary={LexicalErrorBoundary}
+              />
+              <EditorRefPlugin editorRef={controller.setRefs} />
+              {builtinComponents.map(({component: Component, props }) => <Component key={Component.name} {...props} />)}
+        </LexicalComposer>
       </div>
-      {/*<pre style={{ textAlign: "left" }}>
-        {JSON.stringify(draftjs.convertToRaw(c.editorState.getCurrentContent()), undefined, 2)}
-      </pre>*/}
     </>
   );
 });
@@ -317,38 +149,38 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
   <div className="sf-draft-toolbar">
     <InlineStyleButton
       controller={c}
-      style="BOLD"
+      style="bold"
       icon="bold"
       title="Bold (Ctrl + B)"
     />
     <InlineStyleButton
       controller={c}
-      style="ITALIC"
+      style="italic"
       icon="italic"
       title="Italic (Ctrl + I)"
     />
     <InlineStyleButton
       controller={c}
-      style="UNDERLINE"
+      style="underline"
       icon="underline"
       title="Underline (Ctrl + U)"
     />
-    <InlineStyleButton controller={c} style="CODE" icon="code" title="Code" />
+    <InlineStyleButton controller={c} style="code" icon="code" title="Code" />
     <Separator />
     <SubMenuButton controller={c} title="Headings..." icon="heading">
-      <BlockStyleButton controller={c} blockType="header-one" content="H1" />
-      <BlockStyleButton controller={c} blockType="header-two" content="H2" />
-      <BlockStyleButton controller={c} blockType="header-three" content="H3" />
+      <BlockStyleButton controller={c} blockType="h1" content="H1" />
+      <BlockStyleButton controller={c} blockType="h2" content="H2" />
+      <BlockStyleButton controller={c} blockType="h3" content="H3" />
     </SubMenuButton>
     <BlockStyleButton
       controller={c}
-      blockType="unordered-list-item"
+      blockType="ul"
       icon="list-ul"
       title="Unordered list"
     />
     <BlockStyleButton
       controller={c}
-      blockType="ordered-list-item"
+      blockType="ol"
       icon="list-ol"
       title="Ordered list"
     />
@@ -358,22 +190,22 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
       icon="quote-right"
       title="Quote"
     />
-    <BlockStyleButton
+    {/* <BlockStyleButton
       controller={c}
       blockType="code-block"
       icon="file-code"
       title="Code Block"
-    />
+    /> */}
     {c.extraButtons()}
   </div>
 );
 
-export interface HtmlEditorPlugin {
-  getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
-  getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
-  expandConverter?(converter: IContentStateConverter): void;
-  expandEditorProps?(
-    props: draftjs.EditorProps,
-    controller: HtmlEditorController
-  ): void;
-}
+// export interface HtmlEditorPlugin {
+//   //   getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
+//   getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
+//   expandConverter?(converter: ITextConverter): void;
+//   expandEditorProps?(
+//     props: any, //draftjs.EditorProps,
+//     controller: HtmlEditorController
+//   ): void;
+// }

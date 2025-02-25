@@ -12,12 +12,6 @@
     "@lexical/react": "0.24.0",
     "@lexical/list": "0.24.0",
     "@lexical/rich-text": "0.24.0",
-    "@lexical/markdown": "0.24.0",
-    "@types/draft-js": "0.11.18",
-    "@types/html-to-draftjs": "1.4.3",
-    "@types/draftjs-to-html": "0.8.4",
-    "draft-js": "0.11.7",
-    "draftjs-to-html": "0.9.1",
-    "html-to-draftjs": "1.5.0"
+    "@lexical/markdown": "0.24.0"
   }
 }
