@@ -52,7 +52,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    Func<IFilePath, TimeSpan> SASTokenExpires = (IFilePath efp) => TimeSpan.FromMinutes(15);
+    public Func<IFilePath, TimeSpan> SASTokenExpires = (IFilePath efp) => TimeSpan.FromMinutes(15);
 
     public string? GetFullPhysicalPath(IFilePath efp) => null;
 
