@@ -1,18 +1,19 @@
-import { IBinding } from "@framework/Reflection";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
-import * as React from "react";
-import {
-  ITextConverter
-} from "./HtmlContentStateConverter";
-import "./HtmlEditor.css";
 import { classes } from "@framework/Globals";
+import { IBinding } from "@framework/Reflection";
+import { $isCodeNode } from "@lexical/code";
+import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { $getRoot, LexicalEditor } from "lexical";
+import * as React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
+import {
+  ITextConverter
+} from "./HtmlContentStateConverter";
+import "./HtmlEditor.css";
 import {
   BlockStyleButton,
   InlineStyleButton,
@@ -21,6 +22,8 @@ import {
 } from "./HtmlEditorButtons";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useController } from "./useController";
+import { formatCode, formatHeading, formatList, formatQuote } from "./Utilities/format";
+import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utilities/node";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -169,44 +172,42 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
     <InlineStyleButton controller={c} style="code" icon="code" title="Code" />
     <Separator />
     <SubMenuButton controller={c} title="Headings..." icon="heading">
-      <BlockStyleButton controller={c} blockType="h1" content="H1" />
-      <BlockStyleButton controller={c} blockType="h2" content="H2" />
-      <BlockStyleButton controller={c} blockType="h3" content="H3" />
+      <BlockStyleButton controller={c} blockType="h1" content="H1" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h1")} />
+      <BlockStyleButton controller={c} blockType="h2" content="H2" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h2")} />
+      <BlockStyleButton controller={c} blockType="h3" content="H3" isActiveFn={isHeadingActive} onClick={(editor) => formatHeading(editor, "h3")} />
     </SubMenuButton>
     <BlockStyleButton
       controller={c}
       blockType="ul"
       icon="list-ul"
       title="Unordered list"
+      isActiveFn={isListActive}
+      onClick={(editor) => formatList(editor, "ul")}
     />
     <BlockStyleButton
       controller={c}
       blockType="ol"
       icon="list-ol"
       title="Ordered list"
+      isActiveFn={isListActive}
+      onClick={(editor) => formatList(editor, "ol")}
     />
     <BlockStyleButton
       controller={c}
       blockType="blockquote"
       icon="quote-right"
       title="Quote"
+      isActiveFn={isQuoteActive}
+      onClick={formatQuote}
     />
-    {/* <BlockStyleButton
+    <BlockStyleButton
       controller={c}
       blockType="code-block"
       icon="file-code"
       title="Code Block"
-    /> */}
+      isActiveFn={(selection) => isNodeType(selection, node => $isCodeNode(node))}
+      onClick={formatCode}
+    />
     {c.extraButtons()}
   </div>
 );
-
-// export interface HtmlEditorPlugin {
-//   //   getDecorators?(controller: HtmlEditorController): draftjs.DraftDecorator[];
-//   getToolbarButtons?(controller: HtmlEditorController): React.ReactChild;
-//   expandConverter?(converter: ITextConverter): void;
-//   expandEditorProps?(
-//     props: any, //draftjs.EditorProps,
-//     controller: HtmlEditorController
-//   ): void;
-// }

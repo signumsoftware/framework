@@ -110,8 +110,8 @@ type BlockStyleButtonProps = {
   icon?: IconProp;
   content?: React.ReactChild;
   title?: string;
-  checkActive?: (selection: RangeSelection) => boolean;
-  onClick?: (editor: LexicalEditor) => void;
+  isActiveFn: (selection: RangeSelection, blockType: string) => boolean;
+  onClick: (editor: LexicalEditor) => void;
 };
 
 export function BlockStyleButton({
@@ -120,7 +120,7 @@ export function BlockStyleButton({
   icon,
   content,
   title,
-  checkActive,
+  isActiveFn,
   onClick
 }: BlockStyleButtonProps): React.JSX.Element {
   const { editor, editorState } = controller;
@@ -130,61 +130,17 @@ export function BlockStyleButton({
 
     editorState?.read(() => {
       const selection = $getSelection();
-
-      if (!$isRangeSelection(selection)) return;
-
-      if(checkActive) {
-        active = checkActive(selection);
-        return;
-      }
-
-      active = isNodeType(selection, node => {
-        if($isHeadingNode(node) || $isListNode(node)) {
-          return blockType === node.getTag();
-        }
-
-        if($isListItemNode(node)) {
-          const parentNode = node.getParent();
-          return $isListNode(parentNode) && blockType === parentNode.getTag();
-        }
-
-        if($isQuoteNode(node)) {
-          return blockType === "blockquote"
-        }
-
-        return false;
-      })
-    });
+      if(!$isRangeSelection(selection)) return;
+      active = isActiveFn(selection, blockType);
+    })
 
     return active;
-  }, [editorState, blockType]);
-
-  function toggleBlockStyle() {
-    if(onClick) {
-      onClick(editor);
-      return
-    }
-
-    if(blockType === "ul" || blockType === "ol") {
-      formatList(editor, blockType);
-      return;
-    }
-
-    if(blockType === "h1" || blockType === "h2" || blockType === "h3") {
-      formatHeading(editor, blockType as HeadingTagType); 
-      return;
-    }
-
-    if(blockType === "blockquote") {
-      formatQuote(editor);
-      return;
-    }
-  }
+  }, [editorState, blockType])
 
   return (
     <HtmlEditorButton
       isActive={isActive}
-      onClick={toggleBlockStyle}
+      onClick={() => onClick(editor)}
       icon={icon}
       content={content}
       title={title}

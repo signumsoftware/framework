@@ -1,17 +1,9 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
-import {
-  INSERT_UNORDERED_LIST_COMMAND,
-  INSERT_ORDERED_LIST_COMMAND,
-  REMOVE_LIST_COMMAND,
-  $createListNode,
-  ListType,
-  $isListNode,
-  $isListItemNode,
-} from "@lexical/list";
+import { $createListNode } from "@lexical/list";
+import { ListNodeTagType } from "@lexical/list/LexicalListNode";
 import {
   $createHeadingNode,
   $createQuoteNode,
-  $isHeadingNode,
   $isQuoteNode,
   HeadingTagType,
 } from "@lexical/rich-text";
@@ -20,26 +12,21 @@ import {
   $createParagraphNode,
   $getSelection,
   $isRangeSelection,
-  LexicalCommand,
   LexicalEditor,
 } from "lexical";
-import { isNodeType } from "./node";
+import { isHeadingActive, isListActive, isNodeType } from "./node";
 
-export function formatList(editor: LexicalEditor, listTag: "ul" | "ol"): void {
+export function formatList(
+  editor: LexicalEditor,
+  listTag: ListNodeTagType
+): void {
   editor.update(() => {
     const selection = $getSelection();
 
     if (!$isRangeSelection(selection)) return;
 
     const listType = listTag === "ul" ? "bullet" : "number";
-    const revert = isNodeType(selection, (node) => {
-      if ($isListItemNode(node)) {
-        const parentNode = node.getParent();
-        return $isListNode(parentNode) && parentNode.getTag() === listTag;
-      }
-
-      return $isListNode(node) && node.getTag() === listTag;
-    });
+    const revert = isListActive(selection, listTag);
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createListNode(listType)
@@ -56,10 +43,7 @@ export function formatHeading(
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = isNodeType(
-      selection,
-      (node) => $isHeadingNode(node) && node.getTag() === headingTagType
-    );
+    const revert = isHeadingActive(selection, headingTagType);
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createHeadingNode(headingTagType)
@@ -77,6 +61,20 @@ export function formatQuote(editor: LexicalEditor): void {
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createQuoteNode()
+    );
+  });
+}
+
+export function formatCode(editor: LexicalEditor): void {
+  editor.update(() => {
+    const selection = $getSelection();
+
+    if (!$isRangeSelection(selection)) return;
+
+    const revert = isNodeType(selection, (node) => $isCodeNode(node));
+
+    $setBlocksType(selection, () =>
+      revert ? $createParagraphNode() : $createCodeNode()
     );
   });
 }
