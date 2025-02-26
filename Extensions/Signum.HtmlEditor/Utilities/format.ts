@@ -65,7 +65,10 @@ export function formatQuote(editor: LexicalEditor): void {
   });
 }
 
-export function formatCode(editor: LexicalEditor): void {
+export function formatCode(
+  editor: LexicalEditor,
+  language: string = "javascript"
+): void {
   editor.update(() => {
     const selection = $getSelection();
 
@@ -74,7 +77,7 @@ export function formatCode(editor: LexicalEditor): void {
     const revert = isNodeType(selection, (node) => $isCodeNode(node));
 
     $setBlocksType(selection, () =>
-      revert ? $createParagraphNode() : $createCodeNode()
+      revert ? $createParagraphNode() : $createCodeNode(language)
     );
   });
 }

@@ -155,8 +155,39 @@
     white-space: pre-wrap;
     text-align: right;
     min-width: 25px;
-  }
+}
 
+.sf-html-editor .code-token-attr {
+    color: #07a;
+}
+
+.sf-html-editor .code-token-function {
+    color: #dd4a68;
+}
+
+.sf-html-editor .code-token-property {
+    color: #905;
+}
+
+.sf-html-editor .code-token-selector {
+    color: #690;
+}
+
+.sf-html-editor .code-token-comment {
+    color: slategray;
+}
+
+.sf-html-editor .code-token-operator {
+    color: #9a6e3a;
+}
+
+.sf-html-editor .code-token-variable {
+    color: #e90;
+}
+
+.sf-html-editor .code-token-punctuation {
+    color: #999;
+}
 
 .html-viewer .sf-html-editor {
     border: 0px;

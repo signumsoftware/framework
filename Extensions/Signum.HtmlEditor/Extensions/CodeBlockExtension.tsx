@@ -8,8 +8,7 @@ import {
 
 export class CodeBlockExtension implements HtmlEditorExtension {
   registerExtension(controller: HtmlEditorController): OptionalCallback {
-      const unsubscribe = registerCodeHighlighting(controller.editor);
-      return unsubscribe;
+      return registerCodeHighlighting(controller.editor);
   }
 
   getNodes(): LexicalConfigNode {

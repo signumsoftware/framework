@@ -21,6 +21,7 @@ import {
   SubMenuButton,
 } from "./HtmlEditorButtons";
 import { HtmlEditorController } from "./HtmlEditorController";
+import LexicalTheme from "./LexicalTheme";
 import { useController } from "./useController";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utilities/format";
 import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utilities/node";
@@ -32,7 +33,6 @@ export interface HtmlEditorProps {
   mandatory?: boolean | "warning";
   converter?: ITextConverter;
   innerRef?: React.Ref<LexicalEditor>;
-  //   decorators?: draftjs.DraftDecorator[];
   plugins?: HtmlEditorExtension[];
   toolbarButtons?: (
     c: HtmlEditorController
@@ -106,13 +106,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
           initialConfig={{
             namespace: "HtmlEditor",
             nodes: [HeadingNode, QuoteNode, ...nodes!],
-            theme: {
-                text: {
-                    underline: 'text-underline',
-                    code: 'text-code'
-                },
-                code: 'code-block'
-            },
+            theme: LexicalTheme,
             onError: (error) => console.error(error),
           }}
         >
