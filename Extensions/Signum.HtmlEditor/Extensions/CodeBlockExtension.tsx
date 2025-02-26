@@ -1,10 +1,14 @@
-import { CodeNode } from "@lexical/code";
+import { $createCodeNode, $isCodeNode, CodeHighlightNode, CodeNode, registerCodeHighlighting } from "@lexical/code";
+import { $setBlocksType } from "@lexical/selection";
+import { $createParagraphNode, $getSelection, $isRangeSelection, LexicalEditor, TextNode } from "lexical";
 import React from "react";
 import { BlockStyleButton } from "../HtmlEditorButtons";
 import { HtmlEditorController } from "../HtmlEditorController";
+import { isNodeType } from "../Utilities/node";
 import {
   HtmlEditorExtension,
-  LexicalConfigNode
+  LexicalConfigNode,
+  OptionalCallback
 } from "./types";
 
 export class CodeBlockExtension implements HtmlEditorExtension {
@@ -15,11 +19,32 @@ export class CodeBlockExtension implements HtmlEditorExtension {
           blockType="code-block" 
           icon="file-code"
           title="Code Block"
+          checkActive={(selection) => isNodeType(selection, node => $isCodeNode(node))}
+          onClick={formatCode}
         />
       );
   }
 
-  getNodes(): LexicalConfigNode {
-      return [CodeNode]
+  registerExtension(controller: HtmlEditorController): OptionalCallback {
+      const unsubscribe = registerCodeHighlighting(controller.editor);
+      return unsubscribe;
   }
+
+  getNodes(): LexicalConfigNode {
+      return [CodeNode, CodeHighlightNode]
+  }
+}
+
+function formatCode(editor: LexicalEditor): void {
+  editor.update(() => {
+    const selection = $getSelection();
+
+    if (!$isRangeSelection(selection)) return;
+
+    const revert = isNodeType(selection, (node) => $isCodeNode(node));
+
+    $setBlocksType(selection, () =>
+      revert ? $createParagraphNode() : $createCodeNode()
+    );
+  });
 }

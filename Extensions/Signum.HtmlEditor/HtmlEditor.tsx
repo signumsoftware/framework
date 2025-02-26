@@ -106,10 +106,11 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
             theme: {
                 text: {
                     underline: 'text-underline',
-                    code: 'code-block'
-                }
+                    code: 'text-code'
+                },
+                code: 'code-block'
             },
-            onError: (error) => console.error('fwo#error', error),
+            onError: (error) => console.error(error),
           }}
         >
             {controller.overrideToolbar ? (

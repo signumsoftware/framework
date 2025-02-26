@@ -1,7 +1,6 @@
 import { IBinding } from "@framework/Reflection";
 import { LexicalEditor } from "lexical";
 import React from "react";
-import { AutoFocusExtension } from "./Extensions/AutoFocusExtension";
 import { BasicCommandsExtensions } from "./Extensions/BasicCommandsExtension";
 import { CodeBlockExtension } from "./Extensions/CodeBlockExtension";
 import { ListExtension } from "./Extensions/ListExtension";
@@ -51,7 +50,6 @@ export const useController = ({
       new BasicCommandsExtensions(),
       new ListExtension(),
       new OnChangeExtension(),
-      new AutoFocusExtension(),
       new CodeBlockExtension(),
     ];
 

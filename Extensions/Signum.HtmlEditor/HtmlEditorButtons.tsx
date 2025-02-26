@@ -1,46 +1,28 @@
 import * as React from "react";
 // import * as draftjs from "draft-js";
-import { IBinding } from "@framework/Reflection";
-import { HtmlContentStateConverter } from "./HtmlContentStateConverter";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { classes } from "@framework/Globals";
-import { HtmlEditorController } from "./HtmlEditorController";
 import {
-  $createParagraphNode,
-  $getRoot,
-  $getSelection,
-  $isParagraphNode,
-  $isRangeSelection,
-  ElementNode,
-  FORMAT_TEXT_COMMAND,
-  LexicalEditor,
-  LexicalNode,
-  RangeSelection,
-  TextFormatType,
-} from "lexical";
-import {
-  $createListItemNode,
-  $createListNode,
   $isListItemNode,
-  $isListNode,
-  INSERT_ORDERED_LIST_COMMAND,
-  INSERT_UNORDERED_LIST_COMMAND,
-  ListNode,
-  ListType,
-  REMOVE_LIST_COMMAND,
+  $isListNode
 } from "@lexical/list";
 import {
-  $createHeadingNode,
-  $createQuoteNode,
   $isHeadingNode,
   $isQuoteNode,
-  HeadingTagType,
+  HeadingTagType
 } from "@lexical/rich-text";
-import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { replaceNodes } from "./Utilities/replaceNodes";
-import { $createCodeHighlightNode, $createCodeNode, $isCodeNode } from "@lexical/code";
-import { $createCodeBlockNode, $isCodeBlockNode, CodeBlockNode } from "./Nodes/CodeBlockNode";
+import {
+  $getSelection,
+  $isRangeSelection,
+  FORMAT_TEXT_COMMAND,
+  LexicalEditor,
+  RangeSelection,
+  TextFormatType
+} from "lexical";
+import { HtmlEditorController } from "./HtmlEditorController";
+import { formatHeading, formatList, formatQuote } from "./Utilities/format";
+import { isNodeType } from "./Utilities/node";
 
 export function Separator(): React.JSX.Element {
   return <div className="sf-html-separator" />;
@@ -128,6 +110,8 @@ type BlockStyleButtonProps = {
   icon?: IconProp;
   content?: React.ReactChild;
   title?: string;
+  checkActive?: (selection: RangeSelection) => boolean;
+  onClick?: (editor: LexicalEditor) => void;
 };
 
 export function BlockStyleButton({
@@ -136,6 +120,8 @@ export function BlockStyleButton({
   icon,
   content,
   title,
+  checkActive,
+  onClick
 }: BlockStyleButtonProps): React.JSX.Element {
   const { editor, editorState } = controller;
 
@@ -147,69 +133,51 @@ export function BlockStyleButton({
 
       if (!$isRangeSelection(selection)) return;
 
-      const nodes = selection.getNodes();
-
-      for (const node of nodes) {
-        const parent = node.getParent();
-        if (!parent) continue;
-      
-        const isHeading = $isHeadingNode(parent) && parent.getTag() === blockType;
-        const isList =  (() => {
-            if($isListNode(parent) && parent.getTag() === blockType) {
-                return true;
-            }
-
-            if($isListItemNode(parent)) {
-                const listNode = parent.getParent();
-                return $isListNode(listNode) && listNode.getTag() === blockType;
-            }
-
-            return false;
-        })()
-        const isQuote = blockType === "blockquote" && $isQuoteNode(parent);
-        
-        if (isHeading || isList || isQuote) {
-          active = true;
-          break;
-        }
+      if(checkActive) {
+        active = checkActive(selection);
+        return;
       }
+
+      active = isNodeType(selection, node => {
+        if($isHeadingNode(node) || $isListNode(node)) {
+          return blockType === node.getTag();
+        }
+
+        if($isListItemNode(node)) {
+          const parentNode = node.getParent();
+          return $isListNode(parentNode) && blockType === parentNode.getTag();
+        }
+
+        if($isQuoteNode(node)) {
+          return blockType === "blockquote"
+        }
+
+        return false;
+      })
     });
 
     return active;
   }, [editorState, blockType]);
 
   function toggleBlockStyle() {
-    console.log({blockType})
-    if(blockType ==="code-block") {
-      replaceNodes(editor, node => {
-        if($isCodeBlockNode(node)) {
-          return $createParagraphNode();
-        }
-      
-        return $createCodeNode();
-      })
+    if(onClick) {
+      onClick(editor);
       return
     }
 
-    if(["ul", "ol"].includes(blockType)) {
-        const listCommand = (isActive) ? REMOVE_LIST_COMMAND : (blockType === "ul") ? INSERT_UNORDERED_LIST_COMMAND : INSERT_ORDERED_LIST_COMMAND;
-        editor.dispatchCommand(listCommand, undefined);
-        return;
+    if(blockType === "ul" || blockType === "ol") {
+      formatList(editor, blockType);
+      return;
     }
 
-    if(["h1", "h2", "h3"].includes(blockType)) {
-        replaceNodes(editor, node => {
-            if($isHeadingNode(node) && node.getTag() === blockType ) {
-                return $createParagraphNode();
-            }
-            
-            return $createHeadingNode(blockType as HeadingTagType);
-        });
-        return;
+    if(blockType === "h1" || blockType === "h2" || blockType === "h3") {
+      formatHeading(editor, blockType as HeadingTagType); 
+      return;
     }
 
     if(blockType === "blockquote") {
-        replaceNodes(editor, node => $isQuoteNode(node) ? $createParagraphNode() : $createQuoteNode());
+      formatQuote(editor);
+      return;
     }
   }
 

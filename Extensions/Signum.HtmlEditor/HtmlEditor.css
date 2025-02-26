@@ -123,12 +123,12 @@
 }
 
 .sf-html-editor .text-code {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Menlo, Consolas, Monaco, monospace;
+    color: #555;
 }
 
-.sf-html-editor code {
+.sf-html-editor .code-block {
     color: #555;
-
     background-color: rgb(240, 242, 245);
     font-family: Menlo, Consolas, Monaco, monospace;
     display: block;
@@ -143,7 +143,7 @@
     tab-size: 2;
 }
 
-.sf-html-editor code:before {
+.sf-html-editor .code-block:before {
     content: attr(data-gutter);
     position: absolute;
     background-color: #eee;
