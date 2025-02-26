@@ -1,5 +1,6 @@
 import { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { HtmlEditorController } from "../HtmlEditorController";
+import { LexicalNode, NodeKey } from "lexical";
 
 export interface HtmlEditorExtension {
   getToolbarButtons?(controller: HtmlEditorController): React.ReactNode;
@@ -15,5 +16,6 @@ export type ComponentAndProps<
   component: T;
   props?: P;
 };
+
 export type OptionalCallback = (() => void) | null | undefined;
 export type LexicalConfigNode = InitialConfigType["nodes"];

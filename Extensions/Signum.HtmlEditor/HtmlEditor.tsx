@@ -106,7 +106,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
             theme: {
                 text: {
                     underline: 'text-underline',
-                    code: 'text-code'
+                    code: 'code-block'
                 }
             },
             onError: (error) => console.error('fwo#error', error),

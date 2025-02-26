@@ -10,6 +10,7 @@
   "dependencies": {
     "lexical": "0.24.0",
     "@lexical/react": "0.24.0",
+    "@lexical/code": "0.24.0",
     "@lexical/list": "0.24.0",
     "@lexical/rich-text": "0.24.0",
     "@lexical/markdown": "0.24.0"

@@ -38,6 +38,9 @@ import {
   HeadingTagType,
 } from "@lexical/rich-text";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { replaceNodes } from "./Utilities/replaceNodes";
+import { $createCodeHighlightNode, $createCodeNode, $isCodeNode } from "@lexical/code";
+import { $createCodeBlockNode, $isCodeBlockNode, CodeBlockNode } from "./Nodes/CodeBlockNode";
 
 export function Separator(): React.JSX.Element {
   return <div className="sf-html-separator" />;
@@ -176,6 +179,18 @@ export function BlockStyleButton({
   }, [editorState, blockType]);
 
   function toggleBlockStyle() {
+    console.log({blockType})
+    if(blockType ==="code-block") {
+      replaceNodes(editor, node => {
+        if($isCodeBlockNode(node)) {
+          return $createParagraphNode();
+        }
+      
+        return $createCodeNode();
+      })
+      return
+    }
+
     if(["ul", "ol"].includes(blockType)) {
         const listCommand = (isActive) ? REMOVE_LIST_COMMAND : (blockType === "ul") ? INSERT_UNORDERED_LIST_COMMAND : INSERT_ORDERED_LIST_COMMAND;
         editor.dispatchCommand(listCommand, undefined);
@@ -209,28 +224,7 @@ export function BlockStyleButton({
   );
 }
 
-/**
- * Replaces the editor's node of the selection.
- * @param editor Instance of the active editor.
- * @param replaceWith Callback that returns an element to replace the selection's node with.
- */
-function replaceNodes(editor: LexicalEditor, replaceWith: (node: ElementNode) => ElementNode | undefined) {
-    editor.update(() => {
-        const selection = $getSelection();
-        if(!$isRangeSelection(selection)) return;
-        const nodes = selection.getNodes();
-        for(const node of nodes) {
-            const parent = node.getParent();
-            if(!parent) continue;
-            const replacementNode = replaceWith(parent);
-            
-            if(replacementNode) {
-                parent.replace(replacementNode);
-                parent.getChildren().forEach(child => replacementNode.append(child));
-            }
-        }
-    })
-}
+
 
 export function SubMenuButton(p: {
   controller: HtmlEditorController;

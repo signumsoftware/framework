@@ -3,6 +3,7 @@ import { LexicalEditor } from "lexical";
 import React from "react";
 import { AutoFocusExtension } from "./Extensions/AutoFocusExtension";
 import { BasicCommandsExtensions } from "./Extensions/BasicCommandsExtension";
+import { CodeBlockExtension } from "./Extensions/CodeBlockExtension";
 import { ListExtension } from "./Extensions/ListExtension";
 import { OnChangeExtension } from "./Extensions/OnChangeExtension";
 import {
@@ -51,6 +52,7 @@ export const useController = ({
       new ListExtension(),
       new OnChangeExtension(),
       new AutoFocusExtension(),
+      new CodeBlockExtension(),
     ];
 
     if (!plugins) {
