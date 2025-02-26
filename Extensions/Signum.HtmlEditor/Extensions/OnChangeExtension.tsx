@@ -16,11 +16,9 @@ export class OnChangeExtension implements HtmlEditorExtension {
     registerExtension(controller: HtmlEditorController): OptionalCallback {
         if(!controller.editor) return;
 
-        const unsubscribe = controller.editor.registerUpdateListener(({editorState}) => {
+        return controller.editor.registerUpdateListener(({editorState}) => {
             controller.setEditorState(editorState);
             this.props.onChange?.();
         });
-        
-        return unsubscribe;
     }
 }

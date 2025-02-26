@@ -4,7 +4,7 @@ import { HtmlEditorExtension } from "./types";
 
 export class BasicCommandsExtensions implements HtmlEditorExtension {
   registerExtension(controller: HtmlEditorController): () => void {
-    const unsubscribe = controller.editor.registerCommand(
+    return controller.editor.registerCommand(
       KEY_DOWN_COMMAND,
       (event) => {
         if (event.ctrlKey && event.key === "s") {
@@ -16,7 +16,5 @@ export class BasicCommandsExtensions implements HtmlEditorExtension {
       },
       COMMAND_PRIORITY_NORMAL
     );
-
-    return unsubscribe;
   }
 }
