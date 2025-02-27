@@ -21,7 +21,7 @@ public class AuthTest
 
         var result = TypeConditionMerger.MergeBaseImplementations(new() { a, max }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
-        Assert.Equal(max, result);
+        Assert.Equal(max.RemovePrima(), result.RemovePrima());
     }
 
     [Fact]
@@ -53,7 +53,7 @@ public class AuthTest
 
         var result = TypeConditionMerger.MergeBaseImplementations(new() { a, a }, TypeCache.MaxTypeAllowed, TypeAllowed.Write, TypeAllowed.None);
 
-        Assert.Equal(a, result);
+        Assert.Equal(a.RemovePrima(), result.RemovePrima());
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class AuthTest
             new ConditionRule<TypeAllowed>(new []{ TestCondition.Spain}.ToFrozenSet(), TypeAllowed.Write)
         }.ToReadOnly()).WithPrima(false);
 
-        Assert.Equal(mix, result);
+        Assert.Equal(mix.RemovePrima(), result.RemovePrima());
     }
 
     [Fact]

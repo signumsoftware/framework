@@ -6,6 +6,8 @@ using System.Globalization;
 using Signum.Engine.Maps;
 using Npgsql;
 using Microsoft.Data.SqlClient;
+using Signum.Utilities.ExpressionTrees;
+using System.Diagnostics.Metrics;
 
 namespace Signum.Engine.Sync;
 
@@ -458,15 +460,49 @@ public class SqlPreCommandSimple : SqlPreCommand
         }
     }
 
+
+    public string PreparedQuery()
+    {
+        var sqlBuilder = Connector.Current.SqlBuilder;
+        if (!sqlBuilder.IsPostgres)
+            return sp_executesql();
+
+        var ticks = DateTime.UtcNow.Ticks;
+
+        var pars = this.Parameters.EmptyIfNull();
+
+        var parameter = pars.Select(p => new
+        {
+            Name = p.ParameterName,
+            Value = LiteralValue(p.Value, simple: true),
+            ParameterType = "{0}{1}".FormatWith(
+                   p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
+                   sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)),
+        }).ToList();
+
+        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${parameter.FindIndex(p => p.Name == m.Value).NotFoundToNull()!.Value + 1}");
+
+        return $"""
+            DEALLOCATE ALL;
+            PREPARE my_query ({parameter.ToString(a => a.ParameterType, ", ")}) AS
+            {pgsql};
+            EXECUTE my_query ({parameter.ToString(a => a.Value + "::" + a.ParameterType, ", ")});
+            """;
+    }
+
     public string sp_executesql()
     {
-        var pars = this.Parameters.EmptyIfNull();
         var sqlBuilder = Connector.Current.SqlBuilder;
+        if (sqlBuilder.IsPostgres)
+            return PreparedQuery();
+
+        var pars = this.Parameters.EmptyIfNull();
 
         var parameterVars = pars.ToString(p => "{0} {1}{2}".FormatWith(
             p.ParameterName,
             p is SqlParameter sp ? sp.SqlDbType.ToString() : ((NpgsqlParameter)p).NpgsqlDbType.ToString(),
             sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)), ", ");
+       
         var parameterValues = pars.ToString(p => p.ParameterName + " = " + LiteralValue(p.Value, simple: true), ",\r\n");
 
         return @$"EXEC sp_executesql N'{this.Sql.Replace("'", "''")}', 
