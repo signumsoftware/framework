@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
 using NpgsqlTypes;
 using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Engine.Maps;
 
@@ -64,7 +65,7 @@ public class SchemaSettings
         {typeof(string),         new AbstractDbType(SqlDbType.NVarChar,         NpgsqlDbType.Varchar)},
         {typeof(DateOnly),       new AbstractDbType(SqlDbType.Date,             NpgsqlDbType.Date)},
         {typeof(DateTime),       new AbstractDbType(SqlDbType.DateTime2,        NpgsqlDbType.Timestamp)},
-        {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.TimestampTz)},
+        {typeof(DateTimeOffset), new AbstractDbType(SqlDbType.DateTimeOffset,   NpgsqlDbType.Timestamp /*not really*/)},
         {typeof(TimeSpan),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
         {typeof(TimeOnly),       new AbstractDbType(SqlDbType.Time,             NpgsqlDbType.Time)},
 
@@ -389,12 +390,9 @@ public class SchemaSettings
         else
             return defaultScalePostgreSql.TryGetS(dbType.PostgreSql);
     }
-    internal string? GetCollate(DbTypeAttribute? att)
+    internal string? GetCollation(DbTypeAttribute? att)
     {
-        if (att != null && att.Collation != null)
-            return att.Collation;
-
-        return null;
+        return att?.GetCollation(this.IsPostgres);
     }
 
     internal AbstractDbType DefaultSqlType(Type type)
@@ -415,6 +413,9 @@ public class SchemaSettings
     {
         if (TypeValues.TryGetValue(type, out AbstractDbType result))
             return new DbTypePair(result, null);
+
+        if (this.IsPostgres && type == typeof(SqlHierarchyId))
+            return new DbTypePair(new AbstractDbType(NpgsqlDbType.LTree), null);
 
         string? udtTypeName = GetUdtName(type);
         if (udtTypeName != null)

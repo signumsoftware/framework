@@ -605,7 +605,7 @@ public class SchemaBuilder
         return table.PrimaryKey = new FieldPrimaryKey(route, table, attr.Name, attr.Type)
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(attr),
+            Collation = Settings.GetCollation(attr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Default = attr.GetDefault(Settings.IsPostgres),
             Check = attr.GetCheck(Settings.IsPostgres),
@@ -643,7 +643,7 @@ public class SchemaBuilder
         return table.Ticks = new FieldTicks(route, type, ticksName)
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(ticksAttr),
+            Collation = Settings.GetCollation(ticksAttr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = IsNullable.No,
             Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
@@ -670,7 +670,7 @@ public class SchemaBuilder
         return table.PartitionId = new FieldPartitionId(route, type, partitionName)
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(partitionAttr),
+            Collation = Settings.GetCollation(partitionAttr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = IsNullable.No,
             Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),
@@ -694,7 +694,7 @@ public class SchemaBuilder
         return new FieldValue(route, type, toStrName)
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(toStrAttribute),
+            Collation = Settings.GetCollation(toStrAttribute),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = toStrAttribute?.Nullable == false ? IsNullable.No : IsNullable.Yes,
             Size = Settings.GetSqlSize(toStrAttribute, null, pair.DbType),
@@ -716,7 +716,7 @@ public class SchemaBuilder
         return new FieldValue(route, null, name.ToString())
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(att),
+            Collation = Settings.GetCollation(att),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = Settings.GetIsNullable(route, forceNull),
             Size = Settings.GetSqlSize(att, route, pair.DbType),
@@ -877,7 +877,7 @@ public class SchemaBuilder
             order = new FieldValue(route: null!, fieldType: typeof(int), orderAttr.Name ?? "Order")
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(orderAttr),
+                Collation = Settings.GetCollation(orderAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(orderAttr, null, pair.DbType),
@@ -896,7 +896,7 @@ public class SchemaBuilder
             primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, keyAttr.Name)
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(orderAttr),
+                Collation = Settings.GetCollation(orderAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Default = keyAttr.GetDefault(Settings.IsPostgres),
                 Check = keyAttr.GetCheck(Settings.IsPostgres),
@@ -939,7 +939,7 @@ public class SchemaBuilder
             mlistTable.PartitionId = new FieldPartitionId(null!, type, columnName)
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(partitionAttr),
+                Collation = Settings.GetCollation(partitionAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),

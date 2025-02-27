@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.SqlServer;
+using Npgsql;
 
 namespace Signum.Engine;
 
@@ -584,9 +585,9 @@ public class SqlParameterBuilder : ParameterBuilder
 
         var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
-            //https://github.com/dotnet/SqlClient/issues/1009
-            uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
-            uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
+            ////https://github.com/dotnet/SqlClient/issues/1009
+            //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
+            //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
             value;
 
         Expression valueExpr = Expression.Convert(exp, typeof(object));
