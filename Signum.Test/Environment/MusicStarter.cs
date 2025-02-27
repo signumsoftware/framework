@@ -21,12 +21,11 @@ public static class MusicStarter
                 return;
 
             var conf = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory())
-                //.AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.json")
                 .AddUserSecrets(typeof(MusicStarter).Assembly, optional: true)
                 .Build();
 
-            var connectionString = conf.GetConnectionString("SignumTest") ?? "Server=localhost;Port=5432;Database=SignumTest;User Id=postgres;Password=StrongP@$$;";
-            //"Data Source=" + ".\\SQLEXPRESS;Initial Catalog=SignumTest;Integrated Security=true;TrustServerCertificate=true";
+            var connectionString = conf.GetConnectionString("SignumTest") ?? throw new InvalidOperationException("No connection string");
 
             Start(connectionString);
 

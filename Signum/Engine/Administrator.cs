@@ -1,3 +1,4 @@
+using Microsoft.Identity.Client;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
@@ -856,6 +857,60 @@ public static class Administrator
         });
     }
 
+    public static IDisposable WithSnapshotOrTempalateDatabase(string name)
+    {
+        if (Connector.Current is SqlServerConnector)
+            return new Disposable(() => Snapshots.CreateSnapshot(name, Directory.GetCurrentDirectory()));
+
+        else if (Connector.Current is PostgreSqlConnector pg)
+        {
+            var sb = new Npgsql.NpgsqlConnectionStringBuilder(pg.ConnectionString);
+            var dbname = sb.Database!;
+            var dbname_template = name;
+            sb.Database = "postgres";
+            pg.ChangeConnectionString(sb.ToString(), false);
+
+            PostgressTools.CreateDatabase(dbname_template);
+
+            sb.Database = dbname_template;
+            pg.ChangeConnectionString(sb.ToString(), true);
+
+            return new Disposable(() =>
+            {
+                sb.Database = "postgres";
+                pg.ChangeConnectionString(sb.ToString(), false);
+
+                PostgressTools.CreateDatabase(dbname, fromTemplate: dbname_template);
+
+                sb.Database = dbname;
+
+                pg.ChangeConnectionString(sb.ToString(), true);
+            });
+        }
+        else 
+            throw new UnexpectedValueException(Connector.Current);
+    }
+
+    public static void RestoreSnapshotOrDatabase(string name)
+    {
+        if (Connector.Current is SqlServerConnector)
+            Snapshots.RestoreSnapshot(name);
+        else if (Connector.Current is PostgreSqlConnector pg)
+        {
+            var sb = new Npgsql.NpgsqlConnectionStringBuilder(pg.ConnectionString);
+            var dbname = sb.Database!;
+            sb.Database = "postgres";
+            pg.ChangeConnectionString(sb.ToString(), false);
+
+            PostgressTools.CreateDatabase(dbname, fromTemplate: name);
+
+            sb.Database = dbname;
+            pg.ChangeConnectionString(sb.ToString(), true);
+        }
+        else
+            throw new UnexpectedValueException(Connector.Current);
+    }
+
     public static class Snapshots
     {
         public static void CreateSnapshot(string snapshotName, string directory, bool overwrite = true)
@@ -892,5 +947,21 @@ public static class Administrator
         }
     }
 
+    public static class PostgressTools
+    {
+        public static void CreateDatabase(string dbName, bool closeConnections = true, string? fromTemplate = null)
+        {
+            Executor.ExecuteNonQuery($"""
+                    SELECT pg_terminate_backend(pg_stat_activity.pid)
+                    FROM pg_stat_activity
+                    WHERE pg_stat_activity.datname = '{dbName.SqlEscape(true)}'
+                    AND pid <> pg_backend_pid();
+
+                    -- Drop database if it exists
+                    DROP DATABASE IF EXISTS {dbName.SqlEscape(true)};
+                    CREATE DATABASE {dbName.SqlEscape(true)}{(fromTemplate == null ? "" : $" WITH TEMPLATE {fromTemplate.SqlEscape(true)}")};
+                    """);
+        }
+    }
 
 }
