@@ -318,7 +318,13 @@ public class DbTypeAttribute : Attribute
     }
 
 
-    public string? Collation { get; set; }
+    public string? CollationSqlServer { get; set; }
+    public string? CollationPostgres { get; set; }
+
+    public string? GetCollation(bool isPostgres)
+    {
+        return (isPostgres ? CollationPostgres : CollationSqlServer);
+    }
 
     public const string SqlServer_NewId = "NEWID()";
     public const string SqlServer_NewSequentialId = "NEWSEQUENTIALID()";

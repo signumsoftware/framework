@@ -186,14 +186,14 @@ public static class BulkInserter
     {
         var result = type.UnNullify();
 
-        if (!isPostgres)
-        {
-            if (result == typeof(DateOnly))
-                return typeof(DateTime);
+        //if (!isPostgres)
+        //{
+        //    if (result == typeof(DateOnly))
+        //        return typeof(DateTime);
 
-            if (result == typeof(TimeOnly))
-                return typeof(TimeSpan);
-        }
+        //    if (result == typeof(TimeOnly))
+        //        return typeof(TimeSpan);
+        //}
 
         return result;
     }

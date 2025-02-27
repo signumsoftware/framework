@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.SqlServer.Types;
 using Signum.Basics;
+using Npgsql;
 
 namespace Signum.Test.Environment;
 
@@ -51,7 +52,11 @@ public static class MusicStarter
         else
         {
             var postgreeVersion = PostgresVersionDetector.Detect(connectionString, null);
-            Connector.Default = new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion);
+            Connector.Default = new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion, builder =>
+            {
+                builder.EnableLTree();
+                builder.EnableRanges();
+            });
         }
 
         sb.Schema.Version = typeof(MusicStarter).Assembly.GetName().Version!;

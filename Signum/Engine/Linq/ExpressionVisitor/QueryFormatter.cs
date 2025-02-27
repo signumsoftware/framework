@@ -5,6 +5,8 @@ using System.Data.Common;
 using System.Globalization;
 using Signum.Engine.Sync;
 using System.Collections.ObjectModel;
+using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
 
 namespace Signum.Engine.Linq;
 
@@ -57,7 +59,8 @@ internal class QueryFormatter : DbExpressionVisitor
             val = val == null ? (int?)null : Convert.ToInt32(val);
         }
 
-        var typePair = Schema.Current.Settings.GetSqlDbTypePair(clrType);
+        var typePair = isPostgres && clrType == typeof(DateTime) && value.Value is DateTime dt && dt.Kind == DateTimeKind.Utc ? new DbTypePair(new AbstractDbType(NpgsqlDbType.TimestampTz), null) :
+            Schema.Current.Settings.GetSqlDbTypePair(clrType);
 
         var pb = Connector.Current.ParameterBuilder;
 
@@ -197,7 +200,9 @@ internal class QueryFormatter : DbExpressionVisitor
 
                 case ExpressionType.Add:
                 case ExpressionType.AddChecked:
-                    if (this.isPostgres && (b.Left.Type == typeof(string) || b.Right.Type == typeof(string)))
+                    if (this.isPostgres &&
+                        (b.Left.Type == typeof(string) || b.Right.Type == typeof(string) ||
+                        b.Left.Type == typeof(SqlHierarchyId) || b.Right.Type == typeof(SqlHierarchyId)))
                         sb.Append(" || ");
                     else
                         sb.Append(" + ");
@@ -588,7 +593,7 @@ internal class QueryFormatter : DbExpressionVisitor
 
             if(aggregate.OrderBy != null && aggregate.OrderBy.Count > 0 && isPostgres)
             {
-                sb.Append(" ORDER BY");
+                sb.Append(" ORDER BY ");
                 VisitOrderBys(aggregate.OrderBy!);
             }
         }

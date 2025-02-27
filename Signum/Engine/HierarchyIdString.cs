@@ -10,11 +10,11 @@ using Signum.Engine.Maps; // Requires Microsoft.SqlServer.Types NuGet package
 
 public static class HierarchyIdString
 {
+    public static string? ToSortableString(this SqlHierarchyId? hierarchyId) => hierarchyId == null ? null : hierarchyId.Value.ToSortableString();
     public static string? ToSortableString(this SqlHierarchyId hierarchyId)
     {
         if (hierarchyId.IsNull)
             return null;
-
 
         if (hierarchyId.GetLevel() == 0)
             return "";
@@ -35,6 +35,15 @@ public static class HierarchyIdString
         return sb.ToString();
     }
 
+    public static SqlHierarchyId? FromSortableStringNullable(string? sortableString)
+    {
+        var result = FromSortableString(sortableString);
+        if (result.IsNull)
+            return null;
+
+        return result;
+    }
+
     public static SqlHierarchyId FromSortableString(string? sortableString)
     {
         if (sortableString == null) 
@@ -42,7 +51,6 @@ public static class HierarchyIdString
 
         if (sortableString.Length == 0)
             return SqlHierarchyId.GetRoot();
-
 
         StringBuilder sb = new StringBuilder();
         sb.Append('/');

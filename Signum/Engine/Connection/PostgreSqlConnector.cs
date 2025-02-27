@@ -1,8 +1,10 @@
 using Microsoft.Data.SqlClient;
+using Microsoft.SqlServer.Types;
 using Npgsql;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.Postgres;
+using Signum.Utilities.Reflection;
 using System.Data;
 using System.Data.Common;
 
@@ -48,8 +50,12 @@ public class PostgreSqlConnector : Connector
 
     public Version? PostgresVersion { get; set; }
 
-    public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion) : base(schema.Do(s => s.Settings.IsPostgres = true))
+    public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
+        var builder = new NpgsqlSlimDataSourceBuilder(connectionString);
+        customizeBuilder?.Invoke(builder);
+
+        this.DataSource = builder.Build();
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
         this.PostgresVersion = postgresVersion;
@@ -58,6 +64,7 @@ public class PostgreSqlConnector : Connector
     public override int MaxNameLength => 63;
 
     public int? CommandTimeout { get; set; } = null;
+    public NpgsqlDataSource DataSource { get; }
     public string ConnectionString { get; set; }
 
     public override bool AllowsMultipleQueries => true;
@@ -111,7 +118,7 @@ public class PostgreSqlConnector : Connector
 
     public override DbConnection CreateConnection()
     {
-        return new NpgsqlConnection(ConnectionString);
+        return DataSource.CreateConnection();
     }
 
     public override string DatabaseName()
@@ -138,6 +145,7 @@ public class PostgreSqlConnector : Connector
     {
         ((NpgsqlTransaction)transaction).Save(savePointName);
     }
+
 
     T EnsureConnectionRetry<T>(Func<NpgsqlConnection?, T> action)
     {
@@ -534,6 +542,11 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
                 AssertDateTime(dt, datetimeKind);
         }
 
+        if(dbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree && value is SqlHierarchyId shi)
+        {
+            value = shi.ToSortableString();
+        }
+
         var result = new Npgsql.NpgsqlParameter(parameterName, value ?? DBNull.Value)
         {
             IsNullable = nullable
@@ -547,11 +560,17 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         return result;
     }
 
+    protected static MethodInfo miToSortableString = ReflectionTools.GetMethodInfo((SqlHierarchyId? s) => s.ToSortableString());
+
+
     public override MemberInitExpression ParameterFactory(Expression parameterName, AbstractDbType dbType, int? size, byte? precision, byte? scale, string? udtTypeName, bool nullable, DateTimeKind dateTimeKind, Expression value)
     {
         var uType = value.Type.UnNullify();
         var exp =
              uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
+             uType == typeof(SqlHierarchyId) ? Expression.Coalesce(
+                    Expression.Call(miToSortableString, Expression.Convert(value, typeof(SqlHierarchyId?))), 
+                    Expression.Constant(DBNull.Value, typeof(object))) :
              ////https://github.com/dotnet/SqlClient/issues/1009
              //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
              //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
@@ -561,9 +580,11 @@ public class PostgreSqlParameterBuilder : ParameterBuilder
         Expression valueExpr = Expression.Convert(exp, typeof(object));
 
         if (nullable)
+        {
             valueExpr = Expression.Condition(Expression.Equal(value, Expression.Constant(null, value.Type)),
-                        Expression.Constant(DBNull.Value, typeof(object)),
-                        valueExpr);
+                Expression.Constant(DBNull.Value, typeof(object)),
+                valueExpr);
+        }
 
         NewExpression newExpr = Expression.New(typeof(NpgsqlParameter).GetConstructor(new[] { typeof(string), typeof(object) })!, parameterName, valueExpr);
 
