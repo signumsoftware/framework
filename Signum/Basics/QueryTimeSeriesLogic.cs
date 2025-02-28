@@ -148,7 +148,7 @@ public class QueryTimeSeriesLogic
                     increment_type VARCHAR(20),
                     step INT
                 )
-                RETURNS TABLE("Date" timestamptz) AS $$
+                RETURNS TABLE(date timestamptz) AS $$
                 BEGIN
                     RETURN QUERY
                     SELECT generate_series(start_date, end_date, (step || ' ' || increment_type)::interval);

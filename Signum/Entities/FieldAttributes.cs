@@ -339,7 +339,7 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
 {
     public Type Type { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public bool Identity { get; set; }
 
@@ -359,10 +359,9 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
         }
     }
 
-    public PrimaryKeyAttribute(Type type, string name = "ID")
+    public PrimaryKeyAttribute(Type type)
     {
         this.Type = type;
-        this.Name = name;
         this.Identity = type != typeof(Guid);
         this.IdentityBehaviour = true;
     }

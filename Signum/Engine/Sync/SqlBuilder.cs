@@ -632,7 +632,7 @@ WHERE {primaryKey.Name} NOT IN
 
     public string ForeignKeyName(string table, string fieldName)
     {
-        var result = "FK_{0}_{1}".FormatWith(table, fieldName);
+        var result = (isPostgres ? "fk_{0}_{1}" : "FK_{0}_{1}").FormatWith(table, fieldName);
 
         return StringHashEncoder.ChopHash(result, connector.MaxNameLength);
     }

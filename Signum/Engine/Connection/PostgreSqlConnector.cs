@@ -50,10 +50,12 @@ public class PostgreSqlConnector : Connector
 
     public Version? PostgresVersion { get; set; }
 
-    Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder; 
+    Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder;
 
+    string originalDatabaseName;
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
+        this.originalDatabaseName = new NpgsqlConnectionStringBuilder(connectionString).Database!;
         this.customizeBuilder = customizeBuilder;
         this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
@@ -61,11 +63,18 @@ public class PostgreSqlConnector : Connector
         this.PostgresVersion = postgresVersion;
     }
 
-    public void ChangeConnectionString(string connectionString, bool runCustomizer)
+    public void ChangeConnectionStringDatabase(string databaseName, bool runCustomizer = true)
+    {
+        NpgsqlConnectionStringBuilder csb = new NpgsqlConnectionStringBuilder(this.ConnectionString);
+        csb.Database = databaseName;
+        ChangeConnectionString(csb.ToString(), runCustomizer);
+    }
+    public void ChangeConnectionString(string connectionString, bool runCustomizer = true)
     {
         this.ConnectionString = connectionString;
         var builder = new NpgsqlSlimDataSourceBuilder(connectionString);
-        customizeBuilder?.Invoke(builder);
+        if (runCustomizer)
+            customizeBuilder?.Invoke(builder);
 
         this.DataSource = builder.Build();
     }
@@ -130,9 +139,14 @@ public class PostgreSqlConnector : Connector
         return DataSource.CreateConnection();
     }
 
+    public override string OriginalDatabaseName()
+    {
+        return this.originalDatabaseName;
+    }
+
     public override string DatabaseName()
     {
-        return new NpgsqlConnection(ConnectionString).Database!;
+        return new NpgsqlConnectionStringBuilder(ConnectionString).Database!;
     }
 
     public override string DataSourceName()

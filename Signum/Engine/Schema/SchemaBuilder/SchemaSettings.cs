@@ -17,7 +17,7 @@ public class SchemaSettings
     public bool IsPostgres { get; set; }
     public bool PostresVersioningFunctionNoChecks { get; set; }
 
-    public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int), "ID");
+    public PrimaryKeyAttribute DefaultPrimaryKeyAttribute = new PrimaryKeyAttribute(typeof(int));
 
     public Action<Type> AssertNotIncluded = null!;
 

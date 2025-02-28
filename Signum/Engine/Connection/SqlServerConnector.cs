@@ -429,14 +429,17 @@ public class SqlServerConnector : Connector
         });
     }
 
+
+    public override string OriginalDatabaseName() => DatabaseName();
+
     public override string DatabaseName()
     {
-        return new SqlConnection(ConnectionString).Database;
+        return new SqlConnectionStringBuilder(ConnectionString).InitialCatalog;
     }
 
     public override string DataSourceName()
     {
-        return new SqlConnection(ConnectionString).DataSource;
+        return new SqlConnectionStringBuilder(ConnectionString).DataSource;
     }
 
     public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)

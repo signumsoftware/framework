@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using NpgsqlTypes;
 using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq;
@@ -39,9 +40,8 @@ internal class DuplicateHistory : DbExpressionVisitor
                 var tableExp = new TableExpression(aliasGenerator.NextTableAlias(tableNameForAlias), table.Table, systemTime, null);
 
                 ColumnExpression GetTablePeriod() => new ColumnExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), tableExp.Alias, table.Table.SystemVersioned!.PostgresSysPeriodColumnName);
-                
-                SqlFunctionExpression tstzrange(DateTimeOffset start, DateTimeOffset end) => new SqlFunctionExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), null, PostgresFunction.tstzrange.ToString(),
-                    new[] { Expression.Constant(start), Expression.Constant(end) });
+
+                SqlFunctionExpression tstzrange(DateTime start, DateTime end) => PostgresFunction.tstzrange.CallExpression<NpgsqlRange<DateTime>>(Expression.Constant(start), Expression.Constant(end));
 
                 var where = table.SystemTime switch
                 {
