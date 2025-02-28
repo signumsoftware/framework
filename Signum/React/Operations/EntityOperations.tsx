@@ -23,21 +23,21 @@ export namespace EntityOperations {
     if (ti == undefined)
       return undefined;
 
-      const operations = Operations.operationInfos(ti)
-          .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
-          .filter(oi => oi.key in ctx.pack.canExecute)
-          .map(oi => {
+    const operations = Operations.operationInfos(ti)
+      .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
+      .filter(oi => ctx.pack.entity.isNew || oi.key in ctx.pack.canExecute)
+      .map(oi => {
 
-              const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
+        const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
 
-              const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
-              eoc.tag = ctx.tag;
-              eoc.canExecute = ctx.pack.canExecute[oi.key];
-              eoc.settings = eos;
+        const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);
+        eoc.tag = ctx.tag;
+        eoc.canExecute = ctx.pack.canExecute[oi.key];
+        eoc.settings = eos;
 
-              return eoc;
-          })
-          .filter(eoc => eoc.isVisibleInButtonBar(ctx));
+        return eoc;
+      })
+      .filter(eoc => eoc.isVisibleInButtonBar(ctx));
 
     operations.forEach(eoc => eoc.complete());
 

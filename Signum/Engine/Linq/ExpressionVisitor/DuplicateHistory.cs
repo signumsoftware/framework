@@ -47,6 +47,7 @@ internal class DuplicateHistory : DbExpressionVisitor
                 {
                     SystemTime.All => null,
                     SystemTime.AsOf asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(asOf.DateTime) }),
+                    SystemTime.AsOfExpression asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), asOf.Expression }),
                     SystemTime.Between b => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime, b.EndtDateTime), GetTablePeriod() }),
                     SystemTime.ContainedIn ci => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime, ci.EndtDateTime), GetTablePeriod() }),
                     _ => throw new UnexpectedValueException(table.SystemTime),

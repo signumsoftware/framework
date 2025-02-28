@@ -3,6 +3,8 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
 
 namespace Signum.Engine.Maps;
 
@@ -10,7 +12,20 @@ public class Schema : IImplementationsFinder
 {
     public CultureInfo? ForceCultureInfo { get; set; }
 
-    public TimeZoneMode TimeZoneMode { get; set; }
+    private TimeZoneMode timeZoneMode;
+
+    public TimeZoneMode TimeZoneMode
+    {
+        get => timeZoneMode;
+        set {
+
+            timeZoneMode = value;
+            if (Settings.IsPostgres)
+            {
+                Settings.TypeValues[typeof(DateTime)] = new AbstractDbType(timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+            }
+        }
+    }
 
     public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
     public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
@@ -60,9 +75,10 @@ public class Schema : IImplementationsFinder
         get { return tables; }
     }
 
-    public List<string> PostgresExtensions = new List<string>()
+    public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        "uuid-ossp"
+        { "uuid-ossp", s => true },
+        { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
 
     #region Events
