@@ -15,6 +15,7 @@
     "@lexical/rich-text": "0.24.0",
     "@lexical/markdown": "0.24.0",
     "@lexical/selection": "0.24.0",
-    "prismjs": "1.29.0"
+    "prismjs": "1.29.0",
+    "@lexical/link": "0.24.0"
   }
 }

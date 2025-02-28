@@ -1,3 +1,4 @@
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
 import { $createListNode } from "@lexical/list";
 import { ListNodeTagType } from "@lexical/list/LexicalListNode";
@@ -79,5 +80,17 @@ export function formatCode(
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createCodeNode(language)
     );
+  });
+}
+
+export function formatLink(editor: LexicalEditor, url = ""): void {
+  editor.update(() => {
+    const selection = $getSelection();
+
+    if (!$isRangeSelection(selection)) return;
+
+    // const revert = isNodeType(selection, (node) => $isLinkNode(node));
+
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url });
   });
 }

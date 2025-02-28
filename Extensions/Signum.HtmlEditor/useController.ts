@@ -16,6 +16,7 @@ import {
 } from "./HtmlContentStateConverter";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
+import { LinkExtension } from "./Extensions/LinkExtension";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -51,6 +52,7 @@ export const useController = ({
       new ListExtension(),
       new OnChangeExtension(),
       new CodeBlockExtension(),
+      new LinkExtension(),
     ];
 
     if (!plugins) {
