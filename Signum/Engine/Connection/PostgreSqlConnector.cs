@@ -50,22 +50,31 @@ public class PostgreSqlConnector : Connector
 
     public Version? PostgresVersion { get; set; }
 
+    Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder; 
+
     public PostgreSqlConnector(string connectionString, Schema schema, Version? postgresVersion, Action<NpgsqlSlimDataSourceBuilder>? customizeBuilder = null) : base(schema.Do(s => s.Settings.IsPostgres = true))
     {
-        var builder = new NpgsqlSlimDataSourceBuilder(connectionString);
-        customizeBuilder?.Invoke(builder);
-
-        this.DataSource = builder.Build();
+        this.customizeBuilder = customizeBuilder;
+        this.ChangeConnectionString(connectionString, runCustomizer: true);
         this.ConnectionString = connectionString;
         this.ParameterBuilder = new PostgreSqlParameterBuilder();
         this.PostgresVersion = postgresVersion;
     }
 
+    public void ChangeConnectionString(string connectionString, bool runCustomizer)
+    {
+        this.ConnectionString = connectionString;
+        var builder = new NpgsqlSlimDataSourceBuilder(connectionString);
+        customizeBuilder?.Invoke(builder);
+
+        this.DataSource = builder.Build();
+    }
+
     public override int MaxNameLength => 63;
 
     public int? CommandTimeout { get; set; } = null;
-    public NpgsqlDataSource DataSource { get; }
-    public string ConnectionString { get; set; }
+    public NpgsqlDataSource DataSource { get; private set; }
+    public string ConnectionString { get; private set; }
 
     public override bool AllowsMultipleQueries => true;
 

@@ -297,7 +297,11 @@ public class SqlFunctionsTest
         //if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
         //    return;
 
-    var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
+
+        var nodeNullable = Database.Query<LabelEntity>().Select(a => (SqlHierarchyId?)a.Node).ToList();
+        Debug.WriteLine(nodeNullable.ToString("\n"));
+
+        var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
 
         if (Connector.Current is SqlServerConnector)
             Assert.Equal(

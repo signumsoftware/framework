@@ -199,7 +199,12 @@ internal static class TranslatorBuilder
             var col = GetInnerColumn(u);
 
             if (col != null)
+            {
+                if (IsPostgres && u.Type.UnNullify() == typeof(SqlHierarchyId))
+                    return this.Visit(new ColumnExpression(u.Type, col.Alias, col.Name));
+
                 return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type, GetDateTimeKind(col));
+            }
 
             return base.VisitUnary(u);
         }
@@ -241,7 +246,7 @@ internal static class TranslatorBuilder
             if (this.IsPostgres && column.Type.UnNullify() == typeof(SqlHierarchyId))
             {
                 var str =  scope.GetColumnExpression(row, column.Alias, column.Name!, typeof(string), default);
-                return Expression.Call(str.Type.IsNullable() ? miFromSortableStringNullable : miFromSortableString, str);
+                return Expression.Call(column.Type.IsNullable() ? miFromSortableStringNullable : miFromSortableString, str);
             }
 
             DateTimeKind kind = GetDateTimeKind(column);

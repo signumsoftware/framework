@@ -34,7 +34,7 @@
 	<ItemGroup>
 		<None Update="appsettings.json">
 			<Generator></Generator>
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 </Project>
