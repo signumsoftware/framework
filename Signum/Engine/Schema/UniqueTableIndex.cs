@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Maps;
 
@@ -62,7 +63,7 @@ public class TableIndex
 
     internal static string GetPrimaryKeyName(ObjectName tableName)
     {
-        return (tableName.IsPostgres ? "pk_" : "PK_") + tableName.Schema.Name + "_" + tableName.Name;
+        return StringHashEncoder.ChopHash((tableName.IsPostgres ? "pk_" : "PK_") + tableName.Schema.Name + "_" + tableName.Name, MaxNameLength());
     }
 
     protected static int MaxNameLength()

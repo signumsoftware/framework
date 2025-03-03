@@ -28,6 +28,8 @@ public class AssemblySchemaNameAttribute : Attribute
 
     public string SchemaName { get; private set; }
 
+    public bool AvoidIdiomatic { get; set; }
+
     public string? ForNamespace { get; set; }
 
     public AssemblySchemaNameAttribute(string schemaName)
