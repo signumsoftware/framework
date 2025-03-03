@@ -1,6 +1,5 @@
 import { $generateHtmlFromNodes, $generateNodesFromDOM } from "@lexical/html";
-import { $convertFromMarkdownString } from "@lexical/markdown";
-import { $getEditor, EditorState, LexicalEditor, LexicalNode } from "lexical";
+import { $getEditor, $getRoot, $getSelection, EditorState, LexicalEditor } from "lexical";
 
 export interface ITextConverter {
   $convertToText(editor: LexicalEditor): string;
@@ -21,6 +20,15 @@ export class HtmlContentStateConverter implements ITextConverter {
     editor: LexicalEditor,
     html: string
   ): ReturnType<ITextConverter["$convertFromText"]> {
-    return editor.parseEditorState(html);
+
+    editor.update(() => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const nodes = $generateNodesFromDOM(editor, doc)
+      $getRoot().clear().select();
+      $getSelection()?.insertNodes(nodes);
+    }, { discrete: true })
+
+    return editor.getEditorState();
   }
 }

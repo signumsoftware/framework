@@ -7,7 +7,7 @@ import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { $getRoot, LexicalEditor } from "lexical";
+import { LexicalEditor } from "lexical";
 import * as React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
 import {
@@ -23,6 +23,7 @@ import {
 import { HtmlEditorController } from "./HtmlEditorController";
 import LexicalTheme from "./LexicalTheme";
 import { useController } from "./useController";
+import { isEmpty } from "./Utilities/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utilities/format";
 import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utilities/node";
 
@@ -76,14 +77,6 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
 
   React.useImperativeHandle(ref, () => controller, [controller]);
 
-  const hasText = React.useMemo(() => {
-    let hasText = false;
-    controller.editorState?.read(() => {
-      hasText = $getRoot().getTextContentSize() > 0;
-    })
-    return hasText;
-  }, [controller.editorState]);
-  
   const error = binding.getError();
 
   return (
@@ -95,7 +88,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
         className={classes(
           "sf-html-editor",
           mandatory &&
-            !hasText &&
+            isEmpty(controller.editorState) &&
             (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
           error && "has-error",
           controller.small ? "small-mode" : "",

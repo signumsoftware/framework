@@ -1,10 +1,11 @@
 import { IBinding } from "@framework/Reflection";
 import { $getRoot, EditorState } from "lexical";
 import { LexicalEditor } from "lexical/LexicalEditor";
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
 import { ITextConverter } from "./HtmlContentStateConverter";
 import { Separator } from "./HtmlEditorButtons";
+import { isEmpty } from "./Utilities/editorState";
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;
@@ -30,7 +31,7 @@ export class HtmlEditorController {
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
-  initialContentState?: EditorState;
+  initialEditorState?: EditorState;
 
   lastSavedString?: { str: string | null };
 
@@ -72,27 +73,22 @@ export class HtmlEditorController {
       }
     }, []);
 
-    var newValue = this.binding.getValue();
+    const newValue = this.binding.getValue();
     React.useEffect(() => {
-      if (this.lastSavedString && this.lastSavedString.str == newValue) {
+      if(!this.editor || !newValue) return;
+
+      if (this.lastSavedString?.str === newValue) {
         this.lastSavedString = undefined;
         return;
       }
 
-      this.editorState?.read(() => {
-        this.initialContentState = this.converter.$convertFromText(
-          this.editor,
-          newValue ?? ""
-        );
-      });
-
-      this.setEditorState(this.createWithContentAndDecorators());
-    }, [newValue]);
+      this.initialEditorState = this.editor.getEditorState();
+      this.converter.$convertFromText(this.editor, newValue);
+      this.setEditorState(this.editor.getEditorState());
+    }, [newValue, this.editor]);
 
     React.useEffect(() => {
-      return () => {
-        this.saveHtml();
-      };
+      return () => this.saveHtml();
     }, []);
 
     this.setRefs = React.useCallback(
@@ -113,13 +109,10 @@ export class HtmlEditorController {
   saveHtml(): void {
     if (this.readOnly) return;
 
-    let newContentString = JSON.stringify(this.editorState);
-    let initialContentString = JSON.stringify(this.initialContentState);
-
+    const newContentString = JSON.stringify(this.editorState);
+    const initialContentString = JSON.stringify(this.initialEditorState);
     if (newContentString !== initialContentString) {
-      var value = this.editorState.isEmpty()
-        ? null
-        : this.converter.$convertToText(this.editor);
+      const value = isEmpty(this.editorState) ? null : this.converter.$convertToText(this.editor);
       this.lastSavedString = { str: value };
       this.binding.setValue(value);
     }
