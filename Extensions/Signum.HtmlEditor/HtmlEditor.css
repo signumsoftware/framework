@@ -118,6 +118,12 @@
     font-size: 1.5rem;
 }
 
+.sf-html-editor {
+    li:has(ul), li:has(ol) {
+        list-style-type: none;
+    }
+}
+
 .sf-html-editor .text-underline {
     text-decoration: underline;
 }

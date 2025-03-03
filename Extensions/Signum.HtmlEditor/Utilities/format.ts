@@ -1,5 +1,5 @@
-import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
+import { TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $createListNode } from "@lexical/list";
 import { ListNodeTagType } from "@lexical/list/LexicalListNode";
 import {

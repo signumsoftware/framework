@@ -1,19 +1,14 @@
 import * as React from "react";
 // import * as draftjs from "draft-js";
-import HtmlEditor, { HtmlEditorProps } from "./HtmlEditor";
-import { TypeContext } from "@framework/TypeContext";
 import { ErrorBoundary } from "@framework/Components";
-import { getTimeMachineIcon } from "@framework/Lines/TimeMachineIcon";
-// import ListCommandsPlugin from "./Plugins/ListCommandsPlugin";
-// import BasicCommandsPlugin from "./Plugins/BasicCommandsPlugin";
-import "./HtmlEditorLine.css";
 import { classes } from "@framework/Globals";
-import { FormGroup } from "@framework/Lines";
 import { useForceUpdate } from "@framework/Hooks";
+import { FormGroup } from "@framework/Lines";
+import { getTimeMachineIcon } from "@framework/Lines/TimeMachineIcon";
+import { TypeContext } from "@framework/TypeContext";
+import HtmlEditor, { HtmlEditorProps } from "./HtmlEditor";
 import { HtmlEditorController } from "./HtmlEditorController";
-import { OnChangeExtension } from "./Extensions/OnChangeExtension";
-import { BasicCommandsExtensions } from "./Extensions/BasicCommandsExtension";
-import { ListExtension } from "./Extensions/ListExtension";
+import "./HtmlEditorLine.css";
 
 export interface HtmlEditorLineProps
   extends Omit<HtmlEditorProps /*& Partial<draftjs.EditorProps>*/, "binding"> {
@@ -32,7 +27,6 @@ export default function HtmlEditorLine({
   ...p
 }: HtmlEditorLineProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
-  console.log({ ctx });
   return (
     <FormGroup ctx={ctx}>
       {(id) => (

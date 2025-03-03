@@ -1,4 +1,4 @@
-import { $isListItemNode, $isListNode } from "@lexical/list";
+import { $isListItemNode, $isListNode, ListNode } from "@lexical/list";
 import { $isHeadingNode, $isQuoteNode } from "@lexical/rich-text";
 import { ElementNode, RangeSelection } from "lexical";
 
@@ -14,15 +14,17 @@ export function isNodeType(
 
 export function isListActive(
   selection: RangeSelection,
-  listTag: string
+  listTag?: string
 ): boolean {
+  const verifyListTag = (node: ListNode) => !listTag ? true : node.getTag() === listTag
+
   return isNodeType(selection, (node) => {
     if ($isListItemNode(node)) {
       const parentNode = node.getParent();
-      return $isListNode(parentNode) && parentNode.getTag() === listTag;
+      return $isListNode(parentNode) && verifyListTag(parentNode);
     }
 
-    return $isListNode(node) && node.getTag() === listTag;
+    return $isListNode(node) && verifyListTag(node);
   });
 }
 
