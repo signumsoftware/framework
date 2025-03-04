@@ -1,4 +1,5 @@
 using Microsoft.Identity.Client;
+using Npgsql;
 using Signum.CodeGeneration;
 using Signum.Engine.Linq;
 using Signum.Engine.Maps;
@@ -857,55 +858,49 @@ public static class Administrator
         });
     }
 
-    public static IDisposable WithSnapshotOrTempalateDatabase(string name)
+    public static IDisposable WithSnapshotOrTempalateDatabase(string? templateName = null)
     {
+        var dbName = Connector.Current.DatabaseName();
+        templateName ??= dbName + "_Template";
+
         if (Connector.Current is SqlServerConnector)
-            return new Disposable(() => Snapshots.CreateSnapshot(name, Directory.GetCurrentDirectory()));
+            return new Disposable(() => Snapshots.CreateSnapshot(templateName, Directory.GetCurrentDirectory()));
 
         else if (Connector.Current is PostgreSqlConnector pg)
         {
-            var sb = new Npgsql.NpgsqlConnectionStringBuilder(pg.ConnectionString);
-            var dbname = sb.Database!;
-            var dbname_template = name;
-            sb.Database = "postgres";
-            pg.ChangeConnectionString(sb.ToString(), false);
+            pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
 
-            PostgressTools.CreateDatabase(dbname_template);
+            PostgressTools.CreateDatabase(templateName);
 
-            sb.Database = dbname_template;
-            pg.ChangeConnectionString(sb.ToString(), true);
+            pg.ChangeConnectionStringDatabase(templateName);
 
             return new Disposable(() =>
             {
-                sb.Database = "postgres";
-                pg.ChangeConnectionString(sb.ToString(), false);
+                pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
 
-                PostgressTools.CreateDatabase(dbname, fromTemplate: dbname_template);
+                PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
-                sb.Database = dbname;
-
-                pg.ChangeConnectionString(sb.ToString(), true);
+                pg.ChangeConnectionStringDatabase(dbName);
             });
         }
         else 
             throw new UnexpectedValueException(Connector.Current);
     }
 
-    public static void RestoreSnapshotOrDatabase(string name)
+    public static void RestoreSnapshotOrDatabase(string? templateName = null)
     {
+        var dbName = Connector.Current.DatabaseName();
+        templateName ??= dbName + "_Template";
+
         if (Connector.Current is SqlServerConnector)
-            Snapshots.RestoreSnapshot(name);
+            Snapshots.RestoreSnapshot(templateName);
         else if (Connector.Current is PostgreSqlConnector pg)
         {
-            var sb = new Npgsql.NpgsqlConnectionStringBuilder(pg.ConnectionString);
-            var dbname = sb.Database!;
-            sb.Database = "postgres";
-            pg.ChangeConnectionString(sb.ToString(), false);
+            pg.ChangeConnectionStringDatabase("postgres", runCustomizer: false);
 
-            PostgressTools.CreateDatabase(dbname, fromTemplate: name);
+            PostgressTools.CreateDatabase(dbName, fromTemplate: templateName);
 
-            sb.Database = dbname;
-            pg.ChangeConnectionString(sb.ToString(), true);
+            pg.ChangeConnectionStringDatabase(dbName);
         }
         else
             throw new UnexpectedValueException(Connector.Current);
@@ -949,18 +944,59 @@ public static class Administrator
 
     public static class PostgressTools
     {
+
         public static void CreateDatabase(string dbName, bool closeConnections = true, string? fromTemplate = null)
+        {
+            if (closeConnections)
+            {
+                CloseConnections(dbName);
+
+                if (fromTemplate != null)
+                    CloseConnections(fromTemplate);
+            }
+
+            Executor.ExecuteNonQuery($"""DROP DATABASE IF EXISTS {dbName.SqlEscape(true)};""");
+
+            if (fromTemplate == null)
+                Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)};""");
+            else
+                Executor.ExecuteNonQuery($"""CREATE DATABASE {dbName.SqlEscape(true)} WITH TEMPLATE {fromTemplate.SqlEscape(true)};""");
+
+        }
+
+      
+
+        private static void CloseConnections(string dbName)
         {
             Executor.ExecuteNonQuery($"""
                     SELECT pg_terminate_backend(pg_stat_activity.pid)
                     FROM pg_stat_activity
-                    WHERE pg_stat_activity.datname = '{dbName.SqlEscape(true)}'
+                    WHERE pg_stat_activity.datname = '{dbName}'
                     AND pid <> pg_backend_pid();
-
-                    -- Drop database if it exists
-                    DROP DATABASE IF EXISTS {dbName.SqlEscape(true)};
-                    CREATE DATABASE {dbName.SqlEscape(true)}{(fromTemplate == null ? "" : $" WITH TEMPLATE {fromTemplate.SqlEscape(true)}")};
                     """);
+        }
+
+        public static void CreateDatabaseIfNoExists(string connectionString)
+        {
+            NpgsqlConnectionStringBuilder csb = new NpgsqlConnectionStringBuilder(connectionString);
+            var dbName = csb.Database!;
+            csb.Database = "postgres";
+            using (var conn = new NpgsqlConnection(csb.ToString()))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand($"SELECT 1 FROM pg_database WHERE datname = '{dbName}';", conn))
+                {
+                    var exists = cmd.ExecuteScalar();
+
+                    if (exists == null) // Database does not exist
+                    {
+                        using (var createCmd = new NpgsqlCommand($"CREATE DATABASE {dbName.SqlEscape(true)};", conn))
+                        {
+                            createCmd.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
         }
     }
 

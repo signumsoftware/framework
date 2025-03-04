@@ -202,6 +202,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         var errorSuffix = "columns in table " + this.Name.Name;
         var columns = new Dictionary<string, IColumn>();
+
         void AddColumns(IEnumerable<IColumn> newColumns)
         {
             try

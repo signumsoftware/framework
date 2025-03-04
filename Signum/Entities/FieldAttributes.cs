@@ -28,6 +28,8 @@ public class AssemblySchemaNameAttribute : Attribute
 
     public string SchemaName { get; private set; }
 
+    public bool AvoidIdiomatic { get; set; }
+
     public string? ForNamespace { get; set; }
 
     public AssemblySchemaNameAttribute(string schemaName)
@@ -339,7 +341,7 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
 {
     public Type Type { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public bool Identity { get; set; }
 
@@ -359,10 +361,9 @@ public sealed class PrimaryKeyAttribute : DbTypeAttribute
         }
     }
 
-    public PrimaryKeyAttribute(Type type, string name = "ID")
+    public PrimaryKeyAttribute(Type type)
     {
         this.Type = type;
-        this.Name = name;
         this.Identity = type != typeof(Guid);
         this.IdentityBehaviour = true;
     }
@@ -453,6 +454,8 @@ public sealed class TicksColumnAttribute : DbTypeAttribute
 public sealed class ToStringColumnAttribute : DbTypeAttribute
 {
     public string? Name { get; set; }
+
+    public bool AvoidIdiomatic { get; set; }
 
     public Type? Type { get; set; }
 

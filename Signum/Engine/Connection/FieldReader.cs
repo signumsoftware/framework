@@ -24,6 +24,7 @@ public class FieldReader
 
     TypeCode GetTypeCode(int ordinal)
     {
+        //new PostgreSqlConnector(connectionString, sb.Schema, postgreeVersion, dsb => dsb.EnableArrays());
         Type type = reader.GetFieldType(ordinal);
         TypeCode tc = Type.GetTypeCode(type);
         if (tc == TypeCode.Object)

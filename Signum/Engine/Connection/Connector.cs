@@ -83,6 +83,7 @@ public abstract class Connector
 
     public abstract Connector ForDatabase(Maps.DatabaseName? database);
 
+    public abstract string OriginalDatabaseName();
     public abstract string DatabaseName();
 
     public abstract string DataSourceName();

@@ -49,7 +49,7 @@ public static class SchemaSynchronizer
             }
         }
 
-        HashSet <SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
+        HashSet<SchemaName> databaseSchemas = Schema.Current.Settings.IsPostgres ?
             PostgresCatalogSchema.GetSchemaNames(s.DatabaseNames()) :
             SysTablesSchema.GetSchemaNames(s.DatabaseNames());
 
@@ -100,7 +100,7 @@ public static class SchemaSynchronizer
 
             foreach (var inc in incompatibleTypes.Where(kvp => kvp.col.Name == kvp.diff.Name))
             {
-                var newColName = inc.diff.Name + "_OLD";
+                var newColName =  inc.diff.Name + "_old";
                 preRenameColumnsList.GetOrCreate(diff.Name).Add(inc.diff.Name, newColName);
                 inc.diff.Name = newColName;
             }

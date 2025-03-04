@@ -141,19 +141,16 @@ public class QueryTimeSeriesLogic
             }
             else
             {
-                Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """
-                (
-                    start_date timestamptz,
-                    end_date timestamptz,
-                    increment_type VARCHAR(20),
-                    step INT
-                )
-                RETURNS TABLE("Date" timestamptz) AS $$
+                Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """                
+                (start_date timestamp with time zone, end_date timestamp with time zone, increment_type character varying, step integer)
+                 RETURNS TABLE(date timestamp with time zone)
+                 LANGUAGE plpgsql
+                AS $function$
                 BEGIN
                     RETURN QUERY
                     SELECT generate_series(start_date, end_date, (step || ' ' || increment_type)::interval);
                 END;
-                $$ LANGUAGE plpgsql;
+                $function$
                 """);
             }
         }
