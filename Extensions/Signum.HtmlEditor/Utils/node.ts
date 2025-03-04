@@ -1,6 +1,6 @@
 import { $isListItemNode, $isListNode, ListNode } from "@lexical/list";
 import { $isHeadingNode, $isQuoteNode } from "@lexical/rich-text";
-import { ElementNode, RangeSelection } from "lexical";
+import { ElementNode, LexicalEditor, LexicalNode, RangeSelection } from "lexical";
 
 export function isNodeType(
   selection: RangeSelection,
@@ -46,4 +46,16 @@ export function isHeadingActive(
     selection,
     (node) => $isHeadingNode(node) && node.getTag() === headingTag
   );
+}
+
+/**
+ * Can only be used within editor.read/editor.update callback.
+ */
+export function $findMatchingParent(node: LexicalNode, selector: (node: LexicalNode) => boolean): LexicalNode | undefined {
+  if(selector(node)) return node;
+
+  const parentNode = node.getParent();
+  if(!parentNode) return;
+
+  return $findMatchingParent(parentNode, selector);
 }

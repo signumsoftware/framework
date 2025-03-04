@@ -23,9 +23,9 @@ import {
 import { HtmlEditorController } from "./HtmlEditorController";
 import LexicalTheme from "./LexicalTheme";
 import { useController } from "./useController";
-import { isEmpty } from "./Utilities/editorState";
-import { formatCode, formatHeading, formatList, formatQuote } from "./Utilities/format";
-import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utilities/node";
+import { isEmpty } from "./Utils/editorState";
+import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
+import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utils/node";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -80,21 +80,20 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
   const error = binding.getError();
 
   return (
-    <>
-      <div
-        title={error}
-        onClick={() => controller.editor?.focus()}
-        {...htmlAttributes}
-        className={classes(
-          "sf-html-editor",
-          mandatory &&
-            isEmpty(controller.editorState) &&
-            (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
-          error && "has-error",
-          controller.small ? "small-mode" : "",
-          htmlAttributes?.className
-        )}
-      >
+    <div
+      title={error}
+      onClick={() => controller.editor?.focus()}
+      {...htmlAttributes}
+      className={classes(
+        "sf-html-editor",
+        mandatory &&
+          isEmpty(controller.editorState) &&
+          (mandatory == "warning" ? "sf-mandatory-warning" : "sf-mandatory"),
+        error && "has-error",
+        controller.small ? "small-mode" : "",
+        htmlAttributes?.className
+      )}
+    >
         <LexicalComposer
           initialConfig={{
             namespace: "HtmlEditor",
@@ -129,8 +128,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
               <EditorRefPlugin editorRef={controller.setRefs} />
               {builtinComponents.map(({component: Component, props }) => <Component key={Component.name} {...props} />)}
         </LexicalComposer>
-      </div>
-    </>
+    </div>
   );
 });
 

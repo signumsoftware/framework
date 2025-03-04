@@ -5,7 +5,7 @@ import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
 import { ITextConverter } from "./HtmlContentStateConverter";
 import { Separator } from "./HtmlEditorButtons";
-import { isEmpty } from "./Utilities/editorState";
+import { isEmpty } from "./Utils/editorState";
 
 export interface HtmlEditorControllerProps {
   binding: IBinding<string | null | undefined>;

@@ -1,5 +1,5 @@
 import { $createCodeNode, $isCodeNode } from "@lexical/code";
-import { TOGGLE_LINK_COMMAND } from "@lexical/link";
+import { $isLinkNode, TOGGLE_LINK_COMMAND } from "@lexical/link";
 import { $createListNode } from "@lexical/list";
 import { ListNodeTagType } from "@lexical/list/LexicalListNode";
 import {
@@ -16,6 +16,7 @@ import {
   LexicalEditor,
 } from "lexical";
 import { isHeadingActive, isListActive, isNodeType } from "./node";
+import { sanitizeUrl } from "./url";
 
 export function formatList(
   editor: LexicalEditor,
@@ -83,14 +84,14 @@ export function formatCode(
   });
 }
 
-export function formatLink(editor: LexicalEditor, url = ""): void {
+export function formatLink(editor: LexicalEditor, url?: string): void {
   editor.update(() => {
     const selection = $getSelection();
 
     if (!$isRangeSelection(selection)) return;
 
-    // const revert = isNodeType(selection, (node) => $isLinkNode(node));
+    const revert = isNodeType(selection, (node) => $isLinkNode(node));
 
-    editor.dispatchCommand(TOGGLE_LINK_COMMAND, { url });
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, revert ? null : url || null);
   });
 }

@@ -1,17 +1,6 @@
-import * as React from "react";
-// import * as draftjs from "draft-js";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { classes } from "@framework/Globals";
-import {
-  $isListItemNode,
-  $isListNode
-} from "@lexical/list";
-import {
-  $isHeadingNode,
-  $isQuoteNode,
-  HeadingTagType
-} from "@lexical/rich-text";
 import {
   $getSelection,
   $isRangeSelection,
@@ -20,9 +9,8 @@ import {
   RangeSelection,
   TextFormatType
 } from "lexical";
+import * as React from "react";
 import { HtmlEditorController } from "./HtmlEditorController";
-import { formatHeading, formatList, formatQuote } from "./Utilities/format";
-import { isNodeType } from "./Utilities/node";
 
 export function Separator(): React.JSX.Element {
   return <div className="sf-html-separator" />;
