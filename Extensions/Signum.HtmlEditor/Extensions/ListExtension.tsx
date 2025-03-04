@@ -5,7 +5,7 @@ import {
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, INDENT_CONTENT_COMMAND, KEY_TAB_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
 import { HtmlEditorController } from "../HtmlEditorController";
-import { isListActive } from "../Utilities/node";
+import { isListActive } from "../Utils/node";
 import {
   ComponentAndProps,
   HtmlEditorExtension,
