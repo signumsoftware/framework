@@ -57,11 +57,14 @@ export namespace ContextualOperations {
         var normal = contexts.filter(a => a.operationInfo.operationType != "ConstructorFromMany");
         if (normal.length) {
           var ep = await Navigator.API.fetchEntityPack(ctx.lites[0]);
-          contexts.extract(coc => !(coc.operationInfo.key in ep.canExecute));
           normal.forEach(coc => {
-            coc.pack = ep;
-            coc.canExecute = ep.canExecute[coc.operationInfo.key];
-            coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
+            if (!(coc.operationInfo.key in ep.canExecute)) //Not allowed
+              contexts.remove(coc);
+            else {
+              coc.pack = ep;
+              coc.canExecute = ep.canExecute[coc.operationInfo.key];
+              coc.isReadonly = Navigator.isReadOnly(ep, { ignoreTypeIsReadonly: true });
+            }
           });
         }
 
