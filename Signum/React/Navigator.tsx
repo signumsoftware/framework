@@ -746,9 +746,6 @@ export namespace Navigator {
     if (entity == undefined)
       return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
-    let ti = tryGetTypeInfo(entity.Type);
-    if (ti == null || !ti.requiresEntityPack)
-      return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));
   }
@@ -936,7 +933,8 @@ export namespace Navigator {
     }
 
     export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-      return ajaxPost({ url: "/api/entityPackEntity" }, entity);
+      return ajaxPost<EntityPack<T>>({ url: "/api/entityPackEntity" }, entity)
+        .then(ep => ({ ...ep, entity }));
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {

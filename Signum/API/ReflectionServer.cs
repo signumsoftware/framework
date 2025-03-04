@@ -300,8 +300,6 @@ public static class ReflectionServer
 
             HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
             Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
-
-            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute == true),
         };
 
         return OnTypeExtension(result, type);
@@ -426,7 +424,6 @@ public class TypeInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, CustomLiteModelTS>? CustomLiteModels { get; set; } = null!;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasConstructorOperation { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, OperationInfoTS>? Operations { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool RequiresEntityPack { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();
