@@ -16,7 +16,6 @@ import {
   LexicalEditor,
 } from "lexical";
 import { isHeadingActive, isListActive, isNodeType } from "./node";
-import { sanitizeUrl } from "./url";
 
 export function formatList(
   editor: LexicalEditor,
