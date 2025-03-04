@@ -12,7 +12,7 @@ class Upgrade_20250303_AutoReplacementMList : CodeUpgradeBase
        
         uctx.ChangeCodeFile("Southwind.Terminal/Program.cs",  pg =>
         {
-            pg.InsertAfterFirstLine(a => a.Contains("Main(string[]"), """
+            pg.InsertBeforeFirstLine(a => a.Trim() == "try", """
                 Replacements.AutoReplacement = c => {
 
                     var newValue = c.NewValues?.Where(a => a.ToLower().Replace("_", "") == c.OldValue.ToLower().Replace("_", "")).Only();
