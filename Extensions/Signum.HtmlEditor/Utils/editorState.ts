@@ -1,11 +1,8 @@
 import { $getRoot, EditorState } from "lexical";
 
 export function isEmpty(editorState: EditorState | undefined): boolean {
-  let isEmpty = false;
+  return editorState?.read(() => {
+   return $getRoot().getTextContentSize() === 0;
+  }) ?? false;
 
-  editorState?.read(() => {
-    isEmpty = $getRoot().getTextContentSize() === 0;
-  });
-
-  return isEmpty
 }
