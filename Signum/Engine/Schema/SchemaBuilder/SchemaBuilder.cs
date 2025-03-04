@@ -691,7 +691,10 @@ public class SchemaBuilder
 
         DbTypePair pair = Settings.GetSqlDbType(toStrAttribute, type);
 
-        string toStrName = toStrAttribute?.Name ?? name.ToString();
+        string toStrName =
+            toStrAttribute?.Name == null ? name.ToString() :
+            toStrAttribute.AvoidIdiomatic ? toStrAttribute.Name :
+            Idiomatic(toStrAttribute.Name);
 
         return new FieldValue(route, type, FixNameLength(toStrName))
         {

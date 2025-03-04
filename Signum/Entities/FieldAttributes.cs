@@ -455,6 +455,8 @@ public sealed class ToStringColumnAttribute : DbTypeAttribute
 {
     public string? Name { get; set; }
 
+    public bool AvoidIdiomatic { get; set; }
+
     public Type? Type { get; set; }
 
     public bool Nullable { get; set; }
