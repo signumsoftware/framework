@@ -30,7 +30,9 @@ public class QueryTimeSeriesLogic
     {
         if (sb.NotDefined(MethodBase.GetCurrentMethod()))
         {
-            Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """
+            if (!sb.Schema.Settings.IsPostgres)
+            {
+                Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """
                 (
                     @startDate DATETIME2,
                     @endDate DATETIME2,
@@ -136,6 +138,21 @@ public class QueryTimeSeriesLogic
                     RETURN
                 END
                 """);
+            }
+            else
+            {
+                Schema.Current.Assets.IncludeUserDefinedFunction("GetDatesInRange", """                
+                (start_date timestamp with time zone, end_date timestamp with time zone, increment_type character varying, step integer)
+                 RETURNS TABLE(date timestamp with time zone)
+                 LANGUAGE plpgsql
+                AS $function$
+                BEGIN
+                    RETURN QUERY
+                    SELECT generate_series(start_date, end_date, (step || ' ' || increment_type)::interval);
+                END;
+                $function$
+                """);
+            }
         }
     }
 

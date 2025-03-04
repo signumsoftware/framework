@@ -690,7 +690,7 @@ SELECT {id} FROM rows;";
 
 
 
-    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "", string? forceParentId = null)
+    public SqlPreCommand InsertSqlSync(Entity ident, bool includeCollections = true, string? comment = null, string suffix = "", string? forceParentId = null, Action<SqlPreCommandSimple>? fixMainCommand = null)
     {
         PrepareEntitySync(ident);
         SetToStrField(ident);
@@ -712,6 +712,8 @@ SELECT {id} FROM rows;";
                      inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
                      new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
+            fixMainCommand?.Invoke(simpleInsert);
+
             return simpleInsert;
         }
 
@@ -726,10 +728,12 @@ SELECT {id} FROM rows;";
                  inserterDisableIdentity.Value.SqlInsertPattern(new[] { suffix }),
                  new List<DbParameter>().Do(dbParams => inserterDisableIdentity.Value.InsertParameters(ident, new Forbidden(), suffix, dbParams))).AddComment(comment);
 
+        fixMainCommand?.Invoke(insert);
+
         SqlPreCommand? collections = saveCollections.Value?.InsertCollectionsSync(ident, suffix, parentId!);
 
         SqlPreCommand? virtualMList = virtualMLists?.Values
-            .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!))
+            .Select(vmi => giInsertVirtualMListSync.GetInvoker(this.Type, vmi.BackReferenceRoute.RootType)(ident, vmi, parentId!)).ToList()
             .Combine(Spacing.Double);
 
 
@@ -745,13 +749,17 @@ SELECT {id} FROM rows;";
 
         if (isPostgres)
         {
+            var otherDeclarations = virtualMList?.Leaves().Select(a => a.Sql.Between("DO $$\r\n", "BEGIN\r\n")).ToString("\r\n");
+            var virtualMListsBodies = virtualMList?.Leaves().Select(a => a.Sql.After("BEGIN\r\n").BeforeLast("END $$;")).ToString("\r\n\r\n");
+
             return new SqlPreCommandSimple(@$"DO $$
 DECLARE {parentId} {pkType};
+{otherDeclarations}
 BEGIN
 {insert.PlainSql().Indent(4)}
 
 {collections?.PlainSql().Indent(4)}
-{virtualMList?.PlainSql().Indent(4)}
+{virtualMListsBodies}
 END $$;"); ;
         }
         else if (isGuid)
@@ -880,13 +888,11 @@ END $$;"); ;
 
         var inserts = mlist.Select((elem, i) =>
         {
-            var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i);
-
-            var simple = result as SqlPreCommandSimple ?? (SqlPreCommandSimple)((SqlPreCommandConcat)result).Commands.FirstEx(r => r is SqlPreCommandSimple s && s.Parameters != null);
-
-            var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
-
-            simple.ReplaceParameter(param, parentId);
+            var result = table.InsertSqlSync(elem, forceParentId: parentId + "_" + i, fixMainCommand: simple =>
+            {
+                var param = simple.Parameters!.SingleEx(p => p.ParameterName == paramName);
+                simple.ReplaceParameter(param, parentId);
+            });
 
             return result;
         }).Combine(Spacing.Simple);

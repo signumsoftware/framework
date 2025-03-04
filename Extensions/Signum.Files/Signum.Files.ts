@@ -12,7 +12,7 @@ export interface IFile
   __isFile__ : true; //only for type-checking
   binaryFile?: string | null;
   fileName?: string | null;
-  fullWebPath?: string | null;
+
 }
 
 export interface FileEntity extends IFile { }
@@ -22,6 +22,10 @@ export interface IFilePath extends IFile
 {
   fileType?: FileTypeSymbol | null;
   suffix?: string | null;
+  hash?: string | null;
+  fullWebPath?: string | null;
+  fileLength: number;
+  __uploadingOffset?: number;
 }
 
 export interface FilePathEntity extends IFilePath { }
@@ -72,6 +76,9 @@ export namespace FileMessage {
   export const File0IsTooBigTheMaximumSizeIs1: MessageKey = new MessageKey("FileMessage", "File0IsTooBigTheMaximumSizeIs1");
   export const TheNameOfTheFileMustNotContainPercentSymbol: MessageKey = new MessageKey("FileMessage", "TheNameOfTheFileMustNotContainPercentSymbol");
   export const FileImage: MessageKey = new MessageKey("FileMessage", "FileImage");
+  export const File0IsStillUploading: MessageKey = new MessageKey("FileMessage", "File0IsStillUploading");
+  export const Uploading01: MessageKey = new MessageKey("FileMessage", "Uploading01");
+  export const SaveThe0WhenFinished: MessageKey = new MessageKey("FileMessage", "SaveThe0WhenFinished");
 }
 
 export const FilePathEmbedded: Type<FilePathEmbedded> = new Type<FilePathEmbedded>("FilePathEmbedded");

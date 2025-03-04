@@ -294,25 +294,45 @@ public class SqlFunctionsTest
     [Fact]
     public void SqlHierarchyIdFunction()
     {
-        if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
-            return;
+        //if (!Schema.Current.Settings.UdtSqlName.ContainsKey(typeof(SqlHierarchyId)))
+        //    return;
+
+
+        var nodeNullable = Database.Query<LabelEntity>().Select(a => (SqlHierarchyId?)a.Node).ToList();
+        Debug.WriteLine(nodeNullable.ToString("\n"));
 
         var nodes = Database.Query<LabelEntity>().Select(a => a.Node);
 
-        Assert.Equal(
-            nodes.ToList().Select(a => a.ToString()).ToString(", "),
-            nodes.Select(a => a.ToString().InSql()).ToList().ToString(", ")
-            );
+        if (Connector.Current is SqlServerConnector)
+            Assert.Equal(
+                nodes.ToList().Select(a => a.ToString()).ToString(", "),
+                nodes.Select(a => a.ToString().InSql()).ToList().ToString(", ")
+                );
 
+        
         Debug.WriteLine(nodes.Select(n => n.GetAncestor(0).InSql()).ToString(", "));
         Debug.WriteLine(nodes.Select(n => n.GetAncestor(1).InSql()).ToString(", "));
+        Debug.WriteLine(nodes.Select(n => n.GetAncestor((int)n.GetLevel()).InSql()).ToString(", "));
+        Debug.WriteLine(nodes.Select(n => n.GetAncestor((int)n.GetLevel() + 1).InSql()).ToString(", "));
+
         Debug.WriteLine(nodes.Select(n => (int)(short)n.GetLevel().InSql()).ToString(", "));
         Debug.WriteLine(nodes.Select(n => n.ToString().InSql()).ToString(", "));
+        Debug.WriteLine(nodes.Select(n => n.ToString()).ToString(", "));
 
 
-        Debug.WriteLine(nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) > SqlHierarchyId.GetRoot())).ToString(", "));
-        Debug.WriteLine(nodes.Where(n => (bool)(n.GetReparentedValue(n.GetAncestor(0), SqlHierarchyId.GetRoot()) > SqlHierarchyId.GetRoot())).ToString(", "));
 
+        var one = SqlHierarchyId.Parse("/1/");
+        var two = SqlHierarchyId.Parse("/2/");
+
+
+        Debug.WriteLine(nodes.Where(n => (bool)n.IsDescendantOf(one)).ToString(", "));
+        Debug.WriteLine(nodes.Where(n => (bool)n.IsDescendantOf(one)).Select(a => a.GetReparentedValue(one, two).InSql()).ToString(", "));
+
+        var query = nodes.Where(n => (bool)(n.GetDescendant(SqlHierarchyId.Null, SqlHierarchyId.Null) > SqlHierarchyId.GetRoot()));
+        if (Connector.Current is SqlServerConnector)
+            Debug.WriteLine(query.ToString(", "));
+        else
+            Assert.Throws<InvalidOperationException>(() => query.ToString(", "));
 
     }
 

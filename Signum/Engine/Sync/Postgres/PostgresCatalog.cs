@@ -19,6 +19,7 @@ public class PgNamespace : IView
         As.Expression(() => Database.View<PgClass>().Where(t => t.relnamespace == oid && t.relkind == RelKind.Table));
 }
 
+
 [TableName("pg_catalog.pg_class")]
 public class PgClass : IView
 {
@@ -142,7 +143,35 @@ public class PgProc : IView
     [AutoExpressionField]
     public PgNamespace? Namespace() => As.Expression(() => Database.View<PgNamespace>().SingleOrDefault(t => t.oid == pronamespace));
 
+    [AutoExpressionField]
+    public PgExtension? Extension() =>
+       As.Expression(() => Database.View<PgDepend>().Where(t => t.deptype == "e" && t.objid == this.oid)
+       .Select(d => Database.View<PgExtension>().SingleEx(e => e.oid == d.refobjid))
+       .SingleOrDefault());
+
     public string proname;
+}
+
+
+[TableName("pg_catalog.pg_extension")]
+public class PgExtension : IView
+{
+    [ViewPrimaryKey]
+    public int oid;
+
+    public string extname;
+}
+
+[TableName("pg_catalog.pg_depend")]
+public class PgDepend : IView
+{
+    [ViewPrimaryKey]
+    public int objid;
+
+    public string deptype;
+
+    public int refobjid;
+
 }
 
 [TableName("pg_catalog.pg_index")]

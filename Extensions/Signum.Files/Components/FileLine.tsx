@@ -1,17 +1,22 @@
 import * as React from 'react'
-import { classes } from '@framework/Globals'
+import { Form } from 'react-bootstrap'
+import { classes, Dic } from '@framework/Globals'
 import { TypeContext } from '@framework/TypeContext'
-import { Type, getSymbol } from '@framework/Reflection'
+import { OperationInfo, Type, getOperationInfo, getSymbol, getTypeInfo, tryGetOperationInfo, tryGetTypeInfo } from '@framework/Reflection'
 import { FormGroup } from '@framework/Lines/FormGroup'
 import { ModifiableEntity, Lite, Entity, getToString } from '@framework/Signum.Entities'
-import { IFile, FileTypeSymbol } from '../Signum.Files'
+import { IFile, FileTypeSymbol, IFilePath, FileMessage } from '../Signum.Files'
 import { EntityBaseProps, EntityBaseController, Aprox } from '@framework/Lines/EntityBase'
-import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour } from './FileDownloader'
-import { FileUploader } from './FileUploader'
+import { FileDownloader, FileDownloaderConfiguration, DownloadBehaviour, toComputerSize } from './FileDownloader'
+import { FileUploader, AsyncUploadOptions } from './FileUploader'
 
 import "./Files.css"
 import { genericForwardRefWithMemo, useController } from '@framework/Lines/LineBase'
 import { FilesClient } from '../FilesClient'
+import ProgressBar from '@framework/Components/ProgressBar'
+import { FontAwesomeIcon } from '@framework/Lines'
+import { EntityOperationContext, Operations } from '@framework/Operations'
+import { getNiceTypeName } from '@framework/Operations/MultiPropertySetter'
 
 export { FileTypeSymbol };
 
@@ -24,12 +29,16 @@ export interface FileLineProps<V extends ModifiableEntity/* & IFile */ | Lite</*
   accept?: string;
   configuration?: FileDownloaderConfiguration<IFile>;
   maxSizeInBytes?: number;
+  asyncUpload?: boolean;
   getFileFromElement?: (actx: NoInfer<V>) => ModifiableEntity & IFile | Lite<IFile & Entity>;
   createElementFromFile?: (file: ModifiableEntity & IFile) => Promise<NoInfer<V> | undefined>;
 }
 
 
 export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*IFile &*/ Entity> | null> extends EntityBaseController<FileLineProps<V>, V> {
+
+  abortController?: AbortController;
+  executeWhenFinished?: OperationInfo;
 
   overrideProps(p: FileLineProps<V>, overridenProps: FileLineProps<V>): void {
     p.view = EntityBaseController.defaultIsViewable(p.type!, false) && overridenProps.getFileFromElement != null;
@@ -57,6 +66,7 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
       if (p.maxSizeInBytes == null && m.defaultFileTypeInfo.maxSizeInBytes)
         p.maxSizeInBytes = m.defaultFileTypeInfo.maxSizeInBytes;
     }
+
   }
 
   handleFileLoaded = (file: IFile & ModifiableEntity): void => {
@@ -66,6 +76,37 @@ export class FileLineController<V extends ModifiableEntity/* & IFile*/ | Lite</*
     else
       this.convert(file as unknown as Aprox<V>)
         .then(f => this.setValue(f));
+  }
+
+  getAsyncOptions(): AsyncUploadOptions | undefined {
+    if (this.props.asyncUpload) {
+
+      if (!this.props.fileType)
+        throw new Error("AsyncUpload requires a FileTypeSymbol");
+
+      return ({
+        chunkSizeMB: 5,
+        onStart: (file, ac) => {
+          this.abortController = ac;
+          this.forceUpdate();
+        }, 
+        onProgress: (file) => this.forceUpdate(),
+        onFinished: (file) => {
+          this.abortController = undefined;
+          this.forceUpdate();
+
+          if (this.executeWhenFinished) {
+            const frame = this.props.ctx.frame!;
+            new EntityOperationContext(frame, frame.pack.entity as Entity, this.executeWhenFinished).click();
+          }
+        },
+        onError: (file, error) => {
+          this.abortController = undefined;
+          this.setValue(null!);
+          throw error;
+        },
+      });
+    }
   }
 }
 
@@ -79,7 +120,6 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
 
     const ctx = p.ctx;
     const val = ctx.value!;
-    const hasValue = !!val;
 
     const download = p.download ?? "ViewOrSave";
     const showFileIcon = p.showFileIcon ?? true;
@@ -88,6 +128,23 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
     const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
     const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
 
+    function tryGetSaveOperation() {
+      const pack = p.ctx.frame?.pack;
+      if (pack == null)
+        return null;
+
+      const ti = tryGetTypeInfo(pack.entity.Type);
+      if (ti == null || ti.operations == null)
+        return null;
+
+      var oi = Dic.getValues(ti.operations).onlyOrNull(o => Operations.Defaults.isSave(o));
+
+      if (oi == null || pack.canExecute[oi.key] != null)
+        return null;
+
+      return { oi, ti };
+    }
+
     return (
       <FormGroup ctx={p.ctx} label={p.label} labelIcon={p.labelIcon}
         labelHtmlAttributes={p.labelHtmlAttributes}
@@ -95,7 +152,32 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
         helpText={helpText}
         helpTextOnTop={helpTextOnTop}
       >
-        {() => hasValue ? renderFile() : p.ctx.readOnly ? undefined : renderFileUploader()}
+        {() => {
+          if (val) {
+            const fp = FilesClient.uploadingInProgress(val);
+            if (fp != null) {
+
+              const pair = tryGetSaveOperation();
+              
+              return <>
+                <UploadProgress file={fp} abortController={c.abortController} />
+                {pair && <small><Form.Check checked={c.executeWhenFinished == pair.oi}
+                  label={FileMessage.SaveThe0WhenFinished.niceToString().forGenderAndNumber(pair.ti.gender).formatHtml(<strong>{pair.ti.niceName}</strong>)} onChange={e => {
+                  c.executeWhenFinished = e.currentTarget.checked ? pair.oi : undefined;
+                  c.forceUpdate();
+                  }} /></small>}
+              </>;
+
+            }
+
+            return renderFile();
+          }
+
+          if (p.ctx.readOnly)
+            return null;
+
+          return renderFileUploader();
+        }}
       </FormGroup>
     );
 
@@ -137,13 +219,15 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
         dragAndDrop={dragAndDrop}
         dragAndDropMessage={p.dragAndDropMessage}
         fileType={p.fileType}
-        onFileLoaded={c.handleFileLoaded}
+        onFileCreated={c.handleFileLoaded}
         typeName={p.getFileFromElement ?
           p.ctx.propertyRoute!.addLambda(p.getFileFromElement).typeReference().name! :
           p.ctx.propertyRoute!.typeReference().name}
         buttonCss={p.ctx.buttonClass}
         fileDropCssClass={c.mandatoryClass ?? undefined}
-        divHtmlAttributes={{ className: "sf-file-line-new" }} />;
+        divHtmlAttributes={{ className: "sf-file-line-new" }}
+        asyncOptions={c.getAsyncOptions()}
+      />;
 
       if (!p.extraButtonsBefore && !p.extraButtons)
         return content;
@@ -158,3 +242,15 @@ export const FileLine: <V extends (ModifiableEntity/* & IFile*/) | Lite</*IFile 
     }
   }, (prev, next) => FileLineController.propEquals(prev, next));
 
+
+function UploadProgress(p: { file: IFilePath, abortController?: AbortController }) {
+  return (
+    <div>
+      <div>
+        {p.abortController && <a href="#" className="sf-line-button sf-remove" onClick={e => { e.preventDefault(); p.abortController!.abort(); }}><FontAwesomeIcon icon="xmark" /></a>}
+        <small>{FileMessage.Uploading01.niceToString(p.file.fileName, toComputerSize(p.file.fileLength))}</small>
+      </div>
+      <ProgressBar color={p.abortController?.signal.aborted ? "warning" : undefined} value={(p.file.__uploadingOffset == null ? null : p.file.__uploadingOffset / p.file.fileLength)} />
+    </div>
+  );
+}

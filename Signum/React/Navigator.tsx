@@ -734,7 +734,6 @@ export namespace Navigator {
     }
   }
 
-
   export function toEntityPack<T extends ModifiableEntity>(entityOrEntityPack: Lite<T & Entity> | T | EntityPack<T>): Promise<EntityPack<T>> {
     if ((entityOrEntityPack as EntityPack<T>).canExecute)
       return Promise.resolve(entityOrEntityPack as EntityPack<T>);
@@ -746,13 +745,11 @@ export namespace Navigator {
     if (entity == undefined)
       return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
-    let ti = tryGetTypeInfo(entity.Type);
-    if (ti == null || !ti.requiresEntityPack)
+    if (!isEntity(entity.Type))
       return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));
   }
-
 
   export async function reloadFrameIfNecessary(frame: EntityFrame): Promise<void> {
 
@@ -936,7 +933,8 @@ export namespace Navigator {
     }
 
     export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-      return ajaxPost({ url: "/api/entityPackEntity" }, entity);
+      return ajaxPost<EntityPack<T>>({ url: "/api/entityPackEntity" }, entity)
+        .then(ep => ({ ...ep, entity }));
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {

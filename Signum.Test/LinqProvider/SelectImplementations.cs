@@ -346,7 +346,10 @@ public class SelectImplementationsTest1
                          FullName = n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName
                      });
 
-        Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        if (Connector.Current is SqlServerConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        else if (Connector.Current is PostgreSqlConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("artist"));
 
         query.ToList();
     }
@@ -358,7 +361,10 @@ public class SelectImplementationsTest1
                      where (n.Target is ArtistEntity ? ((ArtistEntity)n.Target).Name : ((BandEntity)n.Target).Name).Length > 0
                      select n.Target is ArtistEntity ? ((ArtistEntity)n.Target).FullName : ((BandEntity)n.Target).FullName);
 
-        Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        if (Connector.Current is SqlServerConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("Artist"));
+        else if (Connector.Current is PostgreSqlConnector)
+            Assert.Equal(1, query.QueryText().CountRepetitions("artist"));
 
         query.ToList();
     }

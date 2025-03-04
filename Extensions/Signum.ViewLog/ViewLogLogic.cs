@@ -58,9 +58,9 @@ public static class ViewLogLogic
         }
     }
 
-    private static IDisposable? ExecutionMode_OnApiRetrieved(Entity entity, string viewAction)
+    private static IDisposable? ExecutionMode_OnApiRetrieved(Lite<Entity> entity, string viewAction)
     {
-        return ViewLogLogic.LogView(entity.ToLite(), viewAction);
+        return ViewLogLogic.LogView(entity, viewAction);
     }
 
   
