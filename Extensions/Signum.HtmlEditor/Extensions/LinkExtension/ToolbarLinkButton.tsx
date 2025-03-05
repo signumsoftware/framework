@@ -6,7 +6,7 @@ import { HtmlEditorButton } from "../../HtmlEditorButtons";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { formatLink } from "../../Utils/format";
 import { $findMatchingParent, isNodeType } from "../../Utils/node";
-import EditLinkForm from "./EditLinkForm";
+import EditLinkField from "./EditLinkField";
 import { restoreSelection, sanitizeUrl, validateUrl } from "./helper";
 
 type LinkButtonProps = { controller: HtmlEditorController; }
@@ -42,7 +42,7 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
 
   if(!selection) return;
 
-  const url = await AutoLineModal.show({ title: "Insert a URL for the hyperlink", message: "", initialValue: initialUrl, allowEmptyValue: true, customComponent: p => <EditLinkForm {...p} />})
+  const url = await AutoLineModal.show({ title: "Insert a URL for the hyperlink", message: "", initialValue: initialUrl, allowEmptyValue: true, customComponent: p => <EditLinkField {...p} />})
 
   if(!url) {
     formatLink(editor);

@@ -1,25 +1,33 @@
-import { $isLinkNode, LinkNode } from "@lexical/link";
-import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
+import { $isLinkNode, AutoLinkNode, LinkNode } from "@lexical/link";
+import { AutoLinkPlugin, LinkMatcher } from "@lexical/react/LexicalAutoLinkPlugin";
 import { $getSelection, $isRangeSelection, CLICK_COMMAND, COMMAND_PRIORITY_EDITOR } from "lexical";
-import React from "react";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { $findMatchingParent } from "../../Utils/node";
 import { ComponentAndProps, HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
-import { AutoLinkExtension } from "./AutoLinkExtension";
-import ToolbarLinkButton from './ToolbarLinkButton';
-import { validateUrl } from './helper';
+import { urlRegExp } from "./helper";
 
-export class LinkExtension implements HtmlEditorExtension {
-  getToolbarButtons(controller: HtmlEditorController): React.ReactNode {
-      return <ToolbarLinkButton controller={controller}  />
+const MATCHERS: LinkMatcher[] = [(text: string) => {
+  const match = urlRegExp.exec(text);
+
+  if(match === null) return null;
+
+  const [fullMatch] = match;
+
+  return {
+    index: match.index,
+    length: fullMatch.length,
+    text: fullMatch,
+    url: fullMatch.startsWith("http") ? fullMatch : `https://${fullMatch}`
   }
+}];
 
-  getBuiltInComponent(): ComponentAndProps<typeof LinkPlugin> {
-      return { component: LinkPlugin, props: { attributes: { target: "_blank" },validateUrl: validateUrl } }
+export class AutoLinkExtension implements HtmlEditorExtension {
+  getBuiltInComponent(): ComponentAndProps<typeof AutoLinkPlugin> {
+      return { component: AutoLinkPlugin, props: { matchers: MATCHERS } }
   }
 
   getNodes(): LexicalConfigNode {
-      return [LinkNode]
+      return [AutoLinkNode]
   }
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
@@ -37,7 +45,3 @@ export class LinkExtension implements HtmlEditorExtension {
     }, COMMAND_PRIORITY_EDITOR)
   }
 }
-
-export { AutoLinkExtension };
-
-
