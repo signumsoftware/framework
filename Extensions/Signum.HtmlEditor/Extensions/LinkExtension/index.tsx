@@ -15,7 +15,7 @@ export class LinkExtension implements HtmlEditorExtension {
   }
 
   getBuiltInComponent(): ComponentAndProps<typeof LinkPlugin> {
-      return { component: LinkPlugin, props: { attributes: { target: "_blank" },validateUrl: validateUrl } }
+      return { component: LinkPlugin, props: { attributes: { target: "_blank" }, validateUrl: validateUrl } }
   }
 
   getNodes(): LexicalConfigNode {

@@ -19,7 +19,7 @@ export interface HtmlEditorControllerProps {
 
 export class HtmlEditorController {
   editor!: LexicalEditor;
-
+  editableElement: HTMLElement | null = null;
   editorState!: EditorState;
   setEditorState!: (newState: EditorState) => void;
 
@@ -47,12 +47,24 @@ export class HtmlEditorController {
     return this.editor?.getEditorState();
   }
 
+  private initializeEditableElement() {
+    const editableElement = document.getElementById("editor-editable");
+
+    if(!editableElement) {
+      console.warn("No element with id `editable-element` found. Some functionalities might not work.");
+    }
+
+    return editableElement;
+
+  }
+
   init(p: HtmlEditorControllerProps): void {
     this.binding = p.binding;
     this.readOnly = p.readOnly;
     this.small = p.small;
     this.converter = p.converter;
     this.plugins = p.plugins ?? [];
+    this.editableElement = this.initializeEditableElement();
 
     [this.editorState, this.setEditorState] = React.useState<EditorState>(() =>
       this.createWithContentAndDecorators()

@@ -112,6 +112,7 @@ const HtmlEditor: React.ForwardRefExoticComponent<HtmlEditorProps & React.RefAtt
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
+                    id="editor-editable"
                     className="public-DraftEditor-content"
                     readOnly={controller.readOnly}
                     onFocus={(event: React.FocusEvent) => {

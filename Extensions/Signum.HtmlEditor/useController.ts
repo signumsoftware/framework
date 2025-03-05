@@ -3,6 +3,7 @@ import { LexicalEditor } from "lexical";
 import React from "react";
 import { BasicCommandsExtensions } from "./Extensions/BasicCommandsExtension";
 import { CodeBlockExtension } from "./Extensions/CodeBlockExtension";
+import { ImageExtension } from "./Extensions/ImageExtension";
 import { ListExtension } from "./Extensions/ListExtension";
 import { OnChangeExtension } from "./Extensions/OnChangeExtension";
 import {
@@ -51,6 +52,7 @@ export const useController = ({
       new ListExtension(),
       new OnChangeExtension(),
       new CodeBlockExtension(),
+      new ImageExtension()
     ];
 
     if (!plugins) {
