@@ -16,6 +16,7 @@ export class HtmlContentStateConverter implements ITextConverter {
     });
     return htmlString;
   }
+  
   $convertFromText(
     editor: LexicalEditor,
     html: string
