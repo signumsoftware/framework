@@ -42,7 +42,7 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
 
   if(!selection) return;
   
-  const url = await AutoLineModal.show({ title: "Insert a URL for the hyperlink", message: "", initialValue: initialUrl, allowEmptyValue: true, customComponent: p => <EditLinkField {...p} />})
+  const url = await AutoLineModal.show({ title: "Insert hyperlink", message: "", initialValue: initialUrl, allowEmptyValue: true, customComponent: p => <EditLinkField {...p} />})
 
   if(!url) {
     formatLink(editor);

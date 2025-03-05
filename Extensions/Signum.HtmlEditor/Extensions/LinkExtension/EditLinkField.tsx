@@ -18,7 +18,13 @@ export default function EditLinkField(p: AutoLineProps): ReactNode {
   
   return (
     <div className="d-flex flex-row align-items-center gap-2">
-      <input aria-label="Insert hyperlink URL" value={url} onChange={event => handleUpdateURL(event.target.value)} placeholder="Insert hyperlink URL" className="flex-grow-1 form-control" />
+      <input 
+        value={url} 
+        onChange={event => handleUpdateURL(event.target.value)} 
+        aria-label="Insert hyperlink" 
+        placeholder="Insert hyperlink" 
+        className="flex-grow-1 form-control" 
+      />
       <button aria-label="Remove hyperlink" onClick={removeURL} className="btn btn-light sf-remove">
         <FontAwesomeIcon icon="trash" />
       </button>
