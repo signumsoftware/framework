@@ -2,7 +2,7 @@ import * as React from 'react'
 import { openModal, IModalProps } from './Modals';
 import { SelectorMessage, Lite, getToString, liteKey, Entity, JavascriptMessage } from './Signum.Entities'
 import { TypeInfo, EnumType, Type, getTypeInfo } from './Reflection'
-import { Finder } from './Finder'
+//import { Finder } from './Finder' //allow without log-in
 import { BsSize } from './Components';
 import { Modal } from 'react-bootstrap';
 
@@ -177,7 +177,7 @@ namespace SelectorModal {
         maxElements: config?.maxElements,
       }}
     />);
-  };
+  }
 
   export function chooseType(options: TypeInfo[], config?: SelectorConfig<TypeInfo>): Promise<TypeInfo | undefined> {
     return SelectorModal.chooseElement(options,
@@ -188,7 +188,7 @@ namespace SelectorModal {
         message: SelectorMessage.PleaseSelectAType.niceToString(),
         ...config
       });
-  };
+  }
 
   export function chooseEnum<T extends string>(enumType: EnumType<T>, values?: T[], config?: SelectorConfig<T>): Promise<T | undefined> {
     return SelectorModal.chooseElement(values ?? enumType.values(),
@@ -200,21 +200,20 @@ namespace SelectorModal {
         size: "md",
         ...config
       });
-  };
+  }
 
-  export function chooseLite<T extends Entity>(type: Type<T> | TypeInfo | string, values?: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> {
+  export function chooseLite<T extends Entity>(type: Type<T> | TypeInfo | string, values: Lite<T>[], config?: SelectorConfig<Lite<T>>): Promise<Lite<T> | undefined> {
     const ti = getTypeInfo(type);
-    return (values ? Promise.resolve(values) : Finder.API.fetchAllLites({ types: ti.name }))
-      .then(lites => SelectorModal.chooseElement<Lite<T>>(lites as Lite<T>[],
-        {
-          buttonDisplay: a => getToString(a),
-          buttonName: a => liteKey(a),
-          title: SelectorMessage._0Selector.niceToString(ti.niceName),
-          message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(ti.niceName),
-          size: "md",
-          ...config
-        }));
-  };
+    return SelectorModal.chooseElement<Lite<T>>(values,
+      {
+        buttonDisplay: a => getToString(a),
+        buttonName: a => liteKey(a),
+        title: SelectorMessage._0Selector.niceToString(ti.niceName),
+        message: SelectorMessage.PleaseChooseA0ToContinue.niceToString(ti.niceName),
+        size: "md",
+        ...config
+      });
+  }
 }
 
 export default SelectorModal;

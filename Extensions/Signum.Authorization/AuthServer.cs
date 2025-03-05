@@ -96,8 +96,6 @@ public static class AuthServer
                             ti.Extension.Add("queryAuditors", conditions.ToList());
                     }
 
-                    ti.RequiresEntityPack |= ta.ConditionRules.Any();
-
                     return ti;
                 }
                 else

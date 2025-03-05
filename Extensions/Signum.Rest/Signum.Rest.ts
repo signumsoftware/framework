@@ -14,7 +14,7 @@ export const QueryStringValueEmbedded: Type<QueryStringValueEmbedded> = new Type
 export interface QueryStringValueEmbedded extends Entities.EmbeddedEntity {
   Type: "QueryStringValueEmbedded";
   key: string;
-  value: string;
+  value: string | null;
 }
 
 export const RestApiKeyEntity: Type<RestApiKeyEntity> = new Type<RestApiKeyEntity>("RestApiKey");

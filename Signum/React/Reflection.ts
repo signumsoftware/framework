@@ -34,7 +34,6 @@ export interface TypeInfo {
   isSystemVersioned?: boolean;
   requiresSaveOperation?: boolean;
   queryDefined?: boolean;
-  requiresEntityPack?: boolean;
   members: { [name: string]: MemberInfo };
   membersById?: { [name: string]: MemberInfo };
   hasConstructorOperation?: boolean;

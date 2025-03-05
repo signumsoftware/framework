@@ -5,7 +5,7 @@ namespace Signum.Engine.Maps;
 
 public static class TableExtensions
 {
-    internal static string UnScapeSql(this string name, bool isPostgres)
+    internal static string UnescapeSql(this string name, bool isPostgres)
     {
         if (isPostgres)
         {
@@ -61,7 +61,7 @@ public class ServerName : IEquatable<ServerName>
         if (!name.HasText())
             return null;
 
-        return new ServerName(name.UnScapeSql(isPostgres), isPostgres);
+        return new ServerName(name.UnescapeSql(isPostgres), isPostgres);
     }
 }
 
@@ -269,7 +269,7 @@ public class ObjectName : IEquatable<ObjectName>
             var index = str.LastIndexOf('\"', str.Length - 2);
             return (
                 prefix: index == 0 ? null : str.Substring(0, index - 1),
-                name: str.Substring(index).UnScapeSql(isPostgres)
+                name: str.Substring(index).UnescapeSql(isPostgres)
             );
         }
         else
@@ -286,7 +286,7 @@ public class ObjectName : IEquatable<ObjectName>
             var index = str.LastIndexOf('[');
             return (
                 prefix: index == 0 ? null : str.Substring(0, index - 1),
-                name: str.Substring(index).UnScapeSql(isPostgres)
+                name: str.Substring(index).UnescapeSql(isPostgres)
             );
         }
     }

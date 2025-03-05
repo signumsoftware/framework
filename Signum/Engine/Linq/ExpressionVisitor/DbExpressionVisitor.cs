@@ -329,6 +329,15 @@ internal class DbExpressionVisitor : ExpressionVisitor
         return like;
     }
 
+    protected internal virtual Expression VisitIsDescendatOf(IsDesendantOfExpression isDesendantOf)
+    {
+        Expression child = Visit(isDesendantOf.Child);
+        Expression parent = Visit(isDesendantOf.Parent);
+        if (child != isDesendantOf.Child || parent != isDesendantOf.Parent)
+            return new IsDesendantOfExpression(child, parent);
+        return isDesendantOf;
+    }
+
     protected internal virtual Expression VisitScalar(ScalarExpression scalar)
     {
         var select = (SelectExpression)this.Visit(scalar.Select)!;
