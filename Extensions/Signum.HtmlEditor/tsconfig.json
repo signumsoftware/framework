@@ -4,13 +4,12 @@
         "outDir": "./ts_out",
         "paths": {
             "@framework/*": [
-                "../../Signum/React/*"
+                "../../Signum/React/*",
             ],
         }
     },
     "references": [
-        {
-            "path": "../../Signum"
-        }
+        { "path": "../../Signum" },
+        { "path": "../Signum.Files" },
     ]
 }
