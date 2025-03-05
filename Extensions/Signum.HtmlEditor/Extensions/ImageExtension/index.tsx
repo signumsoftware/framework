@@ -1,9 +1,9 @@
-import { $createImageNode, ImageNode } from "./ImageNode";
-import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
-import { HtmlEditorController } from "../../HtmlEditorController";
-import { $getRoot } from "lexical";
 import AutoLineModal from "@framework/AutoLineModal";
+import { $getRoot, $getSelection } from "lexical";
 import React from 'react';
+import { HtmlEditorController } from "../../HtmlEditorController";
+import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
+import { $createImageNode, ImageNode } from "./ImageNode";
 
 export class ImageExtension implements HtmlEditorExtension {
   registerExtension(controller: HtmlEditorController): OptionalCallback {
@@ -15,7 +15,10 @@ export class ImageExtension implements HtmlEditorExtension {
       return;
     }
 
-    element.addEventListener("dragover", (event) => { event.preventDefault(); }, { signal: abortController.signal })
+    element.addEventListener("dragover", (event) => {
+      event.preventDefault(); 
+    }, { signal: abortController.signal });
+
     element.addEventListener("drop", (event) => {
       event.preventDefault();
       const files = event.dataTransfer?.files;
@@ -36,7 +39,14 @@ export class ImageExtension implements HtmlEditorExtension {
               AutoLineModal.show({ title: "", message: <img src={src} alt="Image" /> })
             }
             const imageNode = $createImageNode(src, "Image", handleImageClick);
-            $getRoot().append(imageNode);
+            const selection = $getSelection();
+
+            if(selection) {
+              selection.insertNodes([imageNode]);
+            } else {
+              $getRoot().append(imageNode)
+            }
+
           });
         };
 

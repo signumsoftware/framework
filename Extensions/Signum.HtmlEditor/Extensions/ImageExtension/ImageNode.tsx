@@ -30,7 +30,11 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(): JSX.Element {
-    return <img src={this.src} alt={this.altText} onClick={this.onClick} className="rounded mw-100" />
+    return (
+      <figure>
+        <img src={this.src} alt={this.altText} onClick={this.onClick} className="mw-100" />
+      </figure>
+    );
   }
 
   static importJSON(serializedNode: any): ImageNode {
