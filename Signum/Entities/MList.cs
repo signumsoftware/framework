@@ -674,6 +674,8 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     public void SyncMList<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
         where K : notnull
     {
+
+        newList.ToDictionaryEx(a => keySelectorNew(a)); //To fail fast and not on next iteration
         var alreadyDic = this.innerList.ToDictionaryEx(a => keySelectorOld(a.Element));
 
         this.innerList = newList.Select(e =>
