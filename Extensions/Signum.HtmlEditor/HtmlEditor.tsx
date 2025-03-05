@@ -25,7 +25,7 @@ import LexicalTheme from "./LexicalTheme";
 import { useController } from "./useController";
 import { isEmpty } from "./Utils/editorState";
 import { formatCode, formatHeading, formatList, formatQuote } from "./Utils/format";
-import { isHeadingActive, isListActive, isNodeType, isQuoteActive } from "./Utils/node";
+import { $findMatchingParent, isHeadingActive, isListActive, isQuoteActive } from "./Utils/node";
 
 export interface HtmlEditorProps {
   binding: IBinding<string | null | undefined>;
@@ -191,7 +191,7 @@ const defaultToolbarButtons = (c: HtmlEditorController) => (
       blockType="code-block"
       icon="file-code"
       title="Code Block"
-      isActiveFn={(selection) => isNodeType(selection, node => $isCodeNode(node))}
+      isActiveFn={(selection) => !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node))}
       onClick={formatCode}
     />
     {c.extraButtons()}

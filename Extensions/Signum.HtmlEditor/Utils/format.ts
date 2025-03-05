@@ -15,7 +15,7 @@ import {
   $isRangeSelection,
   LexicalEditor,
 } from "lexical";
-import { isHeadingActive, isListActive, isNodeType } from "./node";
+import { $findMatchingParent, isHeadingActive, isListActive } from "./node";
 
 export function formatList(
   editor: LexicalEditor,
@@ -58,7 +58,7 @@ export function formatQuote(editor: LexicalEditor): void {
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = isNodeType(selection, (node) => $isQuoteNode(node));
+    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isQuoteNode(node));
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createQuoteNode()
@@ -75,7 +75,7 @@ export function formatCode(
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = isNodeType(selection, (node) => $isCodeNode(node));
+    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node));
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createCodeNode(language)
@@ -89,7 +89,7 @@ export function formatLink(editor: LexicalEditor, url?: string): void {
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = isNodeType(selection, (node) => $isLinkNode(node));
+    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node));
 
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, revert ? null : url || null);
   });

@@ -5,7 +5,7 @@ import React, { useCallback } from "react";
 import { HtmlEditorButton } from "../../HtmlEditorButtons";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { formatLink } from "../../Utils/format";
-import { $findMatchingParent, isNodeType } from "../../Utils/node";
+import { $findMatchingParent } from "../../Utils/node";
 import EditLinkField from "./EditLinkField";
 import { restoreSelection, sanitizeUrl, validateUrl } from "./helper";
 
@@ -21,7 +21,7 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
       const selection = $getSelection();
       if(!$isRangeSelection(selection)) return;
       
-      active = isNodeType(selection, node => $isLinkNode(node))
+      active = !!$findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node));
     })
 
     return active;
