@@ -2094,7 +2094,7 @@ export namespace Finder {
     defaultAggregates?: ColumnOption[];
     hiddenColumns?: ColumnOption[];
     formatters?: { [token: string]: CellFormatter };
-    rowAttributes?: (row: ResultRow, columns: string[]) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
+    rowAttributes?: (row: ResultRow, searchControl: SearchControlLoaded) => React.HTMLAttributes<HTMLTableRowElement> | undefined;
     entityFormatter?: EntityFormatter;
     inPlaceNavigation?: boolean;
     modalSize?: BsSize;

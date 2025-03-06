@@ -13,6 +13,11 @@ public class SchemaBuilder
         get { return schema.Settings; }
     }
 
+    public bool IsPostgres
+    {
+        get { return schema.Settings.IsPostgres; }
+    }
+
     public WebServerBuilder? WebServerBuilder { get; init; }
 
     public SchemaBuilder()
@@ -129,9 +134,6 @@ public class SchemaBuilder
                 index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
             }
         }
-
-
-
 
         return index;
     }
@@ -304,9 +306,9 @@ public class SchemaBuilder
             tr.Switch("GenerateCleanTypeName");
             table.CleanTypeName = GenerateCleanTypeName(type);
             tr.Switch("GenerateFields");
-            table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
+            table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.GetVoid(IsPostgres), forceNull: false, inMList: false);
             tr.Switch("GenerateMixins");
-            table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.Void);
+            table.Mixins = GenerateMixins(PropertyRoute.Root(type), table, NameSequence.GetVoid(IsPostgres));
             tr.Switch("GenerateTemporal");
             table.SystemVersioned = ToSystemVersionedInfo(Settings.TypeAttribute<SystemVersionedAttribute>(type), table.Name);
             tr.Switch("PartitionScheme");
@@ -333,8 +335,8 @@ public class SchemaBuilder
 
         var isPostgres = this.schema.Settings.IsPostgres;
 
-        var tn = att.TemporalTableName != null ? ObjectName.Parse(att.TemporalTableName, isPostgres) :
-                new ObjectName(tableName.Schema, tableName.Name + "_History", isPostgres);
+        var tn = att.TemporalTableName != null ? ObjectName.Parse(FixNameLength(att.TemporalTableName), isPostgres) :
+                new ObjectName(tableName.Schema, FixNameLength(tableName.Name + "_" + Idiomatic("History")), isPostgres);
 
         if (isPostgres)
             return new SystemVersionedInfo(tn, att.PostgresSysPeriodColumname);
@@ -501,7 +503,7 @@ public class SchemaBuilder
             NameSequence name;
             ColumnNameAttribute? vc = Settings.FieldAttribute<ColumnNameAttribute>(route);
             if (vc != null && vc.Name.HasText())
-                name = NameSequence.Void.Add(vc.Name);
+                name = NameSequence.GetVoid(IsPostgres).Add(vc.Name);
             else if (route.PropertyRouteType != PropertyRouteType.MListItems)
                 name = preName.Add(GenerateFieldName(route, kof));
             else if (kof == KindOfField.Enum || kof == KindOfField.Reference)
@@ -602,10 +604,10 @@ public class SchemaBuilder
 
         DbTypePair pair = Settings.GetSqlDbType(attr, attr.Type);
 
-        return table.PrimaryKey = new FieldPrimaryKey(route, table, attr.Name, attr.Type)
+        return table.PrimaryKey = new FieldPrimaryKey(route, table, FixNameLength(attr.Name ?? Idiomatic("ID")), attr.Type)
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(attr),
+            Collation = Settings.GetCollation(attr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Default = attr.GetDefault(Settings.IsPostgres),
             Check = attr.GetCheck(Settings.IsPostgres),
@@ -640,10 +642,10 @@ public class SchemaBuilder
 
         string ticksName = ticksAttr?.Name ?? name.ToString();
 
-        return table.Ticks = new FieldTicks(route, type, ticksName)
+        return table.Ticks = new FieldTicks(route, type, FixNameLength(ticksName))
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(ticksAttr),
+            Collation = Settings.GetCollation(ticksAttr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = IsNullable.No,
             Size = Settings.GetSqlSize(ticksAttr, null, pair.DbType),
@@ -667,10 +669,10 @@ public class SchemaBuilder
 
         string partitionName = partitionAttr?.Name ?? name.ToString();
 
-        return table.PartitionId = new FieldPartitionId(route, type, partitionName)
+        return table.PartitionId = new FieldPartitionId(route, type, FixNameLength(partitionName))
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(partitionAttr),
+            Collation = Settings.GetCollation(partitionAttr),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = IsNullable.No,
             Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),
@@ -689,12 +691,15 @@ public class SchemaBuilder
 
         DbTypePair pair = Settings.GetSqlDbType(toStrAttribute, type);
 
-        string toStrName = toStrAttribute?.Name ?? name.ToString();
+        string toStrName =
+            toStrAttribute?.Name == null ? name.ToString() :
+            toStrAttribute.AvoidIdiomatic ? toStrAttribute.Name :
+            Idiomatic(toStrAttribute.Name);
 
-        return new FieldValue(route, type, toStrName)
+        return new FieldValue(route, type, FixNameLength(toStrName))
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(toStrAttribute),
+            Collation = Settings.GetCollation(toStrAttribute),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = toStrAttribute?.Nullable == false ? IsNullable.No : IsNullable.Yes,
             Size = Settings.GetSqlSize(toStrAttribute, null, pair.DbType),
@@ -713,10 +718,10 @@ public class SchemaBuilder
            Settings.GetSqlDbType(att, route.Type.ElementType()!) :
            Settings.GetSqlDbType(att, route.Type);
 
-        return new FieldValue(route, null, name.ToString())
+        return new FieldValue(route, null, FixNameLength(name.ToString()))
         {
             DbType = pair.DbType,
-            Collation = Settings.GetCollate(att),
+            Collation = Settings.GetCollation(att),
             UserDefinedTypeName = pair.UserDefinedTypeName,
             Nullable = Settings.GetIsNullable(route, forceNull),
             Size = Settings.GetSqlSize(att, route, pair.DbType),
@@ -742,7 +747,7 @@ public class SchemaBuilder
 
         var referenceTable = Include(EnumEntity.Generate(cleanEnum), route);
 
-        return new FieldEnum(route, name.ToString(), referenceTable)
+        return new FieldEnum(route, FixNameLength(name.ToString()), referenceTable)
         {
             Nullable = Settings.GetIsNullable(route, forceNull),
             IsLite = false,
@@ -769,7 +774,7 @@ public class SchemaBuilder
 
         var attr = Settings.FieldAttribute<DbTypeAttribute>(route);
 
-        return new FieldReference(route, null, name.ToString(), referenceTable)
+        return new FieldReference(route, null, FixNameLength(name.ToString()), referenceTable)
         {
             Nullable = nullable,
             IsLite = isLite,
@@ -807,7 +812,7 @@ public class SchemaBuilder
         {
             var rt = Include(t, route);
 
-            string impName = name.Add(TypeLogic.GetCleanName(t)).ToString();
+            string impName = FixNameLength(name.Add(Idiomatic(TypeLogic.GetCleanName(t))).ToString());
             return new ImplementationColumn(impName, referenceTable: rt)
             {
                 CustomLiteModelType = !isLite ? null : Settings.FieldAttributes(route)?.OfType<LiteModelAttribute>().SingleOrDefaultEx(a => a.ForEntityType == t)?.LiteModelType,
@@ -828,6 +833,11 @@ public class SchemaBuilder
         });
     }
 
+    int? maxNameLength;
+    string FixNameLength(string name) => StringHashEncoder.ChopHash(name, (maxNameLength ??= Connector.Current.MaxNameLength));
+
+    string Idiomatic(string name) => IsPostgres ? name.PascalToSnake() : name;
+
     protected virtual FieldImplementedByAll GenerateFieldImplementedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
     {
         var nullable = Settings.GetIsNullable(route, forceNull);
@@ -837,13 +847,13 @@ public class SchemaBuilder
         if(primaryKeyTypes.Count() > 1 && nullable == IsNullable.No)
             nullable = IsNullable.Forced;
 
-        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(preName.Add(t.Name).ToString(), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
+        var columns = Settings.ImplementedByAllPrimaryKeyTypes.Select(t => new ImplementedByAllIdColumn(FixNameLength(preName.Add(Idiomatic(t.Name)).ToString()), nullable.ToBool() ? t.Nullify() : t, Settings.DefaultSqlType(t))
         {
             Nullable = nullable,
             Size = t == typeof(string) ? Settings.ImplementedByAllStringSize : null,
         });
 
-        var columnType = new ImplementationColumn(preName.Add("Type").ToString(), Include(typeof(TypeEntity), route))
+        var columnType = new ImplementationColumn(FixNameLength(preName.Add(Idiomatic("Type")).ToString()), Include(typeof(TypeEntity), route))
         {
             Nullable = nullable,
             AvoidForeignKey = Settings.FieldAttribute<AvoidForeignKeyAttribute>(route) != null,
@@ -874,10 +884,10 @@ public class SchemaBuilder
         {
             var pair = Settings.GetSqlDbTypePair(typeof(int));
 
-            order = new FieldValue(route: null!, fieldType: typeof(int), orderAttr.Name ?? "Order")
+            order = new FieldValue(route: null!, fieldType: typeof(int), FixNameLength(orderAttr.Name ?? Idiomatic("Order")))
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(orderAttr),
+                Collation = Settings.GetCollation(orderAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(orderAttr, null, pair.DbType),
@@ -893,10 +903,10 @@ public class SchemaBuilder
 
             var pair = Settings.GetSqlDbType(keyAttr, keyAttr.Type);
 
-            primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, keyAttr.Name)
+            primaryKey = new TableMList.PrimaryKeyColumn(keyAttr.Type, FixNameLength(keyAttr.Name ?? Idiomatic("ID")))
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(orderAttr),
+                Collation = Settings.GetCollation(orderAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Default = keyAttr.GetDefault(Settings.IsPostgres),
                 Check = keyAttr.GetCheck(Settings.IsPostgres),
@@ -919,7 +929,7 @@ public class SchemaBuilder
             Order = order,
         };
 
-        mlistTable.Field = GenerateField(mlistTable, route.Add("Item"), NameSequence.Void, forceNull: false, inMList: true);
+        mlistTable.Field = GenerateField(mlistTable, route.Add("Item"), NameSequence.GetVoid(IsPostgres), forceNull: false, inMList: true);
 
         var sysAttribute = Settings.FieldAttribute<SystemVersionedAttribute>(route) ??
             (Settings.TypeAttribute<SystemVersionedAttribute>(table.Type) != null ? new SystemVersionedAttribute() : null);
@@ -934,12 +944,12 @@ public class SchemaBuilder
 
             DbTypePair pair = Settings.GetSqlDbType(partitionAttr, type);
 
-            string columnName = partitionAttr?.Name ?? "PartitionId";
+            string columnName = partitionAttr?.Name ?? Idiomatic("PartitionId");
 
             mlistTable.PartitionId = new FieldPartitionId(null!, type, columnName)
             {
                 DbType = pair.DbType,
-                Collation = Settings.GetCollate(partitionAttr),
+                Collation = Settings.GetCollation(partitionAttr),
                 UserDefinedTypeName = pair.UserDefinedTypeName,
                 Nullable = IsNullable.No,
                 Size = Settings.GetSqlSize(partitionAttr, null, pair.DbType),
@@ -962,7 +972,7 @@ public class SchemaBuilder
     {
         var nullable = Settings.GetIsNullable(route, false);
 
-        var hasValue = nullable.ToBool() ? new FieldEmbedded.EmbeddedHasValueColumn(name.Add("HasValue").ToString()) : null;
+        var hasValue = nullable.ToBool() ? new FieldEmbedded.EmbeddedHasValueColumn(FixNameLength(name.Add(Idiomatic("HasValue")).ToString())) : null;
 
         var embeddedFields = GenerateFields(route, table, name, forceNull: nullable.ToBool() || forceNull, inMList: inMList);
         var mixins = GenerateMixins(route, table, name);
@@ -1001,7 +1011,9 @@ public class SchemaBuilder
 
         SchemaName sn = tn != null ? ToSchemaName(tn) : GetSchemaName(type);
 
-        string name = tn?.Name ?? EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type);
+        string name = tn?.Name ?? 
+            (isPostgres ? EnumEntity.Extract(type)?.Name.PascalToSnake() : EnumEntity.Extract(type)?.Name) ?? 
+            (isPostgres ? Reflector.CleanTypeName(type).PascalToSnake() : Reflector.CleanTypeName(type));
 
         return new ObjectName(sn, name, isPostgres);
     }
@@ -1014,12 +1026,12 @@ public class SchemaBuilder
         var assenbly = AssemblySchemaNameAttribute.OverridenAssembly.TryGetC(type) ?? type.Assembly!;
         var attributes = assenbly.GetCustomAttributes<AssemblySchemaNameAttribute>();
 
-        var schema = 
-            attributes?.FirstOrDefault(a => a.ForNamespace == type.Namespace)?.SchemaName ??
-            attributes?.FirstOrDefault(a => a.ForNamespace == null)?.SchemaName;
+        var att = 
+            attributes?.FirstOrDefault(a => a.ForNamespace == type.Namespace) ??
+            attributes?.FirstOrDefault(a => a.ForNamespace == null);
 
-        if(schema != null)
-            return new SchemaName(GetDatabase(type), schema, isPostgres);
+        if (att != null)
+            return new SchemaName(GetDatabase(type), att.AvoidIdiomatic ? att.SchemaName : Idiomatic(att.SchemaName), isPostgres);
 
 
         return SchemaName.Default(isPostgres);
@@ -1046,7 +1058,7 @@ public class SchemaBuilder
 
         SchemaName sn = tn != null ? ToSchemaName(tn) : table.Name.Schema;
 
-        return new ObjectName(sn, tn?.Name ?? (table.Name.Name + name.ToString()), isPostgres);
+        return new ObjectName(sn, FixNameLength(tn?.Name ?? (table.Name.Name + "_" + name.ToString())), isPostgres);
     }
 
     public virtual string GenerateMListFieldName(PropertyRoute route, KindOfField kindOfField)
@@ -1057,10 +1069,10 @@ public class SchemaBuilder
         {
             case KindOfField.Value:
             case KindOfField.Embedded:
-                return type.Name;
+                return Idiomatic(type.Name);
             case KindOfField.Enum:
             case KindOfField.Reference:
-                return (EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type)) + "ID";
+                return Idiomatic((EnumEntity.Extract(type)?.Name ?? Reflector.CleanTypeName(type)) + "ID");
             default:
                 throw new InvalidOperationException("No field name for type {0} defined".FormatWith(type));
         }
@@ -1079,10 +1091,10 @@ public class SchemaBuilder
             case KindOfField.Embedded:
             case KindOfField.MList:  //only used for table name
             case KindOfField.PartitionId:
-                return name;
+                return Idiomatic(name);
             case KindOfField.Reference:
             case KindOfField.Enum:
-                return name + "ID";
+                return Idiomatic(name + "ID");
             default:
                 throw new InvalidOperationException("No name for {0} defined".FormatWith(route.FieldInfo!.Name));
         }
@@ -1090,7 +1102,7 @@ public class SchemaBuilder
 
     public virtual string GenerateBackReferenceName(Type type, BackReferenceColumnNameAttribute? attribute)
     {
-        return attribute?.Name ?? "ParentID";
+        return attribute?.Name ?? Idiomatic("ParentID");
     }
     #endregion
 
@@ -1111,7 +1123,7 @@ public class SchemaBuilder
             GlobalLazyManager.OnLoad(this, invalidateWith);
 
             return func();
-        });
+        }, mode);
 
         GlobalLazyManager.AttachInvalidations(this, invalidateWith, (sender, args) =>
         {
@@ -1229,7 +1241,7 @@ public class ViewBuilder : SchemaBuilder
             IsView = true
         };
 
-        table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.Void, forceNull: false, inMList: false);
+        table.Fields = GenerateFields(PropertyRoute.Root(type), table, NameSequence.GetVoid(IsPostgres), forceNull: false, inMList: false);
 
         table.GenerateColumns();
 

@@ -124,6 +124,7 @@ export interface ExceptionEntity extends Entities.Entity {
   hResult: number;
   referenced: boolean;
   origin: ExceptionOrigin;
+  traceId: string | null;
 }
 
 export const ExceptionOrigin: EnumType<ExceptionOrigin> = new EnumType<ExceptionOrigin>("ExceptionOrigin");

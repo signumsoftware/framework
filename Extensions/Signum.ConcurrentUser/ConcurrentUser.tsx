@@ -43,11 +43,11 @@ export default function ConcurrentUser(p: { entity: Entity, isExecuting: boolean
     if (conn) {
 
       function updateModified() {
-        GraphExplorer.propagateAll(p.entity);
+        const modified = GraphExplorer.hasChangesNoClean(p.entity);
 
-        if (p.entity.modified != isModified.current && conn?.state == HubConnectionState.Connected) {
-          conn?.send("EntityModified", entityKey, userKey, p.entity.modified);
-          isModified.current = p.entity.modified;
+        if (modified != isModified.current && conn?.state == HubConnectionState.Connected) {
+          conn?.send("EntityModified", entityKey, userKey, modified);
+          isModified.current = modified;
         }
       }
 

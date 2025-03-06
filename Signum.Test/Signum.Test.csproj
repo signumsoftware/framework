@@ -27,7 +27,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\Extensions\Signum.Authorization\Signum.Authorization.csproj" />
 		<ProjectReference Include="..\Signum.Utilities\Signum.Utilities.csproj" />
 		<ProjectReference Include="..\Signum\Signum.csproj" />
 	</ItemGroup>
@@ -35,7 +34,7 @@
 	<ItemGroup>
 		<None Update="appsettings.json">
 			<Generator></Generator>
-			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 </Project>

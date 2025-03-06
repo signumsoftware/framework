@@ -274,7 +274,7 @@ public class CodeFile
 
             var text = getText(oldText);
             if (text.HasText())
-                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, indent)));
+                lines.InsertRange(from, text.Lines().Select(a => IndentAndReplace(a, "")));
 
             return true;
         });

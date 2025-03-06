@@ -7,6 +7,7 @@ using Signum.DynamicQuery.Tokens;
 using Microsoft.AspNetCore.Mvc;
 using Signum.API.Json;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Metadata;
 
 namespace Signum.API.Controllers;
 
@@ -27,6 +28,12 @@ public class QueryController : ControllerBase
     public async Task<List<Lite<Entity>>> FetchAllLites(string types, CancellationToken token)
     {
         Implementations implementations = ParseImplementations(types);
+
+        foreach (var type in implementations.Types)
+        {
+            if (EntityKindCache.GetEntityData(type) == EntityData.Transactional)
+                throw new ArgumentNullException($"{type} is a Transactional entity");
+        }
 
         return await AutocompleteUtils.FindAllLiteAsync(implementations, token);
     }

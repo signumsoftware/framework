@@ -28,32 +28,29 @@ export default function HtmlEditorLine({
 }: HtmlEditorLineProps): React.JSX.Element {
   const forceUpdate = useForceUpdate();
   return (
-    <FormGroup ctx={ctx}>
+    <FormGroup ctx={ctx} >
       {(id) => (
         <ErrorBoundary>
           <div className="d-flex">
             {extraButtonsBefore && (
               <div className={ctx.inputGroupVerticalClass("before")}>
-                {extraButtonsBefore()}
+              {extraButtonsBefore()}
               </div>
             )}
             <div
               className={classes(
                 "html-editor-line",
-                p.mandatory ??
-                  (ctx.propertyRoute?.member?.required && !ctx.value)
-                  ? "sf-mandatory"
-                  : undefined
+                ((p.mandatory ?? ctx.propertyRoute?.member?.required) && !ctx.value) && "sf-mandatory"
               )}
               style={{
-                backgroundColor: readOnly ? "#e9ecef" : undefined,
-                flexGrow: 1,
+              backgroundColor: readOnly ? "#e9ecef" : undefined,
+              flexGrow: 1,
                 ...p.htmlAttributes?.style,
               }}
               data-property-path={ctx.propertyPath}
             >
               {getTimeMachineIcon({ ctx: ctx })}
-             <HtmlEditor
+              <HtmlEditor
                 readOnly={ctx.readOnly}
                 binding={ctx.binding}
                 ref={htmlEditorRef}
@@ -67,8 +64,8 @@ export default function HtmlEditorLine({
             </div>
             {extraButtons && (
               <div className={ctx.inputGroupVerticalClass("after")}>
-                {extraButtons()}
-              </div>
+              {extraButtons()}
+            </div>
             )}
           </div>
         </ErrorBoundary>

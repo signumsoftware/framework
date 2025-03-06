@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Routing;
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -138,7 +139,9 @@ public static partial class TypeAuthLogic
 
         var tac = GetAllowed(type);
 
-        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(type) && !HasTypeConditionInOperations(type))
+        var role = RoleEntity.Current;
+
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, type) && !HasTypeConditionInOperations(role, type))
             return null;
 
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
@@ -160,11 +163,10 @@ public static partial class TypeAuthLogic
         return conditions.SingleEx();
     }
 
-    public static Func<Type, bool> HasTypeConditionInProperties = t => false;
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInProperties = (role, t) => false;
 
-    public static Func<Type, bool> HasTypeConditionInOperations = t => false;
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInOperations = (role, t) => false;
 
-  
 
     public static void AssertStarted(SchemaBuilder sb)
     {
