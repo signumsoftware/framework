@@ -10,11 +10,7 @@ export class HtmlContentStateConverter implements ITextConverter {
   $convertToText(
     editor: LexicalEditor
   ): ReturnType<ITextConverter["$convertToText"]> {
-    let htmlString = "";
-    editor.read(() => {
-      htmlString = $generateHtmlFromNodes($getEditor());
-    });
-    return htmlString;
+    return editor.read(() => $generateHtmlFromNodes($getEditor()));
   }
   
   $convertFromText(
