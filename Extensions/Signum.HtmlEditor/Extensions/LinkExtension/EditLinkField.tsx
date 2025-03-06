@@ -25,7 +25,7 @@ export default function EditLinkField(p: AutoLineProps): ReactNode {
         placeholder="Insert hyperlink" 
         className="flex-grow-1 form-control" 
       />
-      <button aria-label="Remove hyperlink" onClick={removeURL} className="btn btn-light sf-remove">
+      <button aria-label="Remove hyperlink" title="Remove hyperlink" onClick={removeURL} className="btn btn-light sf-remove">
         <FontAwesomeIcon icon="trash" />
       </button>
     </div>
