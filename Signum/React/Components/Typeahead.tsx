@@ -251,7 +251,6 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
     <>
       {p.renderInput ? p.renderInput(input) : input}
       <Dropdown show={controller.shown} onToggle={(isOpen: boolean) => controller.setShown(isOpen)}>
-        <Dropdown.Toggle id="dropdown" as={CustomToggle}></Dropdown.Toggle>
         {(p.renderList ? p.renderList(controller) : renderDefaultList())}
       </Dropdown>
     </>
@@ -281,19 +280,6 @@ export const Typeahead: React.ForwardRefExoticComponent<TypeaheadProps & React.R
       </Dropdown.Menu>
     );
   }
-});
-
-
-const CustomToggle = React.forwardRef(function CustomToggle(p: { children?: React.ReactNode, onClick?: React.MouseEventHandler }, ref: React.Ref<HTMLAnchorElement>) {
-
-  return (
-    <a
-      ref={ref}
-      href=""
-      onClick={e => { e.preventDefault(); p.onClick!(e); }}>
-      {p.children}
-    </a>
-  );
 });
 
 Typeahead.defaultProps = {
