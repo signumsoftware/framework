@@ -2,6 +2,7 @@ using Signum.Engine.Linq;
 using Signum.Utilities.Reflection;
 using Signum.Entities.Internal;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
 
 namespace Signum.Cache;
 
@@ -45,6 +46,9 @@ internal class CachedTableConstructor
 
     internal Type GetColumnType(IColumn column)
     {
+        if (column.DbType.IsPostgres && column.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
+            return typeof(string);
+
         return column.Type;
     }
 
@@ -109,12 +113,27 @@ internal class CachedTableConstructor
 
     static Expression NullId = Expression.Constant(null, typeof(PrimaryKey?));
 
+    static MethodInfo miFromSortableString = ReflectionTools.GetMethodInfo(() => HierarchyIdString.FromSortableString(""));
+    static MethodInfo miFromSortableStringNullable = ReflectionTools.GetMethodInfo(() => HierarchyIdString.FromSortableStringNullable(""));
+
     public Expression MaterializeField(Field field)
     {
-        if (field is FieldValue)
+        if (field is FieldValue fv)
         {
-            var value = GetTupleProperty((IColumn)field);
-            return value.Type == field.FieldType ? value : Expression.Convert(value, field.FieldType);
+            var value = GetTupleProperty(fv);
+            if (fv.DbType.IsPostgres && fv.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
+            {
+                if (field.FieldType == typeof(SqlHierarchyId) && value.Type == typeof(string))
+                    return Expression.Call(miFromSortableString, value);
+
+                if (field.FieldType == typeof(SqlHierarchyId?) && value.Type == typeof(string))
+                    return Expression.Call(miFromSortableStringNullable, value);
+            }
+
+            if (value.Type == field.FieldType)
+                return value;
+
+            return Expression.Convert(value, fv.FieldType);
         }
 
         if (field is FieldEnum)
@@ -376,7 +395,7 @@ internal class CachedTableConstructor
 
     internal BlockExpression MaterializeEntity(ParameterExpression me, Table table)
     {
-        if(table.Name.Name == "Employee")
+        if(table.Name.Name == "project")
         {
 
         }
