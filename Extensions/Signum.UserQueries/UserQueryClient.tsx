@@ -17,7 +17,7 @@ import { UserAssetClient } from '../Signum.UserAssets/UserAssetClient'
 import { DashboardClient, CreateNewButton } from '../Signum.Dashboard/DashboardClient'
 import { ImportComponent } from '@framework/ImportComponent'
 import ContextMenu from '@framework/SearchControl/ContextMenu';
-import { ContextualItemsContext, MenuItemBlock, onContextualItems } from '@framework/SearchControl/ContextualItems';
+import { ContextualItemsContext, MenuItemBlock, onContextualItems, ContextualMenuItem } from '@framework/SearchControl/ContextualItems';
 import SearchControlLoaded, { OnDrilldownOptions } from '@framework/SearchControl/SearchControlLoaded';
 import SelectorModal from '@framework/SelectorModal';
 import { Dic } from '@framework/Globals';
@@ -172,10 +172,13 @@ export namespace UserQueryClient {
         return ({
           header: UserQueryEntity.nicePluralName(),
           menuItems: uqs.map(uq =>
-            <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)}>
+          ({
+            fullText: getToString(uq),
+            menu: <Dropdown.Item data-user-query={uq.id} onClick={() => handleGroupMenuClick(uq, resFO, resTable, cic)} >
               <FontAwesomeIcon icon={"rectangle-list"} className="icon" color="dodgerblue" />
               {getToString(uq)}
             </Dropdown.Item>
+          } as ContextualMenuItem)
           )
         } as MenuItemBlock);
       });

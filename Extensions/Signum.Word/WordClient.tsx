@@ -12,7 +12,7 @@ import { WordTemplateEntity, WordTemplateOperation, WordModelEntity, WordTemplat
 import { QueryModel, MultiEntityModel } from '../Signum.Templating/Signum.Templating'
 import { ButtonBarManager } from '@framework/Frames/ButtonBar';
 import * as ContexualItems from '@framework/SearchControl/ContextualItems'
-import { ContextualItemsContext, MenuItemBlock } from "@framework/SearchControl/ContextualItems";
+import { ContextualItemsContext, MenuItemBlock, ContextualMenuItem } from "@framework/SearchControl/ContextualItems";
 import { ModelEntity } from "@framework/Signum.Entities";
 import { QueryRequest } from "@framework/FindOptions";
 import WordSearchMenu from "./WordSearchMenu";
@@ -138,14 +138,17 @@ export namespace WordClient {
       .then(wts => {
         if (!wts.length)
           return undefined;
-  
+
         return {
           header: WordTemplateEntity.nicePluralName(),
           menuItems: wts.map(wt =>
-            <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)}>
+          ({
+            fullText: getToString(wt),
+            element: < Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)} >
               <FontAwesomeIcon icon={"file-word"} className="icon" />
               {getToString(wt)}
-            </Dropdown.Item>
+            </Dropdown.Item >
+          } as ContextualMenuItem)
           )
         } as MenuItemBlock;
       });

@@ -13,7 +13,7 @@ import * as ContexualItems from './SearchControl/ContextualItems';
 import { ButtonBarManager } from './Frames/ButtonBar';
 import { EntityOperations, OperationButton } from './Operations/EntityOperations';
 import { ContextualOperations } from './Operations/ContextualOperations';
-import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
+import { ContextualItemsContext, MenuItemBlock, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
 import Notify from './Frames/Notify';
@@ -471,7 +471,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
@@ -493,7 +493,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => string | undefined | null | true;
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
@@ -594,12 +594,12 @@ export class ContextualOperationContext<T extends Entity> {
     throw new Error("Pack is not available for Contextual with many selected entities");
   }
 
-  createMenuItems(): React.ReactElement[] {
+  createMenuItems(): ContextualMenuItem[] {
 
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [<ContextualOperations.OperationMenuItem coc={this} />];
+    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={ this} /> } as ContextualMenuItem];
   }
 
   raiseEntityChanged() {

@@ -5,9 +5,15 @@ import SearchControlLoaded from "./SearchControlLoaded";
 import { StyleContext } from '../TypeContext';
 import { Dropdown } from 'react-bootstrap';
 
+
+export interface ContextualMenuItem {
+  fullText?: string; //used for filtering
+  menu : React.ReactElement<any>;
+}
+
 export interface MenuItemBlock {
   header: string;
-  menuItems: React.ReactElement[];
+  menuItems: ContextualMenuItem[];
 }
 
 export interface ContextualItemsContext<T extends Entity> {
@@ -33,23 +39,23 @@ export function clearContextualItems() {
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
 
-export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<React.ReactElement[]> {
+export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<ContextualMenuItem[]> {
 
   const blockPromises = onContextualItems.map(func => func(ctx));
 
   return Promise.all(blockPromises).then(blocks => {
 
-    const result: React.ReactElement[] = []
+    const result: ContextualMenuItem[] = []
     blocks.forEach(block => {
 
       if (block == undefined || block.menuItems == undefined || block.menuItems.length == 0)
         return;
 
       if (result.length)
-        result.push(<Dropdown.Divider />);
+        result.push({ menu: <Dropdown.Divider /> });
 
       if (block.header)
-        result.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
+        result.push({ menu: <Dropdown.Header>{block.header}</Dropdown.Header> });
 
       if (block.header)
         result.splice(result.length, 0, ...block.menuItems);

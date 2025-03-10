@@ -18,7 +18,7 @@ import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
-import { renderContextualItems, ContextualItemsContext, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
+import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
 import ContextMenu from './ContextMenu'
 import { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
@@ -137,7 +137,7 @@ export interface SearchControlLoadedState {
   dragColumnIndex?: number,
   dropBorderIndex?: number,
   showHiddenColumns?: boolean,
-  currentMenuItems?: React.ReactElement[];
+  currentMenuItems?: ContextualMenuItem[];
   dataChanged?: boolean;
 
   contextualMenu?: {
@@ -145,6 +145,7 @@ export interface SearchControlLoadedState {
     columnIndex: number | null;
     columnOffset?: number;
     rowIndex: number | null;
+    filter?: string;
   };
 
   refreshMode?: RefreshMode;
@@ -417,7 +418,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         position: ContextMenu.getPositionEvent(event),
         columnIndex,
         rowIndex,
-        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
+        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
+        filter: undefined
       }
     });
 
@@ -902,7 +904,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <Dropdown.Menu>
             {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
               this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
-                this.state.currentMenuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                this.state.currentMenuItems.map((e, i) => React.cloneElement(e.menu, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
     };
@@ -1079,7 +1081,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearchPage1();
   }
 
-  renderContextualMenu() {
+  renderContextualMenu() { //
 
     var showCM = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
 
@@ -1168,7 +1170,10 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         if (menuItems.length && this.state.currentMenuItems.length)
           menuItems.push(<Dropdown.Divider />);
 
-        menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+        const filter = this.state.contextualMenu?.filter;
+        const filtered = filter ? this.state.currentMenuItems.filter(a => !a.fullText || a.fullText.toLowerCase().contains(filter.toLowerCase())) : this.state.currentMenuItems;
+
+        menuItems.splice(menuItems.length, 0, ...filtered.map(mi => mi.menu));
       }
     }
 
@@ -1176,10 +1181,38 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu position={cm.position} onHide={this.handleContextOnHide} alignRight={(window.innerWidth - cm.position.left) < 200}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} alignRight={(window.innerWidth - cm.position.left) < 200}>
+        {cm.rowIndex != undefined && showCM != "Basic" && this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
+          <AutoFocus>
+            <input
+              type="search"
+              className="form-control form-control-sm"
+              value={this.state?.contextualMenu?.filter}
+              placeholder={SearchMessage.Search.niceToString()}
+              onKeyDown={this.handleMenuFilterKeyDown}
+              onChange={this.handleMenuFilterChange} />
+          </AutoFocus>}
         {menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
       </ContextMenu>
     );
+  }
+
+  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cm = this.state.contextualMenu;
+
+    cm && this.setState({ contextualMenu: Object.assign(cm, { filter: e.currentTarget.value }) })
+  }
+
+  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!e.shiftKey && e.key == KeyNames.arrowDown) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)")
+      if (firstItem && (firstItem as HTMLAnchorElement).focus)
+        firstItem.focus();
+    }
   }
 
   handleCopyClick() {
