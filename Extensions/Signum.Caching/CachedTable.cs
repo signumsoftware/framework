@@ -43,7 +43,8 @@ class CachedTable<T> : CachedTableBase where T : Entity
                 table.Name.ToString(),
                 ctr.currentAlias!.ToString());
 
-            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + ".Id\r\n" + remainingJoins;
+            
+            ctr.remainingJoins = lastPartialJoin == null ? null : lastPartialJoin + ctr.currentAlias + "." +  table.PrimaryKey.Name.SqlEscape(isPostgres) + "\r\n" + remainingJoins;
 
             if (ctr.remainingJoins != null)
                 select += ctr.remainingJoins;

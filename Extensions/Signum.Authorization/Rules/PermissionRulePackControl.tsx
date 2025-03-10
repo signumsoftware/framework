@@ -17,9 +17,7 @@ export default function PermissionRulesPackControl(p: { ctx: TypeContext<Permiss
 
   function renderButtons(bc: ButtonsContext) {
 
-    GraphExplorer.propagateAll(bc.pack.entity);
-
-    const hasChanges = bc.pack.entity.modified;
+    const hasChanges = GraphExplorer.hasChanges(bc.pack.entity); 
 
     return [
       { button: <Button variant="primary" disabled={!hasChanges || p.ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> },

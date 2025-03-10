@@ -48,7 +48,7 @@ export class FileImageLineController<V extends ModifiableEntity & IFile | Lite<I
     }
   }
 
-  handleFileLoaded = (file: IFile & ModifiableEntity): void => {
+  handleFileChanged = (file: IFile & ModifiableEntity): void => {
     this.convert(file as Aprox<V>)
       .then(f => this.setValue(f));
   }
@@ -81,7 +81,7 @@ export const FileImageLine: <V extends (ModifiableEntity & IFile) | Lite<IFile &
             dragAndDrop={c.props.dragAndDrop}
             dragAndDropMessage={c.props.dragAndDropMessage}
             fileType={c.props.fileType}
-            onFileLoaded={c.handleFileLoaded}
+            onFileCreated={c.handleFileChanged}
             typeName={p.ctx.propertyRoute!.typeReference().name}
             buttonCss={p.ctx.buttonClass}
             divHtmlAttributes={{ className: "sf-file-line-new" }} />

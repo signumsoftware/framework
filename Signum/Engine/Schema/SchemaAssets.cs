@@ -160,11 +160,12 @@ public class SchemaAssets
                 if (db != null)
                     throw new InvalidOperationException("Multi-database not supported in postgress");
 
-                return (from v in Database.View<PgProc>()
+                return  (from v in Database.View<PgProc>()
                         let ns = v.Namespace()
                         where !ns.IsInternal()
-                        let definition = PostgresFunctions.pg_get_viewdef(v.oid)
-                        select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), v.proname, isPostgres), definition)).ToList();
+                        where v.Extension() == null
+                        let definition = PostgresFunctions.pg_get_functiondef(v.oid)
+                        select KeyValuePair.Create(new ObjectName(new SchemaName(db, ns.nspname, isPostgres), v.proname, isPostgres), definition)).ToList();                
             }
             else
             {
@@ -177,7 +178,7 @@ public class SchemaAssets
                             select KeyValuePair.Create(new ObjectName(new SchemaName(db, s.name, isPostgres), p.name, isPostgres), m.definition)).ToList();
                 }
             }
-        }).ToDictionary();
+        }).ToDictionaryEx();
 
         return Synchronizer.SynchronizeScript(
             Spacing.Double,
@@ -185,7 +186,7 @@ public class SchemaAssets
             oldProcedures,
             createNew: (name, newProc) => drop ? null : newProc.CreateSql(),
             removeOld: null,
-            mergeBoth: (name, newProc, oldProc) => Clean(newProc.CreateSql().Sql) == Clean(oldProc) ? null :
+            mergeBoth: (name, newProc, oldProc) => Clean(newProc.ProcedureCodeAndArguments) == Clean("(" + oldProc.After("(")) ? null :
             drop ? newProc.DropSql() : newProc.CreateSql()
             );
     }

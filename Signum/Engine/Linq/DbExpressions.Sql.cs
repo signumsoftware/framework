@@ -1,3 +1,4 @@
+using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.DataStructures;
@@ -59,6 +60,7 @@ internal enum DbExpressionType
     PrimaryKey,
     ToDayOfWeek,
     Interval,
+    IsDescendatOf
 }
 
 
@@ -671,15 +673,17 @@ internal enum PostgresFunction
     tstzrange,
     upper,
     lower,
+    subpath,
+    nlevel,
 }
 
 public static class PostgressOperator
 {
     public static string Overlap = "&&";
     public static string Contains = "@>";
+    public static string IsContained = "<@";
 
-    public static string[] All = new[] { Overlap, Contains };
-
+    public static string[] All = new[] { Overlap, Contains, IsContained };
 }
 
 internal enum SqlEnums
@@ -1139,6 +1143,33 @@ internal class LikeExpression : DbExpression
     protected override Expression Accept(DbExpressionVisitor visitor)
     {
         return visitor.VisitLike(this);
+    }
+}
+
+internal class IsDesendantOfExpression : DbExpression
+{
+    public readonly Expression Child;
+    public readonly Expression Parent;
+
+    public IsDesendantOfExpression(Expression child, Expression parent) : base(DbExpressionType.IsDescendatOf, typeof(bool))
+    {
+        if (child == null || child.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("expression is wrong");
+
+        if (parent == null || parent.Type != typeof(SqlHierarchyId))
+            throw new ArgumentException("pattern is wrong");
+        this.Child = child;
+        this.Parent = parent;
+    }
+
+    public override string ToString()
+    {
+        return $"{Child} <@ {Parent}";
+    }
+
+    protected override Expression Accept(DbExpressionVisitor visitor)
+    {
+        return visitor.VisitIsDescendatOf(this);
     }
 }
 

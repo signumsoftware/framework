@@ -14,11 +14,11 @@ public class FilePathEntity : Entity, IFile, IFilePath
         this.FileType = fileType;
     }
 
-    public FilePathEntity(FileTypeSymbol fileType, string path)
+    public FilePathEntity(FileTypeSymbol fileType, string readFromFileName)
         : this(fileType)
     {
-        this.FileName = Path.GetFileName(path)!;
-        this.BinaryFile = File.ReadAllBytes(path);
+        this.FileName = Path.GetFileName(readFromFileName)!;
+        this.BinaryFile = File.ReadAllBytes(readFromFileName);
     }
 
     public FilePathEntity(FileTypeSymbol fileType, string fileName, byte[] fileData)
@@ -66,10 +66,10 @@ public class FilePathEntity : Entity, IFile, IFilePath
         binaryFile = null!;
     }
 
-    public string? Hash { get; private set; }
+    public string? Hash { get; set; }
 
     [Format("N0")]
-    public int FileLength { get; internal set; }
+    public long FileLength { get; set; }
 
     [AutoExpressionField]
     public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
@@ -79,93 +79,12 @@ public class FilePathEntity : Entity, IFile, IFilePath
 
     public FileTypeSymbol FileType { get; internal set; }
 
-    [Ignore]
-    internal PrefixPair _prefixPair;
-    public void SetPrefixPair(PrefixPair prefixPair)
-    {
-        this._prefixPair = prefixPair;
-    }
-
-    public PrefixPair GetPrefixPair()
-    {
-        if (this._prefixPair != null)
-            return this._prefixPair;
-
-        if (CalculatePrefixPair == null)
-            throw new InvalidOperationException("OnCalculatePrefixPair not set");
-
-        this._prefixPair = CalculatePrefixPair(this);
-
-        return this._prefixPair;
-    }
-
-    public static Func<FilePathEntity, PrefixPair> CalculatePrefixPair;
-
-    public string FullPhysicalPath()
-    {
-        var pp = this.GetPrefixPair();
-
-        return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
-    }
-
-    public static Func<string, string> ToAbsolute = str => str;
-
-    public string? FullWebPath()
-    {
-        var pp = this.GetPrefixPair();
-
-        if (string.IsNullOrEmpty(pp.WebPrefix))
-            return null;
-
-        var suffix = "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-
-        if (pp.WebPrefix.Contains("<suffix>"))
-            return pp.WebPrefix.Replace("<suffix>", suffix);
-
-        var result = ToAbsolute(pp.WebPrefix + suffix);
-
-        return result;
-    }
+    public string? FullPhysicalPath() => FileTypeLogic.GetAlgorithm(FileType).GetFullPhysicalPath(this);
+    public string? FullWebPath() => FileTypeLogic.GetAlgorithm(FileType).GetFullWebPath(this);
 
     public override string ToString()
     {
         return "{0} - {1}".FormatWith(FileName, ((long)FileLength).ToComputerSize());
-    }
-
-    protected override void PostRetrieving(PostRetrievingContext ctx)
-    {
-        if (CalculatePrefixPair == null)
-            throw new InvalidOperationException("OnCalculatePrefixPair not set");
-
-        this.GetPrefixPair();
-    }
-}
-
-public class PrefixPair
-{
-    string? physicalPrefix;
-    public string PhysicalPrefix => physicalPrefix ?? throw new InvalidOperationException("No PhysicalPrefix defined");
-
-    public string? WebPrefix { get; set; }
-
-    private PrefixPair()
-    {
-        this.physicalPrefix = null;
-    }
-
-    public PrefixPair(string physicalPrefix)
-    {
-        this.physicalPrefix = physicalPrefix;
-    }
-
-    public static PrefixPair None()
-    {
-        return new PrefixPair();
-    }
-
-    public static PrefixPair WebOnly(string webPrefix)
-    {
-        return new PrefixPair { WebPrefix = webPrefix };
     }
 }
 

@@ -57,7 +57,7 @@ public static class PostgresCatalogSchema
                                     select new DiffColumn
                                     {
                                         Name = c.attname,
-                                        DbType = new AbstractDbType(ToNpgsqlDbType(c.Type()!.typname)),
+                                        DbType = new AbstractDbType(TypeMappings.GetOrThrow(c.Type()!.typname)),
                                         UserTypeName = null,
                                         Nullable = !c.attnotnull,
                                         Collation = null,
@@ -158,63 +158,60 @@ public static class PostgresCatalogSchema
         return ObjectName.Parse(args[1], isPostgres: true);
     }
 
-    public static NpgsqlDbType ToNpgsqlDbType(string str)
+    public static readonly Dictionary<string, NpgsqlDbType> TypeMappings = new Dictionary<string, NpgsqlDbType>
     {
-        switch (str)
-        {
-            case "bool": return NpgsqlDbType.Boolean;
-            case "bytea": return NpgsqlDbType.Bytea;
-            case "char": return NpgsqlDbType.Char;
-            case "int8": return NpgsqlDbType.Bigint;
-            case "int2": return NpgsqlDbType.Smallint;
-            case "float4": return NpgsqlDbType.Real;
-            case "float8": return NpgsqlDbType.Double;
-            case "int2vector": return NpgsqlDbType.Smallint | NpgsqlDbType.Array;
-            case "int4": return NpgsqlDbType.Integer;
-            case "text": return NpgsqlDbType.Text;
-            case "json": return NpgsqlDbType.Json;
-            case "xml": return NpgsqlDbType.Xml;
-            case "point": return NpgsqlDbType.Point;
-            case "lseg": return NpgsqlDbType.LSeg;
-            case "path": return NpgsqlDbType.Path;
-            case "box": return NpgsqlDbType.Box;
-            case "polygon": return NpgsqlDbType.Polygon;
-            case "line": return NpgsqlDbType.Line;
-            case "circle": return NpgsqlDbType.Circle;
-            case "money": return NpgsqlDbType.Money;
-            case "macaddr": return NpgsqlDbType.MacAddr;
-            case "macaddr8": return NpgsqlDbType.MacAddr8;
-            case "inet": return NpgsqlDbType.Inet;
-            case "varchar": return NpgsqlDbType.Varchar;
-            case "date": return NpgsqlDbType.Date;
-            case "time": return NpgsqlDbType.Time;
-            case "timestamp": return NpgsqlDbType.Timestamp;
-            case "timestamptz": return NpgsqlDbType.TimestampTz;
-            case "interval": return NpgsqlDbType.Interval;
-            case "timetz": return NpgsqlDbType.TimestampTz;
-            case "bit": return NpgsqlDbType.Bit;
-            case "varbit": return NpgsqlDbType.Varbit;
-            case "numeric": return NpgsqlDbType.Numeric;
-            case "uuid": return NpgsqlDbType.Uuid;
-            case "tsvector": return NpgsqlDbType.TsVector;
-            case "tsquery": return NpgsqlDbType.TsQuery;
-            case "jsonb": return NpgsqlDbType.Jsonb;
-            case "int4range": return NpgsqlDbType.Range | NpgsqlDbType.Integer;
-            case "numrange": return NpgsqlDbType.Range | NpgsqlDbType.Numeric;
-            case "tsrange": return NpgsqlDbType.Range | NpgsqlDbType.Timestamp;
-            case "tstzrange": return NpgsqlDbType.Range | NpgsqlDbType.TimestampTz;
-            case "daterange": return NpgsqlDbType.Range | NpgsqlDbType.Date;
-            case "int8range": return NpgsqlDbType.Range | NpgsqlDbType.Bigint;
-            case "oid":
-            case "cid":
-            case "xid":
-            case "tid":
-                return (NpgsqlDbType)(-1);
-            default:
-                return (NpgsqlDbType)(-1);
-        }
-
-    }
+        { "bool", NpgsqlDbType.Boolean },
+        { "bytea", NpgsqlDbType.Bytea },
+        { "char", NpgsqlDbType.Char },
+        { "int8", NpgsqlDbType.Bigint },
+        { "int2", NpgsqlDbType.Smallint },
+        { "float4", NpgsqlDbType.Real },
+        { "float8", NpgsqlDbType.Double },
+        { "int2vector", NpgsqlDbType.Smallint | NpgsqlDbType.Array },
+        { "int4", NpgsqlDbType.Integer },
+        { "text", NpgsqlDbType.Text },
+        { "json", NpgsqlDbType.Json },
+        { "xml", NpgsqlDbType.Xml },
+        { "point", NpgsqlDbType.Point },
+        { "lseg", NpgsqlDbType.LSeg },
+        { "path", NpgsqlDbType.Path },
+        { "box", NpgsqlDbType.Box },
+        { "polygon", NpgsqlDbType.Polygon },
+        { "line", NpgsqlDbType.Line },
+        { "circle", NpgsqlDbType.Circle },
+        { "money", NpgsqlDbType.Money },
+        { "macaddr", NpgsqlDbType.MacAddr },
+        { "macaddr8", NpgsqlDbType.MacAddr8 },
+        { "inet", NpgsqlDbType.Inet },
+        { "varchar", NpgsqlDbType.Varchar },
+        { "date", NpgsqlDbType.Date },
+        { "time", NpgsqlDbType.Time },
+        { "timestamp", NpgsqlDbType.Timestamp },
+        { "timestamptz", NpgsqlDbType.TimestampTz },
+        { "interval", NpgsqlDbType.Interval },
+        { "timetz", NpgsqlDbType.TimestampTz },
+        { "bit", NpgsqlDbType.Bit },
+        { "varbit", NpgsqlDbType.Varbit },
+        { "numeric", NpgsqlDbType.Numeric },
+        { "uuid", NpgsqlDbType.Uuid },
+        { "tsvector", NpgsqlDbType.TsVector },
+        { "tsquery", NpgsqlDbType.TsQuery },
+        { "jsonb", NpgsqlDbType.Jsonb },
+        { "int4range", NpgsqlDbType.Range | NpgsqlDbType.Integer },
+        { "numrange", NpgsqlDbType.Range | NpgsqlDbType.Numeric },
+        { "tsrange", NpgsqlDbType.Range | NpgsqlDbType.Timestamp },
+        { "tstzrange", NpgsqlDbType.Range | NpgsqlDbType.TimestampTz },
+        { "daterange", NpgsqlDbType.Range | NpgsqlDbType.Date },
+        { "int8range", NpgsqlDbType.Range | NpgsqlDbType.Bigint },
+        { "ltree", NpgsqlDbType.LTree },
+        { "name", NpgsqlDbType.Name },
+        { "oidvector", NpgsqlDbType.Oidvector },
+        { "pg_lsn", NpgsqlDbType.PgLsn },
+        { "oid", (NpgsqlDbType)(-1) },
+        { "cid", (NpgsqlDbType)(-1) },
+        { "xid", (NpgsqlDbType)(-1) },
+        { "tid", (NpgsqlDbType)(-1) }
+    };
 
     public static HashSet<SchemaName> GetSchemaNames(List<DatabaseName?> list)
     {

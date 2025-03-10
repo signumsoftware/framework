@@ -167,7 +167,7 @@ export namespace Operations {
   export namespace Defaults {
 
     export function isSave(oi: OperationInfo): boolean {
-      return oi.key.endsWith(".Save");
+      return oi.operationType == "Execute" && oi.canBeModified == true && oi.key.endsWith(".Save");
     }
 
     export function defaultSetterConfig(coc: ContextualOperationContext<any>): SettersConfig {
@@ -788,7 +788,7 @@ export class EntityOperationContext<T extends Entity> {
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
   onExecuteSuccess?: (pack: EntityPack<T>) => Promise<void> | undefined;
-  onExecuteSuccess_Default = (pack: EntityPack<T>): void  => {
+  onExecuteSuccess_Default = async (pack: EntityPack<T>): Promise<void> => {
     this.frame.onReload(pack);
     if (pack?.entity.id != null)
       Navigator.raiseEntityChanged(pack.entity);

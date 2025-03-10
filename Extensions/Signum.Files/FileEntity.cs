@@ -37,11 +37,6 @@ public class FileEntity : ImmutableEntity, IFile
         return "{0} - {1}".FormatWith(FileName, BinaryFile?.Let(bf => StringExtensions.ToComputerSize(bf.Length)) ?? "??");
     }
 
-    public string? FullWebPath()
-    {
-        return null;
-    }
-
     public XElement ToXML(string elementName)
     {
         return new XElement(elementName,

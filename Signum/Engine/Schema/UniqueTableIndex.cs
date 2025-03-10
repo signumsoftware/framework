@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Signum.Engine.Sync;
+using Signum.Entities.Reflection;
 
 namespace Signum.Engine.Maps;
 
@@ -49,18 +50,20 @@ public class TableIndex
 
         int maxLength = MaxNameLength();
 
-        if (Unique)
-            return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
-    
-        if(Clustered)
-            return StringHashEncoder.ChopHash("CIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        var isPostgres = tableName.IsPostgres;
 
-        return StringHashEncoder.ChopHash("IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        if (Unique)
+            return StringHashEncoder.ChopHash((isPostgres ? "uix_{0}_{1}" :  "UIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+
+        if (Clustered)
+            return StringHashEncoder.ChopHash((isPostgres ? "cix_{0}_{1}" : "CIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+
+        return StringHashEncoder.ChopHash((isPostgres ? "ix_{0}_{1}" : "IX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
     }
 
     internal static string GetPrimaryKeyName(ObjectName tableName)
     {
-        return "PK_" + tableName.Schema.Name + "_" + tableName.Name;
+        return StringHashEncoder.ChopHash((tableName.IsPostgres ? "pk_" : "PK_") + tableName.Schema.Name + "_" + tableName.Name, MaxNameLength());
     }
 
     protected static int MaxNameLength()
@@ -100,7 +103,7 @@ public class TableIndex
 
             var maxSize = MaxNameLength();
 
-            return StringHashEncoder.ChopHash("VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
+            return StringHashEncoder.ChopHash((this.Table.Name.IsPostgres ? "vix_{0}_{1}" : "VIX_{0}_{1}").FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
         }
     }
 

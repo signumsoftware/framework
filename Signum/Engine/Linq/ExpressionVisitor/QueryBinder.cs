@@ -2126,8 +2126,8 @@ internal class QueryBinder : ExpressionVisitor
 
                                     return m.Member.Name switch
                                     {
-                                        "Min" => interval.Min ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.lower.ToString(), new[] { interval.PostgresRange! }),
-                                        "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }),
+                                        "Min" => interval.Min ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.lower.ToString(), new[] { interval.PostgresRange! }).SetMetadata(ExpressionMetadata.UTC),
+                                        "Max" => interval.Max ?? new SqlFunctionExpression(interval.ElementType, null, PostgresFunction.upper.ToString(), new[] { interval.PostgresRange! }).SetMetadata(ExpressionMetadata.UTC),
                                         _ => throw new InvalidOperationException("The member {0} of MListElement is not accesible on queries".FormatWith(m.Member)),
                                     };
                                 }

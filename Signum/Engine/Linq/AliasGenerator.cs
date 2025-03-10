@@ -42,13 +42,9 @@ public class AliasGenerator
 
     public Alias NextTableAlias(string tableName)
     {
-        string? abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
-            tableName.Any(a => a == '_') ? new string(tableName.SplitNoEmpty('_').Select(s => s[0]).ToArray()) : null;
-
-        if (!abv.HasText())
-            abv = tableName.TryStart(3).ToLower();
-        else
-            abv = abv.ToLower();
+        string abv = tableName.Any(char.IsUpper) ? new string(tableName.Where(c => char.IsUpper(c)).ToArray()) :
+            tableName.Contains('_') ? new string(tableName.SplitNoEmpty('_').Select(s => s[0]).ToArray()) :
+            tableName.Substring(0, 1);
 
         return GetUniqueAlias(abv);
     }
