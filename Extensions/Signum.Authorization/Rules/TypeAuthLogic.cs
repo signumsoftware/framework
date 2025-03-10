@@ -199,7 +199,7 @@ public static partial class TypeAuthLogic
             if (max < requested)
             {
                 if (ident.IsNew)
-                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToSave0.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName()));
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo01.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName()));
                 else
                     throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
             }

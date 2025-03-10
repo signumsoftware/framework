@@ -694,6 +694,33 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
         }).ToList();
     }
 
+    public void SyncMListDuplicates<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
+       where K : notnull
+    {
+
+        var alreadyDic = this.innerList.GroupToDictionary(a => keySelectorOld(a.Element));
+
+        this.innerList = newList.Select(e =>
+        {
+            var key = keySelectorNew(e);
+            if (alreadyDic.TryGetValue(key, out var already))
+            {
+                var first = already.First();
+                already.RemoveAt(0);
+                if (already.Count == 0)
+                    alreadyDic.Remove(key);
+
+                assign(first.Element, e);
+                return first;
+            }
+            else
+            {
+                var created = assign(default, e);
+                return new RowIdElement(created);
+            }
+        }).ToList();
+    }
+
     public bool AssignMList(MList<T> list)
     {
         return ((IMListPrivate<T>)this).AssignMList(((IMListPrivate<T>)list).InnerList);
