@@ -26,6 +26,7 @@ Thumbs.db
 obj/
 [Rr]elease*/
 _ReSharper*/
+node_modules/
 [Tt]est[Rr]esult*
 *.js.map
 *.js
