@@ -227,7 +227,8 @@ export namespace UserChartClient {
         startDate: await parseDate(ts.startDate),
         endDate: await parseDate(ts.endDate),
         timeSeriesStep: ts.timeSeriesStep,
-        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep,
+        splitQueries: ts.splitQueries,
       })});
       return applyUserChart(cs, uq, entity);
     }
