@@ -1571,7 +1571,8 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
     NpgsqlDbType? postgreSql;
     public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
 
-    public bool IsPostgres => postgreSql.HasValue;
+    public bool HasPostgres => postgreSql.HasValue;
+    public bool HasSqlServer => sqlServer.HasValue;
 
     public AbstractDbType(SqlDbType sqlDbType)
     {

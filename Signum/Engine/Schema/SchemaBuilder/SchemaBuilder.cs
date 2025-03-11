@@ -836,7 +836,7 @@ public class SchemaBuilder
     int? maxNameLength;
     string FixNameLength(string name) => StringHashEncoder.ChopHash(name, (maxNameLength ??= Connector.Current.MaxNameLength));
 
-    string Idiomatic(string name) => IsPostgres ? name.PascalToSnake() : name;
+    public string Idiomatic(string name) => IsPostgres ? name.PascalToSnake() : name;
 
     protected virtual FieldImplementedByAll GenerateFieldImplementedByAll(PropertyRoute route, ITable table, NameSequence preName, bool forceNull)
     {
