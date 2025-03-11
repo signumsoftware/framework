@@ -62,10 +62,6 @@ public class SchemaBuilder
         if (includeFields != null)
         {
             index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
-            if (table.SystemVersioned != null)
-            {
-                index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
-            }
         }
 
         return index;
@@ -87,10 +83,6 @@ public class SchemaBuilder
         if (includeFields != null)
         {
             index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
-            if (table.SystemVersioned != null)
-            {
-                index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
-            }
         }
 
         AddIndex(index);
@@ -129,10 +121,6 @@ public class SchemaBuilder
         if (includeFields != null)
         {
             index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
-            if (table.SystemVersioned != null)
-            {
-                index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
-            }
         }
 
         return index;
@@ -156,10 +144,6 @@ public class SchemaBuilder
         if (includeFields != null)
         {
             index.IncludeColumns = IndexKeyColumns.Split(table, includeFields);
-            if (table.SystemVersioned != null)
-            {
-                index.IncludeColumns = index.IncludeColumns.Concat(table.SystemVersioned.Columns()).ToArray();
-            }
         }
 
         return index;
