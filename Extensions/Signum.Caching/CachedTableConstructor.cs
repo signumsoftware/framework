@@ -46,7 +46,7 @@ internal class CachedTableConstructor
 
     internal Type GetColumnType(IColumn column)
     {
-        if (column.DbType.IsPostgres && column.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
+        if (column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
             return typeof(string);
 
         return column.Type;
@@ -121,7 +121,7 @@ internal class CachedTableConstructor
         if (field is FieldValue fv)
         {
             var value = GetTupleProperty(fv);
-            if (fv.DbType.IsPostgres && fv.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
+            if (fv.DbType.HasPostgres && fv.DbType.PostgreSql == NpgsqlTypes.NpgsqlDbType.LTree)
             {
                 if (field.FieldType == typeof(SqlHierarchyId) && value.Type == typeof(string))
                     return Expression.Call(miFromSortableString, value);
