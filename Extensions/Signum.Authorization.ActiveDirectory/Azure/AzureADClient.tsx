@@ -10,6 +10,7 @@ import { classes } from "@framework/Globals";
 import { QueryString } from "@framework/QueryString";
 import MessageModal from "@framework/Modals/MessageModal";
 import { AuthError } from "@azure/msal-browser";
+import ErrorModal from "../../../Signum/React/Modals/ErrorModal";
 
 export namespace AzureADClient {
 
@@ -103,7 +104,7 @@ export namespace AzureADClient {
         return;
       }
 
-      signOut().then(() => { throw e; });
+      ErrorModal.showErrorModal(e, () => signOut());
     }
   }
 

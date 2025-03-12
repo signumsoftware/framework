@@ -15,12 +15,13 @@ import { namespace } from 'd3';
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends Modals.IModalProps<undefined> {
   error: any;
+  beforeOkClicked?:()=> Promise<void>
 }
 
 const ErrorModal: {
   (p: ErrorModalProps): React.JSX.Element;
   register: () => void;
-  showErrorModal: (error: any) => Promise<void>;
+  showErrorModal: (error: any, beforeOkClicked?: ()=> Promise<void>) => Promise<void>;
 } = function (p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
@@ -29,7 +30,9 @@ const ErrorModal: {
     p.onExited!(undefined);
   }
 
-  function handleCloseClicked() {
+  async function handleCloseClicked() {
+    await p.beforeOkClicked?.();
+
     setShow(false);
   }
 
@@ -196,7 +199,7 @@ ErrorModal.register = () => {
   };
 }
 
-ErrorModal.showErrorModal = (error: any): Promise<void> => {
+ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): Promise<void> => {
   if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
@@ -214,7 +217,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       style: "warning"
     }).then(() => undefined);
 
-  return Modals.openModal<void>(<ErrorModal error={error} />);
+  return Modals.openModal<void>(<ErrorModal error={error} beforeOkClicked={beforeOkClicked} />);
 }
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
