@@ -323,6 +323,7 @@ export interface ChartTimeSeriesEmbedded extends Entities.EmbeddedEntity {
   timeSeriesUnit: DynamicQuery.TimeSeriesUnit | null;
   timeSeriesStep: number | null;
   timeSeriesMaxRowsPerStep: number | null;
+  splitQueries: boolean;
 }
 
 export namespace D3ChartScript {

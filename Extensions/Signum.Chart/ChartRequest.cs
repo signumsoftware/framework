@@ -128,6 +128,8 @@ public class ChartTimeSeriesEmbedded : EmbeddedEntity
     [NumberIsValidator(ComparisonType.GreaterThan, 0)]
     public int? TimeSeriesMaxRowsPerStep { get; set; }
 
+    public bool SplitQueries { get; set; }
+
     internal ChartTimeSeriesEmbedded? FromXml(XElement xml)
     {
         StartDate = xml.Attribute("StartDate")?.Value;
@@ -135,6 +137,7 @@ public class ChartTimeSeriesEmbedded : EmbeddedEntity
         TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
         TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
         TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
+        SplitQueries = xml.Attribute("SplitQueries")?.Value.ToBool() ?? false;
         return this;
     }
 
@@ -145,7 +148,8 @@ public class ChartTimeSeriesEmbedded : EmbeddedEntity
             EndDate == null ? null : new XAttribute("EndDate", EndDate),
             TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
             TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
-            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!)
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!),
+            SplitQueries == false ? null : new XAttribute("SplitQueries", SplitQueries.ToString()!)
         );
     }
 

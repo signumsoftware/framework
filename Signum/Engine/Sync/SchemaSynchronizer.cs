@@ -20,7 +20,7 @@ public static class SchemaSynchronizer
 
         var sqlBuilder = Connector.Current.SqlBuilder;
 
-
+        var isPostgres = sqlBuilder.IsPostgres;
 
         Dictionary<string, ITable> modelTables = s.GetDatabaseTables().Where(t => !s.IsExternalDatabase(t.Name.Schema.Database)).ToDictionaryEx(a => a.Name.ToString(), "schema tables");
         var modelTablesHistory = modelTables.Values.Where(a => a.SystemVersioned != null).ToDictionaryEx(a => a.SystemVersioned!.TableName.ToString(), "history schema tables");
@@ -29,7 +29,7 @@ public static class SchemaSynchronizer
         var modelPartitionSchemas = modelTables.Values.Where(a => a.PartitionScheme != null).Select(a => (db: a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct().ToDictionary(a => (a.db, name: a.scheme.Name), a => a.scheme);
         var modelPartitionFunction = modelPartitionSchemas.Select(kvp => (kvp.Key.db, kvp.Value.PartitionFunction)).Distinct().ToDictionary(a => (a.db, name: a.PartitionFunction.Name), a => a.PartitionFunction);
 
-        Dictionary<string, DiffTable> databaseTables = Schema.Current.Settings.IsPostgres ?
+        Dictionary<string, DiffTable> databaseTables = isPostgres ?
             PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
 
@@ -208,7 +208,7 @@ public static class SchemaSynchronizer
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: null,
-                        removeOld: (i, dix) => dix.IsControlledIndex || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
+                        removeOld: (i, dix) => dix.IsControlledIndex(isPostgres) || dix.Columns.Any(IsColumnRemovedOrModified) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
@@ -229,7 +229,7 @@ public static class SchemaSynchronizer
                         modelIxs.Where(kvp => kvp.Value.GetType() == typeof(TableIndex) && !kvp.Value.PrimaryKey && !kvp.Value.Unique).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary && kvp.Value.Type != DiffIndexType.Heap).ToDictionary(),
                         createNew: null,
-                        removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex ? sqlBuilder.DropIndex(dif.Name, dix) : null,
+                        removeOld: (i, dix) => dix.Columns.Any(c => removedColums.Contains(c.ColumnName)) || dix.IsControlledIndex(isPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.DropIndex(dif.Name, dix) : null
                         );
 
@@ -549,7 +549,7 @@ public static class SchemaSynchronizer
                         modelIxs.Where(kvp => !kvp.Value.PrimaryKey).ToDictionary(),
                         dif.Indices.Where(kvp => !kvp.Value.IsPrimary).ToDictionary(),
                         createNew: (i, mix) => mix.Unique || mix is FullTextTableIndex || mix.Columns.Any(isNew) || ShouldCreateMissingIndex(mix, tab, replacements) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) : null,
-                        removeOld: (i, dix) => !dix.IsControlledIndex && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
+                        removeOld: (i, dix) => !dix.IsControlledIndex(isPostgres) && dix.Columns.Any(IsColumnRemovedOrModified) && SafeConsole.Ask($"Recreate non-controlled index {dix.IndexName}?") ? sqlBuilder.RecreateDiffIndex(tab, dix) : null,
                         mergeBoth: (i, mix, dix) => !dix.IndexEquals(dif, mix, sqlBuilder.IsPostgres) ? sqlBuilder.CreateIndex(mix, checkUnique: replacements) :
                             mix.IndexName != dix.IndexName ? sqlBuilder.RenameIndex(tab.Name, dix.IndexName, mix.IndexName) : null);
 
@@ -845,7 +845,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
             column.DbType.IsDate() ? "GetDate()" :
             column.DbType.IsGuid() ? "NEWID()" :
         column.DbType.IsTime() ? "'00:00'" :
-        column.DbType.IsPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :
+        column.DbType.HasPostgres && column.DbType.PostgreSql == NpgsqlDbType.TimestampTzRange ? "tstzrange(now(), 'infinity', '[)')" :
             "?");
 
         string defaultValue = rep.Interactive ? SafeConsole.AskString($"Default value for '{table.Name.Name}.{column.Name}'? ([Enter] for {typeDefault} or 'force' if there are no {(forNewColumn ? "rows" : "nulls")}) ", stringValidator: str => null) : "";

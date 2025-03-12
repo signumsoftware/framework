@@ -1,5 +1,6 @@
 using Npgsql;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace Signum.Cache.Broadcast;
 
@@ -9,60 +10,79 @@ public class PostgresBroadcast : IServerBroadcast
 
     public void Send(string methodName, string argument)
     {
-        Executor.ExecuteNonQuery($"NOTIFY table_changed, '{methodName}/{Process.GetCurrentProcess().Id}/{argument}'");
+        Executor.ExecuteNonQuery($"NOTIFY signum_brodcast, '{methodName}/{Process.GetCurrentProcess().Id}/{argument}'");
     }
 
-    public void Start()
+    public bool Running { get; private set; }
+    object syncLock = new object();
+    public void StartIfNecessary()
     {
-        Task.Run(() =>
+        if (Running)
+            return;
+
+        Task.Factory.StartNew(() =>
         {
-            try
+            lock (syncLock)
             {
-                var conn = (NpgsqlConnection)Connector.Current.CreateConnection();
-                conn.Open();
-                conn.Notification += (o, e) =>
+                if(Running) 
+                    return;
+
+                try
                 {
-                    try
+                    var conn = (NpgsqlConnection)Connector.Current.CreateConnection();
+                    conn.Open();
+                    conn.Notification += (o, e) =>
                     {
-                        var methodName = e.Payload.Before('/');
-                        var after = e.Payload.After("/");
+                        try
+                        {
+                            var methodName = e.Payload.Before('/');
+                            var after = e.Payload.After("/");
 
-                        var pid = int.Parse(after.Before("/"));
-                        var arguments = after.After("/");
+                            var pid = int.Parse(after.Before("/"));
+                            var arguments = after.After("/");
 
-                        if (Process.GetCurrentProcess().Id != pid)
-                            Receive?.Invoke(methodName, arguments);
-                    }
-                    catch (Exception ex)
+                            if (Process.GetCurrentProcess().Id != pid)
+                                Receive?.Invoke(methodName, arguments);
+                        }
+                        catch (Exception ex)
+                        {
+                            ex.LogException(a => a.ControllerName = nameof(PostgresBroadcast));
+                        }
+                    };
+
+                    using (var cmd = new NpgsqlCommand("LISTEN signum_brodcast", conn))
                     {
-                        ex.LogException(a => a.ControllerName = nameof(PostgresBroadcast));
+                        cmd.ExecuteNonQuery();
                     }
-                };
 
-                using (var cmd = new NpgsqlCommand("LISTEN table_changed", conn))
+                    Running = true;
+                    while (true)
+                    {
+                        conn.Wait();   // Thread will block here
+                    }
+                }
+                catch (Exception e)
                 {
-                    cmd.ExecuteNonQuery();
+                    if (e is PostgresException pge && pge.SqlState == "57P01") //: terminating connection due to administrator command
+                    {
+                        Receive?.Invoke(CacheLogic.Method_InvalidateAllTable, "nodb");
+                    }
+
+                    e.LogException(a =>
+                    {
+                        a.ControllerName = nameof(PostgresBroadcast);
+                        a.ActionName = "Fatal";
+                    });
                 }
 
-                while (true)
-                {
-                    conn.Wait();   // Thread will block here
-                }
+                Running = false;
             }
-            catch (Exception e)
-            {
-                e.LogException(a =>
-                {
-                    a.ControllerName = nameof(PostgresBroadcast);
-                    a.ActionName = "Fatal";
-                });
-            }
-        });
+        }, TaskCreationOptions.LongRunning);
     }
 
 
     public override string ToString()
     {
-        return $"{nameof(PostgresBroadcast)}()";
+        return $"{nameof(PostgresBroadcast)}(Running = {Running})";
     }
 }

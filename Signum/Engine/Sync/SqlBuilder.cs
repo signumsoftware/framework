@@ -467,8 +467,21 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
 
         var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
 
-        return Convert.ToInt32(Executor.ExecuteScalar(
-$@"SELECT Count(*) FROM {oldTableName}
+        if (isPostgres) // min not defined for uuid
+        {
+            return Convert.ToInt32(Executor.ExecuteScalar(
+    $@"SELECT Count(*) FROM {oldTableName}
+WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
+(
+    SELECT DISTINCT ON ({oldColumns}) {oldPrimaryKey.SqlEscape(IsPostgres)}
+    FROM {oldTableName}
+    {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
+){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
+        }
+        else
+        {
+            return Convert.ToInt32(Executor.ExecuteScalar(
+    $@"SELECT Count(*) FROM {oldTableName}
 WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
     SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
@@ -476,6 +489,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
 ){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
+        }
     }
 
     public SqlPreCommand? RemoveDuplicatesIfNecessary(TableIndex uniqueIndex, Replacements rep)
@@ -516,7 +530,19 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 
     private SqlPreCommand RemoveDuplicates(TableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
     {
-        return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
+        if (isPostgres) //Postgress doesn't have min on uuid
+        {
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
+WHERE {primaryKey.Name} NOT IN
+(
+    SELECT DISTINCT ON ({columns}) {primaryKey.Name}
+    FROM {uniqueIndex.Table.Name}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+        }
+        else
+        {
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
@@ -524,6 +550,7 @@ WHERE {primaryKey.Name} NOT IN
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
     GROUP BY {columns}
 ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+        }
     }
 
     public SqlPreCommand CreateIndexBasic(TableIndex index, bool forHistoryTable)
