@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Identity.Client;
 using Signum.Engine.Sync;
 using Signum.Entities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps;
 
@@ -183,6 +185,35 @@ public class IndexKeyColumns
         var members = Reflector.GetMemberListBase(body);
         if (members.Any(a => ignoreMembers.Contains(a.Name)))
             members = members.Where(a => !ignoreMembers.Contains(a.Name)).ToArray();
+
+        if(members.FirstEx() is MethodInfo mi && mi.Name == nameof(SystemTimeExtensions.SystemPeriod))
+        {
+            var table = (ITable)finder;
+            var sv = table.SystemVersioned;
+
+            if (sv == null)
+                throw new InvalidOperationException($"Table {table.Name} is not system versioned");
+
+            if (members.Length == 1)
+            {
+                if (sv.PostgresSysPeriodColumnName != null)
+                    return [table.Columns[sv.PostgresSysPeriodColumnName!]];
+                else return [
+                    table.Columns[sv.StartColumnName!],
+                    table.Columns[sv.EndColumnName!]
+                ];
+            }else
+            {
+                var columnName = members[1].Name switch
+                {
+                    nameof(NullableInterval<DateTime>.Min) => sv.StartColumnName!,
+                    nameof(NullableInterval<DateTime>.Max) => sv.EndColumnName!,
+                    string other => throw new UnexpectedValueException(other)
+                };
+
+                return [table.Columns[columnName]];
+            }
+        }
 
         Field f = Schema.FindField(finder, members);
 

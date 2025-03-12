@@ -12,11 +12,6 @@ import { getToString } from '@framework/Signum.Entities'
 import { UserChartEntity } from '../UserChart/Signum.Chart.UserChart'
 import { UserQueryMessage } from '../../Signum.UserQueries/Signum.UserQueries'
 import FilterBuilderEmbedded from '../../Signum.UserAssets/Templates/FilterBuilderEmbedded'
-import { ChartTimeSeriesEmbedded } from '../Signum.Chart'
-import { DateTime } from 'luxon'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import ChartTimeSeries from '../Templates/ChartTimeSeries'
-import { UserChartClient } from './UserChartClient'
 
 const CurrentEntityKey = "[CurrentEntity]";
 export default function UserChart(p : { ctx: TypeContext<UserChartEntity> }): React.JSX.Element | null {

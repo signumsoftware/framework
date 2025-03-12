@@ -897,7 +897,9 @@ public enum QueryTokenDateMessage
     Every01,
 
     [Description("{0} steps x {1} rows = {2} total rows (aprox)")]
-    _0Steps1Rows2TotalRowsAprox
+    _0Steps1Rows2TotalRowsAprox,
+
+    SplitQueries,
 }
 
 [InTypeScript(true), DescriptionOptions(DescriptionOptions.All)]

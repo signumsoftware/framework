@@ -98,7 +98,13 @@ export default function ChartBuilder(p: ChartBuilderProps): React.JSX.Element {
               
               if(e.target.checked) {
                 if(!chart.chartTimeSeries)
-                  chart.chartTimeSeries = ChartTimeSeriesEmbedded.New({timeSeriesStep: 1, timeSeriesUnit: 'Month', startDate: DateTime.now().startOf('year').toISODate(), endDate: DateTime.now().endOf('year').toISODate()});
+                  chart.chartTimeSeries = ChartTimeSeriesEmbedded.New({
+                    timeSeriesStep: 1,
+                    timeSeriesUnit: 'Month',
+                    startDate: DateTime.now().startOf('year').toISODate(),
+                    endDate: DateTime.now().toISODate(),
+                    splitQueries: true,
+                  });
               } else {
                 chart.chartTimeSeries = null;
               }
