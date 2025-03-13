@@ -6,8 +6,6 @@ import { classes } from '@framework/Globals'
 import * as AppContext from '@framework/AppContext'
 import { Navigator } from '@framework/Navigator'
 import { Finder } from '@framework/Finder'
-import ContextMenu from '@framework/SearchControl/ContextMenu'
-import { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
 import { Operations } from '@framework/Operations'
 import { SearchMessage, JavascriptMessage, EntityControlMessage, toLite, liteKey, getToString, Lite } from '@framework/Signum.Entities'
 import { TreeViewerMessage, TreeEntity, TreeOperation, MoveTreeModel, TreeMessage } from './Signum.Tree'
@@ -15,7 +13,8 @@ import { FilterOptionParsed, ColumnOptionParsed, QueryDescription, SubTokensOpti
 import FilterBuilder from "@framework/SearchControl/FilterBuilder";
 import { ISimpleFilterBuilder } from "@framework/Search";
 import { is } from "@framework/Signum.Entities";
-import { ContextualItemsContext, renderContextualItems } from "@framework/SearchControl/ContextualItems";
+import ContextMenu, { ContextMenuPosition } from '@framework/SearchControl/ContextMenu'
+import { ContextualItemsContext, ContextualMenuItem, renderContextualItems, SearchableMenuItem } from "@framework/SearchControl/ContextualItems";
 import { Entity } from "@framework/Signum.Entities";
 import { tryGetMixin } from "@framework/Signum.Entities";
 import { Dropdown, DropdownButton } from 'react-bootstrap';
@@ -24,6 +23,8 @@ import { QueryTokenString, getTypeInfo, tryGetOperationInfo } from '@framework/R
 import * as Hooks from '@framework/Hooks'
 import { DisabledMixin } from '@framework/Signum.Basics'
 import SearchControlLoaded, { ColumnParsed } from '@framework/SearchControl/SearchControlLoaded';
+import { AutoFocus } from '../../Signum/React/Components/AutoFocus';
+import { KeyNames } from '../../Signum/React/Components/Basic';
 
 interface TreeViewerProps {
   treeOptions: TreeOptions;
@@ -66,9 +67,10 @@ interface TreeViewerState {
   draggedKind?: "Move" | "Copy";
   draggedOver?: DraggedOver;
 
-  currentMenuItems?: React.ReactElement<any>[];
+  currentMenuItems?: ContextualMenuItem[];
   contextualMenu?: {
     position: ContextMenuPosition;
+    filter?: string;
   };
 }
 
@@ -278,7 +280,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({
       selectedNode: n,
       contextualMenu: {
-        position: ContextMenu.getPositionEvent(e)
+        position: ContextMenu.getMouseEventPosition(e),
+        filter: undefined
       }
     }, () => this.loadMenuItems());
   }
@@ -309,13 +312,41 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       return null;
 
     return (
-      <ContextMenu position={cm.position} onHide={this.handleContextOnHide}>
-        {this.renderMenuItems().map((e, i) => React.cloneElement(e, { key: i }))}
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
+        {this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
+          <AutoFocus>
+            <input
+              type="search"
+              className="form-control form-control-sm"
+              value={this.state?.contextualMenu?.filter}
+              placeholder={SearchMessage.Search.niceToString()}
+              onKeyDown={this.handleMenuFilterKeyDown}
+              onChange={this.handleMenuFilterChange} />
+          </AutoFocus>}
+        {this.renderMenuItems().map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
       </ContextMenu>
     );
   }
 
-  renderMenuItems(): React.ReactElement<any>[] {
+  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const cm = this.state.contextualMenu;
+
+    cm && this.setState({ contextualMenu: Object.assign(cm, { filter: e.currentTarget.value }) })
+  }
+
+  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) => {
+    if (!e.shiftKey && e.key == KeyNames.arrowDown) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)")
+      if (firstItem && (firstItem as HTMLAnchorElement).focus)
+        firstItem.focus();
+    }
+  }
+
+  renderMenuItems(): ContextualMenuItem[] {
 
     let type = this.props.treeOptions.typeName;
 
@@ -324,7 +355,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       tryGetOperationInfo(TreeOperation.CreateChild, type) && <Dropdown.Item onClick={this.handleAddChildren}><FontAwesomeIcon icon="square-caret-right" />&nbsp;{TreeViewerMessage.AddChild.niceToString()}</Dropdown.Item>,
       tryGetOperationInfo(TreeOperation.CreateNextSibling, type) && <Dropdown.Item onClick={this.handleAddSibling}><FontAwesomeIcon icon="square-caret-down" />&nbsp;{TreeViewerMessage.AddSibling.niceToString()}</Dropdown.Item>,
       <Dropdown.Item onClick={this.handleCopyClick}><FontAwesomeIcon icon="copy" />&nbsp;{SearchMessage.Copy.niceToString()}</Dropdown.Item>,
-    ].filter(a => a != false) as React.ReactElement<any>[];
+    ].filter(a => a != false) as ContextualMenuItem[];
 
     if (this.state.currentMenuItems == undefined) {
       menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
@@ -332,7 +363,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       if (menuItems.length && this.state.currentMenuItems.length)
         menuItems.push(<Dropdown.Divider />);
 
-      menuItems.splice(menuItems.length, 0, ...this.state.currentMenuItems);
+      const filter = this.state.contextualMenu?.filter;
+      const filtered = filter ? this.state.currentMenuItems.filter(mi => !(mi as SearchableMenuItem).fullText || (mi as SearchableMenuItem).fullText.toLowerCase().contains(filter.toLowerCase())) : this.state.currentMenuItems;
+
+      menuItems.splice(menuItems.length, 0, ...filtered.map(mi => (mi as SearchableMenuItem).menu ?? mi));      
     }
 
     return menuItems;
@@ -537,7 +571,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           <Dropdown.Menu>
             {menuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
               menuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
-                menuItems.map((e, i) => React.cloneElement(e, { key: i }))}
+                menuItems.map((mi, i) => React.cloneElement((mi as SearchableMenuItem).menu ?? mi, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
         <button className="btn btn-light" onClick={this.handleExplore} ><FontAwesomeIcon icon="magnifying-glass" /> &nbsp; {TreeMessage.ListView.niceToString()}</button>

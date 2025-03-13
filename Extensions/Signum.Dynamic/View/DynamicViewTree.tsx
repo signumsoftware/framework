@@ -54,7 +54,7 @@ export function DynamicViewTree(p: DynamicViewTreeProps) {
 
     p.rootNode.context.setSelectedNode(n);
     setContextualMenu({
-      position: ContextMenu.getPositionEvent(e)
+      position: ContextMenu.getMouseEventPosition(e)
     });
   }
 

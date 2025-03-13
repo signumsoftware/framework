@@ -1160,7 +1160,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       }
     }
 
-    if (cm.rowIndex != undefined && showCM != "Basic") {
+    const renderEntityMenuItems = cm.rowIndex != undefined && showCM != "Basic";
+
+    if (renderEntityMenuItems) {
 
       menuItems.push(<Dropdown.Item className="sf-paste-menu-item" onClick={() => this.handleCopyClick()}>
         <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
@@ -1184,7 +1186,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
-        {cm.rowIndex != undefined && showCM != "Basic" && this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
+        {renderEntityMenuItems && this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
           <AutoFocus>
             <input
               type="search"

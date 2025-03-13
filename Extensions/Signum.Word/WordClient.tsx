@@ -144,7 +144,7 @@ export namespace WordClient {
           menuItems: wts.map(wt =>
           ({
             fullText: getToString(wt),
-            element: < Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)} >
+            menu: <Dropdown.Item data-operation={wt.EntityType} onClick={() => handleMenuClick(wt, ctx)} >
               <FontAwesomeIcon icon={"file-word"} className="icon" />
               {getToString(wt)}
             </Dropdown.Item >
