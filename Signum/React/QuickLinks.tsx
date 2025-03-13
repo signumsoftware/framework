@@ -342,7 +342,7 @@ export abstract class QuickLink<T extends Entity> {
 
   toDropDownItem(ctx: QuickLinkContext<T>) {
     return (
-      <Dropdown.Item data-key={this.key} className="sf-quick-link" onMouseUp={e => this.handleClick(ctx, e)}>
+      <Dropdown.Item data-key={this.key} className="sf-quick-link" onClick={e => this.handleClick(ctx, e)}>
         {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );
