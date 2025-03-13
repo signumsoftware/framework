@@ -19,6 +19,11 @@ export interface MenuItemBlock {
   menuItems: ContextualMenuItem[];
 }
 
+export interface ContextMenuPack {
+  items: ContextualMenuItem[],
+  showSearch: boolean;
+}
+
 export interface ContextualItemsContext<T extends Entity> {
   lites: Lite<T>[];
   queryDescription: QueryDescription;
@@ -42,7 +47,7 @@ export function clearContextualItems() {
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
 
-export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<{ items: ContextualMenuItem[], showSearch: boolean} > {
+export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<ContextMenuPack> {
 
   const blockPromises = onContextualItems.map(func => func(ctx));
   return Promise.all(blockPromises).then(blocks => {

@@ -18,7 +18,7 @@ import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
-import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem } from './ContextualItems'
+import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem, ContextMenuPack } from './ContextualItems'
 import ContextMenu, { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
@@ -136,7 +136,7 @@ export interface SearchControlLoadedState {
   dragColumnIndex?: number,
   dropBorderIndex?: number,
   showHiddenColumns?: boolean,
-  currentMenuItems?: ContextualMenuItem[];
+  currentMenuPack?: ContextMenuPack;
   dataChanged?: boolean;
 
   contextualMenu?: {
@@ -144,7 +144,6 @@ export interface SearchControlLoadedState {
     columnIndex: number | null;
     columnOffset?: number;
     rowIndex: number | null;
-    showSearchBox?: boolean;
     filter?: string;
   };
 
@@ -289,7 +288,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       summaryResultTable: undefined,
       resultFindOptions: undefined,
       selectedRows: [],
-      currentMenuItems: undefined,
+      currentMenuPack: undefined,
       markedRows: undefined,
       dataChanged: undefined,
     }, continuation);
@@ -348,7 +347,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           summaryResultTable: summaryRt,
           resultFindOptions: resultFindOptions,
           selectedRows: [],
-          currentMenuItems: undefined,
+          currentMenuPack: undefined,
           markedRows: undefined,
           searchCount: (this.state.searchCount ?? 0) + 1
         }, () => {
@@ -418,7 +417,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         position: ContextMenu.getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
         columnIndex,
         rowIndex,
-        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
+        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
       }
     });
 
@@ -427,15 +426,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       if (!this.state.selectedRows!.contains(row)) {
         this.setState({
           selectedRows: [row],
-          currentMenuItems: undefined
+          currentMenuPack: undefined
         }, () => {
-          this.loadMenuItems();
+          this.loadMenuIPack();
           this.notifySelectedRowsChanged();
         });
       }
 
-      if (this.state.currentMenuItems == undefined)
-        this.loadMenuItems();
+      if (this.state.currentMenuPack == undefined)
+        this.loadMenuIPack();
     }
   }
 
@@ -847,15 +846,15 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
   handleSelectedToggle = (isOpen: boolean) => {
     this.setState({ isSelectOpen: isOpen }, () => {
-      if (this.state.isSelectOpen && this.state.currentMenuItems == undefined)
-        this.loadMenuItems();
+      if (this.state.isSelectOpen && this.state.currentMenuPack == undefined)
+        this.loadMenuIPack();
     });
   }
 
-  loadMenuItems() {
+  loadMenuIPack() {
     var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
     if (cm == "Basic")
-      this.setState({ currentMenuItems: [] });
+      this.setState({ currentMenuPack: { items: [], showSearch: false } });
     else {
 
       var litesPromise = !this.props.findOptions.groupResults ? Promise.resolve(this.getSelectedEntities()) : this.getGroupedSelectedEntities();
@@ -873,10 +872,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           options.lites = lites;
           return renderContextualItems(options);
         })
-        .then(menuPack => this.setState({
-          currentMenuItems: menuPack.items,
-          contextualMenu: this.state.contextualMenu && Object.assign(this.state.contextualMenu, { showSearchBox: menuPack.showSearch })
-        }));
+        .then(menuPack => this.setState({ currentMenuPack: menuPack }));
     }
   }
 
@@ -909,9 +905,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             {title}
           </Dropdown.Toggle>
           <Dropdown.Menu>
-            {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
-              this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
-                this.state.currentMenuItems.map((e, i) => React.cloneElement((e as SearchableMenuItem).menu ?? e, { key: i }))}
+            {this.state.currentMenuPack == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
+              this.state.currentMenuPack.items.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
+                this.state.currentMenuPack.items.map((e, i) => React.cloneElement((e as SearchableMenuItem).menu ?? e, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
     };
@@ -1106,7 +1102,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return token && !hasOperation(token) && !hasToArray(token);
     }
 
-    if (this.state.currentMenuItems == null)
+    const menuPack = this.state.currentMenuPack;
+    if (menuPack == null)
       return null; //avoid flickering
 
     const menuItems: React.ReactElement[] = [];
@@ -1176,14 +1173,14 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         <FontAwesomeIcon icon="copy" className="icon" color="#21618C" />&nbsp;{SearchMessage.Copy.niceToString()}
       </Dropdown.Item>);
 
-      if (this.state.currentMenuItems == undefined) {
+      if (menuPack == undefined) {
         menuItems.push(<Dropdown.Header>{JavascriptMessage.loading.niceToString()}</Dropdown.Header>);
       } else {
-        if (menuItems.length && this.state.currentMenuItems.length)
+        if (menuItems.length && menuPack.items.length)
           menuItems.push(<Dropdown.Divider />);
 
         const filter = this.state.contextualMenu?.filter;
-        const filtered = filter ? this.state.currentMenuItems.filter(mi => !(mi as SearchableMenuItem).fullText || (mi as SearchableMenuItem).fullText.toLowerCase().contains(filter.toLowerCase())) : this.state.currentMenuItems;
+        const filtered = filter ? menuPack.items.filter(mi => !(mi as SearchableMenuItem).fullText || (mi as SearchableMenuItem).fullText.toLowerCase().contains(filter.toLowerCase())) : menuPack.items;
 
         menuItems.splice(menuItems.length, 0, ...filtered.map(mi => (mi as SearchableMenuItem).menu ?? mi));
       }
@@ -1194,7 +1191,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
-        {renderEntityMenuItems && this.state.contextualMenu?.showSearchBox &&
+        {renderEntityMenuItems && menuPack.showSearch &&
           <AutoFocus>
             <input
               type="search"
@@ -1250,7 +1247,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.setState({
       selectedRows: !this.allSelected() ? this.state.resultTable!.rows.clone() : [],
-      currentMenuItems: undefined,
+      currentMenuPack: undefined,
     }, () => {
       this.notifySelectedRowsChanged()
     });
@@ -1526,7 +1523,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.notifySelectedRowsChanged();
 
-    this.setState({ currentMenuItems: undefined });
+    this.setState({ currentMenuPack: undefined });
   }
 
   static getGroupFilters(row: ResultRow, resTable: ResultTable, resFo: FindOptionsParsed): FilterOption[] {
