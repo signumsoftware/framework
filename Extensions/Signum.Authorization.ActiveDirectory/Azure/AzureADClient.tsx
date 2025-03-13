@@ -64,16 +64,18 @@ export namespace AzureADClient {
     export let scopesB2C: string[] = ["openid", "profile", "email"];
   }
 
-  export function getAuthority(mode?: "B2C" | "B2C_ResetPassword") : string {
-    const config = window.__azureADConfig;
+  export type B2C_UserFlows = "signInSignUp_UserFlow" | "signIn_UserFlow" | "signUp_UserFlow" | "resetPassword_UserFlow";
 
-    return mode == "B2C" ? getAzureB2C_Authority(config?.azureB2C?.signInSignUp_UserFlow!) :
-      mode == "B2C_ResetPassword" ? getAzureB2C_Authority(config?.azureB2C?.resetPassword_UserFlow!) :
+  export function getAuthority(mode?: string, b2c_UserFlow?: B2C_UserFlows) : string {
+    const config = window.__azureADConfig;
+    const _b2c_UserFlow = b2c_UserFlow ? config?.azureB2C?.[b2c_UserFlow]! : config?.azureB2C?.signInSignUp_UserFlow!;
+
+    return mode == "B2C" ? getAzureB2C_Authority(_b2c_UserFlow) :
         "https://login.microsoftonline.com/" + config!.tenantId;
   }
 
 
-  export async function signIn(ctx: LoginContext, b2c: boolean): Promise<void> {
+  export async function signIn(ctx: LoginContext, b2c: boolean, b2c_UserFlow?: B2C_UserFlows): Promise<void> {
     ctx.setLoading(b2c ? "azureB2C" : "azureAD");
 
     const config = window.__azureADConfig;
@@ -83,7 +85,7 @@ export namespace AzureADClient {
     try {
       const authResult = await msalClient.loginPopup({
         scopes: b2c ? Config.scopesB2C : Config.scopes,
-        authority: getAuthority(b2c ? "B2C" : undefined),
+        authority: getAuthority(b2c ? "B2C" : undefined, b2c_UserFlow),
       });
       setMsalAccount(authResult.account!.username, b2c);
 
@@ -119,7 +121,7 @@ export namespace AzureADClient {
 
       const resetPasswordResult = await msalClient.loginPopup({
         scopes: Config.scopesB2C,
-        authority: getAuthority("B2C_ResetPassword"),
+        authority: getAuthority("B2C","resetPassword_UserFlow"),
       });
 
       await MessageModal.show({
@@ -252,6 +254,31 @@ export namespace AzureADClient {
   }
 
   export function AzureB2CSignIn({ ctx }: { ctx: LoginContext }): React.JSX.Element {
+    const config = window.__azureADConfig;
+    const hasSignInFlow = Boolean(config?.azureB2C?.signIn_UserFlow);
+    const hasSignUpFlow = Boolean(config?.azureB2C?.signUp_UserFlow);
+
+    if(hasSignInFlow && hasSignUpFlow) {
+      return (
+        <div className="row mt-4">
+          <div className="col-md-6 offset-md-3">
+            <div className='hstack'>
+                  <div className=''>
+                    <button className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signIn_UserFlow'); }}>
+                      {"Sign in with Azure B2C"}
+                    </button>
+                  </div>
+                  <div className=''>
+                    <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signUp_UserFlow'); }}>
+                      {"Sign up with Azure B2C"}
+                    </button>
+                  </div>
+                </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="row mt-4">
         <div className="col-md-6 offset-md-3">
@@ -299,5 +326,7 @@ interface AzureADConfig {
 interface AzureB2CConfig {
   tenantName: string;
   signInSignUp_UserFlow: string;
+  signIn_UserFlow?: string;
+  signUp_UserFlow?: string;
   resetPassword_UserFlow?: string;
 }
