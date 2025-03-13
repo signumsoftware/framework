@@ -20,7 +20,7 @@ export module ResetPasswordMessage {
   export const YourAccountHasBeenLocked = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLocked");
   export const TheCodeOfYourLinkIsIncorrect = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkIsIncorrect");
   export const TheCodeOfYourLinkHasAlreadyBeenUsed = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkHasAlreadyBeenUsed");
-  export const TheRequestWasReceivedSuccessfully = new MessageKey("ResetPasswordMessage", "TheRequestWasReceivedSuccessfully");
+  export const IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword = new MessageKey("ResetPasswordMessage", "IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword");
 }
 
 export const ResetPasswordRequestEntity = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");

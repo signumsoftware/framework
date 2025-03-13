@@ -21,8 +21,8 @@ public class ResetPasswordController : ControllerBase
             return new ForgotPasswordResponse()
             {
                 success = true,
-                title = AuthServer.AvoidExplicitErrorMessages ? null : LoginAuthMessage.RequestAccepted.NiceToString(),
-                message = AuthServer.AvoidExplicitErrorMessages ? ResetPasswordMessage.TheRequestWasReceivedSuccessfully.NiceToString()
+                title = LoginAuthMessage.RequestAccepted.NiceToString(),
+                message = AuthServer.AvoidExplicitErrorMessages ? ResetPasswordMessage.IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword.NiceToString()
                     : LoginAuthMessage.WeHaveSentYouAnEmailToResetYourPassword.NiceToString(),
             };
         }

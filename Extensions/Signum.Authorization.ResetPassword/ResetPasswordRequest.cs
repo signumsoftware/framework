@@ -51,5 +51,5 @@ public enum ResetPasswordMessage
     YourAccountHasBeenLocked,
     TheCodeOfYourLinkIsIncorrect,
     TheCodeOfYourLinkHasAlreadyBeenUsed,
-    TheRequestWasReceivedSuccessfully,
+    IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword,
 }
