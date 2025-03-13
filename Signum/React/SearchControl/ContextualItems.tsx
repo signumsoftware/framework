@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { QueryDescription, } from '../FindOptions'
+import { Navigator } from '../Navigator'
 import { Lite, Entity } from '../Signum.Entities'
 import SearchControlLoaded from "./SearchControlLoaded";
 import { StyleContext } from '../TypeContext';
@@ -41,28 +42,31 @@ export function clearContextualItems() {
 
 export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promise<MenuItemBlock | undefined> | undefined)[] = [];
 
-export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<ContextualMenuItem[]> {
+export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<{ items: ContextualMenuItem[], showSearch: boolean} > {
 
   const blockPromises = onContextualItems.map(func => func(ctx));
   return Promise.all(blockPromises).then(blocks => {
 
-    const result: ContextualMenuItem[] = []
+    const items: ContextualMenuItem[] = []
     blocks.forEach(block => {
 
       if (block == undefined || block.menuItems == undefined || block.menuItems.length == 0)
         return;
 
-      if (result.length)
-        result.push(<Dropdown.Divider />);
+      if (items.length)
+        items.push(<Dropdown.Divider />);
 
       if (block.header)
-        result.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
+        items.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
 
       if (block.header)
-        result.splice(result.length, 0, ...block.menuItems);
+        items.splice(items.length, 0, ...block.menuItems);
     });
 
-    return result;
+    const showSearchFunc = ctx.lites[0] && Navigator.getSettings(ctx.lites[0].EntityType)?.showContextualSearchBox;
+    const showSearch = Boolean(showSearchFunc && showSearchFunc(ctx, blocks.notNull()));
+
+    return ({ items, showSearch });
   });
 }
 

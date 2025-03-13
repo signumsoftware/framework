@@ -70,6 +70,7 @@ interface TreeViewerState {
   currentMenuItems?: ContextualMenuItem[];
   contextualMenu?: {
     position: ContextMenuPosition;
+    showSearchBox?: boolean;
     filter?: string;
   };
 }
@@ -281,7 +282,6 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       selectedNode: n,
       contextualMenu: {
         position: ContextMenu.getMouseEventPosition(e, document.querySelector('.tree-container tbody')),
-        filter: undefined
       }
     }, () => this.loadMenuItems());
   }
@@ -298,7 +298,10 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       };
 
       renderContextualItems(options)
-        .then(menuItems => this.setState({ currentMenuItems: menuItems }));
+        .then(menuPack => this.setState({
+          currentMenuItems: menuPack.items,
+          contextualMenu: this.state.contextualMenu && Object.assign(this.state.contextualMenu, { showSearchBox: menuPack.showSearch })
+        }));
     }
   }
 
@@ -313,7 +316,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
 
     return (
       <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
-        {this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
+        {this.state.contextualMenu?.showSearchBox &&
           <AutoFocus>
             <input
               type="search"

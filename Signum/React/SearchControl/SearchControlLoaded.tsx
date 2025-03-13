@@ -144,6 +144,7 @@ export interface SearchControlLoadedState {
     columnIndex: number | null;
     columnOffset?: number;
     rowIndex: number | null;
+    showSearchBox?: boolean;
     filter?: string;
   };
 
@@ -417,8 +418,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
         position: ContextMenu.getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
         columnIndex,
         rowIndex,
-        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
-        filter: undefined
+        columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined
       }
     });
 
@@ -860,15 +860,23 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
       var litesPromise = !this.props.findOptions.groupResults ? Promise.resolve(this.getSelectedEntities()) : this.getGroupedSelectedEntities();
 
+      const options = {
+        lites: [],
+        queryDescription: this.props.queryDescription,
+        markRows: this.markRows,
+        container: this,
+        styleContext: this.props.ctx,
+      } as ContextualItemsContext<Entity>;
+
       litesPromise
-        .then(lites => renderContextualItems({
-          lites: lites,
-          queryDescription: this.props.queryDescription,
-          markRows: this.markRows,
-          container: this,
-          styleContext: this.props.ctx,
-        }))
-        .then(menuItems => this.setState({ currentMenuItems: menuItems }));
+        .then(lites => {
+          options.lites = lites;
+          return renderContextualItems(options);
+        })
+        .then(menuPack => this.setState({
+          currentMenuItems: menuPack.items,
+          contextualMenu: this.state.contextualMenu && Object.assign(this.state.contextualMenu, { showSearchBox: menuPack.showSearch })
+        }));
     }
   }
 
@@ -1099,7 +1107,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     if (this.state.currentMenuItems == null)
-      return null;
+      return null; //avoid flickering
 
     const menuItems: React.ReactElement[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
@@ -1186,7 +1194,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
-        {renderEntityMenuItems && this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
+        {renderEntityMenuItems && this.state.contextualMenu?.showSearchBox &&
           <AutoFocus>
             <input
               type="search"
@@ -1202,9 +1210,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   }
 
   handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const cm = this.state.contextualMenu;
-
-    cm && this.setState({ contextualMenu: Object.assign(cm, { filter: e.currentTarget.value }) })
+    this.setState({ contextualMenu: this.state.contextualMenu && Object.assign(this.state.contextualMenu, { filter: e.currentTarget.value }) })
   }
 
   handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) => {
