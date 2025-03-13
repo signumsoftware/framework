@@ -18,9 +18,8 @@ import FilterBuilder from './FilterBuilder'
 import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
-import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow } from './ContextualItems'
-import ContextMenu from './ContextMenu'
-import { ContextMenuPosition } from './ContextMenu'
+import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem } from './ContextualItems'
+import ContextMenu, { ContextMenuPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation, RefreshMode } from '../Signum.DynamicQuery';
@@ -904,7 +903,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <Dropdown.Menu>
             {this.state.currentMenuItems == undefined ? <Dropdown.Item className="sf-tm-selected-loading">{JavascriptMessage.loading.niceToString()}</Dropdown.Item> :
               this.state.currentMenuItems.length == 0 ? <Dropdown.Item className="sf-search-ctxitem-no-results">{JavascriptMessage.noActionsFound.niceToString()}</Dropdown.Item> :
-                this.state.currentMenuItems.map((e, i) => React.cloneElement(e.menu, { key: i }))}
+                this.state.currentMenuItems.map((e, i) => React.cloneElement((e as SearchableMenuItem).menu ?? e, { key: i }))}
           </Dropdown.Menu>
         </Dropdown>
     };
@@ -1099,6 +1098,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return token && !hasOperation(token) && !hasToArray(token);
     }
 
+    if (this.state.currentMenuItems == null)
+      return null;
+
     const menuItems: React.ReactElement[] = [];
     if (this.canFilter() && cm.columnIndex != null && isColumnFilterable(cm.columnIndex)) {
       menuItems.push(<Dropdown.Header>{SearchMessage.Filters.niceToString()}</Dropdown.Header>);
@@ -1171,9 +1173,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           menuItems.push(<Dropdown.Divider />);
 
         const filter = this.state.contextualMenu?.filter;
-        const filtered = filter ? this.state.currentMenuItems.filter(a => !a.fullText || a.fullText.toLowerCase().contains(filter.toLowerCase())) : this.state.currentMenuItems;
+        const filtered = filter ? this.state.currentMenuItems.filter(mi => !(mi as SearchableMenuItem).fullText || (mi as SearchableMenuItem).fullText.toLowerCase().contains(filter.toLowerCase())) : this.state.currentMenuItems;
 
-        menuItems.splice(menuItems.length, 0, ...filtered.map(mi => mi.menu));
+        menuItems.splice(menuItems.length, 0, ...filtered.map(mi => (mi as SearchableMenuItem).menu ?? mi));
       }
     }
 

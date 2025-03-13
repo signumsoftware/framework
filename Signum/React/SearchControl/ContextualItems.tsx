@@ -6,10 +6,12 @@ import { StyleContext } from '../TypeContext';
 import { Dropdown } from 'react-bootstrap';
 
 
-export interface ContextualMenuItem {
-  fullText?: string; //used for filtering
+export interface SearchableMenuItem  {
+  fullText: string; //used for filtering
   menu : React.ReactElement<any>;
 }
+
+export type ContextualMenuItem = React.ReactElement<any> | SearchableMenuItem;
 
 export interface MenuItemBlock {
   header: string;
@@ -42,7 +44,6 @@ export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promis
 export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<ContextualMenuItem[]> {
 
   const blockPromises = onContextualItems.map(func => func(ctx));
-
   return Promise.all(blockPromises).then(blocks => {
 
     const result: ContextualMenuItem[] = []
@@ -52,10 +53,10 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         return;
 
       if (result.length)
-        result.push({ menu: <Dropdown.Divider /> });
+        result.push(<Dropdown.Divider />);
 
       if (block.header)
-        result.push({ menu: <Dropdown.Header>{block.header}</Dropdown.Header> });
+        result.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
 
       if (block.header)
         result.splice(result.length, 0, ...block.menuItems);
