@@ -415,7 +415,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.setState({
       contextualMenu: {
-        position: ContextMenu.getPositionEvent(event),
+        position: ContextMenu.getMouseEventPosition(event),
         columnIndex,
         rowIndex,
         columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
@@ -1181,7 +1181,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       return null;
 
     return (
-      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide} alignRight={(window.innerWidth - cm.position.left) < 200}>
+      <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
         {cm.rowIndex != undefined && showCM != "Basic" && this.state.currentMenuItems && this.state.currentMenuItems?.length > 20 &&
           <AutoFocus>
             <input
