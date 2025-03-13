@@ -7,6 +7,7 @@ import { useForceUpdate } from '../Hooks';
 export interface ContextMenuPosition {
   top: number;
   left: number;
+  maxTop?: number;
 }
 
 interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
@@ -36,7 +37,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       let adjustedLeft = Math.min(left, adjustedPosition.left);
 
       if (adjustedTop + menuHeight > viewportHeight) {
-        adjustedTop = Math.max(14, viewportHeight - menuHeight);
+        adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight);
       }
 
       if (adjustedLeft + menuWidth > viewportWidth) {
@@ -93,7 +94,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
   );
 };
 
- ContextMenu.getMouseEventPosition = (e: React.MouseEvent<any>) => {
+ContextMenu.getMouseEventPosition = (e: React.MouseEvent<HTMLTableElement>, container?: Element | null) => {
 
   const op = DomUtils.offsetParent(e.currentTarget);
 
@@ -102,7 +103,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
   var result = ({
     left: rec == null ? e.pageX : e.clientX - rec.left,
     top: rec == null ? e.pageY : e.clientY - rec.top,
-    width: (op ? op.offsetWidth : window.innerWidth)
+    maxTop: container?.getBoundingClientRect().top, //table's body top
   }) as ContextMenuPosition;
 
   return result;

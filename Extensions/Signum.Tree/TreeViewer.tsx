@@ -280,7 +280,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
     this.setState({
       selectedNode: n,
       contextualMenu: {
-        position: ContextMenu.getMouseEventPosition(e),
+        position: ContextMenu.getMouseEventPosition(e, document.querySelector('.tree-container tbody')),
         filter: undefined
       }
     }, () => this.loadMenuItems());
@@ -340,8 +340,8 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
       e.preventDefault();
       e.stopPropagation();
 
-      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)")
-      if (firstItem && (firstItem as HTMLAnchorElement).focus)
+      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)") as HTMLAnchorElement
+      if (firstItem && typeof firstItem.focus === 'function')
         firstItem.focus();
     }
   }

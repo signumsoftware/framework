@@ -414,7 +414,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.setState({
       contextualMenu: {
-        position: ContextMenu.getMouseEventPosition(event),
+        position: ContextMenu.getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
         columnIndex,
         rowIndex,
         columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
@@ -1213,8 +1213,8 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       e.preventDefault();
       e.stopPropagation();
 
-      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)")
-      if (firstItem && (firstItem as HTMLAnchorElement).focus)
+      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)") as HTMLAnchorElement
+      if (firstItem && typeof firstItem.focus === 'function')
         firstItem.focus();
     }
   }
