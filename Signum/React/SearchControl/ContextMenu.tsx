@@ -68,7 +68,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
 
 
   const handleMenuClick = (e: React.MouseEvent<HTMLElement>) => {
-    (e.target as HTMLElement).matches(".dropdown-item:not(.disabled)") && onHide();
+    (e.target as HTMLElement).matches(".dropdown-item:not(input, .disabled)") && onHide();
   }
 
   const handleKeyDown = (event: React.KeyboardEvent<any>) => {

@@ -320,7 +320,7 @@ export class TreeViewer extends React.Component<TreeViewerProps, TreeViewerState
           <AutoFocus>
             <input
               type="search"
-              className="form-control form-control-sm"
+              className="form-control form-control-sm dropdown-item"
               value={this.state?.contextualMenu?.filter}
               placeholder={SearchMessage.Search.niceToString()}
               onKeyDown={this.handleMenuFilterKeyDown}

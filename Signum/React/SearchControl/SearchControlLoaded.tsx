@@ -1195,7 +1195,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           <AutoFocus>
             <input
               type="search"
-              className="form-control form-control-sm"
+              className="form-control form-control-sm dropdown-item"
               value={this.state?.contextualMenu?.filter}
               placeholder={SearchMessage.Search.niceToString()}
               onKeyDown={this.handleMenuFilterKeyDown}
@@ -1216,7 +1216,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       e.preventDefault();
       e.stopPropagation();
 
-      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(.disabled)") as HTMLAnchorElement
+      var firstItem = document.querySelector("#table-context-menu a.dropdown-item:not(:has(input), .disabled)") as HTMLAnchorElement
       if (firstItem && typeof firstItem.focus === 'function')
         firstItem.focus();
     }
