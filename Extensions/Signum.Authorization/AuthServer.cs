@@ -17,7 +17,7 @@ namespace Signum.Authorization;
 
 public static class AuthServer
 {
-    public static bool MergeInvalidUsernameAndPasswordMessages = false;
+    public static bool AvoidExplicitErrorMessages = false;
 
     public static Action<ActionContext, UserEntity> UserPreLogin;
     public static Action<ActionContext, UserEntity> UserLogged;

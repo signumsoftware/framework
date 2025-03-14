@@ -25,23 +25,28 @@ export namespace ResetPasswordClient {
   }
   
   export module API {
-  
-    export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<string> {
+
+    export function forgotPasswordEmail(request: ForgotPasswordEmailRequest): Promise<ForgotPasswordEmailResponse> {
       return ajaxPost({ url: "/api/auth/forgotPasswordEmail" }, request);
     }
-  
-    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse > {
+
+    export function resetPassword(request: ResetPasswordRequest): Promise<AuthClient.API.LoginResponse> {
       return ajaxPost({ url: "/api/auth/resetPassword" }, request);
     }
-  
-  export interface ResetPasswordRequest {
-    code: string;
-    newPassword: string;
-  }
-  
-  export interface ForgotPasswordEmailRequest {
-    email: string;
-  }
-  
+
+    export interface ResetPasswordRequest {
+      code: string;
+      newPassword: string;
+    }
+
+    export interface ForgotPasswordEmailRequest {
+      email: string;
+    }
+
+    export interface ForgotPasswordEmailResponse {
+      success: boolean;
+      message: string;
+      title?: string;
+    }
   }
 }

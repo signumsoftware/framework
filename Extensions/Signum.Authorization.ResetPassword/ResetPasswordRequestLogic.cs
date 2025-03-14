@@ -118,37 +118,51 @@ public static class ResetPasswordRequestLogic
 
     public static void SendResetPasswordRequestEmail(string email)
     {
-        List<UserEntity> users;
-        using (AuthLogic.Disable())
-        {
-            users = Database
-                .Query<UserEntity>()
-                .Where(u => u.Email == email && u.State != UserState.Deactivated)
-                .ToList();
-
-            if (users.IsEmpty())
-                throw new ApplicationException(ResetPasswordMessage.EmailNotFound.NiceToString());
-
-        }
-
         try
         {
-            foreach (var user in users)
+            List<UserEntity> users;
+            try
             {
-                var request = ResetPasswordRequest(user);
-
-                string url = EmailLogic.Configuration.UrlLeft + @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
-
                 using (AuthLogic.Disable())
-                    new ResetPasswordRequestEmail(request, url).SendMail();
+                {
+                    users = Database
+                        .Query<UserEntity>()
+                        .Where(u => u.Email == email && u.State != UserState.Deactivated)
+                        .ToList();
+
+                    if (users.IsEmpty())
+                        throw new ApplicationException(ResetPasswordMessage.EmailNotFound.NiceToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.LogException();
+                throw;
+            }
+
+            try
+            {
+                foreach (var user in users)
+                {
+                    var request = ResetPasswordRequest(user);
+
+                    string url = EmailLogic.Configuration.UrlLeft + @"/auth/ResetPassword?code={0}".FormatWith(request.Code);
+
+                    using (AuthLogic.Disable())
+                        new ResetPasswordRequestEmail(request, url).SendMail();
+                }
+            }
+            catch (Exception ex)
+            {
+                ex.LogException();
+                throw new ApplicationException(LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString());
             }
         }
-        catch (Exception ex)
+        catch
         {
-            ex.LogException();
-            throw new ApplicationException(LoginAuthMessage.AnErrorOccurredRequestNotProcessed.NiceToString());
+            if (!AuthServer.AvoidExplicitErrorMessages)
+                throw;
         }
-
     }
 
     public static ResetPasswordRequestEntity ResetPasswordRequest(UserEntity user, int maxValidCodes = 5)
