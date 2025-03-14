@@ -428,13 +428,13 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
           selectedRows: [row],
           currentMenuPack: undefined
         }, () => {
-          this.loadMenuIPack();
+          this.loadMenuPack();
           this.notifySelectedRowsChanged();
         });
       }
 
       if (this.state.currentMenuPack == undefined)
-        this.loadMenuIPack();
+        this.loadMenuPack();
     }
   }
 
@@ -847,11 +847,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   handleSelectedToggle = (isOpen: boolean) => {
     this.setState({ isSelectOpen: isOpen }, () => {
       if (this.state.isSelectOpen && this.state.currentMenuPack == undefined)
-        this.loadMenuIPack();
+        this.loadMenuPack();
     });
   }
 
-  loadMenuIPack() {
+  loadMenuPack() {
     var cm = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
     if (cm == "Basic")
       this.setState({ currentMenuPack: { items: [], showSearch: false } });
