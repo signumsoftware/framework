@@ -106,7 +106,7 @@ public abstract class Symbol : Entity
     {
         this.id = id;
         this.IsNew = false;
-        this.toStr = this.Key;
+        this.ToStr = this.Key;
         if (this.Modified != ModifiedState.Sealed)
             this.Modified = ModifiedState.Sealed;
     }

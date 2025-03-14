@@ -2,6 +2,7 @@ using Signum.Utilities.Reflection;
 using Signum.Engine.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.API;
+using System.IO;
 
 namespace Signum.Engine.Maps;
 
@@ -28,6 +29,11 @@ public class SchemaBuilder
         {
             if (schema.Tables.ContainsKey(t))
                 throw new InvalidOperationException("{0} is already included in the Schema".FormatWith(t.TypeName()));
+        };
+
+        schema.SchemaCompleted += () =>
+        {
+            schema.Assets.CreateInitialAssets(this);
         };
     }
 
@@ -469,7 +475,7 @@ public class SchemaBuilder
         }
     }
 
-    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity o) => o.toStr);
+    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity o) => o.ToStr);
     static readonly FieldInfo fiTicks = ReflectionTools.GetFieldInfo((Entity o) => o.ticks);
     static readonly FieldInfo fiId = ReflectionTools.GetFieldInfo((Entity o) => o.id);
     static readonly FieldInfo fiPartitionId = ReflectionTools.GetFieldInfo((Entity o) => o.partitionId);
@@ -1075,6 +1081,7 @@ public class SchemaBuilder
             case KindOfField.Embedded:
             case KindOfField.MList:  //only used for table name
             case KindOfField.PartitionId:
+            case KindOfField.ToStr:
                 return Idiomatic(name);
             case KindOfField.Reference:
             case KindOfField.Enum:

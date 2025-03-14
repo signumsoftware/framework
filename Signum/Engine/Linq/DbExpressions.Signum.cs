@@ -7,7 +7,7 @@ namespace Signum.Engine.Linq;
 internal class EntityExpression : DbExpression
 {
     public static readonly FieldInfo IdField = ReflectionTools.GetFieldInfo((Entity ei) =>ei.id);
-    public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((Entity ie) =>ie.toStr);
+    public static readonly FieldInfo ToStrField = ReflectionTools.GetFieldInfo((Entity ie) =>ie.ToStr);
     public static readonly MethodInfo ToStringMethod = ReflectionTools.GetMethodInfo((object o) => o.ToString());
     public static readonly PropertyInfo IdOrNullProperty = ReflectionTools.GetPropertyInfo((Entity ei) => ei.IdOrNull);
 

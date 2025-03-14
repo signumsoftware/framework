@@ -19,7 +19,8 @@ public class SqlBuilder
         isPostgres = connector.Schema.Settings.IsPostgres;
     }
 
-    public List<string> SystemSchemas = new List<string>()
+    public List<string> SystemSchemasPostgres = new List<string>();
+    public List<string> SystemSchemasSqlServer = new List<string>()
         {
             "dbo",
             "guest",
@@ -35,6 +36,14 @@ public class SqlBuilder
             "db_denydatareader",
             "db_denydatawriter"
         };
+
+    internal List<string> GetSystemSchemas(bool isPostgres)
+    {
+        if (isPostgres)
+            return SystemSchemasPostgres;
+        else
+            return SystemSchemasSqlServer;
+    }
 
     public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
     {
@@ -118,6 +127,11 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
     public SqlPreCommandSimple CreateExtensionIfNotExist(string extensionName)
     {
         return new SqlPreCommandSimple($"CREATE EXTENSION IF NOT EXISTS \"{extensionName}\";");
+    }
+
+    public SqlPreCommandSimple DropExtension(string extensionName)
+    {
+        return new SqlPreCommandSimple($"DROP EXTENSION \"{extensionName}\";");
     }
 
     SqlPreCommand DropViewIndex(ObjectName viewName, string index)
@@ -624,19 +638,20 @@ WHERE {primaryKey.Name} NOT IN
 
     public SqlPreCommand AlterTableAlterColumnDropDefault(ObjectName tableName, string columnName)
     {
-        return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;".FormatWith(
-            tableName,
-            columnName.SqlEscape(isPostgres)));
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {columnName.SqlEscape(isPostgres)} DROP DEFAULT;");
     }
 
     public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint defCons)
     {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName};");
+        if (isPostgres)
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {defCons.ColumnName.SqlEscape(IsPostgres)} SET DEFAULT {defCons.QuotedDefinition};");
+        else
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name.SqlEscape(IsPostgres)} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName.SqlEscape(IsPostgres)};");
     }
 
     public SqlPreCommandSimple AlterTableAddCheckConstraint(ObjectName tableName, CheckConstraint checkCons)
     {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {checkCons.Name} CHECK {checkCons.Definition};");
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {checkCons.Name.SqlEscape(IsPostgres)} CHECK {checkCons.Definition};");
     }
 
     public SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
@@ -921,5 +936,5 @@ CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)}
             new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
 
-   
+
 }
