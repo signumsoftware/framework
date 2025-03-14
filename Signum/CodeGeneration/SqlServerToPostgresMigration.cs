@@ -141,6 +141,11 @@ public static class SqlServerToPostgresMigration
         {
             CopyTable(diffTable, pgName, postgresConnector, sb, batchSize: 10000);
         }
+
+        SafeConsole.WriteLineColor(ConsoleColor.Green, "Finished! Next Steps:");
+        Console.WriteLine("* Change appconfig to connect to postgress");
+        Console.WriteLine("* Synchronize database to add the missing schema stuff (indexes, fks...)");
+        Console.WriteLine($"* Execute {nameof(SqlServerToPostgresMigration)}.{nameof(UpdateIdentities)} to fix the Ids sequences");
     }
 
     public static SqlPreCommand CreatePostgresTables(Dictionary<DiffTable, ObjectName> tables, SchemaBuilder sb)
@@ -346,5 +351,37 @@ public static class SqlServerToPostgresMigration
         }
 
         return dataTable;
+    }
+
+
+    public static void UpdateIdentities()
+    {
+        var dt = Executor.ExecuteDataTable("""
+            SELECT 
+                seq.oid, 
+                seq.relname AS sequence_name,
+                nsp.nspname AS schema_name,
+                tab.relname AS table_name,
+                attr.attname AS column_name
+            FROM pg_class seq
+            JOIN pg_depend dep ON seq.oid = dep.objid 
+            JOIN pg_class tab ON tab.oid = dep.refobjid 
+            JOIN pg_namespace nsp ON tab.relnamespace = nsp.oid -- Get schema name
+            JOIN pg_attribute attr ON attr.attrelid = tab.oid AND attr.attnum = dep.refobjsubid -- Get column name
+            WHERE seq.relkind = 'S'; -- Only sequences
+            """);
+
+        foreach (var item in dt.Rows.OfType<DataRow>())
+        {
+            var tableName = (string)item["table_name"];
+            var columnName = (string)item["column_name"];
+            var schemaName = (string)item["schema_name"];
+            var sequenceName = (string)item["sequence_name"];
+
+            var sql = $"SELECT setval('{schemaName.SqlEscape(true)}.{sequenceName.SqlEscape(true)}', COALESCE((SELECT MAX({columnName.SqlEscape(true)}) FROM {schemaName.SqlEscape(true)}.{tableName.SqlEscape(true)}), 0) + 1, false)";
+
+            Executor.ExecuteNonQuery(sql);
+            Console.WriteLine(sequenceName);
+        }
     }
 }
