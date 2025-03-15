@@ -321,7 +321,7 @@ public class OperationController : ControllerBase
             catch(Exception ex)
             {
                 SignumExceptionFilterAttribute.LogException(ex, context).Wait();
-                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(ex);
+                var error = SignumExceptionFilterAttribute.CustomHttpErrorFactory(ex, context);
                 lastProgress = new ProgressStep<T>
                 {
                     IsFinished = true,
