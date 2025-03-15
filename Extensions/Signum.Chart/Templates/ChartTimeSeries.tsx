@@ -1,5 +1,6 @@
 import { DateTime, DurationUnit } from 'luxon'
 import * as React from 'react'
+import { FormCheck } from 'react-bootstrap'
 import { QueryTokenString, toLuxonFormat, toNumberFormat } from '@framework/Reflection';
 import { JavascriptMessage } from '@framework/Signum.Entities';
 import { TimeSeriesUnit } from '../../../Signum/React/Signum.DynamicQuery';
@@ -88,7 +89,15 @@ export default function ChartTimeSeries(p: { chartTimeSeries: ChartTimeSeriesEmb
       <span className="ms-2 d-flex">{QueryTokenDateMessage.Every01.niceToString().formatHtml(renderTimeSerieStep(), renderTimeSeriesUnit())}</span>
       {renderDateTime("startDate")}
       {renderDateTime("endDate")}
-      <TotalNumStepsAndRows chartTimeSeries={ts} chartBase={p.chartBase} onChange={p.onChange}/>
+      <TotalNumStepsAndRows chartTimeSeries={ts} chartBase={p.chartBase} onChange={p.onChange} />
+
+      <FormCheck
+        className="ms-2"
+        checked={ts.splitQueries}
+        onChange={e => { ts.splitQueries = e.currentTarget.checked; p.onChange(); }}
+        label={QueryTokenDateMessage.SplitQueries.niceToString()}
+        id={`split-queries`}
+      />
     </div>
   );
 }

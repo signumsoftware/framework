@@ -17,7 +17,7 @@ public enum BlobAction
 public enum AzureWebDownload
 {
     DirectUrl,
-    SASTokens,
+    SASToken,
     None
 }
 
@@ -63,7 +63,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             return null;
 
         var client = GetClient(efp);
-        if (download == AzureWebDownload.SASTokens)
+        if (download == AzureWebDownload.SASToken)
         {
             using (HeavyProfiler.LogNoStackTrace("Create SAS Token"))
             {

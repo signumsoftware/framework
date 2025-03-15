@@ -674,6 +674,8 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
     public void SyncMList<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
         where K : notnull
     {
+
+        newList.ToDictionaryEx(a => keySelectorNew(a)); //To fail fast and not on next iteration
         var alreadyDic = this.innerList.ToDictionaryEx(a => keySelectorOld(a.Element));
 
         this.innerList = newList.Select(e =>
@@ -683,6 +685,33 @@ public class MList<T> : Modifiable, IList<T>, IList, INotifyCollectionChanged, I
             {
                 assign(already.Element, e);
                 return already;
+            }
+            else
+            {
+                var created = assign(default, e);
+                return new RowIdElement(created);
+            }
+        }).ToList();
+    }
+
+    public void SyncMListDuplicates<N, K>(IEnumerable<N> newList, Func<T, K> keySelectorOld, Func<N, K> keySelectorNew, Func<T?, N, T> assign)
+       where K : notnull
+    {
+
+        var alreadyDic = this.innerList.GroupToDictionary(a => keySelectorOld(a.Element));
+
+        this.innerList = newList.Select(e =>
+        {
+            var key = keySelectorNew(e);
+            if (alreadyDic.TryGetValue(key, out var already))
+            {
+                var first = already.First();
+                already.RemoveAt(0);
+                if (already.Count == 0)
+                    alreadyDic.Remove(key);
+
+                assign(first.Element, e);
+                return first;
             }
             else
             {

@@ -488,9 +488,9 @@ public static class Administrator
 
             foreach (var item in list)
             {
-                if (item.ToString() != item.toStr)
+                if (item.ToString() != item.ToStr)
                     item.InDB().UnsafeUpdate()
-                        .Set(a => a.toStr, a => item.ToString())
+                        .Set(a => a.ToStr, a => item.ToString())
                         .Execute();
             }
         });
@@ -504,20 +504,20 @@ public static class Administrator
     public static void UpdateToStrings<T>(IQueryable<T> query, Expression<Func<T, string?>> expression) where T : Entity, new()
     {
         SafeConsole.WaitRows("UnsafeUpdate toStr for {0}".FormatWith(typeof(T).TypeName()), () =>
-            query.UnsafeUpdate().Set(a => a.toStr, expression).Execute());
+            query.UnsafeUpdate().Set(a => a.ToStr, expression).Execute());
     }
 
     public static void UpdateToString<T>(T entity) where T : Entity, new()
     {
         entity.InDB().UnsafeUpdate()
-            .Set(e => e.toStr, e => entity.ToString())
+            .Set(e => e.ToStr, e => entity.ToString())
             .Execute();
     }
 
     public static void UpdateToString<T>(T entity, Expression<Func<T, string?>> expression) where T : Entity, new()
     {
         entity.InDB().UnsafeUpdate()
-            .Set(e => e.toStr, expression)
+            .Set(e => e.ToStr, expression)
             .Execute();
     }
 

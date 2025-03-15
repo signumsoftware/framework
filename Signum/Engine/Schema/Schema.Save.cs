@@ -340,7 +340,7 @@ public partial class Table
         get
         {
 
-            if (Fields.TryGetValue("toStr", out var entity))
+            if (Fields.TryGetValue(nameof(Entity.ToStr), out var entity))
                 return (IColumn)entity.Field;
 
             return null;
@@ -359,9 +359,9 @@ public partial class Table
             if (newStr.HasText() && toStrColumn.Size.HasValue && newStr.Length > toStrColumn.Size)
                 newStr = newStr.Substring(0, toStrColumn.Size.Value);
 
-            if (entity.toStr != newStr)
+            if (entity.ToStr != newStr)
             {
-                entity.toStr = newStr;
+                entity.ToStr = newStr;
                 return true;
             }
         }

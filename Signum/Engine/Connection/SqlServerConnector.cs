@@ -799,8 +799,8 @@ deallocate cur";
     public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
-        var systemSchemas = sqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
-        var systemSchemasExeptDbo = sqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
+        var systemSchemas = sqlBuilder.SystemSchemasSqlServer.ToString(a => "'" + a + "'", ", ");
+        var systemSchemasExeptDbo = sqlBuilder.SystemSchemasSqlServer.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
         return SqlPreCommand.Combine(Spacing.Double,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),

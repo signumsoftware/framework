@@ -245,6 +245,9 @@
     position: relative;
 }
 
+.sidebar ul ul {
+  padding: 0;
+}
 
 @media (min-width: 768px) {
 

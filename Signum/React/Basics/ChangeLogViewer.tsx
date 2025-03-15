@@ -8,7 +8,7 @@ import { ChangeLogMessage } from "../Signum.Basics";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import * as AppContext from "../AppContext";
 import { ConnectionMessage, JavascriptMessage } from "../Signum.Entities";
-import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import { OverlayTrigger, Tooltip, Button } from "react-bootstrap";
 import { VersionInfo, VersionInfoTooltip } from "../Frames/VersionChangedAlert";
 import './ChangeLog.css'
 
@@ -28,32 +28,30 @@ export default function ChangeLogViewer(p: { extraInformation?: string }): React
   var countLogs = logs.filter(l => !lastDate ? true : DateTime.fromISO(l.deployDate) > lastDate).length;
 
   return (
-    <div className="nav-link">
-      <OverlayTrigger
-        placement={"bottom-end"}
-        overlay={
-          <Tooltip id={`tooltip-buildId`}>
-            <VersionInfoTooltip extraInformation={p.extraInformation} />
-          </Tooltip>
-        }>
-        <span className="sf-pointer" onClick={async e => {
-          e.preventDefault();
-          await MessageModal.show({
-            title: "Change logs",
-            size: 'md',
-            message: <ShowLogs logs={logs!} lastDate={lastDate} />,
-            buttons: "ok"
-          });
+    <OverlayTrigger
+      placement={"bottom-end"}
+      overlay={
+        <Tooltip id={`tooltip-buildId`}>
+          <VersionInfoTooltip extraInformation={p.extraInformation} />
+        </Tooltip>
+      }>
+      <a href="#" className="sf-pointer nav-link" onClick={async e => {
+        e.preventDefault();
+        await MessageModal.show({
+          title: "Change logs",
+          size: 'md',
+          message: <ShowLogs logs={logs!} lastDate={lastDate} />,
+          buttons: "ok"
+        });
 
-          await ChangeLogClient.API.updateLastDate();
-          reloadLastDate();
-        }}>
-          <FontAwesomeIcon icon="circle-info" />
-          <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
-          {countLogs > 0 && <span className="badge bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
-        </span>
-      </OverlayTrigger>
-    </div>
+        await ChangeLogClient.API.updateLastDate();
+        reloadLastDate();
+      }}>
+        <FontAwesomeIcon icon="circle-info" />
+        <span className="sr-only">{ConnectionMessage.VersionInfo.niceToString()}</span>
+        {countLogs > 0 && <span className="badge bg-info badge-pill sf-change-log-badge">{countLogs}</span>}
+      </a>
+  </OverlayTrigger>
   );
 }
 

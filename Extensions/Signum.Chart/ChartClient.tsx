@@ -533,7 +533,9 @@ export namespace ChartClient {
       timeSeriesUnit: ts.timeSeriesUnit, 
       startDate: ts.startDate, 
       endDate: ts.endDate, 
-      timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep});
+      timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep,
+      splitQueries: ts.splitQueries
+    });
   }
 
   export interface ChartOptions {
@@ -670,7 +672,9 @@ export namespace ChartClient {
         query['systemTimeEndDate'] = ts.endDate;
         query['timeSeriesStep'] = ts.timeSeriesStep;
         query['timeSeriesUnit'] = ts.timeSeriesUnit;
-        query['timeSeriesMaxRowsPerStep'] = ts.timeSeriesMaxRowsPerStep;  
+        query['timeSeriesMaxRowsPerStep'] = ts.timeSeriesMaxRowsPerStep;
+        if (ts.splitQueries)
+          query['splitQueries'] = ts.splitQueries;
       }
     }
   }
@@ -774,11 +778,12 @@ export namespace ChartClient {
       if(!query.timeSeriesUnit)
         return null;
       return ChartTimeSeriesEmbedded.New({
-          startDate: query.systemTimeStartDate,
-          endDate: query.systemTimeEndDate,
-          timeSeriesUnit: query.timeSeriesUnit,
-          timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
-          timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+        startDate: query.systemTimeStartDate,
+        endDate: query.systemTimeEndDate,
+        timeSeriesUnit: query.timeSeriesUnit,
+        timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
+        timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+        splitQueries: query.splitQueries && query.splitQueries != null,
       });
     }
   }
@@ -797,6 +802,7 @@ export namespace ChartClient {
           startDate: ts.startDate!, 
           endDate: ts.endDate!,
           timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep!,
+          splitQueries: ts.splitQueries!,
         });
   
       return {

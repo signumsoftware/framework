@@ -745,7 +745,7 @@ export namespace Navigator {
     if (entity == undefined)
       return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
-    if (!isEntity(entity.Type))
+    if (!isEntity(entity))
       return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));

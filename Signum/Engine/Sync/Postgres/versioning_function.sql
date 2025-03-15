@@ -1,5 +1,7 @@
 CREATE OR REPLACE FUNCTION versioning()
-RETURNS TRIGGER AS $$
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
 DECLARE
   sys_period text;
   history_table text;
@@ -176,4 +178,4 @@ BEGIN
 
   RETURN OLD;
 END;
-$$ LANGUAGE plpgsql;
+$function$

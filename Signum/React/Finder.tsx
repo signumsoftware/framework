@@ -48,6 +48,8 @@ import { QueryTokenMessage } from "./Signum.DynamicQuery.Tokens";
 import { TextHighlighter } from "./Components/Typeahead";
 import * as FinderRules from "./FinderRules";
 import { Operations } from "./Operations";
+import ProgressBar from "./Components/ProgressBar";
+import Notify, { NotifyOptions } from "./Frames/Notify";
 
 
 export namespace Finder {
@@ -282,13 +284,14 @@ export namespace Finder {
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,
       currentPage: fo.pagination && fo.pagination.currentPage,
-      systemTimeMode: fo.systemTime && fo.systemTime.mode,
-      systemTimeJoinMode: fo.systemTime && fo.systemTime.joinMode,
-      systemTimeStartDate: fo.systemTime && fo.systemTime.startDate,
-      systemTimeEndDate: fo.systemTime && fo.systemTime.endDate,
-      timeSeriesStep: fo.systemTime && fo.systemTime.timeSeriesStep,
-      timeSeriesUnit: fo.systemTime && fo.systemTime.timeSeriesUnit,
-      timeSeriesMaxRowsPerStep: fo.systemTime && fo.systemTime.timeSeriesMaxRowsPerStep,
+      systemTimeMode: fo.systemTime?.mode,
+      systemTimeJoinMode: fo.systemTime?.joinMode,
+      systemTimeStartDate: fo.systemTime?.startDate,
+      systemTimeEndDate: fo.systemTime?.endDate,
+      timeSeriesStep: fo.systemTime?.timeSeriesStep,
+      timeSeriesUnit: fo.systemTime?.timeSeriesUnit,
+      timeSeriesMaxRowsPerStep: fo.systemTime?.timeSeriesMaxRowsPerStep,
+      splitQueries: fo.systemTime?.splitQueries,
       ...extra
     };
 
@@ -354,6 +357,7 @@ export namespace Finder {
         timeSeriesUnit: query.timeSeriesUnit,
         timeSeriesStep: query.timeSeriesStep && parseInt(query.timeSeriesStep),
         timeSeriesMaxRowsPerStep: query.timeSeriesMaxRowsPerStep && parseInt(query.timeSeriesMaxRowsPerStep),
+        splitQueries: Boolean(query.splitQueries),
       }
     };
 
@@ -1784,7 +1788,78 @@ export namespace Finder {
     }
 
 
+    export async function executeQuerySplitTimeSeries(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+      const st = request.systemTime!;
+      const endDate = DateTime.fromISO(st.endDate!);
+
+      const resultTables: { timeSerie: string, rt: ResultTable }[] = [];
+      const timeSeries = QueryTokenString.timeSeries.toString();
+
+      var dates = new Array<string>();
+      {
+        let dt = DateTime.fromISO(st.startDate!);
+        while (dt < endDate) {
+          dt = dt.plus({ [st.timeSeriesUnit!.toLowerCase()]: st.timeSeriesStep });
+          dates.push(dt.toISO()!);
+        }
+      }
+
+      var notifyOptions: NotifyOptions = {
+        text: "",
+        type: "loading",
+        priority: 10,
+      };
+     
+
+      for (var i = 0; i < dates.length; i++) {
+
+        const dt = dates[i];
+        const newRequest: QueryRequest = {
+          queryKey: request.queryKey,
+          filters: request.filters,
+          columns: request.columns.filter(a => a.token != timeSeries.toString()),
+          orders: request.orders.filter(a => a.token != timeSeries.toString()),
+          systemTime: {
+            mode: "AsOf",
+            startDate: dt,
+          },
+          groupResults: request.groupResults,
+          pagination: { mode: "Firsts", elementsPerPage: st.timeSeriesMaxRowsPerStep }
+        };
+        const rt = await executeQuery(newRequest, signal);
+        resultTables.push({ timeSerie: dt, rt: decompress(rt) });
+
+        notifyOptions.text = JavascriptMessage.loading.niceToString() + `[${i + 1}/${dates.length}]`;
+        Notify.singleton?.notifyTimeout(notifyOptions);
+      }
+
+      Notify.singleton?.remove(notifyOptions);
+
+      const index = request.columns.findIndex(a => a.token == timeSeries);
+
+      var combined: ResultTable = {
+        columns: [timeSeries, ...resultTables.first().rt.columns],
+        uniqueValues: {},
+        rows: index == -1 ? resultTables.flatMap(a => a.rt.rows) :
+          resultTables.flatMap(a => a.rt.rows.map(row => ({
+            entity: row.entity,
+            columns: [
+              a.timeSerie,
+              ...row.columns
+            ]
+          }))),
+        totalElements: resultTables.sum(a => a.rt.totalElements! ?? 0),
+        pagination: { mode: "All" }
+      };
+
+      return combined;
+    }
+
+
     export function executeQuery(request: QueryRequest, signal?: AbortSignal): Promise<ResultTable> {
+      if (request.systemTime?.mode == "TimeSeries" && request.systemTime.splitQueries) {
+        return executeQuerySplitTimeSeries(request, signal);
+      }
 
       return ajaxPost<ResultTable>({ url: "/api/query/executeQuery/" + request.queryKey, signal }, request)
         .then(rt => decompress(rt));
