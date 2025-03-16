@@ -264,7 +264,7 @@ export function PropertySetterComponent(p: PropertySetterComponentProps): React.
   var fOperations = filterType ? filterOperations[filterType] : null;
 
   var subRoot = pr &&
-    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : PropertyRoute.root(getTypeInfo(pr.typeReference().name))) :
+    (pr.typeReference().isCollection ? (pr.typeReference().isEmbedded ? pr.addMember("Indexer", "Item", true) : tryGetTypeInfo(pr.typeReference().name) && PropertyRoute.root(getTypeInfo(pr.typeReference().name))) :
       (pr.typeReference().isEmbedded ? pr : (p.setter.entityType != null ? PropertyRoute.root(getTypeInfo(p.setter.entityType)) : null)));
 
   return (
