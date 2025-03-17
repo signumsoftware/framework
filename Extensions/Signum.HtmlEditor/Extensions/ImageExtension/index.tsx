@@ -1,13 +1,11 @@
-import { ModifiableEntity } from "@framework/Signum.Entities";
 import { $getRoot, $getSelection, LexicalEditor } from "lexical";
-import { IFile } from "../../../Signum.Files/Signum.Files";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
 import { ImageConverter } from "./ImageConverter";
 import { $createImageNode, ImageNode } from "./ImageNode";
 
-export class ImageExtension implements HtmlEditorExtension {
-  constructor(public imageConverter: ImageConverter<any>) {}
+export class ImageExtension<T extends object = {}> implements HtmlEditorExtension {
+  constructor(public imageConverter: ImageConverter<T>) {}
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
     const abortController = new AbortController();
@@ -22,31 +20,21 @@ export class ImageExtension implements HtmlEditorExtension {
       event.preventDefault(); 
     }, { signal: abortController.signal });
 
-    element.addEventListener("drop", async (event) => {
+    element.addEventListener("drop", (event) => {
       event.preventDefault();
       const files = event.dataTransfer?.files;
 
       if(!files?.length) return;
+      this.insertImageNodes(files, controller.editor, this.imageConverter);
+    }, { signal: abortController.signal });
 
-      for(let i = 0; i < files.length; i++) {
-        const file = files[i];
-
-        if(!file.type.startsWith("image/")) continue;
-
-        const uploadedFile: IFile & ModifiableEntity = await this.imageConverter?.uploadData(file);
-        controller.editor.update(() => {
-          const imageNode = $createImageNode(uploadedFile, this.imageConverter);
-          const selection = $getSelection();
-
-          if(selection) {
-            selection.insertNodes([imageNode]);
-          } else {
-            $getRoot().append(imageNode)
-          }
-
-        });
-      }
-    }, { signal: abortController.signal })
+    element.addEventListener("paste", (event) => {
+      const files = event.clipboardData?.files;
+      
+      if(!files?.length) return;
+      event.preventDefault();
+      this.insertImageNodes(files, controller.editor, this.imageConverter);
+    }, { signal: abortController.signal });
 
     const unsubscribeUpdateListener = controller.editor.registerUpdateListener(() => replaceImagePlaceholders(controller.editor,  this.imageConverter));
 
@@ -55,8 +43,37 @@ export class ImageExtension implements HtmlEditorExtension {
       unsubscribeUpdateListener();
     };
   }
+
   getNodes(): LexicalConfigNode {
     return [ImageNode]
+  
+  }
+
+  async insertImageNodes(files: FileList, editor: LexicalEditor, imageConverter: ImageConverter<T>): Promise<void> {
+    const uploadPromises = Array.from(files).filter(file => file.type.startsWith("image/")).map(file => {
+      try {
+        return imageConverter.uploadData(file)
+      } catch (error) {
+        console.error("Image uploade failed.", error)
+        return null;
+      }
+    });
+  
+    const uploadedFiles = (await Promise.all(uploadPromises)).filter(v => v !== null);
+    if(!uploadedFiles.length) return;
+  
+    editor.update(() => {
+      uploadedFiles.forEach(file => {
+        const imageNode = $createImageNode(file, imageConverter);
+        const selection = $getSelection();
+  
+        if(selection) {
+          selection.insertNodes([imageNode]);
+        } else {
+          $getRoot().append(imageNode)
+        }
+      })
+    });
   }
 }
 

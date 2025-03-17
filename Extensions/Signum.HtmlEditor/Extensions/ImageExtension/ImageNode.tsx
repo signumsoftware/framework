@@ -1,11 +1,8 @@
 import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "lexical";
 import { ImageConverter } from "./ImageConverter";
 
-export class ImageNode extends DecoratorNode<JSX.Element> {
-  private uploadedFile: any;
-  private imageConverter: ImageConverter<any>;
-
-  constructor(uploadedFile: any, imageConverter: ImageConverter<any>, key?: NodeKey) {
+export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element> {
+  constructor(private uploadedFile: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
     super(key);
     this.uploadedFile = uploadedFile;
     this.imageConverter = imageConverter;
@@ -50,6 +47,6 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 }
 
-export function $createImageNode(uploadedFile: any, imageConverter: ImageConverter<any>): ImageNode {
+export function $createImageNode<T extends object = {}>(uploadedFile: T, imageConverter: ImageConverter<T>): ImageNode<T>{
   return $applyNodeReplacement(new ImageNode(uploadedFile, imageConverter));
 }
