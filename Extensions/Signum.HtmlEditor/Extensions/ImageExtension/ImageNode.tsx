@@ -1,16 +1,14 @@
-import { $applyNodeReplacement, DecoratorNode, EditorConfig, LexicalEditor, NodeKey } from "lexical";
-import React from "react";
+import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "lexical";
+import { ImageConverter } from "./ImageConverter";
 
 export class ImageNode extends DecoratorNode<JSX.Element> {
-  private src: string;
-  private altText: string;
-  private onClick?: React.MouseEventHandler;
+  private uploadedFile: any;
+  private imageConverter: ImageConverter<any>;
 
-  constructor(src: string, altText = "", onClick?: React.MouseEventHandler, key?: NodeKey) {
+  constructor(uploadedFile: any, imageConverter: ImageConverter<any>, key?: NodeKey) {
     super(key);
-    this.src = src;
-    this.altText = altText;
-    this.onClick = onClick;
+    this.uploadedFile = uploadedFile;
+    this.imageConverter = imageConverter;
   }
 
   static getType(): string {
@@ -18,11 +16,11 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   static clone(node: ImageNode): ImageNode {
-    return new ImageNode(node.src, node.altText, node.onClick, node.__key);
+    return new ImageNode(node.uploadedFile, node.imageConverter, node.__key);
   }
 
   createDOM(): HTMLElement {
-    return document.createElement("span");
+    return document.createElement("div");;
   }
 
   updateDOM(): boolean {
@@ -30,11 +28,7 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   }
 
   decorate(): JSX.Element {
-    return (
-      <figure>
-        <img src={this.src} alt={this.altText} onClick={this.onClick} className="mw-100" />
-      </figure>
-    );
+    return this.imageConverter.renderImage(this.uploadedFile);
   }
 
   static importJSON(serializedNode: any): ImageNode {
@@ -44,13 +38,18 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   exportJSON(): any {
     return {
       type: "image",
-      src: this.src,
-      altText: this.altText,
+      uploadedFile: this.uploadedFile,
+      imageConverter: this.imageConverter,
       version: 1
     }
   }
+
+  exportDOM(): DOMExportOutput {
+    const element =  this.imageConverter.toElement(this.uploadedFile) ?? null;
+    return { element: element };
+  }
 }
 
-export function $createImageNode(src: string, altText = "", onClick?: React.MouseEventHandler): ImageNode {
-  return $applyNodeReplacement(new ImageNode(src, altText, onClick));
+export function $createImageNode(uploadedFile: any, imageConverter: ImageConverter<any>): ImageNode {
+  return $applyNodeReplacement(new ImageNode(uploadedFile, imageConverter));
 }

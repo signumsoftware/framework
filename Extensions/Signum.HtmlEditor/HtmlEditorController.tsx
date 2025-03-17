@@ -55,7 +55,6 @@ export class HtmlEditorController {
     }
 
     return editableElement;
-
   }
 
   init(p: HtmlEditorControllerProps): void {
@@ -95,8 +94,7 @@ export class HtmlEditorController {
       }
 
       this.initialEditorState = this.editor.getEditorState();
-      this.converter.$convertFromText(this.editor, newValue);
-      this.setEditorState(this.editor.getEditorState());
+      this.setEditorState(this.converter.$convertFromText(this.editor, newValue));
     }, [newValue, this.editor]);
 
     React.useEffect(() => {
