@@ -1,9 +1,11 @@
 import {
+  INSERT_ORDERED_LIST_COMMAND,
+  INSERT_UNORDERED_LIST_COMMAND,
   ListItemNode,
   ListNode
 } from "@lexical/list";
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, INDENT_CONTENT_COMMAND, KEY_TAB_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
+import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, CONTROLLED_TEXT_INSERTION_COMMAND, INDENT_CONTENT_COMMAND, KEY_SPACE_COMMAND, KEY_TAB_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
 import { HtmlEditorController } from "../HtmlEditorController";
 import { isListActive } from "../Utils/node";
 import {
@@ -23,7 +25,31 @@ export class ListExtension implements HtmlEditorExtension {
   }
 
   registerExtension(controller: HtmlEditorController): OptionalCallback {
-    return controller.editor.registerCommand(KEY_TAB_COMMAND, (event) => {
+    const unsubscribeSpaceCommand = controller.editor.registerCommand(KEY_SPACE_COMMAND, () => {
+      const selection = $getSelection();
+     
+      if(!$isRangeSelection(selection) || !selection.isCollapsed()) return false;
+      const anchorNode = selection.anchor.getNode();
+      const text = anchorNode.getTextContent();
+
+      let command = null;
+
+      if(text === "*" || text === "-") {
+        command = INSERT_UNORDERED_LIST_COMMAND;
+      } else if(text === "1.") {
+        command = INSERT_ORDERED_LIST_COMMAND;
+      }
+
+      if(!command) return false;
+
+      controller.editor.update(() => {
+        anchorNode.remove();
+        controller.editor.dispatchCommand(command, undefined);
+      })
+      return true;
+    }, COMMAND_PRIORITY_LOW)
+
+    const unsubscribeTabCommand = controller.editor.registerCommand(KEY_TAB_COMMAND, (event) => {
       let handled = false;
       const selection = $getSelection();
       if(!$isRangeSelection(selection)) return handled;
@@ -42,5 +68,10 @@ export class ListExtension implements HtmlEditorExtension {
 
       return handled;
     }, COMMAND_PRIORITY_LOW);
+    
+    return () => {
+      unsubscribeTabCommand();
+      unsubscribeSpaceCommand();
+    }
   }
 }
