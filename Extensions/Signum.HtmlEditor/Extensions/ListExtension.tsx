@@ -1,4 +1,5 @@
 import {
+  $isListItemNode,
   INSERT_ORDERED_LIST_COMMAND,
   INSERT_UNORDERED_LIST_COMMAND,
   ListItemNode,
@@ -7,13 +8,15 @@ import {
 import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { $getSelection, $isRangeSelection, COMMAND_PRIORITY_LOW, INDENT_CONTENT_COMMAND, KEY_SPACE_COMMAND, KEY_TAB_COMMAND, OUTDENT_CONTENT_COMMAND } from "lexical";
 import { HtmlEditorController } from "../HtmlEditorController";
-import { isListActive } from "../Utils/node";
+import { $findMatchingParent, isListActive } from "../Utils/node";
 import {
   ComponentAndProps,
   HtmlEditorExtension,
   LexicalConfigNode,
   OptionalCallback
 } from "./types";
+
+const MAX_INDENT_LEVEL = 6;
 
 export class ListExtension implements HtmlEditorExtension {
   getBuiltInComponent(): ComponentAndProps {
@@ -56,8 +59,12 @@ export class ListExtension implements HtmlEditorExtension {
 
       if(isListActive(selection)) {
         event.preventDefault();
-
+        
+        const anchorNode = selection.anchor.getNode();
+        const listItemNode = $findMatchingParent(anchorNode, node => $isListItemNode(node)) as ListItemNode | undefined;
+        const depth = listItemNode?.getIndent() || 0;
         if(!event.shiftKey) {
+          if(depth >= MAX_INDENT_LEVEL) return false;
           controller.editor.dispatchCommand(INDENT_CONTENT_COMMAND, undefined);
         } else {
           controller.editor.dispatchCommand(OUTDENT_CONTENT_COMMAND, undefined);
