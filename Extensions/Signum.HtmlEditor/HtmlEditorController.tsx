@@ -48,13 +48,7 @@ export class HtmlEditorController {
   }
 
   private initializeEditableElement() {
-    const editableElement = document.getElementById("editor-editable");
-
-    if(!editableElement) {
-      console.warn("No element with id `editable-element` found. Some functionalities might not work.");
-    }
-
-    return editableElement;
+    return document.getElementById("editor-editable");
   }
 
   init(p: HtmlEditorControllerProps): void {
@@ -94,7 +88,9 @@ export class HtmlEditorController {
       }
 
       this.initialEditorState = this.editor.getEditorState();
-      this.setEditorState(this.converter.$convertFromText(this.editor, newValue));
+      queueMicrotask(() => {
+        this.setEditorState(this.converter.$convertFromText(this.editor, newValue));
+      })
     }, [newValue, this.editor]);
 
     React.useEffect(() => {
@@ -123,6 +119,7 @@ export class HtmlEditorController {
     const initialContentString = JSON.stringify(this.initialEditorState);
     if (newContentString !== initialContentString) {
       const value = isEmpty(this.editorState) ? null : this.converter.$convertToText(this.editor);
+      debugger
       this.lastSavedString = { str: value };
       this.binding.setValue(value);
     }

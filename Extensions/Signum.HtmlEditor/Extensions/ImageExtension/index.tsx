@@ -33,7 +33,10 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
       this.insertImageNodes(files, controller.editor, this.imageConverter);
     }, { signal: abortController.signal });
 
-    const unsubscribeUpdateListener = controller.editor.registerUpdateListener(() => replaceImagePlaceholders(controller.editor,  this.imageConverter));
+    const unsubscribeUpdateListener = controller.editor.registerUpdateListener(() => {
+      if(!controller.editor || !this.imageConverter) return;
+      this.replaceImagePlaceholders(controller);
+    });
 
     return () => {
       abortController.abort();
@@ -72,29 +75,50 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
       })
     });
   }
-}
 
-function replaceImagePlaceholders(editor: LexicalEditor, imageConverter: ImageConverter<any>) {
-  editor.update(() => {
-    const editorState = editor.getEditorState();
-    editorState._nodeMap.forEach((node) => {
-        const text = node.getTextContent();
-        if(node.getType() === "text" && isImagePlaceholderRegex(text)) {
-          const attachmentId = extractAttachmentId(text);
-          node.replace($createImageNode({ attachmentId }, imageConverter));
+  replaceImagePlaceholders(controller: HtmlEditorController): void {
+    const attachments = (() => {
+      const binding = controller.binding;
+      if('parentObject' in binding) {
+        const parentObject = binding.parentObject as object;
+        if('attachments' in parentObject) {
+          const attachments = parentObject.attachments as { rowId: number }[];
+          return attachments.map(att => att.rowId.toString()) ?? []
+          // return parentObject.attachments.map() ?? [];
         }
-    })
-  })
+      }
+
+      return [];
+    })();
+    console.log('>>>', attachments);
+    if(!attachments.length) return;
+    
+    const editorState =  controller.editor.getEditorState();
+    
+    controller.editor.update(() => {
+      const nodes = Array.from(editorState._nodeMap.values());
+      if(!nodes.some(v => isImagePlaceholderRegex(v.getTextContent()))) return;
+      editorState._nodeMap.forEach((node) => {
+          const text = node.getTextContent();
+          
+          if(node.getType() === "text" && isImagePlaceholderRegex(text)) {
+            const attachmentId = extractAttachmentId(text);
+            if(attachmentId && !attachments.includes(attachmentId)) return;
+            node.replace($createImageNode({ attachmentId } as object, this.imageConverter));
+          }
+      });
+    }, { discrete: true });
+  }
 }
 
-const IMAGE_PLACEHOLDER_REGEX = /^\[IMAGE_(\d+)\]$/;
+export const IMAGE_PLACEHOLDER_REGEX: RegExp = /^\[IMAGE_(\d+)\]$/;
 
-function extractAttachmentId(text: string) {
+export function extractAttachmentId(text: string): string | null {
   const match = text.match(IMAGE_PLACEHOLDER_REGEX);
   return match ? match[1] : null
 }
 
-function isImagePlaceholderRegex(text: string) {
+export function isImagePlaceholderRegex(text: string): boolean {
   return IMAGE_PLACEHOLDER_REGEX.test(text);
 }
 
