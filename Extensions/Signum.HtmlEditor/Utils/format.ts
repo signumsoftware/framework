@@ -27,7 +27,11 @@ export function formatList(
     if (!$isRangeSelection(selection)) return;
 
     const listType = listTag === "ul" ? "bullet" : "number";
+
     const revert = isListActive(selection, listTag);
+
+    const anchorNode = selection.anchor.getNode();
+    if(!anchorNode.getTextContent()) return;
 
     $setBlocksType(selection, () =>
       revert ? $createParagraphNode() : $createListNode(listType)
