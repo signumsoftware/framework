@@ -14,5 +14,5 @@ export const useRegisterExtensions = (
       .notNull();
 
     return () => unsubscribeFns.forEach((fn) => fn());
-  }, [controller.editor]);
+  }, [controller.editor, extensions]);
 };
