@@ -2,9 +2,9 @@ import { $applyNodeReplacement, DecoratorNode, DOMExportOutput, NodeKey } from "
 import { ImageConverter } from "./ImageConverter";
 
 export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element> {
-  constructor(private uploadedFile: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
+  constructor(private fileInfo: T, private imageConverter: ImageConverter<T>, key?: NodeKey) {
     super(key);
-    this.uploadedFile = uploadedFile;
+    this.fileInfo = fileInfo;
     this.imageConverter = imageConverter;
   }
 
@@ -13,7 +13,7 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element>
   }
 
   static clone(node: ImageNode): ImageNode {
-    return new ImageNode(node.uploadedFile, node.imageConverter, node.__key);
+    return new ImageNode(node.fileInfo, node.imageConverter, node.__key);
   }
 
   createDOM(): HTMLElement {
@@ -25,24 +25,20 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element>
   }
 
   decorate(): JSX.Element {
-    return this.imageConverter.renderImage(this.uploadedFile);
-  }
-
-  static importJSON(serializedNode: any): ImageNode {
-    return new ImageNode(serializedNode.src, serializedNode.altText);
+    return this.imageConverter.renderImage(this.fileInfo);
   }
 
   exportJSON(): any {
     return {
       type: "image",
-      uploadedFile: this.uploadedFile,
+      uploadedFile: this.fileInfo,
       imageConverter: this.imageConverter,
       version: 1
     }
   }
 
   exportDOM(): DOMExportOutput {
-    const element =  this.imageConverter.toElement(this.uploadedFile) ?? null;
+    const element =  this.imageConverter.toElement(this.fileInfo) ?? null;
     return { element: element };
   }
 }
