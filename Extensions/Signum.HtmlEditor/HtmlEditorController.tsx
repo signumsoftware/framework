@@ -119,7 +119,6 @@ export class HtmlEditorController {
     const initialContentString = JSON.stringify(this.initialEditorState);
     if (newContentString !== initialContentString) {
       const value = isEmpty(this.editorState) ? null : this.converter.$convertToText(this.editor);
-      debugger
       this.lastSavedString = { str: value };
       this.binding.setValue(value);
     }
