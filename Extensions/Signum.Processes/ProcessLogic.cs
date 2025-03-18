@@ -121,7 +121,7 @@ public static class ProcessLogic
 
             ExceptionLogic.DeleteLogs += ExceptionLogic_DeleteLogs;
 
-            sb.Schema.Table<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<ProcessAlgorithmSymbol>().PreDeleteSqlSync += SimpleTaskLogic_PreDeleteSqlSync;
 
         }
     }

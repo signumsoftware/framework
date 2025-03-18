@@ -191,6 +191,8 @@ public class SystemTimeEmbedded : EmbeddedEntity
     [NumberIsValidator(ComparisonType.GreaterThan, 0)]
     public int? TimeSeriesMaxRowsPerStep { get; set; }
 
+    public bool SplitQueries { get; set; }
+
     protected override string? PropertyValidation(PropertyInfo pi)
     {
         return stateValidator.Validate(this, pi) ??  base.PropertyValidation(pi);
@@ -217,6 +219,7 @@ public class SystemTimeEmbedded : EmbeddedEntity
         TimeSeriesUnit = xml.Attribute("TimeSeriesUnit")?.Value.ToEnum<TimeSeriesUnit>();
         TimeSeriesStep = xml.Attribute("TimeSeriesStep")?.Value.ToInt();
         TimeSeriesMaxRowsPerStep = xml.Attribute("TimeSeriesMaxRowsPerStep")?.Value.ToInt();
+        SplitQueries = xml.Attribute("SplitQueries")?.Value.ToBool() ?? false;
         return this;
     }
 
@@ -229,7 +232,8 @@ public class SystemTimeEmbedded : EmbeddedEntity
             JoinMode == null ? null : new XAttribute("JoinMode", JoinMode.ToString()!),
             TimeSeriesUnit == null ? null : new XAttribute("TimeSeriesUnit", TimeSeriesUnit.ToString()!),
             TimeSeriesStep == null ? null : new XAttribute("TimeSeriesStep", TimeSeriesStep.ToString()!),
-            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!)
+            TimeSeriesMaxRowsPerStep == null ? null : new XAttribute("TimeSeriesMaxRowsPerStep", TimeSeriesMaxRowsPerStep.ToString()!),
+            SplitQueries  == false ? null : new XAttribute("SplitQueries", SplitQueries.ToString()!)
         );
     }
 

@@ -33,7 +33,7 @@ public static class FilePathEmbeddedLogic
 
             FilePathEmbedded.OnPreSaving += fpe =>
             {
-                if (fpe.BinaryFile != null && !fpe.KeepSuffix) //First time
+                if (fpe.Suffix == null && fpe.BinaryFile != null)
                 {
                     if (SyncFileSave)
                         fpe.SaveFile();
@@ -44,8 +44,8 @@ public static class FilePathEmbeddedLogic
                         {
                             //https://medium.com/rubrikkgroup/understanding-async-avoiding-deadlocks-e41f8f2c6f5d
                             var a = fpe; //For debugging
-
                             task.WaitSafe();
+                            fpe.CleanBinaryFile();
                         };
                     }
                 }
@@ -183,12 +183,6 @@ public static class FilePathEmbeddedLogic
             () => true,
             () => (t, rowId) => propertyRoute,
             (t, rowId, retriever) => propertyRoute);
-    }
-
-    public static PrefixPair CalculatePrefixPair(this FilePathEmbedded fpe)
-    {
-        using (new EntityCache(EntityCacheType.ForceNew))
-            return fpe.FileType.GetAlgorithm().GetPrefixPair(fpe);
     }
 
     public static byte[] GetByteArray(this FilePathEmbedded fpe)

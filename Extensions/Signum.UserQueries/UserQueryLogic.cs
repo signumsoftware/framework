@@ -42,7 +42,7 @@ public static class UserQueryLogic
             UserAssetsImporter.Register("UserQuery", UserQueryOperation.Save);
 
             sb.Schema.Synchronizing += Schema_Synchronizing;
-            sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryEntity>().Where(a => a.Query.Is(e)));
 
             sb.Include<UserQueryEntity>()
@@ -96,14 +96,14 @@ public static class UserQueryLogic
                     return null;
                 };
 
-                sb.Schema.Table<QueryEntity>().PreDeleteSqlSync += q =>
+                sb.Schema.EntityEvents<QueryEntity>().PreDeleteSqlSync += q =>
                 {
                     var parts = Administrator.UnsafeDeletePreCommandMList((DashboardEntity cp) => cp.Parts, Database.MListQuery((DashboardEntity cp) => cp.Parts).Where(mle => ((UserQueryPartEntity)mle.Element.Content).UserQuery.Query.Is(q)));
                     var parts2 = Administrator.UnsafeDeletePreCommand(Database.Query<UserQueryPartEntity>().Where(uqp => uqp.UserQuery.Query.Is(q)));
                     return SqlPreCommand.Combine(Spacing.Simple, parts, parts2);
                 };
 
-                sb.Schema.Table<UserQueryEntity>().PreDeleteSqlSync += arg =>
+                sb.Schema.EntityEvents<UserQueryEntity>().PreDeleteSqlSync += arg =>
                 {
                     var uq = (UserQueryEntity)arg;
 

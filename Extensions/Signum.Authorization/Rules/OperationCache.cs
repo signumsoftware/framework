@@ -1,8 +1,12 @@
+using Signum.Operations;
+using System.Collections.Concurrent;
+using System.Collections.Frozen;
+using System.Linq;
 using System.Xml.Linq;
 
 namespace Signum.Authorization.Rules;
 
-class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), OperationAllowed, OperationAllowed>
+class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, OperationTypeEmbedded, (OperationSymbol operation, Type type), WithConditions<OperationAllowed>, WithConditionsModel<OperationAllowed>>
 {
     public OperationCache(SchemaBuilder sb) : base(sb, invalidateWithTypes: true)
     {
@@ -14,47 +18,164 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
     protected override OperationTypeEmbedded ToEntity((OperationSymbol operation, Type type) key) => new OperationTypeEmbedded { Operation = key.operation, Type = key.type.ToTypeEntity() };
 
-    protected override OperationAllowed GetRuleAllowed(RuleOperationEntity rule) => rule.Allowed;
+    protected override WithConditions<OperationAllowed> GetRuleAllowed(RuleOperationEntity rule) => new WithConditions<OperationAllowed>(rule.Fallback, rule.ConditionRules.Select(c => new ConditionRule<OperationAllowed>(c.Conditions.ToFrozenSet(), c.Allowed)).ToReadOnly());
 
-    protected override RuleOperationEntity SetRuleAllowed(RuleOperationEntity rule, OperationAllowed allowed)
+    protected override RuleOperationEntity SetRuleAllowed(RuleOperationEntity rule, WithConditions<OperationAllowed> allowed)
     {
-        rule.Allowed = allowed;
+        rule.Fallback = allowed.Fallback;
+        var oldConditions = rule.ConditionRules.Select(a => new ConditionRule<OperationAllowed>(a.Conditions.ToFrozenSet(), a.Allowed)).ToReadOnly();
+        if (!oldConditions.SequenceEqual(allowed.ConditionRules))
+            rule.ConditionRules = allowed.ConditionRules.Select(a => new RuleOperationConditionEntity
+            {
+                Allowed = a.Allowed,
+                Conditions = a.TypeConditions.ToMList()
+            }).ToMList();
         return rule;
     }
 
-    protected override OperationAllowed ToAllowed(OperationAllowed allowedModel) => allowedModel;
-    protected override OperationAllowed ToAllowedModel(OperationAllowed allowed) => allowed;
+    protected override WithConditions<OperationAllowed> ToAllowed(WithConditionsModel<OperationAllowed> allowedModel) => allowedModel.ToImmutable();
+    protected override WithConditionsModel<OperationAllowed> ToAllowedModel(WithConditions<OperationAllowed> allowed) => allowed.ToModel();
 
-    protected override OperationAllowed Merge((OperationSymbol operation, Type type) key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, OperationAllowed>> baseValues)
+    //static ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>> coerceCache =
+    //new ConcurrentDictionary<(WithConditions<OperationAllowed> allowed, WithConditions<TypeAllowed> taac), WithConditions<OperationAllowed>>();
+
+    public override WithConditions<OperationAllowed> CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, WithConditions<OperationAllowed> allowed, bool manual = false)
     {
-        OperationAllowed best = AuthLogic.GetMergeStrategy(role) == MergeStrategy.Union ?
-           Max(baseValues.Select(a => a.Value)) :
-           Min(baseValues.Select(a => a.Value));
+        var operation = OperationLogic.FindOperation(key.type, key.operation);
+
+        var taac = manual ?
+            TypeAuthLogic.Manual.GetAllowed(role, key.type) :
+            TypeAuthLogic.GetAllowed(role, key.type);
+
+       var maxResultAllowed = operation.OperationType is OperationType.ConstructorFrom or OperationType.ConstructorFromMany ?
+            (manual ? TypeAuthLogic.Manual.GetAllowed(role, key.type) : TypeAuthLogic.GetAllowed(role, operation.ReturnType!)).MaxCombined() :
+            (TypeAllowed?)null;
+
+
+        var maxValue = taac.ToOperationAllowed(operation, maxResultAllowed);
+
+        var adjusted = AdjustShape(values: allowed, shape: maxValue);
+
+        return CoerceSimilar(adjusted, maxValue);
+    }
+
+    public static WithConditions<OperationAllowed> CoerceSimilar(WithConditions<OperationAllowed> value, WithConditions<OperationAllowed> maxValue)
+    {
+        if (AlreadyCoerced(value, maxValue))
+            return value;
+
+        OperationAllowed Min(OperationAllowed a, OperationAllowed b) => a < b ? a : b;
+
+        return new WithConditions<OperationAllowed>(Min(value.Fallback, maxValue.Fallback),
+            value.ConditionRules.Select((c, i) => new ConditionRule<OperationAllowed>(c.TypeConditions, Min(c.Allowed, maxValue.ConditionRules[i].Allowed))).ToReadOnly()
+            ).Intern();
+    }
+
+    private static bool AlreadyCoerced(WithConditions<OperationAllowed> value, WithConditions<OperationAllowed> maxValue)
+    {
+        if (value.Fallback > maxValue.Fallback)
+            return false;
+
+        for (int i = 0; i < value.ConditionRules.Count; i++)
+        {
+            if (value.ConditionRules[i].Allowed > maxValue.ConditionRules[i].Allowed)
+                return false;
+        }
+
+        return true;
+    }
+
+    static ConcurrentDictionary<(WithConditions<OperationAllowed> shape, WithConditions<OperationAllowed> values), WithConditions<OperationAllowed>> cacheAdjustShape = new();
+    WithConditions<OperationAllowed> AdjustShape(WithConditions<OperationAllowed> values, WithConditions<OperationAllowed> shape)
+    {
+        if (shape.ConditionRules.Count == values.ConditionRules.Count &&
+            shape.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(values.ConditionRules.Select(a => a.TypeConditions)))
+            return values;
+
+        return cacheAdjustShape.GetOrAdd((shape, values), p => new WithConditions<OperationAllowed>(p.values.Fallback,
+            p.shape.ConditionRules.Select(cr =>
+            {
+                var rule = values.ConditionRules.LastOrDefault(cr2 => cr2.TypeConditions.All(c => cr.TypeConditions.Contains(c)));
+                return new ConditionRule<OperationAllowed>(cr.TypeConditions,
+                    rule.TypeConditions != null ? rule.Allowed : values.Fallback);
+            }).ToReadOnly()).Intern());
+    }
+
+    //static ConcurrentDictionary<(WithConditions<TypeAllowed> shape, WithConditions<TypeAllowed> values), WithConditions<TypeAllowed>> cacheAdjustShapeType = new();
+    //WithConditions<TypeAllowed> AdjustShapeType(WithConditions<TypeAllowed> shape, WithConditions<TypeAllowed> values)
+    //{
+    //    if (shape.ConditionRules.Count == values.ConditionRules.Count &&
+    //        shape.ConditionRules.Select(a => a.TypeConditions).SequenceEqual(values.ConditionRules.Select(a => a.TypeConditions)))
+    //        return values;
+
+    //    return cacheAdjustShapeType.GetOrAdd((shape, values), p => new WithConditions<TypeAllowed>(
+    //        p.values.Fallback,
+    //        p.shape.ConditionRules.Select(cr =>
+    //        {
+    //            var rule = values.ConditionRules.LastOrDefault(cr2 => cr2.TypeConditions.All(c => cr.TypeConditions.Contains(c)));
+    //            return new ConditionRule<TypeAllowed>(cr.TypeConditions,
+    //                rule.TypeConditions == null ? cr.Allowed : values.Fallback);
+    //        }).ToReadOnly()).Intern());
+    //}
+
+    static ConcurrentDictionary<(WithConditions<OperationAllowed> taac, OperationAllowed pa), WithConditions<OperationAllowed>> cacheWithShape = new();
+    WithConditions<OperationAllowed> WithShape(WithConditions<OperationAllowed> taac, OperationAllowed pa)
+    {
+        return cacheWithShape.GetOrAdd((taac, pa), p => new WithConditions<OperationAllowed>(pa, p.taac.ConditionRules.Select(cr => new ConditionRule<OperationAllowed>(cr.TypeConditions, pa)).ToReadOnly()).Intern());
+    }
+
+    protected override WithConditions<OperationAllowed> Merge((OperationSymbol operation, Type type) key, Lite<RoleEntity> role, IEnumerable<KeyValuePair<Lite<RoleEntity>, WithConditions<OperationAllowed>>> baseValues)
+    {
+        MergeStrategy merge = AuthLogic.GetMergeStrategy(role);
+
+        WithConditions<OperationAllowed> tac = GetDefaultFromType(key, role);
+
+        List<WithConditions<OperationAllowed>> baseAdjusted = baseValues.Select(a => AdjustShape(values: a.Value, shape: tac)).ToList();
+
+        Func<IEnumerable<OperationAllowed>, OperationAllowed> collapse = merge == MergeStrategy.Union ? MaxOperationAllowed : MinOperationAllowed ;
+
+        WithConditions<OperationAllowed> best =
+            baseAdjusted.Count == 0 ? WithShape(tac, merge == MergeStrategy.Union ? OperationAllowed.None : OperationAllowed.Allow) :
+            baseAdjusted.Count == 1 ? baseAdjusted.SingleEx() :
+            new WithConditions<OperationAllowed>(collapse(baseAdjusted.Select(a => a.Fallback)),
+                tac.ConditionRules
+                .Select((a, i) => new ConditionRule<OperationAllowed>(a.TypeConditions, collapse(baseAdjusted.Select(b => b.ConditionRules[i].Allowed))))
+                .ToReadOnly());
 
         if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
             return best;
 
-        var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
 
-        if (maxUp.HasValue && maxUp <= best)
-            return best;
-
-        if (baseValues.Where(a => a.Value.Equals(best)).All(a => GetDefault(key, a.Key).Equals(a.Value)))
+        OperationAllowed? maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
+        OperationAllowed AutomaticUpgrade(OperationAllowed mergedValue, IEnumerable<(OperationAllowed baseValue, OperationAllowed fromType)> bases, OperationAllowed fromType)
         {
-            var def = GetDefault(key, role);
+            if (maxUp.HasValue && maxUp <= mergedValue)
+                return mergedValue;
 
-            return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
+            if (bases.Where(a => a.baseValue == mergedValue).All(a => mergedValue == a.fromType))
+            {
+                var result = fromType;
+                if (maxUp.HasValue)
+                    result = Min(result, maxUp.Value);
+
+                return result;
+            }
+
+            return mergedValue;
         }
 
-        return best;
+        List<WithConditions<OperationAllowed>> baseFromType = baseValues.Select(a => AdjustShape(values: GetDefaultFromType(key, a.Key), shape: tac)).ToList();
+        WithConditions<OperationAllowed> result = new WithConditions<OperationAllowed>(AutomaticUpgrade(best.Fallback, baseAdjusted.Zip(baseFromType, (b, ft) => (b.Fallback, ft.Fallback)), tac.Fallback),
+            tac.ConditionRules.Select((cr, i) => new ConditionRule<OperationAllowed>(cr.TypeConditions,
+             AutomaticUpgrade(best.ConditionRules[i].Allowed, baseAdjusted.Zip(baseFromType, (b, ft) => (b.ConditionRules[i].Allowed, ft.ConditionRules[i].Allowed)), cr.Allowed)
+            )).ToReadOnly());
+
+        return result.Intern();
     }
 
-    static OperationAllowed GetDefault((OperationSymbol operation, Type type) operationType, Lite<RoleEntity> role)
-    {
-        return OperationAuthLogic.InferredOperationAllowed(operationType, t => TypeAuthLogic.GetAllowed(role, t));
-    }
-
-    static OperationAllowed Max(IEnumerable<OperationAllowed> baseValues)
+    static OperationAllowed Max(OperationAllowed a, OperationAllowed b) => a > b  ? a : b;
+    static OperationAllowed Min(OperationAllowed a, OperationAllowed b) => a < b  ? a : b;
+    static OperationAllowed MaxOperationAllowed(IEnumerable<OperationAllowed> baseValues)
     {
         OperationAllowed result = OperationAllowed.None;
 
@@ -70,7 +191,7 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
         return result;
     }
 
-    static OperationAllowed Min(IEnumerable<OperationAllowed> baseValues)
+    static OperationAllowed MinOperationAllowed(IEnumerable<OperationAllowed> baseValues)
     {
         OperationAllowed result = OperationAllowed.Allow;
 
@@ -86,41 +207,67 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
         return result;
     }
 
-
-    protected override Func<(OperationSymbol operation, Type type), OperationAllowed> GetDefaultValue(Lite<RoleEntity> role)
+    protected override Func<(OperationSymbol operation, Type type), WithConditions<OperationAllowed>> GetDefaultValue(Lite<RoleEntity> role)
     {
         return key =>
         {
+            var operationAllowed = GetDefaultFromType(key, role);
+
             if (AuthLogic.GetDefaultAllowed(role))
-                return OperationAllowed.Allow;
+                return operationAllowed;
 
             if (!PermissionAuthLogic.IsAuthorized(BasicPermission.AutomaticUpgradeOfOperations, role))
-                return OperationAllowed.None;
+                return CoerceSimple(operationAllowed, OperationAllowed.None);
 
             var maxUp = OperationAuthLogic.MaxAutomaticUpgrade.TryGetS(key.operation);
+            if (maxUp == null)
+                return operationAllowed;
 
-            var def = GetDefault(key, role);
-
-            return maxUp.HasValue && maxUp <= def ? maxUp.Value : def;
+            return CoerceSimple(operationAllowed, maxUp.Value);
         };
     }
 
-    public override OperationAllowed CoerceValue(Lite<RoleEntity> role, (OperationSymbol operation, Type type) key, OperationAllowed allowed, bool manual = false)
+    WithConditions<OperationAllowed> GetDefaultFromType((OperationSymbol operation, Type type) key, Lite<RoleEntity> role)
     {
-        var required = manual ? 
-            OperationAuthLogic.InferredOperationAllowed(key, t => TypeAuthLogic.Manual.GetAllowed(role, t)): 
-            OperationAuthLogic.InferredOperationAllowed(key, t => TypeAuthLogic.GetAllowed(role, t));
+        var operation = OperationLogic.FindOperation(key.type, key.operation);
 
-        return allowed < required ? allowed : required;
+        var ta = TypeAuthLogic.GetAllowed(role, key.type);
+
+        var maxResultAllowed = operation.OperationType is OperationType.ConstructorFrom or OperationType.ConstructorFromMany ?
+            TypeAuthLogic.GetAllowed(role, operation.ReturnType!).MaxCombined() : (TypeAllowed?)null;
+
+        var result = ta.ToOperationAllowed(operation, maxResultAllowed);
+
+        return result;
+    }
+
+    public static WithConditions<OperationAllowed> CoerceSimple(WithConditions<OperationAllowed> value, OperationAllowed maxValue)
+    {
+        if (value.Fallback <= maxValue && value.ConditionRules.All(a => a.Allowed <= maxValue))
+            return value;
+
+        OperationAllowed Min(OperationAllowed a) => a < maxValue ? a : maxValue;
+
+        return new WithConditions<OperationAllowed>(Min(value.Fallback),
+            value.ConditionRules.Select(c => new ConditionRule<OperationAllowed>(c.TypeConditions, Min(c.Allowed))).ToReadOnly()
+            ).Intern();
     }
 
     public override XElement ExportXml(bool exportAll)
     {
         return ExportXmlInternal("Operations", "Operation",
             resourceToString: s => s.operation.Key + "/" + s.type?.ToTypeEntity().CleanName,
-            allowedToXml: b => [new XAttribute("Allowed", b.ToString())],
+            allowedToXml: paac => [
+                new XAttribute("Allowed", paac.Fallback.ToString()),
+                paac.ConditionRules.Select(c => new XElement("Condition",
+                   new XAttribute("Name", c.TypeConditions.ToString(", ")),
+                   new XAttribute("Allowed", c.Allowed.ToString())))            
+                ],
             allKeys: exportAll ? OperationAuthLogic.AllOperationTypes() : null);
     }
+
+    internal static readonly string typeReplacementKey = "AuthRules:" + typeof(TypeEntity).Name;
+    internal static readonly string typeConditionReplacementKey = "AuthRules:" + typeof(TypeConditionSymbol).Name;
 
     internal static readonly string operationReplacementKey = "AuthRules:" + typeof(OperationSymbol).Name;
 
@@ -149,11 +296,21 @@ class OperationCache : AuthCache<RuleOperationEntity, OperationAllowedRule, Oper
 
                 return new OperationTypeEmbedded { Operation = operation, Type = type.ToTypeEntity() };
             },
-            parseAllowed: elem =>
+            parseAllowed: e =>
             {
-                var allowed = elem.Attribute("Allowed")!.Value;
-
-                return EnumExtensions.ToEnum<OperationAllowed>(allowed);
+                return new WithConditions<OperationAllowed>(fallback: e.Attribute("Allowed")!.Value.ToEnum<OperationAllowed>(),
+                    conditionRules: e.Elements("Condition").Select(xc => new ConditionRule<OperationAllowed>(
+                        typeConditions: xc.Attribute("Name")!.Value.SplitNoEmpty(",").Select(s => SymbolLogic<TypeConditionSymbol>.TryToSymbol(replacements.Apply(typeConditionReplacementKey, s.Trim()))).NotNull().ToFrozenSet(),
+                        allowed: xc.Attribute("Allowed")!.Value.ToEnum<OperationAllowed>()))
+                    .ToReadOnly());
             });
+    }
+
+    protected override string AllowedComment(WithConditions<OperationAllowed> allowed)
+    {
+        if (allowed.ConditionRules.Count == 0)
+            return allowed.Fallback.ToString();
+
+        return $"{allowed.Fallback} + {allowed.ConditionRules.Count} conditions";
     }
 }

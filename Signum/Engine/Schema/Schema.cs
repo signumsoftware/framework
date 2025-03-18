@@ -3,6 +3,9 @@ using Signum.Utilities.DataStructures;
 using System.Collections.Concurrent;
 using System.Globalization;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
+using NpgsqlTypes;
+using System.Data;
 
 namespace Signum.Engine.Maps;
 
@@ -10,7 +13,21 @@ public class Schema : IImplementationsFinder
 {
     public CultureInfo? ForceCultureInfo { get; set; }
 
-    public TimeZoneMode TimeZoneMode { get; set; }
+    private TimeZoneMode timeZoneMode;
+
+    public TimeZoneMode TimeZoneMode
+    {
+        get => timeZoneMode;
+        set {
+
+            timeZoneMode = value;
+            if (Settings.IsPostgres)
+            {
+                Settings.TypeValues[typeof(DateTime)] = new AbstractDbType(SqlDbType.DateTime2, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+                Settings.TypeValues[typeof(DateTimeOffset)] = new AbstractDbType(SqlDbType.DateTimeOffset, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+            }
+        }
+    }
 
     public DateTimeKind DateTimeKind => TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
     public Func<Entity, Expression<Func<Entity, bool>>?>? AttachToUniqueFilter = null;
@@ -60,9 +77,11 @@ public class Schema : IImplementationsFinder
         get { return tables; }
     }
 
-    public List<string> PostgresExtensions = new List<string>()
+    public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
-        "uuid-ossp"
+        { "plpgsql", s => true },
+        { "uuid-ossp", s => true },
+        { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
 
     #region Events
@@ -597,9 +616,9 @@ public class Schema : IImplementationsFinder
         this.ViewBuilder = new Maps.ViewBuilder(this);
 
         Generating += SchemaGenerator.SnapshotIsolation;
-        Generating += SchemaGenerator.PostgresExtensions;
-        Generating += SchemaGenerator.PostgresTemporalTableScript;
+        Generating += SchemaGenerator.CreatePostgresExtensions;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
+        Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -607,7 +626,9 @@ public class Schema : IImplementationsFinder
         Generating += Assets.Schema_Generating;
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-        Synchronizing += Assets.Schema_SynchronizingDrop;
+        Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+
+        Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;

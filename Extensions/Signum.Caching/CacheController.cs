@@ -48,18 +48,15 @@ public class CacheController : ControllerBase
     {
         CachePermission.InvalidateCache.AssertAuthorized();
 
-        CacheLogic.ForceReset();
-        GlobalLazy.ResetAll();
-        Schema.Current.InvalidateMetadata();
-        GC.Collect(2);
+        CacheLogic.InvalidateAll(systemLog: true);
     }
 
     [HttpPost("api/cache/invalidateAll"), SignumAllowAnonymous]
     public void InvalidateAll([FromBody] InvalidateAllRequest req)
     {
-        GetSimpleHttpBroadcast().AssertHash(req.SecretHash);
+        SimpleHttpBroadcast sci = GetSimpleHttpBroadcast();
 
-        Clear();
+        sci.InvalidateAllTables(req);
     }
 
 

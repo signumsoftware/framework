@@ -17,7 +17,7 @@ public partial class Table
 
         var variableOrId = entity.Id.VariableName ?? entity.Id.Object;
         var isPostgres = Schema.Current.Settings.IsPostgres;
-        var pre = OnPreDeleteSqlSync(entity);
+        var pre = Schema.Current.EntityEvents<T>().OnPreDeleteSqlSync(entity);
         var collections = (from tml in this.TablesMList()
                            select new SqlPreCommandSimple("DELETE FROM {0} WHERE {1} = {2}; --{3}"
                                .FormatWith(tml.Name, tml.BackReference.Name.SqlEscape(isPostgres), variableOrId, comment ?? entity.ToString()))).Combine(Spacing.Simple);
@@ -93,13 +93,6 @@ END IF;
 END $$;");
     }
 
-    public event Func<Entity, SqlPreCommand?> PreDeleteSqlSync;
 
-    SqlPreCommand? OnPreDeleteSqlSync(Entity entity)
-    {
-        if (PreDeleteSqlSync == null)
-            return null;
 
-        return PreDeleteSqlSync.GetInvocationListTyped().Reverse().Select(a => a(entity)).Combine(Spacing.Simple);
-    }
 }

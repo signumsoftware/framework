@@ -734,7 +734,6 @@ export namespace Navigator {
     }
   }
 
-
   export function toEntityPack<T extends ModifiableEntity>(entityOrEntityPack: Lite<T & Entity> | T | EntityPack<T>): Promise<EntityPack<T>> {
     if ((entityOrEntityPack as EntityPack<T>).canExecute)
       return Promise.resolve(entityOrEntityPack as EntityPack<T>);
@@ -746,13 +745,11 @@ export namespace Navigator {
     if (entity == undefined)
       return API.fetchEntityPack(entityOrEntityPack as Lite<T & Entity>);
 
-    let ti = tryGetTypeInfo(entity.Type);
-    if (ti == null || !ti.requiresEntityPack)
+    if (!isEntity(entity))
       return Promise.resolve({ entity: cloneEntity(entity), canExecute: {} });
 
     return API.fetchEntityPackEntity(entity as T & Entity).then(ep => ({ ...ep, entity: cloneEntity(entity) }));
   }
-
 
   export async function reloadFrameIfNecessary(frame: EntityFrame): Promise<void> {
 
@@ -805,23 +802,27 @@ export namespace Navigator {
     return lite.entity;
   }
 
-  export function useFetchAll<T extends Entity>(type: Type<T>): T[] | undefined {
-    return useAPI(signal => API.fetchAll(type), []);
+  export function useFetchEntity<T extends Entity>(type: Type<T>, id: any, partitionId?: number, deps?: React.DependencyList, options?: APIHookOptions): T | undefined {
+    return useAPI(signal => API.fetchEntity(type, id, partitionId), [type, id, partitionId, ...(deps ?? [])], options);
   }
 
-  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string): Lite<T> {
+  export function useFetchAll<T extends Entity>(type: Type<T>, deps?: React.DependencyList): T[] | undefined {
+    return useAPI(signal => API.fetchAll(type), [type, ...(deps ?? [])]);
+  }
 
-    var lite = React.useMemo(() => newLite(type, id), [type, id]);
+  export function useLiteToString<T extends Entity>(type: Type<T>, id: number | string, deps?: React.DependencyList, options?: APIHookOptions): Lite<T> {
 
-    useAPI(() => API.fillLiteModels(lite), [lite]);
+    var lite = React.useMemo(() => newLite(type, id), [type, id, ...(deps ?? [])]);
+
+    useAPI(() => API.fillLiteModels(lite), [lite, ...(deps ?? [])], options);
 
     return lite;
   }
 
-  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false): void {
+  export function useFillToString<T extends Entity>(lite: Lite<T> | null | undefined, force: boolean = false, deps?: React.DependencyList): void {
     useAPI(() => {
       return lite == null || ((lite.model != null || lite.entity != null) && !force) ? Promise.resolve() : API.fillLiteModels(lite);
-    }, [lite]);
+    }, [lite, ...(deps ?? [])]);
   }
 
 
@@ -843,7 +844,7 @@ export namespace Navigator {
   }
 
 
-  export module API {
+  export namespace API {
 
     export function fillLiteModels(...lites: (Lite<Entity> | null | undefined)[]): Promise<void> {
       return fillLiteModelsArray(lites.filter(l => l != null) as Lite<Entity>[]);
@@ -932,7 +933,8 @@ export namespace Navigator {
     }
 
     export function fetchEntityPackEntity<T extends Entity>(entity: T): Promise<EntityPack<T>> {
-      return ajaxPost({ url: "/api/entityPackEntity" }, entity);
+      return ajaxPost<EntityPack<T>>({ url: "/api/entityPackEntity" }, entity)
+        .then(ep => ({ ...ep, entity }));
     }
 
     export function validateEntity(entity: ModifiableEntity): Promise<void> {

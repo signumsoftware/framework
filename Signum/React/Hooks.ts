@@ -26,8 +26,22 @@ export function useUpdatedRef<T>(newValue: T): React.MutableRefObject<T> {
 }
 
 export function useForceUpdatePromise(): () => Promise<void> {
-  var [count, setCount] = useStateWithPromise(0);
-  return () => setCount(c => c + 1) as Promise<any>;
+  const [ticks, setTick] = React.useState(0); // State used to trigger re-render
+  const resolveRef = React.useRef<(value?: void) => void>(); // Ref to store resolve function
+
+  const forceUpdate = React.useCallback(() => new Promise<void>((resolve) => {
+      resolveRef.current = resolve; // Store the resolve function
+      setTick((tick) => tick + 1); // Trigger re-render
+  }), []);
+
+  React.useEffect(() => {
+    if (resolveRef.current) {
+      resolveRef.current();
+      resolveRef.current = undefined;
+    }
+  }, [ticks]);
+
+  return forceUpdate;
 }
 
 export function useInterval<T>(interval: number | undefined | null, initialState: T, newState: (oldState: T) => T, deps?: ReadonlyArray<any>): T {

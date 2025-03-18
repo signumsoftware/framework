@@ -123,7 +123,7 @@ public static class EmailTemplateLogic
             sb.Schema.Synchronizing += Schema_Synchronizing_Tokens;
             sb.Schema.Synchronizing += Schema_Synchronizing_DefaultTemplates;
 
-            sb.Schema.Table<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
+            sb.Schema.EntityEvents<EmailModelEntity>().PreDeleteSqlSync += EmailTemplateLogic_PreDeleteSqlSync;
 
             Validator.PropertyValidator<EmailTemplateEntity>(et => et.Messages).StaticPropertyValidation += (et, pi) =>
             {
@@ -137,31 +137,30 @@ public static class EmailTemplateLogic
         }
     }
 
-    static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(Entity arg)
+    static SqlPreCommand? EmailTemplateLogic_PreDeleteSqlSync(EmailModelEntity entityModel)
     {
-        EmailModelEntity emailModel = (EmailModelEntity)arg;
     retry:
-        var result = new ConsoleSwitch<string, Func<SqlPreCommand>>($"EmailModel {arg} has been removed... What you want to do?")
+        var result = new ConsoleSwitch<string, Func<SqlPreCommand>>($"EmailModel {entityModel} has been removed... What you want to do?")
         {
             {
                 "mt",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel))),
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(entityModel))),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)))
                 )!,
                 "Delete Messages and Templates"
             },
             { "t",
                 () => SqlPreCommand.Combine(Spacing.Simple,
-                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(emailModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
-                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)))
+                    Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailMessageEntity>().Where(em => em.Template!.Entity.Model.Is(entityModel)).UnsafeUpdate().Set(em  => em.Template, em => null)),
+                    Administrator.UnsafeDeletePreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)))
                 )!,
                 "Delete Templates only, Update Messages"
 
             },
             {
                 "n",
-                () => Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(emailModel)).UnsafeUpdate().Set(a => a.Model, a => null)),
+                () => Administrator.UnsafeUpdatePartPreCommand(Database.Query<EmailTemplateEntity>().Where(et => et.Model.Is(entityModel)).UnsafeUpdate().Set(a => a.Model, a => null)),
                 "Nothing, just Update Templates"
             },
         }.Choose();
@@ -309,6 +308,31 @@ public static class EmailTemplateLogic
                 Construct = _ => new EmailTemplateEntity
                 {
                     MasterTemplate = EmailMasterTemplateLogic.GetDefaultMasterTemplate(),
+                }
+            }.Register();
+
+            new ConstructFrom<EmailTemplateEntity>(EmailTemplateOperation.Clone)
+            {
+                Construct = (e, _) =>
+                {
+                    return new EmailTemplateEntity()
+                    {
+                        Name = $"{e.Name} (Cloned)",
+                        MasterTemplate = e.MasterTemplate,
+                        Applicable = e.Applicable == null ? null : new TemplateApplicableEval() { Script = e.Applicable.Script },
+                        DisableAuthorization = e.DisableAuthorization,
+                        EditableMessage = e.EditableMessage,
+                        GroupResults = e.GroupResults,
+                        MessageFormat = e.MessageFormat,
+                        From = e.From?.Clone(),
+                        Recipients = e.Recipients.Select(r => r.Clone()).ToMList(),
+                        Query = e.Query,
+                        Model = e.Model,
+                        Filters = e.Filters.Select(f => f.Clone()).ToMList(),
+                        Orders = e.Orders.Select(o => o.Clone()).ToMList(),
+                        Messages = e.Messages.Select(m => m.Clone()).ToMList(),
+                        Attachments = e.Attachments.Select(a => a.Clone()).ToMList(),
+                    };
                 }
             }.Register();
 

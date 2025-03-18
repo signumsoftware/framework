@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
 
 namespace Signum.Authorization.Rules;
 
@@ -38,10 +39,27 @@ public class RulePermissionEntity : RuleEntity<PermissionSymbol>
 
 public class RuleOperationEntity : RuleEntity<OperationTypeEmbedded> 
 {
-    public OperationAllowed Allowed { get; set; }
+    public OperationAllowed Fallback { get; set; }
+
+    [PreserveOrder, Ignore, QueryableProperty]
+    [BindParent]
+    public MList<RuleOperationConditionEntity> ConditionRules { get; set; } = new MList<RuleOperationConditionEntity>();
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(ConditionRules))
+        {
+            var errors = NoRepeatValidatorAttribute.ByKey(ConditionRules, a => a.Conditions.OrderBy(a => a.ToString()).ToString(" & "));
+
+            if (errors != null)
+                return ValidationMessage._0HasSomeRepeatedElements1.NiceToString(this.Resource, errors);
+        }
+
+        return base.PropertyValidation(pi);
+    }
 
     [AutoExpressionField]
-    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Allowed}");
+    public override string ToString() => As.Expression(() => $"{Resource} for {Role} <- {Fallback}");
 }
 
 
@@ -53,6 +71,23 @@ public class OperationTypeEmbedded : EmbeddedEntity
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{Operation}/{Type}");
+}
+
+[EntityKind(EntityKind.System, EntityData.Master)]
+public class RuleOperationConditionEntity : Entity, ICanBeOrdered
+{
+    [NotNullValidator(Disabled = true)]
+    public Lite<RuleOperationEntity> RuleOperation { get; set; }
+
+    [PreserveOrder, NoRepeatValidator, CountIsValidator(ComparisonType.GreaterThan, 0)]
+    public MList<TypeConditionSymbol> Conditions { get; set; } = new MList<TypeConditionSymbol>();
+
+    public OperationAllowed Allowed { get; set; }
+
+    public int Order { get; set; }
+
+    [AutoExpressionField]
+    public override string ToString() => As.Expression(() => Allowed.ToString());
 }
 
 public class RulePropertyEntity : RuleEntity<PropertyRouteEntity> 
@@ -159,6 +194,8 @@ public enum OperationAllowed
     Allow = 2,
 }
 
+
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum PropertyAllowed
 {
@@ -231,6 +268,22 @@ public static class TypeAllowedExtensions
         return pa;
     }
 
+    public static bool EqualsForRead(this WithConditions<PropertyAllowed> a, WithConditions<PropertyAllowed> b)
+    {
+        bool CanRead(PropertyAllowed pa) => pa >= PropertyAllowed.Read;
+        if (CanRead(a.Fallback) != CanRead(b.Fallback))
+            return false;
+
+        for (int i = 0; i < a.ConditionRules.Count; i++)
+        {
+            Debug.Assert(a.ConditionRules[i].TypeConditions.SetEquals(b.ConditionRules[i].TypeConditions));
+
+            if (CanRead(a.ConditionRules[i].Allowed) != CanRead(b.ConditionRules[i].Allowed))
+                return false;
+        }
+
+        return true;
+    }
 
     static ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>> cache = new ConcurrentDictionary<WithConditions<TypeAllowed>, WithConditions<PropertyAllowed>>();
     public static WithConditions<PropertyAllowed> ToPropertyAllowed(this WithConditions<TypeAllowed> taac)

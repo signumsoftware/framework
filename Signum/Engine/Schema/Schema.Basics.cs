@@ -202,6 +202,7 @@ public partial class Table : IFieldFinder, ITable, ITablePrivate
     {
         var errorSuffix = "columns in table " + this.Name.Name;
         var columns = new Dictionary<string, IColumn>();
+
         void AddColumns(IEnumerable<IColumn> newColumns)
         {
             try
@@ -1543,9 +1544,9 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
 
     public bool IdentityBehaviour => true; //For now
 
-    internal object?[] BulkInsertDataRow(Entity entity, object value, int order)
+    internal object?[] BulkInsertDataRow(Entity entity, object value, int order, PrimaryKey? rowId)
     {
-        return this.cache.Value.BulkInsertDataRow(entity, value, order);
+        return this.cache.Value.BulkInsertDataRow(entity, value, order, rowId);
     }
 
     public IEnumerable<KeyValuePair<Table, RelationInfo>> GetTables()
@@ -1570,7 +1571,8 @@ public struct AbstractDbType : IEquatable<AbstractDbType>
     NpgsqlDbType? postgreSql;
     public NpgsqlDbType PostgreSql => postgreSql ?? throw new InvalidOperationException("No PostgresSql type defined");
 
-    public bool IsPostgres => postgreSql.HasValue;
+    public bool HasPostgres => postgreSql.HasValue;
+    public bool HasSqlServer => sqlServer.HasValue;
 
     public AbstractDbType(SqlDbType sqlDbType)
     {

@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using Signum.Authorization;
 using Signum.Authorization.ActiveDirectory.Azure;
 using System.DirectoryServices.AccountManagement;
+using System.Runtime.InteropServices.Marshalling;
 using System.Security.Claims;
 
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -54,16 +55,16 @@ public class AzureClaimsAutoCreateUserContext : IAutoCreateUserContext
 
     public string GetClaim(string type) => ClaimsPrincipal.Claims.SingleEx(a => a.Type == type).Value;
 
-    public string? TryGetClain(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
+    public string? TryGetClaim(string type) => ClaimsPrincipal.Claims.SingleOrDefaultEx(a => a.Type == type)?.Value;
 
-    public Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
+    public virtual Guid? OID => Guid.Parse(GetClaim("http://schemas.microsoft.com/identity/claims/objectidentifier"));
 
     public string? SID => null;
 
     public virtual string UserName => GetClaim("preferred_username");
     public virtual string? EmailAddress => GetClaim("preferred_username");
 
-    public virtual string? FullName => TryGetClain("name");
+    public virtual string? FullName => TryGetClaim("name");
 
     public virtual string FirstName
     {
@@ -104,9 +105,11 @@ public class AzureB2CClaimsAutoCreateUserContext : AzureClaimsAutoCreateUserCont
     public override string UserName => GetClaim("emails");
     public override string? EmailAddress => GetClaim("emails");
 
-    public override string? FullName => " ".Combine(FirstName, LastName);
+    public override string? FullName => TryGetClaim("name") ?? " ".Combine(FirstName, LastName);
     public override string FirstName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname");
     public override string LastName => GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname");
+
+    public override Guid? OID => Guid.Parse(GetClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"));
 
     public AzureB2CClaimsAutoCreateUserContext(ClaimsPrincipal claimsPrincipal, string accessToken) : base(claimsPrincipal, accessToken)
     {
@@ -145,11 +148,13 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
         {
             var config = this.GetConfig();
 
-            if (config.LoginWithActiveDirectoryRegistry)
+            var windowsAD = config.WindowsAD;
+
+            if (windowsAD != null && windowsAD.LoginWithActiveDirectoryRegistry)
             {
                 try
                 {
-                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, config.DomainName, userName, password))
+                    using (PrincipalContext pc = new PrincipalContext(ContextType.Domain, windowsAD.DomainName, userName, password))
                     {
                         if (pc.ValidateCredentials(userName, password, ContextOptions.Negotiate))
                         {
@@ -263,11 +268,11 @@ public class ActiveDirectoryAuthorizer : ICustomAuthorizer
                     return null;
             }
         }
-        else if (ctx.OID != null && this.GetConfig().Azure_ApplicationID.HasValue)
+        else if (ctx.OID != null && this.GetConfig().AzureAD?.ApplicationID != null)
         {
             if (config.RoleMapping.Any())
             {
-                var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
+                var groups = ctx is AzureClaimsAutoCreateUserContext ac && this.GetConfig().AzureAD!.UseDelegatedPermission ? AzureADLogic.CurrentADGroupsInternal(ac.AccessToken) :
                     AzureADLogic.CurrentADGroupsInternal(ctx.OID!.Value);
 
                 var roles = config.RoleMapping.Where(m =>

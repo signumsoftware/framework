@@ -173,7 +173,7 @@ public class CollectionToArrayToken : QueryToken
             context.Orders, 
             context.Pagination);
         }
-        // Ask Olmo CollectionNestedToken
+
         var cets = token.Follow(a => a.Parent).TakeWhile(a => a != cta).OfType<CollectionElementToken>().Reverse().ToList();
         foreach (var ce in cets)
         {

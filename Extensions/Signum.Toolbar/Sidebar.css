@@ -23,21 +23,12 @@
     .sidebar .close-sidebar {
         display: none;
         position: absolute;
-        top: 9px;
-        right: 9px;
+        top: 8px;
+        right: 8px;
         border: 3px solid var(--sidebar-principal);
         border-radius: 100%;
-        padding: 10px 16px;
+        padding: 6px 12px;
     }
-
-        .sidebar .close-sidebar:hover {
-            border-color: var(--sidebar-accent);
-            background-color: #e0e0e0;
-        }
-
-            .sidebar .close-sidebar:hover svg {
-                color: var(--sidebar-accent);
-            }
 
         .sidebar .close-sidebar svg {
             color: var(--sidebar-principal);
@@ -62,6 +53,10 @@
     scrollbar-width: thin;
 }
 
+    .sidebar-inner:hover {
+        overflow-y: auto;
+    }
+
     .sidebar-inner .nav-item-sub-menu {
         background-color: #f3f3f3;
     }
@@ -84,17 +79,17 @@
         background-color: #dfdfdf;
     }
 
-    .sidebar-inner .nav-item .sf-extra-icon.active > svg.icon {
-        filter: brightness(0.7);
-    }
+        .sidebar-inner .nav-item .sf-extra-icon.active > svg.icon {
+            filter: brightness(0.7);
+        }
 
     .sidebar-inner .nav-item .sf-extra-icon:hover {
         background-color: #d5d5d5;
     }
 
-    .sidebar-inner .nav-item .sf-extra-icon:hover > svg.icon {
-        filter: brightness(0.5);
-    }
+        .sidebar-inner .nav-item .sf-extra-icon:hover > svg.icon {
+            filter: brightness(0.5);
+        }
 
     /* .sidebar-inner .nav-item .sf-extra-icon:active > svg {
         color: var(--sidebar-accent);
@@ -190,20 +185,23 @@
     margin-left: 11px;
 }
 
-.sidebar-container .container-fluid {
+.sf-page-container {
     flex-grow: 1;
 }
 
-.nav-arrow-icon {
+.sidebar-inner .nav-item .nav-arrow-icon .icon {
     margin-left: -18px;
+    width: 15px;
+    height: 15px;
 }
 
 @media (min-width: 768px) {
     .sidebar-container {
         flex-direction: row;
+        max-height: 100vh;
     }
 
-        .sidebar-container > .container-fluid.sf-page-container {
+        .sidebar-container > .sf-page-container {
             flex-grow: 1;
             width: 0; /*Fixes SearchPage scrolling https://gaurav5430.medium.com/css-flex-positioning-gotchas-child-expands-to-more-than-the-width-allowed-by-the-parent-799c37428dd6*/
         }
@@ -244,8 +242,13 @@
 
 .sidebar ul {
     padding: 0;
+    padding-top: 0.5rem;
+    position: relative;
 }
 
+.sidebar ul ul {
+  padding: 0;
+}
 
 @media (min-width: 768px) {
 
@@ -262,7 +265,6 @@
 
 .sidebar.sidebar-nav {
     user-select: none;
-    max-height: 100vh;
 }
 
     .sidebar.sidebar-nav.hidden {
@@ -291,15 +293,9 @@
     }
 
 .main-toolbar {
-    width: calc(100% + 27px);
     display: flex;
     vertical-align: middle;
-    padding-bottom: 7px;
     border-bottom: 1px solid #e7e7e7;
-    margin-bottom: 15px;
-    margin: 0 -15px;
-    padding: 8px 6px;
-    margin-bottom: 10px;
     align-items: center;
     background-color: #f8f8f8;
     flex-wrap: nowrap;

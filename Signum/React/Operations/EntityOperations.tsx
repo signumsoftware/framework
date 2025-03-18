@@ -25,7 +25,9 @@ export namespace EntityOperations {
 
     const operations = Operations.operationInfos(ti)
       .filter(oi => Operations.isEntityOperation(oi.operationType) && (oi.canBeNew || !ctx.pack.entity.isNew))
+      .filter(oi => ctx.pack.entity.isNew || oi.key in ctx.pack.canExecute)
       .map(oi => {
+
         const eos = Operations.getSettings(oi.key) as EntityOperationSettings<Entity>;
 
         const eoc = new EntityOperationContext<Entity>(ctx.frame, ctx.pack.entity as Entity, oi);

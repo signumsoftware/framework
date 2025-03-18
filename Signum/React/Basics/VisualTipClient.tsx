@@ -9,7 +9,7 @@ export namespace VisualTipClient {
     AppContext.clearSettingsActions.push(() => API.cached = null);
   }
   
-  export module API {
+  export namespace API {
   
     export let cached: Promise<string[] | null> | null | undefined  = null;
   

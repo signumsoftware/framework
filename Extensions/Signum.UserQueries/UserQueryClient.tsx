@@ -278,7 +278,7 @@ export namespace UserQueryClient {
       });
   }
   
-  export module Converter {
+  export namespace Converter {
   
     export async function toFindOptions(uq: UserQueryEntity, entity: Lite<Entity> | undefined): Promise<FindOptions> {
   
@@ -336,6 +336,7 @@ export namespace UserQueryClient {
         timeSeriesStep: uq.systemTime.timeSeriesStep ?? undefined,
         timeSeriesUnit: uq.systemTime.timeSeriesUnit ?? undefined,
         timeSeriesMaxRowsPerStep: uq.systemTime.timeSeriesMaxRowsPerStep ?? undefined,
+        splitQueries: uq.systemTime.splitQueries ?? undefined,
       };
   
       return fo;
@@ -359,7 +360,7 @@ export namespace UserQueryClient {
     }
   }
   
-  export module API {
+  export namespace API {
     export function forEntityType(type: string): Promise<Lite<UserQueryEntity>[]> {
       return ajaxGet({ url: "/api/userQueries/forEntityType/" + type });
     }

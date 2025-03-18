@@ -108,7 +108,7 @@ public static class WordTemplateLogic
                 });
 
 
-            sb.Schema.Table<WordModelEntity>().PreDeleteSqlSync += e =>
+            sb.Schema.EntityEvents<WordModelEntity>().PreDeleteSqlSync += e =>
                 Administrator.UnsafeDeletePreCommand(Database.Query<WordTemplateEntity>()
                     .Where(a => a.Model.Is(e)));
 

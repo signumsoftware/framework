@@ -185,7 +185,7 @@ public static class ReflectionServer
         var genericModels = ReflectionServer.GenericTypeToName.Keys
             .GroupToDictionary(a => a.Assembly);
 
-        var genericTypes = TypeLogic.TypeToEntity.Keys.Where(a => a.IsGenericType && EnumEntity.Extract(a) == null)
+        var genericTypes = TypeLogic.TypeToEntity.Keys.Where(a => a.IsGenericType && !a.IsEnumEntity())
             .GroupToDictionary(a => a.Assembly);
 
         return EntityAssemblies.SelectMany(kvp =>
@@ -300,8 +300,6 @@ public static class ReflectionServer
 
             HasConstructorOperation = allOperations != null && allOperations.Any(oi => oi.OperationType == OperationType.Constructor),
             Operations = allOperations == null ? null : allOperations.Select(oi => KeyValuePair.Create(oi.OperationSymbol.Key, OnOperationExtension(new OperationInfoTS(oi), oi, type)!)).Where(kvp => kvp.Value != null).ToDictionaryEx("operations"),
-
-            RequiresEntityPack = allOperations != null && allOperations.Any(oi => oi.HasCanExecute == true),
         };
 
         return OnTypeExtension(result, type);
@@ -339,6 +337,7 @@ public static class ReflectionServer
         {
             Kind = kind,
             FullName = type.FullName!,
+            NoSchema = kind == KindOfType.Enum && !TypeLogic.NameToType.ContainsKey(type.Name),
             NiceName = descOptions.HasFlag(DescriptionOptions.Description) ? type.NiceName() : null,
             Members = type.GetFields(staticFlags)
                           .Where(fi => kind != KindOfType.Query || queries.QueryDefined(fi.GetValue(null)!))
@@ -419,12 +418,12 @@ public class TypeInfoTS
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool IsSystemVersioned { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public string? ToStringFunction { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool QueryDefined { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool NoSchema { get; set; }
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, MemberInfoTS> Members { get; set; } = null!;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, CustomLiteModelTS>? CustomLiteModels { get; set; } = null!;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool HasConstructorOperation { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] public Dictionary<string, OperationInfoTS>? Operations { get; set; }
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)] public bool RequiresEntityPack { get; set; }
 
     [JsonExtensionData]
     public Dictionary<string, object> Extension { get; set; } = new Dictionary<string, object>();

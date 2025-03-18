@@ -1,6 +1,7 @@
 using Signum.Utilities.DataStructures;
 using Signum.Utilities.Reflection;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
@@ -110,16 +111,24 @@ public class PropertyRoute : IEquatable<PropertyRoute>
         return match.Groups["type"].Value;
     }
 
+
+
+    ConcurrentDictionary<(PropertyRoute pr, MemberInfo member), PropertyRoute> addCache = new();
     public PropertyRoute Add(MemberInfo member)
+    {
+        return addCache.GetOrAdd((this, member), pair => AddImp(pair.pr, pair.member));
+    }
+
+    static PropertyRoute AddImp(PropertyRoute pr, MemberInfo member)
     {
         using (HeavyProfiler.LogNoStackTrace("PR.Add", () => member.Name))
         {
             if (member is MethodInfo && ((MethodInfo)member).IsInstantiationOf(MixinDeclarations.miMixin))
                 member = ((MethodInfo)member).GetGenericArguments()[0];
 
-            if (this.Type.IsIEntity() && PropertyRouteType != PropertyRouteType.Root)
+            if (pr.Type.IsIEntity() && pr.PropertyRouteType != PropertyRouteType.Root)
             {
-                Implementations imp = GetImplementations();
+                Implementations imp = pr.GetImplementations();
 
                 Type? only;
                 if (imp.IsByAll || (only = imp.Types.Only()) == null)
@@ -128,16 +137,11 @@ public class PropertyRoute : IEquatable<PropertyRoute>
                 return new PropertyRoute(Root(only), member);
             }
 
-            return new PropertyRoute(this, member);
+            return new PropertyRoute(pr, member);
         }
     }
 
     PropertyRoute(PropertyRoute parent, MemberInfo fieldOrProperty)
-    {
-        SetParentAndProperty(parent, fieldOrProperty);
-    }
-
-    void SetParentAndProperty(PropertyRoute parent, MemberInfo fieldOrProperty)
     {
         if (fieldOrProperty == null)
             throw new ArgumentNullException(nameof(fieldOrProperty));
@@ -204,24 +208,19 @@ public class PropertyRoute : IEquatable<PropertyRoute>
         }
         else
             throw new NotSupportedException("Properties of {0} not supported".FormatWith(parent.Type));
-
     }
 
 
+    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.ToStr);
 
-    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.toStr);
 
+    static ConcurrentDictionary<Type, PropertyRoute> rootCache = new();
     public static PropertyRoute Root(Type rootEntity)
     {
-        return new PropertyRoute(rootEntity);
+        return rootCache.GetOrAdd(rootEntity, type => new PropertyRoute(type));
     }
 
     PropertyRoute(Type type)
-    {
-        SetRootType(type);
-    }
-
-    void SetRootType(Type type)
     {
         if (type == null)
             throw new ArgumentNullException(nameof(type));
@@ -257,14 +256,17 @@ public class PropertyRoute : IEquatable<PropertyRoute>
     {
         get
         {
-            if (type != null && type.IsIRootEntity())
-                return type;
+            var root = this;
+            while (root.PropertyRouteType != PropertyRouteType.Root)
+                root = root.Parent!;
 
-            return Parent!.RootType;
+            return root.type!;
         }
     }
 
-    public override string ToString()
+    string? cachedToString;
+    public override string ToString() => cachedToString ??= CalculateToString();
+    string CalculateToString() 
     {
         switch (PropertyRouteType)
         {
@@ -282,7 +284,10 @@ public class PropertyRoute : IEquatable<PropertyRoute>
         throw new InvalidOperationException();
     }
 
-    public string PropertyString()
+    string? cachedPropertyString; 
+
+    public string PropertyString() => cachedPropertyString??= CalculatePropertyString();
+    string CalculatePropertyString()
     {
         switch (PropertyRouteType)
         {

@@ -201,14 +201,14 @@ export namespace WordClient {
 declare module '@framework/Signum.Entities' {
 
   export interface EntityPack<T extends ModifiableEntity> {
-    wordTemplates?: Array<Lite<WordTemplateEntity>>;
+    wordTemplates?: Array<Lite<WordTemplateEntity>> | "error";
   }
 }
 
 declare module '@framework/FindOptions' {
 
   export interface QueryDescription {
-    wordTemplates?: Array<Lite<WordTemplateEntity>>;
+    wordTemplates?: Array<Lite<WordTemplateEntity>> | "error";
   }
 }
 

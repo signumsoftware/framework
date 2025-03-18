@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Translations>
+  <Type Name="MicrosoftGraphEmailServiceEntity" Description="le service de messagerie Microsoft Graph" PluralDescription="Services de messagerie Microsoft Graph">
+    <Member Name="Azure_ApplicationID" Description="Azure Application (client) ID" />
+    <Member Name="Azure_ClientSecret" Description="Azure Client Secret" />
+    <Member Name="Azure_DirectoryID" Description="Azure Directory (tenant) ID" />
+    <Member Name="UseActiveDirectoryConfiguration" Description="Utiliser la configuration d’Active Directory" />
+  </Type>
+</Translations>

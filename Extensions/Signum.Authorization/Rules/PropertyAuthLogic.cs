@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Routing;
+using Signum.API.Json;
 using Signum.DynamicQuery.Tokens;
+using Signum.Entities;
 using Signum.Utilities.Reflection;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Diagnostics.Eventing.Reader;
 
 namespace Signum.Authorization.Rules;
@@ -40,12 +44,19 @@ public static class PropertyAuthLogic
             TypeConditionsPerType = sb.GlobalLazy(() => new ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>(),
                 new InvalidateWith(typeof(RulePropertyEntity), typeof(RulePropertyConditionEntity)));
 
+            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
+
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RulePropertyConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleProperty.Entity.Resource.RootType, rtc => rtc.RuleProperty.Entity.Role);
+            sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RulePropertyEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
+            sb.Schema.EntityEvents<PropertyRouteEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RulePropertyEntity>().Where(a => a.Resource.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RulePropertyConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+
+            QueryToken.IsValueHidden = QueryToken_IsValueHidden;
+            TypeAuthLogic.HasTypeConditionInProperties = RequiresTypeConditionForProperties;
+
+
             AuthLogic.ExportToXml += cache.ExportXml;
             AuthLogic.ImportFromXml += cache.ImportXml;
-            AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
-            sb.Schema.Table<PropertyRouteEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand>(AuthCache_PreDeleteSqlSync);
-            QueryToken.IsValueHidden = QueryToken_IsValueHidden;
-            TypeAuthLogic.HasTypeConditionInProperties = HasTypeConditionInProperties;
         }
     }
 
@@ -68,9 +79,8 @@ public static class PropertyAuthLogic
 
         var ta = TypeAuthLogic.GetAllowed(pr.RootType).ToPropertyAllowed();
 
-        if (ta.Equals(pa))
+        if (ta.EqualsForRead(pa))
             return null;
-
 
         var parent = expression.Follow(a => a.Parent).FirstOrDefault(a => a.GetPropertyRoute() is PropertyRoute r && r.PropertyRouteType == PropertyRouteType.Root && r.RootType == pr.RootType);
 
@@ -104,12 +114,11 @@ public static class PropertyAuthLogic
     }
 
     static ResetLazy<ConcurrentDictionary<(Lite<RoleEntity> role, Type type), bool>> TypeConditionsPerType;
-    static bool HasTypeConditionInProperties(Type type)
+    static bool RequiresTypeConditionForProperties(Lite<RoleEntity> role, Type type)
     {
-        var role = RoleEntity.Current;
         return TypeConditionsPerType.Value.GetOrAdd((role, type), e =>
         {
-            var taac = TypeAuthLogic.GetAllowed(e.type);
+            var taac = TypeAuthLogic.GetAllowed(e.role, e.type);
             if (taac.ConditionRules.IsEmpty())
                 return false;
 
@@ -146,16 +155,10 @@ public static class PropertyAuthLogic
         });
     }
 
-    static SqlPreCommand AuthCache_PreDeleteSqlSync(Entity arg)
-    {
-        return Administrator.DeleteWhereScript((RulePropertyEntity rt) => rt.Resource, (PropertyRouteEntity)arg);
-    }
-
-
     public static PropertyRulePack GetPropertyRules(Lite<RoleEntity> role, TypeEntity typeEntity)
     {
         var result = new PropertyRulePack { Role = role, Type = typeEntity };
-        var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity).Where(a => a.Path != "Id").ToList();
+        var properties = PropertyRouteLogic.RetrieveOrGenerateProperties(typeEntity)/*.Where(a => a.Path != "Id")*/.ToList();
         cache.GetRules(result, properties);
 
         result.Rules.ForEach(r => r.Coerced = cache.CoerceValue(role, r.Resource.ToPropertyRoute(), WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write)).ToModel());
@@ -183,25 +186,17 @@ public static class PropertyAuthLogic
 
     public static WithConditions<PropertyAllowed> GetPropertyAllowed(this PropertyRoute route)
     {
-        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+                return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
-        route = route.SimplifyToPropertyOrRoot();
+            route = route.SimplifyToPropertyOrRoot();
 
-        if (!typeof(Entity).IsAssignableFrom(route.RootType))
-            return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
+            if (!TypeLogic.TypeToEntity.ContainsKey(route.RootType))
+                return WithConditions<PropertyAllowed>.Simple(PropertyAllowed.Write);
 
-        return cache.GetAllowed(RoleEntity.Current, route);
+            return cache.GetAllowed(RoleEntity.Current, route);
     }
 
-    public static bool GetAllowUnathenticated(this PropertyRoute route)
-    {
-        var hasAttr = route.RootType.HasAttribute<AllowUnathenticatedAttribute>() ||
-            (route.PropertyInfo != null && route.PropertyInfo!.HasAttribute<AllowUnathenticatedAttribute>()) ||
-            (route.FieldInfo != null && route.FieldInfo!.HasAttribute<AllowUnathenticatedAttribute>());
-
-        return hasAttr;
-    }
 
     public static string? CanBeAllowedFor(this PropertyRoute route, PropertyAllowed requested)
     {
@@ -229,11 +224,29 @@ public static class PropertyAuthLogic
         }
     }
 
-    public static Dictionary<PropertyRoute, WithConditions<PropertyAllowed>>? OverridenProperties()
+    public static FrozenDictionary<PropertyRoute, WithConditions<PropertyAllowed>>? OverridenProperties(Type entityType)
     {
         var dd = cache.GetDefaultDictionary();
+        if (dd.OverrideDictionary == null)
+            return null;
 
-        return dd.OverrideDictionary;
+        var lookup = GetLookupByType(dd);
+
+        return lookup.TryGetC(entityType);
+    }
+
+    private static FrozenDictionary<Type, FrozenDictionary<PropertyRoute, WithConditions<PropertyAllowed>>> GetLookupByType(DefaultDictionary<PropertyRoute, WithConditions<PropertyAllowed>> dd)
+    {
+        if (dd.AdditionalDictionary == null)
+        {
+            var lookup = dd.OverrideDictionary!.AgGroupToFrozenDictionary(kvp => kvp.Key.RootType, gr => gr.ToFrozenDictionaryEx());
+            dd.AdditionalDictionary = lookup;
+            return lookup;
+        }
+        else
+        {
+            return (FrozenDictionary<Type, FrozenDictionary<PropertyRoute, WithConditions<PropertyAllowed>>>)dd.AdditionalDictionary;
+        }
     }
 
     public static WithConditionsModel<AuthThumbnail>? GetAllowedThumbnail(Lite<RoleEntity> role, Type entityType, WithConditions<TypeAllowed> typeAllowedModel)
@@ -307,55 +320,163 @@ public static class PropertyAuthLogic
 
     public static bool IsAllowedFor(IRootEntity? root, PropertyRoute route, PropertyAllowed allowed)
     {
-        if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
-            return true;
-
-        var paac = PropertyAuthLogic.GetPropertyAllowed(route);
-        var taac = root is ModifiableEntity mod && mod.Modified == ModifiedState.Sealed ? null : TypeAuthLogic.GetAllowed(route.RootType);
-
-        if (allowed <= paac.Min(assumingTaac: taac))
-            return true;
-
-        if (paac.Max(assumingTaac: taac) < allowed)
-            return false;
-
-        if (root is Entity e)
+        using (HeavyProfiler.LogNoStackTrace("IsAllowedFor", () => route.ToString()))
         {
-            if (e.IsNew)
+            if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
                 return true;
 
-            //if (!HasTypeConditionInProperties(route.RootType))
-            //{
-            //    throw new InvalidOperationException("Unexpected");  //Type is Write / Read and property same
-            //}
+            var paac = PropertyAuthLogic.GetPropertyAllowed(route);
+            var taac = root is ModifiableEntity mod && mod.Modified == ModifiedState.Sealed ? null : TypeAuthLogic.GetAllowed(route.RootType);
+            if (allowed <= paac.Min(assumingTaac: taac))
+                return true;
 
-            return giEvaluateAllowed.GetInvoker(root.GetType())(e, paac) >= allowed;
+            if (paac.Max(assumingTaac: taac) < allowed)
+                return false;
+
+            if (root is Entity e)
+            {
+                if (e.IsNew)
+                    return true;
+
+                //if (!HasTypeConditionInProperties(route.RootType))
+                //{
+                //    throw new InvalidOperationException("Unexpected");  //Type is Write / Read and property same
+                //}
+
+                return giEvaluateAllowed.GetInvoker(root.GetType())(e, paac) >= allowed;
+            }
+            else if (root == null) //For example Embedded in a Query 
+                return false;
+            else
+                throw new InvalidOperationException("Unexpected");
         }
-        else if(root == null) //For example Embedded in a Query 
-        {
-            return false;
-        }
-        else
-            throw new InvalidOperationException("Unexpected");
     }
-
 
     static GenericInvoker<Func<Entity, WithConditions<PropertyAllowed>, PropertyAllowed>> giEvaluateAllowed =
         new((e, cond) => EvaluateAllowed((ExceptionEntity)e, cond));
     static PropertyAllowed EvaluateAllowed<T>(T entity, WithConditions<PropertyAllowed> paac)
         where T : Entity
     {
-        foreach (var cond in paac.ConditionRules.Reverse())
+        using (HeavyProfiler.LogNoStackTrace("EvaluateAllowed"))
         {
-            if (cond.TypeConditions.All(tc => entity.InTypeCondition(tc)))
+            foreach (var cond in paac.ConditionRules.Reverse())
             {
-                return cond.Allowed;
+                if (cond.TypeConditions.All(tc => entity.InTypeCondition(tc)))
+                {
+                    return cond.Allowed;
+                }
             }
-        }
 
-        return paac.Fallback;
+            return paac.Fallback;
+        }
     }
 
     internal static WithConditions<PropertyAllowed> GetAllowed(Lite<RoleEntity> role, PropertyRoute pr) => cache.GetAllowed(role, pr);
 
+    public static AuthSerializationMetadata? GetAuthSerializationMetadata(IRootEntity root)
+    {
+        var type = root.GetType();
+
+        //if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+        //    return new AuthSerializationMetadata(type, PropertyAllowed.None);
+
+        if (UserEntity.Current == null)
+            return new AuthSerializationMetadata(type,
+                type.HasAttribute<AllowUnathenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
+                null);
+
+        if (root is ModelEntity || !TypeLogic.TypeToEntity.ContainsKey(type))
+            return new AuthSerializationMetadata(type, PropertyAllowed.Write, null);
+
+        return giCalculateAuthSerializationMetadata.GetInvoker(type).Invoke((Entity)root);
+    }
+
+    public static AuthSerializationMetadata? GetAuthSerializationMetadataEmbedded(PropertyRoute route)
+    {
+        var type = route.RootType;
+
+        //if (!AuthLogic.IsEnabled || ExecutionMode.InGlobal)
+        //    return new AuthSerializationMetadata(type, PropertyAllowed.None);
+
+        if (UserEntity.Current == null)
+            return new AuthSerializationMetadata(type,
+                type.HasAttribute<AllowUnathenticatedAttribute>() ? PropertyAllowed.Write : PropertyAllowed.None,
+                null);
+
+
+        var baseEmbedded = PropertyAuthLogic.GetPropertyAllowed(route);
+        var paacDic = OverridenProperties(type)
+            ?.Where(a => !a.Key.Equals(route.PropertyString()) && a.Key.PropertyString().StartsWith(route.PropertyString()))
+            .ToDictionary(a=>a.Key, a => a.Value.Min(baseEmbedded));
+
+        return new AuthSerializationMetadata(route.RootType, baseEmbedded.Min(baseEmbedded), paacDic);
+    }
+
+    static GenericInvoker<Func<Entity, AuthSerializationMetadata>> giCalculateAuthSerializationMetadata =
+       new((e) => CalculateAuthSerializationMetadata<ExceptionEntity>((ExceptionEntity)e));
+    static AuthSerializationMetadata CalculateAuthSerializationMetadata<T>(T entity)
+        where T : Entity
+    {
+        var type = entity.GetType();
+        var taac = TypeAuthLogic.GetAllowed(entity.GetType());
+        var paacDic = PropertyAuthLogic.OverridenProperties(type);
+
+        if (entity.IsNew)
+        {
+            return new AuthSerializationMetadata(typeof(T),
+                taac.ToPropertyAllowed().Max(),
+                paacDic?.ToDictionary(a => a.Key, a => a.Value.Max())
+            );
+        }
+
+        var trivial = TypeAuthLogic.TrivialTypeGetUI(taac);
+        if (trivial != null && !PropertyAuthLogic.RequiresTypeConditionForProperties(RoleEntity.Current, type))
+        {
+            return new AuthSerializationMetadata(typeof(T), trivial.Value.ToPropertyAllowed(),
+                paacDic?.ToDictionary(a => a.Key, a => a.Value.CandidatesAssuming(taac).Distinct().SingleEx())
+                );
+        }
+
+        for (int i = taac.ConditionRules.Count - 1; i >= 0; i--)
+        {
+            var rule = taac.ConditionRules[i];
+
+            if (rule.Allowed != TypeAllowed.None || entity.Modified == ModifiedState.Sealed)
+            {
+                if (rule.TypeConditions.All(tc => entity.InTypeCondition(tc)))
+                    return new AuthSerializationMetadata(typeof(T),
+                        rule.Allowed.GetUI().ToPropertyAllowed(),
+                        paacDic?.ToDictionary(a => a.Key, a => a.Value.ConditionRules[i].Allowed)
+                    );
+
+            }
+        }
+
+        return new AuthSerializationMetadata(typeof(T), 
+            taac.Fallback.GetUI().ToPropertyAllowed(),
+            paacDic?.ToDictionary(a => a.Key, a => a.Value.Fallback)
+        );
+    }
+}
+
+
+public class AuthSerializationMetadata : SerializationMetadata
+{
+    public readonly Type Type;
+
+    public readonly PropertyAllowed Default;
+
+    public readonly Dictionary<PropertyRoute, PropertyAllowed>? Properties;
+
+    public AuthSerializationMetadata(Type type, PropertyAllowed @default, Dictionary<PropertyRoute, PropertyAllowed>? properties)
+    {
+        Type = type;
+        Default = @default;
+        Properties = properties;
+    }
+
+    public override string ToString()
+    {
+        return $"{Type} {Default}" + (Properties == null ? null : $" + {Properties.Count} Properties");
+    }
 }

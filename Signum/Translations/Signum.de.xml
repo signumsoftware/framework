@@ -33,6 +33,7 @@
     <Member Name="Message" Description="Nachricht" />
     <Member Name="Name" Description="Name" />
     <Member Name="Stack" Description="Stapel" />
+    <Member Name="Url" Description="URL" />
   </Type>
   <Type Name="CollapsableCardMessage">
     <Member Name="Collapse" Description="Einklappen" />
@@ -265,7 +266,7 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
-    <Member Name="ComplexCondition" Description="Komplexer Zustand" />
+    <Member Name="ComplexCondition" Description="komplexe Bedingung" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EndsWith" Description="endet mit" />
@@ -498,7 +499,7 @@
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
-    <Member Name="Distinct" Description="Unterschiedlich" />
+    <Member Name="Distinct" Description="Distinct" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />
@@ -510,6 +511,7 @@
     <Member Name="MatchSnippet" Description="Match-Snippet" />
     <Member Name="Modulo0" Description="Modulo {0}" />
     <Member Name="MoreThanOneColumnNamed0" Description="Mehr als eine Spalte mit dem Namen {0}" />
+    <Member Name="Nested" Description="Verschachtelt" />
     <Member Name="Not" Description="Nicht" />
     <Member Name="Null" Description="Leer" />
     <Member Name="Number" Description="Nummer" />

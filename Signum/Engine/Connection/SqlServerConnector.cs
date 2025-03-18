@@ -5,6 +5,7 @@ using System.Data.SqlTypes;
 using Microsoft.Data.SqlClient;
 using Signum.Engine.Sync;
 using Signum.Engine.Sync.SqlServer;
+using Npgsql;
 
 namespace Signum.Engine;
 
@@ -428,14 +429,17 @@ public class SqlServerConnector : Connector
         });
     }
 
+
+    public override string OriginalDatabaseName() => DatabaseName();
+
     public override string DatabaseName()
     {
-        return new SqlConnection(ConnectionString).Database;
+        return new SqlConnectionStringBuilder(ConnectionString).InitialCatalog;
     }
 
     public override string DataSourceName()
     {
-        return new SqlConnection(ConnectionString).DataSource;
+        return new SqlConnectionStringBuilder(ConnectionString).DataSource;
     }
 
     public override void SaveTransactionPoint(DbTransaction transaction, string savePointName)
@@ -584,9 +588,9 @@ public class SqlParameterBuilder : ParameterBuilder
 
         var exp =
             uType == typeof(DateTime) ? Expression.Call(miAsserDateTime, Expression.Convert(value, typeof(DateTime?)), Expression.Constant(dateTimeKind)) :
-            //https://github.com/dotnet/SqlClient/issues/1009
-            uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
-            uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
+            ////https://github.com/dotnet/SqlClient/issues/1009
+            //uType == typeof(DateOnly) ? Expression.Call(miToDateTimeKind, Expression.Convert(value, typeof(DateOnly)), Expression.Constant(Schema.Current.DateTimeKind)) :
+            //uType == typeof(TimeOnly) ? Expression.Call(Expression.Convert(value, typeof(TimeOnly)), miToTimeSpan) :
             value;
 
         Expression valueExpr = Expression.Convert(exp, typeof(object));
@@ -795,8 +799,8 @@ deallocate cur";
     public static SqlPreCommand RemoveAllScript(DatabaseName? databaseName)
     {
         var sqlBuilder = Connector.Current.SqlBuilder;
-        var systemSchemas = sqlBuilder.SystemSchemas.ToString(a => "'" + a + "'", ", ");
-        var systemSchemasExeptDbo = sqlBuilder.SystemSchemas.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
+        var systemSchemas = sqlBuilder.SystemSchemasSqlServer.ToString(a => "'" + a + "'", ", ");
+        var systemSchemasExeptDbo = sqlBuilder.SystemSchemasSqlServer.Where(s => s != "dbo").ToString(a => "'" + a + "'", ", ");
 
         return SqlPreCommand.Combine(Spacing.Double,
             new SqlPreCommandSimple(Use(databaseName, RemoveAllProceduresScript)),

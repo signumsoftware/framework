@@ -35,7 +35,7 @@ export namespace WindowsAuthenticationClient {
     }).catch(() => undefined);
   }
   
-  export module API {
+  export namespace API {
   
     export function loginWindowsAuthentication( throwError : boolean): Promise<AuthClient.API.LoginResponse | undefined> {
       return ajaxPost({ url: `/api/auth/loginWindowsAuthentication?throwError=${throwError}`, avoidAuthToken: true }, undefined);

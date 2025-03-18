@@ -1,4 +1,7 @@
 using Microsoft.SqlServer.Types;
+using Microsoft.Win32;
+using Npgsql;
+using NpgsqlTypes;
 using Signum.Engine.Maps;
 using System.Threading;
 
@@ -20,9 +23,6 @@ public static class MusicLoader
 
     public static SqlHierarchyId NextLabelNode()
     {
-        if (Schema.Current.Settings.IsPostgres)
-            return SqlHierarchyId.Null;
-
         var max = Database.Query<LabelEntity>()
             .Where(lab => (bool)(lab.Node.GetAncestor(1) == SqlHierarchyId.GetRoot()))
             .Select(lab => lab.Node)

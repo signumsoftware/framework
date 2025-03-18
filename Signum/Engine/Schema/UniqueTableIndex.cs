@@ -1,5 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.Identity.Client;
 using Signum.Engine.Sync;
+using Signum.Entities.Reflection;
+using Signum.Utilities.DataStructures;
 
 namespace Signum.Engine.Maps;
 
@@ -49,18 +52,20 @@ public class TableIndex
 
         int maxLength = MaxNameLength();
 
-        if (Unique)
-            return StringHashEncoder.ChopHash("UIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
-    
-        if(Clustered)
-            return StringHashEncoder.ChopHash("CIX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        var isPostgres = tableName.IsPostgres;
 
-        return StringHashEncoder.ChopHash("IX_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        if (Unique)
+            return StringHashEncoder.ChopHash((isPostgres ? "uix_{0}_{1}" :  "UIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+
+        if (Clustered)
+            return StringHashEncoder.ChopHash((isPostgres ? "cix_{0}_{1}" : "CIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+
+        return StringHashEncoder.ChopHash((isPostgres ? "ix_{0}_{1}" : "IX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
     }
 
     internal static string GetPrimaryKeyName(ObjectName tableName)
     {
-        return "PK_" + tableName.Schema.Name + "_" + tableName.Name;
+        return StringHashEncoder.ChopHash((tableName.IsPostgres ? "pk_" : "PK_") + tableName.Schema.Name + "_" + tableName.Name, MaxNameLength());
     }
 
     protected static int MaxNameLength()
@@ -100,7 +105,7 @@ public class TableIndex
 
             var maxSize = MaxNameLength();
 
-            return StringHashEncoder.ChopHash("VIX_{0}_{1}".FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
+            return StringHashEncoder.ChopHash((this.Table.Name.IsPostgres ? "vix_{0}_{1}" : "VIX_{0}_{1}").FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
         }
     }
 
@@ -180,6 +185,35 @@ public class IndexKeyColumns
         var members = Reflector.GetMemberListBase(body);
         if (members.Any(a => ignoreMembers.Contains(a.Name)))
             members = members.Where(a => !ignoreMembers.Contains(a.Name)).ToArray();
+
+        if(members.FirstEx() is MethodInfo mi && mi.Name == nameof(SystemTimeExtensions.SystemPeriod))
+        {
+            var table = (ITable)finder;
+            var sv = table.SystemVersioned;
+
+            if (sv == null)
+                throw new InvalidOperationException($"Table {table.Name} is not system versioned");
+
+            if (members.Length == 1)
+            {
+                if (sv.PostgresSysPeriodColumnName != null)
+                    return [table.Columns[sv.PostgresSysPeriodColumnName!]];
+                else return [
+                    table.Columns[sv.StartColumnName!],
+                    table.Columns[sv.EndColumnName!]
+                ];
+            }else
+            {
+                var columnName = members[1].Name switch
+                {
+                    nameof(NullableInterval<DateTime>.Min) => sv.StartColumnName!,
+                    nameof(NullableInterval<DateTime>.Max) => sv.EndColumnName!,
+                    string other => throw new UnexpectedValueException(other)
+                };
+
+                return [table.Columns[columnName]];
+            }
+        }
 
         Field f = Schema.FindField(finder, members);
 

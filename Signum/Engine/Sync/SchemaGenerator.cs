@@ -1,5 +1,6 @@
 using Microsoft.Identity.Client;
 using Signum.Engine.Maps;
+using Signum.Engine.Sync.Postgres;
 using Signum.Engine.Sync.SqlServer;
 using System.IO;
 
@@ -120,30 +121,16 @@ public static class SchemaGenerator
         return result;
     }
 
-    public static SqlPreCommand? PostgresExtensions()
+    public static SqlPreCommand? CreatePostgresExtensions()
     {
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
-        return Schema.Current.PostgresExtensions.Select(p => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(p)).Combine(Spacing.Simple);
+        var s = Schema.Current;
+
+        return s.PostgresExtensions.Where(kvp => kvp.Value(s)).Select(kvp => Connector.Current.SqlBuilder.CreateExtensionIfNotExist(kvp.Key)).Combine(Spacing.Simple);
     }
 
-    public static SqlPreCommand? PostgresTemporalTableScript()
-    {
-        if (!Schema.Current.Settings.IsPostgres)
-            return null;
-
-        if (!Schema.Current.Tables.Any(t => t.Value.SystemVersioned != null))
-            return null;
-
-        var file = Schema.Current.Settings.PostresVersioningFunctionNoChecks ?
-            "versioning_function_nochecks.sql" :
-            "versioning_function.sql";
-
-        var text = new StreamReader(typeof(Schema).Assembly.GetManifestResourceStream($"Signum.Engine.Sync.Postgres.{file}")!).Using(a => a.ReadToEnd());
-
-        return new SqlPreCommandSimple(text);
-    }
 
     public static SqlPreCommand? SnapshotIsolation()
     {

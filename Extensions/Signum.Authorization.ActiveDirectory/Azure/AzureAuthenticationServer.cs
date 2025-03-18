@@ -11,7 +11,7 @@ namespace Signum.Authorization.ActiveDirectory.Azure;
 
 public class AzureADAuthenticationServer
 {
-    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, bool throwErrors)
+    public static bool LoginAzureADAuthentication(ActionContext ac, LoginWithAzureADRequest request, bool azureB2C, bool throwErrors)
     {
         using (AuthLogic.Disable())
         {
@@ -20,15 +20,30 @@ public class AzureADAuthenticationServer
                 var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
 
                 var config = ada.GetConfig();
+                var azureAD = config.AzureAD;
 
-                if (!config.LoginWithAzureAD)
+                if (azureAD == null)
                     return false;
 
-                var principal = ValidateToken(request.idToken, out var jwtSecurityToken);
+                AzureClaimsAutoCreateUserContext ctx;
+                if (azureB2C)
+                {
+                    if (azureAD.AzureB2C?.LoginWithAzureB2C != true)
+                        return false;
 
-                var ctx = config.AzureB2C != null ?
-                    new AzureB2CClaimsAutoCreateUserContext(principal, request.accessToken) :
-                    new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
+                    var principal = ValidateToken(request.idToken, azureB2C, out var jwtSecurityToken);
+
+                    ctx = new AzureB2CClaimsAutoCreateUserContext(principal, request.accessToken);
+                }
+                else
+                {
+                    if (azureAD.LoginWithAzureAD != true)
+                        return false;
+
+                    var principal = ValidateToken(request.idToken, azureB2C, out var jwtSecurityToken);
+
+                    ctx = new AzureClaimsAutoCreateUserContext(principal, request.accessToken);
+                }
 
                 UserEntity? user = Database.Query<UserEntity>().SingleOrDefault(a => a.Mixin<UserADMixin>().OID == ctx.OID);
 
@@ -75,26 +90,23 @@ public class AzureADAuthenticationServer
     public static Func<IEnumerable<string>>? ExtraValidAudiences;
 
     //https://stackoverflow.com/questions/39866513/how-to-validate-azure-ad-security-token
-    public static ClaimsPrincipal ValidateToken(string jwt, out JwtSecurityToken jwtSecurityToken)
+    public static ClaimsPrincipal ValidateToken(string jwt, bool azureB2C, out JwtSecurityToken jwtSecurityToken)
     {
         var ada = (ActiveDirectoryAuthorizer)AuthLogic.Authorizer!;
-        var adaConfig = ada.GetConfig();
+        var azureAD = ada.GetConfig().AzureAD!;
 
-        string stsDiscoveryEndpoint =
-            adaConfig.AzureB2C != null ?
-            $"https://{adaConfig.AzureB2C.TenantName}.b2clogin.com/{adaConfig.AzureB2C.TenantName}.onmicrosoft.com/{adaConfig.AzureB2C.SignInSignUp_UserFlow}/v2.0/.well-known/openid-configuration?p={adaConfig.AzureB2C.SignInSignUp_UserFlow}" :
-            "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration";
+        string stsDiscoveryEndpoint = !azureB2C ? "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration" :
+            $"https://{azureAD.AzureB2C!.TenantName}.b2clogin.com/{azureAD.AzureB2C.TenantName}.onmicrosoft.com/{azureAD.AzureB2C.SignInSignUp_UserFlow}/v2.0/.well-known/openid-configuration?p={azureAD.AzureB2C.SignInSignUp_UserFlow}";
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
 
-        var issuer = adaConfig.AzureB2C != null ?
-            config.Issuer: 
-            $"https://login.microsoftonline.com/{adaConfig.Azure_DirectoryID}/v2.0";
+        var issuer = !azureB2C ? $"https://login.microsoftonline.com/{azureAD.DirectoryID}/v2.0" :
+            config.Issuer;
 
         TokenValidationParameters validationParameters = new TokenValidationParameters
         {
-            ValidAudience = ada.GetConfig().Azure_ApplicationID.ToString(),
+            ValidAudience = azureAD.ApplicationID.ToString(),
             ValidAudiences = ExtraValidAudiences?.Invoke(),
             ValidIssuer = issuer,
 

@@ -15,12 +15,13 @@ import { namespace } from 'd3';
 //http://codepen.io/m-e-conroy/pen/ALsdF
 interface ErrorModalProps extends Modals.IModalProps<undefined> {
   error: any;
+  beforeOkClicked?:()=> Promise<void>
 }
 
 const ErrorModal: {
   (p: ErrorModalProps): React.JSX.Element;
   register: () => void;
-  showErrorModal: (error: any) => Promise<void>;
+  showErrorModal: (error: any, beforeOkClicked?: ()=> Promise<void>) => Promise<void>;
 } = function (p: ErrorModalProps) {
 
   const [show, setShow] = React.useState(true);
@@ -29,7 +30,9 @@ const ErrorModal: {
     p.onExited!(undefined);
   }
 
-  function handleCloseClicked() {
+  async function handleCloseClicked() {
+    await p.beforeOkClicked?.();
+
     setShow(false);
   }
 
@@ -119,6 +122,7 @@ function logError(error: Error) {
     return;
 
   var errorModel = ClientErrorModel.New({
+    url: (error as any)?.url,
     errorType: (error as Object).constructor.name,
     message: error.message || error.toString(),
     stack: error.stack ?? null,
@@ -129,6 +133,7 @@ function logError(error: Error) {
 
   if (lastError != null) {
     if (
+      lastError.model.url == errorModel.url &&
       lastError.model.errorType == errorModel.errorType &&
       lastError.model.message == errorModel.message &&
       lastError.model.stack == errorModel.stack &&
@@ -149,6 +154,12 @@ function logError(error: Error) {
 ErrorModal.register = () => {
   window.onunhandledrejection = p => {
     var error = p.reason;
+
+    if (error.alreadyConsumed)
+      return;
+
+    error.alreadyConsumed = true;
+
     logError(error);
     if (Modals.isStarted()) {
       ErrorModal.showErrorModal(error);
@@ -162,6 +173,13 @@ ErrorModal.register = () => {
   var oldOnError = window.onerror;
 
   window.onerror = (message: Event | string, filename?: string, lineno?: number, colno?: number, error?: Error) => {
+
+    if (error != null) {
+      if ((error as any).alreadyConsumed)
+        return;
+
+      (error as any).alreadyConsumed = true;
+    }
 
     if (error != null)
       logError(error);
@@ -181,7 +199,7 @@ ErrorModal.register = () => {
   };
 }
 
-ErrorModal.showErrorModal = (error: any): Promise<void> => {
+ErrorModal.showErrorModal = (error: any, beforeOkClicked?: ()=> Promise<void>): Promise<void> => {
   if (error == null || error.code === 20) //abort
     return Promise.resolve();
 
@@ -199,7 +217,7 @@ ErrorModal.showErrorModal = (error: any): Promise<void> => {
       style: "warning"
     }).then(() => undefined);
 
-  return Modals.openModal<void>(<ErrorModal error={error} />);
+  return Modals.openModal<void>(<ErrorModal error={error} beforeOkClicked={beforeOkClicked} />);
 }
 
 function textDanger(message: string | null | undefined): React.ReactFragment | null | undefined {
@@ -221,7 +239,8 @@ export function RenderServiceMessageDefault(p: { error: ServiceError }): React.J
 
   return (
     <div>
-      {textDanger(p.error.httpError.exceptionMessage)}
+
+      {ErrorModalOptions.preferPreFormated(p.error) ? <pre style={{ whiteSpace: "pre-wrap" }}>{p.error.httpError.exceptionMessage}</pre> : textDanger(p.error.httpError.exceptionMessage)}
       {p.error.httpError.stackTrace && ErrorModalOptions.isExceptionViewable() &&
         <div>
           <a href="#" onClick={handleShowStackTrace}>StackTrace</a>
@@ -278,6 +297,9 @@ export namespace ErrorModalOptions {
     return false;
   }
 
+  export function preferPreFormated(se: ServiceError): boolean {
+    return se.httpError.exceptionType.contains("FieldReaderException");
+  }
   export function renderServiceMessage(se: ServiceError): React.ReactNode {
     return <RenderServiceMessageDefault error={se} />;
   }

@@ -142,12 +142,13 @@ public static class TypeLogic
                         var pc = ObjectName.Parse(c.TableName, isPostgres);
                         var ps = ObjectName.Parse(s.TableName, isPostgres);
 
-                        if (!EqualsIgnoringDatabasePrefix(pc, ps))
+                        if(pc.Schema.Database != null ||  pc.Schema.Database != null ? !EqualsIgnoringDatabasePrefix(pc, ps) : c.TableName != s.TableName)
                         {
                             c.TableName = ps.ToString();
                         }
                     }
 
+                    c.TableName = s.TableName;
                     c.CleanName = s.CleanName;
                     c.Namespace = s.Namespace;
                     c.ClassName = s.ClassName;

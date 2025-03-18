@@ -6,14 +6,15 @@ import { ajaxPost, ajaxGet, ValidationError } from '@framework/Services';
 import { Navigator, EntitySettings } from '@framework/Navigator'
 import { EvalClient } from '../Signum.Eval/EvalClient';
 import {
-  EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString
+  EntityPack, Lite, toLite, newMListElement, Entity, isEntityPack, isEntity, getToString,
+  JavascriptMessage
 } from '@framework/Signum.Entities'
 import { TypeEntity } from '@framework/Signum.Basics'
 import { Type, PropertyRoute, OperationInfo, toNumberFormat, getQueryKey, getQueryNiceName, getOperationInfo } from '@framework/Reflection'
 import { TypeContext } from '@framework/TypeContext'
 import * as OmniboxSpecialAction from '@framework/OmniboxSpecialAction'
 import { Finder } from '@framework/Finder'
-import { Operations, EntityOperationSettings, EntityOperationContext } from '@framework/Operations'
+import { Operations, EntityOperationSettings, EntityOperationContext, ContextualOperationContext } from '@framework/Operations'
 import { EntityOperations, OperationButton } from '@framework/Operations/EntityOperations'
 import TypeHelpButtonBarComponent from '../Signum.Eval/TypeHelp/TypeHelpButtonBarComponent'
 import {
@@ -59,6 +60,7 @@ import WorkflowToolbarConfig from './WorkflowToolbarConfig';
 import WorkflowToolbarMenuConfig from './WorkflowToolbarMenuConfig';
 import { isPermissionAuthorized } from '@framework/AppContext';
 import "./Case/Inbox.css";
+import { useAPI } from '../../Signum/React/Hooks';
 
 export namespace WorkflowClient {
 
@@ -170,9 +172,9 @@ export namespace WorkflowClient {
       hiddenColumns: [
         { token: CaseNotificationEntity.token(e => e.state) },
       ],
-      rowAttributes: (row, columns) => {
-        var rowState = row.columns[columns.indexOf("State")] as CaseNotificationState;
-        switch (rowState) {
+      rowAttributes: (row, sc) => {
+        var rowState = sc.tryGetRowValue(row, CaseNotificationEntity.token(e => e.state));
+        switch (rowState?.value) {
           case "New": return { className: "new-row" };
           case "Opened": return { className: "opened-row" };
           case "InProgress": return { className: "in-progress-row" };
@@ -365,6 +367,7 @@ export namespace WorkflowClient {
         settersConfig: coc => "NoDialog",
         isVisible: ctx => true,
         createMenuItems: coc => {
+
           const wa = coc.pack!.entity.workflowActivity as WorkflowActivityEntity;
           if (wa.type == "Task") {
 
@@ -380,10 +383,14 @@ export namespace WorkflowClient {
       },
       contextualFromMany: {
         isVisible: ctx => true,
-        color: "primary"
+        color: "primary",
+        createMenuItems: coc => {
+          return [<CaseActivitiyOperations caseActivities={coc.context.lites} coc={coc} />]
+        },
+        settersConfig: coc => "NoDialog",
       },
-
     }));
+
 
     Operations.addSettings(new EntityOperationSettings(CaseActivityOperation.Undo, {
       hideOnCanExecute: true,
@@ -844,6 +851,10 @@ export namespace WorkflowClient {
     export function nextConnections(request: NextConnectionsRequest): Promise<Array<Lite<IWorkflowNodeEntity>>> {
       return ajaxPost({ url: "/api/workflow/nextConnections" }, request);
     }
+
+    export function getOnlyWorkflowActivity(caseActivities: Lite<CaseActivityEntity>[]): Promise<WorkflowActivityEntity | null> {
+      return ajaxPost({ url: "/api/workflow/onlyWorkflowActivity" }, caseActivities);
+    }
   }
 
   export interface NextConnectionsRequest {
@@ -949,5 +960,33 @@ export namespace WorkflowClient {
   export interface CaseFlowEntityPack {
     pack: EntityPack<CaseEntity>,
     workflowActivity: IWorkflowNodeEntity;
+  }
+
+  export function CaseActivitiyOperations(p: { caseActivities: Lite<CaseActivityEntity>[], coc: ContextualOperationContext<CaseActivityEntity> }): React.JSX.Element | null {
+
+    const wa = useAPI(() => WorkflowClient.API.getOnlyWorkflowActivity(p.caseActivities), [p.caseActivities]);
+
+    if (wa === undefined)
+      return <div>{JavascriptMessage.loading.niceToString()}</div>;
+
+    if (wa === null)
+      return null;
+
+    if (wa.type == "Task") {
+      return (
+        <ContextualOperations.OperationMenuItem coc={p.coc} color={wa.customNextButton?.style.toLowerCase() as BsColor}>
+          {wa.customNextButton?.name}
+        </ContextualOperations.OperationMenuItem>
+      );
+    }
+
+    if (wa.type == "Decision") {
+      return (<>
+        {wa.decisionOptions.map(mle => <ContextualOperations.OperationMenuItem onOperationClick={() => p.coc.defaultClick(mle.element.name)}
+          coc={p.coc} color={mle.element.style.toLowerCase() as BsColor}>{mle.element.name}</ContextualOperations.OperationMenuItem>)}
+      </>);
+    }
+
+    return null;
   }
 }

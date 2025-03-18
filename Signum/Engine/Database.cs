@@ -101,7 +101,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
             throw new ArgumentNullException(nameof(lite));
 
         if (lite.EntityOrNull == null)
-            lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token));
+            lite.SetEntity(await RetrieveAsync(lite.EntityType, lite.Id, token, lite.PartitionId));
 
         return lite.EntityOrNull!;
     }
@@ -114,7 +114,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         if (lite == null)
             throw new ArgumentNullException(nameof(lite));
 
-        return (T)(object)Retrieve(lite.EntityType, lite.Id);
+        return (T)(object)Retrieve(lite.EntityType, lite.Id, lite.PartitionId);
     }
 
     /// <summary>
@@ -125,7 +125,7 @@ VALUES ({parameters.ToString(p => p.ParameterName, ", ")})";
         if (lite == null)
             throw new ArgumentNullException(nameof(lite));
 
-        return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token);
+        return (T)(object)await RetrieveAsync(lite.EntityType, lite.Id, token, lite.PartitionId);
     }
 
     static readonly GenericInvoker<Func<PrimaryKey, int?, Entity>> giRetrieve = new((id, partitionId) => Retrieve<Entity>(id, partitionId));

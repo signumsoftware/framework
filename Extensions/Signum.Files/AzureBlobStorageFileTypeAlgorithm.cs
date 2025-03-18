@@ -1,8 +1,10 @@
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-
+using Azure.Storage.Blobs.Specialized;
+using Azure.Storage.Sas;
 using System.IO;
-using System.Reflection.Metadata;
+using System.Threading;
 
 namespace Signum.Files.FileTypeAlgorithms;
 
@@ -12,11 +14,18 @@ public enum BlobAction
     Download
 }
 
+public enum AzureWebDownload
+{
+    DirectUrl,
+    SASToken,
+    None
+}
+
 public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTypeAlgorithm
 {
     public Func<IFilePath, BlobContainerClient> GetClient { get; private set; }
 
-    public Func<bool> WebDownload { get; set; } = () => false;
+    public Func<AzureWebDownload> WebDownload { get; set; } = () => AzureWebDownload.None;
 
     public Func<IFilePath, string> CalculateSuffix { get; set; } = SuffixGenerators.Safe.YearMonth_Guid_Filename;
     public bool WeakFileReference { get; set; }
@@ -43,20 +52,61 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    public PrefixPair GetPrefixPair(IFilePath efp)
+    public Func<IFilePath, TimeSpan> SASTokenExpires = (IFilePath efp) => TimeSpan.FromMinutes(15);
+
+    public string? GetFullPhysicalPath(IFilePath efp) => null;
+
+    public string? GetFullWebPath(IFilePath efp)
     {
+        var download = this.WebDownload();
+        if (download == AzureWebDownload.None)
+            return null;
+
         var client = GetClient(efp);
+        if (download == AzureWebDownload.SASToken)
+        {
+            using (HeavyProfiler.LogNoStackTrace("Create SAS Token"))
+            {
+                BlobSasBuilder sasBuilder = new BlobSasBuilder()
+                {
+                    BlobContainerName = client.Name,
+                    BlobName = efp.Suffix,
+                    Resource = "b", // "b" = blob, "c" = container
+                    StartsOn = DateTimeOffset.UtcNow.AddSeconds(-10),
+                    ExpiresOn = DateTimeOffset.UtcNow.Add(SASTokenExpires(efp))
+                };
 
-        if (!this.WebDownload())
-            return PrefixPair.None();
+                // Define permissions (Read, Write, Delete, etc.)
+                sasBuilder.SetPermissions(BlobSasPermissions.Read);
 
-        return PrefixPair.WebOnly(client.Uri.ToString().Replace("?", "<suffix>?"));
+                // Generate the SAS token using the storage account key
+
+                var sasToken = sasBuilder.ToSasQueryParameters(GetCredentials(client)).ToString();
+
+                return $"{client.Uri}/{efp.Suffix}?{sasToken}";
+            }
+        }
+
+        if (download == AzureWebDownload.DirectUrl)
+            return $"{client.Uri}/{efp.Suffix}";
+
+        throw new UnexpectedValueException(download);
     }
 
+    static readonly Func<BlobContainerClient, StorageSharedKeyCredential> GetCredentials;
+
+    static AzureBlobStorageFileTypeAlgorithm()
+    {
+        var param = Expression.Parameter(typeof(BlobContainerClient));
+
+        var body = Expression.Property(Expression.Property(param, "ClientConfiguration"), "SharedKeyCredential");
+
+        GetCredentials = Expression.Lambda<Func<BlobContainerClient, StorageSharedKeyCredential>>(body, param).Compile();
+    }
 
     public BlobProperties GetProperties(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage GetProperties"))
+        using (HeavyProfiler.Log("AzureBlobStorage GetProperties", () => fp.Suffix))
         {
             var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).GetProperties();
@@ -66,7 +116,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public Stream OpenRead(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage OpenRead"))
+        using (HeavyProfiler.Log("AzureBlobStorage OpenRead", () => fp.Suffix))
         {
             var client = GetClient(fp);
             return client.GetBlobClient(fp.Suffix).Download().Value.Content;
@@ -75,33 +125,29 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
     public byte[] ReadAllBytes(IFilePath fp)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes"))
+        using (HeavyProfiler.Log("AzureBlobStorage ReadAllBytes", () => fp.Suffix))
         {
-      
-            return GetBlobClient(fp).Download().Value.Content.ReadAllBytes();
+            try
+            {
+                var client = GetClient(fp);
+                return client.GetBlobClient(fp.Suffix).Download().Value.Content.ReadAllBytes();
+            }
+            catch (Exception ex)
+            {
+                ex.Data["suffix"] = fp.Suffix;
+                throw;
+            }
         }
-    }
-
-    public BlobClient GetBlobClient(IFilePath fp)
-    {
-        var client = GetClient(fp);
-        return client.GetBlobClient(fp.Suffix);
-    }
-
-    public  string GetAsString(IFilePath fp)
-    {
-        return GetAsString(GetBlobClient(fp));
 
     }
 
-    public   string GetAsString( BlobClient blobClient)
+    public string GetAsString(BlobClient blobClient)
     {
-        BlobDownloadResult downloadResult =  blobClient.DownloadContentAsync().Result;
+        BlobDownloadResult downloadResult = blobClient.DownloadContentAsync().Result;
         string content = downloadResult.Content.ToString();
 
         return content;
     }
-
 
     public virtual void SaveFile(IFilePath fp)
     {
@@ -117,9 +163,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             {
                 var blobHeaders = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
                 var blobClient = client.GetBlobClient(fp.Suffix);
-                var binaryFile = fp.BinaryFile; //For consistency with async
-                fp.BinaryFile = null!;
-                SaveFileInAzure(blobClient, blobHeaders, binaryFile);
+                SaveFileInAzure(blobClient, blobHeaders, fp.BinaryFile);
+                fp.CleanBinaryFile();
             }
             catch (Exception ex)
             {
@@ -131,10 +176,13 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    private static void SaveFileInAzure(BlobClient blobClient, BlobHttpHeaders blobHeaders, byte[] binaryFile)
+    static void SaveFileInAzure(BlobClient blobClient, BlobHttpHeaders blobHeaders, byte[] binaryFile)
     {
         blobClient.Upload(new MemoryStream(binaryFile), httpHeaders: blobHeaders);
     }
+
+    
+
 
     //Initial exceptions (like connection string problems) should happen synchronously
     public virtual /*async*/ Task SaveFileAsync(IFilePath fp, CancellationToken cancellationToken = default)
@@ -153,8 +201,7 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
                 var blobClient = client.GetBlobClient(fp.Suffix);
 
                 var binaryFile = fp.BinaryFile;
-                fp.BinaryFile = null!; //So the entity is not modified after await
-
+                //fp.CleanBinaryFile(); at the end of transaction
                 return SaveFileInAzureAsync(blobClient, binaryFile, headers, fp.Suffix, cancellationToken);
             }
             catch (Exception ex)
@@ -182,8 +229,92 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         }
     }
 
-    string? alreadyCreated; 
+    public virtual async Task StartUpload(IFilePath fp)
+    {
+        using (HeavyProfiler.Log("AzureBlobStorage StartUpload"))
+        using (new EntityCache(EntityCacheType.ForceNew))
+        {
 
+            BlobContainerClient client = CalculateSuffixWithRenames(fp);
+
+            try
+            {
+                var headers = GetBlobHttpHeaders(fp, this.GetBlobAction(fp));
+                var blobClient = client.GetBlobClient(fp.Suffix);
+
+                if (await blobClient.ExistsAsync())
+                    throw new InvalidOperationException("File already exists");
+                    
+                await blobClient.UploadAsync(new MemoryStream(), overwrite: true);
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("AccountName", client.AccountName);
+                ex.Data.Add("ContainerName", client.Name);
+                throw;
+            }
+        }
+    }
+
+    public virtual async Task<ChunkInfo> UploadChunk(IFilePath fp, int chunkIndex, MemoryStream chunk, CancellationToken token = default)
+    {
+        using (HeavyProfiler.Log("AzureBlobStorage UploadChunk"))
+        using (new EntityCache(EntityCacheType.ForceNew))
+        {
+
+            BlobContainerClient client = GetClient(fp);
+
+            try
+            {
+                var blockClient = client.GetBlockBlobClient(fp.Suffix);
+
+                string blockIdb64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(chunkIndex.ToString("D6")));
+
+                chunk.Position = 0;
+                await blockClient.StageBlockAsync(blockIdb64, chunk);
+
+                chunk.Position = 0;
+                return new ChunkInfo
+                {
+                    PartialHash = CryptorEngine.CalculateMD5Hash(chunk),
+                    BlockId = blockIdb64,
+                };
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("AccountName", client.AccountName);
+                ex.Data.Add("ContainerName", client.Name);
+                throw;
+            }
+        }
+    }
+
+    public virtual async Task FinishUpload(IFilePath fp, List<ChunkInfo> chunks, CancellationToken token = default)
+    {
+        using (HeavyProfiler.Log("AzureBlobStorage FinishUpload"))
+        {
+            BlobContainerClient client = GetClient(fp);
+
+            try
+            {
+                var blockClient = client.GetBlockBlobClient(fp.Suffix);
+
+                var info = await blockClient.CommitBlockListAsync(chunks.Select(a => a.BlockId).ToList());
+            }
+            catch (Exception ex)
+            {
+                ex.Data.Add("Suffix", fp.Suffix);
+                ex.Data.Add("AccountName", client.AccountName);
+                ex.Data.Add("ContainerName", client.Name);
+                throw;
+            }
+        }
+    }
+
+
+    string? blobContainerAlreadyCreated;
     private BlobContainerClient CalculateSuffixWithRenames(IFilePath fp)
     {
         using (HeavyProfiler.LogNoStackTrace("CalculateSuffixWithRenames"))
@@ -192,18 +323,15 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
             if (!suffix.HasText())
                 throw new InvalidOperationException("Suffix not set");
 
-
-            fp.SetPrefixPair(GetPrefixPair(fp));
-
             var client = GetClient(fp);
-            if (CreateBlobContainerIfNotExists && alreadyCreated != client.Name)
+            if (CreateBlobContainerIfNotExists && blobContainerAlreadyCreated != client.Name)
             {
                 using (HeavyProfiler.LogNoStackTrace("AzureBlobStorage CreateIfNotExists"))
                 {
                     try
                     {
                         client.CreateIfNotExists();
-                        alreadyCreated = client.Name;
+                        blobContainerAlreadyCreated = client.Name;
                     }
                     catch (Azure.RequestFailedException ex) when (ex.ErrorCode == "ContainerAlreadyExists")
                     {
@@ -240,13 +368,13 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
         {
             ContentType = contentType,
             ContentDisposition = action == BlobAction.Download ? "attachment" : "inline",
-            CacheControl = GetCacheControl?.Invoke(fp) ?? "", 
+            CacheControl = GetCacheControl?.Invoke(fp) ?? "",
         };
     }
 
-    public void MoveFile(IFilePath ofp, IFilePath nfp,bool createTargetFolder)
+    public void MoveFile(IFilePath ofp, IFilePath nfp, bool createTargetFolder)
     {
-        using (HeavyProfiler.Log("AzureBlobStorage MoveFile"))
+        using (HeavyProfiler.Log("AzureBlobStorage MoveFile", () => ofp.FileName))
         {
             if (WeakFileReference)
                 return;
@@ -292,6 +420,8 @@ public class AzureBlobStorageFileTypeAlgorithm : FileTypeAlgorithmBase, IFileTyp
 
         blobClient.SetHttpHeaders(headers);
     }
+
+
 
     public readonly static Dictionary<string, string> ContentTypesDict = new Dictionary<string, string>()
     {
@@ -991,6 +1121,3 @@ public static class BlobExtensions
         return client.GetBlobs(prefix: blobName.BeforeLast("/") ?? "").Any(b => b.Name == blobName);
     }
 }
-
-
-

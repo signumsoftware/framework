@@ -12,12 +12,14 @@ using Signum.Engine.Sync.SqlServer;
 using Signum.API;
 using Signum.Authorization;
 using Signum.Authorization.Rules;
+using DocumentFormat.OpenXml.Office2013.Drawing.Chart;
 
 namespace Signum.Cache;
 
 public interface IServerBroadcast
 {
-    void Start();
+    bool Running { get; }
+    void StartIfNecessary();
     void Send(string methodName, string argument);
     event Action<string, string>? Receive;
 }
@@ -72,14 +74,14 @@ public static class CacheLogic
             if(ServerBroadcast != null)
             {
                 ServerBroadcast!.Receive += ServerBroadcast_Receive;
-                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.Start();
+                sb.Schema.BeforeDatabaseAccess += () => ServerBroadcast!.StartIfNecessary();
             }
 
             sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
             sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
-            sb.Schema.InvalidateCache += CacheLogic.ForceReset;
+            sb.Schema.InvalidateCache +=  ()=> CacheLogic.ForceReset();
 
-            GlobalLazy.OnResetAll += CacheLogic.ForceReset;
+            GlobalLazy.OnResetAll += ()=> CacheLogic.ForceReset();
         }
     }
 
@@ -138,8 +140,14 @@ public static class CacheLogic
 
     public static Dictionary<string /*methodName*/, Action<string /*argument*/>> BroadcastReceivers = new Dictionary<string, Action<string>>
     {
-        { InvalidateTable, ServerBroadcast_InvalidateTable}
+        { Method_InvalidateTable, ServerBroadcast_InvalidateTable },
+        { Method_InvalidateAllTable, ServerBroadcast_InvalidateAllTables },
     };
+
+    static void ServerBroadcast_InvalidateAllTables(string args)
+    {
+        CacheLogic.InvalidateAll(systemLog: args == "nodb" ? false : true);
+    }
 
     static void ServerBroadcast_InvalidateTable(string cleanName)
     {
@@ -755,7 +763,8 @@ Remember that the Start could be called with an empty database!");
         }
     }
 
-    const string InvalidateTable = "InvalidateTable";
+    public const string Method_InvalidateTable = "InvalidateTable";
+    public const string Method_InvalidateAllTable = "InvalidateAllTables";
 
     internal static void NotifyInvalidateAllConnectedTypes(Type type)
     {
@@ -767,7 +776,7 @@ Remember that the Start could be called with an empty database!");
             if (controller != null)
                 controller.NotifyInvalidated();
 
-            ServerBroadcast?.Send(InvalidateTable, TypeLogic.GetCleanName(stype));
+            ServerBroadcast?.Send(Method_InvalidateTable, TypeLogic.GetCleanName(stype));
         }
     }
 
@@ -795,14 +804,15 @@ Remember that the Start could be called with an empty database!");
         return controllers.GetOrThrow(type)!.CachedTable;
     }
 
-    public static void ForceReset()
+    public static void ForceReset(bool systemLog = true)
     {
         foreach (var controller in controllers.Values.NotNull())
         {
             controller.ForceReset();
         }
 
-        SystemEventLogLogic.Log("CacheLogic.ForceReset");
+        if (systemLog)
+            SystemEventLogLogic.Log("CacheLogic.ForceReset");
     }
 
     public static XDocument SchemaGraph(Func<Type, bool> cacheHint)
@@ -885,6 +895,7 @@ Remember that the Start could be called with an empty database!");
             }
             else
             {
+                CacheLogic.ServerBroadcast?.StartIfNecessary(); //Typicaly NOOP
                 foreach (var t in invalidateWith.Types)
                     sb.Schema.CacheController(t)!.Load();
             }
@@ -916,6 +927,14 @@ Remember that the Start could be called with an empty database!");
             if (dic.IsEmpty())
                 assumeMassiveChangesAsInvalidations.Value = null;
         });
+    }
+
+    public static void InvalidateAll(bool systemLog)
+    {
+        CacheLogic.ForceReset(systemLog: systemLog);
+        GlobalLazy.ResetAll();
+        Schema.Current.InvalidateMetadata();
+        GC.Collect(2);
     }
 }
 

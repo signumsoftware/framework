@@ -112,10 +112,6 @@ public static class AuthLogic
                     r.Description,
                 });
 
-            sb.Schema.Table<RoleEntity>().PreDeleteSqlSync += Role_PreDeleteSqlSync;
-
-
-
             RolesByLite = sb.GlobalLazy(() => Database./*Query*/RetrieveAll<RoleEntity>().ToFrozenDictionaryEx(a => a.ToLite()), new InvalidateWith(typeof(RoleEntity)), AuthLogic.NotifyRulesChanged);
             rolesByName = sb.GlobalLazy(() => RolesByLite.Value.Keys.ToFrozenDictionaryEx(a => a.ToString()!), new InvalidateWith(typeof(RoleEntity)));
             rolesGraph = sb.GlobalLazy(() => CacheRoles(RolesByLite.Value), new InvalidateWith(typeof(RoleEntity)));
@@ -149,11 +145,6 @@ public static class AuthLogic
 
 
         }
-    }
-
-    static SqlPreCommand? Role_PreDeleteSqlSync(Entity entity)
-    {
-        return Administrator.UnsafeDeletePreCommandMList((RoleEntity rt) => rt.InheritsFrom, Database.MListQuery((RoleEntity rt) => rt.InheritsFrom).Where(mle => mle.Element.Is((RoleEntity)entity)));
     }
 
     public static Lite<RoleEntity> GetOrCreateTrivialMergeRole(List<Lite<RoleEntity>> roles, Dictionary<string, Lite<RoleEntity>>? newRoles = null)

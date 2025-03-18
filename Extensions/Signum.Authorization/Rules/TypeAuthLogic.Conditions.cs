@@ -247,7 +247,8 @@ public static partial class TypeAuthLogic
 
         if (entity.Modified != ModifiedState.Sealed)
         {
-            if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(entity.GetType()))
+            var role = RoleEntity.Current;
+            if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, entity.GetType()) && !HasTypeConditionInOperations(role, entity.GetType()))
             {
                 return allowed <= max;
             }
@@ -594,94 +595,61 @@ public static partial class TypeAuthLogic
         }
     }
 
-    static SqlPreCommand? Schema_Synchronizing(Replacements rep)
+
+}
+
+static class TypeConditionRuleSync
+{
+    internal static SqlPreCommand? DeletedTypeCondition<RT>(Expression<Func<RT, MList<TypeConditionSymbol>>> conditionsMList,
+        Expression<Func<MListElement<RT, TypeConditionSymbol>, bool>> predicate,
+        string? comment = null)
+    where RT : Entity
     {
-        var conds = (from rt in Database.Query<RuleTypeEntity>()
-                     from c in rt.ConditionRules
-                     from s in c.Conditions
-                     select new { rt.Resource, s, rt.Role }).ToList();
+        if (!Database.MListQuery(conditionsMList).Any(predicate))
+            return null;
 
-        var errors = conds.GroupBy(a => new { a.Resource, a.s}, a => a.Role)
-            .Where(gr =>
-            {
-                if (gr.Key.s.FieldInfo == null)
-                {
-                    var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.s.Key);
-                    if (replacedName == null)
-                        return false; // Other Syncronizer will do it
+        var mlist = Administrator.UnsafeDeletePreCommandMList(conditionsMList, Database.MListQuery(conditionsMList).Where(predicate))!.AddComment(comment);
+        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RT>().Where(rt => conditionsMList.Evaluate(rt).Count == 0), force: true, avoidMList: true);
 
-                    return !TypeConditionLogic.ConditionsFor(gr.Key.Resource!.ToType()).Any(a => a.Key == replacedName);
-                }
+        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
+    }
 
-                return !TypeConditionLogic.IsDefined(gr.Key.Resource!.ToType(), gr.Key.s);
-            })
-            .ToList();
+    internal static SqlPreCommand? NotDefinedTypeCondition<RC>(Replacements rep,
+        Expression<Func<RC, MList<TypeConditionSymbol>>> mlist,
+        Expression<Func<RC, TypeEntity>> getType,
+        Expression<Func<RC, Lite<RoleEntity>>> getRole)
+    where RC : Entity
+    {
+        var conds = (from ruleCondition in Database.Query<RC>()
+                     from tc in mlist.Evaluate(ruleCondition)
+                     select new { TypeCondition = tc, Type = getType.Evaluate(ruleCondition), Role = getRole.Evaluate(ruleCondition) })
+                   .ToList();
+
+        var errors = conds.GroupBy(a => new { a.Type, a.TypeCondition }, a => a.Role)
+       .Where(gr =>
+       {
+           if (gr.Key.TypeCondition.FieldInfo == null)
+           {
+               var replacedName = rep.TryGetC(typeof(TypeConditionSymbol).Name)?.TryGetC(gr.Key.TypeCondition.Key);
+               if (replacedName == null)
+                   return false; // Other Syncronizer will do it
+
+               return !TypeConditionLogic.ConditionsFor(gr.Key.Type.ToType()).Any(a => a.Key == replacedName);
+           }
+
+           return !TypeConditionLogic.IsDefined(gr.Key.Type.ToType(), gr.Key.TypeCondition);
+       })
+       .ToList();
 
         using (rep.WithReplacedDatabaseName())
             return errors.Select(a =>
             {
-                return Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>()
-                    .Where(rule => rule.Conditions.Contains(a.Key.s) && rule.RuleType.Entity.Resource.Is(a.Key.Resource)))!
-                    .AddComment("TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.s, a.Key.Resource, a.ToString(", ")));
+                return DeletedTypeCondition(
+                    mlist,
+                    mle => mle.Element.Is(a.Key.TypeCondition) && getType.Evaluate(mle.Parent).Is(a.Key.Type),
+                comment: "TypeCondition {0} not defined for {1} (roles {2})".FormatWith(a.Key.TypeCondition, a.Key.Type, a.ToString(", ")));
             }).Combine(Spacing.Double);
     }
 }
 
-//public static class AndOrSimplifierVisitor
-//{
-//    class HashSetComparer<T> : IEqualityComparer<HashSet<T>>
-//    {
-//        public bool Equals(HashSet<T>? x, HashSet<T>? y)
-//        {
-//            return x != null && y != null && x.SetEquals(y);
-//        }
 
-//        public int GetHashCode([DisallowNull] HashSet<T> obj)
-//        {
-//            return obj.Count;
-//        }
-//    }
-
-//    static IEqualityComparer<Expression> Comparer = ExpressionComparer.GetComparer<Expression>(false);
-//    static IEqualityComparer<HashSet<Expression>> HSetComparer = new HashSetComparer<Expression>();
-
-//    public static Expression SimplifyOrs(Expression expr)
-//    {
-//        if (expr is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-//        {
-//            var orGroups = OrAndList(b);
-
-//            var newOrGroups = orGroups.Where(og => !orGroups.Any(og2 => og2 != og && og2.IsMoreSimpleAndGeneralThan(og))).ToList();
-
-//            return newOrGroups.Select(andGroup => andGroup.Aggregate(Expression.AndAlso)).Aggregate(Expression.OrElse);
-//        }
-
-//        return expr;
-//    }
-
-//    static HashSet<HashSet<Expression>> OrAndList(Expression expression)
-//    {
-//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.Or || b.NodeType == ExpressionType.OrElse))
-//        {
-//            return OrAndList(b.Left).Concat(OrAndList(b.Right)).ToHashSet(HSetComparer);
-//        }
-//        else
-//        {
-//            var ands = AndList(expression);
-//            return new HashSet<HashSet<Expression>>(HSetComparer) { ands };
-//        }
-//    }
-
-//    static HashSet<Expression> AndList(Expression expression)
-//    {
-//        if (expression is BinaryExpression b && (b.NodeType == ExpressionType.And || b.NodeType == ExpressionType.AndAlso))
-//            return AndList(b.Left).Concat(AndList(b.Right)).ToHashSet(Comparer);
-//        else
-//            return new HashSet<Expression>(Comparer) { expression };
-//    }
-
-//    static bool IsMoreSimpleAndGeneralThan(this HashSet<Expression> simple, HashSet<Expression> complex)
-//    {
-//        return simple.All(a => complex.Contains(a));
-//    }
-//}

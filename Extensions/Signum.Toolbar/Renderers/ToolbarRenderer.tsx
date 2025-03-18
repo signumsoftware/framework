@@ -164,11 +164,11 @@ export function renderNavItem(res: ToolbarResponse<any>, active: ToolbarResponse
 
       if (res.type == "Header") {
         return (
-          <div key={key} className={"nav-item-header"}>
+          <li key={key} className={"nav-item-header"}>
             {ToolbarConfig.coloredIcon(parseIcon(res.iconName), res.iconColor)}
             <span className={"nav-item-text"}>{res.label}</span>
             <div className={"nav-item-float"}>{res.label}</div>
-          </div>
+          </li>
         );
       }
 
@@ -193,21 +193,27 @@ function ToolbarDropdown(p: { parentTitle: string | undefined, icon: any, childr
 
 
   return (
-    <div>
-      <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
-        icon={
-          <div style={{ display: 'inline-block', position: 'relative' }}>
-            <div className="nav-arrow-icon" style={{ position: 'absolute' }}><FontAwesomeIcon icon={show ? "caret-down" : "caret-right"} className="icon" /></div>
-            <div className="nav-icon-with-arrow">
-              {p.icon ?? <div className="icon" />}
+    <li>
+      <ul>
+        <ToolbarNavItem title={p.parentTitle} extraIcons={p.extraIcons} onClick={() => handleSetShow(!show)}
+          icon={
+            <div style={{ display: 'inline-block', position: 'relative' }}>
+              <div className="nav-arrow-icon" style={{ position: 'absolute' }}>
+                <FontAwesomeIcon icon={show ? "chevron-down" : "chevron-right"} className="icon" />
+              </div>
+              <div className="nav-icon-with-arrow">
+                {p.icon ?? <div className="icon" />}
+              </div>
             </div>
-          </div>
-        }
-      />
-      <div style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
-        {show && p.children}
-      </div>
-    </div>
+          }
+        />
+       {show && <li>
+          <ul style={{ display: show ? "block" : "none" }} className="nav-item-sub-menu">
+            {p.children}
+          </ul>
+        </li>}  
+      </ul>
+    </li>
   );
 }
 

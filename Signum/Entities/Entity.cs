@@ -14,8 +14,8 @@ public abstract class Entity : ModifiableEntity, IEntity
     internal PrimaryKey? id;
 
 
-    [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never), ColumnName("ToStr")]
-    protected internal string? toStr; //for entities with non-expression ToString
+    [Ignore, DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    protected internal string? ToStr; //for entities with non-expression ToString
 
     [HiddenProperty, Description("Id")]
     public PrimaryKey Id

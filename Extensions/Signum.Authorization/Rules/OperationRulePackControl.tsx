@@ -2,17 +2,21 @@ import * as React from 'react'
 import { Button } from 'react-bootstrap'
 import { Operations, EntityOperationSettings } from '@framework/Operations'
 import { TypeContext, ButtonsContext, IRenderButtons, ButtonBarElement } from '@framework/TypeContext'
-import { EntityLine, AutoLine } from '@framework/Lines'
-import { getToString } from '@framework/Signum.Entities'
+import { EntityLine, AutoLine, FormGroup } from '@framework/Lines'
+import { getToString, is } from '@framework/Signum.Entities'
 import { AuthAdminClient } from '../AuthAdminClient'
-import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage } from './Signum.Authorization.Rules'
+import { OperationRulePack, OperationAllowed, OperationAllowedRule, AuthAdminMessage, TypeConditionSymbol, ConditionRuleModel, WithConditionsModel } from './Signum.Authorization.Rules'
 import { ColorRadio, GrayCheckbox } from './ColoredRadios'
 import "./AuthAdmin.css"
-import { useForceUpdate } from '@framework/Hooks'
 import { OperationSymbol } from '@framework/Signum.Operations'
-import { GraphExplorer } from '@framework/Reflection'
+import { Binding, getOperationInfo, GraphExplorer } from '@framework/Reflection'
+import { useDragAndDrop } from './TypeRulePackControl'
 
-export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeContext<OperationRulePack>; innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
+
+
+export default function OperationRulePackControl({ ctx, initialTypeConditions, innerRef }: { ctx: TypeContext<OperationRulePack>, initialTypeConditions: TypeConditionSymbol[] | undefined, innerRef: React.Ref<IRenderButtons> }): React.JSX.Element {
+
+  const [typeConditions, setTypeConditions] = React.useState<TypeConditionSymbol[] | undefined>(initialTypeConditions);
 
   function handleSaveClick(bc: ButtonsContext) {
     let pack = ctx.value;
@@ -25,31 +29,28 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
       });
   }
 
-  function updateFrame() {
-    ctx.frame!.frameComponent.forceUpdate();
-  }
-
-
-  function renderButtons(bc: ButtonsContext): ButtonBarElement[] {
-    GraphExplorer.propagateAll(bc.pack.entity);
-
-    const hasChanges = bc.pack.entity.modified;
+  function renderButtons(bc: ButtonsContext) {
+    const hasChanges = GraphExplorer.hasChanges(bc.pack.entity);
 
     return [
       { button: <Button variant="primary" disabled={!hasChanges || ctx.readOnly} onClick={() => handleSaveClick(bc)}>{AuthAdminMessage.Save.niceToString()}</Button> }
     ];
   }
 
-  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value])
+  React.useImperativeHandle(innerRef, () => ({ renderButtons }), [ctx.value]);
 
-  function handleRadioClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+  function updateFrame() {
+    ctx.frame!.frameComponent.forceUpdate();
+  }
 
-    ctx.value.rules.forEach(mle => {
-      mle.element.allowed = OperationAllowed.min(hc, mle.element.coerced);
-      mle.element.modified = true;
-    });
+  function hasOverrides(tcs: TypeConditionSymbol[] | undefined): undefined | "fw-bold" {
+    return ctx.value.rules.filter(a => !isConstructor(a.element)).some(r => getBinding(r.element.allowed, tcs).getValue() != getBinding(r.element.allowedBase, tcs).getValue()) ? "fw-bold" : undefined;
+  }
 
-    updateFrame();
+
+
+  function isConstructor(oar: OperationAllowedRule) {
+    return getOperationInfo(oar.resource.operation, ctx.value.type.cleanName).operationType == "Constructor"
   }
 
   return (
@@ -58,75 +59,139 @@ export default function OperationRulePackControl({ ctx, innerRef }: { ctx: TypeC
         <EntityLine ctx={ctx.subCtx(f => f.role)} />
         <AutoLine ctx={ctx.subCtx(f => f.strategy)} />
         <EntityLine ctx={ctx.subCtx(f => f.type)} />
+
+
       </div>
-      <table className="table table-sm sf-auth-rules">
-        <thead>
-          <tr>
-            <th>
-              {OperationSymbol.niceName()}
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleRadioClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleRadioClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              <a onClick={e => handleRadioClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
-            </th>
-            <th style={{ textAlign: "center" }}>
-              {AuthAdminMessage.Overriden.niceToString()}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {ctx.mlistItemCtxs(a => a.rules).filter(c => {
-            var os = Operations.getSettings(c.value.resource!.operation);
+      {ctx.value.rules.some(a => isConstructor(a.element)) &&
+        <OperationTable ctx={ctx} filter={oar => isConstructor(oar)} typeConditions={undefined} updateFrame={updateFrame} />}
 
-            if (os instanceof EntityOperationSettings && os.isVisibleOnlyType && !os.isVisibleOnlyType(ctx.value.type.cleanName))
-              return false;
-
-            return true;
-          }).map((c, i) =>
-            <tr key={i}>
-              <td>
-                {getToString(c.value.resource!.operation)}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                {renderRadio(c.value, "Allow", "green")}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                {renderRadio(c.value, "DBOnly", "#FFAD00")}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                {renderRadio(c.value, "None", "red")}
-              </td>
-              <td style={{ textAlign: "center" }}>
-                <GrayCheckbox readOnly={c.readOnly} checked={c.value.allowed != c.value.allowedBase} onUnchecked={() => {
-                  c.value.allowed = c.value.allowedBase;
-                  ctx.value.modified = true;
-                  updateFrame();
-                }} />
-              </td>
-            </tr>
-          )
-          }
-        </tbody>
-      </table>
-
+      {ctx.value.rules.some(a => !isConstructor(a.element)) &&
+        <div className="form-compact">
+          <FormGroup ctx={ctx} label="Type Conditions">
+            {id => <select id={id} className={hasOverrides(typeConditions)} value={typeConditions?.map(a => a.key).join(" & ") ?? "Fallback"} onChange={e => {
+              if (e.currentTarget.value == "Fallback")
+                setTypeConditions(undefined);
+              else {
+                var tcs = ctx.value.availableTypeConditions.single(arr => arr.map(a => a.key).join(" & ") == e.currentTarget.value);
+                setTypeConditions(tcs);
+              }
+            }} >
+              <option value="Fallback" className={hasOverrides(undefined)}>Fallback</option>
+              {ctx.value.availableTypeConditions.map((arr, i) => <option value={arr.map(a => a.key).join(" & ")} className={hasOverrides(arr)}>
+                {arr.map(a => a.key.after(".")).join(" & ")}
+              </option>)}
+            </select>}
+          </FormGroup>
+          <OperationTable ctx={ctx} filter={oar => !isConstructor(oar)} typeConditions={typeConditions} updateFrame={updateFrame} />
+        </div>
+      }
     </div>
   );
+}
 
-  function renderRadio(c: OperationAllowedRule, allowed: OperationAllowed, color: string) {
+function OperationTable(p: {
+  ctx: TypeContext<OperationRulePack>,
+  typeConditions: TypeConditionSymbol[] | undefined,
+  filter: (operation: OperationAllowedRule) => boolean,
+  updateFrame: () => void
+}) {
 
-    if (OperationAllowed.index(c.coerced) < OperationAllowed.index(allowed))
+  function handleHeaderClick(e: React.MouseEvent<HTMLAnchorElement>, hc: OperationAllowed) {
+
+    p.ctx.value.rules.filter(a => p.filter(a.element)).forEach(mle => {
+      const value = OperationAllowed.min(getBinding(mle.element.coerced, p.typeConditions).getValue(), hc);
+      getBinding(mle.element.allowed, p.typeConditions).setValue(value);
+      mle.element.modified = true;
+    });
+
+    p.updateFrame();
+  }
+
+  return (
+    <table className="table table-sm sf-auth-rules">
+      <thead>
+        <tr>
+          <th style={{ width: "50%" }}>
+            {OperationSymbol.niceName()}
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "Allow")}>{OperationAllowed.niceToString("Allow")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "DBOnly")}>{OperationAllowed.niceToString("DBOnly")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            <a onClick={e => handleHeaderClick(e, "None")}>{OperationAllowed.niceToString("None")}</a>
+          </th>
+          <th style={{ textAlign: "center" }}>
+            {AuthAdminMessage.Overriden.niceToString()}
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {p.ctx.mlistItemCtxs(a => a.rules).filter(a => p.filter(a.value)).map((tctx, i) => <OperationRow key={i} tctx={tctx} updateFrame={p.updateFrame} getBidning={tac => getBinding(tac, p.typeConditions)} />)}
+      </tbody>
+    </table>
+  )
+}
+
+function OperationRow(p: { tctx: TypeContext<OperationAllowedRule>, updateFrame: () => void, getBidning: (e: WithConditionsModel<OperationAllowed>) => Binding<OperationAllowed> }): React.JSX.Element {
+
+  const getConfig = useDragAndDrop(p.tctx.value.allowed.conditionRules, () => p.updateFrame(), () => { p.tctx.value.modified = true; p.updateFrame(); });
+
+  const allowedBinding = p.getBidning(p.tctx.value.allowed);
+  const allowedBaseBinding = p.getBidning(p.tctx.value.allowedBase);
+  const coercedBinding = p.getBidning(p.tctx.value.coerced);
+
+  function renderRadio(allowed: OperationAllowed, color: string) {
+
+    if (OperationAllowed.index(coercedBinding.getValue()) < OperationAllowed.index(allowed))
       return;
 
-    return <ColorRadio readOnly={ctx.readOnly} checked={c.allowed == allowed} color={color}
-      onClicked={a => {
-        c.allowed = allowed;
-        c.modified = true;
-        updateFrame();
-      }} />;
+    return <ColorRadio
+      readOnly={p.tctx.readOnly}
+      checked={allowedBinding.getValue() == allowed}
+      color={color}
+      onClicked={e => {
+        allowedBinding.setValue(allowed);
+        p.updateFrame();
+      }}
+    />;
+  }
+
+  return (
+    <tr>
+      <td>
+        {getToString(p.tctx.value.resource.operation)}
+      </td>
+      <td style={{ textAlign: "center" }}>
+        {renderRadio("Allow", "green")}
+      </td>
+      <td style={{ textAlign: "center" }}>
+        {renderRadio("DBOnly", "#FFAD00")}
+      </td>
+      <td style={{ textAlign: "center" }}>
+        {renderRadio("None", "red")}
+      </td>
+      <td style={{ textAlign: "center" }}>
+        <GrayCheckbox readOnly={p.tctx.readOnly} checked={allowedBinding.getValue() != allowedBaseBinding.getValue()} onUnchecked={() => {
+          allowedBinding.setValue(allowedBaseBinding.getValue());
+          p.updateFrame();
+        }} />
+      </td>
+    </tr>
+  )
+}
+
+function matches(r: ConditionRuleModel<OperationAllowed>, typeConditions: TypeConditionSymbol[]) {
+  return r.typeConditions.length == typeConditions.length && r.typeConditions.every((tc, i) => is(tc.element, typeConditions[i]));
+}
+
+function getBinding(pac: WithConditionsModel<OperationAllowed>, typeConditions: TypeConditionSymbol[] | undefined): Binding<OperationAllowed> {
+  if (typeConditions == undefined)
+    return new Binding(pac, "fallback");
+  else {
+    var cr = pac.conditionRules.single(a => matches(a.element, typeConditions)).element;
+    return new Binding(cr, "allowed");
   }
 }

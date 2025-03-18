@@ -174,6 +174,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
       timeSeriesStep: uqNew.systemTime.timeSeriesStep ?? null,
       timeSeriesUnit: uqNew.systemTime.timeSeriesUnit ?? null,
       timeSeriesMaxRowsPerStep: uqNew.systemTime.timeSeriesMaxRowsPerStep ?? null,
+      splitQueries: uqNew.systemTime.splitQueries ?? false,
     });
     uqOld.elementsPerPage = uqNew.elementsPerPage;
     uqOld.customDrilldowns = uqNew.customDrilldowns;
@@ -248,6 +249,7 @@ export default function UserQueryMenu(p: UserQueryMenuProps): React.JSX.Element 
         timeSeriesStep: fo.systemTime.timeSeriesStep ?? null,
         timeSeriesUnit: fo.systemTime.timeSeriesUnit ?? null,
         timeSeriesMaxRowsPerStep: fo.systemTime.timeSeriesMaxRowsPerStep ?? null,
+        splitQueries: fo.systemTime.splitQueries ?? false,
       }),
       paginationMode: fo.pagination && fo.pagination.mode,
       elementsPerPage: fo.pagination && fo.pagination.elementsPerPage,

@@ -217,6 +217,7 @@ function SystemTime(p: { ctx: TypeContext<SystemTimeEmbedded> }) {
             ctx.value.timeSeriesStep = ctx.value.mode == "TimeSeries" ? 1 : null;
             ctx.value.timeSeriesUnit = ctx.value.mode == "TimeSeries" ? "Day" : null;
             ctx.value.timeSeriesMaxRowsPerStep = ctx.value.mode == "TimeSeries" ? 10 : null;
+            ctx.value.splitQueries = ctx.value.mode == "TimeSeries" ? false : false;
             forceUpdate();
           }} />
         </div>

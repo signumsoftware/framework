@@ -1,9 +1,11 @@
 using Microsoft.SqlServer.Server;
+using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -553,12 +555,11 @@ internal class DbExpressionNominator : DbExpressionVisitor
         {
             if (unit == SqlEnums.day && left.Type == typeof(DateOnly) && right.Type == typeof(DateOnly))
                 return Add(Expression.Convert(Expression.Subtract(left, right, ReflectionTools.GetMethodInfo(()=> DaysBetween(DateOnly.MinValue, DateOnly.MinValue))), typeof(double)));
-          
-            var secondsDouble = new SqlFunctionExpression(typeof(double), null, PostgresFunction.EXTRACT.ToString(), new Expression[]
-            {
+
+            var secondsDouble = PostgresFunction.EXTRACT.CallExpression<double>(
                 new SqlLiteralExpression(SqlEnums.epoch),
-                Expression.Subtract(left, right),
-            });
+                Expression.Subtract(left, right)
+            );
 
             if (unit == SqlEnums.second)
                 return Add(secondsDouble);
@@ -791,7 +792,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             static SqlFunctionExpression Extract( SqlEnums part, Expression period)
             {
-                return new SqlFunctionExpression(typeof(int), null, PostgresFunction.EXTRACT.ToString(), new[] { new SqlLiteralExpression(part), period });
+                return PostgresFunction.EXTRACT.CallExpression<int>(new SqlLiteralExpression(part), period);
             }
 
             if (unit == SqlEnums.month)
@@ -1389,8 +1390,8 @@ internal class DbExpressionNominator : DbExpressionVisitor
         if (Has(newSubExpression) && Has(newExpression))
         {
             SqlFunctionExpression result = isPostgres ?
-                new SqlFunctionExpression(typeof(int), null, PostgresFunction.strpos.ToString(), new[] { newExpression, newSubExpression }):
-                new SqlFunctionExpression(typeof(int), null, SqlFunction.CHARINDEX.ToString(), new[] { newSubExpression, newExpression });
+                PostgresFunction.strpos.CallExpression<int>(newExpression, newSubExpression):
+                SqlFunction.CHARINDEX.CallExpression<int>(newSubExpression, newExpression);
 
             Add(result);
 
@@ -1630,7 +1631,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "string.Substring":
                 var start = Expression.Add(m.GetArgument("startIndex"), new SqlConstantExpression(1));
                 var length = m.TryGetArgument("length");
-                if(isPostgres)
+                if (isPostgres)
                     return length == null ?
                         TrySqlFunction(null, PostgresFunction.substr, m.Type, m.Object!, start) :
                         TrySqlFunction(null, PostgresFunction.substr, m.Type, m.Object!, start, length);
@@ -1736,7 +1737,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
             case "DateTimeExtensions.ToDateOnly": return TrySqlCast(m.Type, m.GetArgument("dateTime"));
             case "DateTimeExtensions.ToDateTime": return TrySqlCast(m.Type, m.GetArgument("date"));
-            case "DateOnly.FromDateTime":return  TrySqlCast(m.Type, m.GetArgument("dateTime"));
+            case "DateOnly.FromDateTime": return TrySqlCast(m.Type, m.GetArgument("dateTime"));
 
             case "DateOnly.ToDateTime": return TryAddSubtractDateTimeTimeSpan(m.Object!, m.GetArgument("time"), add: true);
 
@@ -1781,7 +1782,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
                     return TrySqlFunction(null, SqlFunction.ROUND, m.Type, value, digits ?? new SqlConstantExpression(0));
 
             case "Math.Truncate":
-                if(isPostgres)
+                if (isPostgres)
                     return TrySqlFunction(null, PostgresFunction.trunc, m.Type, m.GetArgument("d"));
 
                 return TrySqlFunction(null, SqlFunction.ROUND, m.Type, m.GetArgument("d"), new SqlConstantExpression(0), new SqlConstantExpression(1));
@@ -1804,12 +1805,114 @@ internal class DbExpressionNominator : DbExpressionVisitor
             case "short.Parse": return Add(new SqlCastExpression(typeof(short), m.GetArgument("s")));
             case "int.Parse": return Add(new SqlCastExpression(typeof(int), m.GetArgument("s")));
             case "long.Parse": return Add(new SqlCastExpression(typeof(long), m.GetArgument("s")));
+
+            case "SqlHierarchyId.GetAncestor":
+                {
+                    if (!this.isPostgres)
+                        return null; //SqlMethod attribute
+
+                    var level = TrySqlFunction(null, PostgresFunction.nlevel, typeof(int), m.Object!)!;
+                    if (level == null)
+                        return null;
+
+                    var n = Visit(m.GetArgument("n"));
+                    if (n == null)
+                        return null;
+
+                    var obj = Visit(m.Object!);
+                    if (obj == null || !Has(obj))
+                        return null;
+
+
+                    return Add(new CaseExpression(
+                        [new When(
+                            condition: Expression.LessThan(n, level),
+                            value: PostgresFunction.subpath.CallExpression<SqlHierarchyId>(
+                                obj,
+                                new SqlConstantExpression(0),
+                                Add(Expression.Subtract(level, n))
+                            )),
+
+                        new When(
+                            condition: Expression.Equal(n, level),
+                            value: new SqlConstantExpression("", typeof(SqlHierarchyId)))
+                        ],
+                        new SqlConstantExpression(null, typeof(SqlHierarchyId))
+                    ));
+                }
+            case "SqlHierarchyId.GetLevel":
+                {
+                    if (!this.isPostgres)
+                        return null; //SqlMethod attribute
+
+                    return TrySqlFunction(null, PostgresFunction.nlevel, typeof(SqlInt16), m.Object!);
+                }
+            case "SqlHierarchyId.IsDescendantOf":
+                {
+                    if (!this.isPostgres)
+                        return null; //SqlMethod attribute
+
+                    return TrySqlFunction(null, PostgressOperator.IsContained, typeof(SqlBoolean), m.Object!, m.GetArgument("parent"));
+                }
+            case "SqlHierarchyId.GetReparentedValue":
+                {
+                    if (!this.isPostgres)
+                        return null; //SqlMethod attribute
+
+                    var obj = Visit(m.Object);
+                    if (obj == null || !Has(obj))
+                        return null;
+
+                    var oldParent = Visit(m.GetArgument("oldRoot"));
+                    if (oldParent == null || !Has(oldParent))
+                        return null;
+
+                    var newParent = Visit(m.GetArgument("newRoot"));
+                    if (newParent == null || !Has(newParent))
+                        return null;
+
+
+                    var oldParentLevel = PostgresFunction.nlevel.CallExpression<int>(oldParent);
+                    var objLevel = PostgresFunction.nlevel.CallExpression<int>(obj);
+
+
+
+                    var result = new CaseExpression(
+                         [
+                           new When(
+                                condition: Expression.Not(new SqlFunctionExpression(typeof(bool), null, PostgressOperator.IsContained, [obj, oldParent])),
+                                value: obj
+                            ),
+
+                            new When(
+                                condition: Expression.Convert(Expression.Equal(obj, oldParent), typeof(bool)),
+                                value: newParent
+                            )
+                        ],
+                        Expression.Add(newParent,
+                                    PostgresFunction.subpath.CallExpression<SqlHierarchyId>(obj, oldParentLevel),
+                                    miFakeAdd)
+                    );
+
+                    return Add(result);
+                }
+
+            case "SqlHierarchyId.GetDescendant":
+                {
+                    if (!this.isPostgres)
+                        return null; //SqlMethod attribute
+
+                    return base.VisitMethodCall(m);
+                }
             default: return null;
         }
     }
 
-
-
+    static MethodInfo miFakeAdd = ReflectionTools.GetMethodInfo(() => FakeAdd(SqlHierarchyId.Null, SqlHierarchyId.Null));
+    static SqlHierarchyId FakeAdd(SqlHierarchyId left, SqlHierarchyId right)
+    {
+        throw new NotSupportedException("This method is only for LINQ translation.");
+    }
 
     private SqlColumnListExpression ToLiteralColumns(MethodCallExpression mce)
     {
@@ -1953,14 +2056,14 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
 
         Expression SepLen() => newSep is ConstantExpression c ? (Expression)new SqlConstantExpression(((string)c.Value!).Length) :
-            SqlFunction.LEN.Call<int>(newSep);
+            SqlFunction.LEN.CallExpression<int>(newSep);
 
         Expression ReverseSep()
         {
             if (newSep is ConstantExpression c)
                 return new SqlConstantExpression(((string)c.Value!).Reverse());
             else
-                return SqlFunction.REVERSE.Call<string>(newSep);
+                return SqlFunction.REVERSE.CallExpression<string>(newSep);
         }
 
 
@@ -1976,10 +2079,10 @@ internal class DbExpressionNominator : DbExpressionVisitor
             //LEFT('A=>B=>C', 2 - 1)
             //'A'
 
-            var index = SqlFunction.CHARINDEX.Call<int>(newSep, newStr);
+            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr, newSep) :  SqlFunction.CHARINDEX.CallExpression<int>(newSep, newStr);
             var len = Expression.Subtract(index, new SqlConstantExpression(1));
 
-            value = SqlFunction.LEFT.Call<string>(newStr, len);
+            value = SqlFunction.LEFT.CallExpression<string>(newStr, len);
         }
         else if (method.Name.EndsWith("After"))
         {
@@ -1989,13 +2092,13 @@ internal class DbExpressionNominator : DbExpressionVisitor
             //RIGHT('A=>B=>C', 4)
             //'B=>C'
 
-            var index = SqlFunction.CHARINDEX.Call<int>(newSep, newStr);
+            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr, newSep) : SqlFunction.CHARINDEX.CallExpression<int>(newSep, newStr);
 
             var len = IsOneLength(newSep) ? 
-                                    Expression.Subtract(SqlFunction.LEN.Call<int>(newStr), index):
-                Expression.Subtract(Expression.Subtract(SqlFunction.LEN.Call<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
+                                    Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index):
+                Expression.Subtract(Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
 
-            value = SqlFunction.RIGHT.Call<string>(newStr, len);
+            value = SqlFunction.RIGHT.CallExpression<string>(newStr, len);
         }
         else if (method.Name.EndsWith("BeforeLast"))
         {
@@ -2004,13 +2107,13 @@ internal class DbExpressionNominator : DbExpressionVisitor
             //LEFT('A=>B=>C',  7 - 2 - 1)
             //'A=>B'
 
-            var index = SqlFunction.CHARINDEX.Call<int>(ReverseSep(), SqlFunction.REVERSE.Call<string>(newStr));
+            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(SqlFunction.REVERSE.CallExpression<string>(newStr), ReverseSep()) : SqlFunction.CHARINDEX.CallExpression<int>(ReverseSep(), SqlFunction.REVERSE.CallExpression<string>(newStr));
 
             var len = IsOneLength(newSep) ? 
-                                    Expression.Subtract(SqlFunction.LEN.Call<int>(newStr), index) :
-                Expression.Subtract(Expression.Subtract(SqlFunction.LEN.Call<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
+                                    Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index) :
+                Expression.Subtract(Expression.Subtract(isPostgres ? PostgresFunction.length.CallExpression<int>(newStr) : SqlFunction.LEN.CallExpression<int>(newStr), index), Expression.Subtract(SepLen(), new SqlConstantExpression(1)));
 
-            value = SqlFunction.LEFT.Call<string>(newStr, len);
+            value = SqlFunction.LEFT.CallExpression<string>(newStr, len);
         }
         else if (method.Name.EndsWith("AfterLast"))
         {
@@ -2018,9 +2121,9 @@ internal class DbExpressionNominator : DbExpressionVisitor
             //RIGHT('A=>B=>C', 2 - 1)
             //'C'
 
-            var index = SqlFunction.CHARINDEX.Call<int>(ReverseSep(), SqlFunction.REVERSE.Call<string>(newStr));
+            var index = isPostgres ? PostgresFunction.strpos.CallExpression<int>(SqlFunction.REVERSE.CallExpression<string>(newStr), ReverseSep()) : SqlFunction.CHARINDEX.CallExpression<int>(ReverseSep(), SqlFunction.REVERSE.CallExpression<string>(newStr));
             var len = Expression.Subtract(index, new SqlConstantExpression(1));
-            value = SqlFunction.RIGHT.Call<string>(newStr, len);
+            value = SqlFunction.RIGHT.CallExpression<string>(newStr, len);
         }
         else
         {
@@ -2029,7 +2132,7 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
 
         return Add(new CaseExpression(
-            new[] { new When(Expression.Equal(SqlFunction.CHARINDEX.Call<int>(newSep!, newStr!), new SqlConstantExpression(0)), new SqlConstantExpression(null, typeof(string))) },
+            new[] { new When(Expression.Equal(isPostgres ? PostgresFunction.strpos.CallExpression<int>(newStr!, newSep!) : SqlFunction.CHARINDEX.CallExpression<int>(newSep!, newStr!), new SqlConstantExpression(0)), new SqlConstantExpression(null, typeof(string))) },
             value
         ));
     }
@@ -2065,7 +2168,12 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
 internal static class SqlFunctionExtensions
 {
-    public static SqlFunctionExpression Call<T>(this SqlFunction function, params Expression[] arguments)
+    public static SqlFunctionExpression CallExpression<T>(this SqlFunction function, params Expression[] arguments)
+    {
+        return new SqlFunctionExpression(typeof(T), null, function.ToString(), arguments);
+    }
+
+    public static SqlFunctionExpression CallExpression<T>(this PostgresFunction function, params Expression[] arguments)
     {
         return new SqlFunctionExpression(typeof(T), null, function.ToString(), arguments);
     }

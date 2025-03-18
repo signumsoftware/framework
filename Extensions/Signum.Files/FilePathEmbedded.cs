@@ -85,10 +85,16 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
         }
     }
 
-    public string? Hash { get; private set; }
+
+    public void CleanBinaryFile()
+    {
+        binaryFile = null!;
+    }
+
+    public string? Hash { get; set; }
 
     [Format("N0")]
-    public int FileLength { get; internal set; }
+    public long FileLength { get; set; }
 
     [AutoExpressionField]
     public string FileLengthString => As.Expression(() => ((long)FileLength).ToComputerSize());
@@ -99,49 +105,9 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
     [ForceNotNullable]
     public FileTypeSymbol FileType { get; internal set; }
 
-    //Old UnsafeMode
-    [Ignore]
-    public bool KeepSuffix;
+    public string? FullPhysicalPath() => FileTypeLogic.GetAlgorithm(FileType).GetFullPhysicalPath(this);
+    public string? FullWebPath() => FileTypeLogic.GetAlgorithm(FileType).GetFullWebPath(this);
 
-
-    [Ignore]
-    internal PrefixPair? _prefixPair;
-    public void SetPrefixPair(PrefixPair prefixPair)
-    {
-        this._prefixPair = prefixPair;
-    }
-
-    public PrefixPair GetPrefixPair()
-    {
-        return this._prefixPair ??= FilePathEmbeddedLogic.CalculatePrefixPair(this);
-    }
-
-    public string FullPhysicalPath()
-    {
-        var pp = this.GetPrefixPair();
-
-        return FilePathUtils.SafeCombine(pp.PhysicalPrefix, Suffix);
-    }
-
-    public static Func<string, string> ToAbsolute = str => str;
-
-
-    public string? FullWebPath()
-    {
-        var pp = this.GetPrefixPair();
-
-        if (string.IsNullOrEmpty(pp.WebPrefix))
-            return null;
-
-        var suffix = "/" + FilePathUtils.UrlPathEncode(Suffix.Replace("\\", "/"));
-
-        if (pp.WebPrefix.Contains("<suffix>"))
-            return pp.WebPrefix.Replace("<suffix>", suffix);
-
-        var result = ToAbsolute(pp.WebPrefix + suffix);
-
-        return result;
-    }
 
     [AutoExpressionField]
     public override string ToString() => As.Expression(() => $"{FileName} - {((long)FileLength).ToComputerSize()}");
@@ -155,11 +121,7 @@ public class FilePathEmbedded : EmbeddedEntity, IFile, IFilePath
         OnPreSaving(this);
     }
 
-
-    protected override void PostRetrieving(PostRetrievingContext ctx)
-    {
-        this.GetPrefixPair();
-    }
-
     public FilePathEmbedded Clone() => new FilePathEmbedded(FileType, FileName, this.GetByteArray());
+
+
 }

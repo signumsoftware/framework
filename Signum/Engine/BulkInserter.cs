@@ -186,14 +186,14 @@ public static class BulkInserter
     {
         var result = type.UnNullify();
 
-        if (!isPostgres)
-        {
-            if (result == typeof(DateOnly))
-                return typeof(DateTime);
+        //if (!isPostgres)
+        //{
+        //    if (result == typeof(DateOnly))
+        //        return typeof(DateTime);
 
-            if (result == typeof(TimeOnly))
-                return typeof(TimeSpan);
-        }
+        //    if (result == typeof(TimeOnly))
+        //        return typeof(TimeSpan);
+        //}
 
         return result;
     }
@@ -317,7 +317,7 @@ public static class BulkInserter
 
             foreach (var e in list)
             {
-                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder));
+                dt.Rows.Add(mlistTable.BulkInsertDataRow(e.Parent, e.Element!, e.RowOrder, disableMListIdentity ? e.RowId : null));
             }
 
             using (var tr = new Transaction())

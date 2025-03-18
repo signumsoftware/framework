@@ -67,7 +67,7 @@ export namespace UserAssetClient {
     return token.token!;
   }
   
-  export module Converter {
+  export namespace Converter {
   
     export function toFilterOptionParsed(fn: API.FilterNode): FilterOptionParsed {
       if (fn.groupOperation)
@@ -187,7 +187,7 @@ export namespace UserAssetClient {
   }
   
   
-  export module API {
+  export namespace API {
   
     export function parseFilters(request: ParseFiltersRequest): Promise<FilterNode[]> {
       return ajaxPost({ url: "/api/userAssets/parseFilters/" }, request);

@@ -247,7 +247,7 @@ export namespace AuthClient {
   
   export type AuthenticationType = "database" | "resetPassword" | "changePassword" | "api-key" | "azureAD" | "cookie" | "windows";
   
-  export module API {
+  export namespace API {
     export interface LoginRequest {
       userName: string;
       password: string;

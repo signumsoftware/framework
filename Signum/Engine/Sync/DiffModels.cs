@@ -242,9 +242,12 @@ public class DiffIndex
         return perfect;
     }
 
-    public bool IsControlledIndex
+    public bool IsControlledIndex(bool isPostgres)
     {
-        get { return IndexName.StartsWith("IX_") || IndexName.StartsWith("UIX_") || IndexName.StartsWith("CIX_"); }
+        return
+            IndexName.StartsWith(isPostgres ? "ix_" : "IX_") ||
+            IndexName.StartsWith(isPostgres ? "uix_" : "UIX_") ||
+            IndexName.StartsWith(isPostgres ? "cix_" : "CIX_");
     }
 }
 

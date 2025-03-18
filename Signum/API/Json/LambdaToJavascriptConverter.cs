@@ -288,7 +288,7 @@ public class LambdaToJavascriptConverter
                 {
                     var obj = ToJavascript(param, mc.Object!);
                     if (obj != null)
-                        return "fd.getToString(" + obj + ")";
+                        return "fd.symbolNiceName(" + obj + ")";
                 }
             }
 

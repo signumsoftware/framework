@@ -38,6 +38,7 @@ export namespace ChangeLogViewLogOperation {
 export const ClientErrorModel: Type<ClientErrorModel> = new Type<ClientErrorModel>("ClientErrorModel");
 export interface ClientErrorModel extends Entities.ModelEntity {
   Type: "ClientErrorModel";
+  url: string | null;
   errorType: string;
   message: string;
   stack: string | null;
@@ -123,6 +124,7 @@ export interface ExceptionEntity extends Entities.Entity {
   hResult: number;
   referenced: boolean;
   origin: ExceptionOrigin;
+  traceId: string | null;
 }
 
 export const ExceptionOrigin: EnumType<ExceptionOrigin> = new EnumType<ExceptionOrigin>("ExceptionOrigin");

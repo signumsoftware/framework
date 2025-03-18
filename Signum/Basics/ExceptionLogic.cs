@@ -1,6 +1,7 @@
 using Signum.Engine.Maps;
 using Signum.Utilities.Reflection;
 using Signum.Engine.Sync;
+using Signum.Entities;
 
 namespace Signum.Basics;
 
@@ -27,31 +28,24 @@ public static class ExceptionLogic
         }
     }
 
-    public static event Action<Exception, ExceptionEntity>? OnExceptionLogged;
+    public static event Action<Exception, ExceptionEntity?>? OnExceptionLogged;
 
-    public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity> completeContext)
+    public static ExceptionEntity LogException(this Exception ex, Action<ExceptionEntity>? completeContext = null)
     {
-        var entity = GetEntity(ex);
+        ExceptionEntity? entity = null;
+        try
+        {
+            entity = GetEntity(ex);
+            completeContext?.Invoke(entity);
+            entity.SaveForceNew();
 
-        completeContext(entity);
-
-        entity = entity.SaveForceNew();
-
-        if (OnExceptionLogged is not null)
-            OnExceptionLogged(ex, entity);
-
-        return entity;
-    }
-
-    public static ExceptionEntity LogException(this Exception ex)
-    {
-        var entity = GetEntity(ex);
-        entity = entity.SaveForceNew();
-
-        if (OnExceptionLogged is not null)
-            OnExceptionLogged(ex, entity);
-
-        return entity;
+            return entity;
+        }
+        finally
+        {
+            if (OnExceptionLogged is not null)
+                OnExceptionLogged(ex, entity);
+        }
     }
 
     public static ExceptionEntity? GetExceptionEntity(this Exception ex)

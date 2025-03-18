@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Routing;
 using Signum.Authorization.Rules;
 using Signum.Utilities.Reflection;
+using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -34,7 +36,6 @@ public static partial class TypeAuthLogic
                 }
             };
 
-            sb.Schema.Synchronizing += Schema_Synchronizing;
 
             sb.Schema.EntityEventsGlobal.PreUnsafeDelete += query =>
             {
@@ -47,9 +48,11 @@ public static partial class TypeAuthLogic
 
             cache = new TypeCache(sb);
 
+            sb.Schema.Synchronizing += rep => TypeConditionRuleSync.NotDefinedTypeCondition<RuleTypeConditionEntity>(rep, rt => rt.Conditions, rtc => rtc.RuleType.Entity.Resource, rtc => rtc.RuleType.Entity.Role);
             sb.Schema.EntityEvents<RoleEntity>().PreUnsafeDelete += query => { Database.Query<RuleTypeEntity>().Where(r => query.Contains(r.Role.Entity)).UnsafeDelete(); return null; };
-            sb.Schema.Table<TypeEntity>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Type);
-            sb.Schema.Table<TypeConditionSymbol>().PreDeleteSqlSync += new Func<Entity, SqlPreCommand?>(AuthCache_PreDeleteSqlSync_Condition);
+            sb.Schema.EntityEvents<TypeEntity>().PreDeleteSqlSync += t => Administrator.UnsafeDeletePreCommandVirtualMList(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(t)));
+            sb.Schema.EntityEvents<TypeConditionSymbol>().PreDeleteSqlSync += condition => TypeConditionRuleSync.DeletedTypeCondition<RuleTypeConditionEntity>(rt => rt.Conditions, mle => mle.Element.Is(condition));
+            
             Validator.PropertyValidator((RuleTypeEntity r) => r.ConditionRules).StaticPropertyValidation += TypeAuthCache_StaticPropertyValidation;
             
    
@@ -61,29 +64,6 @@ public static partial class TypeAuthLogic
             AuthLogic.HasRuleOverridesEvent += role => cache.HasRealOverrides(role);
             TypeConditionLogic.RegisterCompile(UserTypeCondition.DeactivatedUsers, (UserEntity u) => u.State == UserState.Deactivated);
         }
-    }
-
-    static SqlPreCommand? AuthCache_PreDeleteSqlSync_Type(Entity arg)
-    {
-        TypeEntity type = (TypeEntity)arg;
-
-        var ruleTypeConditions = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(a => a.RuleType.Entity.Resource.Is(type)));
-        var ruleTypesCommand = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeEntity>().Where(a => a.Resource.Is(type)));
-
-        return SqlPreCommand.Combine(Spacing.Simple, ruleTypeConditions, ruleTypesCommand);
-    }
-
-    static SqlPreCommand? AuthCache_PreDeleteSqlSync_Condition(Entity arg)
-    {
-        TypeConditionSymbol condition = (TypeConditionSymbol)arg;
-
-        if (!Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Any(mle => mle.Element.Is(condition)))
-            return null;
-
-        var mlist = Administrator.UnsafeDeletePreCommandMList((RuleTypeConditionEntity rt) => rt.Conditions, Database.MListQuery((RuleTypeConditionEntity rt) => rt.Conditions).Where(mle => mle.Element.Is(condition)));
-        var emptyRules = Administrator.UnsafeDeletePreCommand(Database.Query<RuleTypeConditionEntity>().Where(rt => rt.Conditions.Count == 0), force: true, avoidMList: true);
-
-        return SqlPreCommand.Combine(Spacing.Simple, mlist, emptyRules);
     }
 
     static string? TypeAuthCache_StaticPropertyValidation(ModifiableEntity sender, PropertyInfo pi)
@@ -159,7 +139,9 @@ public static partial class TypeAuthLogic
 
         var tac = GetAllowed(type);
 
-        if (!HasWriteAndRead(tac) && !HasTypeConditionInProperties(type))
+        var role = RoleEntity.Current;
+
+        if (TrivialTypeGetUI(tac).HasValue && !HasTypeConditionInProperties(role, type) && !HasTypeConditionInOperations(role, type))
             return null;
 
         return tac.ConditionRules.SelectMany(a => a.TypeConditions).Distinct()
@@ -168,22 +150,23 @@ public static partial class TypeAuthLogic
     }
 
 
-    public static bool HasWriteAndRead(WithConditions<TypeAllowed> tac)
+    public static TypeAllowedBasic? TrivialTypeGetUI(WithConditions<TypeAllowed> tac)
     {
-        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI());
+        var conditions = tac.ConditionRules.Where(a => a.Allowed != TypeAllowed.None).Select(a => a.Allowed.GetUI()).ToHashSet();
 
         if (tac.Fallback != TypeAllowed.None)
-            conditions = conditions.And(tac.Fallback.GetUI());
+            conditions.Add(tac.Fallback.GetUI());
 
-        if (conditions.Distinct().Count() > 1)
-            return true;
+        if (conditions.Count > 1)
+            return null;
 
-        return false;
+        return conditions.SingleEx();
     }
 
-    public static Func<Type, bool> HasTypeConditionInProperties = t => false;
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInProperties = (role, t) => false;
 
-  
+    public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInOperations = (role, t) => false;
+
 
     public static void AssertStarted(SchemaBuilder sb)
     {
@@ -214,7 +197,12 @@ public static partial class TypeAuthLogic
                 return;
 
             if (max < requested)
-                throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            {
+                if (ident.IsNew)
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo01.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName()));
+                else
+                    throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedTo0The1WithId2.NiceToString().FormatWith(requested.NiceToString(), ident.GetType().NiceName(), ident.IdOrNull));
+            }
 
             Schema_Saving_Instance(ident);
         }
@@ -229,15 +217,28 @@ public static partial class TypeAuthLogic
             throw new UnauthorizedAccessException(AuthMessage.NotAuthorizedToRetrieve0.NiceToString().FormatWith(type.NicePluralName()));
     }
 
-    public static TypeRulePack GetTypeRules(Lite<RoleEntity> roleLite)
+    public static TypeRulePack GetTypeRules(Lite<RoleEntity> role)
     {
-        var result = new TypeRulePack { Role = roleLite };
-        Schema s = Schema.Current;
-        cache.GetRules(result, TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value));
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRules"))
+        {
+            var result = new TypeRulePack { Role = role };
+            Schema s = Schema.Current;
+            var types = TypeLogic.TypeToEntity.Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null).Select(a => a.Value);
+            cache.GetRules(result, types);
 
+            return result;
+        }
+    }
 
-        return result;
-
+    public static Dictionary<Type, WithConditions<TypeAllowed>> GetTypeRulesSimple(Lite<RoleEntity> role)
+    {
+        using (HeavyProfiler.LogNoStackTrace("GetTypeRulesSimple"))
+        {
+            Schema s = Schema.Current;
+            return TypeLogic.TypeToEntity
+                .Where(t => !t.Key.IsEnumEntity() && s.IsAllowed(t.Key, false) == null)
+                .ToDictionary(kvp => kvp.Key, kvp => GetAllowed(role, kvp.Key));
+        }
     }
 
     public static void SetTypeRules(TypeRulePack rules)
@@ -253,7 +254,7 @@ public static partial class TypeAuthLogic
         if (!TypeLogic.TypeToEntity.ContainsKey(type))
             return WithConditions<TypeAllowed>.Simple(TypeAllowed.Write);
 
-        if (EnumEntity.Extract(type) != null)
+        if (type.IsEnumEntity())
             return WithConditions<TypeAllowed>.Simple(TypeAllowed.Read);
 
         var allowed = cache.GetAllowed(RoleEntity.Current, type);

@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Frozen;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Signum.Authorization;
 
@@ -24,7 +25,7 @@ public static class AuthServer
     public static Action<ActionContext, UserEntity> UserLogged;
     public static Action<ActionContext, UserWithClaims> UserLoggingOut;
 
-    
+
     public static void Start(Func<AuthTokenConfigurationEmbedded> tokenConfig, string hashableEncryptionKey)
     {
         AuthTokenServer.Start(tokenConfig, hashableEncryptionKey);
@@ -94,8 +95,6 @@ public static class AuthServer
                         if (conditions.Any())
                             ti.Extension.Add("queryAuditors", conditions.ToList());
                     }
-
-                    ti.RequiresEntityPack |= ta.ConditionRules.Any();
 
                     return ti;
                 }
@@ -190,7 +189,7 @@ public static class AuthServer
             {
                 if (UserEntity.Current == null)
                 {
-                    if (!pr.GetAllowUnathenticated())
+                    if (!pr.RootType.HasAttribute<AllowUnathenticatedAttribute>())
                         return null;
 
                     mi.Extension.Add("propertyAllowed", PropertyAllowed.Write);
@@ -221,76 +220,48 @@ public static class AuthServer
                 return mi;
             };
 
-            SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod) =>
+            SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadata += root =>
             {
-                if (UserEntity.Current == null)
-                {
-                    if (!pr.GetAllowUnathenticated())
-                        return "Not Allowed for Unathenticated";
-
-                    return null;
-
-                }
-                else
-                {
-                    var entity = mod as IRootEntity ??
-                    (mod is MixinEntity mix ? mix.MainEntity as IRootEntity : null) ??
-                    EntityJsonContext.FindCurrentRootEntity();
-
-                    if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Read))
-                        return "Not Allowed";
-
-                    return null;
-
-                }
+                return PropertyAuthLogic.GetAuthSerializationMetadata(root);
             };
 
-            SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod) =>
+            SignumServer.WebEntityJsonConverterFactory.GetSerializationMetadataEmbedded += root =>
             {
-                if (UserEntity.Current == null)
-                {
-                    if (!pr.GetAllowUnathenticated())
-                        return $"{pr} is not Allowed for Unathenticated";
-
-                    return null;
-                }
-                else
-                {
-                    var entity = mod as IRootEntity ??
-                    (mod is MixinEntity mix ? mix.MainEntity as IRootEntity : null) ??
-                    EntityJsonContext.FindCurrentRootEntity();
-
-                    if (!PropertyAuthLogic.IsAllowedFor(entity, pr, PropertyAllowed.Write))
-                        return $"{pr} is not Allowed to write";
-
-                    return null;
-                }
+                return PropertyAuthLogic.GetAuthSerializationMetadataEmbedded(root);
             };
 
-            SignumServer.WebEntityJsonConverterFactory.GetMetadataPropertyRoute += (pr, mod) =>
+            SignumServer.WebEntityJsonConverterFactory.CanReadPropertyRoute += (pr, mod, sm) =>
             {
-                if (UserEntity.Current == null || !pr.RootType.IsEntity())
+                var asm = AssertSM(sm, pr.RootType);
+
+                var allowed = asm.Properties?.TryGetS(pr) ?? asm.Default;
+
+                if (allowed >= PropertyAllowed.Read)
                     return null;
 
-                var role = RoleEntity.Current;
-                var pac = PropertyAuthLogic.GetAllowed(role, pr);
+                return "Not Allowed to Read " + (asm.Properties != null && asm.Properties.ContainsKey(pr) ? pr.ToString() : pr.RootType.CleanType());
+            };
 
-                var tac = TypeAuthLogic.GetAllowed(pr.RootType);
+            SignumServer.WebEntityJsonConverterFactory.CanWritePropertyRoute += (pr, mod, sm) =>
+            {
+                var asm = AssertSM(sm, pr.RootType);
 
-                var candidates = pac.CandidatesAssuming(tac);
+                var allowed = asm.Properties?.TryGetS(pr) ?? asm.Default;
 
-                if (candidates.Distinct().Count() <= 1)
+                if (allowed == PropertyAllowed.Write)
                     return null;
 
-                var entity = mod as IRootEntity ?? EntityJsonContext.FindCurrentRootEntity()!;
+                return "Not Allowed to Write " + (asm.Properties != null && asm.Properties.ContainsKey(pr) ? pr.ToString() : pr.RootType.CleanType());
+            };
 
-                if (entity == null)
-                {
-                    return null; //Embedded in SearchControl
-                    //throw new InvalidOperationException("Not IRootEntity found");
-                }
+            SignumServer.WebEntityJsonConverterFactory.GetPropertyMetadata += (pr, mod, sm) =>
+            {
+                var asm = AssertSM(sm, pr.RootType);
 
-                var allowed = PropertyAuthLogic.GetAllowed((Entity)entity, pr);
+                var allowed = asm.Properties?.TryGetS(pr);
+
+                if (allowed == null)
+                    return null;
 
                 if (allowed == PropertyAllowed.None)
                     return PropertyMetadata.Hidden;
@@ -307,7 +278,7 @@ public static class AuthServer
             ReflectionServer.OperationExtension += (oits, oi, type) =>
             {
                 var allowed = UserEntity.Current == null ? false :
-                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type, inUserInterface: true);
+                           OperationAuthLogic.GetOperationAllowed(oi.OperationSymbol, type).Max().ToBoolean(inUserInterface: true);
 
                 if (!allowed)
                     return null;
@@ -343,7 +314,9 @@ public static class AuthServer
             CustomWriteJsonProperty = (Utf8JsonWriter writer, WriteJsonPropertyContext ctx) => { },
             CustomReadJsonProperty = (ref Utf8JsonReader reader, ReadJsonPropertyContext ctx) =>
             {
-                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity);
+                var sm = EntityJsonContext.CurrentSerializationPath!.CurrentSerializationMetadata();
+
+                SignumServer.WebEntityJsonConverterFactory.AssertCanWrite(ctx.ParentPropertyRoute.Add(piPasswordHash), ctx.Entity, sm);
 
                 var password = reader.GetString();
 
@@ -370,6 +343,17 @@ public static class AuthServer
             };
 
 
+    }
+
+    private static AuthSerializationMetadata AssertSM(SerializationMetadata? sm, Type rootType)
+    {
+        if (sm is not AuthSerializationMetadata asm)
+            throw new InvalidOperationException("No AuthSerializationMetadata found");
+
+        if (asm.Type != rootType)
+            throw new InvalidOperationException($"AuthSerializationMetadata is for {asm.Type.TypeName()} instead of {rootType.TypeName()}");
+
+        return asm;
     }
 
     private static void RrgisterWithCondition<T>()
@@ -433,7 +417,4 @@ Consider calling ReflectionServer.RegisterLike(typeof({type.Name}), ()=> yourCon
 
         AuthServer.UserLogged?.Invoke(ac, user);
     }
-
-   
-
 }

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { To, NavigateOptions } from "react-router";
+import { To, NavigateOptions, useOutletContext } from "react-router";
 import type { Router } from "@remix-run/router";
 import { IUserEntity } from "./Signum.Security";
 import { PermissionSymbol } from "./Signum.Basics";
@@ -130,6 +130,7 @@ export namespace Expander {
 }
 
 export function useExpand(): void {
+  useOutletContext();
   React.useEffect(() => {
     const wasExpanded = Expander.setExpanded(true);
     return () => { Expander.setExpanded(wasExpanded); }

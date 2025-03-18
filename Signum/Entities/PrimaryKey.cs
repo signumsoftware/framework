@@ -240,6 +240,12 @@ public struct PrimaryKey : IEquatable<PrimaryKey>, IComparable, IComparable<Prim
         return new PrimaryKey((IComparable)ReflectionTools.Parse(value, Type(entityType))!);
     }
 
+
+    public static PrimaryKey Parse(string value, PropertyRoute mListPropertyRoute)
+    {
+        return new PrimaryKey((IComparable)ReflectionTools.Parse(value, MListType(mListPropertyRoute))!);
+    }
+
     public static PrimaryKey? Wrap(IComparable value)
     {
         if (value == null)

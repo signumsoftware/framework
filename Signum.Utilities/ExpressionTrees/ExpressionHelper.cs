@@ -8,6 +8,11 @@ public static class ExpressionHelper
 {
     static MethodInfo miAsQueryable = ReflectionTools.GetMethodInfo(() => Queryable.AsQueryable<int>(null!)).GetGenericMethodDefinition();
 
+    public static string ToStringIndented(this Expression expression)
+    {
+        return ExpressionStringBuilder.ExpressionToString(expression);
+    }
+
     [DebuggerStepThrough]
     public static Expression TryConvert(this Expression expression, Type type)
     {

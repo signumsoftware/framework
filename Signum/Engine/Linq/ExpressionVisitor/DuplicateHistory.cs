@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using NpgsqlTypes;
 using Signum.Engine.Maps;
 
 namespace Signum.Engine.Linq;
@@ -39,14 +40,14 @@ internal class DuplicateHistory : DbExpressionVisitor
                 var tableExp = new TableExpression(aliasGenerator.NextTableAlias(tableNameForAlias), table.Table, systemTime, null);
 
                 ColumnExpression GetTablePeriod() => new ColumnExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), tableExp.Alias, table.Table.SystemVersioned!.PostgresSysPeriodColumnName);
-                
-                SqlFunctionExpression tstzrange(DateTimeOffset start, DateTimeOffset end) => new SqlFunctionExpression(typeof(NpgsqlTypes.NpgsqlRange<DateTime>), null, PostgresFunction.tstzrange.ToString(),
-                    new[] { Expression.Constant(start), Expression.Constant(end) });
+
+                SqlFunctionExpression tstzrange(DateTime start, DateTime end) => PostgresFunction.tstzrange.CallExpression<NpgsqlRange<DateTime>>(Expression.Constant(start), Expression.Constant(end));
 
                 var where = table.SystemTime switch
                 {
                     SystemTime.All => null,
                     SystemTime.AsOf asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), Expression.Constant(asOf.DateTime) }),
+                    SystemTime.AsOfExpression asOf => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { GetTablePeriod(), asOf.Expression }),
                     SystemTime.Between b => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Overlap, new Expression[] { tstzrange(b.StartDateTime, b.EndtDateTime), GetTablePeriod() }),
                     SystemTime.ContainedIn ci => new SqlFunctionExpression(typeof(bool), null, PostgressOperator.Contains, new Expression[] { tstzrange(ci.StartDateTime, ci.EndtDateTime), GetTablePeriod() }),
                     _ => throw new UnexpectedValueException(table.SystemTime),

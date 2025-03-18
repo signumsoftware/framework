@@ -40,6 +40,7 @@ export default function MailingMenu(p : MailingMenuProps): React.JSX.Element | n
   return (
     <DropdownButton id="mailingDropDown" variant="light" className="sf-mailing-dropdown" title={label}>
       {
+        emailTemplates == "error" ? <Dropdown.Item className="text-danger">Error</Dropdown.Item> : 
         emailTemplates.map((wt, i) =>
           <Dropdown.Item key={i}
             onClick={() => handleClick(wt)}>

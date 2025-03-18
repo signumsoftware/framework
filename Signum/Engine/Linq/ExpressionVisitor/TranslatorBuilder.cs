@@ -4,6 +4,8 @@ using Signum.Entities.Internal;
 using Signum.Utilities.DataStructures;
 using System.Collections.ObjectModel;
 using Signum.Engine.Sync;
+using Microsoft.SqlServer.Types;
+using System.Runtime.CompilerServices;
 
 namespace Signum.Engine.Linq;
 
@@ -168,8 +170,11 @@ internal static class TranslatorBuilder
 
         public ProjectionBuilder(Scope scope)
         {
+            this.IsPostgres = Schema.Current.Settings.IsPostgres;
             this.scope = scope;
         }
+
+        bool IsPostgres;
 
         static internal Expression<Func<IProjectionRow, T>> Build<T>(Expression expression, Scope scope)
         {
@@ -194,7 +199,12 @@ internal static class TranslatorBuilder
             var col = GetInnerColumn(u);
 
             if (col != null)
+            {
+                if (IsPostgres && u.Type.UnNullify() == typeof(SqlHierarchyId))
+                    return this.Visit(new ColumnExpression(u.Type, col.Alias, col.Name));
+
                 return scope.GetColumnExpression(row, col.Alias, col.Name!, u.Type, GetDateTimeKind(col));
+            }
 
             return base.VisitUnary(u);
         }
@@ -228,8 +238,17 @@ internal static class TranslatorBuilder
 
         DateTimeKind defaultDateTimeKind = Schema.Current.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
 
+        static MethodInfo miFromSortableString = ReflectionTools.GetMethodInfo(() => HierarchyIdString.FromSortableString(""));
+        static MethodInfo miFromSortableStringNullable = ReflectionTools.GetMethodInfo(() => HierarchyIdString.FromSortableStringNullable(""));
+
         protected internal override Expression VisitColumn(ColumnExpression column)
         {
+            if (this.IsPostgres && column.Type.UnNullify() == typeof(SqlHierarchyId))
+            {
+                var str =  scope.GetColumnExpression(row, column.Alias, column.Name!, typeof(string), default);
+                return Expression.Call(column.Type.IsNullable() ? miFromSortableStringNullable : miFromSortableString, str);
+            }
+
             DateTimeKind kind = GetDateTimeKind(column);
 
             return scope.GetColumnExpression(row, column.Alias, column.Name!, column.Type, kind);
@@ -633,7 +652,7 @@ internal static class TranslatorBuilder
         {
             var result = this.Visit(toDayOfWeek.Expression);
 
-            if (Schema.Current.Settings.IsPostgres)
+            if (IsPostgres)
             {
                 return Expression.Call(ToDayOfWeekExpression.miToDayOfWeekPostgres, result);
             }
@@ -653,7 +672,7 @@ internal static class TranslatorBuilder
         protected internal override Expression VisitInterval(IntervalExpression interval)
         {
             var intervalType = interval.Type.GetGenericArguments()[0];
-            if (Schema.Current.Settings.IsPostgres)
+            if (IsPostgres)
             {
                 return Expression.Call(miToInterval.MakeGenericMethod(intervalType), Visit(interval.PostgresRange!));
             }
