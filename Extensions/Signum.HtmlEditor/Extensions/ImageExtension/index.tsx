@@ -84,13 +84,12 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
         if('attachments' in parentObject) {
           const attachments = parentObject.attachments as { rowId: number }[];
           return attachments.map(att => att.rowId.toString()) ?? []
-          // return parentObject.attachments.map() ?? [];
         }
       }
 
       return [];
     })();
-    console.log('>>>', attachments);
+    
     if(!attachments.length) return;
     
     const editorState =  controller.editor.getEditorState();
