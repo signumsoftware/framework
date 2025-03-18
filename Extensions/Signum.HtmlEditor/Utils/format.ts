@@ -28,13 +28,13 @@ export function formatList(
 
     const listType = listTag === "ul" ? "bullet" : "number";
 
-    const revert = isListActive(selection, listTag);
+    const active = isListActive(selection, listTag);
 
     const anchorNode = selection.anchor.getNode();
-    if(!anchorNode.getTextContent()) return;
+    if(!anchorNode.getTextContent() && !active) return;
 
     $setBlocksType(selection, () =>
-      revert ? $createParagraphNode() : $createListNode(listType)
+      active ? $createParagraphNode() : $createListNode(listType)
     );
   });
 }
@@ -48,10 +48,10 @@ export function formatHeading(
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = isHeadingActive(selection, headingTagType);
+    const active = isHeadingActive(selection, headingTagType);
 
     $setBlocksType(selection, () =>
-      revert ? $createParagraphNode() : $createHeadingNode(headingTagType)
+      active ? $createParagraphNode() : $createHeadingNode(headingTagType)
     );
   });
 }
@@ -62,10 +62,10 @@ export function formatQuote(editor: LexicalEditor): void {
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isQuoteNode(node));
+    const active = !!$findMatchingParent(selection.anchor.getNode(), node => $isQuoteNode(node));
 
     $setBlocksType(selection, () =>
-      revert ? $createParagraphNode() : $createQuoteNode()
+      active ? $createParagraphNode() : $createQuoteNode()
     );
   });
 }
@@ -79,10 +79,10 @@ export function formatCode(
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node));
+    const active = !!$findMatchingParent(selection.anchor.getNode(), node => $isCodeNode(node));
 
     $setBlocksType(selection, () =>
-      revert ? $createParagraphNode() : $createCodeNode(language)
+      active ? $createParagraphNode() : $createCodeNode(language)
     );
   });
 }
@@ -93,8 +93,8 @@ export function formatLink(editor: LexicalEditor, url?: string): void {
 
     if (!$isRangeSelection(selection)) return;
 
-    const revert = !!$findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node));
+    const active = !!$findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node));
 
-    editor.dispatchCommand(TOGGLE_LINK_COMMAND, revert ? null : url || null);
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, active ? null : url || null);
   });
 }
