@@ -65,8 +65,6 @@
     color: #444;
 }
 
-
-
 .sf-html-separator {
     display: inline-block;
     border-right: 1px solid #ddd;
@@ -77,7 +75,6 @@
 .sf-html-editor p {
   margin-bottom: 0.5em;
 }
-
 
 .sf-html-editor blockquote {
     margin: 0 0 1rem 0;
