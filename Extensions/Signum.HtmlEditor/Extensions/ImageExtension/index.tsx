@@ -11,10 +11,7 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
     const abortController = new AbortController();
     const element = controller.editableElement;
 
-    if(!element) {
-      console.warn("ImageExtension does not work properly without the editable element.");
-      return;
-    }
+    if(!element) return;
 
     element.addEventListener("dragover", (event) => {
       event.preventDefault(); 
