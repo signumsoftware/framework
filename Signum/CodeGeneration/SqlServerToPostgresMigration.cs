@@ -9,10 +9,21 @@ using System.Data;
 
 namespace Signum.CodeGeneration;
 
+public class MigrateToPostgresOptions
+{
+    public Func<string, bool> IsSysStartDate = a => a == "SysStartDate";
+    public Func<string, bool> IsSysEndDate = a => a == "SysEndDate";
+
+    public Action<DataTable, DiffTable>? CleanDataTable;
+
+    public int BatchSize = 10000;
+}
+
 public static class SqlServerToPostgresMigration
 {
-    public static void MigrateToPostgres(string postgresConnectionString)
+    public static void MigrateToPostgres(string postgresConnectionString, MigrateToPostgresOptions? options = null)
     {
+        options ??= new MigrateToPostgresOptions();
         if (!(Connector.Current is SqlServerConnector))
             throw new InvalidOperationException($"Current Connector should be SqlServerConnector");
 
@@ -125,7 +136,7 @@ public static class SqlServerToPostgresMigration
             }
 
             Console.Write("Creating new database...");
-            var script = CreatePostgresTables(tables, sb!);
+            var script = CreatePostgresTables(tables, sb!, options);
             using (Connector.Override(postgresConnector))
                 script.ExecuteLeaves();
             Console.WriteLine("Done!");
@@ -139,7 +150,7 @@ public static class SqlServerToPostgresMigration
 
         foreach (var (diffTable, pgName) in tables)
         {
-            CopyTable(diffTable, pgName, postgresConnector, sb, batchSize: 10000);
+            CopyTable(diffTable, pgName, postgresConnector, sb, options);
         }
 
         SafeConsole.WriteLineColor(ConsoleColor.Green, "Finished! Next Steps:");
@@ -148,7 +159,7 @@ public static class SqlServerToPostgresMigration
         Console.WriteLine($"* Execute {nameof(SqlServerToPostgresMigration)}.{nameof(UpdateIdentities)} to fix the Ids sequences");
     }
 
-    public static SqlPreCommand CreatePostgresTables(Dictionary<DiffTable, ObjectName> tables, SchemaBuilder sb)
+    public static SqlPreCommand CreatePostgresTables(Dictionary<DiffTable, ObjectName> tables, SchemaBuilder sb, MigrateToPostgresOptions opts)
     {
         List<SqlPreCommandSimple> result = new List<SqlPreCommandSimple>();
         HashSet<SchemaName> createdSchemas = new HashSet<SchemaName>(); // Track created schemas
@@ -166,7 +177,7 @@ public static class SqlServerToPostgresMigration
                 result.Add(new SqlPreCommandSimple($"CREATE SCHEMA IF NOT EXISTS \"{pgName.Schema}\";"));
             }
 
-            result.Add(CreateTable(diffTable, pgName, sb));
+            result.Add(CreateTable(diffTable, pgName, sb, opts));
         }
 
         return result.Combine(Spacing.Simple)!;
@@ -180,18 +191,17 @@ public static class SqlServerToPostgresMigration
     }
 
 
-    public static Func<string, bool> IsSysStartDate = a => a == "SysStartDate";
-    public static Func<string, bool> IsSysEndDate = a => a == "SysEndDate";
 
-    private static SqlPreCommandSimple CreateTable(DiffTable table, ObjectName newName, SchemaBuilder sb)
+
+    private static SqlPreCommandSimple CreateTable(DiffTable table, ObjectName newName, SchemaBuilder sb, MigrateToPostgresOptions opts)
     {
         return new SqlPreCommandSimple($"""
             CREATE TABLE {newName} (
-            {table.Columns.Values.Where(a => !IsSysStartDate(a.Name) && !IsSysEndDate(a.Name))
+            {table.Columns.Values.Where(a => !opts.IsSysStartDate(a.Name) && !opts.IsSysEndDate(a.Name))
             .Select(col =>
             $"    {PostgresColumn(col, sb)}"
             ).ToString(",\n")}
-            {(table.Columns.Values.Any(a => IsSysStartDate(a.Name) ||IsSysEndDate(a.Name))? ",\nsys_period TSTZRANGE NOT NULL" : null)}
+            {(table.Columns.Values.Any(a => opts.IsSysStartDate(a.Name) || opts.IsSysEndDate(a.Name))? ",\nsys_period TSTZRANGE NOT NULL" : null)}
             );
             """);
     }
@@ -227,7 +237,7 @@ public static class SqlServerToPostgresMigration
     private static bool IsString(SqlDbType sqlServer) => sqlServer == SqlDbType.VarChar || sqlServer == SqlDbType.NVarChar;
 
 
-    private static void BulkInsertToPostgres(PostgreSqlConnector pgConnector, DataTable dataTable,  DiffTable table, SchemaBuilder sb)
+    private static void BulkInsertToPostgres(PostgreSqlConnector pgConnector, DataTable dataTable,  DiffTable table, SchemaBuilder sb, MigrateToPostgresOptions opts)
     {
         using (var conn = (NpgsqlConnection)pgConnector.CreateConnection())
         {
@@ -239,11 +249,11 @@ public static class SqlServerToPostgresMigration
                 {
                     var newName = GetNewTableName(sb, table);
                     var pgColumnNames = table.Columns.Values
-                        .Where(c=>!IsSysStartDate(c.Name) && !IsSysEndDate(c.Name))
+                        .Where(c=>!opts.IsSysStartDate(c.Name) && !opts.IsSysEndDate(c.Name))
                         .ToDictionary(c => sb.Idiomatic(c.Name).SqlEscape(isPostgres: true));
 
-                    var sysStart = table.Columns.Values.SingleOrDefault(c => IsSysStartDate(c.Name));
-                    var sysEnd = table.Columns.Values.SingleOrDefault(c => IsSysEndDate(c.Name));
+                    var sysStart = table.Columns.Values.SingleOrDefault(c => opts.IsSysStartDate(c.Name));
+                    var sysEnd = table.Columns.Values.SingleOrDefault(c => opts.IsSysEndDate(c.Name));
 
                     if (sysStart != null && sysEnd != null)
                         pgColumnNames.Add("sys_period", null!);
@@ -258,10 +268,14 @@ public static class SqlServerToPostgresMigration
                             {
                                 if (pg == "sys_period") // Manually construct tstzrange
                                 {
-                                    var startDate = row[sysStart!.Name] == DBNull.Value ? null : (DateTime?)row[sysStart!.Name];
-                                    var endDate = row[sysEnd!.Name] == DBNull.Value ? null : (DateTime?)row[sysEnd!.Name];
-                                    //writer.Write(new NpgsqlRange<DateTime?>(startDate.HasValue ? startDate.Value : null, endDate.HasValue ? endDate.Value : null), NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
-                                    writer.Write(new NpgsqlRange<DateTime>(startDate ?? DateTime.MinValue, endDate ?? DateTime.MaxValue), NpgsqlDbType.Range | NpgsqlDbType.Timestamp);
+                                    var startDate = DateTime.SpecifyKind((DateTime)row[sysStart!.Name], DateTimeKind.Utc);
+                                    var endDate = DateTime.SpecifyKind((DateTime)row[sysEnd!.Name], DateTimeKind.Utc);
+                                    var interval = new NpgsqlRange<DateTime>(
+                                        startDate, lowerBoundIsInclusive: true, lowerBoundInfinite: startDate == DateTime.MinValue,
+                                        endDate, upperBoundIsInclusive: false, upperBoundInfinite: endDate == DateTime.MaxValue);
+
+                                    writer.Write(interval, 
+                                        NpgsqlDbType.Range | NpgsqlDbType.TimestampTz);
                                 }
                                 else
                                 {
@@ -293,10 +307,10 @@ public static class SqlServerToPostgresMigration
     }
 
 
-    private static void CopyTable(DiffTable table, ObjectName pgName, PostgreSqlConnector pgConnector, SchemaBuilder sb, int batchSize)
+    private static void CopyTable(DiffTable diffTable, ObjectName pgName, PostgreSqlConnector pgConnector, SchemaBuilder sb, MigrateToPostgresOptions opts)
     {
 
-        Console.Write($"Copying {table.Name} ...");
+        Console.Write($"Copying {diffTable.Name} ...");
 
         int rowsCopied = 0;
 
@@ -304,22 +318,25 @@ public static class SqlServerToPostgresMigration
         {
             while (true)
             {
-                DataTable dataTable = SelectBatchSqlServer(table, batchSize, rowsCopied);
+                DataTable dataTable = SelectBatchSqlServer(diffTable, opts.BatchSize, rowsCopied);
 
                 if (dataTable.Rows.Count == 0)
                     break;
 
-                BulkInsertToPostgres(pgConnector, dataTable, table, sb);
-                rowsCopied += dataTable.Rows.Count;
+                var originalRows = dataTable.Rows.Count;
+
+                opts.CleanDataTable?.Invoke(dataTable, diffTable);
+                BulkInsertToPostgres(pgConnector, dataTable, diffTable, sb, opts);
+                rowsCopied += originalRows;
                 Console.Write(".");
 
-                if (dataTable.Rows.Count < batchSize)
+                if (originalRows < opts.BatchSize)
                     break;
             }
         }
         catch (Exception ex)
         {
-            SafeConsole.WriteLineColor(ConsoleColor.Red, $"Error copying data for {table} (offset {rowsCopied}): {ex.Message}");
+            SafeConsole.WriteLineColor(ConsoleColor.Red, $"Error copying data for {diffTable} (offset {rowsCopied}): {ex.Message}");
             throw;
         }
 
