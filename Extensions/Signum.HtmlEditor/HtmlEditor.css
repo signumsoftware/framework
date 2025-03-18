@@ -72,8 +72,10 @@
     margin: 0 0.5em;
 }
 
-.sf-html-editor p {
-  margin-bottom: 0.5em;
+.sf-html-editor {
+  p, ol, ul {
+    margin-bottom: 0.5em;
+  }
 }
 
 .sf-html-editor blockquote {
