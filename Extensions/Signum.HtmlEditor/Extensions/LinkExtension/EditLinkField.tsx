@@ -1,33 +1,22 @@
-import { FontAwesomeIcon } from "@framework/Lines";
+import { classes } from "@framework/Globals";
+import { useForceUpdate } from "@framework/Hooks";
+import { EntityBaseController, TextBoxLine } from "@framework/Lines";
 import { AutoLineProps } from "@framework/Lines/AutoLine";
-import React, { ReactNode, useState } from "react";
+import { EntityControlMessage, HtmlEditorMessage } from "@framework/Signum.Entities";
+import React, { ReactNode } from "react";
 
 export default function EditLinkField(p: AutoLineProps): ReactNode {
-  const { binding } = p.ctx;
-  const [url, setUrl] = useState<string>(() => binding.getValue())
-
-  const handleUpdateURL = (value: string) => {
-    setUrl(value);
-    binding.setValue(value);
-  }
-
-  const removeURL = () => {
-    setUrl("");
-    binding.setValue("");
-  }
-  
+  const forceUpdate = useForceUpdate();
   return (
-    <div className="d-flex flex-row align-items-center gap-2">
-      <input 
-        value={url} 
-        onChange={event => handleUpdateURL(event.target.value)} 
-        aria-label="Insert hyperlink" 
-        placeholder="Insert hyperlink" 
-        className="flex-grow-1 form-control" 
-      />
-      <button aria-label="Remove hyperlink" title="Remove hyperlink" onClick={removeURL} className="btn btn-light sf-remove">
-        <FontAwesomeIcon icon="trash" />
-      </button>
-    </div>
-  )
+    <TextBoxLine {...p} valueHtmlAttributes={{ placeholder: HtmlEditorMessage.EnterYourUrlHere.niceToString() }} extraButtons={() =>
+      <a href="#" className={classes("sf-line-button", "sf-remove", "input-group-text")}
+        onClick={() => {
+          p.ctx.value = null;
+          forceUpdate();
+        }}
+        title={EntityControlMessage.Remove.niceToString()}>
+        {EntityBaseController.getRemoveIcon()}
+      </a>}
+    />
+  );
 }

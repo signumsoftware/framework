@@ -158,6 +158,14 @@ public enum EntityControlMessage
     _0CharactersRemaining
 }
 
+public enum HtmlEditorMessage
+{
+    [Description("Hyperlink")]
+    Hyperlink,
+    [Description("Enter your url here...")]
+    EnterYourUrlHere,
+}
+
 [DescriptionOptions(DescriptionOptions.Members), InTypeScript(true)]
 public enum BooleanEnum
 {
