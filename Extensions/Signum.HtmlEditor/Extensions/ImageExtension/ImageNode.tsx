@@ -17,7 +17,7 @@ export class ImageNode<T extends object = {}> extends DecoratorNode<JSX.Element>
   }
 
   createDOM(): HTMLElement {
-    return document.createElement("div");;
+    return document.createElement("div");
   }
 
   updateDOM(): boolean {
