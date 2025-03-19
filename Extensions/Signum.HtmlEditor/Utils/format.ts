@@ -92,8 +92,15 @@ export function formatLink(editor: LexicalEditor, url?: string): void {
     const selection = $getSelection();
 
     if (!$isRangeSelection(selection)) return;
+    
+    const anchorNode = selection.anchor.getNode();
+    const text = anchorNode.getTextContent();
 
-    const active = !!$findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node));
+    const active = !!$findMatchingParent(anchorNode, node => $isLinkNode(node));
+
+    if(!text && url) {
+      selection.insertText(url);
+    }
 
     editor.dispatchCommand(TOGGLE_LINK_COMMAND, active ? null : url || null);
   });

@@ -2,6 +2,7 @@ import AutoLineModal from "@framework/AutoLineModal";
 import { $isLinkNode, LinkNode } from "@lexical/link";
 import { $getSelection, $isRangeSelection, RangeSelection } from "lexical";
 import React, { useCallback } from "react";
+import { HtmlEditorMessage } from "../../../../Signum/React/Signum.Entities";
 import { HtmlEditorButton } from "../../HtmlEditorButtons";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { formatLink } from "../../Utils/format";
@@ -30,6 +31,7 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
  const toggleLink = useCallback(async () => {
   let selection: RangeSelection | undefined
   let initialUrl = ""
+  
   editor.read(()=> {
     const currentSelection = $getSelection();
     if(!$isRangeSelection(currentSelection)) return
@@ -42,7 +44,13 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
 
   if(!selection) return;
   
-  const url = await AutoLineModal.show({ title: "Insert hyperlink", message: "", initialValue: initialUrl, allowEmptyValue: true, customComponent: p => <EditLinkField {...p} />})
+   const url = await AutoLineModal.show({
+     title: HtmlEditorMessage.Hyperlink.niceToString(),
+     message: "",
+     initialValue: initialUrl,
+     type: { name: "string" },
+     allowEmptyValue: true, 
+    customComponent: p => <EditLinkField {...p} />})
 
   if(!url) {
     formatLink(editor);
@@ -60,7 +68,7 @@ export default function LinkButton({ controller }: LinkButtonProps): React.React
     restoreSelection(editor, selection);
     const linkNode = $findMatchingParent(selection.anchor.getNode(), node => $isLinkNode(node)) as LinkNode | undefined;
     if(linkNode && url) {
-      linkNode.setURL(url);
+      linkNode.setURL(sanitizedUrl);
     } else {
       formatLink(editor, sanitizedUrl)
     }
