@@ -20,6 +20,8 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
     string TopicName { get; set; }
     string SubscriptionName { get; set; }
 
+    public bool Running { get; private set; }
+
     public DateTime StartTime;
     
     public AzureServiceBusBroadcast(string namespaceConnectionString, string topicName = "cache-invalidation")
@@ -45,15 +47,24 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
         }, EntityJsonContext.FullJsonSerializerOptions))).Wait();
     }
 
-    public void Start()
+    public object syncLock = new object();
+
+    public void StartIfNecessary()
     {
-        EnsureInitializationAsync().Wait();
-        StartMessageListener().Wait();
+        if (Running)
+            return;
+
+        lock (syncLock)
+        {
+            Running = true;
+
+            EnsureInitializationAsync().Wait();
+            StartMessageListener().Wait();
+        }
     }
 
     async Task EnsureInitializationAsync()
     {
-
         if (!await adminClient.TopicExistsAsync(this.TopicName))
         {
             await adminClient.CreateTopicAsync(new CreateTopicOptions(this.TopicName)); /*Explore more options*/
@@ -109,7 +120,7 @@ public class AzureServiceBusBroadcast : IServerBroadcast, IAsyncDisposable
 
     public override string ToString()
     {
-        return $"{nameof(AzureServiceBusBroadcast)}(TopicName = {TopicName}, SubscriptionName = {SubscriptionName})";
+        return $"{nameof(AzureServiceBusBroadcast)}(Runing = {Running}, TopicName = {TopicName}, SubscriptionName = {SubscriptionName})";
     }
 
 }

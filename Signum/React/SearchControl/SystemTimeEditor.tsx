@@ -1,5 +1,6 @@
 import { DateTime, Duration, DurationUnit } from 'luxon'
 import * as React from 'react'
+import { FormCheck } from 'react-bootstrap'
 import { Finder } from '../Finder'
 import { classes } from '../Globals';
 import { SystemTime, FindOptionsParsed, QueryDescription, SubTokensOptions } from '../FindOptions'
@@ -20,8 +21,6 @@ interface SystemTimeEditorProps {
 }
 
 export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.Element{
-
- 
 
   function renderShowPeriod() {
 
@@ -100,14 +99,6 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.E
     );
   }
 
-
-
-
-
-
-
-
-
   function isInterval(mode: SystemTimeMode) {
     return mode == "All" || mode == "Between" || mode == "ContainedIn";
   }
@@ -124,6 +115,7 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.E
       st.timeSeriesStep = st.mode == "TimeSeries" ? 1 : undefined;
       st.timeSeriesUnit = st.mode == "TimeSeries" ? "Day" : undefined;
       st.timeSeriesMaxRowsPerStep = st.mode == "TimeSeries" ? 10 : undefined;
+      st.splitQueries = st.mode == "TimeSeries" ? true : undefined;
 
       if (st.mode == "TimeSeries") {
         var token = await Finder.parseSingleToken(p.findOptions.queryKey, QueryTokenString.timeSeries.token, SubTokensOptions.CanTimeSeries);
@@ -237,17 +229,18 @@ export default function SystemTimeEditor(p : SystemTimeEditorProps): React.JSX.E
         {renderDateTime("startDate")}
         {renderDateTime("endDate")}
         <TotalNumStepsAndRows findOptions={p.findOptions} />
-      </> : 
-      <>
-        {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && renderDateTime("startDate")}
-        {(mode == "Between" || mode == "ContainedIn") && renderDateTime("endDate")}
-        {isInterval(mode) && <>
-          <span className="ms-3">{JavascriptMessage.joinMode.niceToString()}</span>
-          {renderJoinMode()}
-        </>}
-        {renderShowPeriod()}
-        {renderShowOperations()}
-      </>
+      </> :
+        <>
+          {(mode == "Between" || mode == "ContainedIn" || mode == "AsOf") && renderDateTime("startDate")}
+          {(mode == "Between" || mode == "ContainedIn") && renderDateTime("endDate")}
+          {isInterval(mode) && <>
+            <span className="ms-3">{JavascriptMessage.joinMode.niceToString()}</span>
+            {renderJoinMode()}
+          </>}
+          {renderShowPeriod()}
+          {renderShowOperations()}
+      
+        </>
       }
     </div>
   );
@@ -284,19 +277,26 @@ function TotalNumStepsAndRows(p: { findOptions: FindOptionsParsed }) {
 
   const formatter = toNumberFormat("C0");
 
- 
-
   return (
-    <span className="ms-1">
-      {QueryTokenDateMessage._0Steps1Rows2TotalRowsAprox.niceToString().formatHtml(
-        <strong className={steps > 1000 ? "text-danger" : undefined}>{formatter.format(steps)}</strong>,
-        <NumberBox validateKey={isNumberKey} value={st.timeSeriesMaxRowsPerStep} format={formatter} onChange={e => { st.timeSeriesMaxRowsPerStep = e ?? 10; forceUpdate(); }}
-          htmlAttributes={{ className: "form-control form-control-xs ms-1", style: { width: "40px", display: "inline-block" } }}
-        />,
-        <strong className={st.timeSeriesMaxRowsPerStep != null && steps * st.timeSeriesMaxRowsPerStep > 1000 ? "text-danger" : undefined}>
-          {st.timeSeriesMaxRowsPerStep == null ? "" : formatter.format(steps * st.timeSeriesMaxRowsPerStep)}
-        </strong>
-      )}
-    </span>
+    <div className="ms-1 d-flex">
+      <span>
+        {QueryTokenDateMessage._0Steps1Rows2TotalRowsAprox.niceToString().formatHtml(
+          <strong className={steps > 1000 ? "text-danger" : undefined}>{formatter.format(steps)}</strong>,
+          <NumberBox validateKey={isNumberKey} value={st.timeSeriesMaxRowsPerStep} format={formatter} onChange={e => { st.timeSeriesMaxRowsPerStep = e ?? 10; forceUpdate(); }}
+            htmlAttributes={{ className: "form-control form-control-xs ms-1", style: { width: "40px", display: "inline-block" } }}
+          />,
+          <strong className={st.timeSeriesMaxRowsPerStep != null && steps * st.timeSeriesMaxRowsPerStep > 1000 ? "text-danger" : undefined}>
+            {st.timeSeriesMaxRowsPerStep == null ? "" : formatter.format(steps * st.timeSeriesMaxRowsPerStep)}
+          </strong>
+        )}
+      </span>
+      <FormCheck
+        className="ms-2"
+        checked={st.splitQueries}
+        onChange={e => { st.splitQueries = e.currentTarget.checked; }}
+        label={QueryTokenDateMessage.SplitQueries.niceToString()}
+        id={`split-queries`}
+      />
+    </div>
   );
 }

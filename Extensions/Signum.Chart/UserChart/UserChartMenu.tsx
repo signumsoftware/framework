@@ -158,7 +158,8 @@ export default function UserChartMenu(p: UserChartMenuProps): React.JSX.Element 
         startDate: ts.startDate && await UserAssetClient.API.stringifyDate(ts.startDate),
         endDate: ts.endDate && await UserAssetClient.API.stringifyDate(ts.endDate),
         timeSeriesStep: ts.timeSeriesStep,
-        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep
+        timeSeriesMaxRowsPerStep: ts.timeSeriesMaxRowsPerStep,
+        splitQueries: ts.splitQueries,
       }),
       maxRows: cr.maxRows,
       filters: qfs.map(f => newMListElement(UserAssetClient.Converter.toQueryFilterEmbedded(f))),

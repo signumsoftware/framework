@@ -41,7 +41,7 @@ public class EnumEntity<T> : Entity, IEquatable<EnumEntity<T>>
     {
         var en = ToEnum();
 
-        return Enum.IsDefined(typeof(T), en) ? en.ToString() : (this.toStr ?? en.ToString());  //for aux sync
+        return Enum.IsDefined(typeof(T), en) ? en.ToString() : (this.ToStr ?? en.ToString());  //for aux sync
     }
 
     public bool Equals(EnumEntity<T>? other)

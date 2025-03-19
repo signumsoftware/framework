@@ -211,7 +211,7 @@ public class PropertyRoute : IEquatable<PropertyRoute>
     }
 
 
-    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.toStr);
+    static readonly FieldInfo fiToStr = ReflectionTools.GetFieldInfo((Entity e) => e.ToStr);
 
 
     static ConcurrentDictionary<Type, PropertyRoute> rootCache = new();

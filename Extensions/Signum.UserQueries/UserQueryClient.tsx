@@ -336,6 +336,7 @@ export namespace UserQueryClient {
         timeSeriesStep: uq.systemTime.timeSeriesStep ?? undefined,
         timeSeriesUnit: uq.systemTime.timeSeriesUnit ?? undefined,
         timeSeriesMaxRowsPerStep: uq.systemTime.timeSeriesMaxRowsPerStep ?? undefined,
+        splitQueries: uq.systemTime.splitQueries ?? undefined,
       };
   
       return fo;

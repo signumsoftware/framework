@@ -5,6 +5,7 @@ using System.Globalization;
 using Signum.Engine.Sync;
 using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
+using System.Data;
 
 namespace Signum.Engine.Maps;
 
@@ -22,7 +23,8 @@ public class Schema : IImplementationsFinder
             timeZoneMode = value;
             if (Settings.IsPostgres)
             {
-                Settings.TypeValues[typeof(DateTime)] = new AbstractDbType(timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+                Settings.TypeValues[typeof(DateTime)] = new AbstractDbType(SqlDbType.DateTime2, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
+                Settings.TypeValues[typeof(DateTimeOffset)] = new AbstractDbType(SqlDbType.DateTimeOffset, timeZoneMode == TimeZoneMode.Local ? NpgsqlDbType.Timestamp: NpgsqlDbType.TimestampTz);
             }
         }
     }
@@ -77,6 +79,7 @@ public class Schema : IImplementationsFinder
 
     public Dictionary<string, Func<Schema, bool>> PostgresExtensions = new Dictionary<string, Func<Schema, bool>>()
     {
+        { "plpgsql", s => true },
         { "uuid-ossp", s => true },
         { "ltree", s => s.GetDatabaseTables().Any(t => t.Columns.Any(c => c.Value.Type.UnNullify() == typeof(SqlHierarchyId)))},
     };
@@ -613,9 +616,9 @@ public class Schema : IImplementationsFinder
         this.ViewBuilder = new Maps.ViewBuilder(this);
 
         Generating += SchemaGenerator.SnapshotIsolation;
-        Generating += SchemaGenerator.PostgresExtensions;
-        Generating += SchemaGenerator.PostgresTemporalTableScript;
+        Generating += SchemaGenerator.CreatePostgresExtensions;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
+        Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
         Generating += SchemaGenerator.CreateTablesScript;
         Generating += SchemaGenerator.InsertEnumValuesScript;
@@ -623,7 +626,9 @@ public class Schema : IImplementationsFinder
         Generating += Assets.Schema_Generating;
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
-        Synchronizing += Assets.Schema_SynchronizingDrop;
+        Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+
+        Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;

@@ -263,19 +263,19 @@ public class PackageOperationAlgorithm : IProcessAlgorithm
             OperationType operationType = OperationLogic.GetOperationInfo(line.Target.GetType(), operationSymbol).OperationType;
 
             OperationLogic.AssertOperationAllowed(operationSymbol, line.Target.GetType(), inUserInterface: true, entity: line.Target);
-            
+
+            var args2 = args.AppendArg(new ProgressProxy(executingProcess.CancellationToken));
             switch (operationType)
             {
                 case OperationType.Execute:
-
-                    OperationLogic.ServiceExecute(line.Target, operationSymbol, args);
+                    OperationLogic.ServiceExecute(line.Target, operationSymbol, args2);
                     break;
                 case OperationType.Delete:
-                    OperationLogic.ServiceDelete(line.Target, operationSymbol, args);
+                    OperationLogic.ServiceDelete(line.Target, operationSymbol, args2);
                     break;
                 case OperationType.ConstructorFrom:
                     {
-                        var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args);
+                        var result = OperationLogic.ServiceConstructFrom(line.Target, operationSymbol, args2);
                         line.Result = result?.ToLite();
                     }
                     break;
@@ -304,9 +304,10 @@ public class PackageDeleteAlgorithm<T> : IProcessAlgorithm where T : class, IEnt
 
         var args = package.GetOperationArgs();
 
+       
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            ((T)(IEntity)line.Target).Delete(DeleteSymbol, args);
+            ((T)(IEntity)line.Target).Delete(DeleteSymbol, args.AppendArg(new ProgressProxy(executingProcess.CancellationToken)));
 
             line.FinishTime = Clock.Now;
             line.Save();
@@ -331,7 +332,7 @@ public class PackageExecuteAlgorithm<T> : IProcessAlgorithm where T : class, IEn
 
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            ((T)(object)line.Target).Execute(Symbol, args);
+            ((T)(object)line.Target).Execute(Symbol, args.AppendArg(new ProgressProxy(executingProcess.CancellationToken)));
             line.FinishTime = Clock.Now;
             line.Save();
         });
@@ -357,7 +358,7 @@ public class PackageConstructFromAlgorithm<F, T> : IProcessAlgorithm
 
         executingProcess.ForEachLine(package.Lines().Where(a => a.FinishTime == null), line =>
         {
-            var result = ((F)(object)line.Target).ConstructFrom(Symbol, args);
+            var result = ((F)(object)line.Target).ConstructFrom(Symbol, args.AppendArg(executingProcess.CancellationToken));
             if (result != null)
             {
                 if (result.IsNew)

@@ -19,7 +19,8 @@ public class SqlBuilder
         isPostgres = connector.Schema.Settings.IsPostgres;
     }
 
-    public List<string> SystemSchemas = new List<string>()
+    public List<string> SystemSchemasPostgres = new List<string>();
+    public List<string> SystemSchemasSqlServer = new List<string>()
         {
             "dbo",
             "guest",
@@ -35,6 +36,14 @@ public class SqlBuilder
             "db_denydatareader",
             "db_denydatawriter"
         };
+
+    internal List<string> GetSystemSchemas(bool isPostgres)
+    {
+        if (isPostgres)
+            return SystemSchemasPostgres;
+        else
+            return SystemSchemasSqlServer;
+    }
 
     public SqlPreCommandSimple? UseDatabase(string? databaseName = null)
     {
@@ -118,6 +127,11 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
     public SqlPreCommandSimple CreateExtensionIfNotExist(string extensionName)
     {
         return new SqlPreCommandSimple($"CREATE EXTENSION IF NOT EXISTS \"{extensionName}\";");
+    }
+
+    public SqlPreCommandSimple DropExtension(string extensionName)
+    {
+        return new SqlPreCommandSimple($"DROP EXTENSION \"{extensionName}\";");
     }
 
     SqlPreCommand DropViewIndex(ObjectName viewName, string index)
@@ -467,8 +481,21 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
 
         var oldPrimaryKey = columnReplacement.TryGetC(primaryKey.Name) ?? primaryKey.Name;
 
-        return Convert.ToInt32(Executor.ExecuteScalar(
-$@"SELECT Count(*) FROM {oldTableName}
+        if (isPostgres) // min not defined for uuid
+        {
+            return Convert.ToInt32(Executor.ExecuteScalar(
+    $@"SELECT Count(*) FROM {oldTableName}
+WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
+(
+    SELECT DISTINCT ON ({oldColumns}) {oldPrimaryKey.SqlEscape(IsPostgres)}
+    FROM {oldTableName}
+    {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
+){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
+        }
+        else
+        {
+            return Convert.ToInt32(Executor.ExecuteScalar(
+    $@"SELECT Count(*) FROM {oldTableName}
 WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 (
     SELECT MIN({oldPrimaryKey.SqlEscape(IsPostgres)})
@@ -476,6 +503,7 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
     {(!uniqueIndex.Where.HasText() ? "" : "WHERE " + uniqueIndex.Where.Replace(columnReplacement))}
     GROUP BY {oldColumns}
 ){(!uniqueIndex.Where.HasText() ? "" : $" AND ({uniqueIndex.Where.Replace(columnReplacement)})")}")!);
+        }
     }
 
     public SqlPreCommand? RemoveDuplicatesIfNecessary(TableIndex uniqueIndex, Replacements rep)
@@ -516,7 +544,19 @@ WHERE {oldPrimaryKey.SqlEscape(IsPostgres)} NOT IN
 
     private SqlPreCommand RemoveDuplicates(TableIndex uniqueIndex, IColumn primaryKey, string columns, bool commentedOut)
     {
-        return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
+        if (isPostgres) //Postgress doesn't have min on uuid
+        {
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
+WHERE {primaryKey.Name} NOT IN
+(
+    SELECT DISTINCT ON ({columns}) {primaryKey.Name}
+    FROM {uniqueIndex.Table.Name}
+    {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
+){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+        }
+        else
+        {
+            return new SqlPreCommandSimple($@"DELETE {uniqueIndex.Table.Name}
 WHERE {primaryKey.Name} NOT IN
 (
     SELECT MIN({primaryKey.Name})
@@ -524,6 +564,7 @@ WHERE {primaryKey.Name} NOT IN
     {(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : "WHERE " + uniqueIndex.Where)}
     GROUP BY {columns}
 ){(string.IsNullOrWhiteSpace(uniqueIndex.Where) ? "" : " AND " + uniqueIndex.Where)};".Let(txt => commentedOut ? txt.Indent(2, '-') : txt));
+        }
     }
 
     public SqlPreCommand CreateIndexBasic(TableIndex index, bool forHistoryTable)
@@ -597,19 +638,20 @@ WHERE {primaryKey.Name} NOT IN
 
     public SqlPreCommand AlterTableAlterColumnDropDefault(ObjectName tableName, string columnName)
     {
-        return new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP DEFAULT;".FormatWith(
-            tableName,
-            columnName.SqlEscape(isPostgres)));
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {columnName.SqlEscape(isPostgres)} DROP DEFAULT;");
     }
 
     public SqlPreCommandSimple AlterTableAddDefaultConstraint(ObjectName tableName, DefaultConstraint defCons)
     {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName};");
+        if (isPostgres)
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ALTER COLUMN {defCons.ColumnName.SqlEscape(IsPostgres)} SET DEFAULT {defCons.QuotedDefinition};");
+        else
+            return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {defCons.Name.SqlEscape(IsPostgres)} DEFAULT {defCons.QuotedDefinition} FOR {defCons.ColumnName.SqlEscape(IsPostgres)};");
     }
 
     public SqlPreCommandSimple AlterTableAddCheckConstraint(ObjectName tableName, CheckConstraint checkCons)
     {
-        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {checkCons.Name} CHECK {checkCons.Definition};");
+        return new SqlPreCommandSimple($"ALTER TABLE {tableName} ADD CONSTRAINT {checkCons.Name.SqlEscape(IsPostgres)} CHECK {checkCons.Definition};");
     }
 
     public SqlPreCommand? AlterTableAddConstraintForeignKey(ITable table, string fieldName, ITable foreignTable)
@@ -894,5 +936,5 @@ CREATE PARTITION SCHEME {partScheme.Name.SqlEscape(isPostgres)}
             new SqlPreCommandSimple($"""DROP PARTITION SCHEME {partSchema.SchemeName.SqlEscape(isPostgres: false)}"""));
     }
 
-   
+
 }

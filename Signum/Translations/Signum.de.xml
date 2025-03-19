@@ -267,7 +267,7 @@
     <Member Name="Or" Description="Oder" />
   </Type>
   <Type Name="FilterOperation" Description="Filteroperation">
-    <Member Name="ComplexCondition" Description="Komplexer Zustand" />
+    <Member Name="ComplexCondition" Description="komplexe Bedingung" />
     <Member Name="Contains" Description="enthält" />
     <Member Name="DistinctTo" Description="anders als" />
     <Member Name="EndsWith" Description="endet mit" />
@@ -504,7 +504,7 @@
     <Member Name="DateTime" Description="Datum und Uhrzeit" />
     <Member Name="DateTimeOffset" Description="Datum und Uhrzeit mit Zeitzone" />
     <Member Name="DecimalNumber" Description="Dezimalzahl" />
-    <Member Name="Distinct" Description="Unterschiedlich" />
+    <Member Name="Distinct" Description="Distinct" />
     <Member Name="Embedded0" Description="eingebettet {0}" />
     <Member Name="EntityType" Description="Entitätstyp" />
     <Member Name="GlobalUniqueIdentifier" Description="Globaler einzigartiger Identifikator" />

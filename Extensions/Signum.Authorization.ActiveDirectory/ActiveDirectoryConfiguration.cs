@@ -96,12 +96,20 @@ public class AzureB2CEmbedded : EmbeddedEntity
     public string SignInSignUp_UserFlow { get; set; }
 
     [StringLengthValidator(Max = 100)]
+    public string? SignIn_UserFlow { get; set; }
+
+    [StringLengthValidator(Max = 100)]
+    public string? SignUp_UserFlow { get; set; }
+
+    [StringLengthValidator(Max = 100)]
     public string? ResetPassword_UserFlow { get; set; }
 
     internal AzureB2CConfigTS ToAzureB2CConfigTS() => new AzureB2CConfigTS
     {
         TenantName = TenantName,
         SignInSignUp_UserFlow = SignInSignUp_UserFlow,
+        SignIn_UserFlow = SignIn_UserFlow,
+        SignUp_UserFlow = SignUp_UserFlow,
         ResetPassword_UserFlow = ResetPassword_UserFlow,
     };
 }
@@ -178,5 +186,7 @@ public class AzureB2CConfigTS
 {
     public string TenantName;
     public string SignInSignUp_UserFlow;
+    public string? SignIn_UserFlow;
+    public string? SignUp_UserFlow;
     public string? ResetPassword_UserFlow;
 }

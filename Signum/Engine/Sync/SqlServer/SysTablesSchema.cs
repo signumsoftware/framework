@@ -212,7 +212,7 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemas);
+                var schemaNames = Database.View<SysSchemas>().Select(s => s.name).ToList().Except(sqlBuilder.SystemSchemasSqlServer);
 
                 result.AddRange(schemaNames.Select(sn => new SchemaName(db, sn, isPostgres)).Where(a => !SchemaSynchronizer.IgnoreSchema(a)));
             }
@@ -227,14 +227,16 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var functions = Database.View<SysPartitionFunction>().Select(f => new DiffPartitionFunction
-                {
-                    DatabaseName = db,
-                    FunctionName = f.name,
-                    Fanout = f.fanout,
-                    Values = Database.View<SysPartitionRangeValues>().Where(a => a.function_id == f.function_id).Select(a => a.value).ToArray()
+                var functions = Database.View<SysPartitionFunction>()
+                    .Where(a => !a.name.StartsWith("ifts_comp_fragmen")) //https://dba.stackexchange.com/questions/122021/restoring-sql-server-2012-enterprise-to-web-edition-not-possible-due-to-full-tex
+                    .Select(f => new DiffPartitionFunction
+                    {
+                        DatabaseName = db,
+                        FunctionName = f.name,
+                        Fanout = f.fanout,
+                        Values = Database.View<SysPartitionRangeValues>().Where(a => a.function_id == f.function_id).Select(a => a.value).ToArray()
 
-                });
+                    });
 
                 result.AddRange(functions);
             }
@@ -249,7 +251,9 @@ public static class SysTablesSchema
         {
             using (Administrator.OverrideDatabaseInSysViews(db))
             {
-                var functions = Database.View<SysPartitionSchemes>().Select(s => new DiffPartitionScheme
+                var functions = Database.View<SysPartitionSchemes>()
+                    .Where(a => !a.name.StartsWith("ifts_comp_fragmen"))
+                    .Select(s => new DiffPartitionScheme
                 {
                     DatabaseName = db,
                     SchemeName = s.name,

@@ -510,6 +510,7 @@ export interface SystemTime {
   mode: SystemTimeMode;
   joinMode?: SystemTimeJoinMode;
   startDate?: string;
+  splitQueries?: boolean;
   endDate?: string;
   timeSeriesUnit?: TimeSeriesUnit;
   timeSeriesStep?: number;
