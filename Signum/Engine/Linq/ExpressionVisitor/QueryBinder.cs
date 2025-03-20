@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
 using Signum.Entities.TsVector;
+using static Signum.Entities.SystemTime;
 
 namespace Signum.Engine.Linq;
 
@@ -3673,9 +3674,10 @@ class QueryJoinExpander : DbExpressionVisitor
                 if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
+                    var period = tr.CompleteEntity.ExternalPeriod!;
                     source = new JoinExpression(JoinType.OuterApply, source,
-                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, 
-                        [new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!)], null, 0),
+                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal,
+                        [new OrderExpression(OrderType.Ascending,  period.Min ?? new SqlFunctionExpression(period.ElementType, null, PostgresFunction.lower.ToString(), new[] { period.PostgresRange! }))], null, 0),
                         null);
                 }
                 else

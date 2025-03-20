@@ -666,7 +666,7 @@ public static class SchemaSynchronizer
 
     private static SqlPreCommand ForHistoryTable(SqlPreCommand sqlCommand, ITable tab)
     {
-        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.Name)}\b"), m => tab.SystemVersioned!.TableName.Name);
+        return sqlCommand.Replace(new Regex(@$"\b{Regex.Escape(tab.Name.ToString())}\b"), m => tab.SystemVersioned!.TableName.ToString());
     }
 
     private static SqlPreCommand? UpdateForeignKeyTypeChanged(SqlBuilder sqlBuilder, ITable tab, DiffTable dif, IColumn tabCol, DiffColumn difCol, Func<ObjectName, ObjectName> changeName, Dictionary<ObjectName, Dictionary<string, string>> preRenameColumnsList)

@@ -137,8 +137,7 @@ public static class VirtualMList
             };
         }
 
-        var baseQuery = Connector.Current is SqlServerConnector ? 
-            Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() :
+        var baseQuery = /*Connector.Current is SqlServerConnector ? Database.Query<L>().WithHint("FORCESEEK").DisableQueryFilter() : */ 
             Database.Query<L>().DisableQueryFilter();
 
         if (preserveOrder)

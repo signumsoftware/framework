@@ -759,6 +759,9 @@ export class EntityOperationContext<T extends Entity> {
     if (!ctx.frame.pack)
       throw new Error("a pack is necessary");
 
+    if (ctx.frame.pack.entity != ctx.value)
+      throw new Error("The ctx.value is not ctx.frame.pack.entity");
+
     return EntityOperationContext.fromEntityPack(ctx.frame, ctx.frame.pack! as EntityPack<T>, operation);
   }
 
