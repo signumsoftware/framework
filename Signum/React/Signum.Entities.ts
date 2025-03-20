@@ -391,7 +391,8 @@ export namespace EngineMessage {
   export const ThereAre0ThatReferThisEntityByProperty1: MessageKey = new MessageKey("EngineMessage", "ThereAre0ThatReferThisEntityByProperty1");
   export const ThereAreRecordsIn0PointingToThisTableByColumn1: MessageKey = new MessageKey("EngineMessage", "ThereAreRecordsIn0PointingToThisTableByColumn1");
   export const UnauthorizedAccessTo0Because1: MessageKey = new MessageKey("EngineMessage", "UnauthorizedAccessTo0Because1");
-  export const TheresAlreadyA0With1EqualsTo2_G: MessageKey = new MessageKey("EngineMessage", "TheresAlreadyA0With1EqualsTo2_G");
+  export const ThereIsAlreadyA0WithTheSame1_G: MessageKey = new MessageKey("EngineMessage", "ThereIsAlreadyA0WithTheSame1_G");
+  export const ThereIsAlreadyA0With1EqualsTo2_G: MessageKey = new MessageKey("EngineMessage", "ThereIsAlreadyA0With1EqualsTo2_G");
 }
 
 export namespace EntityControlMessage {
