@@ -83,12 +83,13 @@ public class PgAttribute : IView
     public short attnum;
     public bool attnotnull;
     public char attidentity;
+    public char attgenerated;
 
     [AutoExpressionField]
     public PgType? Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == atttypid));
 
     [AutoExpressionField]
-    public PgAttributeDef? Default() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == attrelid && d.adnum == attnum));
+    public PgAttributeDef? AttrDef() => As.Expression(() => Database.View<PgAttributeDef>().SingleOrDefault(d => d.adrelid == attrelid && d.adnum == attnum));
 }
 
 [TableName("pg_catalog.pg_attrdef")]

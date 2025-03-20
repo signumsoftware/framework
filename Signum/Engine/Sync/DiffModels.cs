@@ -53,9 +53,9 @@ public class DiffTable
         set
         {
             if (value != null)
-                Indices[FullTextTableIndex.FULL_TEXT] = value;
+                Indices[FullTextTableIndex.SqlServerOptions.FULL_TEXT] = value;
             else
-                Indices.Remove(FullTextTableIndex.FULL_TEXT);
+                Indices.Remove(FullTextTableIndex.SqlServerOptions.FULL_TEXT);
         }
     }
 
@@ -286,6 +286,12 @@ public class DiffDefaultConstraint
     public string Definition;
 }
 
+public class DiffComputedColumn
+{
+    public bool Persisted;
+    public string Definition;
+}
+
 public class DiffColumn
 {
     public string Name;
@@ -301,6 +307,7 @@ public class DiffColumn
 
     public DiffForeignKey? ForeignKey;
 
+    public DiffComputedColumn? ComputedColumn;
     public DiffDefaultConstraint? DefaultConstraint;
 
     public DiffCheckConstraint? CheckConstraint;

@@ -30,8 +30,8 @@ public static class SchemaSynchronizer
         var systemSchemas = sqlBuilder.GetSystemSchemas(isPostgres);
         HashSet<SchemaName> modelSchemas = modelTables.Values.Select(a => a.Name.Schema).Where(a => !systemSchemas.Contains(a.Name)).ToHashSet();
 
-        var modelPartitionSchemas = modelTables.Values.Where(a => a.PartitionScheme != null).Select(a => (db: a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct().ToDictionary(a => (a.db, name: a.scheme.Name), a => a.scheme);
-        var modelPartitionFunction = modelPartitionSchemas.Select(kvp => (kvp.Key.db, kvp.Value.PartitionFunction)).Distinct().ToDictionary(a => (a.db, name: a.PartitionFunction.Name), a => a.PartitionFunction);
+        var modelPartitionSchemas = isPostgres ? null:  modelTables.Values.Where(a => a.PartitionScheme != null).Select(a => (db: a.Name.Schema.Database, scheme: a.PartitionScheme!)).Distinct().ToDictionary(a => (a.db, name: a.scheme.Name), a => a.scheme);
+        var modelPartitionFunction = isPostgres ? null : modelPartitionSchemas!.Select(kvp => (kvp.Key.db, kvp.Value.PartitionFunction)).Distinct().ToDictionary(a => (a.db, name: a.PartitionFunction.Name), a => a.PartitionFunction);
 
         Dictionary<string, DiffTable> databaseTables = isPostgres ?
             PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
@@ -80,15 +80,15 @@ public static class SchemaSynchronizer
         Dictionary<ITable, Dictionary<string, TableIndex>> modelIndices = modelTables.Values
             .ToDictionary(t => t, t => t.AllIndexes().ToDictionaryEx(a => a.IndexName, "Indexes for {0}".FormatWith(t.Name)));
 
-        var modelFullTextCatallogs = (from kvp in modelIndices
+        List<FullTextCatallogName>? modelFullTextCatallogs = Schema.Current.Settings.IsPostgres ? null: 
+                                      (from kvp in modelIndices
                                       from fti in kvp.Value.Values.OfType<FullTextTableIndex>()
-                                      select new FullTextCatallogName(fti.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
+                                      select new FullTextCatallogName(fti.SqlServer.CatallogName, kvp.Key.Name.Schema.Database)).Distinct().ToList();
 
-        if (modelFullTextCatallogs.Any() && !Connector.Current.SupportsFullTextSearch)
+        if (modelFullTextCatallogs != null && modelFullTextCatallogs.Any() && !((SqlServerConnector)Connector.Current).SupportsFullTextSearch)
             throw new InvalidOperationException("Current database does not support Full-Text Search");
 
-        List<FullTextCatallogName> databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ?
-            PostgresCatalogSchema.GetFullTextSearchCatallogs(s.DatabaseNames()) :
+        List<FullTextCatallogName>? databaseFullTextCatallogs = Schema.Current.Settings.IsPostgres ? null :
             SysTablesSchema.GetFullTextSearchCatallogs(s.DatabaseNames());
 
 
@@ -154,25 +154,25 @@ public static class SchemaSynchronizer
             if (preRenameColumns != null)
                 preRenameColumns.GoAfter = true;
 
-            SqlPreCommand? createFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
-                modelFullTextCatallogs.ToDictionary(a => a),
-                databaseFullTextCatallogs.ToDictionary(a => a),
+            SqlPreCommand? createFullTextCatallogs = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs!.ToDictionary(a => a),
+                databaseFullTextCatallogs!.ToDictionary(a => a),
                 createNew: (_, newFTC) => sqlBuilder.CreateFullTextCatallog(newFTC),
                 removeOld: null,
                 mergeBoth: null
                 );
 
-            SqlPreCommand? createPartitionFunction = databasePartitionFunctions == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                 modelPartitionFunction,
-                 databasePartitionFunctions,
+            SqlPreCommand? createPartitionFunction = isPostgres? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                 modelPartitionFunction!,
+                 databasePartitionFunctions!,
                  createNew: (a, newPF) => sqlBuilder.CreateSqlPartitionFunction(newPF, a.db),
                  removeOld: null,
                  mergeBoth: null
                  );
 
-            SqlPreCommand? createPartitionSchema = databasePartitionSchemas == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                  modelPartitionSchemas,
-                  databasePartitionSchemas,
+            SqlPreCommand? createPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                  modelPartitionSchemas!,
+                  databasePartitionSchemas!,
                   createNew: (a, newPS) => sqlBuilder.CreateSqlPartitionScheme(newPS, a.db),
                 removeOld: null,
                 mergeBoth: null
@@ -611,25 +611,25 @@ public static class SchemaSynchronizer
                 mergeBoth: (_, newSN, oldSN) => newSN.Equals(oldSN) ? null : sqlBuilder.DropSchema(oldSN)
              );
 
-            SqlPreCommand? dropPartitionSchema = databasePartitionSchemas == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                modelPartitionSchemas,
-                databasePartitionSchemas,
+            SqlPreCommand? dropPartitionSchema = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelPartitionSchemas!,
+                databasePartitionSchemas!,
                 createNew: null,
                 removeOld: (_, oldPS) => sqlBuilder.DropSqlPartitionScheme(oldPS),
                 mergeBoth: null
                 );
 
-            SqlPreCommand? dropPartitionFunction = databasePartitionFunctions == null ? null : Synchronizer.SynchronizeScript(Spacing.Double,
-                 modelPartitionFunction,
-                 databasePartitionFunctions,
+            SqlPreCommand? dropPartitionFunction = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                 modelPartitionFunction!,
+                 databasePartitionFunctions!,
                  createNew: null,
                  removeOld: (_, oldPF) => sqlBuilder.DropSqlPartitionFunction(oldPF),
                  mergeBoth: null
                  );
 
-            SqlPreCommand? dropFullTextCatallogs = Synchronizer.SynchronizeScript(Spacing.Double,
-                modelFullTextCatallogs.ToDictionary(a => a),
-                databaseFullTextCatallogs.ToDictionary(a => a),
+            SqlPreCommand? dropFullTextCatallogs = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
+                modelFullTextCatallogs!.ToDictionary(a => a),
+                databaseFullTextCatallogs!.ToDictionary(a => a),
                 createNew: null,
                 removeOld: (_, newSN) => sqlBuilder.DropFullTextCatallog(newSN),
                 mergeBoth: null
@@ -810,6 +810,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
+                column.GeneratedAlways != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
                 sqlBuilder.IsPostgres ?
                 sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
                 sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;

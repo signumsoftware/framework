@@ -675,6 +675,13 @@ internal enum PostgresFunction
     lower,
     subpath,
     nlevel,
+    to_tsquery,
+    plainto_tsquery,
+    phraseto_tsquery,
+    websearch_to_tsquery,
+
+    ts_rank,
+    ts_rank_cd,
 }
 
 public static class PostgressOperator
@@ -682,8 +689,9 @@ public static class PostgressOperator
     public static string Overlap = "&&";
     public static string Contains = "@>";
     public static string IsContained = "<@";
+    public static string Matches = "@@";
 
-    public static string[] All = new[] { Overlap, Contains, IsContained };
+    public static string[] All = new[] { Overlap, Contains, IsContained, Matches };
 }
 
 internal enum SqlEnums

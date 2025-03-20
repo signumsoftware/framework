@@ -8,8 +8,6 @@ namespace Signum.Entities;
 
 public abstract class SystemTime
 {
-
-
     static Variable<SystemTime?> currentVariable = Statics.ThreadVariable<SystemTime?>("systemTime");
 
     public static SystemTime? Current => currentVariable.Value;

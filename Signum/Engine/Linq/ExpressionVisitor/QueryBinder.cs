@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
+using Signum.Entities.TsVector;
 
 namespace Signum.Engine.Linq;
 
@@ -1777,6 +1778,19 @@ internal class QueryBinder : ExpressionVisitor
                 throw new InvalidOperationException("No System Period found in " + source);
 
             return tablePeriod;
+        }
+
+        if (m.Method.DeclaringType == typeof(TsVectorExtensions) && m.Method.Name.StartsWith(nameof(TsVectorExtensions.GetTsVectorColumn)))
+        {
+            var colArg = m.TryGetArgument("tsVectorColumnName");
+            var colName = colArg == null ? PostgresTsVectorColumn.DefaultTsVectorColumn : (string)((ConstantExpression)colArg).Value!;
+
+            var tsVectorColumn =
+                source is EntityExpression e ? Completed(e).Let(ec => ec.Table.GetTsVectorColumn(ec.TableAlias!, colName)) :
+                source is MListElementExpression mle ? mle.Table.GetTsVectorColumn(mle.Alias, colName) :
+                throw new InvalidOperationException("Unexpected source");
+
+            return tsVectorColumn;
         }
 
         if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))

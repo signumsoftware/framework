@@ -53,7 +53,7 @@ public static class PostgresCatalogSchema
                                            .SingleOrDefaultEx(),
 
                          Columns = (from c in t.Attributes()
-                                    let def = c.Default()
+                                    let def = c.AttrDef()
                                     select new DiffColumn
                                     {
                                         Name = c.attname,
@@ -65,8 +65,14 @@ public static class PostgresCatalogSchema
                                         Precision = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 >> 16 & 65535 : 0,
                                         Scale = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 & 65535 : 0,
                                         Identity = c.attidentity == 'a',
+                                        
                                         GeneratedAlwaysType = GeneratedAlwaysType.None,
-                                        DefaultConstraint = def == null ? null : new DiffDefaultConstraint
+                                        ComputedColumn = def == null && c.attgenerated == 's' ? new DiffComputedColumn
+                                        {
+                                            Definition = pg_get_expr(def.adbin, def.adrelid),
+                                            Persisted = true /*always in PG*/
+                                        } : null,
+                                        DefaultConstraint = def == null || c.attgenerated == 's' ? null : new DiffDefaultConstraint
                                         {
                                             Definition = pg_get_expr(def.adbin, def.adrelid),
                                         },
@@ -230,10 +236,6 @@ public static class PostgresCatalogSchema
         return result;
     }
 
-    internal static List<FullTextCatallogName> GetFullTextSearchCatallogs(List<DatabaseName?> list)
-    {
-        return new List<FullTextCatallogName>();
-    }
 
 
 }
