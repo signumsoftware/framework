@@ -142,8 +142,23 @@ public class FullTextTableIndex : TableIndex
     public class PostgresOptions
     {
         public string TsVectorColumnName = PostgresTsVectorColumn.DefaultTsVectorColumn;
-        public Dictionary<string, NpgsqlTsVector.Lexeme.Weight> Weights = new Dictionary<string, NpgsqlTsVector.Lexeme.Weight>();
-        public string Configuration = Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";    
+        public string Configuration = Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+
+        public Dictionary<string, NpgsqlTsVector.Lexeme.Weight> Weights = new Dictionary<string, NpgsqlTsVector.Lexeme.Weight>(); //If not set it will use the order A, B, C, D, D, D...
+        internal void DefaultWeights(IColumn[] columns)
+        {
+            var defaultWeight = NpgsqlTsVector.Lexeme.Weight.A;
+            foreach (var c in columns)
+            {
+                if (!Weights.ContainsKey(c.Name))
+                {
+                    Weights.Add(c.Name, defaultWeight);
+                }
+
+                if (defaultWeight > NpgsqlTsVector.Lexeme.Weight.D)
+                    defaultWeight--;
+            }
+        }
     }
 
     public SqlServerOptions SqlServer = new SqlServerOptions();
@@ -161,19 +176,21 @@ public class FullTextTableIndex : TableIndex
     {
     }
 
-    GeneratedAlways GetGeneratedAlways()
+    ComputedColumn GetComputedColumn()
     {
         var pg = this.Postgres;
-        var exp = Columns.ToString(a => $"setweight(to_tsvector('{pg.Configuration}', {a.Name.SqlEscape(true)}), '{pg.Weights.TryGet(a.Name, NpgsqlTypes.NpgsqlTsVector.Lexeme.Weight.A)}')", " ||\n");
+        pg.DefaultWeights(Columns);
 
-        return new GeneratedAlways(exp, persisted: true);
+        var exp = Columns.ToString(a => $"setweight(to_tsvector('{pg.Configuration}'::regconfig, COALESCE({a.Name.SqlEscape(true)}, '')::text), '{pg.Weights.GetOrThrow(a.Name)}'::\"char\")", " || ");
+
+        return new ComputedColumn(exp, persisted: true);
     }
 
     protected internal IEnumerable<IColumn> GenerateColumns()
     {
         if (this.Table.Name.IsPostgres)
         {
-          yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName) { GeneratedAlways = this.GetGeneratedAlways() };
+          yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName) { ComputedColumn = this.GetComputedColumn() };
         }
     }
 }
@@ -190,7 +207,7 @@ public class PostgresTsVectorColumn : IColumn
 
     public string Name { get; private set; }
 
-    public IsNullable Nullable => IsNullable.No;
+    public IsNullable Nullable => IsNullable.Yes;
     public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.TsVector);
     public Type Type => typeof(NpgsqlTsVector);
     public string? UserDefinedTypeName => null;
@@ -198,7 +215,7 @@ public class PostgresTsVectorColumn : IColumn
     public bool IdentityBehaviour => false;
     public bool Identity => false;
     public string? Default => null;
-    public GeneratedAlways? GeneratedAlways { get; set; }
+    public ComputedColumn? ComputedColumn { get; set; }
     public string? Check => null;
     public int? Size => null;
     public byte? Precision => null;

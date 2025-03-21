@@ -302,6 +302,7 @@ public class DiffColumn
     public int Length;
     public int Precision;
     public int Scale;
+    public bool IsDropped;
     public bool Identity;
     public bool PrimaryKey;
 
@@ -314,6 +315,7 @@ public class DiffColumn
 
     public GeneratedAlwaysType GeneratedAlwaysType;
 
+
     public bool ColumnEquals(IColumn other, bool ignorePrimaryKey, bool ignoreIdentity, bool ignoreGenerateAlways)
     {
         var result = DbType.Equals(other.DbType)
@@ -325,7 +327,8 @@ public class DiffColumn
             && ScaleEquals(other)
             && (ignoreIdentity || Identity == other.Identity)
             && (ignorePrimaryKey || PrimaryKey == other.PrimaryKey)
-            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType());
+            && (ignoreGenerateAlways || GeneratedAlwaysType == other.GetGeneratedAlwaysType())
+            && ComputedEquals(other);
 
         if (!result)
             return false;
@@ -356,6 +359,20 @@ public class DiffColumn
         var result = CleanParenthesis(this.DefaultConstraint?.Definition) == CleanParenthesis(other.Default);
 
         return result;
+    }
+
+    public bool ComputedEquals(IColumn other)
+    {
+        if (other.ComputedColumn == null && this.ComputedColumn == null)
+            return true;
+
+        if (other.ComputedColumn?.Persisted != this.ComputedColumn?.Persisted)
+            return false;
+
+        if (CleanParenthesis(this.ComputedColumn?.Definition) != CleanParenthesis(other.ComputedColumn?.Expression))
+            return false;
+
+        return true;
     }
 
     public bool CheckEquals(IColumn other)

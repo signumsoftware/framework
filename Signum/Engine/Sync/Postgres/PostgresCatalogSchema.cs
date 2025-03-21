@@ -57,7 +57,7 @@ public static class PostgresCatalogSchema
                                     select new DiffColumn
                                     {
                                         Name = c.attname,
-                                        DbType = new AbstractDbType(TypeMappings.GetOrThrow(c.Type()!.typname)),
+                                        DbType = new AbstractDbType(c.Type()!.typname == null ? default : TypeMappings.GetOrThrow(c.Type()!.typname)),
                                         UserTypeName = null,
                                         Nullable = !c.attnotnull,
                                         Collation = null,
@@ -65,17 +65,18 @@ public static class PostgresCatalogSchema
                                         Precision = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 >> 16 & 65535 : 0,
                                         Scale = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 & 65535 : 0,
                                         Identity = c.attidentity == 'a',
+                                        IsDropped = c.attisdropped,
                                         
                                         GeneratedAlwaysType = GeneratedAlwaysType.None,
-                                        ComputedColumn = def == null && c.attgenerated == 's' ? new DiffComputedColumn
+                                        ComputedColumn = def != null && c.attgenerated == 's' ? new DiffComputedColumn
                                         {
                                             Definition = pg_get_expr(def.adbin, def.adrelid),
                                             Persisted = true /*always in PG*/
                                         } : null,
-                                        DefaultConstraint = def == null || c.attgenerated == 's' ? null : new DiffDefaultConstraint
+                                        DefaultConstraint = def != null && c.attgenerated != 's' ? new DiffDefaultConstraint
                                         {
                                             Definition = pg_get_expr(def.adbin, def.adrelid),
-                                        },
+                                        } : null,
                                         PrimaryKey = t.Indices().Any(i => i.indisprimary && i.indkey.Contains(c.attnum)),
                                     }).ToDictionaryEx(a => a.Name, "columns"),
 

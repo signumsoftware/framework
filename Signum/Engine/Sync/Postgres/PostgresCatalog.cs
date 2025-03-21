@@ -84,6 +84,7 @@ public class PgAttribute : IView
     public bool attnotnull;
     public char attidentity;
     public char attgenerated;
+    public bool attisdropped;
 
     [AutoExpressionField]
     public PgType? Type() => As.Expression(() => Database.View<PgType>().SingleOrDefault(t => t.oid == atttypid));

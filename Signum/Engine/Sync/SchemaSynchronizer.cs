@@ -38,6 +38,29 @@ public static class SchemaSynchronizer
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
 
 
+        SqlPreCommand? tableVacuum = null;
+        if (isPostgres)
+        {
+            var tables = (from table in databaseTables.Values
+                          from col in table.Columns.Values
+                          where col.IsDropped == true
+                          group col by table into g
+                          select g).ToList();
+
+            if(tables.Any())
+            {
+                tableVacuum = tables.Select(a => new SqlPreCommandSimple("-- VACUUM FULL " + a.Key.Name.ToString() + ";"))
+                    .PreAnd(new SqlPreCommandSimple("--Some tables have columns marked as dropped. Consider a VACUUM FULL outside of business hours"))
+                    .Combine(Spacing.Simple);
+
+                foreach (var item in tables)
+                {
+                    item.Key.Columns.Extract((a, diff) => diff.IsDropped);
+                }
+            }
+
+        }
+
         var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
 
         bool? considerHistory = null;
@@ -367,7 +390,14 @@ public static class SchemaSynchronizer
 
                                 mergeBoth: (cn, tabCol, difCol) =>
                                 {
-                                    if (difCol.CompatibleTypes(tabCol) && difCol.Identity == tabCol.Identity)
+                                    if ((tabCol.ComputedColumn != null || difCol.ComputedColumn != null) && !difCol.ComputedEquals(tabCol))
+                                    {
+                                        return SqlPreCommand.Combine(Spacing.Simple,
+                                            sqlBuilder.AlterTableDropColumn(tab, difCol.Name),
+                                            sqlBuilder.AlterTableAddColumn(tab, tabCol)
+                                        );
+                                    }
+                                    else if (difCol.CompatibleTypes(tabCol) && difCol.Identity == tabCol.Identity)
                                     {
                                         var columnEquals = difCol.ColumnEquals(tabCol, ignorePrimaryKey: true, ignoreIdentity: false, ignoreGenerateAlways: true);
                                         var defaultEquals = difCol.DefaultEquals(tabCol);
@@ -636,6 +666,7 @@ public static class SchemaSynchronizer
                 );
 
             return SqlPreCommand.Combine(Spacing.Triple,
+                tableVacuum,
                 preRenameColumns,
                 createFullTextCatallogs,
                 createPartitionFunction,
@@ -810,7 +841,7 @@ JOIN {tm.BackReference.ReferenceTable.Name} e on mle.{tm.BackReference.Name} = e
 
             return SqlPreCommand.Combine(Spacing.Simple,
                 sqlBuilder.AlterTableAddColumn(table, column, tempDefault),
-                column.GeneratedAlways != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
+                column.ComputedColumn != null || column.GetGeneratedAlwaysType() != GeneratedAlwaysType.None ? null :
                 sqlBuilder.IsPostgres ?
                 sqlBuilder.AlterTableAlterColumnDropDefault(table.Name, column.Name) :
                 sqlBuilder.AlterTableDropConstraint(table.Name, tempDefault.Name))!;

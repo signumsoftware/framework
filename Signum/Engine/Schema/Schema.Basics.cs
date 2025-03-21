@@ -110,7 +110,7 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
-        GeneratedAlways? IColumn.GeneratedAlways => null;
+        ComputedColumn? IColumn.ComputedColumn => null;
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -146,7 +146,7 @@ public class SystemVersionedInfo
         public bool Identity => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
-        GeneratedAlways? IColumn.GeneratedAlways => null;
+        ComputedColumn? IColumn.ComputedColumn => null;
         public int? Size => null;
         public byte? Precision => null;
         public byte? Scale => null;
@@ -521,7 +521,7 @@ public partial interface IColumn
     bool IdentityBehaviour { get; }
     bool Identity { get; }
     string? Default { get; }
-    GeneratedAlways? GeneratedAlways { get; }
+    ComputedColumn? ComputedColumn { get; }
     string? Check { get; }
     int? Size { get; }
     byte? Precision { get; }
@@ -531,9 +531,9 @@ public partial interface IColumn
     bool AvoidForeignKey { get; }
 }
 
-public struct GeneratedAlways
+public struct ComputedColumn
 {
-    public GeneratedAlways(string expression, bool persisted)
+    public ComputedColumn(string expression, bool persisted)
     {
         Expression = expression;
         Persisted = persisted;
@@ -598,7 +598,7 @@ public partial class FieldPrimaryKey : Field, IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
-    GeneratedAlways? IColumn.GeneratedAlways => null;
+    ComputedColumn? IColumn.ComputedColumn => null;
 
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -664,7 +664,7 @@ public partial class FieldValue : Field, IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
-    GeneratedAlways? IColumn.GeneratedAlways => null;
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind { get; set; }
 
     public FieldValue(PropertyRoute route, Type? fieldType, string name)
@@ -744,7 +744,7 @@ public partial class FieldEmbedded : Field, IFieldFinder
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
-        GeneratedAlways? IColumn.GeneratedAlways => null;
+        ComputedColumn? IColumn.ComputedColumn => null;
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
         public EmbeddedHasValueColumn(string name)
@@ -1024,7 +1024,7 @@ public partial class FieldReference : Field, IColumn, IFieldReference
     public bool AvoidExpandOnRetrieving { get; set; }
     public string? Default { get; set; }
     public string? Check { get; set; }
-    GeneratedAlways? IColumn.GeneratedAlways => null;
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public FieldReference(PropertyRoute route, Type? fieldType, string name, Table referenceTable) : base(route, fieldType)
@@ -1282,7 +1282,7 @@ public partial class ImplementationColumn : IColumn
     public bool AvoidForeignKey { get; set; }
     public string? Default { get; set; }
     public string? Check { get; set; }
-    GeneratedAlways? IColumn.GeneratedAlways => null;
+    ComputedColumn? IColumn.ComputedColumn => null;
     public Type? CustomLiteModelType { get; internal set; }
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
@@ -1316,7 +1316,7 @@ public partial class ImplementedByAllIdColumn : IColumn
     public bool AvoidForeignKey => false;
     public string? Default { get; set; }
     public string? Check { get; set; }
-    GeneratedAlways? IColumn.GeneratedAlways => null;
+    ComputedColumn? IColumn.ComputedColumn => null;
     public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
     public ImplementedByAllIdColumn(string name, Type type, AbstractDbType dbType)
@@ -1420,7 +1420,7 @@ public partial class TableMList : ITable, IFieldFinder, ITablePrivate
         public bool AvoidForeignKey => false;
         public string? Default { get; set; }
         public string? Check { get; set; }
-        GeneratedAlways? IColumn.GeneratedAlways => null;
+        ComputedColumn? IColumn.ComputedColumn => null;
         public DateTimeKind DateTimeKind => DateTimeKind.Unspecified;
 
 

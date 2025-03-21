@@ -249,7 +249,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         string fullType = GetColumnType(c);
 
         var generatedAlways =
-            c.GeneratedAlways is { } ga ? (isPostgres ?
+            c.ComputedColumn is { } ga ? (isPostgres ?
                 $"GENERATED ALWAYS AS ({ga.Expression}) {(ga.Persisted ? "STORED" : null)}":
                 $"AS ({ga.Expression}) {((ga.Persisted ? " PERSISTED" : null))}") :
             c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion ? $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? "START" : "END")} HIDDEN" :
