@@ -54,6 +54,7 @@ public static class PostgresCatalogSchema
 
                          Columns = (from c in t.Attributes()
                                     let def = c.AttrDef()
+                                    where !c.attisdropped
                                     select new DiffColumn
                                     {
                                         Name = c.attname,
@@ -65,7 +66,6 @@ public static class PostgresCatalogSchema
                                         Precision = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 >> 16 & 65535 : 0,
                                         Scale = c.atttypid == 1700  /*numeric*/ ? c.atttypmod - 4 & 65535 : 0,
                                         Identity = c.attidentity == 'a',
-                                        IsDropped = c.attisdropped,
                                         
                                         GeneratedAlwaysType = GeneratedAlwaysType.None,
                                         ComputedColumn = def != null && c.attgenerated == 's' ? new DiffComputedColumn

@@ -302,7 +302,6 @@ public class DiffColumn
     public int Length;
     public int Precision;
     public int Scale;
-    public bool IsDropped;
     public bool Identity;
     public bool PrimaryKey;
 
