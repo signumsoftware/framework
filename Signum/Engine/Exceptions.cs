@@ -2,6 +2,8 @@ using System.Text.RegularExpressions;
 using Signum.Engine.Maps;
 using System.Collections.Concurrent;
 using Signum.Utilities.Reflection;
+using Npgsql;
+using System.Globalization;
 
 namespace Signum.Engine;
 
@@ -25,105 +27,132 @@ public class UniqueKeyException : ApplicationException
 
     public UniqueKeyException(Exception inner) : base(null, inner)
     {
-        foreach (var rx in regexes)
+        if (inner is PostgresException pg)
         {
-            Match m = rx.Match(inner.Message);
-            if (m.Success)
+            TableName = new ObjectName(new SchemaName(null, pg.SchemaName!, true), pg.TableName!, true).ToString();
+            IndexName = pg.ConstraintName;
+            Table = FindTable(TableName);
+            if(Table != null && IndexName != null)
             {
-                TableName = m.Groups["table"].Value;
-                IndexName = m.Groups["index"].Value;
-                Values = m.Groups["value"].Value;
-
-                Table = cachedTables.GetOrAdd(TableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
-
-                if (Table != null)
+                (TableIndex index, List<PropertyInfo> properties)? tuple = GetIndexInfo(Table, IndexName);
+                if(tuple != null)
                 {
-                    var tuple = cachedLookups.GetOrAdd((Table, IndexName), tup =>
+                    Index = tuple.Value.index;
+                    Properties = tuple.Value.properties;
+                }
+            }
+        }
+        else
+        {
+            foreach (var rx in regexes)
+            {
+                Match m = rx.Match(inner.Message);
+                if (m.Success)
+                {
+                    TableName = m.Groups["table"].Value;
+                    IndexName = m.Groups["index"].Value;
+                    Values = m.Groups["value"].Value;
+                    Table = FindTable(TableName);
+
+                    if (Table != null && IndexName != null)
                     {
-                        var index = tup.table.AllIndexes().FirstOrDefault(ix => ix.Unique == true && ix.IndexName == tup.indexName);
+                        (TableIndex index, List<PropertyInfo> properties)? tuple = GetIndexInfo(Table, IndexName);
 
-                        if (index == null)
-                            return null;
-
-                        var properties = (from f in tup.table.Fields.Values
-                                          let cols = f.Field.Columns()
-                                          where cols.Any() && cols.All(c => index.Columns.Contains(c))
-                                          select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
-
-                        if (properties.IsEmpty())
-                            return null;
-
-                        return (index, properties);
-                    });
-
-                    if (tuple != null)
-                    {
-                        Index = tuple.Value.index;
-                        Properties = tuple.Value.properties;
-
-                        try
+                        if (tuple != null)
                         {
-                            var values = Values.Split(", ");
+                            Index = tuple.Value.index;
+                            Properties = tuple.Value.properties;
 
-                            if (values.Length == Index.Columns.Length)
+                            try
                             {
-                                var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
+                                var values = Values.Split(", ");
 
-                                HumanValues = Properties.Select(p =>
+                                if (values.Length == Index.Columns.Length)
                                 {
-                                    var f = Table.GetField(p);
-                                    if (f is FieldValue fv)
-                                        return colValues.GetOrThrow(fv);
+                                    var colValues = Index.Columns.Zip(values).ToDictionary(a => a.First, a => a.Second == "<NULL>" ? null : a.Second.Trim().Trim('\''));
 
-                                    if (f is FieldEnum fe)
-                                        return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
-
-                                    if (f is FieldReference fr)
+                                    HumanValues = Properties.Select(p =>
                                     {
-                                        var id = colValues.GetOrThrow(fr);
-                                        if (id == null)
-                                            return null;
+                                        var f = Table.GetField(p);
+                                        if (f is FieldValue fv)
+                                            return colValues.GetOrThrow(fv);
 
-                                        var type = fr.FieldType.CleanType();
+                                        if (f is FieldEnum fe)
+                                            return colValues.GetOrThrow(fe)?.Let(a => ReflectionTools.ChangeType(a, fe.Type));
 
-                                        return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
-                                    } 
+                                        if (f is FieldReference fr)
+                                        {
+                                            var id = colValues.GetOrThrow(fr);
+                                            if (id == null)
+                                                return null;
 
-                                    if (f is FieldImplementedBy ib)
-                                    {
-                                        var imp = ib.ImplementationColumns.SingleOrDefault(ic => colValues.TryGetCN(ic.Value) != null);
-                                        if (imp.Key == null)
-                                            return null;
+                                            var type = fr.FieldType.CleanType();
 
-                                        return Database.RetrieveLite(imp.Key, PrimaryKey.Parse(colValues.GetOrThrow(imp.Value)!, imp.Key));
-                                    }
+                                            return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
+                                        }
 
-                                    if (f is FieldImplementedByAll iba)
-                                    {
-                                        var typeId = colValues.GetOrThrow(iba.TypeColumn);
-                                        if (typeId == null)
-                                            return null;
+                                        if (f is FieldImplementedBy ib)
+                                        {
+                                            var imp = ib.ImplementationColumns.SingleOrDefault(ic => colValues.TryGetCN(ic.Value) != null);
+                                            if (imp.Key == null)
+                                                return null;
 
-                                        var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
+                                            return Database.RetrieveLite(imp.Key, PrimaryKey.Parse(colValues.GetOrThrow(imp.Value)!, imp.Key));
+                                        }
 
-                                        var id = iba.IdColumns.Values.Select(c => colValues.GetOrThrow(c)).NotNull().Single();
+                                        if (f is FieldImplementedByAll iba)
+                                        {
+                                            var typeId = colValues.GetOrThrow(iba.TypeColumn);
+                                            if (typeId == null)
+                                                return null;
 
-                                        return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
-                                    }
-                                    throw new UnexpectedValueException(f);
-                                }).ToArray();
+                                            var type = TypeLogic.IdToType.GetOrThrow(PrimaryKey.Parse(typeId, typeof(TypeEntity)));
+
+                                            var id = iba.IdColumns.Values.Select(c => colValues.GetOrThrow(c)).NotNull().Single();
+
+                                            return Database.RetrieveLite(type, PrimaryKey.Parse(id, type));
+                                        }
+                                        throw new UnexpectedValueException(f);
+                                    }).ToArray();
+                                }
+
+                            }
+                            catch
+                            {
+                                //
                             }
 
                         }
-                        catch
-                        {
-                            //
-                        }
-
                     }
                 }
             }
         }
+    }
+
+    private Table? FindTable(string tableName)
+    {
+        return cachedTables.GetOrAdd(tableName, tn => Schema.Current.Tables.Values.FirstOrDefault(t => t.Name.ToString() == tn));
+    }
+
+    private (TableIndex index, List<PropertyInfo> properties)? GetIndexInfo(Table table, string indexName)
+    {
+        return cachedLookups.GetOrAdd((table, indexName), tup =>
+        {
+            var index = tup.table.AllIndexes().FirstOrDefault(ix => ix.Unique == true && ix.IndexName == tup.indexName);
+
+            if (index == null)
+                return null;
+
+            var properties = (from f in tup.table.Fields.Values
+                              let cols = f.Field.Columns()
+                              where cols.Any() && cols.All(c => index.Columns.Contains(c))
+                              select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().ToList();
+
+            if (properties.IsEmpty())
+                return null;
+
+            return (index, properties);
+        });
     }
 
     static ConcurrentDictionary<string, Table?> cachedTables = new ConcurrentDictionary<string, Table?>();
@@ -137,8 +166,15 @@ public class UniqueKeyException : ApplicationException
             if (Table == null)
                 return InnerException!.Message;
 
-            return EngineMessage.TheresAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table?.Type.GetGender()).FormatWith(
-                Table == null ? TableName : Table.Type.NiceName(),
+            if(Values == null && HumanValues == null)
+                return EngineMessage.ThereIsAlreadyA0WithTheSame1_G.NiceToString().ForGenderAndNumber(Table.Type.GetGender()).FormatWith(
+                Table.Type.NiceName(),
+                Index == null ? IndexName :
+                Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
+                Index.Columns.CommaAnd(c => c.Name));
+
+            return EngineMessage.ThereIsAlreadyA0With1EqualsTo2_G.NiceToString().ForGenderAndNumber(Table.Type.GetGender()).FormatWith(
+                Table.Type.NiceName(),
                 Index == null ? IndexName :
                 Properties != null ? Properties!.CommaAnd(p => p.NiceName()) :
                 Index.Columns.CommaAnd(c => c.Name),
@@ -162,7 +198,7 @@ public class ForeignKeyException : ApplicationException
 
     public bool IsInsert { get; private set; }
 
-    static Regex indexRegex = new Regex(@"['""»]FK_(?<parts>.+?)['""«]");
+    static Regex indexRegex = new Regex(@"['""»][FK_](?<parts>.+?)['""«]", RegexOptions.IgnoreCase);
 
     static Regex referedTable = new Regex(@"table ""(?<referedTable>.+?)""");
 
@@ -172,12 +208,21 @@ public class ForeignKeyException : ApplicationException
 
         if (m.Success)
         {
+            
             var parts = m.Groups["parts"].Value.Split("_");
 
             for (int i = 1; i < parts.Length; i++)
             {
-                TableName = parts.Take(i).ToString("_");
-                ColumnName = parts.Skip(i).ToString("_");
+                if (inner is PostgresException pg)
+                {
+                    TableName = pg.TableName!;
+                    ColumnName = pg.ConstraintName!.After($"fk_{pg.TableName}_");
+                }
+                else
+                {
+                    TableName = parts.Take(i).ToString("_");
+                    ColumnName = parts.Skip(i).ToString("_");
+                }
 
                 var table = Schema.Current.GetDatabaseTables().FirstOrDefault(table => table.Name.Name == TableName);
 
@@ -185,14 +230,14 @@ public class ForeignKeyException : ApplicationException
                 {
                     var column = tmle.Columns.TryGetC(ColumnName);
                     TableType = tmle.BackReference.ReferenceTable.Type;
-                    PropertyInfo = 
+                    PropertyInfo =
                          tmle.Field == column ? tmle.PropertyRoute.PropertyInfo :
                          tmle.Field is FieldEmbedded fe ?
                          (from f in fe.EmbeddedFields.Values
                           where f.Field.Columns().Contains(column)
                           select Reflector.TryFindPropertyInfo(f.FieldInfo)).NotNull().FirstOrDefault() :
                           null;
-                         
+
                     break;
                 }
                 else if (table is Table t)

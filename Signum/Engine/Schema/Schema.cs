@@ -6,6 +6,7 @@ using Signum.Engine.Sync;
 using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using System.Data;
+using static Signum.Engine.Maps.FullTextTableIndex;
 
 namespace Signum.Engine.Maps;
 
@@ -819,7 +820,7 @@ public class Schema : IImplementationsFinder
             (ITable)Table(route.RootType) :
             (ITable)((FieldMList)Field(mlistPr.Parent!)).TableMList;
 
-        return table.MultiColumnIndexes != null && table.MultiColumnIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
+        return table.AdditionalIndexes != null && table.AdditionalIndexes.Any(index => index.Columns.Any(c => cols.Contains(c)));
     }
 
     public override string ToString()
@@ -867,7 +868,7 @@ public class Schema : IImplementationsFinder
         if (table == null)
             return false;
 
-        var fullTextIndex = table.MultiColumnIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
+        var fullTextIndex = table.AdditionalIndexes?.OfType<FullTextTableIndex>().SingleOrDefaultEx();
 
         if (fullTextIndex == null)
             return false;

@@ -4,6 +4,8 @@ using Signum.Utilities.DataStructures;
 using System.Data.Common;
 using System.Collections.Concurrent;
 using Signum.Engine.Sync;
+using NpgsqlTypes;
+using Signum.Engine.Linq;
 
 namespace Signum.Engine.Maps;
 
@@ -1430,6 +1432,13 @@ public partial class TableMList
         }
 
         return result;
+    }
+
+    internal ColumnExpression GetTsVectorColumn(Alias tableAlias, string columnName)
+    {
+        var column = (PostgresTsVectorColumn)this.Columns.GetOrThrow(columnName) ;
+
+        return new ColumnExpression(typeof(NpgsqlTsVector), tableAlias, column.Name);
     }
 }
 

@@ -1,50 +1,58 @@
 using System.Data;
 using System.Diagnostics;
 using System.Threading;
+using Xunit.Sdk;
 
 namespace Signum.Test.LinqProvider;
 
-public class FullTextSearchTest
+
+public class FullTextSearchTest_SqlServer
 {
-    public FullTextSearchTest()
+    public FullTextSearchTest_SqlServer()
     {
         MusicStarter.StartAndLoad();
 
         WaitForFullTextIndex();
 
         Connector.CurrentLogger = new DebugTextWriter();
+
+        if(!(Connector.Current is SqlServerConnector con))
+            throw SkipException.ForSkip("Skipping tests because not SQL Server.");
+
+        if(!con.SupportsFullTextSearch)
+            throw SkipException.ForSkip("Skipping tests because Full Text Search is not enabled.");
     }
 
     void WaitForFullTextIndex()
     {
-        for (int i = 0; i < 10; i++)
+        if (Connector.Current is SqlServerConnector s && s.SupportsFullTextSearch)
         {
-            var t = Executor.ExecuteDataTable(@"
+            for (int i = 0; i < 10; i++)
+            {
+                var t = Executor.ExecuteDataTable(@"
 SELECT
     FULLTEXTCATALOGPROPERTY(cat.name,'MergeStatus') AS [MergeStatus],
     FULLTEXTCATALOGPROPERTY(cat.name,'PopulateStatus') AS [PopulateStatus],
     FULLTEXTCATALOGPROPERTY(cat.name,'ImportStatus') AS [ImportStatus]
 FROM sys.fulltext_catalogs AS cat
 ");
-            var pending = t.Rows.Cast<DataRow>().Any(r => t.Columns.Cast<DataColumn>().Any(c => ((int)r[c]) != 0));
+                var pending = t.Rows.Cast<DataRow>().Any(r => t.Columns.Cast<DataColumn>().Any(c => ((int)r[c]) != 0));
 
-            if (!pending)
-                return;
+                if (!pending)
+                    return;
 
-            Debug.WriteLine("Waiting for FullText Catallog...");
+                Debug.WriteLine("Waiting for FullText Catallog...");
 
-            Thread.Sleep(500);
+                Thread.Sleep(500);
+            }
         }
     }
 
     [Fact]
     public void Contains()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from note1 in Database.Query<NoteWithDateEntity>()
-                   where FullTextSearch.Contains(new[] { note1.Text }, "american AND band")
+                   where FullTextSearch.Contains(new[] { note1.Title }, "american AND band")
                    select note1.Id).ToList();
 
         Assert.True(res.Count == 1);
@@ -53,9 +61,6 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void Contains_AllColumns()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from note1 in Database.Query<NoteWithDateEntity>()
                    where FullTextSearch.Contains(note1, "american AND band")
                    select note1.Id).ToList();
@@ -67,12 +72,9 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void Contains_TwoTables()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from note1 in Database.Query<NoteWithDateEntity>()
                    from note2 in Database.Query<NoteWithDateEntity>()
-                   where FullTextSearch.Contains(new[] { note1.Text }, "american AND band")
+                   where FullTextSearch.Contains(new[] { note1.Title }, "american AND band")
                    select note1.Id).ToList();
 
         Assert.True(res.Count > 1);
@@ -81,14 +83,11 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void Contains_TwoTables_Wrong()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         Assert.Throws<InvalidOperationException>(() =>
         {
             var res = (from note1 in Database.Query<NoteWithDateEntity>()
                        from note2 in Database.Query<NoteWithDateEntity>()
-                       where FullTextSearch.Contains(new[] { note1.Text, note2.Text }, "american AND band")
+                       where FullTextSearch.Contains(new[] { note1.Title, note2.Title }, "american AND band")
                        select note1.Id).ToList();
         });
     }
@@ -96,13 +95,10 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void Contains_TwoTables_Right()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from note1 in Database.Query<NoteWithDateEntity>()
                    from note2 in Database.Query<NoteWithDateEntity>()
-                   where FullTextSearch.Contains(new[] { note1.Text }, "american AND band") &&
-                   FullTextSearch.Contains(new[] { note2.Text }, "blue AND angel")
+                   where FullTextSearch.Contains(new[] { note1.Title }, "american AND band") &&
+                   FullTextSearch.Contains(new[] { note2.Title }, "blue AND angel")
                    select new { Id1 = note1.Id, Id2 = note2.Id }).ToList();
 
         Assert.True(res.Count == 1);
@@ -111,11 +107,8 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void FreeText()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from note1 in Database.Query<NoteWithDateEntity>()
-                   where FullTextSearch.FreeText(new[] { note1.Text }, "American band")
+                   where FullTextSearch.FreeText(new[] { note1.Title }, "American band")
                    select note1.Id).ToList();
 
         Assert.True(res.Count == 2);
@@ -126,9 +119,6 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void ContainsTable()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from r in FullTextSearch.ContainsTable<NoteWithDateEntity>(null, "american AND band", 5)
                    select new { r.Key, r.Rank }).ToList();
 
@@ -138,9 +128,6 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void ContainsTable_Join()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from r in Database.Query<NoteWithDateEntity>()
                    join ft in FullTextSearch.ContainsTable<NoteWithDateEntity>(null, "american AND band", 5)
                    on r.Id equals ft.Key
@@ -154,9 +141,6 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void FreeTextTable()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from r in FullTextSearch.FreeTextTable<NoteWithDateEntity>(null, "american band", 5)
                    select new { r.Key, r.Rank }).ToList();
 
@@ -167,9 +151,6 @@ FROM sys.fulltext_catalogs AS cat
     [Fact]
     public void FreeTextTable_Join()
     {
-        if (!Connector.Current.SupportsFullTextSearch)
-            return;
-
         var res = (from r in Database.Query<NoteWithDateEntity>()
                    join ft in FullTextSearch.FreeTextTable<NoteWithDateEntity>(null, "american band", 5)
                    on r.Id equals ft.Key

@@ -2,6 +2,7 @@ using Signum.Utilities.Reflection;
 using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using Signum.Engine.Maps;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -254,7 +255,9 @@ public abstract class QueryToken : IEquatable<QueryToken>
                     (options & SubTokensOptions.CanManual) != 0 ? new QuickLinksToken(this) : null,
                 }
                 .NotNull()
-                .Concat(EntityProperties(onlyType)).ToList().AndHasValue(this);
+                .Concat(EntityProperties(onlyType))
+                //.Concat(TsVectorColumns(onlyType))
+                .ToList().AndHasValue(this);
             }
 
             return implementations.Value.Types.Select(t => (QueryToken)new AsTypeToken(this, t)).PreAnd(new EntityTypeToken(this)).ToList().AndHasValue(this);

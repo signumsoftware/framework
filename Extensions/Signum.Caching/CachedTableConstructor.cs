@@ -59,7 +59,8 @@ internal class CachedTableConstructor
         var defaultKind = Schema.Current.TimeZoneMode == TimeZoneMode.Utc ? DateTimeKind.Utc : DateTimeKind.Local;
 
         var tupleConstructor = TupleReflection.TupleChainConstructor(
-            columns.Select((c, i) =>
+            columns
+            .Select((c, i) =>
             {
                 DateTimeKind kind = DateTimeKind.Unspecified;
 

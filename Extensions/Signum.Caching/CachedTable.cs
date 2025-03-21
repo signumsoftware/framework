@@ -4,6 +4,7 @@ using System.Data;
 using Signum.Engine.Sync;
 using System.Collections.Frozen;
 using System.Linq;
+using static Signum.Engine.Maps.FullTextTableIndex;
 
 namespace Signum.Cache;
 
@@ -33,7 +34,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
     {
         this.table = Schema.Current.Table(typeof(T));
 
-        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.ToList());
+        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.Where(ShouldBeCached).ToList());
         var isPostgres = Schema.Current.Settings.IsPostgres;
         //Query
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))

@@ -6,6 +6,7 @@
 		<RootNamespace>Signum</RootNamespace>
 		<OutputType>Library</OutputType>
 		<NoWarn>8618</NoWarn>
+		<UserSecretsId>4236b9c6-a674-4f4f-8ce6-6a591967257e</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 	  <TypeScriptCompile Remove="node_modules\**" />
@@ -19,10 +20,10 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
 		<PackageReference Include="Microsoft.SqlServer.Types" Version="160.1000.6" />
-		<PackageReference Include="Npgsql" Version="9.0.2" />
+		<PackageReference Include="Npgsql" Version="9.0.3" />
 		<PackageReference Include="Signum.Analyzer" Version="3.2.0" />
 		<PackageReference Include="Signum.MSBuildTask" Version="9.0.0" />
-		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.7.1">
+		<PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>

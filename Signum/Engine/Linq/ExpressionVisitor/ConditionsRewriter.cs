@@ -365,6 +365,22 @@ internal class ConditionsRewriter: DbExpressionVisitor
         return new OrderExpression(o.OrderType, e);
     }
 
+    protected internal override Expression VisitInsertSelect(InsertSelectExpression insertSelect)
+    {
+        var source = (SourceWithAliasExpression)VisitSource(insertSelect.Source);
+       
+        var assigments = Visit(insertSelect.Assigments, c =>
+        {
+            var exp = MakeSqlValue(Visit(c.Expression));
+            if (exp != c.Expression)
+                return new ColumnAssignment(c.Column, exp);
+            return c;
+        });
+        if (source != insertSelect.Source ||  assigments != insertSelect.Assigments)
+            return new InsertSelectExpression(insertSelect.Table, insertSelect.UseHistoryTable, source, assigments, insertSelect.ReturnRowCount);
+        return insertSelect;
+    }
+
     protected internal override Expression VisitUpdate(UpdateExpression update)
     {
         var source = Visit(update.Source);

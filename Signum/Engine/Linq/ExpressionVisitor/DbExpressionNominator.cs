@@ -2,12 +2,14 @@ using Microsoft.SqlServer.Server;
 using Microsoft.SqlServer.Types;
 using NpgsqlTypes;
 using Signum.Engine.Maps;
+using Signum.Entities.TsVector;
 using Signum.Utilities.Reflection;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Signum.Engine.Linq;
@@ -1904,8 +1906,78 @@ internal class DbExpressionNominator : DbExpressionVisitor
 
                     return base.VisitMethodCall(m);
                 }
+
+            case "TsVectorExtensions.ToTsQuery": 
+            case "TsVectorExtensions.ToTsQuery_Plain": 
+            case "TsVectorExtensions.ToTsQuery_Phrase": 
+            case "TsVectorExtensions.ToTsQuery_WebSearch": 
+                return CreateTsQuery(m);
+
+
+            case "TsVectorExtensions.Matches":
+                return TrySqlFunction(null, PostgressOperator.Matches, typeof(bool), m.GetArgument("vector"), m.GetArgument("query"));
+
+            case "TsVectorExtensions.Rank":
+            case "TsVectorExtensions.RankCoverDensity":
+                return CreateRank(m);
+
             default: return null;
         }
+    }
+
+    private Expression? CreateRank(MethodCallExpression m)
+    {
+        if (!this.isPostgres)
+            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+
+        var method = m.Method.Name switch
+        {
+            "Rank" => PostgresFunction.ts_rank,
+            "RankCoverDensity" => PostgresFunction.ts_rank_cd,
+            _ => throw new UnexpectedValueException(m.Method.Name)
+        };
+
+        var vector = Visit(m.GetArgument("vector"));
+        var query = Visit(m.GetArgument("query"));
+
+        var normalization = m.TryGetArgument("normalization");
+        if (normalization != null)
+        {
+            var norm = (TsRankingNormalization)((ConstantExpression)normalization).Value!;
+            normalization = new SqlConstantExpression((int)norm);
+        }
+       
+        var weights =  m.TryGetArgument("weights");
+        if (weights != null)
+        {
+            var wei = (float[])((ConstantExpression)weights).Value!;
+            weights = new SqlLiteralExpression(typeof(float[]), $"ARRAY[{wei.ToString(w => w.ToString("0.00", CultureInfo.InvariantCulture), ", ")}]");
+        }
+
+        return Add(method.CallExpression<float>(new Expression?[] { weights, vector, query, normalization }.NotNull().ToArray()));
+    }
+
+    private Expression? CreateTsQuery(MethodCallExpression m)
+    {
+        if (!this.isPostgres)
+            throw new InvalidOperationException($"The method {m.Method.DeclaringType!.TypeName()}.{m.Method.Name} can only be called with a " + nameof(PostgreSqlConnector));
+
+        var method = m.Method.Name switch
+        {
+            "ToTsQuery" => PostgresFunction.to_tsquery,
+            "ToTsQuery_Plain" => PostgresFunction.plainto_tsquery,
+            "ToTsQuery_Phrase" => PostgresFunction.phraseto_tsquery,
+            "ToTsQuery_WebSearch" => PostgresFunction.websearch_to_tsquery,
+            _ => throw new UnexpectedValueException(m.Method.Name)
+        };
+
+        var value = Visit(m.GetArgument("value"));
+        var config = Visit(m.TryGetArgument("config"));
+
+        if(config == null)
+            return Add(method.CallExpression<NpgsqlTsQuery>(value));
+
+        return Add(method.CallExpression<NpgsqlTsQuery>(value, config));
     }
 
     static MethodInfo miFakeAdd = ReflectionTools.GetMethodInfo(() => FakeAdd(SqlHierarchyId.Null, SqlHierarchyId.Null));

@@ -240,8 +240,11 @@ internal class QueryFormatter : DbExpressionVisitor
             if (i > 0)
                 sb.Append(", ");
             this.Visit(exp.Expression);
-            if (exp.OrderType != OrderType.Ascending)
-                sb.Append(" DESC");
+
+            if (exp.OrderType == OrderType.Ascending)
+                sb.Append(isPostgres ? " NULLS FIRST" : "");
+            else
+                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
         }
         sb.Append(')');
         return rowNumber;
@@ -546,10 +549,10 @@ internal class QueryFormatter : DbExpressionVisitor
                 sb.Append(", ");
             }
             this.Visit(exp.Expression);
-            if (exp.OrderType != OrderType.Ascending)
-            {
-                sb.Append(" DESC");
-            }
+            if (exp.OrderType == OrderType.Ascending)
+                sb.Append(isPostgres ? " NULLS FIRST" : "");
+            else
+                sb.Append(isPostgres ? " DESC NULLS LAST" : " DESC");
         }
     }
 

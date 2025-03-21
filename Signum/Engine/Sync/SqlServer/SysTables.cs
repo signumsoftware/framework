@@ -219,6 +219,16 @@ public class SysDefaultConstraints : IView
     public bool is_system_named;
 }
 
+[TableName("sys.computed_columns ")]
+public class SysComputedColumn : IView
+{
+    public string name;
+    public int object_id;
+    public int column_id;
+    public string definition;
+    public bool is_persisted;
+}
+
 [TableName("sys.check_constraints")]
 public class SysCheckConstraints : IView
 {

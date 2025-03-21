@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Identity.Client;
+using NpgsqlTypes;
 using Signum.Engine.Sync;
 using Signum.Entities.Reflection;
 using Signum.Utilities.DataStructures;
@@ -54,18 +55,19 @@ public class TableIndex
 
         var isPostgres = tableName.IsPostgres;
 
-        if (Unique)
-            return StringHashEncoder.ChopHash((isPostgres ? "uix_{0}_{1}" :  "UIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        var prefix = Unique ? "UIX" : Clustered ? "CIX" : "IX";
 
-        if (Clustered)
-            return StringHashEncoder.ChopHash((isPostgres ? "cix_{0}_{1}" : "CIX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        if (isPostgres)
+            prefix = prefix.ToLower();
 
-        return StringHashEncoder.ChopHash((isPostgres ? "ix_{0}_{1}" : "IX_{0}_{1}").FormatWith(tableName.Name, ColumnSignature()), maxLength) + WhereSignature();
+        return StringHashEncoder.ChopHash($"{prefix}_{tableName.Name}_{ColumnSignature()}", maxLength, isPostgres) + WhereSignature();
     }
 
     internal static string GetPrimaryKeyName(ObjectName tableName)
     {
-        return StringHashEncoder.ChopHash((tableName.IsPostgres ? "pk_" : "PK_") + tableName.Schema.Name + "_" + tableName.Name, MaxNameLength());
+        var prefix = tableName.IsPostgres ? "pk" : "PK";
+
+        return StringHashEncoder.ChopHash($"{prefix}_{tableName.Schema.Name}_{tableName.Name}", MaxNameLength(), tableName.IsPostgres);
     }
 
     protected static int MaxNameLength()
@@ -87,7 +89,7 @@ public class TableIndex
         if (string.IsNullOrEmpty(Where) && includeColumns == null)
             return null;
 
-        return "__" + StringHashEncoder.Codify(Where + includeColumns);
+        return "__" + StringHashEncoder.Codify(Where + includeColumns, this.Table.Name.IsPostgres);
     }
 
     public string? ViewName
@@ -105,7 +107,9 @@ public class TableIndex
 
             var maxSize = MaxNameLength();
 
-            return StringHashEncoder.ChopHash((this.Table.Name.IsPostgres ? "vix_{0}_{1}" : "VIX_{0}_{1}").FormatWith(Table.Name.Name, ColumnSignature()), maxSize) + WhereSignature();
+            var prefix = this.Table.Name.IsPostgres ? "vix" : "VIX";
+
+            return StringHashEncoder.ChopHash($"{prefix}_{Table.Name.Name}_{ColumnSignature()}", maxSize, this.Table.Name.IsPostgres) + WhereSignature();
         }
     }
 
@@ -124,23 +128,106 @@ public class TableIndex
 
 public class FullTextTableIndex : TableIndex
 {
-    public Dictionary<IColumn, int> Language = new Dictionary<IColumn, int>();
+    public class SqlServerOptions
+    {
+        public string CatallogName = "DefaultFullTextCatallog";
 
-    public string CatallogName = "DefaultFullTextCatallog";
+        public FullTextIndexChangeTracking? ChangeTraking;
+        public string? StoplistName;
+        public string? PropertyListName;
 
-    public FullTextIndexChangeTracking? ChangeTraking;
-    public string? StoplistName;
-    public string? PropertyListName;
+        public static readonly string FULL_TEXT = "FULL_TEXT_INDEX";
+    }
 
-    public static readonly string FULL_TEXT = "FULL_TEXT_INDEX";
+    public class PostgresOptions
+    {
+        public string TsVectorColumnName = PostgresTsVectorColumn.DefaultTsVectorColumn;
+        public string Configuration = Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+
+        public Dictionary<string, NpgsqlTsVector.Lexeme.Weight> Weights = new Dictionary<string, NpgsqlTsVector.Lexeme.Weight>(); //If not set it will use the order A, B, C, D, D, D...
+        internal void DefaultWeights(IColumn[] columns)
+        {
+            var defaultWeight = NpgsqlTsVector.Lexeme.Weight.A;
+            foreach (var c in columns)
+            {
+                if (!Weights.ContainsKey(c.Name))
+                {
+                    Weights.Add(c.Name, defaultWeight);
+                }
+
+                if (defaultWeight > NpgsqlTsVector.Lexeme.Weight.D)
+                    defaultWeight--;
+            }
+        }
+    }
+
+    public SqlServerOptions SqlServer = new SqlServerOptions();
+    public PostgresOptions Postgres = new PostgresOptions();
 
     public override string GetIndexName(ObjectName tableName)
     {
-        return FULL_TEXT;
+        if (!tableName.IsPostgres)
+            return SqlServerOptions.FULL_TEXT;
+
+        return StringHashEncoder.ChopHash("ix_{0}_{1}".FormatWith(tableName.Name, ColumnSignature()), MaxNameLength(), tableName.IsPostgres);
     }
 
     public FullTextTableIndex(ITable table, IColumn[] columns) : base(table, columns)
     {
+    }
+
+    ComputedColumn GetComputedColumn()
+    {
+        var pg = this.Postgres;
+        pg.DefaultWeights(Columns);
+
+        var exp = Columns.ToString(a => $"setweight(to_tsvector('{pg.Configuration}'::regconfig, COALESCE({a.Name.SqlEscape(true)}, '')::text), '{pg.Weights.GetOrThrow(a.Name)}'::\"char\")", " || ");
+
+        return new ComputedColumn(exp, persisted: true);
+    }
+
+    protected internal IEnumerable<IColumn> GenerateColumns()
+    {
+        if (this.Table.Name.IsPostgres)
+        {
+          yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName) { ComputedColumn = this.GetComputedColumn() };
+        }
+    }
+}
+
+public class PostgresTsVectorColumn : IColumn
+{
+    public static string DefaultTsVectorColumn = "tsvector_col";
+
+
+    public PostgresTsVectorColumn(string name)
+    {
+        this.Name = name;
+    }
+
+    public string Name { get; private set; }
+
+    public IsNullable Nullable => IsNullable.Yes;
+    public AbstractDbType DbType => new AbstractDbType(NpgsqlDbType.TsVector);
+    public Type Type => typeof(NpgsqlTsVector);
+    public string? UserDefinedTypeName => null;
+    public bool PrimaryKey => false;
+    public bool IdentityBehaviour => false;
+    public bool Identity => false;
+    public string? Default => null;
+    public ComputedColumn? ComputedColumn { get; set; }
+    public string? Check => null;
+    public int? Size => null;
+    public byte? Precision => null;
+    public byte? Scale => null;
+    public string? Collation => null;
+    public Table? ReferenceTable => null;
+    public bool AvoidForeignKey => false;
+    public DateTimeKind DateTimeKind => DateTimeKind.Utc;
+
+    public override string ToString()
+    {
+        return Name;
     }
 }
 

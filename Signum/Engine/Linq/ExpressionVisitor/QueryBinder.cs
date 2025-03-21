@@ -8,6 +8,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.SqlServer.Server;
 using Signum.Engine.Sync.Postgres;
+using Signum.Entities.TsVector;
+using static Signum.Entities.SystemTime;
 
 namespace Signum.Engine.Linq;
 
@@ -1777,6 +1779,19 @@ internal class QueryBinder : ExpressionVisitor
                 throw new InvalidOperationException("No System Period found in " + source);
 
             return tablePeriod;
+        }
+
+        if (m.Method.DeclaringType == typeof(TsVectorExtensions) && m.Method.Name.StartsWith(nameof(TsVectorExtensions.GetTsVectorColumn)))
+        {
+            var colArg = m.TryGetArgument("tsVectorColumnName");
+            var colName = colArg == null ? PostgresTsVectorColumn.DefaultTsVectorColumn : (string)((ConstantExpression)colArg).Value!;
+
+            var tsVectorColumn =
+                source is EntityExpression e ? Completed(e).Let(ec => ec.Table.GetTsVectorColumn(ec.TableAlias!, colName)) :
+                source is MListElementExpression mle ? mle.Table.GetTsVectorColumn(mle.Alias, colName) :
+                throw new InvalidOperationException("Unexpected source");
+
+            return tsVectorColumn;
         }
 
         if (m.Method.DeclaringType == typeof(TypeLogic) && m.Method.Name == nameof(TypeLogic.ToTypeEntity))
@@ -3659,9 +3674,10 @@ class QueryJoinExpander : DbExpressionVisitor
                 if (this.systemTime is SystemTime.Interval inter && inter.JoinMode == SystemTimeJoinMode.FirstCompatible && tr.CompleteEntity.ExternalPeriod != null)
                 {
                     Alias newAlias = aliasGenerator.NextSelectAlias();
+                    var period = tr.CompleteEntity.ExternalPeriod!;
                     source = new JoinExpression(JoinType.OuterApply, source,
-                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal, 
-                        [new OrderExpression(OrderType.Ascending, tr.CompleteEntity.ExternalPeriod!.Min!)], null, 0),
+                        new SelectExpression(newAlias, false, top: new SqlConstantExpression(1, typeof(int)), null, tr.Table, equal,
+                        [new OrderExpression(OrderType.Ascending,  period.Min ?? new SqlFunctionExpression(period.ElementType, null, PostgresFunction.lower.ToString(), new[] { period.PostgresRange! }))], null, 0),
                         null);
                 }
                 else
