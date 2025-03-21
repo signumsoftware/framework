@@ -37,30 +37,6 @@ public static class SchemaSynchronizer
             PostgresCatalogSchema.GetDatabaseDescription(Schema.Current.DatabaseNames()) :
             SysTablesSchema.GetDatabaseDescription(s.DatabaseNames());
 
-
-        SqlPreCommand? tableVacuum = null;
-        if (isPostgres)
-        {
-            var tables = (from table in databaseTables.Values
-                          from col in table.Columns.Values
-                          where col.IsDropped == true
-                          group col by table into g
-                          select g).ToList();
-
-            if(tables.Any())
-            {
-                tableVacuum = tables.Select(a => new SqlPreCommandSimple("-- VACUUM FULL " + a.Key.Name.ToString() + ";"))
-                    .PreAnd(new SqlPreCommandSimple("--Some tables have columns marked as dropped. Consider a VACUUM FULL outside of business hours"))
-                    .Combine(Spacing.Simple);
-
-                foreach (var item in tables)
-                {
-                    item.Key.Columns.Extract((a, diff) => diff.IsDropped);
-                }
-            }
-
-        }
-
         var databaseTablesHistory = databaseTables.Extract((key, val) => val.TemporalType == SysTableTemporalType.HistoryTable);
 
         bool? considerHistory = null;
@@ -666,7 +642,6 @@ public static class SchemaSynchronizer
                 );
 
             return SqlPreCommand.Combine(Spacing.Triple,
-                tableVacuum,
                 preRenameColumns,
                 createFullTextCatallogs,
                 createPartitionFunction,
