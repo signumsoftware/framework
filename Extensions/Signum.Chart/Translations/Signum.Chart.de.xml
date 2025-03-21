@@ -270,6 +270,7 @@
   <Type Name="ChartScriptSymbol" Description="Diagrammskript" Gender="n" />
   <Type Name="ChartTimeSeriesEmbedded" Description="Zeitreihen in Diagrammen">
     <Member Name="EndDate" Description="Enddatum" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="StartDate" Description="Startdatum" />
     <Member Name="TimeSeriesMaxRowsPerStep" Description="Zeitreihe max. Zeilen pro Schritt" />
     <Member Name="TimeSeriesStep" Description="Zeitreihenschritt" />

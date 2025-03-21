@@ -56,9 +56,9 @@
     <Member Name="IncludeTrivialMerges" Description="Einschließen trivialer Zusammenführungen" />
     <Member Name="MaximumOfThe0" Description="Maximum der {0}" />
     <Member Name="MinumumOfThe0" Description="Minimum der {0}" />
+    <Member Name="NotAuthorizedTo01" Description="Nicht berechtigt zu {0} '{1}'" />
     <Member Name="NotAuthorizedTo0The1WithId2" Description="Nicht autorisiert, um die Entität {1} mit der Id {2} zu {0} " />
     <Member Name="NotAuthorizedToRetrieve0" Description="Nicht autorisiert zum Abrufen von '{0}'" />
-    <Member Name="NotAuthorizedToSave0" Description="Nicht berechtigt, '{0}' zu speichern" />
     <Member Name="Nothing" Description="Nichts" />
     <Member Name="OnlyActive" Description="Nur aktive" />
     <Member Name="SameAs0" Description="Wie {0}" />

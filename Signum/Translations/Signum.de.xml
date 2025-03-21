@@ -153,7 +153,8 @@
     <Member Name="TheEntity0IsNew" Description="Die Entität {0} ist neu" />
     <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Es gibt '{0}', die sich auf diese Entität durch die Eigenschaft '{1}' beziehen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] {2} entspricht" />
+    <Member Name="ThereIsAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit {1} gleich {2}" />
+    <Member Name="ThereIsAlreadyA0WithTheSame1_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit dem gleichen {1}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität">
@@ -215,6 +216,7 @@
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
     <Member Name="ThreadId" Description="Thread id" />
+    <Member Name="TraceId" Description="Spur-ID" />
     <Member Name="UrlReferer" Description="Referer Url" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="UserAgent" Description="User agent" />
@@ -470,6 +472,7 @@
     <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="Second" Description="Sekunde" />
     <Member Name="SecondStart" Description="Sekundenstart" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />
