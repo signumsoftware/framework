@@ -3,6 +3,7 @@ using Signum.Engine.Linq;
 using Signum.Utilities.DataStructures;
 using Signum.API;
 using System.IO;
+using System.Security.AccessControl;
 
 namespace Signum.Engine.Maps;
 
@@ -96,17 +97,13 @@ public class SchemaBuilder
         return index;
     }
 
-    public FullTextTableIndex AddFullTextIndex<T>(Expression<Func<T, object?>> fields) where T : Entity
+    public FullTextTableIndex AddFullTextIndex<T>(Expression<Func<T, object?>> fields, Action<FullTextTableIndex>? customize = null) where T : Entity
     {
         var table = Schema.Table<T>();
 
         IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
-        var index = new FullTextTableIndex(table, columns);
-
-        AddIndex(index);
-
-        return index;
+        return AddFullTextIndex(table, columns, customize);
     }
 
     public TableIndex AddUniqueIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
@@ -156,31 +153,32 @@ public class SchemaBuilder
     }
 
     public FullTextTableIndex AddFullTextIndexMList<T, V>(Expression<Func<T, MList<V>>> toMList,
-        Expression<Func<MListElement<T, V>, object>> fields)
+        Expression<Func<MListElement<T, V>, object>> fields, Action<FullTextTableIndex>? customize = null)
         where T : Entity
     {
         TableMList table = ((FieldMList)Schema.FindField(Schema.Table(typeof(T)), Reflector.GetMemberList(toMList))).TableMList;
 
         IColumn[] columns = IndexKeyColumns.Split(table, fields);
 
-        var index = new FullTextTableIndex(table, columns);
-
-        AddIndex(index);
-
-        return index;
+        return AddFullTextIndex(table, columns, customize);
     }
 
-    public FullTextTableIndex AddFullTextIndex(ITable table, Field[] fields)
+    public FullTextTableIndex AddFullTextIndex(ITable table, Field[] fields, Action<FullTextTableIndex>? customize)
     {
-        var index = new FullTextTableIndex(table, TableIndex.GetColumnsFromFields(fields));
-        AddIndex(index);
-        return index;
+        return AddFullTextIndex(table, TableIndex.GetColumnsFromFields(fields), customize);
     }
 
-    public FullTextTableIndex AddFullTextIndex(ITable table, IColumn[] columns)
+    public FullTextTableIndex AddFullTextIndex(ITable table, IColumn[] columns, Action<FullTextTableIndex>? customize)
     {
         var index = new FullTextTableIndex(table, columns);
+        customize?.Invoke(index);
         AddIndex(index);
+
+        foreach (var col in index.GenerateColumns())
+        {
+            table.Columns.Add(col.Name, col);
+        }
+
         return index;
     }
 
@@ -216,10 +214,10 @@ public class SchemaBuilder
     {
         ITable table = index.Table;
 
-        if (table.MultiColumnIndexes == null)
-            table.MultiColumnIndexes = new List<TableIndex>();
+        if (table.AdditionalIndexes == null)
+            table.AdditionalIndexes = new List<TableIndex>();
 
-        table.MultiColumnIndexes.Add(index);
+        table.AdditionalIndexes.Add(index);
     }
 
     public FluentInclude<T> Include<T>() where T : Entity
@@ -824,7 +822,7 @@ public class SchemaBuilder
     }
 
     int? maxNameLength;
-    string FixNameLength(string name) => StringHashEncoder.ChopHash(name, (maxNameLength ??= Connector.Current.MaxNameLength));
+    string FixNameLength(string name) => StringHashEncoder.ChopHash(name, (maxNameLength ??= Connector.Current.MaxNameLength), this.IsPostgres);
 
     public string Idiomatic(string name) => IsPostgres ? name.PascalToSnake() : name;
 

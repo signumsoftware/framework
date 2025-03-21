@@ -27,8 +27,7 @@ public class FluentInclude<T> where T : Entity
 
     public FluentInclude<T> WithFullTextIndex(Expression<Func<T, object?>> fields, Action<FullTextTableIndex>? customize = null)
     {
-        var result = this.SchemaBuilder.AddFullTextIndex<T>(fields);
-        customize?.Invoke(result);
+        var result = this.SchemaBuilder.AddFullTextIndex<T>(fields, customize);
         return this;
     }
 
@@ -56,8 +55,7 @@ public class FluentInclude<T> where T : Entity
     public FluentInclude<T> WithFullTextIndexMList<M>(Expression<Func<T, MList<M>>> mlist,
         Expression<Func<MListElement<T, M>, object>> fields, Action<FullTextTableIndex>? customize = null)
     {
-        var result = this.SchemaBuilder.AddFullTextIndexMList<T, M>(mlist, fields);
-        customize?.Invoke(result);
+        var result = this.SchemaBuilder.AddFullTextIndexMList<T, M>(mlist, fields, customize);
         return this;
     }
 

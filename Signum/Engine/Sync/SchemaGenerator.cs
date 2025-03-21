@@ -77,13 +77,13 @@ public static class SchemaGenerator
         if (foreignKeys != null)
             foreignKeys.GoAfter = true;
 
-        HashSet<string> fullTextSearchCatallogs = new HashSet<string>(); 
+        HashSet<string>? fullTextSearchCatallogs = sqlBuilder.IsPostgres ? null : new HashSet<string>(); 
 
         SqlPreCommand? indices = tables.Select(t =>
         {
             var allIndexes = t.AllIndexes().Where(a => !a.PrimaryKey);
 
-            fullTextSearchCatallogs.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.CatallogName));
+            fullTextSearchCatallogs?.AddRange(allIndexes.OfType<FullTextTableIndex>().Select(a => a.SqlServer.CatallogName));
 
             var mainIndices = allIndexes.Select(ix => sqlBuilder.CreateIndex(ix, checkUnique: null)).Combine(Spacing.Simple);
 
@@ -97,10 +97,10 @@ public static class SchemaGenerator
         if (indices != null)
             indices.GoAfter = true;
 
-        if (fullTextSearchCatallogs.Any() && !Connector.Current.SupportsFullTextSearch)
+        if (fullTextSearchCatallogs != null && fullTextSearchCatallogs.Any() && Connector.Current is SqlServerConnector ssc && !ssc.SupportsFullTextSearch)
             throw new InvalidOperationException("Current database does not support Full-Text Search");
 
-        var catallogs = fullTextSearchCatallogs.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
+        var catallogs = fullTextSearchCatallogs?.Select(a => sqlBuilder.CreateFullTextCatallog(a)).Combine(Spacing.Simple);
         if (catallogs != null)
             catallogs.GoAfter = true;
 

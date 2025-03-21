@@ -99,8 +99,12 @@ public enum EngineMessage
     ThereAreRecordsIn0PointingToThisTableByColumn1,
     [Description("Unauthorized access to {0} because {1}")]
     UnauthorizedAccessTo0Because1,
+
+
+    [Description("There is already a {0} with the same {1}")]
+    ThereIsAlreadyA0WithTheSame1_G,
     [Description("There is already a {0} with {1} equals to {2}")]
-    TheresAlreadyA0With1EqualsTo2_G
+    ThereIsAlreadyA0With1EqualsTo2_G
 }
 
 public enum FrameMessage

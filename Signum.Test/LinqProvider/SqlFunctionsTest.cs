@@ -502,9 +502,9 @@ public class SqlFunctionsTest
         {
             using (var tr = new Transaction())
             {
-                note.InDB().UnsafeUpdate(a => a.Text, a => value);
+                note.InDB().UnsafeUpdate(a => a.Title, a => value);
 
-                return note.InDB(n => function.Evaluate(n.Text).InSql());
+                return note.InDB(n => function.Evaluate(n.Title).InSql());
 
                 //tr.Commit()
             }

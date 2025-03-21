@@ -112,7 +112,7 @@ public class SqlServerConnector : Connector
     public override bool SupportsScalarSubquery { get { return true; } }
     public override bool SupportsScalarSubqueryInAggregates { get { return false; } }
 
-    public override bool SupportsFullTextSearch
+    public bool SupportsFullTextSearch
     {
         get
         {
@@ -811,7 +811,7 @@ deallocate cur";
             new SqlPreCommandSimple(Use(databaseName, RemoveAllSchemasScript.FormatWith(systemSchemas))),
             Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionSchemas) : null,
             Connector.Current.SupportsPartitioning ? new SqlPreCommandSimple(RemoveAllPartitionFunction) : null,
-            Connector.Current.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
+            Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch ? new SqlPreCommandSimple(Use(databaseName, RemoveAllFullTextCatallogs)) : null
             )!;
     }
 

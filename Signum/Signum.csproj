@@ -6,6 +6,7 @@
 		<RootNamespace>Signum</RootNamespace>
 		<OutputType>Library</OutputType>
 		<NoWarn>8618</NoWarn>
+		<UserSecretsId>4236b9c6-a674-4f4f-8ce6-6a591967257e</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
 	  <TypeScriptCompile Remove="node_modules\**" />

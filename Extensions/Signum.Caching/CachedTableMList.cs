@@ -26,7 +26,7 @@ class CachedTableMList<T> : CachedTableBase
     {
         this.table = table;
         var isPostgres = Schema.Current.Settings.IsPostgres;
-        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.ToList());
+        CachedTableConstructor ctr = this.Constructor = new CachedTableConstructor(this, aliasGenerator, table.Columns.Values.Where(ShouldBeCached).ToList());
 
         //Query
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
