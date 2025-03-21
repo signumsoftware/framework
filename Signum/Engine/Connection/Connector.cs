@@ -109,8 +109,6 @@ public abstract class Connector
     public abstract bool SupportsScalarSubquery { get; }
     public abstract bool SupportsScalarSubqueryInAggregates { get; }
 
-    public abstract bool SupportsFullTextSearch { get; }
-
     public static string? TryExtractDatabaseNameWithPostfix(ref string connectionString, string catalogPostfix)
     {
         string toFind = "+" + catalogPostfix;

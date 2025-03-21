@@ -14,8 +14,6 @@ public static class MusicLogic
     {
         if (sb.NotDefined(MethodInfo.GetCurrentMethod()))
         {
-
-
             sb.Include<AlbumEntity>()
                 .WithExpressionFrom((IAuthorEntity au) => au.Albums())
                 .WithQuery(() => a => new
@@ -37,13 +35,13 @@ public static class MusicLogic
                 {
                     Entity = a,
                     a.Id,
-                    a.Text,
+                    a.Title,
                     a.Target,
                     a.CreationTime,
                 });
 
-            if (Connector.Current.SupportsFullTextSearch)
-                sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Text });
+            if (Connector.Current is SqlServerConnector ss && ss.SupportsFullTextSearch || Connector.Current is PostgreSqlConnector)
+                sb.AddFullTextIndex<NoteWithDateEntity>(a => new { a.Title, a.Text });
 
             sb.Include<ConfigEntity>()
                 .WithSave(ConfigOperation.Save);
@@ -146,7 +144,7 @@ public static class MusicLogic
                 .ColumnProperyRoutes(a => a.Id, PropertyRoute.Construct((ArtistEntity a) => a.Id), PropertyRoute.Construct((BandEntity a) => a.Id)),
                 entityImplementations: Implementations.By(typeof(ArtistEntity), typeof(BandEntity)));
 
-            Validator.PropertyValidator((NoteWithDateEntity n) => n.Text)
+            Validator.PropertyValidator((NoteWithDateEntity n) => n.Title)
                 .IsApplicableValidator<NotNullValidatorAttribute>(n => Corruption.Strict);
         }
     }

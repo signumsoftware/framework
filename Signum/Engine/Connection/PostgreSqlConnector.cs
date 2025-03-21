@@ -109,8 +109,6 @@ public class PostgreSqlConnector : Connector
 
     public override bool SupportsDateDifBig => false;
 
-    public override bool SupportsFullTextSearch => false;
-
     public override bool SupportsPartitioning => false; //for now
 
     public override bool AllowsIndexWithWhere(string where) => true;

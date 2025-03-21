@@ -60,6 +60,7 @@ public static class SysTablesSchema
                                     join userType in Database.View<SysTypes>().DefaultIfEmpty() on c.user_type_id equals userType.user_type_id
                                     join sysType in Database.View<SysTypes>().DefaultIfEmpty() on c.system_type_id equals sysType.user_type_id
                                     join ctr in Database.View<SysDefaultConstraints>().DefaultIfEmpty() on c.default_object_id equals ctr.object_id
+                                    join cc in Database.View<SysComputedColumn>().DefaultIfEmpty() on new { c.column_id, c.object_id} equals new { cc.column_id, cc.object_id }
                                     select new DiffColumn
                                     {
                                         Name = c.name,
@@ -72,6 +73,11 @@ public static class SysTablesSchema
                                         Scale = c.scale,
                                         Identity = c.is_identity,
                                         GeneratedAlwaysType = con.SupportsTemporalTables ? c.generated_always_type : GeneratedAlwaysType.None,
+                                        ComputedColumn = cc.name == null ? null : new DiffComputedColumn 
+                                        {
+                                            Definition = cc.definition,
+                                            Persisted = cc.is_persisted,
+                                        },
                                         DefaultConstraint = ctr.name == null ? null : new DiffDefaultConstraint
                                         {
                                             Name = ctr.name,
@@ -154,7 +160,7 @@ public static class SysTablesSchema
                                        Columns = (from ic in fti.IndexColumns()
                                                   join c in t.Columns() on ic.column_id equals c.column_id
                                                   select new DiffIndexColumn { ColumnName = c.name }).ToList(),
-                                       IndexName = FullTextTableIndex.FULL_TEXT,
+                                       IndexName = FullTextTableIndex.SqlServerOptions.FULL_TEXT,
                                        IsUnique = false,
                                        IsPrimary = false,
                                        Type = DiffIndexType.FullTextIndex,

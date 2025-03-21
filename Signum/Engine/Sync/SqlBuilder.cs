@@ -1,6 +1,8 @@
 using System.Data;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
+using Signum.Utilities;
 
 #pragma warning disable CA1822 // Mark members as static
 
@@ -181,11 +183,6 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, ColumnLine(column, tempDefault ?? GetDefaultConstaint(table, column), checkConst: null, isChange: false)));
     }
 
-    public SqlPreCommand AlterTableAddOldColumn(ITable table, DiffColumn column)
-    {
-        return new SqlPreCommandSimple("ALTER TABLE {0} ADD {1};".FormatWith(table.Name, CreateOldColumn(column)));
-    }
-
     public SqlPreCommand AlterTableAlterColumn(ITable table, IColumn column, DiffColumn diffColumn, ObjectName? forceTableName = null)
     {
         var tableName = forceTableName ?? table.Name;
@@ -200,19 +197,7 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
                  !diffColumn.Nullable && column.Nullable.ToBool()? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} DROP NOT NULL;".FormatWith(tableName, column.Name.SqlEscape(isPostgres))) : null,
              }.Combine(Spacing.Simple) ?? new SqlPreCommandSimple("ALTER TABLE {0} ALTER COLUMN {1} -- UNEXPECTED COLUMN CHANGE!!".FormatWith(tableName, column.Name.SqlEscape(isPostgres)));
 
-        //if (column.Default == null && column.Check == null)
-            return alterColumn;
-
-        //var defCons = GetDefaultConstaint(table, column)!;
-        //var checkCons = GetCheckConstaint(table, column)!;
-
-        //return SqlPreCommand.Combine(Spacing.Simple,
-        //    checkCons == null ? null : AlterTableDropConstraint(table.Name, diffColumn.CheckConstraint?.Name ?? checkCons.Name),
-        //    defCons == null ? null : AlterTableDropConstraint(table.Name, diffColumn.DefaultConstraint?.Name ?? defCons.Name),
-        //    alterColumn,
-        //    defCons == null ? null : AlterTableAddDefaultConstraint(table.Name, defCons),
-        //    checkCons == null ? null : AlterTableAddCheckConstraint(table.Name, checkCons)
-        //)!;
+        return alterColumn;
     }
 
     public DefaultConstraint? GetDefaultConstaint(ITable t, IColumn c)
@@ -259,33 +244,15 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         }
     }
 
-    public string CreateOldColumn(DiffColumn c)
-    {
-        string fullType = GetColumnType(c);
-
-        var generatedAlways = c.GeneratedAlwaysType != GeneratedAlwaysType.None ?
-            $"GENERATED ALWAYS AS ROW {(c.GeneratedAlwaysType == GeneratedAlwaysType.AsRowStart ? "START" : "END")} HIDDEN" :
-            null;
-
-        var defaultConstraint = c.DefaultConstraint != null ? $"CONSTRAINT {c.DefaultConstraint.Name} DEFAULT " + c.DefaultConstraint.Definition : null;
-
-        return $" ".Combine(
-            c.Name.SqlEscape(isPostgres),
-            fullType,
-            c.Identity ? "IDENTITY " : null,
-            generatedAlways,
-            c.Collation != null ? "COLLATE " + c.Collation : null,
-            c.Nullable ? "NULL" : "NOT NULL",
-            defaultConstraint
-            );
-    }
-
     public string ColumnLine(IColumn c, DefaultConstraint? defaultConst, CheckConstraint? checkConst, bool isChange, bool avoidSystemVersion = false, bool forHistoryTable = false)
     {
         string fullType = GetColumnType(c);
 
-        var generatedAlways = c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion ?
-            $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? "START" : "END")} HIDDEN" :
+        var generatedAlways =
+            c.ComputedColumn is { } ga ? (isPostgres ?
+                $"GENERATED ALWAYS AS ({ga.Expression}) {(ga.Persisted ? "STORED" : null)}":
+                $"AS ({ga.Expression}) {((ga.Persisted ? " PERSISTED" : null))}") :
+            c is SystemVersionedInfo.SqlServerPeriodColumn svc && !forHistoryTable && !avoidSystemVersion ? $"GENERATED ALWAYS AS ROW {(svc.SystemVersionColumnType == SystemVersionedInfo.SystemVersionColumnType.Start ? "START" : "END")} HIDDEN" :
             null;
 
         var defaultConstraint = defaultConst != null ? $"CONSTRAINT {defaultConst.Name} DEFAULT " + defaultConst.QuotedDefinition : null;
@@ -297,9 +264,9 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
             c.Identity && !isChange && !forHistoryTable ? isPostgres ? "GENERATED ALWAYS AS IDENTITY" : "IDENTITY" : null,
             generatedAlways,
             c.Collation != null ? "COLLATE " + c.Collation : null,
-            c.Nullable.ToBool() ? "NULL" : "NOT NULL",
-            defaultConstraint,
-            checkConstraint
+            generatedAlways != null ? null : c.Nullable.ToBool() ? "NULL" : "NOT NULL",
+            generatedAlways != null ? null: defaultConstraint,
+            generatedAlways != null ? null: checkConstraint
             );
     }
 
@@ -428,28 +395,37 @@ FOR EACH ROW EXECUTE PROCEDURE versioning({VersioningTriggerArgs(t.SystemVersion
         }
         else if(index is FullTextTableIndex ftindex)
         {
-            var pk = ftindex.Table.AllIndexes().SingleEx(a => a.PrimaryKey);
-
-            var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
-
-
-            var options = new[]
+            if (!isPostgres)
             {
-                ftindex.ChangeTraking != null ? "CHANGE_TRACKING = " + GetSqlserverString(ftindex.ChangeTraking.Value) : null,
-                ftindex.StoplistName != null ? "STOPLIST =" + ftindex.StoplistName : null,
-                ftindex.PropertyListName != null ? "SEARCH PROPERTY LIST=" + ftindex.PropertyListName : null,
-            }.NotNull().ToList();
+                var sqls = ftindex.SqlServer;
 
-            SqlPreCommandSimple indexSql = new SqlPreCommandSimple(
-                new string?[]
+                var pk = ftindex.Table.AllIndexes().SingleEx(a => a.PrimaryKey);
+
+                var columns = index.Columns.ToString(c => c.Name.SqlEscape(isPostgres), ", ");
+
+                var options = new[]
+                {
+                    sqls.ChangeTraking != null ? "CHANGE_TRACKING = " + GetSqlserverString(sqls.ChangeTraking.Value) : null,
+                    sqls.StoplistName != null ? "STOPLIST =" + sqls.StoplistName : null,
+                    sqls.PropertyListName != null ? "SEARCH PROPERTY LIST=" + sqls.PropertyListName : null,
+                }.NotNull().ToList();
+
+                SqlPreCommandSimple indexSql = new SqlPreCommandSimple(new string?[]
                 {
                     $"CREATE FULLTEXT INDEX ON {ftindex.Table.Name}({columns})",
                     $"KEY INDEX {pk.IndexName}",
-                    $"ON {ftindex.CatallogName}",
+                    $"ON {sqls.CatallogName}",
                     options.Any() ? "WITH " + options.ToString(", ") : null
                 }.ToString("\n"));
 
-            return indexSql;
+                return indexSql;
+            }
+            else
+            {
+                var pg = ftindex.Postgres;
+
+                return new SqlPreCommandSimple($"CREATE INDEX {ftindex.IndexName} ON {ftindex.Table} USING GIN ({pg.TsVectorColumnName.SqlEscape(true)});");
+            }
         }
         else
         {
@@ -676,7 +652,7 @@ WHERE {primaryKey.Name} NOT IN
     {
         var result = (isPostgres ? "fk_{0}_{1}" : "FK_{0}_{1}").FormatWith(table, fieldName);
 
-        return StringHashEncoder.ChopHash(result, connector.MaxNameLength);
+        return StringHashEncoder.ChopHash(result, connector.MaxNameLength, isPostgres);
     }
 
     public SqlPreCommand RenameForeignKey(ObjectName tn, ObjectName foreignKeyName, string newName)
@@ -770,7 +746,7 @@ FROM {1} as [table];".FormatWith(
     public SqlPreCommand RenameIndex(ObjectName tableName, string oldName, string newName)
     {
         if (IsPostgres)
-            return new SqlPreCommandSimple($"ALTER INDEX {oldName.SqlEscape(IsPostgres)} RENAME TO {newName.SqlEscape(IsPostgres)};");
+            return new SqlPreCommandSimple($"ALTER INDEX {new ObjectName(tableName.Schema, oldName, tableName.IsPostgres)} RENAME TO {newName.SqlEscape(IsPostgres)};");
 
         return SP_RENAME(tableName.Schema.Database, tableName.OnDatabase(null) + "." + oldName, newName, "INDEX");
     }

@@ -44,7 +44,7 @@ public class UpdateUpdateTest
     {
         using (var tr = new Transaction())
         {
-            int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate().Set(a => a.Text, a => null!).Execute();
+            int count = Database.Query<NoteWithDateEntity>().UnsafeUpdate().Set(a => a.Title, a => null!).Execute();
             //tr.Commit();
         }
 
