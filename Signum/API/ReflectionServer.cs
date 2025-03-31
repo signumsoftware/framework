@@ -65,7 +65,7 @@ public static class ReflectionServer
     {
         DescriptionManager.Invalidated += InvalidateCache;
         Schema.Current.OnMetadataInvalidated += InvalidateCache;
-        Schema.Current.InvalidateCache += InvalidateCache;
+        Schema.Current.OnInvalidateCache += InvalidateCache;
 
         Schema.Current.SchemaCompleted += () =>
         {
