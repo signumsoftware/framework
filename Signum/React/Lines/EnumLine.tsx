@@ -14,6 +14,7 @@ export interface EnumLineProps<V extends string | number | boolean | null> exten
   "DropDownList" | /*For Enums! (only values in optionItems can be selected)*/
   "ComboBoxText" | /*For Text! (with freedom to choose a different value not in optionItems)*/
   "RadioGroup";
+  emptyLabel?: string;
   optionItems?: (OptionItem | MemberInfo | V)[];
   onRenderDropDownListItem?: (oi: OptionItem) => React.ReactNode;
   optionHtmlAttributes?: (oi: OptionItem) => React.OptionHTMLAttributes<HTMLOptionElement>;
@@ -57,7 +58,7 @@ function internalDropDownList<V extends string | number | boolean | null>(c: Enu
 
   const p = c.props;
   if (!p.type!.isNotNullable || p.ctx.value == undefined)
-    optionItems = [{ value: null, label: " - " }].concat(optionItems);
+    optionItems = [{ value: null, label: p.emptyLabel ?? " - " }].concat(optionItems);
 
   const helpText = p.helpText && (typeof p.helpText == "function" ? p.helpText(c) : p.helpText);
   const helpTextOnTop = p.helpTextOnTop && (typeof p.helpTextOnTop == "function" ? p.helpTextOnTop(c) : p.helpTextOnTop);
