@@ -323,7 +323,13 @@ public static class ProcessLogic
     }
 
     public static void ForEachLine<T>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Action<T> action, int groupsOf = 100)
-        where T : Entity, new()
+        where T : Entity
+    {
+        executingProcess.ForEachLine<T, T>(remainingLines, selector: a => a, (lite, entity) => action(entity), groupsOf);
+    }
+
+    public static void ForEachLine<T, A>(this ExecutingProcess executingProcess, IQueryable<T> remainingLines, Expression<Func<T, A>> selector, Action<Lite<T>, A> action, int groupsOf = 100)
+       where T : Entity
     {
         var remainingNotExceptionsLines = remainingLines.Where(li => executingProcess.CurrentProcess.ExceptionLines().SingleOrDefault(el => el.Line.Is(li))! == null);
 
@@ -332,7 +338,7 @@ public static class ProcessLogic
         executingProcess.ProgressChanged(0, totalCount);
         while (true)
         {
-            List<T> lines = remainingNotExceptionsLines.Take(groupsOf).ToList();
+            var lines = remainingNotExceptionsLines.Select(a => ValueTuple.Create(a.ToLite(), selector.Evaluate(a))).Take(groupsOf).ToList();
             if (lines.IsEmpty())
                 return;
 
@@ -340,15 +346,15 @@ public static class ProcessLogic
             {
                 executingProcess.CancellationToken.ThrowIfCancellationRequested();
 
-                T pl = lines[i];
+                var (lite, info) = lines[i];
 
-                using (HeavyProfiler.Log("ProcessLine", () => pl.ToString()))
+                using (HeavyProfiler.Log("ProcessLine", () => lite.ToString()))
                 {
                     try
                     {
                         Transaction.ForceNew().EndUsing(tr =>
                         {
-                            action(pl);
+                            action(lite, info);
                             tr.Commit();
                         });
                     }
@@ -364,7 +370,7 @@ public static class ProcessLogic
                             new ProcessExceptionLineEntity
                             {
                                 Exception = exLog.ToLite(),
-                                Line = pl.ToLite(),
+                                Line = lite,
                                 Process = executingProcess.CurrentProcess.ToLite()
                             }.Save();
 
