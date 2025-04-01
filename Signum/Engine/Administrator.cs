@@ -152,6 +152,10 @@ public static class Administrator
         }
 
         command.OpenSqlFileRetry();
+
+        GlobalLazy.ResetAll();
+        Schema.Current.InvalidateMetadata();
+        Schema.Current.InvalidateCache();
     }
 
     public static SqlPreCommand? TotalSynchronizeScript(bool interactive = true, bool schemaOnly = false)

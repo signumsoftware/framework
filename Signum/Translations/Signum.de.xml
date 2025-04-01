@@ -153,7 +153,8 @@
     <Member Name="TheEntity0IsNew" Description="Die Entität {0} ist neu" />
     <Member Name="ThereAre0ThatReferThisEntityByProperty1" Description="Es gibt '{0}', die sich auf diese Entität durch die Eigenschaft '{1}' beziehen" />
     <Member Name="ThereAreRecordsIn0PointingToThisTableByColumn1" Description="Gibt es Datensätze in '{0}', die druch die Spalte '{1}' auf diese Tabelle verweisen" />
-    <Member Name="TheresAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:einen|f:eine|n:ein] {0} mit {1}, [m:der|f:die|n:das] {2} entspricht" />
+    <Member Name="ThereIsAlreadyA0With1EqualsTo2_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit {1} gleich {2}" />
+    <Member Name="ThereIsAlreadyA0WithTheSame1_G" Description="Es gibt bereits [m:ein|n:ein|f:eine] {0} mit dem gleichen {1}" />
     <Member Name="UnauthorizedAccessTo0Because1" Description="Nicht zulässiger Zugriff auf {0}, weil {1}" />
   </Type>
   <Type Name="Entity" Description="Entität">
@@ -215,6 +216,7 @@
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
     <Member Name="ThreadId" Description="Thread id" />
+    <Member Name="TraceId" Description="Trace-Id" />
     <Member Name="UrlReferer" Description="Referer Url" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="UserAgent" Description="User agent" />
@@ -292,6 +294,10 @@
     <Member Name="Main" Description="Haupt" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
+  </Type>
+  <Type Name="HtmlEditorMessage">
+    <Member Name="EnterYourUrlHere" Description="Geben Sie hier Ihre URL ein..." />
+    <Member Name="Hyperlink" Description="Hyperlink" />
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />
@@ -470,6 +476,7 @@
     <Member Name="QuarterStart" Description="Quartalsstart" />
     <Member Name="Second" Description="Sekunde" />
     <Member Name="SecondStart" Description="Sekundenstart" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="TimeOfDay" Description="Tageszeit" />
     <Member Name="TotalDays" Description="Tage insgesamt" />
     <Member Name="TotalHours" Description="Stunden insgesamt" />

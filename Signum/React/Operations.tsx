@@ -1,29 +1,28 @@
-import * as React from "react"
-import { Dic } from './Globals'
-import { ajaxGetRaw, ajaxPost, ajaxPostRaw, ServiceError, WebApiHttpError } from './Services'
-import { Lite, Entity, OperationMessage, EntityPack, JavascriptMessage, EngineMessage, getToString, toLite } from './Signum.Entities';
-import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString, getOperationInfo, getQueryKey } from './Reflection';
-import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
-import * as AppContext from './AppContext';
-import { Finder } from './Finder';
-import { Navigator } from './Navigator';
-import * as ContexualItems from './SearchControl/ContextualItems';
-import { ButtonBarManager } from './Frames/ButtonBar';
-import { EntityOperations, OperationButton } from './Operations/EntityOperations';
-import { ContextualOperations } from './Operations/ContextualOperations';
-import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
-import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import * as React from "react";
+import * as AppContext from './AppContext';
+import { BsColor, KeyNames } from "./Components/Basic";
+import { Finder } from './Finder';
+import { ButtonBarManager } from './Frames/ButtonBar';
 import Notify from './Frames/Notify';
-import { FilterOperation } from "./Signum.DynamicQuery";
+import { Dic } from './Globals';
 import { FunctionalAdapter } from "./Modals";
-import { SearchControlLoaded } from "./Search";
-import { isActive } from "./FindOptions";
+import { Navigator } from './Navigator';
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperationButton";
+import { ContextualOperations } from './Operations/ContextualOperations';
+import { EntityOperations, OperationButton } from './Operations/EntityOperations';
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
-import { QuickLinkExplore, QuickLinkClient } from "./QuickLinkClient";
+import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
+import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
+import { SearchControlLoaded } from "./Search";
+import * as ContexualItems from './SearchControl/ContextualItems';
+import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
+import { FilterOperation } from "./Signum.DynamicQuery";
+import { EngineMessage, Entity, EntityPack, getToString, JavascriptMessage, Lite, OperationMessage, toLite } from './Signum.Entities';
+import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
+import { ButtonBarElement, ButtonsContext, EntityFrame, IOperationVisible, TypeContext } from './TypeContext';
 
 
 export namespace Operations {
@@ -149,7 +148,7 @@ export namespace Operations {
 
   export const CreateGroup: EntityOperationGroup = {
     key: "create",
-    text: () => OperationMessage.Create.niceToString(),
+    text: OperationMessage.Create.niceToString(),
     simplifyName: cs => {
       const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
       return array ? array[1].firstUpper() : cs;
@@ -609,7 +608,7 @@ export class ContextualOperationContext<T extends Entity> {
 
 export interface EntityOperationGroup {
   key: string;
-  text: () => React.ReactNode;
+  text: React.ReactNode;
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;

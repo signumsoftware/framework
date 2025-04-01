@@ -17,6 +17,7 @@
     <Member Name="EndDate" Description="Enddatum" />
     <Member Name="JoinMode" Description="Join-Modus" />
     <Member Name="Mode" Description="Modus" />
+    <Member Name="SplitQueries" Description="Geteilte Abfragen" />
     <Member Name="StartDate" Description="Startdatum" />
     <Member Name="TimeSeriesMaxRowsPerStep" Description="Zeitreihe max. Zeilen pro Schritt" />
     <Member Name="TimeSeriesStep" Description="Zeitreihenschritt" />
