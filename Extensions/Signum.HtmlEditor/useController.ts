@@ -64,7 +64,7 @@ export const useController = ({
     return [...defaultPlugins, ...plugins];
   }, [plugins, controller]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!controller.editor) return;
 
     controller.editor.setEditable(!readOnly);
