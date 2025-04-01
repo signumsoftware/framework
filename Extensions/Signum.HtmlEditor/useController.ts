@@ -17,6 +17,7 @@ import {
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
 import { useRegisterKeybindings } from "./useRegisterKeybindings";
+import { HtmlEditorProps } from "./HtmlEditor";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -62,6 +63,12 @@ export const useController = ({
 
     return [...defaultPlugins, ...plugins];
   }, [plugins, controller]);
+
+  useEffect(() => {
+    if (!controller.editor) return;
+
+    controller.editor.setEditable(!readOnly);
+  }, [controller.editor, readOnly]);
 
   useRegisterExtensions(controller, extensions);
 
