@@ -5,12 +5,13 @@ import * as Reflection from "@framework/Reflection";
 import { AuthClient } from "../../Signum.Authorization/AuthClient";
 import LoginPage, { LoginContext } from "../../Signum.Authorization/Login/LoginPage";
 import { ExternalServiceError, ajaxPost } from "@framework/Services";
-import { AuthMessage, LoginAuthMessage } from "../../Signum.Authorization/Signum.Authorization";
+import { AuthMessage, LoginAuthMessage, ResetPasswordB2CMessage } from "../../Signum.Authorization/Signum.Authorization";
 import { classes } from "@framework/Globals";
 import { QueryString } from "@framework/QueryString";
-import MessageModal from "@framework/Modals/MessageModal";
+import MessageModal, { MessageModalHandler } from "@framework/Modals/MessageModal";
 import { AuthError } from "@azure/msal-browser";
 import ErrorModal from "../../../Signum/React/Modals/ErrorModal";
+import { JavascriptMessage } from "@framework/Signum.Entities";
 
 export namespace AzureADClient {
 
@@ -113,32 +114,54 @@ export namespace AzureADClient {
   export async function resetPasswordB2C(ctx: LoginContext): Promise<void> {
     ctx.setLoading("azureAD");
 
-    const config = window.__azureADConfig;
+    var promise: Promise<void> | undefined;
+    const modalRef = React.createRef<MessageModalHandler>();
+    await MessageModal.show({ //The point of this modal is to avoid the browser blocking the popup
+      modalRef: modalRef,
+      title: ResetPasswordB2CMessage.ResetPasswordRequested.niceToString(),
+      message: ResetPasswordB2CMessage.DoYouWantToContinue.niceToString(),
+      buttonContent: a => a == "ok" ? ResetPasswordB2CMessage.ResetPassword.niceToString() : undefined,
+      onButtonClicked: a => {
+        if (a == "ok")
+          promise = handleResetPAsswordClick();
 
-    try {
+        modalRef.current!.handleButtonClicked(a);
+      },
+      buttons: "ok_cancel"
+    })
 
-      (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
+    await promise;
 
-      const resetPasswordResult = await msalClient.loginPopup({
-        scopes: Config.scopesB2C,
-        authority: getAuthority("B2C","resetPassword_UserFlow"),
-      });
+    ctx.setLoading(undefined);
 
-      await MessageModal.show({
-        title: LoginAuthMessage.PasswordChanged.niceToString(),
-        message: LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString(),
-        buttons: "ok",
-      });
+    async function handleResetPAsswordClick() {
+      const config = window.__azureADConfig;
 
-      ctx.setLoading(undefined);
+      try {
 
-    } catch (e) {
-      ctx.setLoading(undefined);
-      if (e instanceof msal.InteractionRequiredAuthError ||
-        e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
-        return Promise.resolve(undefined);
+        (msalClient as any).browserStorage.setInteractionInProgress(false); //Without this cancelling log-out makes log-in impossible without cleaning cookies and local storage
 
-      signOut().then(() => { throw e; });
+        const resetPasswordResult = await msalClient.loginPopup({
+          scopes: Config.scopesB2C,
+          authority: getAuthority("B2C", "resetPassword_UserFlow"),
+        });
+
+        await MessageModal.show({
+          title: LoginAuthMessage.PasswordChanged.niceToString(),
+          message: LoginAuthMessage.PasswordHasBeenChangedSuccessfully.niceToString(),
+          buttons: "ok",
+        });
+
+        ctx.setLoading(undefined);
+
+      } catch (e) {
+        ctx.setLoading(undefined);
+        if (e instanceof msal.InteractionRequiredAuthError ||
+          e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
+          return Promise.resolve(undefined);
+
+        ErrorModal.showErrorModal(e, () => signOut());
+      }
     }
   }
 
