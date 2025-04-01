@@ -1,10 +1,6 @@
 import * as React from 'react'
-import * as draftjs from 'draft-js';
 import { Binding, PropertyRoute, getSymbol } from '@framework/Reflection';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
-import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
-import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
-import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
 import { ModifiableEntity } from '@framework/Signum.Entities';
 import { FilePathEmbedded, FileTypeSymbol, IFile } from '../../Signum.Files/Signum.Files';
@@ -13,19 +9,25 @@ import { ReadonlyBinding } from '@framework/Lines';
 import { ErrorBoundary } from '@framework/Components';
 import { WhatsNewEntity } from '../Signum.WhatsNew';
 import { ImageModal } from '../../Signum.Files/Components/ImageModal';
+import { LexicalEditor } from "lexical";
+import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
+import { AutoLinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension/AutoLinkExtension';
+import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
+import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
 
 export default function WhatsNewHtmlEditor(p: {
   binding: Binding<string | undefined | null>;
   readonly?: boolean
-  innerRef?: React.Ref<draftjs.Editor>;
+  innerRef?: React.Ref<LexicalEditor>;
 }): React.JSX.Element {
 
   return (
     <ErrorBoundary>
       <HtmlEditor binding={p.binding} readOnly={p.readonly} innerRef={p.innerRef} plugins={[
-        new LinksPlugin(),
-        new BasicCommandsPlugin(),
-        new ImagePlugin(new AttachmentImageConverter())
+        new AutoLinkExtension(),
+        new BasicCommandsExtensions(),
+        new ImageExtension(new AttachmentImageConverter())
       ]} />
     </ErrorBoundary>
   );
@@ -39,9 +41,9 @@ export function HtmlViewer(p: { text: string; }): React.JSX.Element {
     <div className="html-viewer" >
       <ErrorBoundary>
         <HtmlEditor readOnly binding={binding} toolbarButtons={c => null} plugins={[
-          new LinksPlugin(),
-          new BasicCommandsPlugin(),
-          new ImagePlugin(new AttachmentImageConverter())
+          new AutoLinkExtension(),
+          new BasicCommandsExtensions(),
+          new ImageExtension(new AttachmentImageConverter())
         ]} />
       </ErrorBoundary>
     </div>
@@ -61,6 +63,19 @@ export class AttachmentImageConverter implements ImageConverter<ImageInfo>{
     this.pr = WhatsNewEntity.propertyRouteAssert(a => a.attachment);
   }
 
+  toElement(val: ImageInfo): HTMLElement | undefined {
+    const img = document.createElement("img");
+    if (val.binaryFile) {
+      img.setAttribute("data-binary-file", val.binaryFile);
+      img.setAttribute("data-file-name", val.fileName || "");
+      return img;
+    }
+
+    if (val.attachmentId) {
+      img.setAttribute("data-attachment-id", val.attachmentId);
+      return img;
+    }
+  }
   uploadData(blob: Blob): Promise<ImageInfo> {
 
     var file = blob instanceof File ? blob :
