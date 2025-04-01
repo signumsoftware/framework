@@ -216,6 +216,7 @@ export interface QueryToken {
   niceTypeName: string;
   isGroupable: boolean;
   hasOrderAdapter?: boolean;
+  tsVectorFor?: string[];
   preferEquals?: boolean;
   filterType?: FilterType;
   fullKey: string;
@@ -727,6 +728,12 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
   "Boolean": [
     "EqualTo",
     "DistinctTo",
+  ],
+  "TsVector": [
+    "TsQuery",
+    "TsQuery_Plain",
+    "TsQuery_Phrase",
+    "TsQuery_WebSearch",
   ]
 };
 

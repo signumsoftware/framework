@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using Signum.Engine.Maps;
+using NpgsqlTypes;
 
 namespace Signum.DynamicQuery.Tokens;
 
@@ -256,7 +257,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
                 }
                 .NotNull()
                 .Concat(EntityProperties(onlyType))
-                //.Concat(TsVectorColumns(onlyType))
+                .Concat(TsVectorColumns(onlyType))
                 .ToList().AndHasValue(this);
             }
 
@@ -274,6 +275,19 @@ public abstract class QueryToken : IEquatable<QueryToken>
         }
 
         return new List<QueryToken>();
+    }
+
+    private IEnumerable<QueryToken> TsVectorColumns(Type onlyType)
+    {
+        var table = Schema.Current.Tables.TryGetC(onlyType);
+
+        if (table != null)
+        {
+            foreach (var item in table.Columns.Values.OfType<PostgresTsVectorColumn>())
+            {
+                yield return new PgTsVectorColumnToken(this, item);
+            }
+        }
     }
 
     public List<QueryToken> StringTokens()
@@ -580,7 +594,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
         }
     }
 
-    public string NiceTypeName
+    public virtual string NiceTypeName
     {
         get
         {
@@ -606,7 +620,7 @@ public abstract class QueryToken : IEquatable<QueryToken>
 
     public static bool IsCollection(Type type)
     {
-        return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
+        return type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null && type != typeof(NpgsqlTsVector);
     }
 
     static string GetNiceTypeName(Type type, Implementations? implementations)
