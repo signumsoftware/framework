@@ -148,7 +148,7 @@ export namespace Operations {
 
   export const CreateGroup: EntityOperationGroup = {
     key: "create",
-    text: OperationMessage.Create.niceToString(),
+    text: () => OperationMessage.Create.niceToString(),
     simplifyName: cs => {
       const array = new RegExp(OperationMessage.CreateFromRegex.niceToString()).exec(cs);
       return array ? array[1].firstUpper() : cs;
@@ -608,7 +608,7 @@ export class ContextualOperationContext<T extends Entity> {
 
 export interface EntityOperationGroup {
   key: string;
-  text: React.ReactNode;
+  text: () => React.ReactNode; /*Delayed for authorization reasons, not culture */
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;

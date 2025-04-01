@@ -165,6 +165,7 @@ ErrorModal.register = () => {
       ErrorModal.showErrorModal(error);
     }
     else {
+      error.alreadyConsumed = false;
       window.onerror?.("error", undefined, undefined, undefined, error);
       console.error("Unhandled promise rejection:", error);
     }
