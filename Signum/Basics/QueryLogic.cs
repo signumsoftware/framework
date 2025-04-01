@@ -19,8 +19,8 @@ public static class QueryLogic
 
     static QueryLogic()
     {
-        FilterFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
-        FilterFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
+        FilterSqlServerFullText.miContains = ReflectionTools.GetMethodInfo(() => FullTextSearch.Contains(new string[0], ""));
+        FilterSqlServerFullText.miFreeText = ReflectionTools.GetMethodInfo(() => FullTextSearch.FreeText(new string[0], ""));
 
         ExtensionToken.BuildExtension = (parentType, key, parentExpression) => Expressions.BuildExtension(parentType, key, parentExpression);
     }

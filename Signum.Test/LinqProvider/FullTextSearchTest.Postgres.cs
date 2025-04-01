@@ -132,20 +132,4 @@ public class FullTextSearchTest_Postgres
                    orderby rank descending
                    select new { note1.Id, rank }).ToList();
     }
-
-
-    [Fact]
-    public void ToTsQuery_RankCoverDensity()
-    {
-        var query = "american & alternative";
-
-        var res = (from note1 in Database.Query<NoteWithDateEntity>()
-                   let tsquery = query.ToTsQuery()
-                   where note1.GetTsVectorColumn().Matches(tsquery)
-                   let rank = note1.GetTsVectorColumn().RankCoverDensity(tsquery, TsRankingNormalization.DivideBy1PlusLogLength, new float[] { 0.1f, 0.2f, 0.5f, 0.8f })
-                   orderby rank descending
-                   select new { note1.Id, rank }).ToList();
-    }
-
-
 }

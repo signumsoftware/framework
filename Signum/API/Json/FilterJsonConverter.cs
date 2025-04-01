@@ -86,8 +86,7 @@ public class FilterConditionTS : FilterTS
     {
         var options = SubTokensOptions.CanElement | SubTokensOptions.CanAnyAll | (canAggregate ? SubTokensOptions.CanAggregate : 0) | (canTimeSeries ? SubTokensOptions.CanTimeSeries : 0);
         var parsedToken = QueryUtils.Parse(token, qd, options);
-        var expectedValueType = operation.IsList() ? typeof(List<>).MakeGenericType(parsedToken.Type.Nullify()) : 
-            parsedToken.Type;
+        var expectedValueType = FilterCondition.GetValueType(parsedToken, operation);
 
         object? val;
         try

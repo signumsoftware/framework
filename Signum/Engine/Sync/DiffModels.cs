@@ -208,7 +208,7 @@ public class DiffIndex
         if (mix.Unique && mix.ViewName != null)
             return null;
 
-        if (mix is FullTextTableIndex)
+        if (mix is FullTextTableIndex && !isPostgress)
             return DiffIndexType.FullTextIndex;
 
         if (mix.Clustered && !isPostgress)
@@ -219,13 +219,23 @@ public class DiffIndex
 
     bool ColumnsChanged(DiffTable dif, TableIndex mix)
     {
-        bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Key).ToList());
-        bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Included).ToList());
+        if (mix is FullTextTableIndex fti && dif.Name.IsPostgres)
+        {
+            if (fti.Postgres.TsVectorColumnName == this.Columns.Only()?.ColumnName)
+                return false;
 
-        if (sameCols && sameIncCols)
-            return false;
+            return true;
+        }
+        else
+        {
+            bool sameCols = IdenticalColumns(dif, mix.Columns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Key).ToList());
+            bool sameIncCols = IdenticalColumns(dif, mix.IncludeColumns, this.Columns.Where(a => a.Type == DiffIndexColumnType.Included).ToList());
 
-        return true;
+            if (sameCols && sameIncCols)
+                return false;
+
+            return true;
+        }
     }
 
     private static bool IdenticalColumns(DiffTable dif, IColumn[]? modColumns, List<DiffIndexColumn> diffColumns)
@@ -302,7 +312,6 @@ public class DiffColumn
     public int Length;
     public int Precision;
     public int Scale;
-    public bool IsDropped;
     public bool Identity;
     public bool PrimaryKey;
 
