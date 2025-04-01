@@ -67,14 +67,17 @@ export namespace AzureADClient {
 
   export type B2C_UserFlows = "signInSignUp_UserFlow" | "signIn_UserFlow" | "signUp_UserFlow" | "resetPassword_UserFlow";
 
-  export function getAuthority(mode?: string, b2c_UserFlow?: B2C_UserFlows) : string {
+  export function getAuthority(mode?: "B2C" | undefined, b2c_UserFlow?: B2C_UserFlows): string {
     const config = window.__azureADConfig;
-    const _b2c_UserFlow = b2c_UserFlow ? config?.azureB2C?.[b2c_UserFlow]! : config?.azureB2C?.signInSignUp_UserFlow!;
+    if (mode == undefined)
+      return "https://login.microsoftonline.com/" + config!.tenantId;
 
-    return mode == "B2C" ? getAzureB2C_Authority(_b2c_UserFlow) :
-        "https://login.microsoftonline.com/" + config!.tenantId;
+    const confB2C = config!.azureB2C!;
+    const userFlow = b2c_UserFlow ? confB2C[b2c_UserFlow]! : (confB2C.signInSignUp_UserFlow || confB2C.signIn_UserFlow!);
+
+    const tenantName = confB2C.tenantName;
+    return `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/${userFlow}`;
   }
-
 
   export async function signIn(ctx: LoginContext, b2c: boolean, b2c_UserFlow?: B2C_UserFlows): Promise<void> {
     ctx.setLoading(b2c ? "azureB2C" : "azureAD");
@@ -100,6 +103,9 @@ export namespace AzureADClient {
     } catch (e) {
       ctx.setLoading(undefined);
       if (e instanceof msal.BrowserAuthError && (e.errorCode == "user_login_error" || e.errorCode == "user_cancelled"))
+        return;
+
+      if (e instanceof msal.AuthError && e.errorCode == "access_denied" && e.errorMessage.startsWith("AADB2C90091"))
         return;
 
       if (e instanceof msal.AuthError && e.errorCode == "access_denied" && e.errorMessage.startsWith("AADB2C90118")) {
@@ -281,22 +287,22 @@ export namespace AzureADClient {
     const hasSignInFlow = Boolean(config?.azureB2C?.signIn_UserFlow);
     const hasSignUpFlow = Boolean(config?.azureB2C?.signUp_UserFlow);
 
-    if(hasSignInFlow && hasSignUpFlow) {
+    if (hasSignInFlow && hasSignUpFlow) {
       return (
         <div className="row mt-4">
           <div className="col-md-6 offset-md-3">
             <div className='hstack'>
-                  <div className=''>
-                    <button className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signIn_UserFlow'); }}>
-                      {"Sign in with Azure B2C"}
-                    </button>
-                  </div>
-                  <div className=''>
-                    <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signUp_UserFlow'); }}>
-                      {"Sign up with Azure B2C"}
-                    </button>
-                  </div>
-                </div>
+              <div className=''>
+                <button className={classes("btn btn-secondary me-2", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signIn_UserFlow'); }}>
+                  {"Sign in with Azure B2C"}
+                </button>
+              </div>
+              <div className=''>
+                <button className={classes("btn btn-primary", ctx.loading != null ? "disabled" : undefined)} onClick={e => { AzureADClient.signIn(ctx, true, 'signUp_UserFlow'); }}>
+                  {"Sign up with Azure B2C"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       );
@@ -322,14 +328,12 @@ export namespace AzureADClient {
   export namespace API {
     export function loginWithAzureAD(jwt: string, accessToken: string, opts: { throwErrors: boolean, azureB2C: boolean }): Promise<AuthClient.API.LoginResponse | undefined> {
       return ajaxPost({
-        url: "/api/auth/loginWithAzureAD?" + QueryString.stringify(opts), avoidAuthToken: true }, { idToken: jwt, accessToken });
+        url: "/api/auth/loginWithAzureAD?" + QueryString.stringify(opts), avoidAuthToken: true
+      }, { idToken: jwt, accessToken });
     }
   }
 
-  export function getAzureB2C_Authority(userFlow: string): string {
-    const tenantName = window.__azureADConfig?.azureB2C?.tenantName;
-    return `https://${tenantName}.b2clogin.com/${tenantName}.onmicrosoft.com/${userFlow}`;
-  }
+
 
 }
 

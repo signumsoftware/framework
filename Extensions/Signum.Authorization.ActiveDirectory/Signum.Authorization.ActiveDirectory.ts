@@ -85,7 +85,7 @@ export interface AzureB2CEmbedded extends Entities.EmbeddedEntity {
   Type: "AzureB2CEmbedded";
   loginWithAzureB2C: boolean;
   tenantName: string;
-  signInSignUp_UserFlow: string;
+  signInSignUp_UserFlow: string | null;
   signIn_UserFlow: string | null;
   signUp_UserFlow: string | null;
   resetPassword_UserFlow: string | null;
