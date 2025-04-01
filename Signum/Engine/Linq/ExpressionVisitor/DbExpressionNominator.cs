@@ -1562,12 +1562,26 @@ internal class DbExpressionNominator : DbExpressionVisitor
             if (!Has(v))
                 return null;
 
-            return Add(Expression.Add(date, Expression.Multiply(value, new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'"))).CopyMetadata(date));
+            var timeSpan = new SqlLiteralExpression(typeof(TimeSpan), $"INTERVAL '1 {unit}'");
+
+            if (d.Type.UnNullify() == typeof(DateTime))
+                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan)).CopyMetadata(date));
+
+            if (d.Type.UnNullify() == typeof(DateOnly))
+                return Add(Expression.Add(date, Expression.Multiply(value, timeSpan, miPseudoMult), miPseudoAdd).CopyMetadata(date));
+
+            throw new UnexpectedValueException(d.Type);
         }
 
 
         return TrySqlFunction(null, SqlFunction.DATEADD, returnType, new SqlLiteralExpression(unit), value, date)?.CopyMetadata(date);
     }
+
+    static MethodInfo miPseudoAdd = ReflectionTools.GetMethodInfo(() => PseudoAdd(DateOnly.MinValue, TimeSpan.MinValue));
+    static DateOnly PseudoAdd(DateOnly dateOnly, TimeSpan ts) => throw new InvalidOperationException("Only for queries");
+
+    static MethodInfo miPseudoMult = ReflectionTools.GetMethodInfo(() => PseudoMult(0, TimeSpan.MinValue));
+    static TimeSpan PseudoMult(int factor, TimeSpan ts) => throw new InvalidOperationException("Only for queries");
 
     private Expression? HardCodedMethods(MethodCallExpression m)
     {
