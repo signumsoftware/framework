@@ -16,6 +16,7 @@ import {
 } from "./HtmlContentStateConverter";
 import { HtmlEditorController } from "./HtmlEditorController";
 import { useRegisterExtensions } from "./useRegisterExtensions";
+import { useRegisterKeybindings } from "./useRegisterKeybindings";
 
 type ControllerProps = {
   binding: IBinding<string | null | undefined>;
@@ -25,6 +26,7 @@ type ControllerProps = {
   innerRef?: React.Ref<LexicalEditor>;
   plugins?: HtmlEditorExtension[];
   initiallyFocused?: boolean | number;
+  handleKeybindings?: HtmlEditorProps['handleKeybindings'];
 };
 
 type ControllerReturnType = {
@@ -41,6 +43,7 @@ export const useController = ({
   innerRef,
   plugins,
   initiallyFocused,
+  handleKeybindings
 }: ControllerProps): ControllerReturnType => {
   const controller = React.useMemo(() => new HtmlEditorController(), []);
   const textConverter = converter ?? new HtmlContentStateConverter();
@@ -61,6 +64,8 @@ export const useController = ({
   }, [plugins, controller]);
 
   useRegisterExtensions(controller, extensions);
+
+  useRegisterKeybindings(controller, handleKeybindings);
 
   controller.init({
     binding,
