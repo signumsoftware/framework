@@ -147,8 +147,7 @@ export namespace AzureADClient {
   }
 
   export function loginWithAzureADSilent(): Promise<AuthClient.API.LoginResponse | undefined> {
-
-    if (location.search.contains("avoidAD") || window.__azureADConfig)
+    if (location.search.contains("avoidAD") || !window.__azureADConfig)
       return Promise.resolve(undefined);
 
     var ai = getMsalAccount();
