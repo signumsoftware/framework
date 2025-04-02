@@ -1,4 +1,4 @@
-import { $getRoot, $getSelection, LexicalEditor } from "lexical";
+import { $getRoot, LexicalEditor } from "lexical";
 import { HtmlEditorController } from "../../HtmlEditorController";
 import { HtmlEditorExtension, LexicalConfigNode, OptionalCallback } from "../types";
 import { ImageConverter } from "./ImageConverter";
@@ -65,13 +65,7 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
     editor.update(() => {
       uploadedFiles.forEach(file => {
         const imageNode = $createImageNode(file, imageConverter);
-        const selection = $getSelection();
-  
-        if(selection) {
-          selection.insertNodes([imageNode]);
-        } else {
-          $getRoot().append(imageNode)
-        }
+          $getRoot().append(imageNode);
       })
     });
   }
@@ -93,7 +87,7 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
     if(!attachments.length) return;
     
     const editorState =  controller.editor.getEditorState();
-    
+    let hasUpdatedNodes = false
     controller.editor.update(() => {
       const nodes = Array.from(editorState._nodeMap.values());
       if(!nodes.some(v => isImagePlaceholderRegex(v.getTextContent()))) return;
@@ -104,9 +98,12 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
             const attachmentId = extractAttachmentId(text);
             if(attachmentId && !attachments.includes(attachmentId)) return;
             node.replace($createImageNode({ attachmentId } as object, this.imageConverter));
+            hasUpdatedNodes = true;
           }
       });
     }, { discrete: true });
+
+    if(hasUpdatedNodes) controller.saveHtml();
   }
 }
 
