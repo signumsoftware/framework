@@ -77,7 +77,7 @@ export class ImageExtension<T extends object = {}> implements HtmlEditorExtensio
         const parentObject = binding.parentObject as object;
         if('attachments' in parentObject) {
           const attachments = parentObject.attachments as { rowId: number }[];
-          return attachments.map(att => att.rowId.toString()) ?? []
+          return attachments.map(att => att.rowId?.toString()) ?? []
         }
       }
 
