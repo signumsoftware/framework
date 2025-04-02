@@ -9,7 +9,7 @@ import * as AppContext from './AppContext'
 import { Navigator } from './Navigator'
 import { ModifiableEntity, QuickLinkMessage, Lite, Entity, toLiteFat, is, isEntity, liteKey } from './Signum.Entities'
 import { onWidgets, WidgetContext } from './Frames/Widgets'
-import { onContextualItems, ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems'
+import { onContextualItems, ContextualItemsContext, MenuItemBlock, ContextualMenuItem } from './SearchControl/ContextualItems'
 import { useAPI } from './Hooks';
 import { StyleContext } from './Lines'
 import { Dropdown } from 'react-bootstrap'
@@ -192,15 +192,11 @@ export namespace QuickLinkClient {
 
     return getQuickLinks(qlCtx).then(links => {
 
-      if (links.length == 0)
-        return undefined;
-
-      return {
-        header: QuickLinkMessage.Quicklinks.niceToString(),
-        menuItems: links.map(ql => ql.toDropDownItem(qlCtx))
-      } as MenuItemBlock;
-    });
-  }
+    return {
+      header: QuickLinkMessage.Quicklinks.niceToString(),
+      menuItems: links.map(ql => ({ fullText: ql.text(), menu: ql.toDropDownItem(qlCtx) } as ContextualMenuItem))
+    } as MenuItemBlock;
+  });
 }
 
 export interface QuickLinkWidgetProps {
@@ -348,7 +344,7 @@ export abstract class QuickLink<T extends Entity> {
 
   toDropDownItem(ctx: QuickLinkContext<T>): React.JSX.Element {
     return (
-      <Dropdown.Item data-key={this.key} className="sf-quick-link" onMouseUp={e => this.handleClick(ctx, e)}>
+      <Dropdown.Item data-key={this.key} className="sf-quick-link" onClick={e => this.handleClick(ctx, e)}>
         {this.renderIcon()}&nbsp;{this.text()}
       </Dropdown.Item>
     );

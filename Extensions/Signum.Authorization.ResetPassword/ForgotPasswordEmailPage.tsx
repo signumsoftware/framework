@@ -5,12 +5,14 @@ import { ValidationError } from '@framework/Services'
 import { LoginAuthMessage } from '../Signum.Authorization/Signum.Authorization'
 import { ResetPasswordClient } from './ResetPasswordClient'
 import { useStateWithPromise } from '@framework/Hooks'
+import { AutoFocus } from '@framework/Components/AutoFocus'
 
 export default function ForgotPasswordEmailPage(): React.JSX.Element {
 
   const [modelState, setModelState] = useStateWithPromise<ModelState | undefined>(undefined);
   const [success, setSuccess] = React.useState(false);
   const [message, setMessage] = React.useState<string | undefined>(undefined);
+  const [title, setTitle] = React.useState<string | undefined>(undefined);
 
   const eMail = React.useRef<HTMLInputElement>(null);
 
@@ -25,10 +27,11 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
       };
 
       try {
-        var msg = await ResetPasswordClient.API.forgotPasswordEmail(request);
+        var response = await ResetPasswordClient.API.forgotPasswordEmail(request);
 
-        setSuccess(msg == undefined);
-        setMessage(msg);
+        setSuccess(response.success);
+        setMessage(response.message);
+        setTitle(response.title);
 
       } catch (e) {
         if (e instanceof ValidationError) {
@@ -41,14 +44,13 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
 
   function validateEmail() {
     if (eMail.current?.value) {
-      setModelState({
-        eMail: [LoginAuthMessage.PasswordMustHaveAValue.niceToString()]
-      });
-
+      setModelState({});
       return true;
     }
 
-    setModelState({  });
+    setModelState({
+      eMail: [LoginAuthMessage.EnterYourUserEmail.niceToString()]
+    });
     return false;
   }
 
@@ -63,9 +65,13 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
     return (
       <div className="container">
         <div className="row">
-          <div className="col-md-6 offset-md-3">
-            <h2 className="sf-entity-title">{LoginAuthMessage.RequestAccepted.niceToString()}</h2>
-            <p>{LoginAuthMessage.WeHaveSentYouAnEmailToResetYourPassword.niceToString()}</p>
+          <div className="col-md-6 offset-md-3 forgot-password-success">
+            {title &&
+              <>
+                <h2 className="sf-entity-title">{title}</h2>
+                <p>{message}</p>
+              </>}
+            {!title && <h2 className="sf-entity-title">{message}</h2>}
           </div>
         </div>
       </div>
@@ -74,24 +80,25 @@ export default function ForgotPasswordEmailPage(): React.JSX.Element {
 
 
   return (
+    <AutoFocus>
+      <div className="container">
+        <div className="row">
+          <div className="col-md-6 offset-md-3">
+            <form onSubmit={(e) => handleSubmit(e)}>
+              <h2 className="sf-entity-title">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h2>
+              <p>{LoginAuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
 
-    <div className="container">
-      <div className="row">
-        <div className="col-md-6 offset-md-3">
-          <form onSubmit={(e) => handleSubmit(e)}>
-            <h2 className="sf-entity-title">{LoginAuthMessage.IForgotMyPassword.niceToString()}</h2>
-            <p>{LoginAuthMessage.GiveUsYourUserEmailToResetYourPassword.niceToString()}</p>
-
-            <div className={classes("form-group mb-3", error("eMail") && "has-error")}>
+              <div className={classes("form-group mb-3", error("eMail") && "has-error")}>
                 <input type="texbox" className="form-control" id="eMail" ref={eMail} onBlur={validateEmail} placeholder={LoginAuthMessage.EnterYourUserEmail.niceToString()} />
-              {error("eMail") && <span className="help-block text-danger">{error("newPassword")}</span>}
-              {message && < div className="form-text text-danger">{message}</div>}
-            </div>
+                {error("eMail") && <span className="help-block text-danger">{error("eMail")}</span>}
+                {message && <div className="form-text text-danger">{message}</div>}
+              </div>
 
-            <button type="submit" className="btn btn-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>
-          </form>
+              <button type="submit" className="btn btn-primary" id="changePasswordRequest">{LoginAuthMessage.SendEmail.niceToString()}</button>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </AutoFocus>
   );
 }

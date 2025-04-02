@@ -443,9 +443,15 @@ public class DecimalsValidatorAttribute : ValidatorAttribute
         if (value == null)
             return null;
 
-        if (value is decimal && Math.Round((decimal)value, DecimalPlaces) != (decimal)value)
+        if (value is decimal decimalValue)
         {
-            return ValidationMessage._0HasMoreThan1DecimalPlaces.NiceToString("{0}", DecimalPlaces);
+            // Redondear el valor primero y luego validar
+            decimal roundedValue = Math.Round(decimalValue, DecimalPlaces);
+
+            if (roundedValue != Math.Round(decimalValue, DecimalPlaces))
+            {
+                return ValidationMessage._0HasMoreThan1DecimalPlaces.NiceToString("{0}", DecimalPlaces);
+            }
         }
 
         return null;

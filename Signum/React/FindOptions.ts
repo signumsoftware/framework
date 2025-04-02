@@ -28,6 +28,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   autoSkipIfZero?: boolean;
+  autoCheckSingleRowResult?: boolean;
   modalSize?: BsSize;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;

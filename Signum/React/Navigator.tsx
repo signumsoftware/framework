@@ -26,6 +26,7 @@ import { TextHighlighter, TypeaheadOptions } from "./Components/Typeahead";
 import CopyLinkButton from "./Components/CopyLinkButton";
 import { object } from "prop-types";
 import { clearSpecialActions } from "./OmniboxSpecialAction";
+import { ContextualItemsContext, MenuItemBlock } from "./SearchControl/ContextualItems";
 
 if (!window.__allowNavigatorWithoutUser && (currentUser == null || getToString(currentUser) == "Anonymous"))
   throw new Error("To improve intial performance, no dependency to any module that depends on Navigator should be taken for anonymous user. Review your dependencies or write var __allowNavigatorWithoutUser = true in Index.cshtml to disable this check.");
@@ -1008,6 +1009,8 @@ export interface EntitySettingsOptions<T extends ModifiableEntity> {
   enforceFocusInModal?: boolean;
 
   namedViews?: NamedViewSettings<T>[];
+
+  showContextualSearchBox?: (ctx: ContextualItemsContext<Entity>, blocks?: MenuItemBlock[]) => boolean
 }
 
 export interface AutocompleteConstructorContext {
@@ -1078,6 +1081,8 @@ export class EntitySettings<T extends ModifiableEntity> {
   renderEntity?: (entity: T, hl: TextHighlighter) => React.ReactElement | string; 
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
+
+  showContextualSearchBox = (ctx: any, blocks?: MenuItemBlock[]) => Boolean(blocks && blocks.notNull().sum(b => b.menuItems?.length) > 20);
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

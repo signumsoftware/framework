@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception e) when (e is IncorrectUsernameException || e is IncorrectPasswordException)
         {
-            if (AuthServer.MergeInvalidUsernameAndPasswordMessages)
+            if (AuthServer.AvoidExplicitErrorMessages)
             {
                 return ModelError("login", LoginAuthMessage.InvalidUsernameOrPassword.NiceToString());
             }
@@ -57,7 +57,7 @@ public class AuthController : ControllerBase
 
         if (data.rememberMe == true)
         {
-            UserTicketServer.SaveCookie(ControllerContext);
+            UserTicketServer.OnSaveCookie(ControllerContext);
         }
 
         var token = AuthTokenServer.CreateToken(user);

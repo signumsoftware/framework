@@ -18,6 +18,7 @@ import { ImportComponent } from '@framework/ImportComponent'
 import "./Processes.css"
 import { ConstructSymbol_From, DeleteSymbol, ExecuteSymbol } from '@framework/Signum.Operations';
 import { ChangeLogClient } from '@framework/Basics/ChangeLogClient';
+import { ContextualMenuItem } from '../../Signum/React/SearchControl/ContextualItems';
 
 export namespace ProcessClient {
   
@@ -87,7 +88,7 @@ export namespace ProcessClient {
   
     const base = ContextualOperationContext.prototype.createMenuItems;
   
-    ContextualOperationContext.prototype.createMenuItems = function(this: ContextualOperationContext<any>): React.ReactElement[] {
+    ContextualOperationContext.prototype.createMenuItems = function (this: ContextualOperationContext<any>): ContextualMenuItem[] {
   
       if (this.settings?.createMenuItems)
         return this.settings.createMenuItems(this);
