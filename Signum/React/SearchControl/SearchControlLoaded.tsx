@@ -1084,7 +1084,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
       this.doSearchPage1();
   }
 
-  renderContextualMenu() { //
+  renderContextualMenu() {
 
     var showCM = this.props.showContextMenu(this.state.resultFindOptions ?? this.props.findOptions);
 
@@ -1103,7 +1103,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     }
 
     const menuPack = this.state.currentMenuPack;
-    if (menuPack == null)
+    if (cm.rowIndex != undefined && menuPack == null)
       return null; //avoid flickering
 
     const menuItems: React.ReactElement[] = [];
@@ -1191,7 +1191,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     return (
       <ContextMenu id="table-context-menu" position={cm.position} onHide={this.handleContextOnHide}>
-        {renderEntityMenuItems && menuPack.showSearch &&
+        {renderEntityMenuItems && menuPack && menuPack.showSearch &&
           <AutoFocus>
             <input
               type="search"
