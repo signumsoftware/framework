@@ -60,8 +60,10 @@ export namespace Operations {
       isApplicable: c => {
         return c.type.name == "CellOperationDTO";
       },
-      formatter: c => new Finder.CellFormatter((dto: Operations.API.CellOperationDto, ctx) => dto && dto.lite ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
-
+      formatter: c => new Finder.CellFormatter(
+        (dto: Operations.API.CellOperationDto, ctx, cp) =>
+          dto && dto.lite ? <CellOperationButton coc={(new CellOperationContext({ cellContext: ctx, text: cp.column.displayName, ...dto }))} /> : undefined,
+        false)
     });
 
   }
@@ -666,14 +668,17 @@ export class CellOperationContext<T extends Entity> {
 
   tag?: string;
   readonly lite: Lite<T>;
+  readonly canExecute?: string;
+  readonly operationKey: string;
+
   readonly operationInfo: OperationInfo;
   readonly cellContext: Finder.CellFormatterContext;
-  readonly canExecute?: string;
   readonly settings?: CellOperationSettings<T>;
   readonly entityOperationSettings?: EntityOperationSettings<any>;
   event?: React.MouseEvent<any>;
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
+  text?: string;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -684,12 +689,14 @@ export class CellOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
-  constructor(ctx: Finder.CellFormatterContext, co: Operations.API.CellOperationDto) {
-    this.lite = co.lite as Lite<T>;
-    this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
-    this.cellContext = ctx;
-    this.canExecute = co.canExecute;
-    this.entityOperationSettings = Operations.getSettings(co.operationKey) as EntityOperationSettings<Entity>;
+  constructor(init: Partial<CellOperationContext<T>>) {
+    Object.assign(this, init);
+    this.lite = init.lite as Lite<T>;
+    this.operationKey = init.operationKey!;
+    this.canExecute = init.canExecute;
+    this.operationInfo = getOperationInfo(this.operationKey!, this.lite.EntityType);
+    this.cellContext = init.cellContext!;
+    this.entityOperationSettings = Operations.getSettings(this.operationKey) as EntityOperationSettings<Entity>;
     this.settings = this.entityOperationSettings?.cell;
   }
 

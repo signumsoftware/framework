@@ -1388,7 +1388,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             refresh: () => scl.dataChanged(),
             systemTime: scl.props.findOptions.systemTime,
             searchControl: scl,
-          }, summaryToken)}
+          }, { column: { token: summaryToken }, resultIndex: colIndex })}
         </div>
       );
     }
@@ -1719,9 +1719,9 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
   getColumnElement(fctx: Finder.CellFormatterContext, c: ColumnParsed) {
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? SearchControlLoaded.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((fctx.row.columns[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, SearchControlLoaded.maxToArrayElements) :
-        c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c.column.token!);
+        c.cellFormatter.formatter(fctx.row.columns[c.resultIndex], fctx, c);
   }
 
   renderRows(): React.ReactNode {

@@ -29,7 +29,7 @@ import {
 } from './Reflection';
 
 import EntityLink from './SearchControl/EntityLink';
-import SearchControlLoaded, { SearchControlMobileOptions } from './SearchControl/SearchControlLoaded';
+import SearchControlLoaded, { SearchControlMobileOptions, ColumnParsed } from './SearchControl/SearchControlLoaded';
 import { ImportComponent } from './ImportComponent'
 import { ButtonBarElement } from "./TypeContext";
 import { EntityBaseController, TypeContext } from "./Lines";
@@ -2070,7 +2070,7 @@ export namespace Finder {
 
   export class CellFormatter {
     constructor(
-      public formatter: (cell: any, ctx: CellFormatterContext, column: QueryToken) => React.ReactElement | string | null | undefined,
+      public formatter: (cell: any, ctx: CellFormatterContext, column: ColumnParsed) => React.ReactElement | string | null | undefined,
       public fillWidth: boolean,
       public cellClass?: string) {
     }

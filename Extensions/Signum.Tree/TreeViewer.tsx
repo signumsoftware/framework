@@ -860,9 +860,9 @@ class TreeNodeControl extends React.Component<TreeNodeControlProps> {
     };
 
     return c.resultIndex == -1 || c.cellFormatter == undefined ? undefined :
-      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c.column.token!)),
+      c.hasToArray != null ? SearchControlLoaded.joinNodes((node.values[c.resultIndex] as unknown[]).map(v => c.cellFormatter!.formatter(v, fctx, c)),
         c.hasToArray.key == "SeparatedByComma" || c.hasToArray.key == "SeparatedByCommaDistinct" ? <span className="text-muted">, </span> : <br />, TreeViewer.maxToArrayElements) :
-        c.cellFormatter.formatter(node.values[c.resultIndex], fctx, c.column.token!);
+        c.cellFormatter.formatter(node.values[c.resultIndex], fctx, c);
   }
 
   getDragAndDropStyle(node: TreeNode): React.CSSProperties | undefined {
