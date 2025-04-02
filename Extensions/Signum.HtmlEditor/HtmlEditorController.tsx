@@ -1,5 +1,5 @@
 import { IBinding } from "@framework/Reflection";
-import { $getRoot, EditorState } from "lexical";
+import { EditorState } from "lexical";
 import { LexicalEditor } from "lexical/LexicalEditor";
 import React from "react";
 import { HtmlEditorExtension } from "./Extensions/types";
@@ -21,7 +21,6 @@ export class HtmlEditorController {
   editor!: LexicalEditor;
   editableElement: HTMLElement | null = null;
   editorState!: EditorState;
-  setEditorState!: (newState: EditorState) => void;
 
   overrideToolbar!: React.ReactElement | undefined;
   setOverrideToolbar!: (newState: React.ReactElement | undefined) => void;
@@ -31,21 +30,9 @@ export class HtmlEditorController {
   binding!: IBinding<string | null | undefined>;
   readOnly?: boolean;
   small?: boolean;
-  initialEditorState?: EditorState;
+  initialEditorContent?: string;
 
-  lastSavedString?: { str: string | null };
-
-  createWithContentAndDecorators(contentState?: EditorState): EditorState {
-    this.editor?.update(() => {
-      if (contentState) {
-        this.editor.setEditorState(contentState);
-      } else {
-        $getRoot().clear();
-      }
-    });
-
-    return this.editor?.getEditorState();
-  }
+  lastSavedString?: string | null
 
   private initializeEditableElement() {
     return document.getElementById("editor-editable");
@@ -58,10 +45,6 @@ export class HtmlEditorController {
     this.converter = p.converter;
     this.plugins = p.plugins ?? [];
     this.editableElement = this.initializeEditableElement();
-
-    [this.editorState, this.setEditorState] = React.useState<EditorState>(() =>
-      this.createWithContentAndDecorators()
-    );
 
     [this.overrideToolbar, this.setOverrideToolbar] = React.useState<
       React.ReactElement | undefined
@@ -82,14 +65,16 @@ export class HtmlEditorController {
     React.useEffect(() => {
       if(!this.editor || !newValue) return;
 
-      if (this.lastSavedString?.str === newValue) {
+      if (this.lastSavedString === newValue) {
         this.lastSavedString = undefined;
         return;
       }
 
-      this.initialEditorState = this.editor.getEditorState();
+      const newState = this.converter.$convertFromText(this.editor, newValue);
       queueMicrotask(() => {
-        this.setEditorState(this.converter.$convertFromText(this.editor, newValue));
+        this.editor.setEditorState(newState);
+        const htmlString = this.converter.$convertToText(this.editor);
+        this.initialEditorContent = htmlString
       })
     }, [newValue, this.editor]);
 
@@ -114,12 +99,12 @@ export class HtmlEditorController {
 
   saveHtml(): void {
     if (this.readOnly) return;
-
-    const newContentString = JSON.stringify(this.editorState);
-    const initialContentString = JSON.stringify(this.initialEditorState);
-    if (newContentString !== initialContentString) {
-      const value = isEmpty(this.editorState) ? null : this.converter.$convertToText(this.editor);
-      this.lastSavedString = { str: value };
+    
+    const newContentString = this.converter.$convertToText(this.editor);
+    
+    if (newContentString !== this.initialEditorContent) {
+      const value = isEmpty(this.editorState) ? null : newContentString;
+      this.lastSavedString = value;
       this.binding.setValue(value);
     }
   }

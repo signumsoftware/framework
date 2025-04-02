@@ -17,7 +17,6 @@ export class OnChangeExtension implements HtmlEditorExtension {
         if(!controller.editor) return;
 
         return controller.editor.registerUpdateListener(({editorState}) => {
-            controller.setEditorState(editorState);
             this.props.onChange?.();
         });
     }
