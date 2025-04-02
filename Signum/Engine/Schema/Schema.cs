@@ -661,6 +661,7 @@ public class Schema : IImplementationsFinder
 
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.CreatePostgresExtensions;
+        Generating += SchemaGenerator.CreatePostgresDefaultTextLanguage;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
@@ -671,6 +672,7 @@ public class Schema : IImplementationsFinder
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
         Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+        Synchronizing += SchemaSynchronizer.SyncPostgresDefaultTextLanguage;
 
         Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
