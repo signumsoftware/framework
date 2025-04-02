@@ -132,6 +132,14 @@ public static class SchemaGenerator
     }
 
 
+    internal static SqlPreCommand? CreatePostgresDefaultTextLanguage()
+    {
+        if (!Schema.Current.Settings.IsPostgres)
+            return null;
+
+        return new SqlPreCommandSimple($"ALTER DATABASE \"{Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+    }
+
     public static SqlPreCommand? SnapshotIsolation()
     {
         var connector = Connector.Current;

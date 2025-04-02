@@ -153,6 +153,9 @@ public static class SchemaSynchronizer
             if (preRenameColumns != null)
                 preRenameColumns.GoAfter = true;
 
+
+
+
             SqlPreCommand? createFullTextCatallogs = isPostgres ? null : Synchronizer.SynchronizeScript(Spacing.Double,
                 modelFullTextCatallogs!.ToDictionary(a => a),
                 databaseFullTextCatallogs!.ToDictionary(a => a),
@@ -1174,6 +1177,23 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
               mergeBoth: (k, n, o) => null);
 
         return result;
+    }
+
+
+    public static SqlPreCommand? SyncPostgresDefaultTextLanguage(Replacements replacements)
+    {
+        if (!Schema.Current.Settings.IsPostgres)
+            return null;
+
+        var culture = (string)Executor.ExecuteScalar("SHOW default_text_search_config;")!;
+
+        if(culture.StartsWith("pg_catalog."))
+            culture = culture.After("pg_catalog.");
+
+        if (culture != FullTextTableIndex.PostgresOptions.DefaultLanguage())
+            return new SqlPreCommandSimple($"ALTER DATABASE \"{Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+
+        return null;
     }
 
 }
