@@ -155,7 +155,7 @@ public static class SqlPreCommandExtensions
         }
     }
 
-    public static int Timeout = 20 * 60;
+    public static int DefaultScriptTimeout = 20 * 60;
 
     public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -211,7 +211,7 @@ public static class SqlPreCommandExtensions
 
     public static void ExecuteScript(string title, string script)
     {
-        using (Connector.CommandTimeoutScope(Timeout))
+        using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
             List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 

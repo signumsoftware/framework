@@ -96,7 +96,7 @@ public class AzureADAuthenticationServer
         var azureAD = ada.GetConfig().AzureAD!;
 
         string stsDiscoveryEndpoint = !azureB2C ? "https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration" :
-            $"https://{azureAD.AzureB2C!.TenantName}.b2clogin.com/{azureAD.AzureB2C.TenantName}.onmicrosoft.com/{azureAD.AzureB2C.SignInSignUp_UserFlow}/v2.0/.well-known/openid-configuration?p={azureAD.AzureB2C.SignInSignUp_UserFlow}";
+            $"https://{azureAD.AzureB2C!.TenantName}.b2clogin.com/{azureAD.AzureB2C.TenantName}.onmicrosoft.com/{azureAD.AzureB2C.GetDefaultSignInFlow()}/v2.0/.well-known/openid-configuration?p={azureAD.AzureB2C.GetDefaultSignInFlow()}";
 
         var configManager = new ConfigurationManager<OpenIdConnectConfiguration>(stsDiscoveryEndpoint, new OpenIdConnectConfigurationRetriever());
         OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;

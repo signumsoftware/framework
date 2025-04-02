@@ -49,7 +49,11 @@ export type FilterOperation =
   "IsIn" |
   "IsNotIn" |
   "ComplexCondition" |
-  "FreeText";
+  "FreeText" |
+  "TsQuery" |
+  "TsQuery_Plain" |
+  "TsQuery_Phrase" |
+  "TsQuery_WebSearch";
 
 export const FilterType: EnumType<FilterType> = new EnumType<FilterType>("FilterType");
 export type FilterType =
@@ -63,7 +67,8 @@ export type FilterType =
   "Model" |
   "Boolean" |
   "Enum" |
-  "Guid";
+  "Guid" |
+  "TsVector";
 
 export const OrderType: EnumType<OrderType> = new EnumType<OrderType>("OrderType");
 export type OrderType =

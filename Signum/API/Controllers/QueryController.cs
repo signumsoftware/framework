@@ -226,6 +226,7 @@ public class QueryTokenTS
         this.queryTokenType = GetQueryTokenType(qt);
         this.isGroupable = qt.IsGroupable;
         this.hasOrderAdapter = QueryUtils.OrderAdapters.Any(a => a(qt) != null);
+        this.tsVectorFor = qt is PgTsVectorColumnToken tsqt ? tsqt.GetColumnsRoutes().Select(a => a.ToString()).ToList() : null;
 
         this.preferEquals = qt.Type == typeof(string) &&
             qt.GetPropertyRoute() is PropertyRoute pr &&
@@ -279,6 +280,8 @@ public class QueryTokenTS
     public bool hasOrderAdapter;
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool preferEquals;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? tsVectorFor;
     public QueryTokenTS? parent;
     public string? propertyRoute;
 }

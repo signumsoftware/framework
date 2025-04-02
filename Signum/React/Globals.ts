@@ -49,8 +49,6 @@ declare global {
 
     distinctBy(this: Array<T>, keySelector?: (element: T) => unknown): T[];
 
-    flatMap<R>(this: Array<T>, selector: (element: T, index: number, array: T[]) => R[]): R[];
-
     clear(this: Array<T>): void;
     groupsOf(this: Array<T>, groupSize: number, elementSize?: (item: T) => number): T[][];
 
@@ -408,17 +406,6 @@ Array.prototype.distinctBy = function (this: any[], keySelector: (element: any) 
       keysFound.add(key);
     }
   });
-
-  return result;
-};
-
-Array.prototype.flatMap = function (this: any[], selector: (element: any, index: number, array: any[]) => any[]): any {
-
-  const result: any[] = [];
-  this.forEach((item, index, array) =>
-    selector(item, index, array).forEach(item2 =>
-      result.push(item2)
-    ));
 
   return result;
 };

@@ -82,6 +82,8 @@ public class AzureActiveDirectoryEmbedded : EmbeddedEntity
         TenantId = DirectoryID.ToString(),
         AzureB2C = AzureB2C == null || AzureB2C.LoginWithAzureB2C == false ? null : AzureB2C.ToAzureB2CConfigTS()
     };
+
+
 }
 
 //https://learn.microsoft.com/en-us/azure/active-directory-b2c/configure-authentication-sample-spa-app
@@ -93,7 +95,7 @@ public class AzureB2CEmbedded : EmbeddedEntity
     public string TenantName { get; set; }
 
     [StringLengthValidator(Max = 100)]
-    public string SignInSignUp_UserFlow { get; set; }
+    public string? SignInSignUp_UserFlow { get; set; }
 
     [StringLengthValidator(Max = 100)]
     public string? SignIn_UserFlow { get; set; }
@@ -112,6 +114,19 @@ public class AzureB2CEmbedded : EmbeddedEntity
         SignUp_UserFlow = SignUp_UserFlow,
         ResetPassword_UserFlow = ResetPassword_UserFlow,
     };
+
+    public string GetDefaultSignInFlow()
+    {
+        return SignInSignUp_UserFlow.DefaultText(SignIn_UserFlow!);
+    }
+
+    protected override string? PropertyValidation(PropertyInfo pi)
+    {
+        if (pi.Name == nameof(SignInSignUp_UserFlow) && SignInSignUp_UserFlow.IsNullOrEmpty() && LoginWithAzureB2C && SignIn_UserFlow.IsNullOrEmpty())
+            return ValidationMessage._0IsNotSet.NiceToString(pi.NiceName());
+
+        return base.PropertyValidation(pi);
+    }
 }
 
 public class RoleMappingEmbedded : EmbeddedEntity
@@ -185,7 +200,7 @@ public class AzureADConfigTS
 public class AzureB2CConfigTS
 {
     public string TenantName;
-    public string SignInSignUp_UserFlow;
+    public string? SignInSignUp_UserFlow;
     public string? SignIn_UserFlow;
     public string? SignUp_UserFlow;
     public string? ResetPassword_UserFlow;

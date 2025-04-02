@@ -14,6 +14,7 @@ export interface HtmlEditorLineProps
   extends Omit<HtmlEditorProps /*& Partial<draftjs.EditorProps>*/, "binding"> {
   ctx: TypeContext<string | null | undefined>;
   htmlEditorRef?: React.Ref<HtmlEditorController>;
+  handleKeybindings?: HtmlEditorProps['handleKeybindings'];
   extraButtons?: () => React.ReactNode;
   extraButtonsBefore?: () => React.ReactNode;
 }
