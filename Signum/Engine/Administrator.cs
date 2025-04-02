@@ -174,6 +174,11 @@ public static class Administrator
             new SqlPreCommandSimple(SynchronizerMessage.EndOfSyncScript.NiceToString()));
     }
 
+    public static bool NeedsSynchrhronization()
+    {
+        return Schema.Current.NeedsSynchronization();
+    }
+
     public static void CreateTemporaryTable<T>()
       where T : IView
     {
