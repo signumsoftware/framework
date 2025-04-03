@@ -52,7 +52,7 @@ public class SelectorModalProxy : ModalProxy
 
     public string[] ButtonNames()
     {
-        return this.Element.FindElements(By.CssSelector("button[name]")).Select(e => e.GetDomProperty("name")).ToArray();
+        return this.Element.FindElements(By.CssSelector("button[name]")).Select(e => e.GetDomProperty("name")!).ToArray();
     }
 
     public static bool IsSelector(IWebElement element)

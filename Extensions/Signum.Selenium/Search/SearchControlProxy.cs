@@ -8,7 +8,7 @@ public class SearchControlProxy
 
     public IWebElement Element { get; private set; }
 
-    public object QueryName => QueryLogic.ToQueryName(this.Element.GetDomAttribute("data-query-key"));
+    public object QueryName => QueryLogic.ToQueryName(this.Element.GetDomAttribute("data-query-key")!);
 
     public FiltersProxy Filters => new FiltersProxy(this.FiltersPanel.Find(), QueryName);
     public ColumnEditorProxy ColumnEditor() => new ColumnEditorProxy(this.Element.FindElement(By.CssSelector(".sf-column-editor")));
@@ -36,7 +36,7 @@ public class SearchControlProxy
 
     public void WaitSearchCompleted(Action searchTrigger)
     {
-        string counter = this.Element.GetDomAttribute("data-search-count");
+        string counter = this.Element.GetDomAttribute("data-search-count")!;
         searchTrigger();
         WaitSearchCompleted(counter);
     }
