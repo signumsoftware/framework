@@ -51,7 +51,8 @@ export const onContextualItems: ((ctx: ContextualItemsContext<Entity>) => Promis
 
 export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Promise<ContextMenuPack> {
 
-  const blockPromises = onContextualItems.map(func => func(ctx));
+  const blockPromises = onContextualItems.map(func => func(ctx)?.catch(a => ({ error: a, func })));
+
   return Promise.all(blockPromises).then(blocks => {
 
     const items: ContextualMenuItem[] = []
@@ -61,7 +62,7 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
         return;
 
       if ("error" in block) {
-        result.push(
+        items.push(
           <Dropdown className="text-danger" onClick={() => ErrorModal.showErrorModal(block.error)}>
             Error in {block.func.name}
           </Dropdown >
@@ -72,8 +73,8 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
       if (block.menuItems == undefined || block.menuItems.length == 0)
         return;
 
-      if (result.length)
-        result.push(<Dropdown.Divider />);
+      if (items.length)
+        items.push(<Dropdown.Divider />);
 
       if (block.header)
         items.push(<Dropdown.Header>{block.header}</Dropdown.Header>);
@@ -83,7 +84,8 @@ export function renderContextualItems(ctx: ContextualItemsContext<Entity>): Prom
     });
 
     const showSearchFunc = ctx.lites[0] && Navigator.getSettings(ctx.lites[0].EntityType)?.showContextualSearchBox;
-    const showSearch = Boolean(showSearchFunc && showSearchFunc(ctx, blocks.notNull()));
+    const blockWithError = blocks.filter(a => a != null && !("error" in a)) as MenuItemBlock[];
+    const showSearch = Boolean(showSearchFunc && showSearchFunc(ctx, blockWithError));
 
     return ({ items, showSearch });
   });

@@ -17,7 +17,7 @@ import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
 import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
 import { SearchControlLoaded } from "./Search";
 import * as ContexualItems from './SearchControl/ContextualItems';
-import { ContextualItemsContext } from './SearchControl/ContextualItems';
+import { ContextualItemsContext, ContextualMenuItem } from './SearchControl/ContextualItems';
 import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
 import { FilterOperation } from "./Signum.DynamicQuery";
 import { EngineMessage, Entity, EntityPack, getToString, JavascriptMessage, Lite, OperationMessage, toLite } from './Signum.Entities';

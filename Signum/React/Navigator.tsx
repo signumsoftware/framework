@@ -1082,7 +1082,7 @@ export class EntitySettings<T extends ModifiableEntity> {
   extraToolbarButtons?: (ctx: ButtonsContext) => (ButtonBarElement | undefined)[];
   enforceFocusInModal?: boolean;
 
-  showContextualSearchBox = (ctx: any, blocks?: MenuItemBlock[]) => Boolean(blocks && blocks.notNull().sum(b => b.menuItems?.length) > 20);
+  showContextualSearchBox = (ctx: any, blocks?: MenuItemBlock[]) : boolean => Boolean(blocks && blocks.notNull().sum(b => b.menuItems?.length) > 20);
 
   constructor(type: Type<T> | string, getViewModule?: (entity: T) => Promise<ViewModule<T>>, options?: EntitySettingsOptions<T>) {
 

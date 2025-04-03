@@ -192,13 +192,14 @@ export namespace QuickLinkClient {
 
     return getQuickLinks(qlCtx).then(links => {
 
-    return {
-      header: QuickLinkMessage.Quicklinks.niceToString(),
-      menuItems: links.map(ql => ({ fullText: ql.text(), menu: ql.toDropDownItem(qlCtx) } as ContextualMenuItem))
-    } as MenuItemBlock;
-  });
-}
+      return {
+        header: QuickLinkMessage.Quicklinks.niceToString(),
+        menuItems: links.map(ql => ({ fullText: ql.text(), menu: ql.toDropDownItem(qlCtx) } as ContextualMenuItem))
+      } as MenuItemBlock;
+    });
+  }
 
+}
 export interface QuickLinkWidgetProps {
   qlc: QuickLinkContext<Entity>
 }
@@ -247,10 +248,10 @@ export function QuickLinkWidget(p: QuickLinkWidgetProps): React.JSX.Element | nu
                   title={QuickLinkMessage.Quicklinks.niceToString()}
                   badgeColor={dd.color}
                   content={<>
-                  {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
-                  {dd.icon && "\u00A0"}
-                  {dd.text(gr.elements)}
-                </>} />
+                    {dd.icon && <FontAwesomeIcon icon={dd.icon} />}
+                    {dd.icon && "\u00A0"}
+                    {dd.text(gr.elements)}
+                  </>} />
                 <Dropdown.Menu align="end">
                   {gr.elements.orderBy(a => a.order).map((a, i) => React.cloneElement(a.toDropDownItem(p.qlc), { key: i }))}
                 </Dropdown.Menu>
@@ -324,7 +325,7 @@ export abstract class QuickLink<T extends Entity> {
   group?: QuickLinkGroup;
   openInAnotherTab?: boolean;
   allowsMultiple?: boolean;
-  
+
 
   static defaultGroup: QuickLinkGroup = {
     name: "quickLinks",
@@ -372,7 +373,7 @@ export class QuickLinkAction<T extends Entity> extends QuickLink<T> {
       ...options
     });
     this.action = action;
-  } 
+  }
 
   handleClick = (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>): void => {
     this.action(ctx, e);
@@ -382,7 +383,7 @@ export class QuickLinkAction<T extends Entity> extends QuickLink<T> {
 export class QuickLinkLink<T extends Entity> extends QuickLink<T> {
   url: (ctx: QuickLinkContext<T>) => (string | Promise<string>);
 
-  constructor(key: string, text : ()=> string, url: (ctx: QuickLinkContext<T>) => (string | Promise<string>), options?: QuickLinkOptions<T>) {
+  constructor(key: string, text: () => string, url: (ctx: QuickLinkContext<T>) => (string | Promise<string>), options?: QuickLinkOptions<T>) {
     super({
       key: key,
       text: text,
@@ -392,7 +393,7 @@ export class QuickLinkLink<T extends Entity> extends QuickLink<T> {
   }
 
   handleClick = async (ctx: QuickLinkContext<T>, e: React.MouseEvent<any>): Promise<void> => {
-    var url = typeof this.url === "string" ? this.url : await this.url(ctx); 
+    var url = typeof this.url === "string" ? this.url : await this.url(ctx);
 
     if (this.openInAnotherTab)
       window.open(AppContext.toAbsoluteUrl(url));
@@ -439,7 +440,7 @@ export class QuickLinkNavigate<T extends Entity> extends QuickLink<T> {
 
   constructor(lite: Lite<Entity>, viewName?: string, options?: QuickLinkOptions<T>) {
     super({
-      key: lite.EntityType, 
+      key: lite.EntityType,
       isVisible: Navigator.isViewable(lite.EntityType),
       text: () => getTypeInfo(lite.EntityType).niceName!,
       ...options
@@ -460,3 +461,4 @@ export class QuickLinkNavigate<T extends Entity> extends QuickLink<T> {
       Navigator.view(this.lite, { buttons: "close", getViewPromise: this.viewName ? (e => this.viewName) : undefined });
   }
 }
+

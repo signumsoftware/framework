@@ -16,7 +16,7 @@ interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   children: React.ReactNode;
 }
 
-export default function ContextMenu({ position, onHide, children, ...rest }: ContextMenuProps) {
+export default function ContextMenu({ position, onHide, children, ...rest }: ContextMenuProps): React.ReactElement {
 
   const { top, left } = position;
 
@@ -94,7 +94,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
   );
 };
 
-ContextMenu.getMouseEventPosition = (e: React.MouseEvent<HTMLTableElement>, container?: Element | null) => {
+export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, container?: Element | null): ContextMenuPosition {
 
   const op = DomUtils.offsetParent(e.currentTarget);
 
@@ -107,4 +107,4 @@ ContextMenu.getMouseEventPosition = (e: React.MouseEvent<HTMLTableElement>, cont
   }) as ContextMenuPosition;
 
   return result;
-}
+};

@@ -20,7 +20,7 @@ import ColumnEditor from './ColumnEditor'
 import MultipliedMessage from './MultipliedMessage'
 import GroupByMessage from './GroupByMessage'
 import { renderContextualItems, ContextualItemsContext, ContextualMenuItem, MarkedRowsDictionary, MarkedRow, SearchableMenuItem, ContextMenuPack } from './ContextualItems'
-import ContextMenu, { ContextMenuPosition } from './ContextMenu'
+import ContextMenu, { ContextMenuPosition, getMouseEventPosition } from './ContextMenu'
 import SelectorModal from '../SelectorModal'
 import { ISimpleFilterBuilder } from './SearchControl'
 import { FilterOperation, RefreshMode, SystemTimeMode } from '../Signum.DynamicQuery';
@@ -429,7 +429,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
 
     this.setState({
       contextualMenu: {
-        position: ContextMenu.getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
+        position: getMouseEventPosition(event, event.currentTarget.querySelector('tbody')),
         columnIndex,
         rowIndex,
         columnOffset: td.tagName == "TH" ? this.getOffset(event.pageX, td.getBoundingClientRect(), Number.MAX_VALUE) : undefined,
@@ -1230,11 +1230,11 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
     );
   }
 
-  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  handleMenuFilterChange = (e: React.ChangeEvent<HTMLInputElement>) : void => {
     this.setState({ contextualMenu: this.state.contextualMenu && Object.assign(this.state.contextualMenu, { filter: e.currentTarget.value }) })
   }
 
-  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>) => {
+  handleMenuFilterKeyDown = (e: React.KeyboardEvent<any>): void => {
     if (!e.shiftKey && e.key == KeyNames.arrowDown) {
 
       e.preventDefault();
@@ -1412,7 +1412,7 @@ export class SearchControlLoaded extends React.Component<SearchControlLoadedProp
             refresh: () => scl.dataChanged(),
             systemTime: scl.props.findOptions.systemTime,
             searchControl: scl,
-          }, { column: { token: summaryToken }, resultIndex: colIndex })}
+          }, { column: { token: summaryToken }, resultIndex: colIndex, columnIndex: colIndex, cellFormatter: formatter })}
         </div>
       );
     }

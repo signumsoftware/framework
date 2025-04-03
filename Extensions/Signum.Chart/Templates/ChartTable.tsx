@@ -102,7 +102,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
 
       const formatter = (qs?.formatters && qs.formatters[co.token!.fullKey]) ?? Finder.formatRules.filter(a => a.isApplicable(co.token!, undefined)).last("FormatRules").formatter(co.token!, undefined);
 
-      let resultIndex : number | "Entity"= resultTable.columns.indexOf(co.token!.fullKey);
+      let resultIndex: number | "Entity" = resultTable.columns.indexOf(co.token!.fullKey);
 
       if (resultIndex == -1 && co.token?.fullKey == "Entity")
         resultIndex = "Entity";
@@ -151,7 +151,8 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
                     }
                     {columns.map((c, j) =>
                       <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx, c!)}
+                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx, c.column.token!,
+                          { column: c.column, resultIndex: c.resultIndex, columnIndex: j, cellFormatter: c.cellFormatter })}
                       </td>)
                     }
                   </tr>
