@@ -78,7 +78,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
   }
 
   return (
-    <Dropdown show={true}
+    <Dropdown show={true} 
       ref={menuRef}
       style={{
         position: 'absolute',
@@ -87,7 +87,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       }}
       {...rest as any}
     >
-      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown}>
+      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown} className="sf-context-menu">
         {children}
       </Dropdown.Menu>
     </Dropdown>

@@ -151,7 +151,7 @@ export default function ChartTableComponent(p: ChartTableProps): React.JSX.Eleme
                     }
                     {columns.map((c, j) =>
                       <td key={j} className={c.cellFormatter && c.cellFormatter.cellClass}>
-                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx, c.column.token!,
+                        {c.resultIndex == -1 || c.cellFormatter == undefined ? undefined : c.cellFormatter.formatter(c.resultIndex == "Entity" ? row.entity : row.columns[c.resultIndex], ctx,
                           { column: c.column, resultIndex: c.resultIndex, columnIndex: j, cellFormatter: c.cellFormatter })}
                       </td>)
                     }
