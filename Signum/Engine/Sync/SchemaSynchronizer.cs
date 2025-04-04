@@ -1191,7 +1191,7 @@ EXEC(@{1})".FormatWith(databaseName.Name, variableName));
             culture = culture.After("pg_catalog.");
 
         if (culture != FullTextTableIndex.PostgresOptions.DefaultLanguage())
-            return new SqlPreCommandSimple($"ALTER DATABASE \"{Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+            return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
 
         return null;
     }
