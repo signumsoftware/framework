@@ -154,7 +154,7 @@ public static class BulkInserter
             DataTable dt = new DataTable();
             var columns = t.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (disableIdentityBehaviour || !c.IdentityBehaviour)).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             using (disableIdentityBehaviour ? Administrator.DisableIdentity(t, behaviourOnly: true) : null)
             {
@@ -180,6 +180,25 @@ public static class BulkInserter
                 return tr.Commit(list.Count);
             }
         }
+    }
+
+    private static DataColumn GetColumn(IColumn c, bool isPostgres)
+    {
+        var dc = new DataColumn(c.Name, ConvertType(c.Type, isPostgres));
+        if (c.Type.UnNullify() == typeof(DateTime))
+            dc.DateTimeMode = ToDataSetDateTime(c.DateTimeKind);
+        return dc;
+    }
+
+    private static DataSetDateTime ToDataSetDateTime(DateTimeKind dateTimeKind)
+    {
+        return dateTimeKind switch
+        {
+            DateTimeKind.Utc => DataSetDateTime.Utc,
+            DateTimeKind.Unspecified => DataSetDateTime.Unspecified,
+            DateTimeKind.Local => DataSetDateTime.Local,
+            _ => throw new UnexpectedValueException(Schema.Current.DateTimeKind)
+        };
     }
 
     private static Type ConvertType(Type type, bool isPostgres)
@@ -311,7 +330,7 @@ public static class BulkInserter
             var dt = new DataTable();
             var columns = mlistTable.Columns.Values.Where(c => !(c is SystemVersionedInfo.SqlServerPeriodColumn) && (!c.IdentityBehaviour || disableIdentityBehaviour)).ToList();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             var list = mlistElements.ToList();
 
@@ -372,7 +391,7 @@ public static class BulkInserter
             var columns = t.Columns.Values.ToList();
             DataTable dt = new DataTable();
             foreach (var c in columns)
-                dt.Columns.Add(new DataColumn(c.Name, ConvertType(c.Type, isPostgres)));
+                dt.Columns.Add(GetColumn(c, isPostgres));
 
             foreach (var e in entities)
             {
