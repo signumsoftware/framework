@@ -47,7 +47,7 @@ public class EntityComboProxy : EntityBaseProxy
     public List<Lite<Entity>?> Options()
     {
         return this.ComboElement.Options
-            .Select(o => Lite.Parse(o.GetDomProperty("value"))?.Do(l => l.SetModel(o.Text)))
+            .Select(o => Lite.Parse(o.GetDomProperty("value")!)?.Do(l => l.SetModel(o.Text)))
             .ToList();
     }
 

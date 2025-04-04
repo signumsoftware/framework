@@ -9,21 +9,38 @@ namespace Signum.Authorization.ResetPassword;
 public class ResetPasswordController : ControllerBase
 {
     [HttpPost("api/auth/forgotPasswordEmail"), SignumAllowAnonymous]
-    public string? ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
+    public ForgotPasswordResponse ForgotPasswordEmail([Required, FromBody] ForgotPasswordRequest request)
     {
-        if (string.IsNullOrEmpty(request.eMail))
-            return LoginAuthMessage.EnterYourUserEmail.NiceToString();
-
         try
         {
+            if (string.IsNullOrEmpty(request.eMail))
+                throw new ApplicationException(LoginAuthMessage.EnterYourUserEmail.NiceToString());
+
             ResetPasswordRequestLogic.SendResetPasswordRequestEmail(request.eMail);
+
+            return new ForgotPasswordResponse()
+            {
+                success = true,
+                title = LoginAuthMessage.RequestAccepted.NiceToString(),
+                message = AuthServer.AvoidExplicitErrorMessages ? ResetPasswordMessage.IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword.NiceToString()
+                    : LoginAuthMessage.WeHaveSentYouAnEmailToResetYourPassword.NiceToString(),
+            };
         }
         catch (Exception ex)
         {
-            return ex.Message;
+            return new ForgotPasswordResponse()
+            {
+                success = false,
+                message = ex.Message,
+            };
         }
+    }
 
-        return null;
+    public class ForgotPasswordResponse
+    { 
+        public bool success { get; set; }
+        public string message { get; set; }
+        public string? title { get; set; }
     }
 
     [HttpPost("api/auth/resetPassword"), SignumAllowAnonymous]

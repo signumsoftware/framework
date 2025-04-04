@@ -134,7 +134,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
 
     public string GetChanges()
     {
-        return this.Element.GetDomAttribute("data-changes");
+        return this.Element.GetDomAttribute("data-changes")!;
     }
 
     public void WaitEntityInfoChanges(Action action, string actionDescription, int? index = null)
@@ -152,7 +152,7 @@ public abstract class EntityBaseProxy : BaseLineProxy
         var element = index == null ? Element :
             this.Element.FindElements(By.CssSelector("[data-entity]")).ElementAt(index.Value);
 
-        return element.GetDomAttribute("data-entity");
+        return element.GetDomAttribute("data-entity")!;
     }
 
     protected EntityInfoProxy? EntityInfoInternal(int? index) => EntityInfoProxy.Parse(EntityInfoString(index));

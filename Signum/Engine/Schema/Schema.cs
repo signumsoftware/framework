@@ -466,6 +466,44 @@ public class Schema : IImplementationsFinder
         }
     }
 
+    public bool NeedsSynchronization()
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Synchronizing == null)
+            return false;
+
+        using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
+        using (ExecutionMode.Global())
+        {
+            Replacements replacements = new Replacements()
+            {
+                Interactive = false,
+                ReplaceDatabaseName = null,
+                SchemaOnly = false
+            };
+
+            return Synchronizing
+                .GetInvocationListTyped()
+                .Any(e =>
+                {
+                    SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
+                    Console.Write(".");
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
+                    Console.Write("...");
+
+                    var result = e(replacements);
+
+                    if (result == null)
+                        SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
+                    else
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes"); 
+
+                    return result != null;
+                });
+        }
+    }
+
     public Table View<T>() where T : IView
     {
         return View(typeof(T));
@@ -623,6 +661,7 @@ public class Schema : IImplementationsFinder
 
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.CreatePostgresExtensions;
+        Generating += SchemaGenerator.CreatePostgresDefaultTextLanguage;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
@@ -633,6 +672,7 @@ public class Schema : IImplementationsFinder
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
         Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+        Synchronizing += SchemaSynchronizer.SyncPostgresDefaultTextLanguage;
 
         Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;

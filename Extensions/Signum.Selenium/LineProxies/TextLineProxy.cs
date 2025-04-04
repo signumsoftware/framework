@@ -28,7 +28,7 @@ public abstract class TextBoxBaseLineProxy : BaseLineProxy
     {
         var textLine = InputLocator.Find(); 
 
-        return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value");
+        return /*textLine.GetDomAttribute("data-value") ??*/ textLine.GetDomProperty("value")!;
     }
 
     public bool IsReadonly()
