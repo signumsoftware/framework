@@ -17,7 +17,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
 
     public static Func<Exception, bool> ShouldLogException = e => e is not OperationCanceledException;
 
-    public static Func<Exception, HttpError> CustomHttpErrorFactory = ex => new HttpError(ex);
+    public static Func<Exception, ActionContext, HttpError> CustomHttpErrorFactory = (ex, ac) => new HttpError(ex);
 
     public static Action<ActionContext, ExceptionEntity>? ApplyMixins = null;
 
@@ -43,7 +43,7 @@ public class SignumExceptionFilterAttribute : IAsyncResourceFilter
                 using (ci == null ? null : CultureInfoUtils.ChangeBothCultures(ci))
                 {
                     statusCode = GetStatus(context.Exception.GetType());
-                    error = CustomHttpErrorFactory(context.Exception);
+                    error = CustomHttpErrorFactory(context.Exception, context);
                 } //No await inside
 
                 response.StatusCode = (int)statusCode;
