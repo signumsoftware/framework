@@ -325,6 +325,6 @@ public class ObjectName : IEquatable<ObjectName>
 
 public struct ObjectNameOptions
 {
-    public string DatabaseNameReplacement;
+    public string? DatabaseNameReplacement;
     public bool AvoidDatabaseName;
 }

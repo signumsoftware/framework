@@ -137,7 +137,7 @@ public static class SchemaGenerator
         if (!Schema.Current.Settings.IsPostgres)
             return null;
 
-        return new SqlPreCommandSimple($"ALTER DATABASE \"{Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
+        return new SqlPreCommandSimple($"ALTER DATABASE \"{ObjectName.CurrentOptions.DatabaseNameReplacement ?? Connector.Current.DatabaseName()}\" SET default_text_search_config = '{FullTextTableIndex.PostgresOptions.DefaultLanguage()}';");
     }
 
     public static SqlPreCommand? SnapshotIsolation()
