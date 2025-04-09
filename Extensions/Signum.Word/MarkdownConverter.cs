@@ -9,18 +9,15 @@ namespace Signum.Word;
 
 public static class MarkdownConverter
 {
-    private static MarkdownPipelineBuilder builder = new MarkdownPipelineBuilder();
+    private static readonly MarkdownPipeline pipeline = new MarkdownPipelineBuilder()
+        .UseAdvancedExtensions()
+        .UseSoftlineBreakAsHardlineBreak()
+        .Build();
 
     public static string MarkdownToHtml(string markdown)
     {
         if (string.IsNullOrEmpty(markdown))
             return string.Empty;
-
-        builder.Extensions.Add(new MyParagraphExtension());
-        var pipeline = builder
-            .UseAdvancedExtensions()
-            .UseSoftlineBreakAsHardlineBreak()
-            .Build();
 
         string html = Markdown.ToHtml(markdown, pipeline);
 
@@ -55,7 +52,8 @@ public static class MarkdownConverter
             .Replace("<h1>", "\r\n<h1>")
             .Replace("<h2>", "\r\n<h2>")
             .Replace("<h3>", "\r\n<h3>")
-            .Replace("<h4>", "\r\n<h4>");
+            .Replace("<h4>", "\r\n<h4>")
+            .Replace("\n", "");
     }
 }
 
