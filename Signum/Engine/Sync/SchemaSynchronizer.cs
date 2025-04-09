@@ -291,6 +291,24 @@ public static class SchemaSynchronizer
 
             }
 
+            SqlPreCommand? UpdateForeignKeys(ObjectName tableName, string newId, string oldId)
+            {
+                return (from t in databaseTables.Values
+                        from c in t.Columns.Values
+                        where c.ForeignKey != null && c.ForeignKey.TargetTable.Equals(tableName)
+                        select isPostgres ? new SqlPreCommandSimple($"""
+                            UPDATE {t.Name} s 
+                            SET {c.Name.SqlEscape(isPostgres)} = t.{newId.SqlEscape(isPostgres)} 
+                            FROM {tableName} t WHERE s.{c} = t.{oldId}
+                            """) :
+                        new SqlPreCommandSimple($"""
+                            UPDATE s
+                            SET {c.Name.SqlEscape(isPostgres)} = t.{newId.SqlEscape(isPostgres)}
+                            FROM {t.Name} s 
+                            JOIN {tableName} t ON s.{c} = t.{oldId}
+                            """)).Combine(Spacing.Double);
+
+            }
 
             SqlPreCommand? tables =
                     Synchronizer.SynchronizeScript(
@@ -324,7 +342,8 @@ public static class SchemaSynchronizer
                         var dropPrimaryKey = diffPK != null && (modelPK == null || !diffPK.IndexEquals(dif, modelPK, sqlBuilder.IsPostgres)) ?
                         SqlPreCommand.Combine(Spacing.Simple,
                             DropForeignKeys(tab.Name),
-                            sqlBuilder.DropIndex(tab.Name, diffPK)) :
+                            sqlBuilder.DropIndex(tab.Name, diffPK)
+                            ) :
                          diffPK != null && modelPK != null && diffPK.IndexName != modelPK.IndexName ? sqlBuilder.RenameForeignKey(tab.Name, new ObjectName(dif.Name.Schema, diffPK.IndexName, sqlBuilder.IsPostgres), modelPK.IndexName).Do(a => a.GoBefore = true) :
                         null;
 
@@ -406,7 +425,10 @@ public static class SchemaSynchronizer
                                     }
                                     else
                                     {
-                                        var update = difCol.PrimaryKey ? null : UpdateForeignKeyTypeChanged(sqlBuilder, tab, dif, tabCol, difCol, ChangeName, preRenameColumnsList) ?? UpdateCustom(tab, tabCol, difCol);
+                                        var update = difCol.PrimaryKey ? 
+                                            (difCol.CompatibleTypes(tabCol) && difCol.Identity != tabCol.Identity ? UpdateForeignKeys(tab.Name, tabCol.Name, difCol.Name) : null): 
+                                            UpdateForeignKeyTypeChanged(sqlBuilder, tab, dif, tabCol, difCol, ChangeName, preRenameColumnsList) ?? UpdateCustom(tab, tabCol, difCol);
+
                                         var drop = sqlBuilder.AlterTableDropColumn(tab, difCol.Name);
 
                                         delayedUpdates.Add(update);

@@ -13,10 +13,11 @@ export interface ContextMenuPosition {
 interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
   onHide: () => void;
+  alignRight?: boolean;
   children: React.ReactNode;
 }
 
-export default function ContextMenu({ position, onHide, children, ...rest }: ContextMenuProps): React.ReactElement {
+export default function ContextMenu({ position, onHide, children, alignRight, ...rest }: ContextMenuProps): React.ReactElement {
 
   const { top, left } = position;
 
@@ -33,8 +34,8 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
 
-      let adjustedTop = Math.min(top, adjustedPosition.top);
-      let adjustedLeft = Math.min(left, adjustedPosition.left);
+      let adjustedTop = top;
+      let adjustedLeft = left;
 
       if (adjustedTop + menuHeight > viewportHeight) {
         adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight);
@@ -83,7 +84,7 @@ export default function ContextMenu({ position, onHide, children, ...rest }: Con
       style={{
         position: 'absolute',
         top: `${adjustedPosition.top}px`,
-        left: `${adjustedPosition.left}px`,
+        left: alignRight ? `${adjustedPosition.left - (menuRef.current?.scrollWidth ?? 100)}px` : `${adjustedPosition.left}px`,
       }}
       {...rest as any}
     >
@@ -108,3 +109,17 @@ export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, con
 
   return result;
 };
+
+export function getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
+  const op = DomUtils.offsetParent(button);
+
+  const recOp = op!.getBoundingClientRect();
+  const recButton = button.getBoundingClientRect();
+  var result = ({
+    left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
+    top: recButton.top + recButton.height - recOp.top,
+    width: (op ? op.offsetWidth : window.outerWidth)
+  }) as ContextMenuPosition;
+
+  return result;
+}

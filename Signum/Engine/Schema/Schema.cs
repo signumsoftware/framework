@@ -679,7 +679,7 @@ public class Schema : IImplementationsFinder
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;
 
-        OnInvalidateCache += GlobalLazy.ResetAll;
+        OnInvalidateCache += () => GlobalLazy.ResetAll(systemLog: false);
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
     }

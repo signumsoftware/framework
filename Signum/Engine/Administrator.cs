@@ -153,7 +153,7 @@ public static class Administrator
 
         command.OpenSqlFileRetry();
 
-        GlobalLazy.ResetAll();
+        GlobalLazy.ResetAll(systemLog: false);
         Schema.Current.InvalidateMetadata();
         Schema.Current.InvalidateCache();
     }
