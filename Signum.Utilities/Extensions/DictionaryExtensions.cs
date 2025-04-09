@@ -194,6 +194,42 @@ public static class DictionaryExtensions
         return result;
     }
 
+
+
+    public static ConcurrentDictionary<K, T> ToConcurrentDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, string? errorContext = null)
+      where K : notnull
+    {
+        ConcurrentDictionary<K, T> result = new ConcurrentDictionary<K, T>();
+        result.AddRange(source, keySelector, v => v, errorContext ?? typeof(K).TypeName());
+        return result;
+    }
+
+    public static ConcurrentDictionary<K, V> ToConcurrentDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, string? errorContext = null)
+        where K : notnull
+    {
+        ConcurrentDictionary<K, V> result = new ConcurrentDictionary<K, V>();
+        result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
+        return result;
+    }
+
+    public static ConcurrentDictionary<K, T> ToConcurrentDictionary<T, K>(this IEnumerable<T> source, Func<T, K> keySelector, IEqualityComparer<K> comparer, string? errorContext = null)
+        where K : notnull
+    {
+        ConcurrentDictionary<K, T> result = new ConcurrentDictionary<K, T>(comparer);
+        result.AddRange(source, keySelector, v => v, errorContext ?? typeof(K).TypeName());
+        return result;
+    }
+
+    public static ConcurrentDictionary<K, V> ToConcurrentDictionary<T, K, V>(this IEnumerable<T> source, Func<T, K> keySelector, Func<T, V> elementSelector, IEqualityComparer<K> comparer, string? errorContext = null)
+        where K : notnull
+    {
+        ConcurrentDictionary<K, V> result = new ConcurrentDictionary<K, V>(comparer);
+        result.AddRange(source, keySelector, elementSelector, errorContext ?? typeof(K).TypeName());
+        return result;
+    }
+
+
+
     public static FrozenDictionary<K, V> ToFrozenDictionaryEx<K, V>(this IEnumerable<KeyValuePair<K, V>> collection, string? errorContext = null)
         where K : notnull => collection.ToDictionaryEx(errorContext).ToFrozenDictionary();
 

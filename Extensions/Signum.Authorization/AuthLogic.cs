@@ -684,7 +684,7 @@ public static class AuthLogic
             }
         }
 
-        GlobalLazy.ResetAll();
+        GlobalLazy.ResetAll(systemLog: false);
 
         {
             Console.WriteLine("Part 2: Synchronize roles relationships and trivial merges");
@@ -744,7 +744,7 @@ public static class AuthLogic
             }
         }
 
-        GlobalLazy.ResetAll();
+        GlobalLazy.ResetAll(systemLog: false);
     }
 
 
@@ -809,7 +809,7 @@ public static class AuthLogic
             else
                 command.OpenSqlFileRetry();
 
-            GlobalLazy.ResetAll();
+            GlobalLazy.ResetAll(systemLog: false);
         }
 
         void Export()

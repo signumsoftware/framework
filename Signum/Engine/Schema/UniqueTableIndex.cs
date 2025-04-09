@@ -142,7 +142,12 @@ public class FullTextTableIndex : TableIndex
     public class PostgresOptions
     {
         public string TsVectorColumnName = PostgresTsVectorColumn.DefaultTsVectorColumn;
-        public string Configuration = Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+        public string Configuration = DefaultLanguage();
+
+        public static string DefaultLanguage()
+        {
+            return Schema.Current.ForceCultureInfo?.EnglishName.ToLower().Try(a => a.TryBefore(" ") ?? a) ?? "english";
+        }
 
         public Dictionary<string, NpgsqlTsVector.Lexeme.Weight> Weights = new Dictionary<string, NpgsqlTsVector.Lexeme.Weight>(); //If not set it will use the order A, B, C, D, D, D...
         internal void DefaultWeights(IColumn[] columns)
@@ -181,7 +186,7 @@ public class FullTextTableIndex : TableIndex
         var pg = this.Postgres;
         pg.DefaultWeights(Columns);
 
-        var exp = Columns.ToString(a => $"setweight(to_tsvector('{pg.Configuration}'::regconfig, COALESCE({a.Name.SqlEscape(true)}, '')::text), '{pg.Weights.GetOrThrow(a.Name)}'::\"char\")", " || ");
+        var exp = Columns.ToString(a => $"setweight(to_tsvector('{pg.Configuration}'::regconfig, (COALESCE({a.Name.SqlEscape(true)}, ''::character varying))::text), '{pg.Weights.GetOrThrow(a.Name)}'::\"char\")", " || ");
 
         return new ComputedColumn(exp, persisted: true);
     }
@@ -190,19 +195,21 @@ public class FullTextTableIndex : TableIndex
     {
         if (this.Table.Name.IsPostgres)
         {
-          yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName) { ComputedColumn = this.GetComputedColumn() };
+          yield return new PostgresTsVectorColumn(this.Postgres.TsVectorColumnName, this.Columns) { ComputedColumn = this.GetComputedColumn() };
         }
     }
 }
 
 public class PostgresTsVectorColumn : IColumn
 {
-    public static string DefaultTsVectorColumn = "tsvector_col";
+    public static string DefaultTsVectorColumn = "tsvector";
 
+    public IColumn[] Columns { get; set; }
 
-    public PostgresTsVectorColumn(string name)
+    public PostgresTsVectorColumn(string name, IColumn[] columns)
     {
         this.Name = name;
+        this.Columns = columns;
     }
 
     public string Name { get; private set; }

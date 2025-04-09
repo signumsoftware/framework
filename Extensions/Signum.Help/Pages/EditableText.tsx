@@ -7,14 +7,16 @@ import { classes } from '@framework/Globals';
 import { HelpImageEntity, HelpMessage } from '../Signum.Help';
 import HtmlEditor from '../../Signum.HtmlEditor/HtmlEditor';
 import { ErrorBoundary } from '@framework/Components';
-import LinksPlugin from '../../Signum.HtmlEditor/Plugins/LinksPlugin';
-import BasicCommandsPlugin from '../../Signum.HtmlEditor/Plugins/BasicCommandsPlugin';
-import ImagePlugin, { ImageConverter } from '../../Signum.HtmlEditor/Plugins/ImagePlugin';
 import { FilePathEmbedded, FileTypeSymbol } from '../../Signum.Files/Signum.Files';
 import { FilesClient } from '../../Signum.Files/FilesClient';
 import { IBinding, getSymbol } from '@framework/Reflection';
 import { FileImage } from '../../Signum.Files/Components/FileImage';
 import { toFileEntity } from '../../Signum.Files/Components/FileUploader';
+import { ListExtension } from '../../Signum.HtmlEditor/Extensions/ListExtension';
+import { BasicCommandsExtensions } from '../../Signum.HtmlEditor/Extensions/BasicCommandsExtension';
+import { AutoLinkExtension } from '../../Signum.HtmlEditor/Extensions/LinkExtension/AutoLinkExtension';
+import { ImageConverter } from '../../Signum.HtmlEditor/Extensions/ImageExtension/ImageConverter';
+import { ImageExtension } from '../../Signum.HtmlEditor/Extensions/ImageExtension';
 
 export function EditableTextComponent({ ctx, defaultText, onChange, defaultEditable }: { ctx: TypeContext<string | null>, defaultText?: string, onChange?: () => void, defaultEditable?: boolean }): React.JSX.Element {
   var [editable, setEditable] = React.useState(defaultEditable || false);
@@ -59,9 +61,9 @@ export function HelpHtmlEditor(p: { binding: IBinding<string | null | undefined>
     <ErrorBoundary>
       <HtmlEditor
         binding={p.binding} plugins={[
-          new LinksPlugin(),
-          new BasicCommandsPlugin(),
-          new ImagePlugin(new InlineImageConverter())
+          new AutoLinkExtension(),
+          new BasicCommandsExtensions(),
+          new ImageExtension(new InlineImageConverter())
         ]} />
     </ErrorBoundary>
   );
@@ -83,9 +85,9 @@ export function HtmlViewer(p: { text: string | null | undefined; htmlAttributes?
           binding={binding as any}
           htmlAttributes={p.htmlAttributes}
           toolbarButtons={c => null} plugins={[
-            new LinksPlugin(),
-            new BasicCommandsPlugin(),
-            new ImagePlugin(new InlineImageConverter())
+            new AutoLinkExtension(),
+            new BasicCommandsExtensions(),
+            new ImageExtension(new InlineImageConverter())
           ]} />
       </ErrorBoundary>
     </div>
@@ -103,6 +105,20 @@ export class InlineImageConverter implements ImageConverter<ImageInfo>{
   pr: PropertyRoute;
   constructor() {
     this.pr = HelpImageEntity.propertyRouteAssert(a => a.file);;
+  }
+
+  toElement(val: ImageInfo): HTMLElement | undefined {
+    const img = document.createElement("img");
+    if (val.binaryFile) {
+      img.setAttribute("data-binary-file", val.binaryFile);
+      img.setAttribute("data-file-name", val.fileName || "");
+      return img;
+    }
+
+    if (val.inlineImageId) {
+      img.setAttribute("data-attachment-id", val.inlineImageId);
+      return img;
+    }
   }
 
   uploadData(blob: Blob): Promise<ImageInfo> {

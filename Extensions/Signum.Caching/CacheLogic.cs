@@ -79,9 +79,9 @@ public static class CacheLogic
 
             sb.Schema.SchemaCompleted += () => Schema_SchemaCompleted(sb);
             sb.Schema.BeforeDatabaseAccess += StartSqlDependencyAndEnableBrocker;
-            sb.Schema.InvalidateCache +=  ()=> CacheLogic.ForceReset();
+            sb.Schema.OnInvalidateCache += () => CacheLogic.ForceReset();
 
-            GlobalLazy.OnResetAll += ()=> CacheLogic.ForceReset();
+            GlobalLazy.OnResetAll += systemLog => CacheLogic.ForceReset(systemLog);
         }
     }
 
@@ -931,8 +931,8 @@ Remember that the Start could be called with an empty database!");
 
     public static void InvalidateAll(bool systemLog)
     {
-        CacheLogic.ForceReset(systemLog: systemLog);
-        GlobalLazy.ResetAll();
+        CacheLogic.ForceReset(systemLog);
+        GlobalLazy.ResetAll(systemLog);
         Schema.Current.InvalidateMetadata();
         GC.Collect(2);
     }

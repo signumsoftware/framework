@@ -6,6 +6,8 @@ using Signum.Utilities.Reflection;
 using System.Diagnostics.CodeAnalysis;
 using Signum.API.Json;
 using System.Collections.Frozen;
+using NpgsqlTypes;
+using Signum.DynamicQuery.Tokens;
 
 namespace Signum.API;
 
@@ -65,7 +67,7 @@ public static class ReflectionServer
     {
         DescriptionManager.Invalidated += InvalidateCache;
         Schema.Current.OnMetadataInvalidated += InvalidateCache;
-        Schema.Current.InvalidateCache += InvalidateCache;
+        Schema.Current.OnInvalidateCache += InvalidateCache;
 
         Schema.Current.SchemaCompleted += () =>
         {
@@ -501,7 +503,7 @@ public class TypeReferenceTS
     [SetsRequiredMembers]
     public TypeReferenceTS(Type type, Implementations? implementations)
     {
-        this.IsCollection = type != typeof(string) && type != typeof(byte[]) && type.ElementType() != null;
+        this.IsCollection = QueryToken.IsCollection(type);
 
         var clean = type == typeof(string) ? type : (type.ElementType() ?? type);
         this.IsLite = clean.IsLite();

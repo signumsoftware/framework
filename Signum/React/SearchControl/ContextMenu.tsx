@@ -1,118 +1,125 @@
 import * as React from 'react'
-import * as ReactDOM from 'react-dom'
-import { classes, combineFunction, DomUtils } from '../Globals'
-import * as PropTypes from "prop-types";
-import { DropdownItemProps } from 'react-bootstrap/DropdownItem';
+import { classes, DomUtils } from '../Globals'
+import { Dropdown } from 'react-bootstrap';
+import { useForceUpdate } from '../Hooks';
+
 
 export interface ContextMenuPosition {
-  left: number;
   top: number;
-  width: number; //Necessary for RTL
-  children: React.ReactElement[]
+  left: number;
+  maxTop?: number;
 }
 
-export interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
+interface ContextMenuProps extends React.HTMLAttributes<HTMLUListElement> {
   position: ContextMenuPosition;
-  onHide: (e: MouseEvent | TouchEvent) => void;
+  onHide: () => void;
   alignRight?: boolean;
   children: React.ReactNode;
-  ref?: React.Ref<ContextMenu>;
 }
 
-export default class ContextMenu extends React.Component<ContextMenuProps> {
-  handleToggle = (): void => {
+export default function ContextMenu({ position, onHide, children, alignRight, ...rest }: ContextMenuProps): React.ReactElement {
 
+  const { top, left } = position;
+
+  const forceUpdate = useForceUpdate();
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const [adjustedPosition, setAdjustedPosition] = React.useState({ left, top });
+
+
+  React.useEffect(() => {
+
+    if (menuRef.current) {
+      const menuWidth = menuRef.current.scrollWidth;
+      const menuHeight = menuRef.current.scrollHeight;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let adjustedTop = top;
+      let adjustedLeft = left;
+
+      if (adjustedTop + menuHeight > viewportHeight) {
+        adjustedTop = Math.max(position.maxTop ?? 14, viewportHeight - menuHeight);
+      }
+
+      if (adjustedLeft + menuWidth > viewportWidth) {
+        adjustedLeft = Math.max(14, viewportWidth - menuWidth - 14);
   }
 
-  getChildContext(): {
-      toggle: () => void;
-  } {
-    return { toggle: this.handleToggle };
-  }
-
-  static childContextTypes: {
-      toggle: PropTypes.Requireable<(...args: any[]) => any>;
-  } = { "toggle": PropTypes.func };
-
-  static getPositionEvent(e: React.MouseEvent<any>): ContextMenuPosition {
-
-    const op = DomUtils.offsetParent(e.currentTarget);
-
-    const rec = op?.getBoundingClientRect();
-
-    var result = ({
-      left: rec == null ? e.pageX : e.clientX - rec.left,
-      top: rec == null ? e.pageY : e.clientY - rec.top,
-      width: (op ? op.offsetWidth : window.innerWidth)
-    }) as ContextMenuPosition;
-
-    return result;
-  }
-
-  static getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
-    const op = DomUtils.offsetParent(button);
-
-    const recOp = op!.getBoundingClientRect();
-    const recButton = button.getBoundingClientRect();
-    var result = ({
-      left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
-      top: recButton.top + recButton.height - recOp.top,
-      width: (op ? op.offsetWidth : window.outerWidth)
-    }) as ContextMenuPosition;
-
-    return result;
-  }
-
-  render(): React.JSX.Element {
-
-    const { position, onHide, ref, alignRight, ...props } = this.props;
-
-    const style: React.CSSProperties = { zIndex: 9999, display: "block", position: "absolute" };
-
-    style.top = position.top + "px";
-    if (document.body.className.contains("rtl-mode") !== Boolean(alignRight))
-      style.right = (position.width - position.left - 14 /*HACK*/) + "px";
-    else
-      style.left = position.left + "px";
-
-    const childrens = React.Children.map(this.props.children,
-      (rc) => {
-        let c = rc as React.ReactElement<DropdownItemProps>;
-        return c && React.cloneElement(c, { onClick: e => { c.props.onClick && c.props.onClick(e); onHide(e.nativeEvent); } } as Partial<DropdownItemProps>);
-      });
-
-    const ul = (
-      <div {...props as any} className={classes(props.className, "dropdown-menu sf-context-menu")} style={style}>
-        {childrens}
-      </div>
-    );
-
-    return ul;
-  }
-
-
-
-  componentDidMount(): void {
-
-    document.addEventListener('click', this.handleDocumentClick, true);
-    document.addEventListener('touchstart', this.handleDocumentClick, true);
-  }
-
-  componentWillUnmount(): void {
-    document.removeEventListener('click', this.handleDocumentClick, true);
-    document.removeEventListener('touchstart', this.handleDocumentClick, true);
-  }
-
-  handleDocumentClick = (e: MouseEvent | TouchEvent): void => {
-    if ((e as MouseEvent).which === 3)
-      return;
-
-    const container = ReactDOM.findDOMNode(this) as HTMLElement;
-    if (container.contains(e.target as Node) &&
-      container !== e.target) {
-      return;
+      setAdjustedPosition({ top: adjustedTop, left: adjustedLeft });
     }
+  }, [React.Children.count(children), left, top, menuRef.current?.scrollWidth, menuRef.current?.scrollHeight, window.innerWidth, window.innerHeight]);
 
-    this.props.onHide(e);
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        onHide();
   }
+    };
+
+    const oldResize = window.onresize;
+
+    window.onresize = (e) => { oldResize?.call(window, e); forceUpdate(); };
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.onresize = oldResize;
+    };
+  }, [onHide]);
+
+
+  const handleMenuClick = (e: React.MouseEvent<HTMLElement>) => {
+    (e.target as HTMLElement).matches(".dropdown-item:not(input, .disabled)") && onHide();
+  }
+
+  const handleKeyDown = (event: React.KeyboardEvent<any>) => {
+    if (event.key === 'Escape') {
+      onHide();
+    }
+  }
+
+  return (
+    <Dropdown show={true} 
+      ref={menuRef}
+      style={{
+        position: 'absolute',
+        top: `${adjustedPosition.top}px`,
+        left: alignRight ? `${adjustedPosition.left - (menuRef.current?.scrollWidth ?? 100)}px` : `${adjustedPosition.left}px`,
+      }}
+      {...rest as any}
+    >
+      <Dropdown.Menu onClick={handleMenuClick} onKeyDown={handleKeyDown} className="sf-context-menu">
+        {children}
+      </Dropdown.Menu>
+    </Dropdown>
+  );
+};
+
+export function getMouseEventPosition(e: React.MouseEvent<HTMLTableElement>, container?: Element | null): ContextMenuPosition {
+
+  const op = DomUtils.offsetParent(e.currentTarget);
+
+  const rec = op?.getBoundingClientRect();
+
+  var result = ({
+    left: rec == null ? e.pageX : e.clientX - rec.left,
+    top: rec == null ? e.pageY : e.clientY - rec.top,
+    maxTop: container?.getBoundingClientRect().top, //table's body top
+  }) as ContextMenuPosition;
+
+  return result;
+};
+
+export function getPositionElement(button: HTMLElement, alignRight?: boolean): ContextMenuPosition {
+  const op = DomUtils.offsetParent(button);
+
+  const recOp = op!.getBoundingClientRect();
+  const recButton = button.getBoundingClientRect();
+  var result = ({
+    left: recButton.left + (alignRight ? recButton.width : 0) - recOp.left,
+    top: recButton.top + recButton.height - recOp.top,
+    width: (op ? op.offsetWidth : window.outerWidth)
+  }) as ContextMenuPosition;
+
+  return result;
 }

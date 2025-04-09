@@ -60,7 +60,7 @@ public class EnumLineProxy : BaseLineProxy
         {
             var elem = this.SelectLocator.Find();
 
-            strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetDomProperty("value").ToString() :
+            strValue = elem.TagName == "select" ? elem.SelectElement().SelectedOption.GetDomProperty("value")! :
                 elem.GetDomAttribute("data-value");
 
         }

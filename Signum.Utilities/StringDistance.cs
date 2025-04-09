@@ -375,21 +375,24 @@ public class StringDistance
         if (comparer == null)
             comparer = EqualityComparer<T>.Default;
 
-        int M1 = text.Length + 1;
-        int M2 = pattern.Length + 1;
-
-        var num = ResizeArray(M1, M2);
-
         int rows = text.Length + 1;
         int cols = pattern.Length + 1;
 
-        _cachedNum = new int[rows, cols];
+        var num = ResizeArray(rows, cols);
+
+        for (int i = 0; i < rows; i++)
+            num[i, 0] = 0;
+        for (int j = 0; j < cols; j++)
+            num[0, j] = 0;
+
         int maxScore = 0;
 
         // Scoring parameters
         int match = 2;       // Score for a match
         int mismatch = -1;   // Penalty for a mismatch
         int gap = -1;        // Penalty for a gap
+
+        
 
         for (int i = 1; i < rows; i++)
         {
@@ -399,12 +402,12 @@ public class StringDistance
                 int scoreMatch = comparer.Equals(text[i - 1], pattern[j - 1]) ? match : mismatch;
 
                 // Calculate scores based on possible options
-                int diag = _cachedNum[i - 1, j - 1] + scoreMatch; // Diagonal (match/mismatch)
-                int up = _cachedNum[i - 1, j] + gap;              // Up (gap in text)
-                int left = _cachedNum[i, j - 1] + gap;            // Left (gap in pattern)
+                int diag = num[i - 1, j - 1] + scoreMatch; // Diagonal (match/mismatch)
+                int up = num[i - 1, j] + gap;              // Up (gap in text)
+                int left = num[i, j - 1] + gap;            // Left (gap in pattern)
                 int maxCellScore = Math.Max(0, Math.Max(diag, Math.Max(up, left)));
 
-                _cachedNum[i, j] = maxCellScore;
+                num[i, j] = maxCellScore;
 
                 // Track the highest score for alignment
                 maxScore = Math.Max(maxScore, maxCellScore);

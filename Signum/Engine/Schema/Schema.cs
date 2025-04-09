@@ -466,6 +466,44 @@ public class Schema : IImplementationsFinder
         }
     }
 
+    public bool NeedsSynchronization()
+    {
+        OnBeforeDatabaseAccess();
+
+        if (Synchronizing == null)
+            return false;
+
+        using (CultureInfoUtils.ChangeBothCultures(ForceCultureInfo))
+        using (ExecutionMode.Global())
+        {
+            Replacements replacements = new Replacements()
+            {
+                Interactive = false,
+                ReplaceDatabaseName = null,
+                SchemaOnly = false
+            };
+
+            return Synchronizing
+                .GetInvocationListTyped()
+                .Any(e =>
+                {
+                    SafeConsole.WriteColor(ConsoleColor.White, e.Method.DeclaringType!.TypeName());
+                    Console.Write(".");
+                    SafeConsole.WriteColor(ConsoleColor.DarkGray, e.Method.MethodName());
+                    Console.Write("...");
+
+                    var result = e(replacements);
+
+                    if (result == null)
+                        SafeConsole.WriteLineColor(ConsoleColor.Green, "OK");
+                    else
+                        SafeConsole.WriteLineColor(ConsoleColor.Yellow, "Changes"); 
+
+                    return result != null;
+                });
+        }
+    }
+
     public Table View<T>() where T : IView
     {
         return View(typeof(T));
@@ -573,7 +611,7 @@ public class Schema : IImplementationsFinder
         BeforeDatabaseAccess = null;
     }
 
-    public event Action? InvalidateCache; 
+    public event Action? OnInvalidateCache; 
 
     public event Action? Initializing;
 
@@ -584,12 +622,7 @@ public class Schema : IImplementationsFinder
         if (Initializing == null)
             return;
 
-        if (InvalidateCache != null)
-        {
-            foreach (var ic in InvalidateCache.GetInvocationListTyped())
-                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
-                    ic();
-        }
+        InvalidateCache();
 
         using (ExecutionMode.Global())
             foreach (var init in Initializing.GetInvocationListTyped())
@@ -597,6 +630,16 @@ public class Schema : IImplementationsFinder
                     init();
 
         Initializing = null;
+    }
+
+    public void InvalidateCache()
+    {
+        if (OnInvalidateCache != null)
+        {
+            foreach (var ic in OnInvalidateCache.GetInvocationListTyped())
+                using (HeavyProfiler.Log("InvalidateCache", () => ic.Method.DeclaringType!.ToString()))
+                    ic();
+        }
     }
 
     #endregion
@@ -618,6 +661,7 @@ public class Schema : IImplementationsFinder
 
         Generating += SchemaGenerator.SnapshotIsolation;
         Generating += SchemaGenerator.CreatePostgresExtensions;
+        Generating += SchemaGenerator.CreatePostgresDefaultTextLanguage;
         Generating += SchemaGenerator.CreatePartitioningFunctionScript;
         Generating += Assets.Schema_GeneratingBeforeTables;
         Generating += SchemaGenerator.CreateSchemasScript;
@@ -628,13 +672,14 @@ public class Schema : IImplementationsFinder
 
         Synchronizing += SchemaSynchronizer.SnapshotIsolation;
         Synchronizing += SchemaSynchronizer.SyncPostgresExtensions;
+        Synchronizing += SchemaSynchronizer.SyncPostgresDefaultTextLanguage;
 
         Synchronizing += Assets.Schema_SynchronizingBeforeTables;
         Synchronizing += SchemaSynchronizer.SynchronizeTablesScript;
         Synchronizing += Assets.Schema_Synchronizing;
         Synchronizing += TypeLogic.Schema_Synchronizing;
 
-        InvalidateCache += GlobalLazy.ResetAll;
+        OnInvalidateCache += () => GlobalLazy.ResetAll(systemLog: false);
 
         SchemaCompleted += Schema.CheckImplementedByAllPrimaryKeyTypes;
     }

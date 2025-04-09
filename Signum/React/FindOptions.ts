@@ -28,6 +28,7 @@ export interface ModalFindOptions {
   useDefaultBehaviour?: boolean;
   autoSelectIfOne?: boolean;
   autoSkipIfZero?: boolean;
+  autoCheckSingleRowResult?: boolean;
   modalSize?: BsSize;
   searchControlProps?: Partial<SearchControlProps>;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
@@ -216,6 +217,7 @@ export interface QueryToken {
   niceTypeName: string;
   isGroupable: boolean;
   hasOrderAdapter?: boolean;
+  tsVectorFor?: string[];
   preferEquals?: boolean;
   filterType?: FilterType;
   fullKey: string;
@@ -727,6 +729,12 @@ export const filterOperations: Record<FilterType, FilterOperation[]> = {
   "Boolean": [
     "EqualTo",
     "DistinctTo",
+  ],
+  "TsVector": [
+    "TsQuery",
+    "TsQuery_Plain",
+    "TsQuery_Phrase",
+    "TsQuery_WebSearch",
   ]
 };
 

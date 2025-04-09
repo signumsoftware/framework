@@ -160,7 +160,12 @@ public static partial class TypeAuthLogic
         if (conditions.Count > 1)
             return null;
 
-        return conditions.SingleEx();
+        if (conditions.Count == 0)
+            return TypeAllowedBasic.None;
+        else if (conditions.Count == 1)
+            return conditions.SingleEx();
+        else
+            return null;
     }
 
     public static Func<Lite<RoleEntity>, Type, bool> HasTypeConditionInProperties = (role, t) => false;

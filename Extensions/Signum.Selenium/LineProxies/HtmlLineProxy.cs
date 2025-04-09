@@ -19,7 +19,7 @@ public class HtmlLineProxy : BaseLineProxy
 
     public void SetValue(string? value)
     {
-        InputLocator.Find().SendKeys(value);
+        InputLocator.Find().SendKeys(value ?? "");
     }
 
     public string? GetValue()

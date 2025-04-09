@@ -81,7 +81,7 @@ public class QueryRequest : BaseQueryRequest
     }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -332,7 +332,7 @@ public class QueryValueRequest : BaseQueryRequest
               .ToHashSet();
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
 
     public override QueryValueRequest CombineFullTextFilters()
     {
@@ -371,7 +371,7 @@ public class UniqueEntityRequest : BaseQueryRequest
     public required UniqueType UniqueType { get; set; }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(this.AllTokens());
-    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() =>
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())
@@ -410,7 +410,7 @@ public class QueryEntitiesRequest : BaseQueryRequest
     public required List<Order> Orders { get; set; }
 
     public List<CollectionElementToken> Multiplications() => CollectionElementToken.GetElements(AllTokens());
-    public List<FilterFullText> FullTextTableFilters() => FilterFullText.TableFilters(this.Filters);
+    public List<FilterSqlServerFullText> FullTextTableFilters() => FilterSqlServerFullText.TableFilters(this.Filters);
 
     public override HashSet<QueryToken> AllTokens() => 
         Filters.SelectMany(a => a.GetAllFilters()).SelectMany(f => f.GetTokens())

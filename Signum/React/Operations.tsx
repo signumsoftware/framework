@@ -1,29 +1,28 @@
-import * as React from "react"
-import { Dic } from './Globals'
-import { ajaxGetRaw, ajaxPost, ajaxPostRaw, ServiceError, WebApiHttpError } from './Services'
-import { Lite, Entity, OperationMessage, EntityPack, JavascriptMessage, EngineMessage, getToString, toLite } from './Signum.Entities';
-import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
-import { PseudoType, TypeInfo, getTypeInfo, OperationInfo, OperationType, GraphExplorer, tryGetTypeInfo, Type, getTypeName, QueryTokenString, getOperationInfo, getQueryKey } from './Reflection';
-import { TypeContext, EntityFrame, ButtonsContext, IOperationVisible, ButtonBarElement } from './TypeContext';
-import * as AppContext from './AppContext';
-import { Finder } from './Finder';
-import { Navigator } from './Navigator';
-import * as ContexualItems from './SearchControl/ContextualItems';
-import { ButtonBarManager } from './Frames/ButtonBar';
-import { EntityOperations, OperationButton } from './Operations/EntityOperations';
-import { ContextualOperations } from './Operations/ContextualOperations';
-import { ContextualItemsContext, MenuItemBlock } from './SearchControl/ContextualItems';
-import { BsColor, KeyNames } from "./Components/Basic";
 import { IconProp } from "@fortawesome/fontawesome-svg-core";
+import * as React from "react";
+import * as AppContext from './AppContext';
+import { BsColor, KeyNames } from "./Components/Basic";
+import { Finder } from './Finder';
+import { ButtonBarManager } from './Frames/ButtonBar';
 import Notify from './Frames/Notify';
-import { FilterOperation } from "./Signum.DynamicQuery";
+import { Dic } from './Globals';
 import { FunctionalAdapter } from "./Modals";
-import { SearchControlLoaded } from "./Search";
-import { isActive } from "./FindOptions";
+import { Navigator } from './Navigator';
 import { CellOperationButton, defaultCellOperationClick } from "./Operations/CellOperationButton";
+import { ContextualOperations } from './Operations/ContextualOperations';
+import { EntityOperations, OperationButton } from './Operations/EntityOperations';
 import { MultiOperationProgressModal } from "./Operations/MultiOperationProgressModal";
 import { ProgressModal, ProgressModalOptions } from "./Operations/ProgressModal";
-import { QuickLinkExplore, QuickLinkClient } from "./QuickLinkClient";
+import { QuickLinkClient, QuickLinkExplore } from "./QuickLinkClient";
+import { getOperationInfo, getQueryKey, getTypeInfo, getTypeName, GraphExplorer, OperationInfo, OperationType, QueryTokenString, Type, TypeInfo } from './Reflection';
+import { SearchControlLoaded } from "./Search";
+import * as ContexualItems from './SearchControl/ContextualItems';
+import { ContextualItemsContext, ContextualMenuItem } from './SearchControl/ContextualItems';
+import { ajaxPost, ajaxPostRaw, WebApiHttpError } from './Services';
+import { FilterOperation } from "./Signum.DynamicQuery";
+import { EngineMessage, Entity, EntityPack, getToString, JavascriptMessage, Lite, OperationMessage, toLite } from './Signum.Entities';
+import { ConstructSymbol_From, ConstructSymbol_FromMany, ConstructSymbol_Simple, DeleteSymbol, ExecuteSymbol, OperationLogEntity, OperationSymbol, PropertyOperation } from './Signum.Operations';
+import { ButtonBarElement, ButtonsContext, EntityFrame, IOperationVisible, TypeContext } from './TypeContext';
 
 
 export namespace Operations {
@@ -58,8 +57,10 @@ export namespace Operations {
       isApplicable: c => {
         return c.type.name == "CellOperationDTO";
       },
-      formatter: c => new Finder.CellFormatter((dto: Operations.API.CellOperationDto, ctx) => dto && dto.lite ? <CellOperationButton coc={new CellOperationContext(ctx, dto)} /> : undefined, false)
-
+      formatter: c => new Finder.CellFormatter(
+        (dto: Operations.API.CellOperationDto, ctx, cp) =>
+          dto && dto.lite ? <CellOperationButton coc={(new CellOperationContext({ cellContext: ctx, text: cp.column.displayName, ...dto }))} /> : undefined,
+        false)
     });
 
   }
@@ -469,7 +470,7 @@ export class ContextualOperationSettings<T extends Entity> extends OperationSett
   hideOnCanExecute?: boolean;
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => React.ReactElement | string | undefined | null | true;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
@@ -491,7 +492,7 @@ export interface ContextualOperationOptions<T extends Entity> {
   showOnReadOnly?: boolean;
   confirmMessage?: (coc: ContextualOperationContext<T>) => React.ReactElement | string | undefined | null | true;
   onClick?: (coc: ContextualOperationContext<T>) => Promise<void>;
-  createMenuItems?: (eoc: ContextualOperationContext<T>) => React.ReactElement[];
+  createMenuItems?: (eoc: ContextualOperationContext<T>) => ContextualMenuItem[];
   settersConfig?: (coc: ContextualOperationContext<T>) => SettersConfig;
   color?: BsColor;
   icon?: IconProp;
@@ -592,12 +593,12 @@ export class ContextualOperationContext<T extends Entity> {
     throw new Error("Pack is not available for Contextual with many selected entities");
   }
 
-  createMenuItems(): React.ReactElement[] {
+  createMenuItems(): ContextualMenuItem[] {
 
     if (this.settings?.createMenuItems)
       return this.settings.createMenuItems(this);
 
-    return [<ContextualOperations.OperationMenuItem coc={this} />];
+    return [{ fullText: this.operationInfo.niceName, menu: <ContextualOperations.OperationMenuItem coc={ this} /> } as ContextualMenuItem];
   }
 
   raiseEntityChanged(): void {
@@ -609,7 +610,7 @@ export class ContextualOperationContext<T extends Entity> {
 
 export interface EntityOperationGroup {
   key: string;
-  text: () => React.ReactNode;
+  text: () => React.ReactNode; /*Delayed for authorization reasons, not culture */
   simplifyName?: (complexName: string) => string;
   cssClass?: string;
   color?: BsColor;
@@ -664,14 +665,17 @@ export class CellOperationContext<T extends Entity> {
 
   tag?: string;
   readonly lite: Lite<T>;
+  readonly canExecute?: string;
+  readonly operationKey: string;
+
   readonly operationInfo: OperationInfo;
   readonly cellContext: Finder.CellFormatterContext;
-  readonly canExecute?: string;
   readonly settings?: CellOperationSettings<T>;
   readonly entityOperationSettings?: EntityOperationSettings<any>;
   event?: React.MouseEvent<any>;
   progressModalOptions?: Operations.API.OperationWithProgressOptions;
 
+  text?: string;
   color?: BsColor;
   icon?: IconProp;
   iconColor?: string;
@@ -682,12 +686,14 @@ export class CellOperationContext<T extends Entity> {
   onConstructFromSuccess?: (pack: EntityPack<Entity> | undefined) => void;
   onDeleteSuccess?: () => void;
 
-  constructor(ctx: Finder.CellFormatterContext, co: Operations.API.CellOperationDto) {
-    this.lite = co.lite as Lite<T>;
-    this.operationInfo = getOperationInfo(co.operationKey, co.lite.EntityType);
-    this.cellContext = ctx;
-    this.canExecute = co.canExecute;
-    this.entityOperationSettings = Operations.getSettings(co.operationKey) as EntityOperationSettings<Entity>;
+  constructor(init: Partial<CellOperationContext<T>>) {
+    Object.assign(this, init);
+    this.lite = init.lite as Lite<T>;
+    this.operationKey = init.operationKey!;
+    this.canExecute = init.canExecute;
+    this.operationInfo = getOperationInfo(this.operationKey!, this.lite.EntityType);
+    this.cellContext = init.cellContext!;
+    this.entityOperationSettings = Operations.getSettings(this.operationKey) as EntityOperationSettings<Entity>;
     this.settings = this.entityOperationSettings?.cell;
   }
 

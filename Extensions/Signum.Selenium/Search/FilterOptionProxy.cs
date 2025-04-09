@@ -49,7 +49,7 @@ public class FilterConditionProxy : FilterProxy
 
     public FilterOperation Operation
     {
-        get { return OperationElement.Find().SelectElement().SelectedOption.GetDomProperty("value").ToEnum<FilterOperation>(); }
+        get { return OperationElement.Find().SelectElement().SelectedOption.GetDomProperty("value")!.ToEnum<FilterOperation>(); }
         set { OperationElement.Find().SelectElement().SelectByValue(value.ToString()); }
     }
 

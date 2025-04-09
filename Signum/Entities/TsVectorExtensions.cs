@@ -2,6 +2,7 @@ using NpgsqlTypes;
 using Signum.Engine.Maps;
 using Signum.Engine.Sync;
 using Signum.Utilities.DataStructures;
+using Signum.Utilities.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Signum.Entities.TsVector;
@@ -95,6 +96,11 @@ public static class TsVectorExtensions
     public static NpgsqlTsQuery ToTsQuery_WebSearch(this string value, string langConfig) => throw OnlyQueries();
 
 
+    [AvoidEagerEvaluation]
+    public static NpgsqlTsQuery And(this NpgsqlTsQuery a, NpgsqlTsQuery b) => throw OnlyQueries();
+
+    [AvoidEagerEvaluation]
+    public static NpgsqlTsQuery Or(this NpgsqlTsQuery a, NpgsqlTsQuery b) => throw OnlyQueries();
 
     /// <summary>
     ///     Calculates the rank of <paramref name="vector" /> for <paramref name="query" />.
@@ -157,6 +163,40 @@ public static class TsVectorExtensions
     //public static float Headline(this NpgsqlTsQuery query, string document) => throw OnlyQueries();
     //public static float Headline(this NpgsqlTsQuery query, string document, string options) => throw OnlyQueries();
     //public static float Headline(this NpgsqlTsQuery query, string document, string options, string langConfig) => throw OnlyQueries();
+
+
+    internal static MethodInfo miMatches = ReflectionTools.GetMethodInfo((NpgsqlTsVector v) => Matches(v, null!));
+    internal static MethodInfo miRank = ReflectionTools.GetMethodInfo((NpgsqlTsVector v) => Rank(v, null!));
+
+    static MethodInfo miToTsQuery = ReflectionTools.GetMethodInfo((string query) => ToTsQuery(query));
+    static MethodInfo miToTsQuery_Plain = ReflectionTools.GetMethodInfo((string query) => ToTsQuery_Plain(query));
+    static MethodInfo miToTsQuery_Phrase = ReflectionTools.GetMethodInfo((string query) => ToTsQuery_Phrase(query));
+    static MethodInfo miToTsQuery_WebSearch = ReflectionTools.GetMethodInfo((string query) => ToTsQuery_WebSearch(query));
+
+    internal static MethodInfo GetTsQueryMethodInfo(FilterOperation operation)
+    {
+        return operation switch
+        {
+            FilterOperation.TsQuery => miToTsQuery,
+            FilterOperation.TsQuery_Plain => miToTsQuery_Plain,
+            FilterOperation.TsQuery_Phrase => miToTsQuery_Phrase,
+            FilterOperation.TsQuery_WebSearch => miToTsQuery_WebSearch,
+            _ => throw new UnexpectedValueException(operation)
+        };
+    }
+
+    static MethodInfo miAnd = ReflectionTools.GetMethodInfo(() => And(null!, null!));
+    static MethodInfo miOr = ReflectionTools.GetMethodInfo(() => Or(null!, null!));
+
+    internal static MethodInfo GetTsQueryGroupOperator(FilterGroupOperation operation)
+    {
+        return operation switch
+        {
+            FilterGroupOperation.And => miAnd,
+            FilterGroupOperation.Or => miOr,
+            _ => throw new UnexpectedValueException(operation)
+        };
+    }
 }
 
 public enum TsRankingNormalization

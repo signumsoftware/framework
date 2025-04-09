@@ -155,7 +155,7 @@ public static class SqlPreCommandExtensions
         }
     }
 
-    public static int Timeout = 20 * 60;
+    public static int DefaultScriptTimeout = 20 * 60;
 
     public static Regex regexBeginEnd = new Regex(@"^ *(GO--(?<type>BEGIN|END)) *(?<key>.*)$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
@@ -211,7 +211,7 @@ public static class SqlPreCommandExtensions
 
     public static void ExecuteScript(string title, string script)
     {
-        using (Connector.CommandTimeoutScope(Timeout))
+        using (Connector.CommandTimeoutScope(Connector.ScopeTimeout ?? DefaultScriptTimeout))
         {
             List<KeyValuePair<string, string>> beginEndParts = ExtractBeginEndParts(ref script).ToList();
 
@@ -480,7 +480,10 @@ public class SqlPreCommandSimple : SqlPreCommand
                    sqlBuilder.GetSizePrecisionScale(p.Size.DefaultToNull(), p.Precision.DefaultToNull(), p.Scale.DefaultToNull(), p.DbType == System.Data.DbType.Decimal)),
         }).ToList();
 
-        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${parameter.FindIndex(p => p.Name == m.Value).NotFoundToNull()!.Value + 1}");
+        var index = 1;
+        var paramToIndex = parameter.ToDictionary(a => a.Name.StartsWith("@") ? a.Name : "@" + a.Name, a => index++);
+
+        var pgsql = Regex.Replace(this.Sql, @"@(\w+)", m => $"${paramToIndex.GetOrThrow(m.Value)}");
 
         return $"""
             DEALLOCATE ALL;

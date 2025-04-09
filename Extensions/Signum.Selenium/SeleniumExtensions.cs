@@ -155,16 +155,15 @@ public static class SeleniumExtensions
     //[DebuggerHidden]
     public static bool IsStale(this IWebElement element)
     {
-        //try
-        //{
-        //    // Calling any method forces a staleness check
-        //    return element == null || !element.Enabled;
-        //}
-        //catch (StaleElementReferenceException)
-        //{
-        //    return true;
-        //}
-        return SeleniumExtras.WaitHelpers.ExpectedConditions.StalenessOf(element)(element.GetDriver());
+        try
+        {
+            // Calling any method forces a staleness check
+            return element == null || !element.Enabled;
+        }
+        catch (StaleElementReferenceException)
+        {
+            return true;
+        }
     }
 
     public static IWebElement WaitElementVisible(this WebDriver selenium, By locator, Func<string>? actionDescription = null, TimeSpan? timeout = null)
@@ -308,14 +307,14 @@ public static class SeleniumExtensions
         return new SelectElement(element);
     }
 
-    public static string GetID(this IWebElement element)
+    public static string? GetID(this IWebElement element)
     {
         return element.GetDomProperty("id");
     }
 
     public static IEnumerable<string> GetClasses(this IWebElement element)
     {
-        return element.GetDomAttribute("class").Split(' ');
+        return (element.GetDomAttribute("class") ?? "").Split(' ');
     }
 
     public static bool HasClass(this IWebElement element, string className)
@@ -421,7 +420,7 @@ public static class SeleniumExtensions
         element.ScrollTo();
         new Actions(element.GetDriver()).MoveToElement(element).Perform();
         var length = 0;
-        while((length = element.GetDomProperty("value").Length) > 0)
+        while((length = element.GetDomProperty("value")!.Length) > 0)
         {
             for (int i = 0; i < length; i++)
                 element.SendKeys(Keys.Backspace);
@@ -435,7 +434,7 @@ public static class SeleniumExtensions
         element.GetDriver().Wait(() => element.GetDomProperty("value") == (text ?? ""));
     }
 
-    public static string Value(this IWebElement e) => e.GetDomProperty("value");
+    public static string Value(this IWebElement e) => e.GetDomProperty("value")!;
 
     public static void ButtonClick(this IWebElement button)
     {

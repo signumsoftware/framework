@@ -40,7 +40,7 @@ class CachedTable<T> : CachedTableBase where T : Entity
         using (ObjectName.OverrideOptions(new ObjectNameOptions { AvoidDatabaseName = true }))
         {
             string select = "SELECT\r\n{0}\r\nFROM {1} {2}\r\n".FormatWith(
-                Table.Columns.Values.ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
+                Table.Columns.Values.Where(ShouldBeCached).ToString(c => ctr.currentAlias + "." + c.Name.SqlEscape(isPostgres), ",\r\n"),
                 table.Name.ToString(),
                 ctr.currentAlias!.ToString());
 

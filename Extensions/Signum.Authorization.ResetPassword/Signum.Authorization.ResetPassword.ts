@@ -20,6 +20,7 @@ export namespace ResetPasswordMessage {
   export const YourAccountHasBeenLocked: MessageKey = new MessageKey("ResetPasswordMessage", "YourAccountHasBeenLocked");
   export const TheCodeOfYourLinkIsIncorrect: MessageKey = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkIsIncorrect");
   export const TheCodeOfYourLinkHasAlreadyBeenUsed: MessageKey = new MessageKey("ResetPasswordMessage", "TheCodeOfYourLinkHasAlreadyBeenUsed");
+  export const IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword: MessageKey = new MessageKey("ResetPasswordMessage", "IfEmailIsValidWeWillSendYouAnEmailToResetYourPassword");
 }
 
 export const ResetPasswordRequestEntity: Type<ResetPasswordRequestEntity> = new Type<ResetPasswordRequestEntity>("ResetPasswordRequest");

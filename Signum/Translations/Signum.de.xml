@@ -216,7 +216,7 @@
     <Member Name="StackTrace" Description="Stack trace" />
     <Member Name="StackTraceHash" Description="Stack trace hash" />
     <Member Name="ThreadId" Description="Thread id" />
-    <Member Name="TraceId" Description="Spur-ID" />
+    <Member Name="TraceId" Description="Trace-Id" />
     <Member Name="UrlReferer" Description="Referer Url" />
     <Member Name="User" Description="Benutzer" />
     <Member Name="UserAgent" Description="User agent" />
@@ -294,6 +294,10 @@
     <Member Name="Main" Description="Haupt" />
     <Member Name="New0_G" Description="Neu[m:er|f:e|n:es] {0}" />
     <Member Name="ThereAreErrors" Description="Es gibt Fehler" />
+  </Type>
+  <Type Name="HtmlEditorMessage">
+    <Member Name="EnterYourUrlHere" Description="Geben Sie hier Ihre URL ein..." />
+    <Member Name="Hyperlink" Description="Hyperlink" />
   </Type>
   <Type Name="IEntity">
     <Member Name="Id" Description="Id" />

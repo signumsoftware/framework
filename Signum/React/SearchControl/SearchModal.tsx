@@ -2,11 +2,11 @@ import * as React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { openModal, IModalProps } from '../Modals';
 import { Finder } from '../Finder';
-import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed } from '../FindOptions'
+import { FindOptions, FindMode, ResultRow, ModalFindOptions, ModalFindOptionsMany, FindOptionsParsed, ResultTable } from '../FindOptions'
 import { getQueryNiceName, PseudoType, QueryKey, getTypeInfo } from '../Reflection'
 import SearchControl, { SearchControlProps, SearchControlHandler } from './SearchControl'
 import { AutoFocus } from '../Components/AutoFocus';
-import { Entity, EntityPack, FrameMessage, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite } from '../Signum.Entities';
+import { Entity, EntityPack, FrameMessage, getToString, isEntityPack, isLite, Lite, ModifiableEntity, SearchMessage, toLite, is } from '../Signum.Entities';
 import { ModalFooterButtons, ModalHeaderButtons } from '../Components/ModalHeaderButtons';
 import { Modal, Dropdown } from 'react-bootstrap';
 import { useForceUpdate } from '../Hooks';
@@ -25,6 +25,7 @@ interface SearchModalProps extends IModalProps<{ rows: ResultRow[], searchContro
   size?: BsSize;
   avoidReturnCreate?: boolean;
   searchControlProps?: Partial<SearchControlProps>;
+  autoCheckSingleRowResult?: boolean;
   onOKClicked?: (sc: SearchControlLoaded) => Promise<boolean>;
 }
 
@@ -33,6 +34,7 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
   const [show, setShow] = React.useState(true);
 
   const selectedRows = React.useRef<ResultRow[]>([]);
+  const [singleResultRow, setSingleResultRow] = React.useState<ResultRow | null>(null);
   const okPressed = React.useRef<boolean>(false);
   const forceUpdate = useForceUpdate();
   const searchControl = React.useRef<SearchControlHandler>(null);
@@ -41,6 +43,15 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
     window.addEventListener('resize', onResize);
     return () => window.removeEventListener('resize', onResize);
   });
+
+  if (p.autoCheckSingleRowResult)
+    React.useEffect(() => {
+
+      let scl = searchControl.current?.searchControlLoaded;
+      if (scl && singleResultRow) {       
+        scl.setState({ selectedRows: [singleResultRow] }, () => handleSelectionChanged([singleResultRow]));
+      }
+    }, [singleResultRow]);
 
   function handleSelectionChanged(selected: ResultRow[]) {
     selectedRows.current = selected;
@@ -78,6 +89,16 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
     handleOkClicked();
   }
 
+  function handleOnResult(table: ResultTable, dataChange: boolean, scl: SearchControlLoaded) {
+    if (!p.autoCheckSingleRowResult)
+      return;
+
+    if (table.rows.length == 1)
+      setSingleResultRow(table.rows[0])
+    else
+      setSingleResultRow(null)
+  }
+
   function handleCreateFinished(entity: EntityPack<Entity> | ModifiableEntity | Lite<Entity> | undefined | void) {
 
     const scl = searchControl.current!.searchControlLoaded!;
@@ -101,6 +122,18 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
 
     } else 
       scl.dataChanged();
+  }
+
+
+  function handleInputsKeyUp(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key == "Enter") {
+
+      (e.target as HTMLElement).blur()
+
+      window.setTimeout(() => {
+        handleOkClicked();
+      }, 100);
+    }
   }
 
   function onResize() {
@@ -138,8 +171,8 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
         </>
         }
       </ModalHeaderButtons>
-      <div className="modal-body">
-        <SearchControl
+      <div className="modal-body" onKeyUp={handleInputsKeyUp} >
+        <SearchControl 
           ref={searchControl}
           hideFullScreenButton={true}
           throwIfNotFindable={true}
@@ -155,6 +188,7 @@ function SearchModal(p: SearchModalProps): React.JSX.Element {
           onCreateFinished={handleCreateFinished}
           onHeighChanged={onResize}
           onDoubleClick={p.findMode == "Find" ? handleDoubleClick : undefined}
+          onResult={handleOnResult}
           {...p.searchControlProps}
         />
       </div>
@@ -182,6 +216,7 @@ namespace SearchModal {
       message={modalOptions?.message ?? defaultSelectMessage(findOptions.queryName, false, modalOptions?.forProperty)}
       size={modalOptions?.modalSize}
       searchControlProps={modalOptions?.searchControlProps}
+      autoCheckSingleRowResult={modalOptions?.autoCheckSingleRowResult}
       onOKClicked={modalOptions?.onOKClicked}
     />)
       .then(a => a && { row: a.rows[0], searchControl: a.searchControl });
