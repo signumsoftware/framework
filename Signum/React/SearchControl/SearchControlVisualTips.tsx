@@ -30,25 +30,25 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
 
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
-      <Popover.Header as="h3"><strong>Search help</strong></Popover.Header>
+      <Popover.Header as="h3"><strong>{SearchMessage.SearchHelp.niceToString()}</strong></Popover.Header>
       <Popover.Body>
-        <div className="my-2">The <strong>search control</strong> is very powerfull, but can be intimidating. Take some time to learn how to use it... will be worth it!</div>
-        <div className="pt-2"><strong>The basics</strong></div>
-        {searchMode == "Search" && <p className="my-2">Currently we are in the query <strong><samp>{query}</samp></strong>, you can open a <strong><samp>{type}</samp></strong> by clicking the <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> icon, or doing <strong><samp style={{ whiteSpace: 'nowrap' }}>double-click</samp></strong> in the row (but not in a link!). </p>}
-        {searchMode == "Group" && <p className="my-2">Currently we are in the query <strong><samp>{query}</samp></strong> grouped by {tokens.map(a => <strong><samp>{a.niceName}</samp></strong>).joinCommaHtml(CollectionMessage.And.niceToString())}, you can open a group by clicking in the <FontAwesomeIcon icon="layer-group" color="#b1bac4" /> icon, or doing <strong><samp style={{ whiteSpace: 'nowrap' }}>double-click</samp></strong> in the row (but not in a link!). </p>}
-        {searchMode == "Find" && <p className="my-2">Doing <strong><samp style={{ whiteSpace: 'nowrap' }}>double-click</samp></strong> in the row will select the entity and close the modal automatically, alternatively you can select one entity and click OK.</p>}
-        {getAllPinned(fo.filterOptions).length > 0 && <div className="my-2">You can use the prepared filters on the top to quickly find the <strong><samp>{type}</samp></strong> you are looking for. </div>}
-        <div className="pt-2"><strong>Ordering results</strong></div>
-        <p className="my-2">You can order results by clicking in a column header, default ordering is <samp>Ascending</samp> <FontAwesomeIcon icon="sort-up" /> and by clicking again it changes to <samp>Descending</samp> <FontAwesomeIcon icon="sort-down" />. You can order by more that one column if you keep <kbd>Shift</kbd> down when clicking on the columns header.</p>
-        <div className="pt-2"><strong>Change columns</strong></div>
-        <p className="my-2">You are not limited to the columns you see! The default columns can be changed at will by <strong><samp>right-clicking</samp></strong> in a column header and then select {getInsertColumnIcon()}<em>Insert Column</em>, {getEditColumnIcon()}<em>Edit Column</em> or {getRemoveColumnIcon()}<em>Remove Column</em>.</p>
-        <p className="my-2">You can also <em>rearrange</em> the columns by dragging and dropping them to another position.</p>
-        <p className="my-2">When inserting, the new column will be added before or after the selected column, depending where you <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong>.</p>
-        <div className="pt-2"><strong>Advanced Filters</strong></div>
-        <p className="my-2">Click on the <FontAwesomeIcon icon="filter" /> button to open the Advanced filters, this will allow you create complex filters manually by selecting the <strong>field</strong> of the entity (or a related entities), a comparison <strong>operator</strong> and a <strong>value</strong> to compare.</p>
-        <p className="my-2">Trick: You can <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong> on a <strong>column header</strong> and choose {getAddFilterIcon()}<em>Add filter</em> to quickly filter by this column. Even more, you can <strong><samp style={{ whiteSpace: 'nowrap' }}>right-click</samp></strong> on a <strong>value</strong> to filter by this value directly.</p>
-        <div className="pt-2"><strong>Grouping results by one (or more) column</strong></div>
-        <p className="my-2">You can group results by <strong><samp style={{ whiteSpace: 'nowrap' }}>right-clicking</samp></strong> in a column header and selecting {getGroupByThisColumnIcon()}<em style={{ whiteSpace: 'nowrap' }}>Group by this column</em>. All the columns will disapear except the selected one and an agregation column (typically <em>Count</em>).</p>
+        <div className="my-2">The <strong>{SearchMessage.SearchControl.niceToString()}</strong> {SearchMessage.IsVeryPowerfullButCanBeIntimidatingTakeSomeTimeToLearnHowToUseItWillBeWorthIt.niceToString()}</div>
+        <div className="pt-2"><strong>{SearchMessage.TheBasics.niceToString()}</strong></div>
+        {searchMode == "Search" && <p className="my-2">{SearchMessage.CurrentlyWeAreInTheQuery.niceToString()} <strong><samp>{query}</samp></strong>, {SearchMessage.YouCanOpenA.niceToString()} <strong><samp>{type}</samp></strong> {SearchMessage.ByClickingThe.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrDoing.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.DoubleClick.niceToString()}</samp></strong> {SearchMessage.InTheRowButNotInALink.niceToString()}</p>}
+        {searchMode == "Group" && <p className="my-2">{SearchMessage.CurrentlyWeAreInTheQuery.niceToString()} <strong><samp>{query}</samp></strong> {SearchMessage.GroupedBy.niceToString()} {tokens.map(a => <strong><samp>{a.niceName}</samp></strong>).joinCommaHtml(CollectionMessage.And.niceToString())}, {SearchMessage.YouCanOpenAGroupByClickingInThe.niceToString()} <FontAwesomeIcon icon="layer-group" color="#b1bac4" /> {SearchMessage.IconOrDoing.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.DoubleClick.niceToString()}</samp></strong> {SearchMessage.InTheRowButNotInALink.niceToString()}</p>}
+        {searchMode == "Find" && <p className="my-2">{SearchMessage.Doing.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.DoubleClick.niceToString()}</samp></strong> {SearchMessage.InTheRowWillSelectTheEntityAndCloseTheModalAutomaticallyAlternativelyYouCanSelectOneEntityAndClickOK.niceToString()}</p>}
+        {getAllPinned(fo.filterOptions).length > 0 && <div className="my-2">{SearchMessage.YouCanUseThePreparedFiltersOnTheTopToQuicklyFindThe.niceToString()} <strong><samp>{type}</samp></strong> {SearchMessage.YouAreLookingFor.niceToString()}</div>}
+        <div className="pt-2"><strong>{SearchMessage.OrderingResults.niceToString()}</strong></div>
+        <p className="my-2">{SearchMessage.YouCanOrderResultsByClickingInAColumnHeaderDefaultOrderingIs.niceToString()} <samp>Ascending</samp> <FontAwesomeIcon icon="sort-up" /> {SearchMessage.AndByClickingAgainItChangesTo.niceToString()} <samp>Descending</samp> <FontAwesomeIcon icon="sort-down" />. {SearchMessage.YouCanOrderByMoreThanOneColumnIfYouKeep.niceToString()} <kbd>Shift</kbd> {SearchMessage.DownWhenClickingOnTheColumnsHeader.niceToString()}</p>
+        <div className="pt-2"><strong>{SearchMessage.ChangeColumns.niceToString()}</strong></div>
+        <p className="my-2">{SearchMessage.YouAreNotLimitedToTheColumnsYouSeeTheDefaultColumnsCanBeChangedAtWillBy.niceToString()} <strong><samp>{SearchMessage.RightClicking.niceToString()}</samp></strong> {SearchMessage.InAColumnHeaderAndThenSelect.niceToString()} {getInsertColumnIcon()}<em>{SearchMessage.InsertColumn.niceToString()}</em>, {getEditColumnIcon()}<em>{SearchMessage.EditColumn.niceToString()}</em> {SearchMessage.Or.niceToString()} {getRemoveColumnIcon()}<em>{SearchMessage.RemoveColumn.niceToString()}</em>.</p>
+        <p className="my-2">{SearchMessage.YouCanAlso.niceToString()} <em>{SearchMessage.Rearrange.niceToString()}</em> {SearchMessage.TheColumnsByDraggingAndDroppingThemToAnotherPosition.niceToString()}</p>
+        <p className="my-2">{SearchMessage.WhenInsertingTheNewColumnWillBeAddedBeforeOrAfterTheSelectedColumnDependingWhereYou.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RightClicking.niceToString()}</samp></strong>.</p>
+        <div className="pt-2"><strong>{SearchMessage.AdvancedFilters.niceToString()}</strong></div>
+        <p className="my-2">{SearchMessage.ClickOnThe.niceToString()} <FontAwesomeIcon icon="filter" /> {SearchMessage.ButtonToOpenTheAdvancedFiltersThisWillAllowYouCreateComplexFiltersManuallyBySelectingThe.niceToString()} <strong>field</strong> {SearchMessage.OfTheEntityOrARelatedEntitiesAComparison.niceToString()} <strong>operator</strong> {SearchMessage.AndA.niceToString()} <strong>value</strong> {SearchMessage.ToCompare.niceToString()}</p>
+        <p className="my-2">{SearchMessage.TrickYouCan.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RightClicking.niceToString()}</samp></strong> {SearchMessage.OnA.niceToString()} <strong>{SearchMessage.ColumnHeader.niceToString()}</strong> {SearchMessage.AndChoose.niceToString()} {getAddFilterIcon()}<em>{SearchMessage.AddFilter.niceToString()}</em> {SearchMessage.ToQuicklyFilterByThisColumnEvenMoreYouCan.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RightClicking.niceToString()}</samp></strong> {SearchMessage.OnA.niceToString()}on a <strong>{SearchMessage.Value.niceToString()}</strong> {SearchMessage.ToFilterByThisValueDirectly.niceToString()}</p>
+        <div className="pt-2"><strong>{SearchMessage.GroupingResultsByOneOrMoreColumn.niceToString()}</strong></div>
+        <p className="my-2">{SearchMessage.YouCanGroupResultsBy.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RightClicking.niceToString()}</samp></strong> {SearchMessage.InAColumnHeaderAndSelecting.niceToString()} {getGroupByThisColumnIcon()}<em style={{ whiteSpace: 'nowrap' }}>{SearchMessage.GroupByThisColumn.niceToString()}</em>. {SearchMessage.AllTheColumnsWillDisappearExceptTheSelectedOneAndAnAggregationColumnTypically.niceToString()} <em>Count</em>).</p>
       </Popover.Body>
     </Popover>
   );
@@ -57,11 +57,11 @@ export function SearchHelp(p: { sc: SearchControlLoaded, injected: OverlayInject
 export function GroupHelp(p: { injected: OverlayInjectedProps }): React.JSX.Element {
   return (
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 900 }}>
-      <Popover.Header as="h3"><strong>Group help</strong></Popover.Header>
+      <Popover.Header as="h3"><strong>{SearchMessage.GroupHelp.niceToString()}</strong></Popover.Header>
       <Popover.Body>
-        <p className="my-2">Any new column should either be an aggregate (<samp>{AggregateFunction.niceToString("Count")}</samp>, <samp>{AggregateFunction.niceToString("Sum")}</samp>, <samp>{AggregateFunction.niceToString("Min")}</samp>...) or it will be considered a new group key <FontAwesomeIcon icon="key" color="gray" />.</p>
-        <p className="my-2">Once grouping you can filter normally or using aggregates as the field (<code>HAVING</code> in SQL).</p>
-        <p className="my-2">Finally you can stop grouping by <strong><samp style={{ whiteSpace: 'nowrap' }}>right-clicking</samp></strong> in a column header and select {getResotreDefaultColumnsIcon()}<em style={{ whiteSpace: 'nowrap' }}>Restore default columns</em>.</p>
+        <p className="my-2">{SearchMessage.AnyNewColumnShouldEitherBeAnAggregate.niceToString()} (<samp>{AggregateFunction.niceToString("Count")}</samp>, <samp>{AggregateFunction.niceToString("Sum")}</samp>, <samp>{AggregateFunction.niceToString("Min")}</samp>...) {SearchMessage.OrItWillBeConsideredANewGroupKey.niceToString()} <FontAwesomeIcon icon="key" color="gray" />.</p>
+        <p className="my-2">{SearchMessage.OnceGroupingYouCanFilterNormallyOrUsingAggregatesAsTheField.niceToString()} (<code>HAVING</code> {SearchMessage.InSql.niceToString()}).</p>
+        <p className="my-2">{SearchMessage.FinallyYouCanStopGroupingBy.niceToString()} <strong><samp style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RightClicking.niceToString()}</samp></strong> {SearchMessage.InAColumnHeaderAndSelect.niceToString()} {getResotreDefaultColumnsIcon()}<em style={{ whiteSpace: 'nowrap' }}>{SearchMessage.RestoreDefaultColumns.niceToString()}</em>.</p>
       </Popover.Body>
     </Popover>
   );
@@ -90,12 +90,12 @@ export function FilterHelp(p: { queryDescription: QueryDescription, injected: Ov
           .formatHtml(<strong>{FilterFieldMessage.Field.niceToString()}</strong>, <strong>{FilterFieldMessage.Operator.niceToString()}</strong>, <strong>{FilterFieldMessage.Value.niceToString()}</strong>)}</div>
         <ul>
           <li>
-            {isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>A query expression could be any field of the <strong><samp>{type}</samp></strong> (like {sampleColumns.filter((c, i) => i < 3).map((c, i) => <strong><samp>{c.displayName}</samp></strong>).notNull().joinHtml(', ')} or any other field that you see in the <strong><samp>{type}</samp></strong> when you click <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> icon) or any related entity.</div>}
-            {!isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>A query expression could be any column of the <strong><samp>{getQueryNiceName(p.queryDescription.queryKey)}</samp></strong> (like {Object.values(p.queryDescription.columns).map((c, i) => i < 3 && <strong><samp>{c.displayName}</samp></strong>).joinCommaHtml(',')}, or any other field that you see in the Project when you click <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> icon) or any related entity.</div>}
+            {isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{type}</samp></strong> ({SearchMessage.Like.niceToString()} {sampleColumns.filter((c, i) => i < 3).map((c, i) => <strong><samp>{c.displayName}</samp></strong>).notNull().joinHtml(', ')} {SearchMessage.OrAnyOtherFieldThatYouSeeInThe.niceToString()} <strong><samp>{type}</samp></strong> {SearchMessage.WhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
+            {!isDefaultQuery && <div className="my-2"><strong>{FilterFieldMessage.Field.niceToString()}: </strong>{SearchMessage.AQueryExpressionCouldBeAnyColumnOfThe.niceToString()} <strong><samp>{getQueryNiceName(p.queryDescription.queryKey)}</samp></strong> (like {Object.values(p.queryDescription.columns).map((c, i) => i < 3 && <strong><samp>{c.displayName}</samp></strong>).joinCommaHtml(',')}, {SearchMessage.OrAnyOtherFieldThatYouSeeInTheProjectWhenYouClick.niceToString()} <FontAwesomeIcon icon="arrow-right" color="#b1bac4" /> {SearchMessage.IconOrAnyRelatedEntity.niceToString()}</div>}
             <LearnMoreAboutFieldExpressions expanded={expressionExpanded} onSetExpanded={setExpressionExpanded} showAny={true} />
           </li>
-          <li><div className="my-2"><strong>{FilterFieldMessage.Operator.niceToString()}: </strong>The operation that will be used to compare the <strong><samp>field</samp></strong><samp></samp> with the <strong><samp>value</samp></strong>, like <samp>Equals, Distinct, GreaterThan</samp>, etc...</div></li>
-          <li><div className="my-2"><strong>{FilterFieldMessage.Value.niceToString()}: </strong>The value that will be compared with the <strong><samp>field</samp></strong>, typically has the same type as the field, but some operators like <strong><samp>IsIn</samp></strong> and <strong><samp>IsNotIn</samp></strong> allow to select multiple values.</div></li>
+          <li><div className="my-2"><strong>{FilterFieldMessage.Operator.niceToString()}: </strong>{SearchMessage.TheOperationThatWillBeUsedToCompareThe.niceToString()} <strong><samp>field</samp></strong><samp></samp> {SearchMessage.WithThe.niceToString()} <strong><samp>value</samp></strong>, {SearchMessage.Like.niceToString()} <samp>{SearchMessage.EqualsDistinctGreaterThan.niceToString()}</samp>, {SearchMessage.Etc.niceToString()}</div></li>
+          <li><div className="my-2"><strong>{FilterFieldMessage.Value.niceToString()}: </strong>{SearchMessage.TheValueThatWillBeComparedWithThe.niceToString()} <strong><samp>field</samp></strong>, {SearchMessage.TypicallyHasTheSameTypeAsTheFieldButSomeOperatorsLike.niceToString()} <strong><samp>{SearchMessage.IsIn.niceToString()}</samp></strong> {SearchMessage.And.niceToString()} <strong><samp>{SearchMessage.IsNotIn.niceToString()}</samp></strong> {SearchMessage.AllowToSelectMultipleValues.niceToString()}</div></li>
         </ul>
         {/*{isDefaultQuery && <div className="my-2">{FilterFieldMessage.FieldCanBeAnyFieldOfThe0OrAnyRelatedEntity.niceToString().formatHtml(<strong>{type}</strong>)}</div>}*/}
         {/*{!isDefaultQuery && <div className="my-2">{FilterFieldMessage.FieldCanBeAnyColumnOfTheQuery0OrAnyFieldOf1.niceToString().formatHtml(<strong>{getQueryNiceName(queryKey)}</strong>, <strong>{type}</strong>)}</div>}*/}
@@ -116,7 +116,7 @@ export function ColumnHelp(p: { queryDescription: QueryDescription, injected: Ov
     <Popover id="popover-basic" {...p.injected} style={{ ...p.injected.style, minWidth: 800 }}>
       <Popover.Header as="h3"><strong>{ColumnFieldMessage.ColumnsHelp.niceToString()}</strong></Popover.Header>
       <Popover.Body>
-        <div className="my-2">You are editing a column, let me explain what each field does:</div>
+        <div className="my-2">{SearchMessage.YouAreEditingAColumnLetMeExplainWhatEachFieldDoes.niceToString()}</div>
         <ul>
           <li>
             <strong>{SearchMessage.ColumnField.niceToString()}: </strong>          
@@ -170,7 +170,7 @@ export function LearnMoreAboutFieldExpressions(p: { expanded: boolean, onSetExpa
           </li>
           <li><strong style={{ color: 'green' }}>{FieldExpressionMessage.Aggregates.niceToString()}:</strong> {FieldExpressionMessage.WhenGroupingAllowsToCollapseManyValuesInOneValue.niceToString()}
             <ul>
-              <li><strong>{AggregateFunction.niceToString("Count")}:</strong> Can be used as the first item, counts the number of rows on each group.</li>
+              <li><strong>{AggregateFunction.niceToString("Count")}:</strong> {SearchMessage.CanBeUsedAsTheFirstItemCountsTheNumberOfRowsOnEachGroup.niceToString()}</li>
               <li><strong>{AggregateFunction.niceToString("Min")}, {AggregateFunction.niceToString("Max")}, {AggregateFunction.niceToString("Average")}, {FieldExpressionMessage.CountNotNull.niceToString()}, {FieldExpressionMessage.CountDistinct.niceToString()} ..:</strong> {FieldExpressionMessage.CanOnlyBeUsedAfterAnotherField.niceToString()}</li>
             </ul>
           </li>
